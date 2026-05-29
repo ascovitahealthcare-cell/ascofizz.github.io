@@ -33,7 +33,7 @@ const PRODUCT_IMAGES = {
   // —— id: 5 — Vitamin C Effervescent – Orange Flavour ——
   5: { images: [] },
 
-  // —— id: 6 — VitaPlus B12 + D3 Vegan – with Certified Organic Spirulina ——
+  // —— id: 10 — VitaPlus B12 + D3 Vegan – with Certified Organic Spirulina ——
   10: { images: [
     "https://static.wixstatic.com/media/f0adaf_902199f4d8c74178a5be5b997e4a2e4d~mv2.jpg/v1/fill/w_600,h_600,al_c,q_85,usm_0.66_1.00_0.01,enc_avif,quality_auto/f0adaf_902199f4d8c74178a5be5b997e4a2e4d~mv2.jpg",
   ]},
@@ -47,6 +47,19 @@ const PRODUCT_IMAGES = {
   8: { images: [
     "https://static.wixstatic.com/media/f0adaf_389d6b29ad5446bb81ad305de9756f17~mv2.jpg/v1/fill/w_600,h_600,al_c,q_85,usm_0.66_1.00_0.01,enc_avif,quality_auto/f0adaf_389d6b29ad5446bb81ad305de9756f17~mv2.jpg",
   ]},
+
+  // —— id: 12 — CS++ + Iron++ – Calcium + Iron with B12+D3 ——
+  12: { images: [
+    "https://static.wixstatic.com/media/f0adaf_fb4f54451eb94ce38d361b1e0186522d~mv2.png/v1/fill/w_1100,h_1100,al_c,q_90,usm_0.66_1.00_0.01,enc_avif,quality_auto/f0adaf_fb4f54451eb94ce38d361b1e0186522d~mv2.png",
+  ]},
+
+  // —— id: 11 — MG+++ Magnesium – B12 + D3 with Magnesium ——
+  11: { images: [
+    "https://static.wixstatic.com/media/f0adaf_110567acf3b045e0a0998a68f50e4aae~mv2.jpg/v1/fill/w_1100,h_1100,al_c,q_85,usm_0.66_1.00_0.01,enc_avif,quality_auto/f0adaf_110567acf3b045e0a0998a68f50e4aae~mv2.jpg",
+  ]},
+
+  // —— id: 22 — Power Pro Tablets ——
+  22: { images: [] },
 
 };
 
