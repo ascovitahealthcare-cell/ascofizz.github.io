@@ -5,8 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Ascovita Healthcare</title>
   <script>
-    // GitHub Pages SPA fix
-    // Redirects /shop, /about, /product/slug etc. back to index.html
+    // GitHub Pages SPA fix — redirects /shop, /about, /product/slug etc. back to index.html
     (function() {
       var path = window.location.pathname;
 
@@ -15,6 +14,9 @@
 
       // Don't redirect root
       if (path === '/' || path === '/index.html') return;
+
+      // Don't redirect real static files
+      if (path.match(/\.(txt|xml|json|png|jpg|ico|svg|webp|js|css|html)$/i)) return;
 
       // Send path to index.html via ?p= so it can load the right section
       var newUrl = '/?p=' + encodeURIComponent(path);
