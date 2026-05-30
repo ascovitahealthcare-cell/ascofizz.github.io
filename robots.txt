@@ -4,5 +4,6 @@ Allow: /
 Disallow: /admin
 Disallow: /admin.html
 Disallow: /offline.html
+Disallow: /free/
 
 Sitemap: https://www.ascovita.com/sitemap.xml
