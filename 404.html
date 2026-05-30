@@ -2,19 +2,21 @@
 <html lang="en">
 <head>
   <meta charset="utf-8">
-  <title>Ascovita</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ascovita Healthcare</title>
   <script>
-    // GitHub Pages SPA fix — only redirect if not already on index
+    // GitHub Pages SPA fix
+    // Redirects /shop, /about, /product/slug etc. back to index.html
     (function() {
       var path = window.location.pathname;
-      
-      // Prevent infinite loop — if we came from a ?p= redirect already, stop
+
+      // Prevent infinite loop
       if (window.location.search.indexOf('?p=') === 0) return;
-      
-      // Don't redirect root or index
+
+      // Don't redirect root
       if (path === '/' || path === '/index.html') return;
- 
-      // Clean redirect — send path to index.html once
+
+      // Send path to index.html via ?p= so it can load the right section
       var newUrl = '/?p=' + encodeURIComponent(path);
       window.location.replace(newUrl);
     })();
@@ -22,4 +24,3 @@
 </head>
 <body></body>
 </html>
- 
