@@ -1,5 +1,5 @@
 // ═══════════════════════════════════════════════════════════════════
-// ASCOVITA BACKEND — server.js  v7.0
+// ASCOVITA BACKEND — server.js  v7.1
 // Node.js + Express + Supabase (acts as ORM layer)
 //
 // ✅ Google OAuth + Email Auth with sessions
@@ -20,6 +20,7 @@
 //   SUPABASE_URL              supabase project URL
 //   SUPABASE_SERVICE_KEY      supabase service role key
 //   GOOGLE_CLIENT_ID          google oauth client id
+//   GOOGLE_CLIENT_SECRET      google oauth client secret (for mobile redirect flow)
 //   JWT_SECRET                long random string
 //   ADMIN_PASSWORD            admin panel password
 //   CASHFREE_APP_ID           cashfree app id
@@ -82,7 +83,7 @@ async function ensureBucket(sb) {
 
 // ── Supabase ──────────────────────────────────────────────────────
 // Crash loudly on missing env vars so Render shows the real error in build logs
-const _REQUIRED_ENV = ['SUPABASE_URL', 'SUPABASE_SERVICE_KEY', 'JWT_SECRET', 'ADMIN_PASSWORD'];
+const _REQUIRED_ENV = ['SUPABASE_URL', 'SUPABASE_SERVICE_KEY', 'JWT_SECRET', 'ADMIN_PASSWORD', 'GOOGLE_CLIENT_SECRET'];
 const _MISSING = _REQUIRED_ENV.filter(k => !process.env[k]);
 if (_MISSING.length) {
   console.error('\n❌  FATAL — Missing required environment variables:\n  ' + _MISSING.join('\n  '));
