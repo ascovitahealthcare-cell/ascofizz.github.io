@@ -1,6 +1,6 @@
 {
   "name": "ascovita-backend",
-  "version": "7.0.0",
+  "version": "7.1.0",
   "description": "Ascovita Healthcare Backend — Node.js + Express + Supabase",
   "main": "server.js",
   "scripts": {
