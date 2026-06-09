@@ -10595,8 +10595,8 @@ function validateCheckoutForm() {
   const phone     = getFormField('input[type="tel"]');
   const addr1     = getFormField('input[placeholder="House / Flat No., Street"]');
   const city      = getFormField('input[placeholder="City"]');
-  const state     = getFormField('select') || getFormField('input[placeholder="State"]');
-  const pin       = getFormField('input[placeholder="Pincode"]') || getFormField('input[placeholder="PIN Code"]');
+  const state     = getFormField('input[placeholder="State"]') || getFormField('select');
+  const pin       = getFormField('input[placeholder="6-digit PIN"]') || getFormField('input[placeholder="Pincode"]') || getFormField('input[placeholder="PIN Code"]');
 
   const errors = [];
   if (!firstName)                                               errors.push('First name is required');
@@ -10608,7 +10608,7 @@ function validateCheckoutForm() {
 
   if (errors.length) { showToast('⚠️ ' + errors[0], 'error'); return null; }
   return { firstName, lastName, email, phone, addr1,
-           addr2: getFormField('input[placeholder="Apartment, Floor, Area (optional)"]') || '',
+           addr2: getFormField('input[placeholder="Area / Locality (optional)"]') || getFormField('input[placeholder="Apartment, Floor, Area (optional)"]') || '',
            city, state, pin };
 }
 
