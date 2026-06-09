@@ -4823,6 +4823,8 @@ textarea.form-input { resize:vertical; min-height:90px; }
 }
 </style>
 </head>
+<!-- Promotional Media Config -->
+<script src="PROMO_MEDIA.js"></script>
 <body>
 
 
@@ -5992,6 +5994,110 @@ setInterval(function() { syncAppCartBadge(); syncAppWishBadge(); }, 2000);
     </div>
   </div>
 
+  <!-- ═══ PROMO MEDIA — infinite loop strip ═══ -->
+  <section id="promo-media-section" style="padding:36px 0;background:#fff;overflow:hidden">
+    <div class="pm-track-outer">
+      <div class="pm-track" id="pmTrack"></div>
+    </div>
+  </section>
+
+  <style>
+  .pm-track-outer {
+    overflow: hidden;
+    /* fade edges */
+    -webkit-mask-image: linear-gradient(90deg, transparent 0%, #000 6%, #000 94%, transparent 100%);
+    mask-image: linear-gradient(90deg, transparent 0%, #000 6%, #000 94%, transparent 100%);
+  }
+  .pm-track {
+    display: flex;
+    gap: 14px;
+    width: max-content;
+    animation: pmScroll 28s linear infinite;
+    will-change: transform;
+  }
+  .pm-track:hover { animation-play-state: paused; }
+  @keyframes pmScroll {
+    from { transform: translateX(0); }
+    to   { transform: translateX(-50%); }
+  }
+  .pm-card {
+    flex-shrink: 0;
+    width: 185px;
+    border-radius: 16px;
+    overflow: hidden;
+    position: relative;
+    cursor: pointer;
+    background: #e8f5d0;
+    box-shadow: 0 2px 10px rgba(0,0,0,.07);
+    transition: transform .2s, box-shadow .2s;
+  }
+  .pm-card:hover { transform: translateY(-4px); box-shadow: 0 10px 28px rgba(0,0,0,.15); }
+  .pm-card-media {
+    width: 100%; height: 260px;
+    object-fit: cover; display: block;
+  }
+  .pm-card-ph {
+    width: 100%; height: 260px;
+    background: linear-gradient(155deg, #ddf0c0, #c4e49a);
+    display: flex; align-items: center; justify-content: center;
+  }
+  .pm-card-ph-inner {
+    width: 56px; height: 56px; border-radius: 50%;
+    border: 2px dashed rgba(45,80,22,.3);
+    display: flex; align-items: center; justify-content: center;
+    color: rgba(45,80,22,.35); font-size: 1.4rem; font-weight: 300;
+  }
+  .pm-badge {
+    position: absolute; top: 10px; right: 10px;
+    background: var(--green); color: #fff;
+    font-size: .6rem; font-weight: 800; letter-spacing: .6px;
+    padding: 3px 9px; border-radius: 20px;
+    text-transform: uppercase; z-index: 2;
+  }
+  @media(max-width:600px){
+    .pm-card { width: calc(50vw - 22px); }
+    .pm-card-media, .pm-card-ph { height: 210px; }
+    .pm-track { animation-duration: 20s; }
+  }
+  </style>
+
+  <script>
+  (function(){
+    var BADGES = ['15% off','10% off','20% off','5% off','10% off','5% off'];
+    function buildCard(item, badge){
+      var hasSrc = item && item.src && item.src.trim();
+      var page = (item && item.ctaPage) || 'shop';
+      var media = hasSrc
+        ? (item.type==='video'
+            ? '<video class="pm-card-media" src="'+item.src+'"'+(item.poster?' poster="'+item.poster+'"':'')+' muted playsinline loop preload="metadata"></video>'
+            : '<img class="pm-card-media" src="'+item.src+'" alt="" loading="lazy">')
+        : '<div class="pm-card-ph"><div class="pm-card-ph-inner">+</div></div>';
+      return '<div class="pm-card" onclick="showPage(\''+page+'\')">'
+        + media
+        + '<div class="pm-badge">'+badge+'</div>'
+        + '</div>';
+    }
+    function renderPromoMedia(){
+      var track = document.getElementById('pmTrack');
+      if(!track) return;
+      var data = (typeof PROMO_MEDIA !== 'undefined') ? PROMO_MEDIA : [];
+      var cards = '';
+      // Build 6 cards
+      for(var i=0;i<6;i++){
+        cards += buildCard(data[i]||{}, (data[i]&&data[i].discount)||BADGES[i]);
+      }
+      // Duplicate for seamless infinite loop
+      track.innerHTML = cards + cards;
+      track.querySelectorAll('video').forEach(function(v){
+        v.addEventListener('mouseenter',function(){ v.play(); });
+        v.addEventListener('mouseleave',function(){ v.pause(); v.currentTime=0; });
+      });
+    }
+    if(document.readyState==='loading'){ document.addEventListener('DOMContentLoaded',renderPromoMedia); }
+    else { renderPromoMedia(); }
+  })();
+  </script>
+
   <!-- CATEGORIES -->
   <section class="section" style="padding-bottom:32px">
     <div class="container">
@@ -6555,7 +6661,6 @@ setInterval(function() { syncAppCartBadge(); syncAppWishBadge(); }, 2000);
     </div>
   </div>
 </section>
-
 <!-- ═══════════ CUSTOMER REVIEWS WALL ═══════════ -->
 <section class="influencer-section" style="background:var(--green-wash)">
   <div class="container">
@@ -6971,6 +7076,16 @@ setInterval(function() { syncAppCartBadge(); syncAppWishBadge(); }, 2000);
         <div class="cart-summary-box">
           <h2 style="font-size:1.1rem;margin-bottom:18px">Order Summary</h2>
           <div id="ckSummary"></div>
+
+          <!-- ── CHECKOUT RECOMMENDATIONS ── -->
+          <div id="ckRecoSection" style="margin-top:18px;display:none">
+            <div style="font-size:.78rem;font-weight:700;color:var(--dark);margin-bottom:10px;display:flex;align-items:center;gap:6px">
+              <span style="background:linear-gradient(135deg,var(--green),var(--green-light));color:white;border-radius:6px;padding:2px 8px;font-size:.65rem;font-weight:800;letter-spacing:.4px">COMPLETE YOUR ORDER</span>
+              <span style="color:var(--gray);font-size:.72rem;font-weight:400">Customers also bought</span>
+            </div>
+            <div id="ckRecoItems"></div>
+          </div>
+
           <!-- UPSELL WIDGET -->
           <div class="upsell-bar" id="upsellBar">
             <div class="upsell-bar-title">⚡ Customers Also Added</div>
@@ -6984,7 +7099,7 @@ setInterval(function() { syncAppCartBadge(); syncAppWishBadge(); }, 2000);
               <button class="promo-apply-btn" onclick="applyPromoCode()">Apply</button>
             </div>
             <div id="promoStatus"></div>
-            <div style="font-size:0.72rem;color:var(--gray);margin-top:6px">Promo codes are added by admin. Use TEST100 for payment testing only.</div>
+            <div style="font-size:0.72rem;color:var(--gray);margin-top:6px">Enter your promo code above</div>
           </div>
           <!-- Online Payment Button -->
           <button class="checkout-btn" id="onlinePayBtn" onclick="initiatePayment()" style="margin-top:14px">🔒 Pay Securely via GoKwik</button>
@@ -7008,6 +7123,175 @@ setInterval(function() { syncAppCartBadge(); syncAppWishBadge(); }, 2000);
   </div>
 </div>
 <!-- ══════════ END CHECKOUT ══════════ -->
+
+<style>
+/* ── Checkout qty controls ── */
+.ck-item-row { display:flex; gap:10px; align-items:center; margin-bottom:12px; padding-bottom:12px; border-bottom:1px solid var(--light-gray); }
+.ck-item-row:last-child { border-bottom:none; }
+.ck-item-img { width:50px; height:50px; border-radius:9px; object-fit:contain; background:var(--off-white); padding:4px; flex-shrink:0; }
+.ck-item-info { flex:1; min-width:0; }
+.ck-item-name { font-size:.8rem; font-weight:600; line-height:1.3; margin-bottom:2px; }
+.ck-item-price-line { font-size:.72rem; color:var(--gray); }
+.ck-item-right { display:flex; flex-direction:column; align-items:flex-end; gap:5px; }
+.ck-qty-wrap { display:flex; align-items:center; gap:0; border:1.5px solid var(--light-gray); border-radius:8px; overflow:hidden; }
+.ck-qty-btn { width:28px; height:28px; border:none; background:white; cursor:pointer; font-size:1rem; font-weight:700; color:var(--green); display:flex; align-items:center; justify-content:center; transition:background .15s; }
+.ck-qty-btn:hover { background:var(--green-pale); }
+.ck-qty-num { width:28px; text-align:center; font-size:.82rem; font-weight:700; color:var(--dark); }
+.ck-item-total { font-weight:700; font-size:.85rem; color:var(--dark); }
+.ck-remove-btn { background:none; border:none; cursor:pointer; font-size:.75rem; color:var(--gray); padding:0; line-height:1; }
+.ck-remove-btn:hover { color:var(--red); }
+
+/* ── Checkout reco cards ── */
+.ck-reco-card { display:flex; align-items:center; gap:10px; padding:10px 12px; border:1.5px solid var(--light-gray); border-radius:12px; margin-bottom:8px; cursor:pointer; transition:border-color .2s, box-shadow .2s; }
+.ck-reco-card:hover { border-color:var(--green); box-shadow:0 2px 10px rgba(45,80,22,.1); }
+.ck-reco-img { width:46px; height:46px; border-radius:8px; object-fit:contain; background:var(--off-white); padding:3px; flex-shrink:0; }
+.ck-reco-info { flex:1; min-width:0; }
+.ck-reco-name { font-size:.78rem; font-weight:600; color:var(--dark); line-height:1.3; }
+.ck-reco-price { font-size:.72rem; color:var(--gray); margin-top:1px; }
+.ck-reco-badge { font-size:.62rem; background:var(--green-pale); color:var(--green); border-radius:20px; padding:2px 7px; font-weight:700; display:inline-block; margin-top:3px; }
+.ck-reco-add-btn { flex-shrink:0; padding:7px 14px; background:var(--green); color:white; border:none; border-radius:8px; font-size:.76rem; font-weight:700; cursor:pointer; font-family:var(--font-body); transition:background .2s; white-space:nowrap; }
+.ck-reco-add-btn:hover { background:var(--green-light); }
+.ck-reco-add-btn.in-cart { background:#e8f5d8; color:var(--green); cursor:default; }
+</style>
+
+<script>
+// ══════════════════════════════════════════════
+// CHECKOUT QUANTITY CONTROLS + RECOMMENDATIONS
+// ══════════════════════════════════════════════
+
+function ckUpdateQty(id, newQty, tierIdx) {
+  if (newQty < 1) {
+    if (confirm('Remove this item from your cart?')) {
+      STORE.removeFromCart(id);
+    }
+  } else {
+    if (tierIdx !== undefined && tierIdx >= 0) {
+      const item = STORE.cart.find(i => i.id === id && i.tierIdx === tierIdx);
+      if (item) { item.qty = newQty; STORE.save(); }
+    } else {
+      STORE.updateQty(id, newQty);
+    }
+  }
+  renderCheckoutSummary();
+  renderCkRecommendations();
+  renderSideCart();
+}
+
+function renderCkRecommendations() {
+  const sec = document.getElementById('ckRecoSection');
+  const el  = document.getElementById('ckRecoItems');
+  if (!sec || !el || typeof PRODUCTS === 'undefined') return;
+  const cartIds = STORE.cart.map(i => i.id);
+  if (cartIds.length === 0) { sec.style.display = 'none'; return; }
+
+  // Get categories of cart items
+  const cartCategories = [...new Set(STORE.cart.map(i => {
+    const p = PRODUCTS.find(p => p.id === i.id);
+    return p ? p.category : null;
+  }).filter(Boolean))];
+
+  // Score products: same category = 3pts, has tags in common = 1pt each, not in cart = eligible
+  const scored = PRODUCTS
+    .filter(p => !cartIds.includes(p.id))
+    .map(p => {
+      let score = 0;
+      if (cartCategories.includes(p.category)) score += 3;
+      const cartTags = STORE.cart.flatMap(i => { const cp=PRODUCTS.find(x=>x.id===i.id); return cp?cp.tags:[]; });
+      (p.tags||[]).forEach(t => { if(cartTags.includes(t)) score++; });
+      if ((p.tags||[]).includes('bestseller')) score += 2;
+      if ((p.tags||[]).includes('featured'))   score += 1;
+      return { p, score };
+    })
+    .sort((a, b) => b.score - a.score)
+    .slice(0, 3)
+    .map(x => x.p);
+
+  if (scored.length === 0) { sec.style.display = 'none'; return; }
+  sec.style.display = '';
+
+  el.innerHTML = scored.map(p => {
+    const price    = p.salePrice || p.price;
+    const inCart   = STORE.cart.some(i => i.id === p.id);
+    const imgSrc   = getProductImg(p);
+    const savePct  = p.salePrice ? Math.round((1 - p.salePrice / p.price) * 100) : 0;
+    const saveBadge= savePct > 0 ? `<span class="ck-reco-badge">Save ${savePct}%</span>` : (p.badge ? `<span class="ck-reco-badge">${p.badge}</span>` : '');
+    const addBtn   = inCart
+      ? `<button class="ck-reco-add-btn in-cart" disabled>✓ Added</button>`
+      : `<button class="ck-reco-add-btn" onclick="event.stopPropagation();STORE.addToCart(${p.id});renderCheckoutSummary();renderCkRecommendations();renderSideCart();showToast('🛒 ${p.name.split(' ')[0]} added!','success')">+ Add</button>`;
+    return `<div class="ck-reco-card" onclick="openProduct(${p.id})">
+      <img class="ck-reco-img" src="${imgSrc}" alt="${p.name}" onerror="this.src=PRODUCT_FALLBACKS.default" loading="lazy">
+      <div class="ck-reco-info">
+        <div class="ck-reco-name">${p.name}</div>
+        <div class="ck-reco-price">₹${price.toLocaleString('en-IN')} ${p.hasTiers ? '<span style="color:var(--green);font-size:.65rem">· multi-pack deals</span>' : ''}</div>
+        ${saveBadge}
+      </div>
+      ${addBtn}
+    </div>`;
+  }).join('');
+}
+
+// Patch renderCheckoutSummary to include qty controls
+const _origRenderCkSummary = renderCheckoutSummary;
+function renderCheckoutSummary() {
+  const el = document.getElementById('ckSummary');
+  if (!el) return;
+
+  const sub = STORE.cart.reduce((s, item) => {
+    const p = PRODUCTS.find(p => p.id === item.id);
+    if (!p) return s;
+    const unitPrice = item.tierRate !== undefined ? item.tierRate : (p.salePrice || p.price);
+    return s + unitPrice * item.qty;
+  }, 0);
+
+  let disc = 0;
+  if (typeof activePromoCode !== 'undefined' && activePromoCode) {
+    if (activePromoCode.type === 'pct') disc = Math.round(sub * activePromoCode.value / 100);
+    else if (activePromoCode.type === 'flat') disc = Math.min(activePromoCode.value, sub);
+  } else if (typeof appliedDiscount !== 'undefined' && appliedDiscount) {
+    disc = appliedDiscount.type==='percent' ? Math.round(sub*appliedDiscount.value/100) : appliedDiscount.value;
+  }
+
+  const ship  = 0;
+  const total = sub - disc + ship;
+
+  const itemsHtml = STORE.cart.map(item => {
+    const p = PRODUCTS.find(p => p.id === item.id);
+    if (!p) return '';
+    const unitPrice  = item.tierRate !== undefined ? item.tierRate : (p.salePrice || p.price);
+    const packLabel  = item.tierTabs  ? ` (${item.tierTabs} tabs)` : '';
+    const tierLabel  = item.tierLabel ? ` — ${item.tierLabel}` : '';
+    const tierIdx    = item.tierIdx !== undefined ? item.tierIdx : -1;
+    const imgSrc     = getProductImg(p);
+    return `<div class="ck-item-row">
+      <img class="ck-item-img" src="${imgSrc}" alt="${p.name}" onerror="this.src=PRODUCT_FALLBACKS.default" loading="lazy">
+      <div class="ck-item-info">
+        <div class="ck-item-name">${p.name}${packLabel}${tierLabel}</div>
+        <div class="ck-item-price-line">₹${unitPrice.toLocaleString('en-IN')} each</div>
+      </div>
+      <div class="ck-item-right">
+        <div class="ck-qty-wrap">
+          <button class="ck-qty-btn" onclick="ckUpdateQty(${p.id},${item.qty-1},${tierIdx})" title="Decrease">−</button>
+          <span class="ck-qty-num">${item.qty}</span>
+          <button class="ck-qty-btn" onclick="ckUpdateQty(${p.id},${item.qty+1},${tierIdx})" title="Increase">+</button>
+        </div>
+        <div class="ck-item-total">₹${(unitPrice * item.qty).toLocaleString('en-IN')}</div>
+        <button class="ck-remove-btn" onclick="if(confirm('Remove?')){STORE.removeFromCart(${p.id});renderCheckoutSummary();renderCkRecommendations();renderSideCart();}" title="Remove">Remove ✕</button>
+      </div>
+    </div>`;
+  }).join('');
+
+  el.innerHTML = `${itemsHtml}
+    <hr style="border:none;border-top:1.5px solid var(--light-gray);margin:14px 0 10px">
+    <div class="sum-row"><span>Subtotal</span><span>₹${sub.toLocaleString('en-IN')}</span></div>
+    ${disc > 0 ? `<div class="sum-row" style="color:var(--success)"><span>🏷️ Discount</span><span>-₹${disc.toLocaleString('en-IN')}</span></div>` : ''}
+    <div class="sum-row"><span>Shipping</span><span>${ship === 0 ? '<span style="color:var(--success);font-weight:700">FREE</span>' : '₹' + ship}</span></div>
+    <hr style="border:none;border-top:1px solid var(--light-gray);margin:8px 0">
+    <div class="sum-row total"><span>Total</span><span style="color:var(--green);font-size:1.1rem">₹${total.toLocaleString('en-IN')}</span></div>`;
+
+  // Also re-render recommendations whenever summary updates
+  renderCkRecommendations();
+}
+</script>
 
 
 <!-- ══════════ THANK YOU PAGE ══════════ -->
@@ -9574,6 +9858,8 @@ function showPage(pg) {
   }
   if (pg === 'checkout') {
     renderCheckoutSummary();
+    // Render product recommendations for checkout
+    setTimeout(function() { if (typeof renderCkRecommendations === 'function') renderCkRecommendations(); }, 50);
     // ── Pre-warm backend when user opens checkout (30-50s head-start before they click Pay) ──
     try { fetch(API_BASE + '/api/wake').catch(function(){ fetch(API_BASE + '/').catch(function(){}); }); } catch(e) {}
     // Show warming notice on Pay button if backend likely cold
@@ -10595,8 +10881,8 @@ function validateCheckoutForm() {
   const phone     = getFormField('input[type="tel"]');
   const addr1     = getFormField('input[placeholder="House / Flat No., Street"]');
   const city      = getFormField('input[placeholder="City"]');
-  const state     = getFormField('input[placeholder="State"]') || getFormField('select');
-  const pin       = getFormField('input[placeholder="6-digit PIN"]') || getFormField('input[placeholder="Pincode"]') || getFormField('input[placeholder="PIN Code"]');
+  const state     = getFormField('select') || getFormField('input[placeholder="State"]');
+  const pin       = getFormField('input[placeholder="Pincode"]') || getFormField('input[placeholder="PIN Code"]');
 
   const errors = [];
   if (!firstName)                                               errors.push('First name is required');
@@ -10608,7 +10894,7 @@ function validateCheckoutForm() {
 
   if (errors.length) { showToast('⚠️ ' + errors[0], 'error'); return null; }
   return { firstName, lastName, email, phone, addr1,
-           addr2: getFormField('input[placeholder="Area / Locality (optional)"]') || getFormField('input[placeholder="Apartment, Floor, Area (optional)"]') || '',
+           addr2: getFormField('input[placeholder="Apartment, Floor, Area (optional)"]') || '',
            city, state, pin };
 }
 
@@ -15954,12 +16240,9 @@ function saveProfile() {
 // CHECKOUT: PROMO CODES + SAVED ADDRESS AUTO-FILL
 // ═══════════════════════════════════════════════════════
 
-// Promo codes — only TEST100 kept locally for payment testing.
 // ALL real codes are fetched live from backend (Supabase coupons table).
-const PROMO_CODES = {
-  'TEST100': { type: 'pct', value: 100, label: '100% OFF (Test Mode)', demo: true },
-  'TESTPAY': { type: 'pct', value: 100, label: '100% OFF (Payment Test)', demo: true },
-};
+// No local test codes — admin creates all promo codes in the dashboard.
+const PROMO_CODES = {};
 // Note: activePromoCode declared globally above (near appliedDiscount)
 
 async function applyPromoCode() {
