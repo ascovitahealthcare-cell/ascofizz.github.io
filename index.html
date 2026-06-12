@@ -2,7 +2,11 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://www.googletagmanager.com https://accounts.google.com https://cdn.jsdelivr.net https://cdnjs.cloudflare.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: blob: https:; connect-src 'self' https://ascovitahealthcare-cell-github-io.onrender.com https://*.gokwik.co https://gkx.gokwik.co https://www.google-analytics.com https://region1.google-analytics.com https://www.google.com https://www.googleapis.com https://oauth2.googleapis.com https://openidconnect.googleapis.com; frame-src https://accounts.google.com https://content.googleapis.com https://oauth2.googleapis.com https://*.gokwik.co; object-src 'none'; base-uri 'self';">
+  <!-- ✅ Indexing directives — placed first so Googlebot reads them before any script loads -->
+  <meta name="robots" content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1">
+  <meta name="googlebot" content="index, follow, max-image-preview:large">
+  <meta name="bingbot" content="index, follow">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://www.googletagmanager.com https://accounts.google.com https://cdn.jsdelivr.net https://cdnjs.cloudflare.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: blob: https:; connect-src 'self' https://ascovitahealthcare-cell-github-io.onrender.com https://*.gokwik.co https://gkx.gokwik.co https://www.google-analytics.com https://region1.google-analytics.com https://www.googleapis.com https://oauth2.googleapis.com https://openidconnect.googleapis.com; frame-src https://accounts.google.com https://content.googleapis.com https://oauth2.googleapis.com https://*.gokwik.co; object-src 'none'; base-uri 'self';">
   <!-- Google Analytics 4 — G-PSRK3R6L0Z -->
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-PSRK3R6L0Z"></script>
 <script>
@@ -137,10 +141,7 @@
 
   <meta name="keywords" content="Ascovita, Ascovita Healthcare, Ascovita Health, ascovita.com, Ascovita supplements India, Ascovita effervescent vitamins, Ascovita nutraceuticals, Ascovita Anand Gujarat, Ascovita brand, Aamin Ghachivahora, Aamin Ghachivahora Ascovita, co-founder Ascovita Healthcare, nutraceutical manufacturer India, WHO-GMP certified supplement manufacturer Gujarat, FSSAI approved nutraceutical manufacturer India, private label supplement manufacturer India, contract supplement manufacturing India, effervescent tablet manufacturer Anand, B2B nutraceutical manufacturer Gujarat, L-Glutathione effervescent tablets India, glutathione 650mg orange effervescent, skin brightening supplement India, glass skin supplement India, glutathione with vitamin C 1000mg India, best glutathione tablets India, Ascovita glutathione review, ACV moringa effervescent green apple, apple cider vinegar weight management India, ACV garcinia cambogia effervescent tablets, VitaPlus B12 D3 vegan spirulina tablets, organic spirulina B12 supplement India, vegan B12 D3 supplement India, MG+++ magnesium B12 D3 spirulina, magnesium sleep supplement India, recovery supplement India, B12 biotin effervescent guava flavour, biotin hair growth supplement India, hair fall supplement India, CS++ calcium iron B12 D3, calcium iron supplement for women India, women wellness supplement India, Multidiata premium multivitamin 23 vitamins, best multivitamin brand India, L-carnitine effervescent weight loss, moringa tablets India, natural immunity booster India, effervescent supplement India, fast absorbing vitamins India, buy supplements online India, best supplement brand Gujarat, made in India nutraceuticals, supplement company Anand Gujarat">
 
-  <!-- Robots & Indexing -->
-  <meta name="robots" content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1">
-  <meta name="googlebot" content="index, follow, max-image-preview:large">
-  <meta name="bingbot" content="index, follow">
+  <!-- Robots & Indexing — moved to top of <head> for earliest possible Googlebot read -->
 
   <!-- Brand & Author -->
   <meta name="author" content="Ascovita Healthcare — Co-founded by Aamin Ghachivahora, Anand, Gujarat, India">
@@ -14615,15 +14616,6 @@ document.addEventListener('DOMContentLoaded', function _patchAuthButtons() {
 
 const GOOGLE_CLIENT_ID = '6793142938-b9sl3d3lh2svjkmcnina8fsh31nut0bu.apps.googleusercontent.com';
 
-// ── Shared bot/crawler detector — used to keep Google One Tap / FedCM ──
-// ── completely out of the rendered DOM for search engine crawlers.    ──
-// ── (One Tap injects an accounts.google.com iframe that carries its   ──
-// ── own noindex tag, which gets picked up as "noindex" on THIS page.) ──
-function _isCrawlerUA() {
-  var ua = navigator.userAgent || '';
-  return /googlebot|bingbot|slurp|duckduckbot|baiduspider|yandexbot|sogou|exabot|facebot|ia_archiver|crawler|spider|bot\b/i.test(ua);
-}
-
 // ── State tracking ──
 let _googleInitialized = false;
 let _googleInitRetries = 0;
@@ -14693,7 +14685,9 @@ const _GOOGLE_MAX_RETRIES = 8;
 window.onGoogleLibraryLoad = function() {
   console.log('[Ascovita Auth] Google Identity Services SDK loaded ✓');
   // ── DO NOT run auth for bots/crawlers — prevents noindex from OAuth error page ──
-  if (!_isCrawlerUA()) _initGoogleOneTap();
+  var ua = navigator.userAgent || '';
+  var isBot = /googlebot|bingbot|slurp|duckduckbot|baiduspider|yandexbot|sogou|exabot|facebot|ia_archiver|crawler|spider|bot/i.test(ua);
+  if (!isBot) _initGoogleOneTap();
 };
 
 // ── Safely parse a Google-issued JWT without verification (client-side only) ──
@@ -14948,7 +14942,6 @@ function socialLogin(provider) {
 function _initGoogleOneTap() {
   if (_googleInitialized) return;
   if (typeof google === 'undefined' || !google.accounts?.id) return;
-  if (_isCrawlerUA()) return; // never let crawlers trigger One Tap / FedCM
 
   // If user already logged in via our JWT — init SDK but suppress ALL prompts
   if (getCurrentUser()) {
