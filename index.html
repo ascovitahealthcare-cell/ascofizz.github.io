@@ -14615,6 +14615,15 @@ document.addEventListener('DOMContentLoaded', function _patchAuthButtons() {
 
 const GOOGLE_CLIENT_ID = '6793142938-b9sl3d3lh2svjkmcnina8fsh31nut0bu.apps.googleusercontent.com';
 
+// ── Shared bot/crawler detector — used to keep Google One Tap / FedCM ──
+// ── completely out of the rendered DOM for search engine crawlers.    ──
+// ── (One Tap injects an accounts.google.com iframe that carries its   ──
+// ── own noindex tag, which gets picked up as "noindex" on THIS page.) ──
+function _isCrawlerUA() {
+  var ua = navigator.userAgent || '';
+  return /googlebot|bingbot|slurp|duckduckbot|baiduspider|yandexbot|sogou|exabot|facebot|ia_archiver|crawler|spider|bot\b/i.test(ua);
+}
+
 // ── State tracking ──
 let _googleInitialized = false;
 let _googleInitRetries = 0;
@@ -14684,9 +14693,7 @@ const _GOOGLE_MAX_RETRIES = 8;
 window.onGoogleLibraryLoad = function() {
   console.log('[Ascovita Auth] Google Identity Services SDK loaded ✓');
   // ── DO NOT run auth for bots/crawlers — prevents noindex from OAuth error page ──
-  var ua = navigator.userAgent || '';
-  var isBot = /googlebot|bingbot|slurp|duckduckbot|baiduspider|yandexbot|sogou|exabot|facebot|ia_archiver|crawler|spider|bot/i.test(ua);
-  if (!isBot) _initGoogleOneTap();
+  if (!_isCrawlerUA()) _initGoogleOneTap();
 };
 
 // ── Safely parse a Google-issued JWT without verification (client-side only) ──
@@ -14941,6 +14948,7 @@ function socialLogin(provider) {
 function _initGoogleOneTap() {
   if (_googleInitialized) return;
   if (typeof google === 'undefined' || !google.accounts?.id) return;
+  if (_isCrawlerUA()) return; // never let crawlers trigger One Tap / FedCM
 
   // If user already logged in via our JWT — init SDK but suppress ALL prompts
   if (getCurrentUser()) {
