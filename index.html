@@ -122,7 +122,23 @@
   };
 </script>
 <!-- End Google Analytics -->
-  <script src="https://accounts.google.com/gsi/client" async defer onload="window.onGoogleLibraryLoad && window.onGoogleLibraryLoad()"></script>
+  <script>
+    // Only load Google Identity Services for real users — NOT bots/crawlers
+    // The gsi/client script injects <meta name="robots" content="noindex"> when
+    // rendered by Googlebot, which blocks indexing. Skip it entirely for crawlers.
+    (function() {
+      var ua = navigator.userAgent || '';
+      var isBot = /googlebot|bingbot|slurp|duckduckbot|baiduspider|yandexbot|sogou|exabot|facebot|ia_archiver|crawler|spider|headlesschrome|bot\b/i.test(ua);
+      if (!isBot) {
+        var s = document.createElement('script');
+        s.src = 'https://accounts.google.com/gsi/client';
+        s.async = true;
+        s.defer = true;
+        s.onload = function() { window.onGoogleLibraryLoad && window.onGoogleLibraryLoad(); };
+        document.head.appendChild(s);
+      }
+    })();
+  </script>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
   <!-- ═══════════════════════════════════════════════════════
