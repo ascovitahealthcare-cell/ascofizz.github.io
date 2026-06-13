@@ -25,13 +25,19 @@ const PRODUCT_IMAGES = {
   ]},
 
   // —— id: 3 — L-Carnitine Effervescent – Orange Flavour ——
-  3: { images: [] },
+  3: { images: [
+    "https://static.wixstatic.com/media/f0adaf_f75bd00063ef46e58a1efdea01d18789~mv2.png/v1/fill/w_1100,h_1100,al_c,q_90,usm_0.66_1.00_0.01,enc_avif,quality_auto/f0adaf_f75bd00063ef46e58a1efdea01d18789~mv2.png",
+  ]},
 
   // —— id: 4 — B12 + Biotin Effervescent – Guava Flavour ——
-  4: { images: [] },
+  4: { images: [
+    "https://static.wixstatic.com/media/f0adaf_ff7808219dc64cfab2102ea067910a6a~mv2.png/v1/fill/w_1100,h_1100,al_c,q_90,usm_0.66_1.00_0.01,enc_avif,quality_auto/f0adaf_ff7808219dc64cfab2102ea067910a6a~mv2.png",
+  ]},
 
   // —— id: 5 — Vitamin C Effervescent – Orange Flavour ——
-  5: { images: [] },
+  5: { images: [
+    "https://static.wixstatic.com/media/f0adaf_adf1de2910e24be895072712f8965914~mv2.png/v1/fill/w_1100,h_1100,al_c,q_90,usm_0.66_1.00_0.01,enc_avif,quality_auto/f0adaf_adf1de2910e24be895072712f8965914~mv2.png",
+  ]},
 
   // —— id: 8 — Multidiata – Ascovita Premium Multivitamin ——
   8: { images: [
