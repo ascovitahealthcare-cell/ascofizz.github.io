@@ -6405,8 +6405,17 @@ setInterval(function() { syncAppCartBadge(); syncAppWishBadge(); }, 2000);
 
   <script>
   (function(){
-    var BADGES = ['15% off','10% off','20% off','5% off','10% off','5% off'];
-    function buildCard(item, badge){
+    /* ── shuffle helper ── */
+    function shuffle(arr){
+      var a = arr.slice();
+      for(var i=a.length-1;i>0;i--){
+        var j=Math.floor(Math.random()*(i+1));
+        var t=a[i];a[i]=a[j];a[j]=t;
+      }
+      return a;
+    }
+
+    function buildCard(item){
       var hasSrc = item && item.src && item.src.trim();
       var page = (item && item.ctaPage) || 'shop';
       var media = hasSrc
@@ -6418,24 +6427,53 @@ setInterval(function() { syncAppCartBadge(); syncAppWishBadge(); }, 2000);
         + media
         + '</div>';
     }
+
     function renderPromoMedia(){
       var track = document.getElementById('pmTrack');
       if(!track) return;
-      var data = (typeof PROMO_MEDIA !== 'undefined') ? PROMO_MEDIA : [];
+
+      /* Always read PROMO_MEDIA fresh (reflects any live changes to PROMO_MEDIA.js) */
+      var raw = (typeof PROMO_MEDIA !== 'undefined' && PROMO_MEDIA.length) ? PROMO_MEDIA : [];
+
+      /* Shuffle all images randomly on every render */
+      var data = shuffle(raw);
+
+      /* Build cards for ALL images in PROMO_MEDIA */
       var cards = '';
-      // Build 6 cards
-      for(var i=0;i<6;i++){
-        cards += buildCard(data[i]||{}, (data[i]&&data[i].discount)||BADGES[i]);
+      for(var i=0;i<data.length;i++){
+        cards += buildCard(data[i]);
       }
-      // Duplicate for seamless infinite loop
+
+      /* Duplicate for seamless infinite loop */
       track.innerHTML = cards + cards;
+
+      /* Activate videos on hover */
       track.querySelectorAll('video').forEach(function(v){
         v.addEventListener('mouseenter',function(){ v.play(); });
         v.addEventListener('mouseleave',function(){ v.pause(); v.currentTime=0; });
       });
+
+      /* Scale scroll speed to number of images (keeps consistent feel) */
+      var baseDuration = Math.max(20, data.length * 2.2);
+      track.style.animationDuration = baseDuration + 's';
     }
-    if(document.readyState==='loading'){ document.addEventListener('DOMContentLoaded',renderPromoMedia); }
-    else { renderPromoMedia(); }
+
+    /* Initial render */
+    if(document.readyState==='loading'){
+      document.addEventListener('DOMContentLoaded', renderPromoMedia);
+    } else {
+      renderPromoMedia();
+    }
+
+    /* ── Auto-reshuffle every 60 s so returning visitors see variety ── */
+    setInterval(function(){
+      var track = document.getElementById('pmTrack');
+      if(!track) return;
+      /* Pause animation smoothly before rebuild */
+      track.style.animationPlayState = 'paused';
+      setTimeout(function(){ renderPromoMedia(); }, 120);
+    }, 60000);
+
   })();
   </script>
 
