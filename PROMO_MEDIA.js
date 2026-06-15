@@ -91,6 +91,54 @@ var PROMO_MEDIA = [
     src:     'https://i.ibb.co/cc9y9XfC/ascovita-b2b-insta-2.png',
     type:    'image',
     ctaPage: 'shop'
+  },
+
+  {
+    src:     'https://i.ibb.co/mVxKFNQG/post4-family.png',
+    type:    'image',
+    ctaPage: 'shop'
+  },
+
+  {
+    src:     'https://i.ibb.co/sv2kTr3f/post5-gym.png',
+    type:    'image',
+    ctaPage: 'shop'
+  },
+
+  {
+    src:     'https://i.ibb.co/bjCJ21t2/post6-nutrition.png',
+    type:    'image',
+    ctaPage: 'shop'
+  },
+
+  {
+    src:     'https://i.ibb.co/x8R0ryxd/post7-service.png',
+    type:    'image',
+    ctaPage: 'shop'
+  },
+
+  {
+    src:     'https://i.ibb.co/W4WSG7Pp/post9-standards.png',
+    type:    'image',
+    ctaPage: 'shop'
+  },
+
+  {
+    src:     'https://i.ibb.co/cSyLT5NM/multidiata-poster.png',
+    type:    'image',
+    ctaPage: 'shop'
+  },
+
+  {
+    src:     'https://i.ibb.co/KpwzhdMk/glutathione-poster.png',
+    type:    'image',
+    ctaPage: 'shop'
+  },
+
+  {
+    src:     'https://i.ibb.co/MxxNxXV3/magnesium-poster.png',
+    type:    'image',
+    ctaPage: 'shop'
   }
 
 ];
