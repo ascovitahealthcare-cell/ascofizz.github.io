@@ -2196,11 +2196,28 @@ img, canvas, svg, table { max-width:100%; }
 
 <script>
 // ═══════════════════════════════════════════════
+// POLYFILLS
+// ═══════════════════════════════════════════════
+if (!AbortSignal.timeout) {
+  AbortSignal.timeout = function(ms) {
+    const ctrl = new AbortController();
+    setTimeout(() => ctrl.abort(new DOMException('TimeoutError','TimeoutError')), ms);
+    return ctrl.signal;
+  };
+}
+
+// ═══════════════════════════════════════════════
 // CONFIG
 // ═══════════════════════════════════════════════
 const API = 'https://ascovitahealthcare-cell-github-io.onrender.com';
 let authToken = localStorage.getItem('ascovita_token') || '';
 let allOrders = [], allProducts = [], allCustomers = [], allDiscounts = [], allPayments = [];
+
+// XSS-safe HTML escaping for all user/API data rendered into innerHTML
+function esc(str) {
+  if (str === null || str === undefined) return '';
+  return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+}
 let editingProductId = null, editingCouponId = null, currentProductFilter = 'all', currentInvFilter = 'all';
 let showDeletedProducts = false;
 
@@ -3061,7 +3078,7 @@ async function loadDashboard() {
     document.getElementById('dashOrdersTbody').innerHTML = orders.slice(0,10).map(o=>`
       <tr>
         <td class="td-id" style="color:var(--green-text);cursor:pointer" onclick="showPage('orders')">${o.id}</td>
-        <td><div style="font-size:0.83rem;font-weight:500;">${o.customer_name||'-'}</div><div style="font-size:0.7rem;color:var(--text3);">${o.city||o.customer_phone||''}</div></td>
+        <td><div style="font-size:0.83rem;font-weight:500;">${esc(o.customer_name)||'-'}</div><div style="font-size:0.7rem;color:var(--text3);">${o.city||o.customer_phone||''}</div></td>
         <td style="color:var(--green-text);font-weight:600;">₹${fmtNum(o.total||0)}</td>
         <td>${payBadge(o.payment_status)}</td>
         <td>${statusBadge(o.fulfillment||o.status)}</td>
@@ -3780,8 +3797,8 @@ function renderOrders(list) {
     <tr>
       <td class="td-id" style="cursor:pointer;color:var(--green-text);" onclick="openOrderModal('${o.id}')">${o.id}</td>
       <td>
-        <div style="font-size:0.83rem;font-weight:500;">${o.customer_name||'-'}</div>
-        <div style="font-size:0.72rem;color:var(--text3);">${o.customer_phone||o.customer_email||''}</div>
+        <div style="font-size:0.83rem;font-weight:500;">${esc(o.customer_name)||'-'}</div>
+        <div style="font-size:0.72rem;color:var(--text3);">${esc(o.customer_phone||o.customer_email||'')}</div>
       </td>
       <td style="font-size:0.78rem;color:var(--text2);">${items.length} item${items.length!==1?'s':''}</td>
       <td style="font-weight:700;color:var(--green-text);">₹${fmtNum(o.total||0)}</td>
@@ -3810,22 +3827,22 @@ async function openOrderModal(orderId) {
     <div class="grid-2" style="margin-bottom:20px;gap:12px;">
       <div>
         <div style="font-size:0.72rem;color:var(--text3);margin-bottom:4px;">CUSTOMER</div>
-        <div style="font-weight:600;">${o.customer_name||'-'}</div>
-        <div style="font-size:0.8rem;color:var(--text2);">${o.customer_email||''}</div>
-        <div style="font-size:0.8rem;color:var(--text2);">${o.customer_phone||''}</div>
+        <div style="font-weight:600;">${esc(o.customer_name)||'-'}</div>
+        <div style="font-size:0.8rem;color:var(--text2);">${esc(o.customer_email)}</div>
+        <div style="font-size:0.8rem;color:var(--text2);">${esc(o.customer_phone)}</div>
       </div>
       <div>
         <div style="font-size:0.72rem;color:var(--text3);margin-bottom:4px;">SHIPPING ADDRESS</div>
         <div style="font-size:0.82rem;color:var(--text2);line-height:1.7;">
-          ${o.address||o.address_line1||''} ${o.address_line2||''}<br>
-          ${o.city||''}, ${o.state||''} ${o.pincode||''}
+          ${esc(o.address||o.address_line1||'')} ${esc(o.address_line2||'')}<br>
+          ${esc(o.city||'')}, ${esc(o.state||'')} ${esc(o.pincode||'')}
         </div>
       </div>
     </div>
     <div class="table-wrap" style="margin-bottom:20px;">
       <table>
         <thead><tr><th>Product</th><th>Qty</th><th>Price</th><th>Total</th></tr></thead>
-        <tbody>${items.map(it => `<tr><td>${it.name||'?'}</td><td>${it.qty||it.units||1}</td><td>₹${fmtNum(it.price||it.selling_price||0)}</td><td>₹${fmtNum((it.price||it.selling_price||0)*(it.qty||it.units||1))}</td></tr>`).join('')||'<tr><td colspan="4">No items</td></tr>'}</tbody>
+        <tbody>${items.map(it => `<tr><td>${esc(it.name||'?')}</td><td>${it.qty||it.units||1}</td><td>₹${fmtNum(it.price||it.selling_price||0)}</td><td>₹${fmtNum((it.price||it.selling_price||0)*(it.qty||it.units||1))}</td></tr>`).join('')||'<tr><td colspan="4">No items</td></tr>'}</tbody>
       </table>
     </div>
     <div class="grid-2" style="margin-bottom:20px;gap:12px;">
@@ -3987,7 +4004,7 @@ function renderProducts(list) {
       <td><input type="checkbox" ${checked} onchange="toggleSelectProduct(${p.id},this)"></td>
       <td><img class="prod-img" src="${p.image||'https://via.placeholder.com/44'}" onerror="this.src='https://via.placeholder.com/44'" alt=""></td>
       <td>
-        <div class="prod-tbl-name">${p.name}</div>
+        <div class="prod-tbl-name">${esc(p.name)}</div>
         <div class="prod-tbl-brand">${p.brand||'Ascovita'} · ${p.category||'–'}</div>
       </td>
       <td><span class="badge badge-gray" style="text-transform:capitalize;">${p.category||'-'}</span></td>
@@ -4660,13 +4677,13 @@ function filterCustomers() {
     <tr>
       <td>
         <div style="display:flex;align-items:center;gap:10px;">
-          <div style="width:32px;height:32px;border-radius:50%;background:var(--green-glow);display:flex;align-items:center;justify-content:center;font-size:0.85rem;font-weight:700;color:var(--green-text);flex-shrink:0;">${(c.name||'?')[0].toUpperCase()}</div>
-          <span style="font-size:0.83rem;font-weight:500;">${c.name||'-'}</span>
+          <div style="width:32px;height:32px;border-radius:50%;background:var(--green-glow);display:flex;align-items:center;justify-content:center;font-size:0.85rem;font-weight:700;color:var(--green-text);flex-shrink:0;">${esc((c.name||'?')[0].toUpperCase())}</div>
+          <span style="font-size:0.83rem;font-weight:500;">${esc(c.name)||'-'}</span>
         </div>
       </td>
-      <td style="font-size:0.78rem;">${c.email||'-'}</td>
-      <td style="font-family:var(--mono);font-size:0.75rem;">${c.phone||'-'}</td>
-      <td style="font-size:0.78rem;">${c.city||'-'}</td>
+      <td style="font-size:0.78rem;">${esc(c.email)||'-'}</td>
+      <td style="font-family:var(--mono);font-size:0.75rem;">${esc(c.phone)||'-'}</td>
+      <td style="font-size:0.78rem;">${esc(c.city)||'-'}</td>
       <td style="font-family:var(--mono);">${c.total_orders||0}</td>
       <td style="color:var(--green-text);font-weight:600;">₹${fmtNum(c.total_spent||0)}</td>
       <td style="font-size:0.72rem;color:var(--text3);">${fmtDate(c.created_at)}</td>
@@ -4697,7 +4714,7 @@ function filterPayments() {
   document.getElementById('paymentsTbody').innerHTML = list.slice(0,200).map(o => `
     <tr>
       <td class="td-id">${o.id}</td>
-      <td>${o.customer_name||'-'}</td>
+      <td>${esc(o.customer_name)||'-'}</td>
       <td style="font-weight:600;color:var(--green-text);">₹${fmtNum(o.total||0)}</td>
       <td><span class="badge badge-gray">${o.payment_mode||'UPI'}</span></td>
       <td>${payBadge(o.payment_status)}</td>
@@ -4724,7 +4741,7 @@ function filterInvoices() {
     const tax  = base * cgst / 100;
     return `<tr>
       <td class="td-id">${o.id}</td>
-      <td>${o.customer_name||'-'}</td>
+      <td>${esc(o.customer_name)||'-'}</td>
       <td style="font-weight:700;color:var(--green-text);">₹${fmtNum(t)}</td>
       <td style="font-family:var(--mono);font-size:0.75rem;">₹${tax.toFixed(2)}</td>
       <td style="font-family:var(--mono);font-size:0.75rem;">₹${tax.toFixed(2)}</td>
@@ -4757,7 +4774,7 @@ function printInvoice(orderId) {
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-bottom:20px;">
         <div style="background:#f9f9f9;border-radius:8px;padding:12px;">
           <div style="font-size:10px;font-weight:700;text-transform:uppercase;color:#888;margin-bottom:6px;">Bill To</div>
-          <div style="font-weight:600;">${o.customer_name||'-'}</div>
+          <div style="font-weight:600;">${esc(o.customer_name)||'-'}</div>
           <div style="font-size:11px;color:#555;line-height:1.8;">
             ${o.address||o.address_line1||''} ${o.address_line2||''}<br>
             ${o.city||''}, ${o.state||''} - ${o.pincode||''}<br>
@@ -4977,17 +4994,18 @@ Products: ${allProducts.slice(0,5).map(p=>p.name+'(₹'+p.price+')').join(', ')}
 
 Be helpful, concise, and use ₹ for Indian currency. Provide actionable business insights.`;
 
-    const response = await fetch('https://api.anthropic.com/v1/messages', {
+    const response = await fetch(`${API}/api/gemini`, {
       method:'POST',
-      headers:{'Content-Type':'application/json'},
+      headers:{'Content-Type':'application/json','Authorization':'Bearer '+authToken},
       body: JSON.stringify({
-        model:'claude-sonnet-4-20250514', max_tokens:1000,
-        system: systemPrompt,
-        messages: chatHistory,
-      })
+        system_instruction: { parts: [{ text: systemPrompt }] },
+        contents: chatHistory.map(m=>({ role: m.role==='assistant'?'model':'user', parts:[{text:m.content}] })),
+        generationConfig: { maxOutputTokens: 1000, temperature: 0.7 }
+      }),
+      signal: AbortSignal.timeout(25000),
     });
     const data = await response.json();
-    const reply = data.content?.[0]?.text || 'Sorry, I could not get a response.';
+    const reply = data.candidates?.[0]?.content?.parts?.[0]?.text || data.error?.message || 'Sorry, I could not get a response.';
     chatHistory.push({role:'assistant', content:reply});
     document.getElementById(typingId)?.remove();
     appendChatMsg(reply, 'ai');
