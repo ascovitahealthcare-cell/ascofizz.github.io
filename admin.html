@@ -846,6 +846,7 @@ img, canvas, svg, table { max-width:100%; }
     <div class="nav-sec-label">System</div>
     <div class="nav-item" onclick="showPage('whatsapp')"><span class="nav-ico">📱</span> WhatsApp</div>
     <div class="nav-item" onclick="showPage('aiassistant')"><span class="nav-ico">🤖</span> AI Assistant</div>
+    <div class="nav-item" id="navAiTeam" onclick="showPage('aiteam')" style="display:none;"><span class="nav-ico">🧠</span> AI Agent Team <span style="margin-left:auto;font-size:0.6rem;font-weight:800;color:#000;background:var(--gold-text);padding:1px 6px;border-radius:5px;">OWNER</span></div>
     <div class="nav-item" onclick="showPage('database')"><span class="nav-ico">🗄️</span> Database</div>
     <div class="nav-item" onclick="showPage('integrations')"><span class="nav-ico">🔗</span> Integrations</div>
     <div class="nav-item" onclick="showPage('geoanalytics')"><span class="nav-ico">🌏</span> Geo Analytics <span class="nav-new"></span></div>
@@ -1701,6 +1702,61 @@ img, canvas, svg, table { max-width:100%; }
   </div>
 </div>
 
+<!-- ═════════════ AI AGENT TEAM (OWNER ONLY) ═════════════ -->
+<div class="page" id="page-aiteam">
+  <div class="page-hdr">
+    <div><div class="page-title">🧠 AI Agent Team</div><div class="page-sub">Autonomous exec team · Claude-powered · grounded in your live data</div></div>
+    <div class="page-actions" style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
+      <label style="display:flex;align-items:center;gap:6px;font-size:0.78rem;color:var(--text2);">
+        <input type="checkbox" id="aiteamAutopilot" onchange="toggleAutopilot()"> Autopilot insights
+        <select id="aiteamInterval" style="background:var(--surface2);color:var(--text);border:1px solid var(--border);border-radius:6px;font-size:0.75rem;padding:3px 4px;">
+          <option value="300000">every 5 min</option>
+          <option value="600000" selected>every 10 min</option>
+          <option value="1800000">every 30 min</option>
+        </select>
+      </label>
+      <button class="btn btn-secondary" onclick="runTeamMeeting()">📋 Team Meeting</button>
+    </div>
+  </div>
+
+  <div style="font-size:0.74rem;color:var(--text3);margin:-6px 0 16px;line-height:1.6;">
+    Insights are generated freely — they cost a small Claude API call but never touch real data. Anything that would change real orders, stock, prices, coupons or send a message is queued below as a <strong style="color:var(--gold-text);">draft action</strong> — nothing executes until you click Approve.
+  </div>
+
+  <div style="display:grid;grid-template-columns:280px 1fr;gap:16px;align-items:start;">
+    <!-- Roster -->
+    <div class="card" style="padding:10px;">
+      <div class="card-hdr" style="padding:4px 6px 10px;"><span class="card-title">Team Roster</span></div>
+      <div id="aiteamRoster" style="display:flex;flex-direction:column;gap:2px;"></div>
+    </div>
+
+    <!-- Right column -->
+    <div style="display:flex;flex-direction:column;gap:16px;">
+      <div class="card">
+        <div class="card-hdr"><span class="card-title">Talk to an agent</span></div>
+        <div style="display:flex;gap:8px;margin-bottom:10px;flex-wrap:wrap;">
+          <select id="aiteamAgentSelect" class="form-control" style="max-width:240px;flex:1 1 200px;"></select>
+          <input class="form-control" id="aiteamTaskInput" placeholder="Ask for an insight or report…" style="flex:2 1 240px;" onkeydown="if(event.key==='Enter')askAgent()">
+          <button class="btn btn-primary" onclick="askAgent()">Ask →</button>
+        </div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;">
+          <input class="form-control" id="aiteamActionInput" placeholder="Describe a real action to propose (e.g. 'send today's WhatsApp report')…" style="flex:1 1 260px;">
+          <button class="btn btn-secondary" onclick="proposeAction()" style="border-color:var(--gold-text);color:var(--gold-text);">⚡ Propose Action</button>
+        </div>
+      </div>
+
+      <div class="card" style="min-height:200px;max-height:420px;overflow-y:auto;padding:0;" id="aiteamFeed" data-empty="true">
+        <div style="color:var(--text3);font-size:0.82rem;text-align:center;padding:30px 10px;">No insights yet — ask an agent something, or run a Team Meeting.</div>
+      </div>
+
+      <div class="card">
+        <div class="card-hdr"><span class="card-title">⚡ Pending Actions</span><button class="btn btn-secondary btn-sm" onclick="loadPendingActions()">↺ Refresh</button></div>
+        <div id="aiteamActions" style="display:flex;flex-direction:column;gap:10px;"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
 <!-- ═════════════ DATABASE ═════════════ -->
 <div class="page" id="page-database">
   <div class="page-hdr">
@@ -2401,6 +2457,11 @@ function applyRole(role) {
     badge.style.background = r === 'owner' ? 'rgba(196,146,14,0.2)' : 'rgba(74,138,40,0.15)';
     badge.style.color = r === 'owner' ? 'var(--gold-text)' : 'var(--green-text)';
   }
+  // AI Agent Team nav link — explicitly shown/hidden by role, not just CSS.
+  // (The real boundary is server-side: every /api/owner/ai/* route 403s
+  // for non-owner tokens regardless of what's visible in this UI.)
+  const navAiTeam = document.getElementById('navAiTeam');
+  if (navAiTeam) navAiTeam.style.display = (r === 'owner') ? 'flex' : 'none';
 }
 
 // Auto-login if token exists
@@ -2450,6 +2511,7 @@ function showPage(name) {
   if(name === 'invoices') loadInvoices();
   if(name === 'banners') loadBanners();
   if(name === 'settings') { loadSettings(); }
+  if(name === 'aiteam') { loadAITeamPage(); }
 }
 
 function toggleSidebar() {
@@ -5029,6 +5091,179 @@ function clearChat() {
 }
 
 document.getElementById('aiInput').addEventListener('keydown', e => { if(e.key==='Enter') sendAiMsg(); });
+
+// ═══════════════════════════════════════════════
+// AI AGENT TEAM (owner-only — server enforces this on every call)
+// ═══════════════════════════════════════════════
+const AITEAM_AGENTS = [
+  {id:'CEO',         name:'Aryan Shah',    role:'Chief Executive Officer',      emoji:'👔'},
+  {id:'CFO',         name:'Priya Mehta',   role:'Chief Financial Officer',      emoji:'💹'},
+  {id:'CMO',         name:'Sneha Patel',   role:'Chief Marketing Officer',      emoji:'📣'},
+  {id:'Marketing',   name:'Rahul Gupta',   role:'Marketing Manager',            emoji:'📊'},
+  {id:'Social',      name:'Kavya Nair',    role:'Social Media Manager',         emoji:'📱'},
+  {id:'Leads',       name:'Vikram Singh',  role:'Leads & Sales Manager',        emoji:'🎯'},
+  {id:'Partnership', name:'Ankit Sharma',  role:'Partnership Manager',          emoji:'🤝'},
+  {id:'Research',    name:'Dr. Aditi Roy', role:'Research & Expansion Manager', emoji:'🔬'},
+  {id:'Customer',    name:'Meera Joshi',   role:'Customer Engagement Manager',  emoji:'💚'},
+  {id:'COO',         name:'Rohan Das',     role:'Chief Operating Officer',      emoji:'⚙️'},
+  {id:'CTO',         name:'Zara Khan',     role:'Chief Technology Officer',     emoji:'💻'},
+];
+let aiteamAutopilotTimer = null;
+
+function aiteamAgentById(id) { return AITEAM_AGENTS.find(a => a.id === id); }
+
+function loadAITeamPage() {
+  const roster = document.getElementById('aiteamRoster');
+  if (roster) {
+    roster.innerHTML = AITEAM_AGENTS.map(a => `
+      <div style="display:flex;align-items:center;gap:8px;padding:7px 8px;border-radius:8px;cursor:pointer;" onclick="document.getElementById('aiteamAgentSelect').value='${a.id}'" onmouseover="this.style.background='var(--surface2)'" onmouseout="this.style.background='transparent'">
+        <span style="font-size:1.1rem;">${a.emoji}</span>
+        <div style="min-width:0;">
+          <div style="font-size:0.8rem;font-weight:600;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${a.name}</div>
+          <div style="font-size:0.68rem;color:var(--text3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${a.role}</div>
+        </div>
+      </div>`).join('');
+  }
+  const sel = document.getElementById('aiteamAgentSelect');
+  if (sel && !sel.dataset.filled) {
+    sel.innerHTML = AITEAM_AGENTS.map(a => `<option value="${a.id}">${a.emoji} ${a.name} — ${a.role}</option>`).join('');
+    sel.dataset.filled = '1';
+  }
+  loadPendingActions();
+}
+
+function aiteamFeedCard(agentId, html, tag) {
+  const feed = document.getElementById('aiteamFeed');
+  if (!feed) return;
+  if (feed.dataset.empty !== 'false') { feed.innerHTML = ''; feed.dataset.empty = 'false'; }
+  const a = aiteamAgentById(agentId) || {emoji:'🤖', name: agentId};
+  const card = document.createElement('div');
+  card.style.cssText = 'padding:10px 12px;border-bottom:1px solid var(--border);font-size:0.84rem;line-height:1.6;';
+  card.innerHTML = `<div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:4px;gap:10px;">
+      <strong style="color:var(--green-text);">${a.emoji} ${a.name}</strong>
+      <span style="font-size:0.68rem;color:var(--text3);white-space:nowrap;">${tag||''} ${new Date().toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit'})}</span>
+    </div>
+    <div>${html}</div>`;
+  feed.insertBefore(card, feed.firstChild);
+}
+
+async function askAgent() {
+  const agentId = document.getElementById('aiteamAgentSelect').value;
+  const input   = document.getElementById('aiteamTaskInput');
+  const task    = input.value.trim();
+  if (!task) return;
+  input.value = '';
+  aiteamFeedCard(agentId, '<span class="typing-dot"></span><span class="typing-dot"></span><span class="typing-dot"></span>', 'thinking…');
+  try {
+    const r = await fetch(`${API}/api/owner/ai/ask`, {
+      method:'POST',
+      headers:{'Content-Type':'application/json','Authorization':'Bearer '+authToken},
+      body: JSON.stringify({ agentId, task }),
+    });
+    const d = await r.json();
+    document.getElementById('aiteamFeed').firstChild?.remove();
+    if (d.error) aiteamFeedCard(agentId, '⚠️ '+d.error);
+    else aiteamFeedCard(agentId, d.response.replace(/\n/g,'<br>'));
+  } catch(e) {
+    document.getElementById('aiteamFeed').firstChild?.remove();
+    aiteamFeedCard(agentId, '⚠️ Network error: '+e.message);
+  }
+}
+
+async function runTeamMeeting() {
+  const order = ['CFO','CMO','Leads','Partnership','Research','Customer','COO','CEO'];
+  aiteamFeedCard('CEO', '<strong>📋 Weekly Sync started</strong> — collecting updates from the team…', 'meeting');
+  for (const id of order) {
+    const prompt = id === 'CEO'
+      ? 'Give your CEO synthesis from the team updates so far this session: top 3 priorities and one decision you are making right now.'
+      : 'Give a 30-second update: one win, one challenge, one ask — specific to Ascovita and grounded in real numbers if you have them.';
+    try {
+      const r = await fetch(`${API}/api/owner/ai/ask`, {
+        method:'POST', headers:{'Content-Type':'application/json','Authorization':'Bearer '+authToken},
+        body: JSON.stringify({ agentId:id, task:prompt }),
+      });
+      const d = await r.json();
+      aiteamFeedCard(id, (d.response||d.error||'').replace(/\n/g,'<br>'), id==='CEO'?'synthesis':'weekly sync');
+    } catch(e) { aiteamFeedCard(id, '⚠️ '+e.message); }
+    await new Promise(res => setTimeout(res, 500));
+  }
+}
+
+async function proposeAction() {
+  const agentId = document.getElementById('aiteamAgentSelect').value;
+  const input   = document.getElementById('aiteamActionInput');
+  const instruction = input.value.trim();
+  if (!instruction) return;
+  input.value = '';
+  aiteamFeedCard(agentId, '⚡ Drafting an action proposal…', 'drafting');
+  try {
+    const r = await fetch(`${API}/api/owner/ai/propose-action`, {
+      method:'POST', headers:{'Content-Type':'application/json','Authorization':'Bearer '+authToken},
+      body: JSON.stringify({ agentId, instruction }),
+    });
+    const d = await r.json();
+    document.getElementById('aiteamFeed').firstChild?.remove();
+    if (d.error) { aiteamFeedCard(agentId, '⚠️ '+d.error); return; }
+    aiteamFeedCard(agentId, `Drafted action: <strong>${(d.action_type||'').replace(/_/g,' ')}</strong> — ${d.summary||''}<br><span style="color:var(--gold-text);font-size:0.75rem;">→ See Pending Actions below to approve.</span>`);
+    loadPendingActions();
+  } catch(e) {
+    document.getElementById('aiteamFeed').firstChild?.remove();
+    aiteamFeedCard(agentId, '⚠️ Network error: '+e.message);
+  }
+}
+
+async function loadPendingActions() {
+  const box = document.getElementById('aiteamActions');
+  if (!box) return;
+  try {
+    const r = await fetch(`${API}/api/owner/ai/actions?status=pending`, { headers:{'Authorization':'Bearer '+authToken} });
+    const d = await r.json();
+    const rows = d.data || [];
+    if (!rows.length) { box.innerHTML = '<div style="color:var(--text3);font-size:0.8rem;text-align:center;padding:14px;">No pending actions.</div>'; return; }
+    box.innerHTML = rows.map(a => `
+      <div style="border:1px solid var(--border2);border-radius:10px;padding:10px 12px;">
+        <div style="font-size:0.68rem;color:var(--gold-text);font-weight:700;letter-spacing:0.5px;">${(a.action_type||'').toUpperCase().replace(/_/g,' ')}</div>
+        <div style="font-size:0.82rem;color:var(--text);margin-top:2px;">${a.summary || ''}</div>
+        <div style="font-size:0.68rem;color:var(--text3);margin-top:4px;">by ${a.agent_name||a.agent_id} · ${new Date(a.created_at).toLocaleString('en-IN')}</div>
+        <div style="display:flex;gap:8px;margin-top:10px;">
+          <button class="btn btn-primary btn-sm" onclick="decideAction('${a.id}','approve')">✓ Approve & Execute</button>
+          <button class="btn btn-secondary btn-sm" onclick="decideAction('${a.id}','reject')">✕ Reject</button>
+        </div>
+      </div>`).join('');
+  } catch(e) { box.innerHTML = `<div style="color:var(--red);font-size:0.8rem;">Failed to load: ${e.message}</div>`; }
+}
+
+async function decideAction(id, decision) {
+  try {
+    const r = await fetch(`${API}/api/owner/ai/actions/${id}/${decision}`, { method:'POST', headers:{'Authorization':'Bearer '+authToken} });
+    const d = await r.json();
+    if (d.error) toast('⚠️ '+d.error); else toast(decision==='approve' ? '✅ Action executed' : 'Action rejected');
+    loadPendingActions();
+  } catch(e) { toast('⚠️ '+e.message); }
+}
+
+function toggleAutopilot() {
+  const on = document.getElementById('aiteamAutopilot').checked;
+  clearTimeout(aiteamAutopilotTimer);
+  if (!on) return;
+  const tick = async () => {
+    const a = AITEAM_AGENTS[Math.floor(Math.random()*AITEAM_AGENTS.length)];
+    try {
+      const r = await fetch(`${API}/api/owner/ai/ask`, {
+        method:'POST', headers:{'Content-Type':'application/json','Authorization':'Bearer '+authToken},
+        body: JSON.stringify({ agentId:a.id, task:'Give a brief unprompted status update or one suggestion for your area right now — keep it short.' }),
+      });
+      const d = await r.json();
+      aiteamFeedCard(a.id, (d.response||d.error||'').replace(/\n/g,'<br>'), 'autopilot');
+    } catch(e) { /* silent — next tick will retry */ }
+    if (document.getElementById('aiteamAutopilot')?.checked) {
+      const interval = parseInt(document.getElementById('aiteamInterval').value, 10) || 600000;
+      aiteamAutopilotTimer = setTimeout(tick, interval);
+    }
+  };
+  const interval = parseInt(document.getElementById('aiteamInterval').value, 10) || 600000;
+  aiteamAutopilotTimer = setTimeout(tick, interval);
+}
 
 // ═══════════════════════════════════════════════
 // DATABASE
