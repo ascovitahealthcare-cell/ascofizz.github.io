@@ -11657,7 +11657,7 @@ function validateCheckoutForm() {
   const addr1     = getFormField('input[placeholder="House / Flat No., Street"]');
   const city      = getFormField('input[placeholder="City"]');
   const state     = getFormField('select') || getFormField('input[placeholder="State"]');
-  const pin       = getFormField('input[placeholder="Pincode"]') || getFormField('input[placeholder="PIN Code"]');
+  const pin       = getFormField('input[placeholder="6-digit PIN"]');
 
   const errors = [];
   if (!firstName)                                               errors.push('First name is required');
