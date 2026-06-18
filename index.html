@@ -12069,6 +12069,7 @@ async function finalizeOrder(orderId, formData, total, method, codCharge) {
       const srResp = await fetch(SHIPROCKET_CONFIG.apiBase + '/api/create-shiprocket-order', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
+        signal: AbortSignal.timeout(20000),
         body: JSON.stringify({
           order_id: orderId,
           order_date: new Date().toISOString().slice(0,19).replace('T',' '),
@@ -12149,6 +12150,7 @@ async function finalizeOrder(orderId, formData, total, method, codCharge) {
             'Content-Type': 'application/json',
             ..._jwt ? { 'Authorization': 'Bearer ' + _jwt } : {},
           },
+          signal: AbortSignal.timeout(25000),
           body: JSON.stringify({ order_id: orderId, order_data: orderPayload }),
         });
         const confirmResult = await confirmResp.json();
@@ -12168,6 +12170,7 @@ async function finalizeOrder(orderId, formData, total, method, codCharge) {
             'Content-Type': 'application/json',
             ..._jwt ? { 'Authorization': 'Bearer ' + _jwt } : {},
           },
+          signal: AbortSignal.timeout(25000),
           body: JSON.stringify(orderPayload),
         });
       }
