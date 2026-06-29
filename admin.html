@@ -1621,9 +1621,10 @@ img, canvas, svg, table { max-width:100%; }
 <!-- ═════════════ INVOICES ═════════════ -->
 <div class="page" id="page-invoices">
   <div class="page-hdr">
-    <div><div class="page-title">Invoices</div><div class="page-sub">GST tax invoices (CGST + SGST)</div></div>
+    <div><div class="page-title">Invoices</div><div class="page-sub">GST tax invoices · 5% (CGST 2.5% + SGST 2.5%, or IGST 5%)</div></div>
     <div class="page-actions">
-      <input class="filter-input" placeholder="🔍 Search order ID..." id="invoiceSearch" oninput="filterInvoices()" style="width:200px">
+      <input class="filter-input" placeholder="🔍 Search order ID or customer..." id="invoiceSearch" oninput="filterInvoices()" style="width:220px">
+      <button class="btn btn-primary owner-only" onclick="openManualInvoiceDrawer()">🧾＋ Create Invoice</button>
       <button class="btn-export" onclick="openExportModal('invoices')">📤 Export ▾</button>
     </div>
   </div>
@@ -1643,13 +1644,124 @@ img, canvas, svg, table { max-width:100%; }
       <button class="ep-dl-btn" onclick="doPageExport('invoices')">⬇ Download</button>
     </div>
   </div>
+  <div style="display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap;">
+    <div class="filter-chip active" onclick="setInvoiceSrcFilter('all',this)">All</div>
+    <div class="filter-chip" onclick="setInvoiceSrcFilter('order',this)">🛒 Order Invoices</div>
+    <div class="filter-chip owner-only" onclick="setInvoiceSrcFilter('manual',this)">🧾 Manual Invoices</div>
+  </div>
   <div class="table-wrap">
     <table>
-      <thead><tr><th>Invoice #</th><th>Customer</th><th>Amount</th><th>CGST</th><th>SGST</th><th>Date</th><th>Actions</th></tr></thead>
+      <thead><tr><th>Invoice #</th><th>Customer</th><th>Amount</th><th>CGST 2.5%</th><th>SGST 2.5%</th><th>Date</th><th>Source</th><th>Actions</th></tr></thead>
       <tbody id="invoicesTbody"></tbody>
     </table>
   </div>
 </div>
+
+<!-- ═════════════ MANUAL INVOICE DRAWER (OWNER ONLY) ═════════════ -->
+<div class="drawer-overlay" id="manualInvOverlay" onclick="closeManualInvoiceDrawer()"></div>
+<div class="prod-drawer" id="manualInvDrawer" style="width:640px;">
+  <div class="prod-drawer-hdr">
+    <div>
+      <div style="font-family:var(--display);font-weight:800;font-size:1rem;color:var(--white);">🧾 Create Manual Invoice</div>
+      <div style="font-size:0.72rem;color:var(--text3);">Owner-only · Add products, custom pricing & discounts · 5% GST auto-applied</div>
+    </div>
+    <button class="modal-close" onclick="closeManualInvoiceDrawer()">✕</button>
+  </div>
+  <div class="prod-drawer-body">
+
+    <!-- Customer -->
+    <div class="section-ico-hdr"><div class="section-ico green">👤</div><div style="font-weight:700;font-size:0.88rem;">Customer / Bill To</div></div>
+    <div class="drawer-2col">
+      <div class="drawer-field">
+        <div class="drawer-field-label">Customer Name *</div>
+        <input class="drawer-input" id="miName" placeholder="Full name">
+      </div>
+      <div class="drawer-field">
+        <div class="drawer-field-label">Phone</div>
+        <input class="drawer-input" id="miPhone" placeholder="+91 …">
+      </div>
+    </div>
+    <div class="drawer-field">
+      <div class="drawer-field-label">Email</div>
+      <input class="drawer-input" id="miEmail" placeholder="customer@email.com">
+    </div>
+    <div class="drawer-field">
+      <div class="drawer-field-label">Billing Address</div>
+      <textarea class="drawer-input drawer-textarea" id="miAddress" placeholder="Address line, city, state, PIN" style="min-height:54px;"></textarea>
+    </div>
+    <div class="drawer-2col">
+      <div class="drawer-field">
+        <div class="drawer-field-label">State (for GST type)</div>
+        <input class="drawer-input" id="miState" placeholder="e.g. Gujarat" oninput="renderManualInvoiceTotals()">
+      </div>
+      <div class="drawer-field">
+        <div class="drawer-field-label">GSTIN (if B2B, optional)</div>
+        <input class="drawer-input" id="miGstin" placeholder="Customer's GSTIN">
+      </div>
+    </div>
+
+    <!-- Items -->
+    <div class="section-ico-hdr" style="margin-top:8px;"><div class="section-ico gold">📦</div><div style="font-weight:700;font-size:0.88rem;">Items</div></div>
+    <div class="drawer-field">
+      <div class="drawer-field-label">Add Product From Catalog</div>
+      <select class="drawer-input" id="miProductPicker" onchange="addManualInvoiceProduct()">
+        <option value="">+ Select a product to add…</option>
+      </select>
+    </div>
+    <div id="miItemsList" style="display:flex;flex-direction:column;gap:8px;margin-bottom:8px;"></div>
+    <button class="btn btn-secondary btn-sm" onclick="addManualInvoiceCustomItem()">＋ Add Custom Line Item</button>
+
+    <!-- Charges -->
+    <div class="section-ico-hdr" style="margin-top:18px;"><div class="section-ico blue">💰</div><div style="font-weight:700;font-size:0.88rem;">Discount, Shipping & Payment</div></div>
+    <div class="drawer-2col">
+      <div class="drawer-field">
+        <div class="drawer-field-label">Overall Discount (₹)</div>
+        <input class="drawer-input" id="miDiscountFlat" type="number" min="0" value="0" oninput="renderManualInvoiceTotals()">
+      </div>
+      <div class="drawer-field">
+        <div class="drawer-field-label">Overall Discount (%)</div>
+        <input class="drawer-input" id="miDiscountPct" type="number" min="0" max="100" value="0" oninput="renderManualInvoiceTotals()">
+      </div>
+    </div>
+    <div class="drawer-2col">
+      <div class="drawer-field">
+        <div class="drawer-field-label">Shipping Charge (₹)</div>
+        <input class="drawer-input" id="miShipping" type="number" min="0" value="0" oninput="renderManualInvoiceTotals()">
+      </div>
+      <div class="drawer-field">
+        <div class="drawer-field-label">Payment Mode</div>
+        <select class="drawer-input" id="miPaymentMode" onchange="renderManualInvoiceTotals()">
+          <option value="COD">Cash on Delivery</option>
+          <option value="UPI">UPI</option>
+          <option value="Card">Card</option>
+          <option value="Net Banking">Net Banking</option>
+          <option value="Bank Transfer">Bank Transfer</option>
+        </select>
+      </div>
+    </div>
+    <div class="drawer-field">
+      <div class="drawer-field-label">Payment Status</div>
+      <select class="drawer-input" id="miPaymentStatus">
+        <option value="Paid">Paid</option>
+        <option value="Pending">Pending</option>
+        <option value="Partially Paid">Partially Paid</option>
+      </select>
+    </div>
+    <div class="drawer-field">
+      <div class="drawer-field-label">Notes (shown on invoice, optional)</div>
+      <textarea class="drawer-input drawer-textarea" id="miNotes" placeholder="e.g. Manual order taken over phone / Special bulk pricing applied" style="min-height:50px;"></textarea>
+    </div>
+
+    <!-- Live totals -->
+    <div id="miTotalsBox" style="background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:14px;margin-top:14px;font-size:0.85rem;"></div>
+
+    <div style="display:flex;gap:8px;margin-top:18px;position:sticky;bottom:0;background:var(--surface);padding-top:10px;">
+      <button class="btn btn-secondary" style="flex:1;" onclick="closeManualInvoiceDrawer()">Cancel</button>
+      <button class="btn btn-primary" style="flex:1;" onclick="generateManualInvoice()">🧾 Generate Invoice</button>
+    </div>
+  </div>
+</div>
+
 
 <!-- ═════════════ WHATSAPP ═════════════ -->
 <div class="page" id="page-whatsapp">
@@ -4788,99 +4900,381 @@ function filterPayments() {
 // ═══════════════════════════════════════════════
 // INVOICES
 // ═══════════════════════════════════════════════
+const SELLER = {
+  name: 'ASCOVITA HEALTHCARE',
+  addr: 'Amin Auto Road, Near Rajshivalay Cinema, Anand – 388001, Gujarat, India',
+  gstin: '24XXXXX1234X1Z5', // TODO: replace with real GSTIN
+  fssai: '10024022001967',
+  phone: '+91 98985 82650',
+  email: 'admin@ascovita.com',
+  homeState: 'gujarat',
+  hsn: '30049099', // Nutraceuticals
+};
+const GST_RATE = 0.05; // Nutraceuticals — 5% GST (CGST 2.5% + SGST 2.5%, or IGST 5%)
+
+let manualInvoices = JSON.parse(localStorage.getItem('ascovita_manual_invoices') || '[]');
+let currentInvoiceSrcFilter = 'all';
+let manualInvoiceItems = []; // working draft while drawer is open
+
+function saveManualInvoices() {
+  localStorage.setItem('ascovita_manual_invoices', JSON.stringify(manualInvoices));
+}
+
 async function loadInvoices() {
   if(!allOrders.length) { const r = await apiFetch('/api/admin/orders'); allOrders = (await r.json()).data||[]; }
   filterInvoices();
 }
 
+function setInvoiceSrcFilter(f, el) {
+  currentInvoiceSrcFilter = f;
+  el.closest('div').querySelectorAll('.filter-chip').forEach(c=>c.classList.remove('active'));
+  el.classList.add('active');
+  filterInvoices();
+}
+
+// GST split helper — inclusive price, 5% nutraceutical rate.
+// Gujarat (seller's home state) → CGST 2.5% + SGST 2.5%. Any other state → IGST 5%.
+function gstSplit(totalInclGst, buyerState) {
+  const taxableBase = totalInclGst / (1 + GST_RATE);
+  const gstAmt = totalInclGst - taxableBase;
+  const isHomeState = (buyerState || '').toLowerCase().includes(SELLER.homeState);
+  return {
+    taxableBase,
+    cgst: isHomeState ? gstAmt / 2 : 0,
+    sgst: isHomeState ? gstAmt / 2 : 0,
+    igst: isHomeState ? 0 : gstAmt,
+    isHomeState,
+  };
+}
+
 function filterInvoices() {
   const q = (document.getElementById('invoiceSearch').value||'').toLowerCase();
-  const list = q ? allOrders.filter(o => o.id.toLowerCase().includes(q)||o.customer_name?.toLowerCase().includes(q)) : allOrders;
-  const cgst = 9, sgst = 9;
-  document.getElementById('invoicesTbody').innerHTML = list.slice(0,200).map(o => {
-    const t = parseFloat(o.total||0);
-    const base = t / (1 + (cgst+sgst)/100);
-    const tax  = base * cgst / 100;
+
+  // Build a unified list: order-based invoices + manual invoices
+  let orderRows = (currentInvoiceSrcFilter==='manual') ? [] : allOrders.map(o => ({
+    src: 'order', id: o.id, customer: o.customer_name, total: parseFloat(o.total||0),
+    state: o.state, date: o.created_at, raw: o,
+  }));
+  let manualRows = (currentInvoiceSrcFilter==='order') ? [] : manualInvoices.map(m => ({
+    src: 'manual', id: m.invoiceNo, customer: m.customer.name, total: m.total,
+    state: m.customer.state, date: m.createdAt, raw: m,
+  }));
+
+  let list = [...manualRows, ...orderRows].sort((a,b)=> new Date(b.date) - new Date(a.date));
+  if (q) list = list.filter(r => (r.id||'').toLowerCase().includes(q) || (r.customer||'').toLowerCase().includes(q));
+
+  document.getElementById('invoicesTbody').innerHTML = list.slice(0,200).map(r => {
+    const { cgst, sgst } = gstSplit(r.total, r.state);
+    const srcBadge = r.src === 'manual'
+      ? `<span class="badge" style="background:rgba(196,146,14,0.15);color:var(--gold-text);">🧾 Manual</span>`
+      : `<span class="badge badge-gray">🛒 Order</span>`;
+    const actionBtn = r.src === 'manual'
+      ? `<button class="btn btn-secondary btn-sm" onclick="printManualInvoice('${r.id}')">🖨️ Print</button>
+         <button class="btn btn-danger btn-sm owner-only" onclick="deleteManualInvoice('${r.id}')">🗑️</button>`
+      : `<button class="btn btn-secondary btn-sm" onclick="printInvoice('${r.id}')">🖨️ Print</button>`;
     return `<tr>
-      <td class="td-id">${o.id}</td>
-      <td>${esc(o.customer_name)||'-'}</td>
-      <td style="font-weight:700;color:var(--green-text);">₹${fmtNum(t)}</td>
-      <td style="font-family:var(--mono);font-size:0.75rem;">₹${tax.toFixed(2)}</td>
-      <td style="font-family:var(--mono);font-size:0.75rem;">₹${tax.toFixed(2)}</td>
-      <td style="font-size:0.72rem;color:var(--text3);">${fmtDate(o.created_at)}</td>
-      <td><button class="btn btn-secondary btn-sm" onclick="printInvoice('${o.id}')">🖨️ Print</button></td>
+      <td class="td-id">${esc(r.id)}</td>
+      <td>${esc(r.customer)||'-'}</td>
+      <td style="font-weight:700;color:var(--green-text);">₹${fmtNum(r.total)}</td>
+      <td style="font-family:var(--mono);font-size:0.75rem;">₹${cgst.toFixed(2)}</td>
+      <td style="font-family:var(--mono);font-size:0.75rem;">₹${sgst.toFixed(2)}</td>
+      <td style="font-size:0.72rem;color:var(--text3);">${fmtDate(r.date)}</td>
+      <td>${srcBadge}</td>
+      <td style="display:flex;gap:6px;">${actionBtn}</td>
     </tr>`;
-  }).join('') || '<tr><td colspan="7" class="empty-state">No invoices</td></tr>';
+  }).join('') || '<tr><td colspan="8" class="empty-state">No invoices</td></tr>';
+}
+
+// Shared invoice HTML builder — used for both order invoices and manual invoices.
+// `data` shape: { invoiceNo, date, orderId, customer:{name,phone,email,address,state,gstin}, items:[{name,hsn,qty,price}], discount, shipping, paymentMode, paymentStatus, notes }
+function buildInvoiceHtml(data) {
+  const itemsTotal = data.items.reduce((s,it)=> s + (it.price * it.qty), 0);
+  const discount = Math.min(data.discount||0, itemsTotal);
+  const subAfterDiscount = itemsTotal - discount;
+  const shipping = data.shipping || 0;
+  const grandTotal = subAfterDiscount + shipping;
+  const { taxableBase, cgst, sgst, igst, isHomeState } = gstSplit(subAfterDiscount, data.customer.state);
+
+  const itemRows = data.items.map((it,i) => {
+    const lineTotal = it.price * it.qty;
+    const lineBase = lineTotal / (1 + GST_RATE);
+    const lineGst = lineTotal - lineBase;
+    return `<tr style="border-bottom:1px solid #eee;">
+      <td style="padding:9px 10px;font-size:11.5px;">${i+1}</td>
+      <td style="padding:9px 10px;font-size:11.5px;">${esc(it.name)}</td>
+      <td style="padding:9px 10px;font-size:11.5px;color:#888;">${esc(it.hsn||SELLER.hsn)}</td>
+      <td style="padding:9px 10px;font-size:11.5px;text-align:center;">${it.qty}</td>
+      <td style="padding:9px 10px;font-size:11.5px;text-align:right;">₹${fmtNum(it.price)}</td>
+      <td style="padding:9px 10px;font-size:11.5px;text-align:right;color:#666;">₹${lineGst.toFixed(2)}</td>
+      <td style="padding:9px 10px;font-size:11.5px;text-align:right;font-weight:600;">₹${fmtNum(lineTotal)}</td>
+    </tr>`;
+  }).join('');
+
+  const gstRows = isHomeState
+    ? `<tr><td style="padding:5px 10px;font-size:12px;color:#555;">CGST (2.5%)</td><td style="padding:5px 10px;font-size:12px;text-align:right;">₹${cgst.toFixed(2)}</td></tr>
+       <tr><td style="padding:5px 10px;font-size:12px;color:#555;">SGST (2.5%)</td><td style="padding:5px 10px;font-size:12px;text-align:right;">₹${sgst.toFixed(2)}</td></tr>`
+    : `<tr><td style="padding:5px 10px;font-size:12px;color:#555;">IGST (5%)</td><td style="padding:5px 10px;font-size:12px;text-align:right;">₹${igst.toFixed(2)}</td></tr>`;
+
+  return `
+    <div style="font-family:Arial,sans-serif;max-width:720px;margin:0 auto;color:#1a1a1a;background:#fff;">
+      <div style="background:linear-gradient(135deg,#2D5016,#4a7c28);color:#fff;padding:22px 26px;border-radius:10px 10px 0 0;display:flex;justify-content:space-between;align-items:flex-start;">
+        <div>
+          <div style="font-size:20px;font-weight:800;">🌿 ${SELLER.name}</div>
+          <div style="font-size:11px;opacity:.85;margin-top:3px;">Organic Vitamins &amp; Nutraceuticals</div>
+          <div style="font-size:10px;opacity:.7;margin-top:6px;">FSSAI Lic: ${SELLER.fssai} &nbsp;|&nbsp; GSTIN: ${SELLER.gstin}</div>
+        </div>
+        <div style="text-align:right;">
+          <div style="font-size:14px;font-weight:700;">TAX INVOICE</div>
+          <div style="font-size:11px;opacity:.85;margin-top:4px;">${esc(SELLER.addr)}</div>
+          <div style="font-size:11px;opacity:.85;">📞 ${SELLER.phone} &nbsp;|&nbsp; ✉ ${SELLER.email}</div>
+        </div>
+      </div>
+      <div style="background:#f8fdf4;padding:14px 26px;display:flex;justify-content:space-between;flex-wrap:wrap;gap:10px;border-bottom:2px solid #2D5016;">
+        <div><div style="font-size:10px;text-transform:uppercase;color:#888;">Invoice #</div><div style="font-size:13px;font-weight:700;color:#2D5016;">${esc(data.invoiceNo)}</div></div>
+        <div><div style="font-size:10px;text-transform:uppercase;color:#888;">Date</div><div style="font-size:13px;font-weight:700;color:#2D5016;">${fmtDate(data.date)}</div></div>
+        ${data.orderId ? `<div><div style="font-size:10px;text-transform:uppercase;color:#888;">Order ID</div><div style="font-size:13px;font-weight:700;color:#2D5016;">${esc(data.orderId)}</div></div>` : ''}
+        <div><div style="font-size:10px;text-transform:uppercase;color:#888;">Payment</div><div style="font-size:13px;font-weight:700;color:#2D5016;">${esc(data.paymentMode||'-')} · ${esc(data.paymentStatus||'-')}</div></div>
+      </div>
+      <div style="padding:18px 26px 0;">
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
+          <div style="background:#f9f9f9;border:1px solid #eee;border-radius:8px;padding:12px;">
+            <div style="font-size:10px;font-weight:700;text-transform:uppercase;color:#999;margin-bottom:5px;">Bill To</div>
+            <div style="font-weight:600;font-size:13px;">${esc(data.customer.name)||'-'}</div>
+            <div style="font-size:11px;color:#555;line-height:1.8;margin-top:2px;">
+              ${esc(data.customer.address||'')}<br>
+              ${data.customer.state ? esc(data.customer.state)+'<br>' : ''}
+              📞 ${esc(data.customer.phone||'-')}<br>✉ ${esc(data.customer.email||'-')}
+              ${data.customer.gstin ? `<br>GSTIN: ${esc(data.customer.gstin)}` : ''}
+            </div>
+          </div>
+          <div style="background:#f0f7ea;border-radius:8px;padding:12px;">
+            <div style="font-size:10px;font-weight:700;text-transform:uppercase;color:#999;margin-bottom:5px;">Tax Type</div>
+            <div style="font-size:12px;line-height:1.8;color:#444;">
+              ${isHomeState ? 'Intra-state (Gujarat) — CGST + SGST' : 'Inter-state — IGST'}<br>
+              HSN: ${SELLER.hsn} (Nutraceuticals) · GST Rate: 5%
+            </div>
+          </div>
+        </div>
+      </div>
+      <div style="padding:18px 26px;">
+        <table style="width:100%;border-collapse:collapse;">
+          <thead style="background:#2D5016;color:#fff;">
+            <tr>${['#','Product','HSN','Qty','Unit Price','GST Amt','Total'].map((h,i)=>`<th style="padding:9px 10px;text-align:${i>=3?'right':'left'};font-size:10.5px;text-transform:uppercase;">${h}</th>`).join('')}</tr>
+          </thead>
+          <tbody>${itemRows}</tbody>
+        </table>
+        <div style="display:flex;justify-content:flex-end;margin-top:10px;">
+          <table style="border-collapse:collapse;min-width:280px;">
+            <tr><td style="padding:5px 10px;font-size:12px;color:#555;">Items Total</td><td style="padding:5px 10px;font-size:12px;text-align:right;">₹${fmtNum(itemsTotal)}</td></tr>
+            ${discount > 0 ? `<tr><td style="padding:5px 10px;font-size:12px;color:#27ae60;">Discount</td><td style="padding:5px 10px;font-size:12px;text-align:right;color:#27ae60;">-₹${fmtNum(discount)}</td></tr>` : ''}
+            <tr><td style="padding:5px 10px;font-size:12px;color:#555;">Taxable Amount</td><td style="padding:5px 10px;font-size:12px;text-align:right;">₹${taxableBase.toFixed(2)}</td></tr>
+            ${gstRows}
+            <tr><td style="padding:5px 10px;font-size:12px;color:#555;">Shipping</td><td style="padding:5px 10px;font-size:12px;text-align:right;">${shipping<=0?'<span style="color:#27ae60">FREE</span>':'₹'+fmtNum(shipping)}</td></tr>
+            <tr style="background:#2D5016;color:#fff;"><td style="padding:9px 10px;font-size:13.5px;font-weight:800;">GRAND TOTAL</td><td style="padding:9px 10px;font-size:13.5px;font-weight:800;text-align:right;">₹${fmtNum(grandTotal)}</td></tr>
+          </table>
+        </div>
+        ${data.notes ? `<div style="margin-top:14px;background:#fffbea;border:1px solid #f5e6a8;border-radius:8px;padding:10px 14px;font-size:11px;color:#776a2a;"><b>Note:</b> ${esc(data.notes)}</div>` : ''}
+      </div>
+      <div style="padding:0 26px 20px;font-size:10.5px;color:#888;border-top:1px solid #eee;padding-top:12px;margin:0 26px 0px;">
+        • All prices are inclusive of 5% GST &nbsp;|&nbsp; HSN: ${SELLER.hsn} (Nutraceuticals)<br>
+        • This is a computer-generated invoice and does not require a signature<br>
+        • For queries: ${SELLER.email} &nbsp;|&nbsp; ${SELLER.phone}
+      </div>
+      <div style="background:#2D5016;color:#fff;text-align:center;padding:12px;font-size:10.5px;border-radius:0 0 10px 10px;">
+        Thank you for your business 🌿 &nbsp;|&nbsp; Made in India, Anand Gujarat &nbsp;|&nbsp; FSSAI Approved · WHO-GMP Certified
+      </div>
+    </div>
+  `;
 }
 
 function printInvoice(orderId) {
   const o = allOrders.find(x=>x.id===orderId); if(!o) return;
-  let items = []; try { items = typeof o.items==='string'?JSON.parse(o.items||'[]'):(o.items||[]); } catch {}
-  const t = parseFloat(o.total||0);
-  const base = t / (1 + 0.18);
-  const tax  = base * 0.09;
-  document.getElementById('invoicePrintArea').innerHTML = `
-    <div style="font-family:Arial,sans-serif;max-width:680px;margin:0 auto;color:#1a1a1a;">
-      <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:24px;padding-bottom:16px;border-bottom:2px solid #2D5016;">
-        <div>
-          <div style="font-size:22px;font-weight:800;color:#2D5016;">🌿 ASCOVITA HEALTHCARE</div>
-          <div style="font-size:11px;color:#666;margin-top:4px;">Anand, Gujarat, India · GSTIN: 24XXXXXXX · FSSAI: 10019042000XXX</div>
-          <div style="font-size:11px;color:#666;">admin@ascovita.com · +91 98985 82650</div>
-        </div>
-        <div style="text-align:right;">
-          <div style="font-size:14px;font-weight:700;color:#2D5016;">TAX INVOICE</div>
-          <div style="font-size:12px;color:#666;margin-top:4px;">#${o.id}</div>
-          <div style="font-size:11px;color:#666;">${fmtDate(o.created_at)}</div>
-        </div>
-      </div>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-bottom:20px;">
-        <div style="background:#f9f9f9;border-radius:8px;padding:12px;">
-          <div style="font-size:10px;font-weight:700;text-transform:uppercase;color:#888;margin-bottom:6px;">Bill To</div>
-          <div style="font-weight:600;">${esc(o.customer_name)||'-'}</div>
-          <div style="font-size:11px;color:#555;line-height:1.8;">
-            ${o.address||o.address_line1||''} ${o.address_line2||''}<br>
-            ${o.city||''}, ${o.state||''} - ${o.pincode||''}<br>
-            📞 ${o.customer_phone||''}<br>✉️ ${o.customer_email||''}
-          </div>
-        </div>
-        <div style="background:#f0f7ea;border-radius:8px;padding:12px;">
-          <div style="font-size:10px;font-weight:700;text-transform:uppercase;color:#888;margin-bottom:6px;">Payment</div>
-          <div style="font-size:12px;line-height:1.8;color:#444;">
-            <b>Mode:</b> ${o.payment_mode||o.payment_method||'Online'}<br>
-            <b>Status:</b> ${o.payment_status||'-'}<br>
-            ${o.cf_payment_id?`<b>Ref:</b> ${o.cf_payment_id}<br>`:''}
-            <b>Date:</b> ${fmtDate(o.created_at)}
-          </div>
-        </div>
-      </div>
-      <table style="width:100%;border-collapse:collapse;margin-bottom:16px;">
-        <thead style="background:#2D5016;color:white;">
-          <tr>${['#','Product','HSN','Qty','Unit Price','Amount'].map(h=>`<th style="padding:8px 10px;text-align:left;font-size:11px;">${h}</th>`).join('')}</tr>
-        </thead>
-        <tbody>
-          ${items.map((it,i)=>`<tr style="border-bottom:1px solid #eee;">
-            <td style="padding:7px 10px;font-size:11px;">${i+1}</td>
-            <td style="padding:7px 10px;font-size:11px;">${it.name||'Product'}</td>
-            <td style="padding:7px 10px;font-size:11px;color:#888;">30049099</td>
-            <td style="padding:7px 10px;font-size:11px;">${it.qty||it.units||1}</td>
-            <td style="padding:7px 10px;font-size:11px;">₹${fmtNum(it.price||it.selling_price||0)}</td>
-            <td style="padding:7px 10px;font-size:11px;font-weight:600;">₹${fmtNum((it.price||it.selling_price||0)*(it.qty||it.units||1))}</td>
-          </tr>`).join('')}
-        </tbody>
-      </table>
-      <div style="display:flex;justify-content:flex-end;">
-        <table style="border-collapse:collapse;min-width:260px;">
-          ${[['Taxable Amount',`₹${base.toFixed(2)}`],['CGST (9%)',`₹${tax.toFixed(2)}`],['SGST (9%)',`₹${tax.toFixed(2)}`],['Shipping',`₹${o.shipping||0}`]].map(([k,v])=>`<tr><td style="padding:5px 10px;font-size:12px;color:#555;">${k}</td><td style="padding:5px 10px;font-size:12px;text-align:right;">${v}</td></tr>`).join('')}
-          <tr style="background:#2D5016;color:white;"><td style="padding:8px 10px;font-size:13px;font-weight:700;">Total</td><td style="padding:8px 10px;font-size:13px;font-weight:700;text-align:right;">₹${fmtNum(t)}</td></tr>
-        </table>
-      </div>
-      <div style="margin-top:24px;padding-top:12px;border-top:1px solid #eee;font-size:10px;color:#888;text-align:center;">
-        This is a computer-generated invoice. For queries: admin@ascovita.com | © 2025 Ascovita Healthcare, Anand, Gujarat
-      </div>
-    </div>
-  `;
+  let rawItems = []; try { rawItems = typeof o.items==='string'?JSON.parse(o.items||'[]'):(o.items||[]); } catch {}
+  const items = rawItems.map(it => ({ name: it.name||'Product', hsn: SELLER.hsn, qty: it.qty||it.units||1, price: it.price||it.selling_price||0 }));
+  const html = buildInvoiceHtml({
+    invoiceNo: 'INV-' + String(o.id).replace(/^\D*/,''),
+    date: o.created_at, orderId: o.id,
+    customer: {
+      name: o.customer_name, phone: o.customer_phone, email: o.customer_email,
+      address: [o.address||o.address_line1, o.address_line2, o.city, o.pincode].filter(Boolean).join(', '),
+      state: o.state,
+    },
+    items, discount: 0, shipping: o.shipping||0,
+    paymentMode: o.payment_mode||o.payment_method||'Online', paymentStatus: o.payment_status||'-',
+  });
+  document.getElementById('invoicePrintArea').innerHTML = html;
   openModal('invoiceModal');
 }
+
+function printManualInvoice(invoiceNo) {
+  const m = manualInvoices.find(x=>x.invoiceNo===invoiceNo); if(!m) return;
+  document.getElementById('invoicePrintArea').innerHTML = buildInvoiceHtml(m);
+  openModal('invoiceModal');
+}
+
+function deleteManualInvoice(invoiceNo) {
+  if(!confirm('Delete this manual invoice? This cannot be undone.')) return;
+  manualInvoices = manualInvoices.filter(x=>x.invoiceNo!==invoiceNo);
+  saveManualInvoices();
+  toast('Manual invoice deleted');
+  filterInvoices();
+}
+
+// ── Manual Invoice Drawer (owner only) ──────────────────────────
+function openManualInvoiceDrawer() {
+  if (!document.body.classList.contains('role-owner')) {
+    toast('Only the owner account can create manual invoices', 'error');
+    return;
+  }
+  manualInvoiceItems = [];
+  document.getElementById('miName').value = '';
+  document.getElementById('miPhone').value = '';
+  document.getElementById('miEmail').value = '';
+  document.getElementById('miAddress').value = '';
+  document.getElementById('miState').value = 'Gujarat';
+  document.getElementById('miGstin').value = '';
+  document.getElementById('miDiscountFlat').value = 0;
+  document.getElementById('miDiscountPct').value = 0;
+  document.getElementById('miShipping').value = 0;
+  document.getElementById('miPaymentMode').value = 'COD';
+  document.getElementById('miPaymentStatus').value = 'Paid';
+  document.getElementById('miNotes').value = '';
+
+  const picker = document.getElementById('miProductPicker');
+  picker.innerHTML = '<option value="">+ Select a product to add…</option>' +
+    allProducts.filter(p=>!p.deleted_at).map(p => `<option value="${p.id}">${esc(p.name)} — ₹${fmtNum(p.sale_price||p.price||0)}</option>`).join('');
+
+  renderManualInvoiceItems();
+  document.getElementById('manualInvDrawer').classList.add('open');
+  document.getElementById('manualInvOverlay').classList.add('open');
+}
+
+function closeManualInvoiceDrawer() {
+  document.getElementById('manualInvDrawer').classList.remove('open');
+  document.getElementById('manualInvOverlay').classList.remove('open');
+}
+
+function addManualInvoiceProduct() {
+  const picker = document.getElementById('miProductPicker');
+  const id = picker.value; if(!id) return;
+  const p = allProducts.find(x=>String(x.id)===String(id)); if(!p) return;
+  manualInvoiceItems.push({
+    name: p.name, hsn: p.hsn||SELLER.hsn, qty: 1,
+    price: parseFloat(p.sale_price || p.price || 0), mrp: parseFloat(p.price||0),
+    custom: false,
+  });
+  picker.value = '';
+  renderManualInvoiceItems();
+}
+
+function addManualInvoiceCustomItem() {
+  manualInvoiceItems.push({ name: '', hsn: SELLER.hsn, qty: 1, price: 0, custom: true });
+  renderManualInvoiceItems();
+}
+
+function removeManualInvoiceItem(idx) {
+  manualInvoiceItems.splice(idx, 1);
+  renderManualInvoiceItems();
+}
+
+function updateManualInvoiceItem(idx, field, value) {
+  if (!manualInvoiceItems[idx]) return;
+  if (field === 'qty') manualInvoiceItems[idx].qty = Math.max(1, parseInt(value)||1);
+  else if (field === 'price') manualInvoiceItems[idx].price = Math.max(0, parseFloat(value)||0);
+  else if (field === 'name') manualInvoiceItems[idx].name = value;
+  renderManualInvoiceTotals();
+}
+
+function renderManualInvoiceItems() {
+  const box = document.getElementById('miItemsList');
+  if (!manualInvoiceItems.length) {
+    box.innerHTML = `<div class="empty-state" style="padding:18px;font-size:0.78rem;">No items yet. Add a product or a custom line item above.</div>`;
+  } else {
+    box.innerHTML = manualInvoiceItems.map((it,idx) => `
+      <div style="display:flex;gap:6px;align-items:flex-start;background:var(--bg2);border:1px solid var(--border);border-radius:8px;padding:8px;">
+        ${it.custom
+          ? `<input class="drawer-input" style="flex:2;" placeholder="Custom item name" value="${esc(it.name)}" oninput="updateManualInvoiceItem(${idx},'name',this.value)">`
+          : `<div style="flex:2;font-size:0.82rem;display:flex;align-items:center;">${esc(it.name)}</div>`
+        }
+        <input class="drawer-input" type="number" min="1" style="width:60px;" value="${it.qty}" title="Qty" oninput="updateManualInvoiceItem(${idx},'qty',this.value)">
+        <input class="drawer-input" type="number" min="0" style="width:90px;" value="${it.price}" title="Unit Price ₹" oninput="updateManualInvoiceItem(${idx},'price',this.value)">
+        <button class="btn btn-danger btn-sm" style="flex-shrink:0;" onclick="removeManualInvoiceItem(${idx})">✕</button>
+      </div>
+    `).join('');
+  }
+  renderManualInvoiceTotals();
+}
+
+function renderManualInvoiceTotals() {
+  const itemsTotal = manualInvoiceItems.reduce((s,it)=> s + (it.price * it.qty), 0);
+  const discFlat = parseFloat(document.getElementById('miDiscountFlat')?.value)||0;
+  const discPct  = parseFloat(document.getElementById('miDiscountPct')?.value)||0;
+  const discount = Math.min(itemsTotal, discFlat + (itemsTotal * discPct / 100));
+  const shipping = parseFloat(document.getElementById('miShipping')?.value)||0;
+  const subAfterDiscount = itemsTotal - discount;
+  const grandTotal = subAfterDiscount + shipping;
+  const state = document.getElementById('miState')?.value || '';
+  const { taxableBase, cgst, sgst, igst, isHomeState } = gstSplit(subAfterDiscount, state);
+
+  const box = document.getElementById('miTotalsBox');
+  if (!box) return;
+  box.innerHTML = `
+    <div style="display:flex;justify-content:space-between;margin-bottom:4px;"><span style="color:var(--text3);">Items Total</span><span>₹${fmtNum(itemsTotal)}</span></div>
+    ${discount>0?`<div style="display:flex;justify-content:space-between;margin-bottom:4px;color:#4ade80;"><span>Discount</span><span>-₹${fmtNum(discount)}</span></div>`:''}
+    <div style="display:flex;justify-content:space-between;margin-bottom:4px;"><span style="color:var(--text3);">Taxable Amount</span><span>₹${taxableBase.toFixed(2)}</span></div>
+    ${isHomeState
+      ? `<div style="display:flex;justify-content:space-between;margin-bottom:4px;"><span style="color:var(--text3);">CGST (2.5%)</span><span>₹${cgst.toFixed(2)}</span></div>
+         <div style="display:flex;justify-content:space-between;margin-bottom:4px;"><span style="color:var(--text3);">SGST (2.5%)</span><span>₹${sgst.toFixed(2)}</span></div>`
+      : `<div style="display:flex;justify-content:space-between;margin-bottom:4px;"><span style="color:var(--text3);">IGST (5%)</span><span>₹${igst.toFixed(2)}</span></div>`}
+    <div style="display:flex;justify-content:space-between;margin-bottom:8px;"><span style="color:var(--text3);">Shipping</span><span>${shipping<=0?'FREE':'₹'+fmtNum(shipping)}</span></div>
+    <div style="display:flex;justify-content:space-between;padding-top:8px;border-top:1px solid var(--border);font-weight:800;font-size:1rem;color:var(--green-text);"><span>Grand Total</span><span>₹${fmtNum(grandTotal)}</span></div>
+  `;
+}
+
+function generateManualInvoice() {
+  if (!document.body.classList.contains('role-owner')) {
+    toast('Only the owner account can create manual invoices', 'error');
+    return;
+  }
+  const name = document.getElementById('miName').value.trim();
+  if (!name) { toast('Customer name is required', 'error'); return; }
+  if (!manualInvoiceItems.length) { toast('Add at least one item', 'error'); return; }
+  if (manualInvoiceItems.some(it => !it.name.trim())) { toast('All items need a name', 'error'); return; }
+
+  const itemsTotal = manualInvoiceItems.reduce((s,it)=> s + (it.price * it.qty), 0);
+  const discFlat = parseFloat(document.getElementById('miDiscountFlat').value)||0;
+  const discPct  = parseFloat(document.getElementById('miDiscountPct').value)||0;
+  const discount = Math.min(itemsTotal, discFlat + (itemsTotal * discPct / 100));
+  const shipping = parseFloat(document.getElementById('miShipping').value)||0;
+  const grandTotal = (itemsTotal - discount) + shipping;
+
+  const invoiceNo = 'MAN-' + Date.now().toString().slice(-8);
+  const record = {
+    invoiceNo,
+    createdAt: new Date().toISOString(),
+    date: new Date().toISOString(),
+    customer: {
+      name, phone: document.getElementById('miPhone').value.trim(),
+      email: document.getElementById('miEmail').value.trim(),
+      address: document.getElementById('miAddress').value.trim(),
+      state: document.getElementById('miState').value.trim(),
+      gstin: document.getElementById('miGstin').value.trim(),
+    },
+    items: manualInvoiceItems.map(it => ({ name: it.name, hsn: it.hsn||SELLER.hsn, qty: it.qty, price: it.price })),
+    discount, shipping, total: grandTotal,
+    paymentMode: document.getElementById('miPaymentMode').value,
+    paymentStatus: document.getElementById('miPaymentStatus').value,
+    notes: document.getElementById('miNotes').value.trim(),
+  };
+
+  manualInvoices.unshift(record);
+  saveManualInvoices();
+  closeManualInvoiceDrawer();
+  toast('Manual invoice created ✅');
+  filterInvoices();
+  printManualInvoice(invoiceNo);
+}
+
 
 // ═══════════════════════════════════════════════
 // BANNERS
