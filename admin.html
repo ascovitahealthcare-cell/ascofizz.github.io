@@ -1832,11 +1832,11 @@ img, canvas, svg, table { max-width:100%; }
       <div class="form-row col2">
         <div class="form-group">
           <label class="form-label">CGST %</label>
-          <input type="number" class="form-control" id="cgstRate" value="9">
+          <input type="number" class="form-control" id="cgstRate" value="2.5" step="0.5">
         </div>
         <div class="form-group">
           <label class="form-label">SGST %</label>
-          <input type="number" class="form-control" id="sgstRate" value="9">
+          <input type="number" class="form-control" id="sgstRate" value="2.5" step="0.5">
         </div>
       </div>
       <div class="form-group" style="margin-bottom:14px">
@@ -2147,7 +2147,7 @@ img, canvas, svg, table { max-width:100%; }
 </div>
 
 <!-- Manual Invoice Generator Modal (Owner Only) -->
-<div class="modal-overlay owner-only" id="manualInvoiceModal" style="display:none;">
+<div class="modal-overlay" id="manualInvoiceModal">
   <div class="modal" style="max-width:760px;width:95vw;max-height:92vh;overflow-y:auto;">
     <div class="modal-hdr">
       <span class="modal-title">📄 Manual Invoice Generator</span>
@@ -5054,7 +5054,224 @@ function printInvoice(orderId) {
 }
 
 // ═══════════════════════════════════════════════
-// BANNERS
+// MANUAL INVOICE GENERATOR (Owner Only)
+// ═══════════════════════════════════════════════
+let miItems = [];
+let miRowSeq = 0;
+
+function openManualInvoice() {
+  const role = localStorage.getItem('ascovita_role') || 'admin';
+  if (role !== 'owner') { showToast('🔒 Owner access only'); return; }
+  miItems = [];
+  miRowSeq = 0;
+  document.getElementById('mi_name').value = '';
+  document.getElementById('mi_phone').value = '';
+  document.getElementById('mi_email').value = '';
+  document.getElementById('mi_state').value = 'Gujarat';
+  document.getElementById('mi_address').value = '';
+  document.getElementById('mi_city').value = '';
+  document.getElementById('mi_pin').value = '';
+  document.getElementById('mi_invno').value = '';
+  document.getElementById('mi_date').value = new Date().toISOString().slice(0,10);
+  document.getElementById('mi_paymode').value = 'UPI';
+  document.getElementById('mi_paystatus').value = 'PAID';
+  document.getElementById('mi_promo').value = 0;
+  document.getElementById('mi_ship').value = 0;
+  document.getElementById('mi_notes').value = '';
+  miAddRow();
+  openModal('manualInvoiceModal');
+}
+
+function miAddRow() {
+  miRowSeq++;
+  miItems.push({ rid: miRowSeq, name:'', qty:1, mrp:0, price:0, discount:0 });
+  miRenderRows();
+}
+
+function miRemoveRow(rid) {
+  miItems = miItems.filter(it => it.rid !== rid);
+  if (!miItems.length) miAddRow(); else { miRenderRows(); miCalcTotals(); }
+}
+
+function miUpdateRow(rid, field, value) {
+  const row = miItems.find(it => it.rid === rid);
+  if (!row) return;
+  row[field] = (field === 'name') ? value : (parseFloat(value) || 0);
+  miCalcTotals();
+}
+
+function miRenderRows() {
+  document.getElementById('miItemsBody').innerHTML = miItems.map(it => {
+    const lineTotal = Math.max(0, (it.price * it.qty) - it.discount);
+    return `<tr style="border-bottom:1px solid var(--border);">
+      <td style="padding:6px 8px;"><input class="form-control" style="min-width:140px" value="${esc(it.name)}" placeholder="Product name" oninput="miUpdateRow(${it.rid},'name',this.value)"></td>
+      <td style="padding:6px 8px;"><input class="form-control" type="number" min="1" style="width:60px;text-align:center" value="${it.qty}" oninput="miUpdateRow(${it.rid},'qty',this.value)"></td>
+      <td style="padding:6px 8px;"><input class="form-control" type="number" min="0" style="width:90px;text-align:right" value="${it.mrp}" oninput="miUpdateRow(${it.rid},'mrp',this.value)"></td>
+      <td style="padding:6px 8px;"><input class="form-control" type="number" min="0" style="width:90px;text-align:right" value="${it.price}" oninput="miUpdateRow(${it.rid},'price',this.value)"></td>
+      <td style="padding:6px 8px;"><input class="form-control" type="number" min="0" style="width:90px;text-align:right" value="${it.discount}" oninput="miUpdateRow(${it.rid},'discount',this.value)"></td>
+      <td style="padding:6px 10px;text-align:right;font-weight:700;">₹${fmtNum(lineTotal)}</td>
+      <td style="padding:6px 6px;text-align:center;"><button class="btn btn-danger btn-sm btn-icon" onclick="miRemoveRow(${it.rid})" title="Remove">🗑️</button></td>
+    </tr>`;
+  }).join('');
+  miCalcTotals();
+}
+
+function miCalcTotals() {
+  const sub = miItems.reduce((s,it) => s + Math.max(0,(it.price*it.qty) - it.discount), 0);
+  const promo = parseFloat(document.getElementById('mi_promo')?.value || 0) || 0;
+  const ship = parseFloat(document.getElementById('mi_ship')?.value || 0) || 0;
+  const netSub = Math.max(0, sub - promo);
+  const taxable = Math.round(netSub / 1.05);
+  const gstTotal = netSub - taxable;
+  const isGuj = (document.getElementById('mi_state')?.value || '').toLowerCase().includes('gujarat');
+  const cgst = isGuj ? gstTotal/2 : 0;
+  const sgst = isGuj ? gstTotal/2 : 0;
+  const igst = isGuj ? 0 : gstTotal;
+  const grandTotal = netSub + ship;
+
+  const el = document.getElementById('miTotalsPreview');
+  if (el) {
+    el.innerHTML = `
+      <div style="display:flex;justify-content:space-between;"><span style="color:var(--text3)">Subtotal</span><span>₹${fmtNum(sub)}</span></div>
+      ${promo>0?`<div style="display:flex;justify-content:space-between;color:#27ae60;"><span>Promo Discount</span><span>-₹${fmtNum(promo)}</span></div>`:''}
+      <div style="display:flex;justify-content:space-between;"><span style="color:var(--text3)">Taxable Amount</span><span>₹${fmtNum(taxable)}</span></div>
+      ${isGuj
+        ? `<div style="display:flex;justify-content:space-between;"><span style="color:var(--text3)">CGST (2.5%)</span><span>₹${cgst.toFixed(2)}</span></div>
+           <div style="display:flex;justify-content:space-between;"><span style="color:var(--text3)">SGST (2.5%)</span><span>₹${sgst.toFixed(2)}</span></div>`
+        : `<div style="display:flex;justify-content:space-between;"><span style="color:var(--text3)">IGST (5%)</span><span>₹${igst.toFixed(2)}</span></div>`}
+      <div style="display:flex;justify-content:space-between;"><span style="color:var(--text3)">Shipping</span><span>${ship<=0?'<span style="color:#27ae60">FREE</span>':'₹'+fmtNum(ship)}</span></div>
+      <div style="display:flex;justify-content:space-between;border-top:1px solid var(--border);margin-top:6px;padding-top:8px;font-weight:800;font-size:14px;"><span>Grand Total</span><span style="color:var(--green-text)">₹${fmtNum(grandTotal)}</span></div>
+    `;
+  }
+  return { sub, promo, taxable, gstTotal, cgst, sgst, igst, ship, grandTotal, isGuj };
+}
+
+function miGenerate() {
+  const name = document.getElementById('mi_name').value.trim();
+  const state = document.getElementById('mi_state').value;
+  if (!name) { showToast('⚠️ Customer name is required'); return; }
+  if (!state) { showToast('⚠️ Select a state'); return; }
+  if (!miItems.length || miItems.every(it => !it.name.trim())) { showToast('⚠️ Add at least one product'); return; }
+
+  const t = miCalcTotals();
+  const phone = document.getElementById('mi_phone').value.trim();
+  const email = document.getElementById('mi_email').value.trim();
+  const address = document.getElementById('mi_address').value.trim();
+  const city = document.getElementById('mi_city').value.trim();
+  const pin = document.getElementById('mi_pin').value.trim();
+  const paymode = document.getElementById('mi_paymode').value;
+  const paystatus = document.getElementById('mi_paystatus').value;
+  const notes = document.getElementById('mi_notes').value.trim();
+  const invNo = document.getElementById('mi_invno').value.trim() || ('INV-M' + Date.now().toString().slice(-6));
+  const dateVal = document.getElementById('mi_date').value;
+  const dateStr = dateVal
+    ? new Date(dateVal+'T00:00:00').toLocaleDateString('en-IN',{day:'2-digit',month:'long',year:'numeric'})
+    : new Date().toLocaleDateString('en-IN',{day:'2-digit',month:'long',year:'numeric'});
+
+  const itemRows = miItems.filter(it=>it.name.trim()).map((it,i) => {
+    const lineTotal = Math.max(0, (it.price*it.qty) - it.discount);
+    const lineGst = lineTotal - Math.round(lineTotal/1.05);
+    return `<tr style="border-bottom:1px solid #eee;">
+      <td style="padding:9px 12px;font-size:12px;color:#666;">${i+1}</td>
+      <td style="padding:9px 12px;font-size:12px;font-weight:600;">${esc(it.name)}</td>
+      <td style="padding:9px 12px;font-size:11px;color:#888;text-align:center;">30049099</td>
+      <td style="padding:9px 12px;font-size:12px;text-align:center;">${it.qty}</td>
+      <td style="padding:9px 12px;font-size:12px;text-align:right;">₹${fmtNum(it.mrp||it.price)}</td>
+      <td style="padding:9px 12px;font-size:12px;text-align:right;">₹${fmtNum(it.price)}</td>
+      <td style="padding:9px 12px;font-size:12px;text-align:right;">${it.discount>0?'₹'+fmtNum(it.discount):'-'}</td>
+      <td style="padding:9px 12px;font-size:11px;text-align:center;color:#2D7D0A;">5%</td>
+      <td style="padding:9px 12px;font-size:11px;text-align:right;color:#2D7D0A;">₹${lineGst.toFixed(2)}</td>
+      <td style="padding:9px 12px;font-size:12px;text-align:right;font-weight:700;">₹${fmtNum(lineTotal)}</td>
+    </tr>`;
+  }).join('');
+
+  const taxRows = t.isGuj ? `
+    <tr><td colspan="7"></td><td style="padding:5px 12px;font-size:12px;color:#555;text-align:right;">CGST (2.5%)</td><td colspan="2" style="padding:5px 12px;font-size:12px;text-align:right;">₹${t.cgst.toFixed(2)}</td></tr>
+    <tr><td colspan="7"></td><td style="padding:5px 12px;font-size:12px;color:#555;text-align:right;">SGST (2.5%)</td><td colspan="2" style="padding:5px 12px;font-size:12px;text-align:right;">₹${t.sgst.toFixed(2)}</td></tr>` : `
+    <tr><td colspan="7"></td><td style="padding:5px 12px;font-size:12px;color:#555;text-align:right;">IGST (5%)</td><td colspan="2" style="padding:5px 12px;font-size:12px;text-align:right;">₹${t.igst.toFixed(2)}</td></tr>`;
+
+  document.getElementById('invoicePrintArea').innerHTML = `
+  <div style="font-family:'Segoe UI',Arial,sans-serif;max-width:820px;margin:0 auto;background:#fff;border:1px solid #ddd;border-radius:10px;overflow:hidden;color:#1a1a1a;">
+    <div style="background:linear-gradient(135deg,#2D5016 0%,#3d6e1f 100%);color:#fff;padding:28px 32px;display:flex;justify-content:space-between;align-items:flex-start;">
+      <div>
+        <div style="font-size:24px;font-weight:900;letter-spacing:.5px;">🌿 ASCOVITA HEALTHCARE</div>
+        <div style="font-size:11px;opacity:.8;margin-top:3px;">Organic Vitamins & Nutraceuticals · Made in India</div>
+        <div style="font-size:10px;opacity:.65;margin-top:5px;">FSSAI Lic: 10024022001967 &nbsp;|&nbsp; GSTIN: 24XXXXXXX &nbsp;|&nbsp; HSN: 30049099</div>
+        <div style="font-size:10px;opacity:.65;">Amin Auto Road, Near Rajshivalay Cinema, Anand – 388001, Gujarat</div>
+      </div>
+      <div style="text-align:right;">
+        <div style="background:rgba(255,255,255,0.15);border-radius:6px;padding:10px 16px;display:inline-block;">
+          <div style="font-size:11px;opacity:.75;text-transform:uppercase;letter-spacing:1px;">Tax Invoice</div>
+          <div style="font-size:20px;font-weight:800;margin-top:2px;">${esc(invNo)}</div>
+        </div>
+        <div style="font-size:11px;opacity:.7;margin-top:8px;">${dateStr}</div>
+      </div>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;background:#f8fdf4;border-bottom:2px solid #2D5016;padding:16px 32px;gap:20px;">
+      <div>
+        <div style="font-size:10px;text-transform:uppercase;letter-spacing:.8px;color:#888;margin-bottom:4px;font-weight:700;">Bill To</div>
+        <div style="font-weight:700;font-size:14px;">${esc(name)}</div>
+        <div style="font-size:11px;color:#555;line-height:1.8;margin-top:2px;">
+          ${esc(address)}<br>
+          ${esc(city)}${city&&state?', ':''}${esc(state)}${pin?' – '+esc(pin):''}<br>
+          ${phone?'📞 '+esc(phone)+'<br>':''}${email?'✉️ '+esc(email):''}
+        </div>
+      </div>
+      <div>
+        <div style="font-size:10px;text-transform:uppercase;letter-spacing:.8px;color:#888;margin-bottom:4px;font-weight:700;">Invoice Details</div>
+        <div style="font-size:11px;line-height:2;color:#444;">
+          <b>Invoice #:</b> ${esc(invNo)}<br>
+          <b>Date:</b> ${dateStr}<br>
+          <b>Type:</b> Manual Invoice
+        </div>
+      </div>
+      <div>
+        <div style="font-size:10px;text-transform:uppercase;letter-spacing:.8px;color:#888;margin-bottom:4px;font-weight:700;">Payment</div>
+        <div style="font-size:11px;line-height:2;color:#444;">
+          <b>Mode:</b> ${esc(paymode)}<br>
+          <b>Status:</b> <span style="color:${paystatus==='PAID'?'#22c55e':'#f59e0b'};font-weight:700;">${esc(paystatus)}</span>
+        </div>
+      </div>
+    </div>
+    <div style="padding:20px 32px 0;">
+      <table style="width:100%;border-collapse:collapse;">
+        <thead>
+          <tr style="background:#2D5016;color:#fff;">
+            ${['#','Product','HSN','Qty','MRP','Unit Price','Discount','GST%','Tax Amt','Total'].map(h=>`<th style="padding:10px 12px;text-align:${['Qty','GST%'].includes(h)?'center':h==='#'?'left':'right'};font-size:11px;font-weight:600;letter-spacing:.3px;">${h}</th>`).join('')}
+          </tr>
+        </thead>
+        <tbody>${itemRows}</tbody>
+        <tbody style="background:#f8fdf4;border-top:2px solid #2D5016;">
+          <tr><td colspan="7"></td><td style="padding:6px 12px;font-size:12px;color:#666;text-align:right;">Subtotal</td><td colspan="2" style="padding:6px 12px;font-size:12px;text-align:right;">₹${fmtNum(t.sub)}</td></tr>
+          ${t.promo>0?`<tr><td colspan="7"></td><td style="padding:6px 12px;font-size:12px;color:#27ae60;text-align:right;">Promo Discount</td><td colspan="2" style="padding:6px 12px;font-size:12px;text-align:right;color:#27ae60;">-₹${fmtNum(t.promo)}</td></tr>`:''}
+          <tr><td colspan="7"></td><td style="padding:6px 12px;font-size:12px;color:#666;text-align:right;">Taxable Amount</td><td colspan="2" style="padding:6px 12px;font-size:12px;text-align:right;">₹${fmtNum(t.taxable)}</td></tr>
+          ${taxRows}
+          <tr><td colspan="7"></td><td style="padding:6px 12px;font-size:12px;color:#666;text-align:right;">Shipping</td><td colspan="2" style="padding:6px 12px;font-size:12px;text-align:right;">${t.ship<=0?'<span style="color:#22c55e;font-weight:700;">FREE</span>':'₹'+fmtNum(t.ship)}</td></tr>
+          <tr style="background:#2D5016;color:#fff;">
+            <td colspan="7"></td>
+            <td style="padding:12px;font-size:14px;font-weight:800;text-align:right;">GRAND TOTAL</td>
+            <td colspan="2" style="padding:12px;font-size:15px;font-weight:900;text-align:right;">₹${fmtNum(t.grandTotal)}</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <div style="padding:16px 32px;border-top:1px solid #eee;font-size:10px;color:#888;line-height:1.9;">
+      • All prices inclusive of 5% GST &nbsp;|&nbsp; HSN Code: 30049099 (Nutraceuticals) &nbsp;|&nbsp; ${t.isGuj?'CGST 2.5% + SGST 2.5% (Gujarat)':'IGST 5%'}<br>
+      ${notes ? esc(notes)+'<br>' : ''}
+      • Computer-generated invoice — no physical signature required<br>
+      • Queries: Ascovitahealthcare@gmail.com &nbsp;|&nbsp; +91 98985 82650
+    </div>
+    <div style="background:#2D5016;color:rgba(255,255,255,0.9);padding:12px 32px;text-align:center;font-size:10px;line-height:1.8;">
+      Thank you for shopping with Ascovita Healthcare 🌿 &nbsp;|&nbsp; WHO-GMP Certified · FSSAI Approved · Lab Tested &nbsp;|&nbsp; ascovita.in
+    </div>
+  </div>`;
+
+  closeModal('manualInvoiceModal');
+  openModal('invoiceModal');
+  showToast('✅ Manual invoice generated');
+}
+
+
 // ═══════════════════════════════════════════════
 const DEMO_BANNERS = [
   {id:1, title:'Glutathione Banner', url:'https://static.wixstatic.com/media/f0adaf_059d2c1e15c0421da19fa9495e205e37~mv2.jpg', active:true},
@@ -5858,7 +6075,7 @@ async function loadSettings() {
     if(d.cod_available !== undefined) document.getElementById('codAvailable').checked = d.cod_available === 'true' || d.cod_available === true;
     if(d.free_shipping?.threshold) document.getElementById('freeShippingThreshold').value = d.free_shipping.threshold;
     if(d.whatsapp_number) document.getElementById('whatsappNumber').value = d.whatsapp_number;
-    if(d.gst_rate) { document.getElementById('cgstRate').value = d.gst_rate.cgst||9; document.getElementById('sgstRate').value = d.gst_rate.sgst||9; }
+    if(d.gst_rate) { document.getElementById('cgstRate').value = d.gst_rate.cgst||2.5; document.getElementById('sgstRate').value = d.gst_rate.sgst||2.5; }
     if(d.razorpay_mode) document.getElementById('pgMode').value = d.razorpay_mode;
   } catch {}
 }
@@ -5869,7 +6086,7 @@ async function saveSettings() {
     cod_available: document.getElementById('codAvailable').checked,
     free_shipping: {threshold: parseInt(document.getElementById('freeShippingThreshold').value)||599},
     whatsapp_number: document.getElementById('whatsappNumber').value,
-    gst_rate: {cgst: parseInt(document.getElementById('cgstRate').value)||9, sgst: parseInt(document.getElementById('sgstRate').value)||9},
+    gst_rate: {cgst: parseFloat(document.getElementById('cgstRate').value)||2.5, sgst: parseFloat(document.getElementById('sgstRate').value)||2.5},
     razorpay_mode: document.getElementById('pgMode').value,
   };
   try {
