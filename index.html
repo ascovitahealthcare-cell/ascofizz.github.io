@@ -12353,8 +12353,8 @@ function generateInvoice({ orderId, formData, srItems, sub, disc, promoDisc, shi
 <style>
   * { margin:0; padding:0; box-sizing:border-box; }
   body { font-family: Arial, sans-serif; font-size: 13px; color: #222; background:#fff; padding:30px; }
-  .inv-wrap { max-width:900px; margin:0 auto; border:1px solid #ddd; border-radius:8px; overflow:hidden; }
-  .inv-header { background:linear-gradient(135deg,#2D5016,#4a7c28); color:#fff; padding:28px 32px; display:flex; justify-content:space-between; align-items:flex-start; }
+  .inv-wrap { max-width:900px; margin:0 auto; border:1px solid #ddd; border-radius:10px; overflow:hidden; box-shadow:0 4px 24px rgba(0,0,0,0.08); }
+  .inv-header { background:linear-gradient(135deg,#2D5016 0%,#3d6e1f 100%); color:#fff; padding:28px 32px; display:flex; justify-content:space-between; align-items:flex-start; }
   .inv-logo-name { font-size:22px; font-weight:900; letter-spacing:.5px; }
   .inv-logo-sub { font-size:11px; opacity:.8; margin-top:3px; }
   .inv-company-addr { font-size:11px; opacity:.85; line-height:1.7; text-align:right; }
@@ -12393,7 +12393,9 @@ function generateInvoice({ orderId, formData, srItems, sub, disc, promoDisc, shi
       <div style="font-size:10px;opacity:.7;margin-top:6px">FSSAI Lic. No: 10024022001967 &nbsp;|&nbsp; GSTIN: 24XXXXX (update)</div>
     </div>
     <div class="inv-company-addr">
-      <strong style="font-size:13px;display:block;margin-bottom:4px">TAX INVOICE</strong>
+      <div style="background:rgba(255,255,255,0.15);border-radius:6px;padding:8px 14px;display:inline-block;margin-bottom:8px;">
+        <strong style="font-size:13px;display:block;">TAX INVOICE</strong>
+      </div><br>
       Amin Auto Road, Near Rajshivalay Cinema<br>
       Anand – 388001, Gujarat, India<br>
       📞 +91 98985 82650<br>
