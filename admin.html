@@ -4098,17 +4098,7 @@ function toggleShowDeleted() {
   filterProducts();
 }
 
-function filterProducts() {
-  const q   = (document.getElementById('productSearch').value||'').toLowerCase();
-  const cat = document.getElementById('productCatFilter').value;
-  let list  = allProducts;
-  if(!showDeletedProducts) list = list.filter(p => !p.deleted_at);
-  if(q) list = list.filter(p => (p.name||'').toLowerCase().includes(q));
-  if(cat) list = list.filter(p => p.category === cat);
-  if(currentProductFilter === 'active') list = list.filter(p => p.active);
-  if(currentProductFilter === 'lowstock') list = list.filter(p => p.stock < 20);
-  renderProducts(list);
-}
+// filterProducts is defined once below (full version: search by name/brand/category, sorting, stats)
 
 // ── Product view state ──────────────────────
 let currentProductView = 'cards';
