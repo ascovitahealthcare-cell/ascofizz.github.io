@@ -12213,7 +12213,7 @@ async function initiateCOD() {
     await finalizeOrder(orderId, formData, codTotal, 'cod', codCharge);
     // finalizeOrder navigates to thank-you page — done!
   } catch(err) {
-    if (btn) { btn.disabled = false; btn.style.opacity = '1'; btn.innerHTML = '<span style="font-size:1.2rem">💵</span><div style="text-align:left"><div>Confirm COD Order</div><div id="codBtnNote" style="font-size:.65rem;opacity:.8;font-weight:500;margin-top:1px">+₹60 charge · Free if order ≥ ₹599</div></div>'; updateCodBtnNote(); }
+    if (btn) { btn.disabled = false; btn.style.opacity = '1'; btn.innerHTML = '<span style="font-size:1.2rem">💵</span><div style="text-align:left"><div>Confirm COD Order</div><div id="codBtnNote" style="font-size:.65rem;opacity:.8;font-weight:500;margin-top:1px">+₹60 charge · Free if order ≥ ₹599</div></div>'; }
     showToast('❌ Order failed: ' + err.message, 'error');
   }
 }
@@ -15623,7 +15623,7 @@ function renderQuizResult(){
   const ov=document.getElementById('quizOverlay');if(!ov)return;
   const ids=QUIZ_RECS[quizAnswers[0]||0]||QUIZ_RECS[0];
   const rp=ids.map(id=>PRODUCTS.find(p=>p.id===id)).filter(Boolean);
-  ov.innerHTML='<div class="quiz-modal"><div class="qm-head"><div class="qm-title">🎯 Your Personalised Stack<\/div><button class="qm-close" onclick="closeQuiz()">✕<\/button><\/div><div class="qm-body"><div class="qm-result"><div class="qm-result-ico">🌿<\/div><div class="qm-result-title">Here\'s what your body needs<\/div><div class="qm-result-sub">Based on your answers, our nutritionists recommend this personalised Ascovita stack.<\/div><div class="qm-result-prods">'+rp.map(p=>'<div class="qm-rp" onclick="closeQuiz();openProduct('+p.id+')"><img src="'+(esc(p.image||''))+ '" style="width:72px;height:72px;object-fit:cover;border-radius:10px;display:block;margin:0 auto 8px" onerror="this.style.display=\'none\'"><div class="qm-rp-name">'+esc(p.name||'')+'<\/div><div class="qm-rp-price">₹'+(p.salePrice||p.price||0)+'<\/div><\/div>').join('')+'<\/div><button class="btn-primary" onclick="closeQuiz();showPage(\'shop\')" style="margin-bottom:12px">Shop My Recommendations →<\/button><\/div><\/div><\/div>';
+  ov.innerHTML='<div class="quiz-modal"><div class="qm-head"><div class="qm-title">🎯 Your Personalised Stack<\/div><button class="qm-close" onclick="closeQuiz()">✕<\/button><\/div><div class="qm-body"><div class="qm-result"><div class="qm-result-ico">🌿<\/div><div class="qm-result-title">Here\'s what your body needs<\/div><div class="qm-result-sub">Based on your answers, our nutritionists recommend this personalised Ascovita stack.<\/div><div class="qm-result-prods">'+rp.map(p=>'<div class="qm-rp" onclick="closeQuiz();showProduct('+p.id+')"><img src="'+(esc(p.image||''))+ '" style="width:72px;height:72px;object-fit:cover;border-radius:10px;display:block;margin:0 auto 8px" onerror="this.style.display=\'none\'"><div class="qm-rp-name">'+esc(p.name||'')+'<\/div><div class="qm-rp-price">₹'+(p.salePrice||p.price||0)+'<\/div><\/div>').join('')+'<\/div><button class="btn-primary" onclick="closeQuiz();showPage(\'shop\')" style="margin-bottom:12px">Shop My Recommendations →<\/button><\/div><\/div><\/div>';
 }
 
 let selectedBundleIds=new Set();
