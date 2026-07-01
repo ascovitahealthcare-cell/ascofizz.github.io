@@ -392,11 +392,9 @@ body.role-admin .admin-hidden { display:flex !important; }
 .em-dl-btn:hover{transform:translateY(-2px);box-shadow:0 8px 28px rgba(74,138,40,0.6);}
 .em-dl-btn:active{transform:translateY(0);}
 /* Override old inline export panels - now hidden, use modal instead */
-.export-panel{display:none!important;}
-.export-panel{background:var(--surface);border:1px solid var(--border2);border-radius:var(--radius);padding:16px 20px;margin-bottom:16px;display:none;animation:slideDown 0.2s ease;}
-.export-panel.open{display:block;}
+
 @keyframes slideDown{from{opacity:0;transform:translateY(-8px)}to{opacity:1;transform:translateY(0)}}
-.export-panel-inner{display:flex;gap:12px;flex-wrap:wrap;align-items:flex-end;}
+
 .ep-group{display:flex;flex-direction:column;gap:5px;}
 .ep-label{font-size:0.68rem;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:1px;}
 .ep-chips{display:flex;gap:6px;flex-wrap:wrap;}
@@ -868,22 +866,6 @@ img, canvas, svg, table { max-width:100%; }
       <button class="btn-export" onclick="openExportModal('dashboard')">📤 Export ▾</button>
     </div>
   </div>
-  <div class="export-panel" id="ep-dashboard">
-    <div class="export-panel-inner">
-      <div class="ep-group"><div class="ep-label">Period</div><div class="ep-chips" id="epchips-dashboard">
-        <span class="ep-chip active" onclick="setEpChip('dashboard','today',this)">Today</span>
-        <span class="ep-chip" onclick="setEpChip('dashboard','week',this)">Week</span>
-        <span class="ep-chip" onclick="setEpChip('dashboard','month',this)">Month</span>
-        <span class="ep-chip" onclick="setEpChip('dashboard','year',this)">Year</span>
-        <span class="ep-chip" onclick="setEpChip('dashboard','all',this)">All</span>
-        <span class="ep-chip" onclick="setEpChip('dashboard','custom',this)">Custom</span>
-      </div></div>
-      <div class="ep-group" id="epdate-dashboard" style="display:none"><div class="ep-label">Date Range</div><div class="ep-date-row"><input type="date" id="epfrom-dashboard"><span style="color:var(--text3)">→</span><input type="date" id="epto-dashboard"></div></div>
-      <div class="ep-group"><div class="ep-label">Format</div><div class="ep-fmt" id="epfmt-dashboard"><button class="ep-fmt-btn active" onclick="setEpFmt('dashboard','csv',this)">CSV</button><button class="ep-fmt-btn" onclick="setEpFmt('dashboard','json',this)">JSON</button></div></div>
-      <div class="ep-preview" id="epprev-dashboard">Select period to preview…</div>
-      <button class="ep-dl-btn" onclick="doPageExport('dashboard')">⬇ Download</button>
-    </div>
-  </div>
   <!-- ══ KPI ROW ══ -->
   <div class="grid-4" id="kpiCards" style="margin-bottom:20px">
     <div class="kpi skel" style="height:108px"></div>
@@ -1048,22 +1030,6 @@ img, canvas, svg, table { max-width:100%; }
       <button class="btn-export" onclick="openExportModal('analytics')">📤 Export ▾</button>
     </div>
   </div>
-  <div class="export-panel" id="ep-analytics">
-    <div class="export-panel-inner">
-      <div class="ep-group"><div class="ep-label">Period</div><div class="ep-chips">
-        <span class="ep-chip active" onclick="setEpChip('analytics','today',this)">Today</span>
-        <span class="ep-chip" onclick="setEpChip('analytics','week',this)">Week</span>
-        <span class="ep-chip" onclick="setEpChip('analytics','month',this)">Month</span>
-        <span class="ep-chip" onclick="setEpChip('analytics','year',this)">Year</span>
-        <span class="ep-chip" onclick="setEpChip('analytics','all',this)">All</span>
-        <span class="ep-chip" onclick="setEpChip('analytics','custom',this)">Custom</span>
-      </div></div>
-      <div class="ep-group" id="epdate-analytics" style="display:none"><div class="ep-label">Date Range</div><div class="ep-date-row"><input type="date" id="epfrom-analytics"><span style="color:var(--text3)">→</span><input type="date" id="epto-analytics"></div></div>
-      <div class="ep-group"><div class="ep-label">Format</div><div class="ep-fmt" id="epfmt-analytics"><button class="ep-fmt-btn active" onclick="setEpFmt('analytics','csv',this)">CSV</button><button class="ep-fmt-btn" onclick="setEpFmt('analytics','json',this)">JSON</button></div></div>
-      <div class="ep-preview" id="epprev-analytics">Select period to preview…</div>
-      <button class="ep-dl-btn" onclick="doPageExport('analytics')">⬇ Download</button>
-    </div>
-  </div>
   <div class="grid-4" style="margin-bottom:20px" id="analyticsKpis">
     <div class="kpi skel" style="height:90px"></div>
     <div class="kpi skel" style="height:90px"></div>
@@ -1156,22 +1122,6 @@ img, canvas, svg, table { max-width:100%; }
       <button class="btn-export" onclick="openExportModal('orders')">📤 Export ▾</button>
     </div>
   </div>
-  <div class="export-panel" id="ep-orders">
-    <div class="export-panel-inner">
-      <div class="ep-group"><div class="ep-label">Period</div><div class="ep-chips">
-        <span class="ep-chip active" onclick="setEpChip('orders','today',this)">Today</span>
-        <span class="ep-chip" onclick="setEpChip('orders','week',this)">Week</span>
-        <span class="ep-chip" onclick="setEpChip('orders','month',this)">Month</span>
-        <span class="ep-chip" onclick="setEpChip('orders','year',this)">Year</span>
-        <span class="ep-chip" onclick="setEpChip('orders','all',this)">All</span>
-        <span class="ep-chip" onclick="setEpChip('orders','custom',this)">Custom</span>
-      </div></div>
-      <div class="ep-group" id="epdate-orders" style="display:none"><div class="ep-label">Date Range</div><div class="ep-date-row"><input type="date" id="epfrom-orders"><span style="color:var(--text3)">→</span><input type="date" id="epto-orders"></div></div>
-      <div class="ep-group"><div class="ep-label">Format</div><div class="ep-fmt" id="epfmt-orders"><button class="ep-fmt-btn active" onclick="setEpFmt('orders','csv',this)">CSV</button><button class="ep-fmt-btn" onclick="setEpFmt('orders','json',this)">JSON</button></div></div>
-      <div class="ep-preview" id="epprev-orders">Select period to preview…</div>
-      <button class="ep-dl-btn" onclick="doPageExport('orders')">⬇ Download</button>
-    </div>
-  </div>
   <div class="filter-bar">
     <input class="filter-input" placeholder="🔍 Search order ID, customer..." id="orderSearch" oninput="filterOrders()">
     <select class="filter-select" id="orderStatusFilter" onchange="filterOrders()">
@@ -1222,21 +1172,6 @@ img, canvas, svg, table { max-width:100%; }
     <div class="stat-tick down"><span class="stat-tick-ico">📦</span><div><div class="stat-tick-val" id="statLowStock">–</div><div class="stat-tick-lbl">Low / Out of Stock</div></div></div>
     <div class="stat-tick"><span class="stat-tick-ico">⭐</span><div><div class="stat-tick-val" id="statAvgRating">–</div><div class="stat-tick-lbl">Avg Rating</div></div></div>
     <div class="stat-tick" style="margin-left:auto;"><span class="stat-tick-ico">💰</span><div><div class="stat-tick-val" id="statCatalogValue">–</div><div class="stat-tick-lbl">Catalog MRP Value</div></div></div>
-  </div>
-  <div class="export-panel" id="ep-products">
-    <div class="export-panel-inner">
-      <div class="ep-group"><div class="ep-label">Period</div><div class="ep-chips">
-        <span class="ep-chip active" onclick="setEpChip('products','all',this)">All</span>
-        <span class="ep-chip" onclick="setEpChip('products','week',this)">This Week</span>
-        <span class="ep-chip" onclick="setEpChip('products','month',this)">This Month</span>
-        <span class="ep-chip" onclick="setEpChip('products','year',this)">This Year</span>
-        <span class="ep-chip" onclick="setEpChip('products','custom',this)">Custom</span>
-      </div></div>
-      <div class="ep-group" id="epdate-products" style="display:none"><div class="ep-label">Date Range</div><div class="ep-date-row"><input type="date" id="epfrom-products"><span style="color:var(--text3)">→</span><input type="date" id="epto-products"></div></div>
-      <div class="ep-group"><div class="ep-label">Format</div><div class="ep-fmt" id="epfmt-products"><button class="ep-fmt-btn active" onclick="setEpFmt('products','csv',this)">CSV</button><button class="ep-fmt-btn" onclick="setEpFmt('products','json',this)">JSON</button></div></div>
-      <div class="ep-preview" id="epprev-products">Select period to preview…</div>
-      <button class="ep-dl-btn" onclick="doPageExport('products')">⬇ Download</button>
-    </div>
   </div>
   <!-- Bulk bar -->
   <div class="bulk-bar" id="bulkBar">
@@ -1440,20 +1375,6 @@ img, canvas, svg, table { max-width:100%; }
       <button class="btn-export" onclick="openExportModal('inventory')">📤 Export ▾</button>
     </div>
   </div>
-  <div class="export-panel" id="ep-inventory">
-    <div class="export-panel-inner">
-      <div class="ep-group"><div class="ep-label">Period</div><div class="ep-chips">
-        <span class="ep-chip active" onclick="setEpChip('inventory','all',this)">All</span>
-        <span class="ep-chip" onclick="setEpChip('inventory','month',this)">Month</span>
-        <span class="ep-chip" onclick="setEpChip('inventory','year',this)">Year</span>
-        <span class="ep-chip" onclick="setEpChip('inventory','custom',this)">Custom</span>
-      </div></div>
-      <div class="ep-group" id="epdate-inventory" style="display:none"><div class="ep-label">Date Range</div><div class="ep-date-row"><input type="date" id="epfrom-inventory"><span style="color:var(--text3)">→</span><input type="date" id="epto-inventory"></div></div>
-      <div class="ep-group"><div class="ep-label">Format</div><div class="ep-fmt" id="epfmt-inventory"><button class="ep-fmt-btn active" onclick="setEpFmt('inventory','csv',this)">CSV</button><button class="ep-fmt-btn" onclick="setEpFmt('inventory','json',this)">JSON</button></div></div>
-      <div class="ep-preview" id="epprev-inventory">Select period to preview…</div>
-      <button class="ep-dl-btn" onclick="doPageExport('inventory')">⬇ Download</button>
-    </div>
-  </div>
   <div class="filter-bar">
     <input class="filter-input" placeholder="🔍 Filter products..." id="invSearch" oninput="filterInventory()">
     <div class="filter-chip active" onclick="setInvFilter('all',this)">All</div>
@@ -1489,20 +1410,6 @@ img, canvas, svg, table { max-width:100%; }
     <button class="tab-btn active" onclick="switchDiscTab('pct',this)">🏷️ % Discounts</button>
     <button class="tab-btn" onclick="switchDiscTab('tier',this)">📦 Pack Tiers</button>
   </div>
-  <div class="export-panel" id="ep-discounts">
-    <div class="export-panel-inner">
-      <div class="ep-group"><div class="ep-label">Period</div><div class="ep-chips">
-        <span class="ep-chip active" onclick="setEpChip('discounts','all',this)">All</span>
-        <span class="ep-chip" onclick="setEpChip('discounts','month',this)">Month</span>
-        <span class="ep-chip" onclick="setEpChip('discounts','year',this)">Year</span>
-        <span class="ep-chip" onclick="setEpChip('discounts','custom',this)">Custom</span>
-      </div></div>
-      <div class="ep-group" id="epdate-discounts" style="display:none"><div class="ep-label">Date Range</div><div class="ep-date-row"><input type="date" id="epfrom-discounts"><span style="color:var(--text3)">→</span><input type="date" id="epto-discounts"></div></div>
-      <div class="ep-group"><div class="ep-label">Format</div><div class="ep-fmt" id="epfmt-discounts"><button class="ep-fmt-btn active" onclick="setEpFmt('discounts','csv',this)">CSV</button><button class="ep-fmt-btn" onclick="setEpFmt('discounts','json',this)">JSON</button></div></div>
-      <div class="ep-preview" id="epprev-discounts">Select period to preview…</div>
-      <button class="ep-dl-btn" onclick="doPageExport('discounts')">⬇ Download</button>
-    </div>
-  </div>
   <div id="discPane_pct" style="padding-top:14px;">
     <div class="table-wrap">
       <table>
@@ -1524,21 +1431,6 @@ img, canvas, svg, table { max-width:100%; }
     <div class="page-actions">
       <button class="btn btn-secondary" onclick="loadCustomers()">↺ Refresh</button>
       <button class="btn-export" onclick="openExportModal('customers')">📤 Export ▾</button>
-    </div>
-  </div>
-  <div class="export-panel" id="ep-customers">
-    <div class="export-panel-inner">
-      <div class="ep-group"><div class="ep-label">Period</div><div class="ep-chips">
-        <span class="ep-chip active" onclick="setEpChip('customers','all',this)">All</span>
-        <span class="ep-chip" onclick="setEpChip('customers','week',this)">Week</span>
-        <span class="ep-chip" onclick="setEpChip('customers','month',this)">Month</span>
-        <span class="ep-chip" onclick="setEpChip('customers','year',this)">Year</span>
-        <span class="ep-chip" onclick="setEpChip('customers','custom',this)">Custom</span>
-      </div></div>
-      <div class="ep-group" id="epdate-customers" style="display:none"><div class="ep-label">Date Range</div><div class="ep-date-row"><input type="date" id="epfrom-customers"><span style="color:var(--text3)">→</span><input type="date" id="epto-customers"></div></div>
-      <div class="ep-group"><div class="ep-label">Format</div><div class="ep-fmt" id="epfmt-customers"><button class="ep-fmt-btn active" onclick="setEpFmt('customers','csv',this)">CSV</button><button class="ep-fmt-btn" onclick="setEpFmt('customers','json',this)">JSON</button></div></div>
-      <div class="ep-preview" id="epprev-customers">Select period to preview…</div>
-      <button class="ep-dl-btn" onclick="doPageExport('customers')">⬇ Download</button>
     </div>
   </div>
   <div class="filter-bar">
@@ -1593,22 +1485,6 @@ img, canvas, svg, table { max-width:100%; }
       <button class="btn-export" onclick="openExportModal('payments')">📤 Export ▾</button>
     </div>
   </div>
-  <div class="export-panel" id="ep-payments">
-    <div class="export-panel-inner">
-      <div class="ep-group"><div class="ep-label">Period</div><div class="ep-chips">
-        <span class="ep-chip active" onclick="setEpChip('payments','today',this)">Today</span>
-        <span class="ep-chip" onclick="setEpChip('payments','week',this)">Week</span>
-        <span class="ep-chip" onclick="setEpChip('payments','month',this)">Month</span>
-        <span class="ep-chip" onclick="setEpChip('payments','year',this)">Year</span>
-        <span class="ep-chip" onclick="setEpChip('payments','all',this)">All</span>
-        <span class="ep-chip" onclick="setEpChip('payments','custom',this)">Custom</span>
-      </div></div>
-      <div class="ep-group" id="epdate-payments" style="display:none"><div class="ep-label">Date Range</div><div class="ep-date-row"><input type="date" id="epfrom-payments"><span style="color:var(--text3)">→</span><input type="date" id="epto-payments"></div></div>
-      <div class="ep-group"><div class="ep-label">Format</div><div class="ep-fmt" id="epfmt-payments"><button class="ep-fmt-btn active" onclick="setEpFmt('payments','csv',this)">CSV</button><button class="ep-fmt-btn" onclick="setEpFmt('payments','json',this)">JSON</button></div></div>
-      <div class="ep-preview" id="epprev-payments">Select period to preview…</div>
-      <button class="ep-dl-btn" onclick="doPageExport('payments')">⬇ Download</button>
-    </div>
-  </div>
   <div class="grid-3" style="margin-bottom:20px" id="payKpis"></div>
   <div class="table-wrap">
     <table>
@@ -1626,22 +1502,6 @@ img, canvas, svg, table { max-width:100%; }
       <input class="filter-input" placeholder="🔍 Search order ID / customer..." id="invoiceSearch" oninput="filterInvoices()" style="width:220px">
       <button class="btn btn-primary owner-only" onclick="openManualInvoice()">＋ Manual Invoice</button>
       <button class="btn-export" onclick="openExportModal('invoices')">📤 Export ▾</button>
-    </div>
-  </div>
-  <div class="export-panel" id="ep-invoices">
-    <div class="export-panel-inner">
-      <div class="ep-group"><div class="ep-label">Period</div><div class="ep-chips">
-        <span class="ep-chip active" onclick="setEpChip('invoices','today',this)">Today</span>
-        <span class="ep-chip" onclick="setEpChip('invoices','week',this)">Week</span>
-        <span class="ep-chip" onclick="setEpChip('invoices','month',this)">Month</span>
-        <span class="ep-chip" onclick="setEpChip('invoices','year',this)">Year</span>
-        <span class="ep-chip" onclick="setEpChip('invoices','all',this)">All</span>
-        <span class="ep-chip" onclick="setEpChip('invoices','custom',this)">Custom</span>
-      </div></div>
-      <div class="ep-group" id="epdate-invoices" style="display:none"><div class="ep-label">Date Range</div><div class="ep-date-row"><input type="date" id="epfrom-invoices"><span style="color:var(--text3)">→</span><input type="date" id="epto-invoices"></div></div>
-      <div class="ep-group"><div class="ep-label">Format</div><div class="ep-fmt" id="epfmt-invoices"><button class="ep-fmt-btn active" onclick="setEpFmt('invoices','csv',this)">CSV</button><button class="ep-fmt-btn" onclick="setEpFmt('invoices','json',this)">JSON</button></div></div>
-      <div class="ep-preview" id="epprev-invoices">Select period to preview…</div>
-      <button class="ep-dl-btn" onclick="doPageExport('invoices')">⬇ Download</button>
     </div>
   </div>
   <div class="table-wrap">
@@ -1779,6 +1639,26 @@ img, canvas, svg, table { max-width:100%; }
     <div class="grid-2" id="softDeleteCards"></div>
   </div>
   <div class="tab-pane" id="db-audit">
+    <!-- Login IP audit panel — OWNER ACCESS ONLY -->
+    <div class="card owner-only" style="margin-bottom:20px">
+      <div class="card-hdr" style="display:flex;align-items:center;justify-content:space-between">
+        <span class="card-title">🛡️ Admin Login Audit — IP &amp; Location <span style="font-size:0.6rem;font-weight:800;color:#000;background:var(--gold-text);padding:1px 6px;border-radius:5px;margin-left:6px;vertical-align:middle;">OWNER ONLY</span></span>
+        <div style="display:flex;gap:8px;align-items:center">
+          <span id="loginAuditCount" style="font-size:0.72rem;color:var(--text3)"></span>
+          <button class="btn btn-secondary btn-sm" onclick="clearLoginAudit()">🗑 Clear</button>
+        </div>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Time</th><th>Username</th><th>Status</th><th>IP Address</th><th>Location (City / Country)</th></tr></thead>
+          <tbody id="loginAuditTbody"><tr><td colspan="5" class="empty-state" style="padding:24px;text-align:center;color:var(--text3)">No login attempts recorded yet in this session.</td></tr></tbody>
+        </table>
+      </div>
+    </div>
+    <div class="admin-hidden card" style="margin-bottom:20px">
+      <div style="padding:24px;text-align:center;color:var(--text3);font-size:0.85rem;">🔒 Login audit is visible to the owner account only.</div>
+    </div>
+    <!-- Backend audit log -->
     <div class="table-wrap"><table>
       <thead><tr><th>Table</th><th>Record ID</th><th>Action</th><th>Changed By</th><th>Time</th></tr></thead>
       <tbody id="auditTbody"></tbody>
@@ -1848,7 +1728,7 @@ img, canvas, svg, table { max-width:100%; }
       </div>
       <div class="form-group">
         <label class="form-label">Admin Email</label>
-        <input type="text" class="form-control" value="admin@ascovita.com" readonly style="opacity:0.6;">
+        <input type="text" class="form-control" value="ascovitahealthcare@gmail.com" readonly style="opacity:0.6;">
       </div>
     </div>
     <div class="card">
@@ -1981,134 +1861,6 @@ img, canvas, svg, table { max-width:100%; }
       <button class="modal-close" onclick="closeModal('orderModal')">✕</button>
     </div>
     <div class="modal-body" id="orderModalBody"></div>
-  </div>
-</div>
-
-<!-- Product Modal -->
-<div class="modal-overlay" id="productModal">
-  <div class="modal modal-lg">
-    <div class="modal-hdr">
-      <span class="modal-title" id="productModalTitle">New Product</span>
-      <button class="modal-close" onclick="closeModal('productModal')">✕</button>
-    </div>
-    <div class="modal-body">
-      <div class="tab-bar">
-        <button class="tab-btn active" onclick="switchTab('prod','basic',this)">Basic</button>
-        <button class="tab-btn" onclick="switchTab('prod','pricing',this)">Pricing</button>
-        <button class="tab-btn" onclick="switchTab('prod','details',this)">Details</button>
-        <button class="tab-btn" onclick="switchTab('prod','images',this)">Images</button>
-        <button class="tab-btn" onclick="switchTab('prod','seo',this)">SEO</button>
-      </div>
-      <!-- Basic -->
-      <div class="tab-pane active" id="prod-basic">
-        <div class="form-row col2">
-          <div class="form-group"><label class="form-label">Product Name *</label><input class="form-control" id="pName" placeholder="e.g. Glutathione Effervescent"></div>
-          <div class="form-group"><label class="form-label">Brand</label><input class="form-control" id="pBrand" value="Ascovita"></div>
-        </div>
-        <div class="form-row col2">
-          <div class="form-group"><label class="form-label">Category *</label>
-            <select class="form-control" id="pCategory">
-              <option value="effervescent">🫧 Effervescent</option>
-              <option value="spirulina">🌊 Spirulina</option>
-              <option value="premium">🏆 Premium</option>
-              <option value="ayurvedic">🌿 Ayurvedic</option>
-              <option value="immunity">💪 Immunity</option>
-              <option value="energy">⚡ Energy</option>
-              <option value="weight">🏋 Weight</option>
-              <option value="skin">⭐ Skin &amp; Glow</option>
-              <option value="combos">🎁 Combos</option>
-            </select>
-          </div>
-          <div class="form-group"><label class="form-label">Badge</label><input class="form-control" id="pBadge" placeholder="e.g. Bestseller, New"></div>
-        </div>
-        <div class="form-group" style="margin-bottom:14px"><label class="form-label">Description</label><textarea class="form-control" id="pDescription" rows="3"></textarea></div>
-        <div class="form-row col2">
-          <div class="form-group"><label class="form-label">Stock</label><input type="number" class="form-control" id="pStock" value="0"></div>
-          <div class="form-group"><label class="form-label">Status</label>
-            <select class="form-control" id="pActive"><option value="true">Active</option><option value="false">Inactive</option></select>
-          </div>
-        </div>
-      </div>
-      <!-- Pricing -->
-      <div class="tab-pane" id="prod-pricing">
-        <div class="form-row col2">
-          <div class="form-group"><label class="form-label">MRP (₹) *</label><input type="number" class="form-control" id="pPrice"></div>
-          <div class="form-group"><label class="form-label">Sale Price (₹)</label><input type="number" class="form-control" id="pSalePrice" placeholder="Leave blank if no sale"></div>
-        </div>
-        <div class="form-row col2">
-          <div class="form-group"><label class="form-label">Offer Text</label><input class="form-control" id="pOfferText" placeholder="e.g. Save 20%"></div>
-          <div class="form-group"><label class="form-label">HSN Code</label><input class="form-control" id="pHsn" value="30049099"></div>
-        </div>
-        <div style="background:var(--bg2);border-radius:10px;padding:14px;margin-top:8px;">
-          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
-            <div style="font-size:0.78rem;font-weight:600;color:var(--text)">⚡ Pack Size Tiers <span style="font-weight:400;color:var(--text3)">(shown as "Buy More Save More" on product page)</span></div>
-            <button class="btn btn-secondary btn-sm" onclick="addTierRow()">＋ Add Pack</button>
-          </div>
-          <div style="display:grid;grid-template-columns:80px 1fr 1fr 1fr 32px;gap:6px;margin-bottom:6px;">
-            <div style="font-size:0.7rem;color:var(--text3);font-weight:600;">TABLETS</div>
-            <div style="font-size:0.7rem;color:var(--text3);font-weight:600;">MRP (₹)</div>
-            <div style="font-size:0.7rem;color:var(--text3);font-weight:600;">SALE RATE (₹)</div>
-            <div style="font-size:0.7rem;color:var(--text3);font-weight:600;">DISCOUNT %</div>
-            <div></div>
-          </div>
-          <div id="tiersList" style="display:flex;flex-direction:column;gap:6px;"></div>
-          <div style="font-size:0.72rem;color:var(--text3);margin-top:8px;">💡 Typical packs: 15 / 30 / 45 / 60 tablets. Discount% auto-calculates from MRP & Rate.</div>
-        </div>
-      </div>
-      <!-- Details -->
-      <div class="tab-pane" id="prod-details">
-        <div class="form-group" style="margin-bottom:14px"><label class="form-label">How to Use</label><textarea class="form-control" id="pHowToUse" rows="3"></textarea></div>
-        <div class="form-group" style="margin-bottom:14px"><label class="form-label">Key Ingredients (comma-separated)</label><input class="form-control" id="pIngredients"></div>
-        <div class="form-group"><label class="form-label">Tags (comma-separated)</label><input class="form-control" id="pTags" placeholder="vitamins, immunity, glow"></div>
-      </div>
-      <!-- Images / Videos — up to 10 -->
-      <div class="tab-pane" id="prod-images">
-        <div style="font-size:0.78rem;color:var(--text3);margin-bottom:10px;">Add up to <strong>10 images or videos</strong> per product. Drag slots to reorder. First slot = main product image.</div>
-        <!-- 10 media slots grid -->
-        <div class="media-slots" id="mediaSlots"></div>
-        <!-- Upload -->
-        <div class="media-upload-zone" id="mediaUploadZone" style="margin-top:12px;" onclick="document.getElementById('mediaFileInput').click()">
-          <input type="file" id="mediaFileInput" accept="image/*,video/mp4,video/webm,video/mov,.jpg,.jpeg,.png,.webp,.mp4,.webm,.mov" onchange="uploadMediaFile(this)" multiple>
-          <div style="font-size:1.5rem;margin-bottom:4px;">📁</div>
-          <div style="font-size:0.82rem;font-weight:600;">Click to upload images or videos</div>
-          <div style="font-size:0.72rem;color:var(--text3);margin-top:3px;">JPG · PNG · WebP · MP4 · WebM · Max 50MB each</div>
-        </div>
-        <!-- Upload progress -->
-        <div id="mediaUploadProgress" style="display:none;margin-top:8px;">
-          <div style="background:var(--border);border-radius:4px;height:6px;overflow:hidden;"><div id="mediaUploadBar" style="height:100%;background:var(--green);width:0%;transition:width 0.3s;"></div></div>
-          <div style="font-size:0.72rem;color:var(--text3);margin-top:4px;" id="mediaUploadStatus">Uploading…</div>
-        </div>
-        <!-- Paste URL row -->
-        <div style="margin-top:12px;font-size:0.75rem;color:var(--text3);font-weight:600;margin-bottom:6px;">Or paste URL directly:</div>
-        <div class="media-add-row">
-          <select class="form-control" id="mediaAddType" style="width:110px;flex:none;">
-            <option value="image">🖼️ Image</option>
-            <option value="video">🎬 Video</option>
-          </select>
-          <input class="form-control" id="mediaAddUrl" placeholder="https://... image or video URL">
-          <button class="btn btn-secondary btn-sm" onclick="mediaAddFromUrl()" style="white-space:nowrap;">＋ Add</button>
-        </div>
-        <!-- Hidden legacy fields for back-compat -->
-        <input type="hidden" id="pImage">
-        <input type="hidden" id="pImage2">
-      </div>
-      <!-- SEO -->
-      <div class="tab-pane" id="prod-seo">
-        <div class="form-group" style="margin-bottom:14px"><label class="form-label">SEO Title</label><input class="form-control" id="pSeoTitle"></div>
-        <div class="form-group" style="margin-bottom:14px"><label class="form-label">Meta Description</label><textarea class="form-control" id="pMetaDesc" rows="2"></textarea></div>
-        <div class="form-group" style="margin-bottom:16px"><label class="form-label">SEO Keywords (comma-separated)</label><input class="form-control" id="pSeoKeywords"></div>
-        <div style="background:var(--bg2);border-radius:10px;padding:14px;">
-          <div style="font-size:0.72rem;color:var(--text3);text-transform:uppercase;letter-spacing:1px;margin-bottom:8px;">Google Preview</div>
-          <div style="font-size:0.88rem;color:#4fa3e0;font-weight:500;" id="seoPreviewTitle">Product Name</div>
-          <div style="font-size:0.72rem;color:#6b9b37;margin:2px 0;">https://ascovita.com/product/...</div>
-          <div style="font-size:0.78rem;color:var(--text2);" id="seoPreviewDesc">Meta description will appear here.</div>
-        </div>
-      </div>
-    </div>
-    <div class="modal-ftr">
-      <button class="btn btn-secondary" onclick="closeModal('productModal')">Cancel</button>
-      <button class="btn btn-primary" onclick="saveProduct()">💾 Save Product</button>
-    </div>
   </div>
 </div>
 
@@ -2568,6 +2320,8 @@ function applyRole(role) {
   // for non-owner tokens regardless of what's visible in this UI.)
   const navAiTeam = document.getElementById('navAiTeam');
   if (navAiTeam) navAiTeam.style.display = (r === 'owner') ? 'flex' : 'none';
+  // Re-render the login audit table so it clears/populates correctly for the active role
+  if (typeof renderLoginAudit === 'function') renderLoginAudit();
 }
 
 // Auto-login if token exists
@@ -5046,7 +4800,7 @@ function printInvoice(orderId) {
       • All prices inclusive of 5% GST &nbsp;|&nbsp; HSN Code: 30049099 (Nutraceuticals) &nbsp;|&nbsp; ${isGuj?'CGST 2.5% + SGST 2.5% (Gujarat)':'IGST 5%'}<br>
       • Returns accepted within 7 days for sealed/unused products<br>
       • Computer-generated invoice — no physical signature required<br>
-      • Queries: Ascovitahealthcare@gmail.com &nbsp;|&nbsp; +91 98985 82650
+      • Queries: ascovitahealthcare@gmail.com &nbsp;|&nbsp; +91 98985 82650
     </div>
     <!-- FOOTER -->
     <div style="background:#2D5016;color:rgba(255,255,255,0.9);padding:12px 32px;text-align:center;font-size:10px;line-height:1.8;">
@@ -5087,7 +4841,7 @@ function openManualInvoice() {
 
 function miAddRow() {
   miRowSeq++;
-  miItems.push({ rid: miRowSeq, name:'', qty:1, mrp:0, price:0, discount:0 });
+  miItems.push({ rid: miRowSeq, pid: null, name:'', qty:1, mrp:0, price:0, discount:0 });
   miRenderRows();
 }
 
@@ -5096,23 +4850,71 @@ function miRemoveRow(rid) {
   if (!miItems.length) miAddRow(); else { miRenderRows(); miCalcTotals(); }
 }
 
+// Owner picks a product from the live catalog (allProducts) — MRP, sale price,
+// and the resulting discount are filled in automatically. Product catalog itself
+// (add/edit/remove products) remains owner-only, controlled from the Products page.
+function miSelectProduct(rid, val) {
+  const row = miItems.find(it => it.rid === rid);
+  if (!row) return;
+
+  if (val === '') {
+    row.pid = null; row.name = ''; row.mrp = 0; row.price = 0; row.discount = 0;
+  } else if (val === 'custom') {
+    row.pid = 'custom'; row.name = ''; row.mrp = 0; row.price = 0; row.discount = 0;
+  } else {
+    const p = allProducts.find(x => String(x.id) === String(val));
+    if (p) {
+      row.pid = p.id;
+      row.name = p.name;
+      row.mrp = parseFloat(p.price) || 0;
+      row.price = parseFloat(p.sale_price || p.price) || 0;
+      // Auto discount = qty × (MRP − sale price)
+      row.discount = Math.max(0, (row.mrp - row.price) * row.qty);
+    }
+  }
+  miRenderRows();
+}
+
 function miUpdateRow(rid, field, value) {
   const row = miItems.find(it => it.rid === rid);
   if (!row) return;
   row[field] = (field === 'name') ? value : (parseFloat(value) || 0);
+
+  // If qty changes on a catalog-linked product, keep the discount in sync automatically
+  if (field === 'qty' && row.pid && row.pid !== 'custom') {
+    row.discount = Math.max(0, (row.mrp - row.price) * row.qty);
+    const discInput = document.getElementById(`mi_disc_${row.rid}`);
+    if (discInput) discInput.value = row.discount.toFixed(2);
+  }
+
+  // Update just this row's line total in place — avoid a full re-render, which
+  // would otherwise steal focus from whichever field the owner is typing in.
+  const lineTotal = Math.max(0, (row.price * row.qty) - row.discount);
+  const totalCell = document.getElementById(`mi_total_${row.rid}`);
+  if (totalCell) totalCell.textContent = '₹' + fmtNum(lineTotal);
+
   miCalcTotals();
 }
 
 function miRenderRows() {
+  const activeProducts = (allProducts || []).filter(p => !p.deleted_at);
   document.getElementById('miItemsBody').innerHTML = miItems.map(it => {
     const lineTotal = Math.max(0, (it.price * it.qty) - it.discount);
+    const isCustom = it.pid === 'custom';
+    const productOptions = `
+      <option value="">— Select Product —</option>
+      ${activeProducts.map(p => `<option value="${p.id}" ${String(it.pid)===String(p.id)?'selected':''}>${esc(p.name)}</option>`).join('')}
+      <option value="custom" ${isCustom?'selected':''}>✏️ Custom / Other item</option>`;
     return `<tr style="border-bottom:1px solid var(--border);">
-      <td style="padding:6px 8px;"><input class="form-control" style="min-width:140px" value="${esc(it.name)}" placeholder="Product name" oninput="miUpdateRow(${it.rid},'name',this.value)"></td>
+      <td style="padding:6px 8px;">
+        <select class="form-control" style="min-width:170px" onchange="miSelectProduct(${it.rid}, this.value)">${productOptions}</select>
+        ${isCustom ? `<input class="form-control" style="margin-top:6px;min-width:170px" value="${esc(it.name)}" placeholder="Custom item name" oninput="miUpdateRow(${it.rid},'name',this.value)">` : ''}
+      </td>
       <td style="padding:6px 8px;"><input class="form-control" type="number" min="1" style="width:60px;text-align:center" value="${it.qty}" oninput="miUpdateRow(${it.rid},'qty',this.value)"></td>
       <td style="padding:6px 8px;"><input class="form-control" type="number" min="0" style="width:90px;text-align:right" value="${it.mrp}" oninput="miUpdateRow(${it.rid},'mrp',this.value)"></td>
       <td style="padding:6px 8px;"><input class="form-control" type="number" min="0" style="width:90px;text-align:right" value="${it.price}" oninput="miUpdateRow(${it.rid},'price',this.value)"></td>
-      <td style="padding:6px 8px;"><input class="form-control" type="number" min="0" style="width:90px;text-align:right" value="${it.discount}" oninput="miUpdateRow(${it.rid},'discount',this.value)"></td>
-      <td style="padding:6px 10px;text-align:right;font-weight:700;">₹${fmtNum(lineTotal)}</td>
+      <td style="padding:6px 8px;"><input class="form-control" id="mi_disc_${it.rid}" type="number" min="0" style="width:90px;text-align:right" value="${(it.discount||0).toFixed(2)}" oninput="miUpdateRow(${it.rid},'discount',this.value)"></td>
+      <td style="padding:6px 10px;text-align:right;font-weight:700;" id="mi_total_${it.rid}">₹${fmtNum(lineTotal)}</td>
       <td style="padding:6px 6px;text-align:center;"><button class="btn btn-danger btn-sm btn-icon" onclick="miRemoveRow(${it.rid})" title="Remove">🗑️</button></td>
     </tr>`;
   }).join('');
@@ -5265,7 +5067,7 @@ function miGenerate() {
       • All prices inclusive of 5% GST &nbsp;|&nbsp; HSN Code: 30049099 (Nutraceuticals) &nbsp;|&nbsp; ${t.isGuj?'CGST 2.5% + SGST 2.5% (Gujarat)':'IGST 5%'}<br>
       ${notes ? esc(notes)+'<br>' : ''}
       • Computer-generated invoice — no physical signature required<br>
-      • Queries: Ascovitahealthcare@gmail.com &nbsp;|&nbsp; +91 98985 82650
+      • Queries: ascovitahealthcare@gmail.com &nbsp;|&nbsp; +91 98985 82650
     </div>
     <div style="background:#2D5016;color:rgba(255,255,255,0.9);padding:12px 32px;text-align:center;font-size:10px;line-height:1.8;">
       Thank you for shopping with Ascovita Healthcare 🌿 &nbsp;|&nbsp; WHO-GMP Certified · FSSAI Approved · Lab Tested &nbsp;|&nbsp; ascovita.in
@@ -6813,6 +6615,179 @@ document.addEventListener("DOMContentLoaded", function() {
   var saved = localStorage.getItem("ga4_property_id");
   var inp = document.getElementById("ga4PropertyIdInput");
   if (saved && inp) inp.value = saved;
+});
+</script>
+
+<script>
+/* ══════════════════════════════════════════════════════════════
+   ASCOVITA ADMIN — Login IP Audit & Bot Detection
+   - Captures IP on every login attempt (success + failure)
+   - Uses ip-api.com (free, no key needed, 45 req/min)
+   - Stores up to 200 records in localStorage
+   - Bot heuristics: headless UA, missing languages, etc.
+══════════════════════════════════════════════════════════════ */
+
+const LOGIN_AUDIT_KEY = 'asc_login_audit';
+const LOGIN_AUDIT_MAX = 200;
+
+// ── Fetch visitor IP + geo info ──────────────────────────────
+async function fetchIpInfo() {
+  try {
+    // ip-api.com: free, no key, returns JSON
+    const r = await fetch('http://ip-api.com/json/?fields=status,message,country,regionName,city,zip,lat,lon,isp,org,as,query', {
+      signal: AbortSignal.timeout(6000)
+    });
+    if (!r.ok) throw new Error('ip-api error');
+    return await r.json();
+  } catch(e) {
+    // Fallback: ipify just for the IP
+    try {
+      const r2 = await fetch('https://api.ipify.org?format=json', { signal: AbortSignal.timeout(5000) });
+      const d = await r2.json();
+      return { query: d.ip, country: '?', city: '?', isp: '?', status: 'partial' };
+    } catch(e2) {
+      return { query: 'unknown', country: '?', city: '?', isp: '?', status: 'fail' };
+    }
+  }
+}
+
+// ── Bot heuristic score ──────────────────────────────────────
+function botScore(ua, ipData) {
+  let score = 0;
+  const flags = [];
+  const u = ua.toLowerCase();
+
+  if (!ua || ua.length < 30) { score += 3; flags.push('very-short-UA'); }
+  if (/headless|phantomjs|selenium|puppeteer|playwright|webdriver|bot|crawl|spider|scraper/i.test(ua)) {
+    score += 5; flags.push('bot-keyword');
+  }
+  if (!navigator.languages || navigator.languages.length === 0) { score += 2; flags.push('no-languages'); }
+  if (typeof navigator.webdriver !== 'undefined' && navigator.webdriver) { score += 5; flags.push('webdriver=true'); }
+  if (!window.chrome && /chrome/i.test(ua)) { score += 2; flags.push('chrome-UA-no-chrome-obj'); }
+  if (navigator.hardwareConcurrency < 2) { score += 1; flags.push('low-cpu-cores'); }
+  if (ipData && ipData.org && /datacenter|hosting|cloud|aws|goog|azure|linode|digital ocean|ovh|vultr|hetzner/i.test(ipData.org)) {
+    score += 3; flags.push('datacenter-IP');
+  }
+
+  let label = '✅ Human';
+  if (score >= 7) label = '🤖 Likely Bot';
+  else if (score >= 4) label = '⚠️ Suspicious';
+
+  return { score, flags, label };
+}
+
+// ── Record one login attempt ──────────────────────────────────
+async function recordLoginAttempt(username, status) {
+  const ipData = await fetchIpInfo();
+  const ua = navigator.userAgent;
+  const bot = botScore(ua, ipData);
+
+  const entry = {
+    ts: new Date().toISOString(),
+    username,
+    status,           // 'success' | 'fail' | 'locked'
+    ip: ipData.query || 'unknown',
+    country: ipData.country || '?',
+    region: ipData.regionName || '',
+    city: ipData.city || '',
+    isp: ipData.isp || '',
+    org: ipData.org || '',
+    lat: ipData.lat,
+    lon: ipData.lon,
+    ua: ua.substring(0, 200),
+    botScore: bot.score,
+    botFlags: bot.flags,
+    botLabel: bot.label
+  };
+
+  // Persist to localStorage (ring buffer — keep newest 200)
+  let log = [];
+  try { log = JSON.parse(localStorage.getItem(LOGIN_AUDIT_KEY) || '[]'); } catch(e) {}
+  log.unshift(entry);
+  if (log.length > LOGIN_AUDIT_MAX) log = log.slice(0, LOGIN_AUDIT_MAX);
+  localStorage.setItem(LOGIN_AUDIT_KEY, JSON.stringify(log));
+
+  renderLoginAudit();
+  return entry;
+}
+
+// ── Render the login audit table ─────────────────────────────
+function renderLoginAudit() {
+  const tbody = document.getElementById('loginAuditTbody');
+  const countEl = document.getElementById('loginAuditCount');
+  if (!tbody) return;
+
+  // Owner-only data: don't populate the table for non-owner roles, even if the
+  // card's CSS were somehow bypassed. The real boundary should also be enforced
+  // server-side wherever this log is persisted centrally.
+  const role = localStorage.getItem('ascovita_role') || 'admin';
+  if (role !== 'owner') {
+    tbody.innerHTML = '<tr><td colspan="5" class="empty-state" style="padding:24px;text-align:center;color:var(--text3)">🔒 Owner access only.</td></tr>';
+    if (countEl) countEl.textContent = '';
+    return;
+  }
+
+  let log = [];
+  try { log = JSON.parse(localStorage.getItem(LOGIN_AUDIT_KEY) || '[]'); } catch(e) {}
+
+  if (countEl) countEl.textContent = log.length + ' record' + (log.length !== 1 ? 's' : '');
+
+  if (!log.length) {
+    tbody.innerHTML = '<tr><td colspan="5" class="empty-state" style="padding:24px;text-align:center;color:var(--text3)">No login attempts recorded yet.</td></tr>';
+    return;
+  }
+
+  tbody.innerHTML = log.map(e => {
+    const statusBadge = e.status === 'success'
+      ? '<span class="badge badge-green">✓ Success</span>'
+      : e.status === 'locked'
+        ? '<span class="badge badge-red">🔒 Locked</span>'
+        : '<span class="badge badge-red">✗ Failed</span>';
+
+    // Simplified location: City / Country only (no ISP, UA, or bot heuristics shown)
+    const location = [e.city, e.country].filter(Boolean).join(', ') || '?';
+
+    return `<tr>
+      <td style="font-size:0.72rem;white-space:nowrap;color:var(--text3)">${new Date(e.ts).toLocaleString('en-IN')}</td>
+      <td><code style="font-size:0.8rem">${e.username || '-'}</code></td>
+      <td>${statusBadge}</td>
+      <td><code style="font-size:0.8rem;user-select:all">${e.ip}</code></td>
+      <td style="font-size:0.82rem">${location}</td>
+    </tr>`;
+  }).join('');
+}
+
+// ── Clear log ────────────────────────────────────────────────
+function clearLoginAudit() {
+  if (!confirm('Clear all login audit records? This cannot be undone.')) return;
+  localStorage.removeItem(LOGIN_AUDIT_KEY);
+  renderLoginAudit();
+}
+
+// ── Patch doLogin to capture IP on attempt ───────────────────
+const _origDoLogin = doLogin;
+window.doLogin = async function() {
+  const username = document.getElementById('loginUser')?.value?.trim() || 'unknown';
+  // We call the original and intercept success/fail via a wrapper
+  let loginOk = false;
+  const origToken = authToken;
+  await _origDoLogin();
+  loginOk = authToken && authToken !== origToken;
+  // Record async — don't block login UI
+  recordLoginAttempt(username, loginOk ? 'success' : 'fail');
+};
+
+// ── Also render any stored log when the Audit tab opens ─────
+document.addEventListener('DOMContentLoaded', function() {
+  // Intercept tab switch to render audit on open
+  const origSwitchTab = window.switchTab;
+  if (origSwitchTab) {
+    window.switchTab = function(page, tab, btn) {
+      origSwitchTab(page, tab, btn);
+      if (tab === 'audit') renderLoginAudit();
+    };
+  }
+  renderLoginAudit();
 });
 </script>
 
