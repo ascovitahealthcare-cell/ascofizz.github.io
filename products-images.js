@@ -72,6 +72,18 @@ const PRODUCT_IMAGES = {
 };
 
 // ================================================================
+// RESPONSIVE IMAGE HELPER
+// Wix media URLs embed their own resize params (w_XXX,h_XXX). Swapping
+// that segment gives us a smaller variant of the same image for free —
+// no extra uploads, no extra CDN. Used to serve small thumbnails to
+// grid/cart/related-product cards instead of the full 600-1100px asset.
+// ================================================================
+function wixResize(url, size) {
+  if (!url || typeof url !== 'string') return url;
+  return url.replace(/w_\d+,h_\d+/, 'w_' + size + ',h_' + size);
+}
+
+// ================================================================
 // AUTO-APPLY IMAGES TO PRODUCTS ARRAY
 // This runs after PRODUCTS is defined and injects the real images
 // ================================================================
@@ -88,7 +100,7 @@ const PRODUCT_IMAGES = {
 
     var imgs = imgData.images;
 
-    // Set primary image
+    // Set primary image (full size — product page / lightbox)
     p.image  = imgs[0] || p.image;
     p.image2 = imgs[1] || '';
     p.image3 = imgs[2] || '';
@@ -98,14 +110,20 @@ const PRODUCT_IMAGES = {
     // Set allImages array for gallery
     p.allImages = imgs;
 
-    // Build media array for the 10-image gallery system
+    // Build media array for the 10-image gallery system.
+    // thumb is now a real small variant (300px) instead of the full image,
+    // so the gallery thumbnail strip doesn't download full-res images 5x over.
     p.media = imgs.map(function(url) {
-      return { url: url, type: 'image', thumb: url };
+      return { url: url, type: 'image', thumb: wixResize(url, 300) };
     });
+
+    // NEW — small (400px) variant for product-card grids, cart rows,
+    // related/upsell tiles. These never need the full 600-1100px asset.
+    p.thumb400 = wixResize(imgs[0] || p.image || '', 400);
   });
 
   console.log('[Ascovita] ✅ Product images applied from PRODUCT_IMAGES map');
 })();
 
 // Export for Node.js / bundlers
-if (typeof module !== "undefined") module.exports = PRODUCT_IMAGES;
+if (typeof module !== "undefined") module.exports = { PRODUCT_IMAGES: PRODUCT_IMAGES, wixResize: wixResize };
