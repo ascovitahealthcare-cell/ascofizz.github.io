@@ -3834,10 +3834,19 @@ async function loadProducts() {
     document.getElementById('productCardsView').innerHTML = '<div class="empty-state" style="grid-column:1/-1;"><div class="loading-dots" style="font-size:0.9rem;color:var(--text3);">Loading products</div></div>';
     const r = await apiFetch('/api/admin/products');
     const _r = await r.json();
+    // Surface real failures (403 permission denied, 500 server/DB error) instead of
+    // silently treating them as "zero products" — this was masking real errors before.
+    if (!r.ok || _r.error) {
+      throw new Error(_r.error || `Server returned ${r.status}`);
+    }
     allProducts = _r.data || _r.products || (Array.isArray(_r)?_r:[]);
     filterProducts();
     loadInventory();
-  } catch(e) { toast('Products error: '+e.message,'error'); }
+  } catch(e) {
+    toast('Products error: '+e.message,'error');
+    document.getElementById('productCardsView').innerHTML =
+      `<div class="empty-state" style="grid-column:1/-1;color:var(--red);">⚠️ Could not load products: ${e.message}</div>`;
+  }
 }
 
 function setProductFilter(f, el) {
