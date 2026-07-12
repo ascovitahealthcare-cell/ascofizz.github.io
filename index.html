@@ -11047,8 +11047,13 @@ function mergeBackendProducts(backendProducts) {
       // Rating
       if (bp.rating != null) p.rating   = parseFloat(bp.rating);
       if (bp.reviews != null) p.reviews = parseInt(bp.reviews);
-      // Tags
-      if (bp.tags) p.tags = parseArr(bp.tags);
+      // Tags — only overwrite local curation tags (featured/new/etc.) if the backend
+      // actually sent a non-empty list. An empty array is truthy in JS, so a bare
+      // `if (bp.tags)` check was wiping out "featured"/"new" tags whenever the
+      // Supabase `tags` column was empty or not kept in sync, silently hiding the
+      // product from the Featured/New Arrivals sections after the backend sync ran.
+      const incomingTags = parseArr(bp.tags);
+      if (incomingTags.length) p.tags = incomingTags;
       // Media — support media[] JSON array (up to 10 images/videos) OR individual fields
       // ✅ Only apply backend images if products-images.js has NOT already set them
       const alreadyHasImage = p.image && p.image.startsWith('http');
