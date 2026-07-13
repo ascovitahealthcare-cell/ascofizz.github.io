@@ -3133,8 +3133,11 @@ function renderDashboardData(orders, prods, stats) {
   const revUp = revPct>=0;
 
   // Revenue breakdown for KPI display — within range
-  const onlineRev = paidRange.filter(o=>!(o.payment_status||'').toLowerCase().includes('cod')).reduce((s,o)=>s+parseFloat(o.total||0),0);
-  const codRev    = rangeOrders.filter(o=>(o.payment_status||'').toLowerCase().includes('cod')).reduce((s,o)=>s+parseFloat(o.total||0),0);
+  const onlineRev  = paidRange.filter(o=>!(o.payment_status||'').toLowerCase().includes('cod')).reduce((s,o)=>s+parseFloat(o.total||0),0);
+  // Only COD orders actually marked Paid (i.e. delivered & collected) count as revenue here —
+  // matches rangeRev above. Uncollected COD is tracked separately as "outstanding", not revenue.
+  const codRev     = paidRange.filter(o=>(o.payment_status||'').toLowerCase().includes('cod')).reduce((s,o)=>s+parseFloat(o.total||0),0);
+  const codOutstanding = rangeOrders.filter(o=>{ const s=(o.payment_status||'').toLowerCase(); return s.includes('cod') && !s.includes('paid'); }).reduce((s,o)=>s+parseFloat(o.total||0),0);
   const rangeLbl  = _dashGRangeLabel();
 
   // KPI Cards with animated counters
@@ -3150,7 +3153,7 @@ function renderDashboardData(orders, prods, stats) {
       <div class="kpi-glow" style="background:radial-gradient(circle at 50% 0%,rgba(32,128,232,0.08),transparent 60%);"></div>
       <div class="kpi-label">Revenue · ${rangeLbl}</div>
       <div class="kpi-val" id="kv1">₹0</div>
-      <div class="kpi-trend" style="color:var(--text3)">💳 ₹${fmtNum(Math.round(onlineRev))} online &nbsp;+&nbsp; 💵 ₹${fmtNum(Math.round(codRev))} COD</div>
+      <div class="kpi-trend" style="color:var(--text3)">💳 ₹${fmtNum(Math.round(onlineRev))} online &nbsp;+&nbsp; 💵 ₹${fmtNum(Math.round(codRev))} COD collected${codOutstanding>0?` &nbsp;·&nbsp; ⏳ ₹${fmtNum(Math.round(codOutstanding))} COD outstanding`:''}</div>
       <span class="kpi-ico">📈</span>
     </div>
     <div class="kpi" style="border-color:rgba(232,173,44,0.3);">
@@ -4429,15 +4432,34 @@ async function openOrderModal(orderId) {
 async function updateOrderStatus(orderId) {
   const status = document.getElementById('orderStatusSel').value;
   const tracking = document.getElementById('trackingIdInput').value;
+  const order = allOrders.find(o=>o.id===orderId);
+
+  // Online payments are already marked Paid at checkout via Cashfree — untouched here.
+  // COD orders stay "COD - Pending" until delivered; once Delivered, auto-mark the
+  // cash as collected so it starts counting in revenue.
+  const curPay   = (order && order.payment_status) || '';
+  const isCOD    = curPay.toLowerCase().includes('cod');
+  const isPaid   = curPay.toLowerCase().includes('paid') || curPay === 'SUCCESS';
+  let payment_status;
+  if (status === 'Delivered' && isCOD && !isPaid) {
+    payment_status = 'Paid - COD Collected';
+  }
+
+  const body = {status, fulfillment:status, shiprocket_id:tracking||null};
+  if (payment_status) body.payment_status = payment_status;
+
   try {
     const r = await apiFetch(`/api/admin/orders/${orderId}`, {
-      method:'PUT', body: JSON.stringify({status, fulfillment:status, shiprocket_id:tracking||null})
+      method:'PUT', body: JSON.stringify(body)
     });
     const d = await r.json();
     if(!r.ok) throw new Error(d.error||d.message||'Update failed — check backend logs');
     const idx = allOrders.findIndex(o=>o.id===orderId);
-    if(idx>-1) { allOrders[idx].status = status; allOrders[idx].fulfillment = status; allOrders[idx].shiprocket_id = tracking; }
-    toast(`Order ${orderId} → ${status}`);
+    if(idx>-1) {
+      allOrders[idx].status = status; allOrders[idx].fulfillment = status; allOrders[idx].shiprocket_id = tracking;
+      if (payment_status) allOrders[idx].payment_status = payment_status;
+    }
+    toast(payment_status ? `Order ${orderId} → ${status} (COD payment collected ✅)` : `Order ${orderId} → ${status}`);
     closeModal('orderModal');
     filterOrders();
   } catch(e) { toast(e.message,'error'); }
