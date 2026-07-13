@@ -878,6 +878,26 @@ img, canvas, svg, table { max-width:100%; }
       <button class="btn-export" onclick="openExportModal('dashboard')">📤 Export ▾</button>
     </div>
   </div>
+
+  <!-- ══ GLOBAL DASHBOARD RANGE FILTER — drives every section below ══ -->
+  <div class="card" style="padding:12px 16px;margin-bottom:16px;display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
+    <span style="font-size:0.78rem;font-weight:700;color:var(--text2);">📅 Dashboard Range:</span>
+    <div style="display:flex;gap:6px;flex-wrap:wrap;">
+      <button class="ep-chip" id="dashGChipAll" onclick="setDashGlobalRange('all',this)" style="padding:5px 13px;">All Time</button>
+      <button class="ep-chip active" id="dashGChip7" onclick="setDashGlobalRange(7,this)" style="padding:5px 13px;">7D</button>
+      <button class="ep-chip" id="dashGChip30" onclick="setDashGlobalRange(30,this)" style="padding:5px 13px;">30D</button>
+      <button class="ep-chip" id="dashGChip90" onclick="setDashGlobalRange(90,this)" style="padding:5px 13px;">90D</button>
+      <button class="ep-chip" id="dashGChipCustom" onclick="toggleDashGlobalCustom()" style="padding:5px 13px;">Custom</button>
+    </div>
+    <div id="dashGCustomBar" style="display:none;align-items:center;gap:6px;flex-wrap:wrap;">
+      <input type="date" class="filter-input" id="dashGDateStart" style="max-width:150px;">
+      <span style="color:var(--text3);">→</span>
+      <input type="date" class="filter-input" id="dashGDateEnd" style="max-width:150px;">
+      <button class="btn btn-primary btn-sm" onclick="applyDashGlobalCustomRange()">Apply</button>
+    </div>
+    <span style="margin-left:auto;font-size:0.72rem;color:var(--text3);" id="dashGRangeLabel">Last 7 days</span>
+  </div>
+
   <!-- ══ KPI ROW ══ -->
   <div class="grid-4" id="kpiCards" style="margin-bottom:20px">
     <div class="kpi skel" style="height:108px"></div>
@@ -894,22 +914,7 @@ img, canvas, svg, table { max-width:100%; }
     <div class="card" style="padding:0;overflow:hidden;">
       <div class="card-hdr" style="padding:16px 20px 12px;">
         <span class="card-title">📈 Revenue Trend</span>
-        <div style="display:flex;gap:6px;align-items:center;">
-          <span class="badge badge-green" id="dashRevTotal">₹0</span>
-          <div style="display:flex;gap:4px;">
-            <button class="ep-chip active" id="revChip7" onclick="setRevRange(7,this)" style="padding:3px 10px;font-size:0.7rem;">7D</button>
-            <button class="ep-chip" id="revChip30" onclick="setRevRange(30,this)" style="padding:3px 10px;font-size:0.7rem;">30D</button>
-            <button class="ep-chip" id="revChip90" onclick="setRevRange(90,this)" style="padding:3px 10px;font-size:0.7rem;">90D</button>
-            <button class="ep-chip" id="revChipCustom" onclick="toggleRevCustom()" style="padding:3px 10px;font-size:0.7rem;">Custom</button>
-          </div>
-        </div>
-      </div>
-      <div id="revCustomBar" style="display:none;align-items:center;gap:6px;padding:0 20px 10px;flex-wrap:wrap;">
-        <span style="font-size:0.7rem;color:var(--text3);">Range:</span>
-        <input type="date" class="filter-input" id="revDateStart" style="max-width:140px;padding:5px 8px;font-size:0.75rem;">
-        <span style="color:var(--text3);">→</span>
-        <input type="date" class="filter-input" id="revDateEnd" style="max-width:140px;padding:5px 8px;font-size:0.75rem;">
-        <button class="btn btn-primary btn-sm" onclick="applyRevCustomRange()">Apply</button>
+        <span class="badge badge-green" id="dashRevTotal">₹0</span>
       </div>
       <canvas id="revenueCanvas" style="display:block;width:100%;height:180px;"></canvas>
     </div>
@@ -1031,19 +1036,7 @@ img, canvas, svg, table { max-width:100%; }
     <div class="card">
       <div class="card-hdr">
         <span class="card-title">📈 Customer Growth</span>
-        <div style="display:flex;gap:4px;">
-          <button class="ep-chip active" id="custGrowthChip7" onclick="setDashCustGrowthRange(7,this)" style="padding:3px 10px;font-size:0.7rem;">7D</button>
-          <button class="ep-chip" id="custGrowthChip30" onclick="setDashCustGrowthRange(30,this)" style="padding:3px 10px;font-size:0.7rem;">30D</button>
-          <button class="ep-chip" id="custGrowthChip90" onclick="setDashCustGrowthRange(90,this)" style="padding:3px 10px;font-size:0.7rem;">90D</button>
-          <button class="ep-chip" id="custGrowthChipCustom" onclick="toggleCustGrowthCustom()" style="padding:3px 10px;font-size:0.7rem;">Custom</button>
-        </div>
-      </div>
-      <div id="custGrowthCustomBar" style="display:none;align-items:center;gap:6px;padding:0 16px 10px;flex-wrap:wrap;">
-        <span style="font-size:0.7rem;color:var(--text3);">Range:</span>
-        <input type="date" class="filter-input" id="custGrowthDateStart" style="max-width:140px;padding:5px 8px;font-size:0.75rem;">
-        <span style="color:var(--text3);">→</span>
-        <input type="date" class="filter-input" id="custGrowthDateEnd" style="max-width:140px;padding:5px 8px;font-size:0.75rem;">
-        <button class="btn btn-primary btn-sm" onclick="applyCustGrowthCustomRange()">Apply</button>
+        <span class="badge badge-gray" id="custGrowthTotalDash">0 new</span>
       </div>
       <canvas id="dashCustGrowthCanvas" style="display:block;width:100%;height:150px;"></canvas>
     </div>
@@ -3035,36 +3028,60 @@ function drawGoalRing(canvasId, pct, color='#5EAB30') {
 // ═══════════════════════════════════════════════
 // DASHBOARD — Full real-data render
 // ═══════════════════════════════════════════════
-let _revRange = 7;
-let _revCustomFrom = null, _revCustomTo = null;
-function setRevRange(days, btn) {
-  _revRange = days;
-  _revCustomFrom = null; _revCustomTo = null;
-  document.getElementById('revCustomBar').style.display = 'none';
-  document.querySelectorAll('[id^=revChip]').forEach(b=>b.classList.remove('active'));
-  btn.classList.add('active');
-  renderRevenueChart(allOrders, days);
+// Global dashboard-wide date range — drives EVERY time-based section on this page
+let _dashGRange = { mode: 'days', days: 7, from: null, to: null };
+let _dashLastStats = {};
+
+function _dashGFilterOrders(orders) {
+  if (_dashGRange.mode === 'all') return orders;
+  if (_dashGRange.mode === 'custom' && _dashGRange.from && _dashGRange.to) {
+    const start = new Date(_dashGRange.from);
+    const end   = new Date(_dashGRange.to); end.setHours(23,59,59,999);
+    return orders.filter(o => { const d = new Date(o.created_at); return d >= start && d <= end; });
+  }
+  const cutoff = new Date(); cutoff.setDate(cutoff.getDate() - (_dashGRange.days||7)); cutoff.setHours(0,0,0,0);
+  return orders.filter(o => new Date(o.created_at) >= cutoff);
 }
-function toggleRevCustom() {
-  const bar = document.getElementById('revCustomBar');
+function _dashGRangeLabel() {
+  if (_dashGRange.mode === 'all') return 'All time';
+  if (_dashGRange.mode === 'custom' && _dashGRange.from && _dashGRange.to) return `${_dashGRange.from} → ${_dashGRange.to}`;
+  return `Last ${_dashGRange.days} days`;
+}
+// Bucket spec reused by every chart on the page so they all slice time the same way
+function _dashGBucketSpec() {
+  if (_dashGRange.mode === 'custom' && _dashGRange.from && _dashGRange.to) return { days:null, customRange:{from:_dashGRange.from, to:_dashGRange.to} };
+  if (_dashGRange.mode === 'all') return { days:90, customRange:null }; // cap chart buckets at 90d for 'all time' for readability
+  return { days:_dashGRange.days||7, customRange:null };
+}
+function setDashGlobalRange(days, btn) {
+  _dashGRange = { mode:'days', days, from:null, to:null };
+  document.getElementById('dashGCustomBar').style.display = 'none';
+  document.querySelectorAll('[id^=dashGChip]').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById('dashGRangeLabel').textContent = _dashGRangeLabel();
+  if (allOrders && allOrders.length !== undefined) renderDashboardData(allOrders, allProducts, _dashLastStats);
+}
+function toggleDashGlobalCustom() {
+  const bar = document.getElementById('dashGCustomBar');
   const show = bar.style.display === 'none';
   bar.style.display = show ? 'flex' : 'none';
   if (show) {
-    document.querySelectorAll('[id^=revChip]').forEach(b=>b.classList.remove('active'));
-    document.getElementById('revChipCustom').classList.add('active');
+    document.querySelectorAll('[id^=dashGChip]').forEach(b=>b.classList.remove('active'));
+    document.getElementById('dashGChipCustom').classList.add('active');
   }
 }
-function applyRevCustomRange() {
-  const from = document.getElementById('revDateStart').value;
-  const to   = document.getElementById('revDateEnd').value;
+function applyDashGlobalCustomRange() {
+  const from = document.getElementById('dashGDateStart').value;
+  const to   = document.getElementById('dashGDateEnd').value;
   if (!from || !to) { toast('Pick both a start and end date','error'); return; }
-  _revCustomFrom = from; _revCustomTo = to;
-  document.querySelectorAll('[id^=revChip]').forEach(b=>b.classList.remove('active'));
-  document.getElementById('revChipCustom').classList.add('active');
-  renderRevenueChart(allOrders, null, {from, to});
+  _dashGRange = { mode:'custom', days:null, from, to };
+  document.querySelectorAll('[id^=dashGChip]').forEach(b=>b.classList.remove('active'));
+  document.getElementById('dashGChipCustom').classList.add('active');
+  document.getElementById('dashGRangeLabel').textContent = _dashGRangeLabel();
+  renderDashboardData(allOrders, allProducts, _dashLastStats);
 }
 
-async function loadDashboard() {
+async function loadDashboardCore() {
   document.getElementById('kpiCards').innerHTML = Array(4).fill('<div class="kpi skel" style="height:108px"></div>').join('');
   try {
     const [statsR, ordersR, prodsR] = await Promise.all([
@@ -3077,220 +3094,242 @@ async function loadDashboard() {
     const prdData = await prodsR.json();
     const orders  = ordData.data||ordData.orders||(Array.isArray(ordData)?ordData:[]);
     const prods   = prdData.data||prdData.products||(Array.isArray(prdData)?prdData:[]);
-    allOrders = orders; allProducts = prods;
-
-    const todayStr = new Date().toISOString().split('T')[0];
-    const isPaid = o=>(o.payment_status||'').toLowerCase().includes('paid')||o.payment_status==='SUCCESS';
-    const paidOrders = orders.filter(isPaid);
-    const todayPaid  = paidOrders.filter(o=>(o.created_at||'').startsWith(todayStr));
-    const todayAll   = orders.filter(o=>(o.created_at||'').startsWith(todayStr));
-    const totalRev   = stats.totalRevenue  || paidOrders.reduce((s,o)=>s+parseFloat(o.total||0),0);
-    const todayRev   = stats.todayRevenue  || todayPaid.reduce((s,o)=>s+parseFloat(o.total||0),0);
-    const pending    = stats.pendingOrders || orders.filter(o=>(o.fulfillment||o.status||'')==='Pending').length;
-    const conv       = orders.length ? ((paidOrders.length/orders.length)*100) : 0;
-    const avgOrder   = paidOrders.length ? totalRev/paidOrders.length : 0;
-
-    // Trend vs yesterday
-    const yday = new Date(); yday.setDate(yday.getDate()-1);
-    const yStr = yday.toISOString().split('T')[0];
-    const yestRev = paidOrders.filter(o=>(o.created_at||'').startsWith(yStr)).reduce((s,o)=>s+parseFloat(o.total||0),0);
-    const revPct = yestRev>0?((todayRev-yestRev)/yestRev*100):0;
-    const revUp = revPct>=0;
-
-    // Revenue breakdown for KPI display
-    const onlineRev = paidOrders.filter(o=>!(o.payment_status||'').toLowerCase().includes('cod')).reduce((s,o)=>s+parseFloat(o.total||0),0);
-    const codRev    = orders.filter(o=>(o.payment_status||'').toLowerCase().includes('cod')).reduce((s,o)=>s+parseFloat(o.total||0),0);
-
-    // KPI Cards with animated counters
-    document.getElementById('kpiCards').innerHTML = `
-      <div class="kpi" style="border-color:rgba(94,171,48,0.3);">
-        <div class="kpi-glow" style="background:radial-gradient(circle at 50% 0%,rgba(94,171,48,0.08),transparent 60%);"></div>
-        <div class="kpi-label">Today's Revenue</div>
-        <div class="kpi-val" id="kv0">₹0</div>
-        <div class="kpi-trend ${revUp?'up':'down'}">${revUp?'↑':'↓'}${Math.abs(revPct).toFixed(1)}% vs yesterday</div>
-        <span class="kpi-ico">💰</span>
-      </div>
-      <div class="kpi" style="border-color:rgba(32,128,232,0.3);">
-        <div class="kpi-glow" style="background:radial-gradient(circle at 50% 0%,rgba(32,128,232,0.08),transparent 60%);"></div>
-        <div class="kpi-label">Total Revenue</div>
-        <div class="kpi-val" id="kv1">₹0</div>
-        <div class="kpi-trend" style="color:var(--text3)">💳 ₹${fmtNum(Math.round(onlineRev))} online &nbsp;+&nbsp; 💵 ₹${fmtNum(Math.round(codRev))} COD</div>
-        <span class="kpi-ico">📈</span>
-      </div>
-      <div class="kpi" style="border-color:rgba(232,173,44,0.3);">
-        <div class="kpi-glow" style="background:radial-gradient(circle at 50% 0%,rgba(232,173,44,0.08),transparent 60%);"></div>
-        <div class="kpi-label">Pending Orders</div>
-        <div class="kpi-val" id="kv2" style="color:var(--gold-text)">0</div>
-        <div class="kpi-trend" style="color:var(--gold-text)">⏳ Need action</div>
-        <span class="kpi-ico">📦</span>
-      </div>
-      <div class="kpi" style="border-color:rgba(124,58,237,0.3);">
-        <div class="kpi-glow" style="background:radial-gradient(circle at 50% 0%,rgba(124,58,237,0.08),transparent 60%);"></div>
-        <div class="kpi-label">Avg Order Value</div>
-        <div class="kpi-val" id="kv3">₹0</div>
-        <div class="kpi-trend" style="color:var(--text3)">${orders.length} total orders</div>
-        <span class="kpi-ico">🛒</span>
-      </div>
-    `;
-    // Animate counters
-    setTimeout(()=>{
-      animateCount(document.getElementById('kv0'), 0, todayRev, v=>'₹'+fmtNum(Math.round(v)));
-      animateCount(document.getElementById('kv1'), 0, totalRev,  v=>'₹'+fmtNum(Math.round(v)));
-      animateCount(document.getElementById('kv2'), 0, pending,   v=>Math.round(v));
-      animateCount(document.getElementById('kv3'), 0, avgOrder,  v=>'₹'+fmtNum(Math.round(v)));
-    }, 100);
-
-    document.getElementById('pendingBadge').textContent = pending;
-
-    // Stats Ticker
-    const week = new Date(); week.setDate(week.getDate()-7);
-    const weekRev = paidOrders.filter(o=>new Date(o.created_at)>=week).reduce((s,o)=>s+parseFloat(o.total||0),0);
-    document.getElementById('statsTicker').innerHTML = `
-      <div class="stat-tick up"><span class="stat-tick-ico">📅</span><div><div class="stat-tick-val">₹${fmtNum(Math.round(weekRev))}</div><div class="stat-tick-lbl">This Week</div></div></div>
-      <div class="stat-tick"><span class="stat-tick-ico">🧾</span><div><div class="stat-tick-val">${todayAll.length}</div><div class="stat-tick-lbl">Orders Today</div></div></div>
-      <div class="stat-tick"><span class="stat-tick-ico">💳</span><div><div class="stat-tick-val">${conv.toFixed(1)}%</div><div class="stat-tick-lbl">Conversion</div></div></div>
-      <div class="stat-tick"><span class="stat-tick-ico">🔴</span><div><div class="stat-tick-val">${prods.filter(p=>!p.deleted_at&&(p.stock||0)===0).length}</div><div class="stat-tick-lbl">Out of Stock</div></div></div>
-      <div class="stat-tick"><span class="stat-tick-ico">🏷️</span><div><div class="stat-tick-val">${prods.filter(p=>!p.deleted_at&&(p.stock||0)>0&&(p.stock||0)<10).length}</div><div class="stat-tick-lbl">Low Stock</div></div></div>
-      <div class="stat-tick"><span class="stat-tick-ico">🚚</span><div><div class="stat-tick-val">${orders.filter(o=>(o.fulfillment||o.status||'')==='Shipped').length}</div><div class="stat-tick-lbl">In Transit</div></div></div>
-    `;
-
-    // Revenue chart
-    renderRevenueChart(orders, _revRange);
-
-    // Sparklines
-    const last7 = Array.from({length:7},(_,i)=>{ const d=new Date(); d.setDate(d.getDate()-(6-i)); return d.toISOString().split('T')[0]; });
-    const revSpark = last7.map(d=>paidOrders.filter(o=>(o.created_at||'').startsWith(d)).reduce((s,o)=>s+parseFloat(o.total||0),0));
-    const ordSpark = last7.map(d=>orders.filter(o=>(o.created_at||'').startsWith(d)).length);
-    document.getElementById('sparkRevVal').textContent = '₹'+fmtNum(Math.round(todayRev));
-    document.getElementById('sparkOrdVal').textContent = todayAll.length;
-    document.getElementById('sparkConvVal').textContent = conv.toFixed(1)+'%';
-    document.getElementById('sparkRevLabel').textContent = `${paidOrders.length} paid · 7-day trend`;
-    document.getElementById('sparkOrdLabel').textContent = `${orders.length} total orders`;
-    document.getElementById('sparkConvLabel').textContent = `${paidOrders.length} of ${orders.length} paid`;
-    setTimeout(()=>{
-      drawSparkline('sparkRevCanvas', revSpark, '#5EAB30');
-      drawSparkline('sparkOrdCanvas', ordSpark, '#2080E8');
-      document.getElementById('convFill').style.width = Math.min(conv,100)+'%';
-    }, 80);
-
-    // Status + Payment donuts
-    renderStatusChart(orders);
-    renderPayChart(orders);
-
-    // Hourly orders
-    renderHourlyChart(orders);
-
-    // India map + top cities
-    const cityMap = {};
-    orders.forEach(o => {
-      const city = o.city||o.address_city||'Unknown';
-      if(!cityMap[city]) cityMap[city]={orders:0,revenue:0};
-      cityMap[city].orders++;
-      cityMap[city].revenue+=parseFloat(o.total||0);
-    });
-    renderIndiaMap(cityMap);
-    document.getElementById('mapOrderCount').textContent = Object.keys(cityMap).length+' cities';
-
-    // Top cities chart
-    const topCities = Object.entries(cityMap).sort((a,b)=>b[1].orders-a[1].orders).slice(0,8);
-    const maxCity = topCities[0]?.[1].orders||1;
-    const cityColors = ['#5EAB30','#2080E8','#E8AD2C','#7C3AED','#E87020','#E53535','#06B6D4','#EC4899'];
-    document.getElementById('topCitiesChart').innerHTML = topCities.map(([city,info],i)=>`
-      <div class="rank-row">
-        <div class="rank-num">${i+1}</div>
-        <div style="display:flex;flex-direction:column;gap:3px;flex:1;min-width:0;">
-          <div style="display:flex;justify-content:space-between;">
-            <span class="rank-label">${city}</span>
-            <span class="rank-val">${info.orders} orders</span>
-          </div>
-          <div class="rank-bar"><div class="rank-fill" style="width:${(info.orders/maxCity*100).toFixed(1)}%;background:${cityColors[i%cityColors.length]};"></div></div>
-        </div>
-      </div>`).join('') || '<div class="empty-state" style="padding:20px;">No city data</div>';
-
-    // Category revenue chart
-    const catRev={};
-    paidOrders.forEach(o=>{
-      try{(typeof o.items==='string'?JSON.parse(o.items||'[]'):(o.items||[])).forEach(it=>{
-        const c=it.category||'Other'; catRev[c]=(catRev[c]||0)+parseFloat(it.price||0)*(it.qty||1);
-      });}catch{}
-    });
-    const catEntries=Object.entries(catRev).sort((a,b)=>b[1]-a[1]).slice(0,7);
-    if(catEntries.length) {
-      setTimeout(()=>drawHBarChart('catCanvas',catEntries.map(e=>e[0]),catEntries.map(e=>e[1]),cityColors),100);
-    } else {
-      const cv=document.getElementById('catCanvas'); if(cv){const ctx=cv.getContext('2d');ctx.fillStyle='rgba(106,120,96,0.5)';ctx.font='12px DM Sans,sans-serif';ctx.textAlign='center';ctx.fillText('No category data yet',cv.offsetWidth/2,(cv.offsetHeight||180)/2);}
-    }
-
-    // Top products widget
-    const prodCount={};
-    paidOrders.forEach(o=>{try{(typeof o.items==='string'?JSON.parse(o.items||'[]'):(o.items||[])).forEach(it=>{prodCount[it.name||'?']=(prodCount[it.name||'?']||0)+(it.qty||1)});}catch{}});
-    const topProds=Object.entries(prodCount).sort((a,b)=>b[1]-a[1]).slice(0,6);
-    const maxP=topProds[0]?.[1]||1;
-    document.getElementById('topProductsWidget').innerHTML = topProds.map(([name,qty],i)=>`
-      <div class="rank-row">
-        <div class="rank-num">${i+1}</div>
-        <div style="display:flex;flex-direction:column;gap:3px;flex:1;min-width:0;">
-          <div style="display:flex;justify-content:space-between;">
-            <span class="rank-label">${name.length>22?name.slice(0,22)+'…':name}</span>
-            <span class="rank-val">${qty} sold</span>
-          </div>
-          <div class="rank-bar"><div class="rank-fill" style="width:${(qty/maxP*100).toFixed(1)}%;background:${cityColors[i%cityColors.length]};"></div></div>
-        </div>
-      </div>`).join('') || '<div class="empty-state" style="padding:20px;">No sales data yet</div>';
-
-    // Activity feed
-    const activities = orders.slice(0,10).map(o=>({
-      text:`<strong>${o.customer_name||'Customer'}</strong> placed order <span style="color:var(--green-text)">₹${fmtNum(o.total||0)}</span>`,
-      time: fmtTime(o.created_at),
-      color: isPaid(o)?'var(--green)':'var(--gold)'
-    }));
-    document.getElementById('activityFeed').innerHTML = activities.map(a=>`
-      <div class="act-item">
-        <div class="act-dot" style="background:${a.color};box-shadow:0 0 6px ${a.color}60;"></div>
-        <div class="act-text">${a.text}</div>
-        <div class="act-time">${a.time}</div>
-      </div>`).join('') || '<div style="color:var(--text3);font-size:0.8rem;padding:12px;">No activity yet</div>';
-
-    // Low stock
-    const lowStock = prods.filter(p=>!p.deleted_at&&(p.stock||0)<20).sort((a,b)=>(a.stock||0)-(b.stock||0)).slice(0,6);
-    document.getElementById('lowStockBadge').textContent = lowStock.length;
-    document.getElementById('lowStockList').innerHTML = lowStock.map(p=>`
-      <div style="display:flex;align-items:center;justify-content:space-between;padding:6px 0;border-bottom:1px solid var(--border);">
-        <div><div style="font-size:0.8rem;color:var(--text)">${p.name}</div><div style="font-size:0.68rem;color:var(--text3)">${p.category||''}</div></div>
-        <span class="badge ${(p.stock||0)===0?'badge-red':'badge-gold'}">${(p.stock||0)===0?'Out':p.stock+' left'}</span>
-      </div>`).join('') || '<div style="color:var(--text3);font-size:0.82rem;padding:12px 0;">✅ All stocked</div>';
-
-    // Goal widget
-    const monthStart = new Date(); monthStart.setDate(1); monthStart.setHours(0,0,0,0);
-    const monthRev = paidOrders.filter(o=>new Date(o.created_at)>=monthStart).reduce((s,o)=>s+parseFloat(o.total||0),0);
-    const goalTarget = 100000; // ₹1L monthly goal
-    const goalPct = Math.min((monthRev/goalTarget)*100, 100);
-    document.getElementById('goalWidget').innerHTML = `
-      <div class="goal-ring"><canvas id="goalCanvas" style="width:100px;height:100px;display:block;"></canvas></div>
-      <div class="goal-info">
-        <span>₹${fmtNum(Math.round(monthRev))} earned</span>
-        <span>₹${fmtNum(goalTarget)} goal</span>
-      </div>
-      <div style="font-size:0.72rem;color:var(--text3);text-align:center;margin-top:6px;">
-        ${goalPct>=100?'🎉 Goal achieved!':'₹'+fmtNum(Math.round(goalTarget-monthRev))+' to go'}
-      </div>`;
-    setTimeout(()=>drawGoalRing('goalCanvas', goalPct), 120);
-
-    // Revenue total badge
-    const el=document.getElementById('dashRevTotal'); if(el) el.textContent='₹'+fmtNum(Math.round(totalRev));
-
-    // Recent orders table
-    document.getElementById('dashOrdersTbody').innerHTML = orders.slice(0,10).map(o=>`
-      <tr>
-        <td class="td-id" style="color:var(--green-text);cursor:pointer" onclick="showPage('orders')">${o.id}</td>
-        <td><div style="font-size:0.83rem;font-weight:500;">${esc(o.customer_name)||'-'}</div><div style="font-size:0.7rem;color:var(--text3);">${o.city||o.customer_phone||''}</div></td>
-        <td style="color:var(--green-text);font-weight:600;">₹${fmtNum(o.total||0)}</td>
-        <td>${payBadge(o.payment_status)}</td>
-        <td>${statusBadge(o.fulfillment||o.status)}</td>
-        <td style="color:var(--text3);font-size:0.75rem;">${fmtTime(o.created_at)}</td>
-      </tr>`).join('') || '<tr><td colspan="6" class="empty-state">No orders yet</td></tr>';
-
+    allOrders = orders; allProducts = prods; _dashLastStats = stats;
+    renderDashboardData(orders, prods, stats);
   } catch(e) { toast('Dashboard error: '+e.message, 'error'); console.error(e); }
+}
+
+// Renders every section of the dashboard from already-fetched data.
+// Called on initial load AND whenever the global date range changes (no refetch needed).
+function renderDashboardData(orders, prods, stats) {
+  stats = stats || {};
+  orders = orders || [];
+  prods  = prods  || [];
+  const isPaid = o=>(o.payment_status||'').toLowerCase().includes('paid')||o.payment_status==='SUCCESS';
+
+  // rangeOrders = orders within the globally-selected date range — drives every range-aware widget below.
+  const rangeOrders = _dashGFilterOrders(orders);
+  const paidRange = rangeOrders.filter(isPaid);
+
+  // "Today" is always literal-today regardless of the selected range (Today's Revenue / Orders Today
+  // are point-in-time snapshots, not trend widgets — same convention most dashboards use).
+  const todayStr = new Date().toISOString().split('T')[0];
+  const paidAll   = orders.filter(isPaid);
+  const todayPaid = paidAll.filter(o=>(o.created_at||'').startsWith(todayStr));
+  const todayAll  = orders.filter(o=>(o.created_at||'').startsWith(todayStr));
+  const todayRev  = stats.todayRevenue || todayPaid.reduce((s,o)=>s+parseFloat(o.total||0),0);
+
+  // Range-based aggregates — these now respond to the dashboard-wide filter
+  const rangeRev   = paidRange.reduce((s,o)=>s+parseFloat(o.total||0),0);
+  const pending    = rangeOrders.filter(o=>(o.fulfillment||o.status||'')==='Pending').length;
+  const conv       = rangeOrders.length ? ((paidRange.length/rangeOrders.length)*100) : 0;
+  const avgOrder   = paidRange.length ? rangeRev/paidRange.length : 0;
+
+  // Trend vs yesterday (today-anchored, independent of range — see note above)
+  const yday = new Date(); yday.setDate(yday.getDate()-1);
+  const yStr = yday.toISOString().split('T')[0];
+  const yestRev = paidAll.filter(o=>(o.created_at||'').startsWith(yStr)).reduce((s,o)=>s+parseFloat(o.total||0),0);
+  const revPct = yestRev>0?((todayRev-yestRev)/yestRev*100):0;
+  const revUp = revPct>=0;
+
+  // Revenue breakdown for KPI display — within range
+  const onlineRev = paidRange.filter(o=>!(o.payment_status||'').toLowerCase().includes('cod')).reduce((s,o)=>s+parseFloat(o.total||0),0);
+  const codRev    = rangeOrders.filter(o=>(o.payment_status||'').toLowerCase().includes('cod')).reduce((s,o)=>s+parseFloat(o.total||0),0);
+  const rangeLbl  = _dashGRangeLabel();
+
+  // KPI Cards with animated counters
+  document.getElementById('kpiCards').innerHTML = `
+    <div class="kpi" style="border-color:rgba(94,171,48,0.3);">
+      <div class="kpi-glow" style="background:radial-gradient(circle at 50% 0%,rgba(94,171,48,0.08),transparent 60%);"></div>
+      <div class="kpi-label">Today's Revenue</div>
+      <div class="kpi-val" id="kv0">₹0</div>
+      <div class="kpi-trend ${revUp?'up':'down'}">${revUp?'↑':'↓'}${Math.abs(revPct).toFixed(1)}% vs yesterday</div>
+      <span class="kpi-ico">💰</span>
+    </div>
+    <div class="kpi" style="border-color:rgba(32,128,232,0.3);">
+      <div class="kpi-glow" style="background:radial-gradient(circle at 50% 0%,rgba(32,128,232,0.08),transparent 60%);"></div>
+      <div class="kpi-label">Revenue · ${rangeLbl}</div>
+      <div class="kpi-val" id="kv1">₹0</div>
+      <div class="kpi-trend" style="color:var(--text3)">💳 ₹${fmtNum(Math.round(onlineRev))} online &nbsp;+&nbsp; 💵 ₹${fmtNum(Math.round(codRev))} COD</div>
+      <span class="kpi-ico">📈</span>
+    </div>
+    <div class="kpi" style="border-color:rgba(232,173,44,0.3);">
+      <div class="kpi-glow" style="background:radial-gradient(circle at 50% 0%,rgba(232,173,44,0.08),transparent 60%);"></div>
+      <div class="kpi-label">Pending Orders · ${rangeLbl}</div>
+      <div class="kpi-val" id="kv2" style="color:var(--gold-text)">0</div>
+      <div class="kpi-trend" style="color:var(--gold-text)">⏳ Need action</div>
+      <span class="kpi-ico">📦</span>
+    </div>
+    <div class="kpi" style="border-color:rgba(124,58,237,0.3);">
+      <div class="kpi-glow" style="background:radial-gradient(circle at 50% 0%,rgba(124,58,237,0.08),transparent 60%);"></div>
+      <div class="kpi-label">Avg Order Value</div>
+      <div class="kpi-val" id="kv3">₹0</div>
+      <div class="kpi-trend" style="color:var(--text3)">${rangeOrders.length} orders · ${rangeLbl}</div>
+      <span class="kpi-ico">🛒</span>
+    </div>
+  `;
+  // Animate counters
+  setTimeout(()=>{
+    animateCount(document.getElementById('kv0'), 0, todayRev, v=>'₹'+fmtNum(Math.round(v)));
+    animateCount(document.getElementById('kv1'), 0, rangeRev, v=>'₹'+fmtNum(Math.round(v)));
+    animateCount(document.getElementById('kv2'), 0, pending,  v=>Math.round(v));
+    animateCount(document.getElementById('kv3'), 0, avgOrder, v=>'₹'+fmtNum(Math.round(v)));
+  }, 100);
+
+  const pendingBadgeEl = document.getElementById('pendingBadge');
+  if (pendingBadgeEl) pendingBadgeEl.textContent = orders.filter(o=>(o.fulfillment||o.status||'')==='Pending').length; // nav badge always reflects true all-time pending
+
+  // Stats Ticker — all range-aware except Low/Out of Stock (current inventory state, not time-based)
+  document.getElementById('statsTicker').innerHTML = `
+    <div class="stat-tick up"><span class="stat-tick-ico">📅</span><div><div class="stat-tick-val">₹${fmtNum(Math.round(rangeRev))}</div><div class="stat-tick-lbl">Revenue · ${rangeLbl}</div></div></div>
+    <div class="stat-tick"><span class="stat-tick-ico">🧾</span><div><div class="stat-tick-val">${todayAll.length}</div><div class="stat-tick-lbl">Orders Today</div></div></div>
+    <div class="stat-tick"><span class="stat-tick-ico">💳</span><div><div class="stat-tick-val">${conv.toFixed(1)}%</div><div class="stat-tick-lbl">Conversion · ${rangeLbl}</div></div></div>
+    <div class="stat-tick"><span class="stat-tick-ico">🔴</span><div><div class="stat-tick-val">${prods.filter(p=>!p.deleted_at&&(p.stock||0)===0).length}</div><div class="stat-tick-lbl">Out of Stock</div></div></div>
+    <div class="stat-tick"><span class="stat-tick-ico">🏷️</span><div><div class="stat-tick-val">${prods.filter(p=>!p.deleted_at&&(p.stock||0)>0&&(p.stock||0)<10).length}</div><div class="stat-tick-lbl">Low Stock</div></div></div>
+    <div class="stat-tick"><span class="stat-tick-ico">🚚</span><div><div class="stat-tick-val">${rangeOrders.filter(o=>(o.fulfillment||o.status||'')==='Shipped').length}</div><div class="stat-tick-lbl">In Transit · ${rangeLbl}</div></div></div>
+  `;
+
+  const bucketSpec = _dashGBucketSpec();
+
+  // Revenue chart
+  renderRevenueChart(rangeOrders, bucketSpec.days, bucketSpec.customRange);
+
+  // Sparklines — always the trailing 7 real days (today-anchored, same convention as the Today KPI)
+  const last7 = Array.from({length:7},(_,i)=>{ const d=new Date(); d.setDate(d.getDate()-(6-i)); return d.toISOString().split('T')[0]; });
+  const revSpark = last7.map(d=>paidAll.filter(o=>(o.created_at||'').startsWith(d)).reduce((s,o)=>s+parseFloat(o.total||0),0));
+  const ordSpark = last7.map(d=>orders.filter(o=>(o.created_at||'').startsWith(d)).length);
+  document.getElementById('sparkRevVal').textContent = '₹'+fmtNum(Math.round(todayRev));
+  document.getElementById('sparkOrdVal').textContent = todayAll.length;
+  document.getElementById('sparkConvVal').textContent = conv.toFixed(1)+'%';
+  document.getElementById('sparkRevLabel').textContent = `${paidAll.length} paid all-time · 7-day trend`;
+  document.getElementById('sparkOrdLabel').textContent = `${rangeOrders.length} orders · ${rangeLbl}`;
+  document.getElementById('sparkConvLabel').textContent = `${paidRange.length} of ${rangeOrders.length} paid · ${rangeLbl}`;
+  setTimeout(()=>{
+    drawSparkline('sparkRevCanvas', revSpark, '#5EAB30');
+    drawSparkline('sparkOrdCanvas', ordSpark, '#2080E8');
+    document.getElementById('convFill').style.width = Math.min(conv,100)+'%';
+  }, 80);
+
+  // Status + Payment donuts — within range
+  renderStatusChart(rangeOrders);
+  renderPayChart(rangeOrders);
+
+  // Hourly order pattern — aggregated across every order in the selected range
+  renderHourlyChart(rangeOrders);
+
+  // India map + top cities — within range
+  const cityMap = {};
+  rangeOrders.forEach(o => {
+    const city = o.city||o.address_city||'Unknown';
+    if(!cityMap[city]) cityMap[city]={orders:0,revenue:0};
+    cityMap[city].orders++;
+    cityMap[city].revenue+=parseFloat(o.total||0);
+  });
+  renderIndiaMap(cityMap);
+  document.getElementById('mapOrderCount').textContent = Object.keys(cityMap).length+' cities';
+
+  // Top cities chart
+  const topCities = Object.entries(cityMap).sort((a,b)=>b[1].orders-a[1].orders).slice(0,8);
+  const maxCity = topCities[0]?.[1].orders||1;
+  const cityColors = ['#5EAB30','#2080E8','#E8AD2C','#7C3AED','#E87020','#E53535','#06B6D4','#EC4899'];
+  document.getElementById('topCitiesChart').innerHTML = topCities.map(([city,info],i)=>`
+    <div class="rank-row">
+      <div class="rank-num">${i+1}</div>
+      <div style="display:flex;flex-direction:column;gap:3px;flex:1;min-width:0;">
+        <div style="display:flex;justify-content:space-between;">
+          <span class="rank-label">${city}</span>
+          <span class="rank-val">${info.orders} orders</span>
+        </div>
+        <div class="rank-bar"><div class="rank-fill" style="width:${(info.orders/maxCity*100).toFixed(1)}%;background:${cityColors[i%cityColors.length]};"></div></div>
+      </div>
+    </div>`).join('') || `<div class="empty-state" style="padding:20px;">No city data · ${rangeLbl}</div>`;
+
+  // Category revenue chart — within range
+  const catRev={};
+  paidRange.forEach(o=>{
+    try{(typeof o.items==='string'?JSON.parse(o.items||'[]'):(o.items||[])).forEach(it=>{
+      const c=it.category||'Other'; catRev[c]=(catRev[c]||0)+parseFloat(it.price||0)*(it.qty||1);
+    });}catch{}
+  });
+  const catEntries=Object.entries(catRev).sort((a,b)=>b[1]-a[1]).slice(0,7);
+  if(catEntries.length) {
+    setTimeout(()=>drawHBarChart('catCanvas',catEntries.map(e=>e[0]),catEntries.map(e=>e[1]),cityColors),100);
+  } else {
+    const cv=document.getElementById('catCanvas'); if(cv){const ctx=cv.getContext('2d');ctx.fillStyle='rgba(106,120,96,0.5)';ctx.font='12px DM Sans,sans-serif';ctx.textAlign='center';ctx.fillText('No category data · '+rangeLbl,cv.offsetWidth/2,(cv.offsetHeight||180)/2);}
+  }
+
+  // Top products widget — within range
+  const prodCount={};
+  paidRange.forEach(o=>{try{(typeof o.items==='string'?JSON.parse(o.items||'[]'):(o.items||[])).forEach(it=>{prodCount[it.name||'?']=(prodCount[it.name||'?']||0)+(it.qty||1)});}catch{}});
+  const topProds=Object.entries(prodCount).sort((a,b)=>b[1]-a[1]).slice(0,6);
+  const maxP=topProds[0]?.[1]||1;
+  document.getElementById('topProductsWidget').innerHTML = topProds.map(([name,qty],i)=>`
+    <div class="rank-row">
+      <div class="rank-num">${i+1}</div>
+      <div style="display:flex;flex-direction:column;gap:3px;flex:1;min-width:0;">
+        <div style="display:flex;justify-content:space-between;">
+          <span class="rank-label">${name.length>22?name.slice(0,22)+'…':name}</span>
+          <span class="rank-val">${qty} sold</span>
+        </div>
+        <div class="rank-bar"><div class="rank-fill" style="width:${(qty/maxP*100).toFixed(1)}%;background:${cityColors[i%cityColors.length]};"></div></div>
+      </div>
+    </div>`).join('') || `<div class="empty-state" style="padding:20px;">No sales data · ${rangeLbl}</div>`;
+
+  // Activity feed — most recent within range
+  const activities = [...rangeOrders].sort((a,b)=>new Date(b.created_at)-new Date(a.created_at)).slice(0,10).map(o=>({
+    text:`<strong>${o.customer_name||'Customer'}</strong> placed order <span style="color:var(--green-text)">₹${fmtNum(o.total||0)}</span>`,
+    time: fmtTime(o.created_at),
+    color: isPaid(o)?'var(--green)':'var(--gold)'
+  }));
+  document.getElementById('activityFeed').innerHTML = activities.map(a=>`
+    <div class="act-item">
+      <div class="act-dot" style="background:${a.color};box-shadow:0 0 6px ${a.color}60;"></div>
+      <div class="act-text">${a.text}</div>
+      <div class="act-time">${a.time}</div>
+    </div>`).join('') || `<div style="color:var(--text3);font-size:0.8rem;padding:12px;">No activity · ${rangeLbl}</div>`;
+
+  // Low stock — current inventory state, not time-based (unaffected by range by design)
+  const lowStock = prods.filter(p=>!p.deleted_at&&(p.stock||0)<20).sort((a,b)=>(a.stock||0)-(b.stock||0)).slice(0,6);
+  document.getElementById('lowStockBadge').textContent = lowStock.length;
+  document.getElementById('lowStockList').innerHTML = lowStock.map(p=>`
+    <div style="display:flex;align-items:center;justify-content:space-between;padding:6px 0;border-bottom:1px solid var(--border);">
+      <div><div style="font-size:0.8rem;color:var(--text)">${p.name}</div><div style="font-size:0.68rem;color:var(--text3)">${p.category||''}</div></div>
+      <span class="badge ${(p.stock||0)===0?'badge-red':'badge-gold'}">${(p.stock||0)===0?'Out':p.stock+' left'}</span>
+    </div>`).join('') || '<div style="color:var(--text3);font-size:0.82rem;padding:12px 0;">✅ All stocked</div>';
+
+  // Goal widget — always calendar month-to-date (a monthly target isn't meaningful re-scoped to an
+  // arbitrary custom range), clearly labelled so it reads as intentional, not inconsistent.
+  const monthStart = new Date(); monthStart.setDate(1); monthStart.setHours(0,0,0,0);
+  const monthRev = paidAll.filter(o=>new Date(o.created_at)>=monthStart).reduce((s,o)=>s+parseFloat(o.total||0),0);
+  const goalTarget = 100000; // ₹1L monthly goal
+  const goalPct = Math.min((monthRev/goalTarget)*100, 100);
+  document.getElementById('goalWidget').innerHTML = `
+    <div class="goal-ring"><canvas id="goalCanvas" style="width:100px;height:100px;display:block;"></canvas></div>
+    <div class="goal-info">
+      <span>₹${fmtNum(Math.round(monthRev))} earned</span>
+      <span>₹${fmtNum(goalTarget)} goal</span>
+    </div>
+    <div style="font-size:0.72rem;color:var(--text3);text-align:center;margin-top:6px;">
+      ${goalPct>=100?'🎉 Goal achieved!':'₹'+fmtNum(Math.round(goalTarget-monthRev))+' to go'} · This month
+    </div>`;
+  setTimeout(()=>drawGoalRing('goalCanvas', goalPct), 120);
+
+  // Revenue total badge (matches Revenue Trend chart, within range)
+  const el=document.getElementById('dashRevTotal'); if(el) el.textContent='₹'+fmtNum(Math.round(rangeRev));
+
+  // Recent orders table — most recent within range
+  document.getElementById('dashOrdersTbody').innerHTML = [...rangeOrders].sort((a,b)=>new Date(b.created_at)-new Date(a.created_at)).slice(0,10).map(o=>`
+    <tr>
+      <td class="td-id" style="color:var(--green-text);cursor:pointer" onclick="showPage('orders')">${o.id}</td>
+      <td><div style="font-size:0.83rem;font-weight:500;">${esc(o.customer_name)||'-'}</div><div style="font-size:0.7rem;color:var(--text3);">${o.city||o.customer_phone||''}</div></td>
+      <td style="color:var(--green-text);font-weight:600;">₹${fmtNum(o.total||0)}</td>
+      <td>${payBadge(o.payment_status)}</td>
+      <td>${statusBadge(o.fulfillment||o.status)}</td>
+      <td style="color:var(--text3);font-size:0.75rem;">${fmtTime(o.created_at)}</td>
+    </tr>`).join('') || `<tr><td colspan="6" class="empty-state">No orders · ${rangeLbl}</td></tr>`;
+
+  // Advanced widgets (area chart, heatmap, rings, forecast, customer growth, funnel) — range-aware
+  setTimeout(()=>renderAdvancedWidgets(rangeOrders, prods, bucketSpec), 300);
 }
 
 function renderRevenueChart(orders, days=7, customRange=null) {
