@@ -11002,10 +11002,6 @@ const API_BASE = 'https://ascovitahealthcare-cell-github-io.onrender.com';
 function mergeBackendProducts(backendProducts) {
   if (!backendProducts || !backendProducts.length) return;
 
-  // ✅ WHITELIST: Only these product IDs are valid. Any backend product NOT in this
-  // list is ignored — prevents stale/test/duplicate Supabase entries from appearing.
-  const VALID_PRODUCT_IDS = new Set([1, 2, 3, 4, 5, 8, 10, 11, 12, 20, 22]);
-
   const parseArr = (val) => {
     if (!val) return [];
     if (Array.isArray(val)) return val;
@@ -11015,11 +11011,6 @@ function mergeBackendProducts(backendProducts) {
 
   backendProducts.forEach(bp => {
     bp.id = parseInt(bp.id);
-
-    // Skip any product not in the whitelist — blocks rogue/test/duplicate backend entries
-    if (!VALID_PRODUCT_IDS.has(bp.id)) {
-      return;
-    }
 
     const idx = PRODUCTS.findIndex(p => p.id === bp.id);
 
