@@ -355,6 +355,16 @@ input[type=file]{display:none;}
 .price-preview-sale { font-family:var(--display); font-size:1.3rem; font-weight:800; color:var(--green-text); }
 .price-preview-mrp { font-size:0.85rem; color:var(--text3); text-decoration:line-through; }
 .price-preview-disc { background:rgba(74,138,40,0.15); color:var(--green-text); border-radius:6px; padding:3px 9px; font-size:0.8rem; font-weight:700; margin-left:auto; }
+.tier-row { background:var(--bg2); border:1px solid var(--border); border-radius:10px; padding:10px 12px; margin-bottom:10px; }
+.tier-row-grid { display:grid; grid-template-columns:0.8fr 0.9fr 1fr 1fr; gap:8px; align-items:end; }
+.tier-row-label { font-size:0.65rem; font-weight:700; color:var(--text3); text-transform:uppercase; letter-spacing:0.5px; margin-bottom:4px; }
+.tier-row-input { width:100%; background:var(--surface); border:1px solid var(--border); border-radius:6px; padding:7px 9px; color:var(--text); font-size:0.8rem; outline:none; }
+.tier-row-input:focus { border-color:var(--green); }
+.tier-row-foot { display:flex; align-items:center; justify-content:space-between; margin-top:8px; padding-top:8px; border-top:1px dashed var(--border); }
+.tier-row-preview { font-size:0.75rem; color:var(--text2); }
+.tier-row-preview b { color:var(--green-text); }
+.tier-row-remove { background:none; border:1px solid rgba(229,53,53,0.4); color:#E53535; border-radius:6px; padding:3px 9px; font-size:0.7rem; font-weight:700; cursor:pointer; }
+.tier-row-remove:hover { background:rgba(229,53,53,0.12); }
 
 /* Role-aware UI */
 .owner-only { display:block; }
@@ -890,8 +900,16 @@ img, canvas, svg, table { max-width:100%; }
             <button class="ep-chip active" id="revChip7" onclick="setRevRange(7,this)" style="padding:3px 10px;font-size:0.7rem;">7D</button>
             <button class="ep-chip" id="revChip30" onclick="setRevRange(30,this)" style="padding:3px 10px;font-size:0.7rem;">30D</button>
             <button class="ep-chip" id="revChip90" onclick="setRevRange(90,this)" style="padding:3px 10px;font-size:0.7rem;">90D</button>
+            <button class="ep-chip" id="revChipCustom" onclick="toggleRevCustom()" style="padding:3px 10px;font-size:0.7rem;">Custom</button>
           </div>
         </div>
+      </div>
+      <div id="revCustomBar" style="display:none;align-items:center;gap:6px;padding:0 20px 10px;flex-wrap:wrap;">
+        <span style="font-size:0.7rem;color:var(--text3);">Range:</span>
+        <input type="date" class="filter-input" id="revDateStart" style="max-width:140px;padding:5px 8px;font-size:0.75rem;">
+        <span style="color:var(--text3);">→</span>
+        <input type="date" class="filter-input" id="revDateEnd" style="max-width:140px;padding:5px 8px;font-size:0.75rem;">
+        <button class="btn btn-primary btn-sm" onclick="applyRevCustomRange()">Apply</button>
       </div>
       <canvas id="revenueCanvas" style="display:block;width:100%;height:180px;"></canvas>
     </div>
@@ -1017,7 +1035,15 @@ img, canvas, svg, table { max-width:100%; }
           <button class="ep-chip active" id="custGrowthChip7" onclick="setDashCustGrowthRange(7,this)" style="padding:3px 10px;font-size:0.7rem;">7D</button>
           <button class="ep-chip" id="custGrowthChip30" onclick="setDashCustGrowthRange(30,this)" style="padding:3px 10px;font-size:0.7rem;">30D</button>
           <button class="ep-chip" id="custGrowthChip90" onclick="setDashCustGrowthRange(90,this)" style="padding:3px 10px;font-size:0.7rem;">90D</button>
+          <button class="ep-chip" id="custGrowthChipCustom" onclick="toggleCustGrowthCustom()" style="padding:3px 10px;font-size:0.7rem;">Custom</button>
         </div>
+      </div>
+      <div id="custGrowthCustomBar" style="display:none;align-items:center;gap:6px;padding:0 16px 10px;flex-wrap:wrap;">
+        <span style="font-size:0.7rem;color:var(--text3);">Range:</span>
+        <input type="date" class="filter-input" id="custGrowthDateStart" style="max-width:140px;padding:5px 8px;font-size:0.75rem;">
+        <span style="color:var(--text3);">→</span>
+        <input type="date" class="filter-input" id="custGrowthDateEnd" style="max-width:140px;padding:5px 8px;font-size:0.75rem;">
+        <button class="btn btn-primary btn-sm" onclick="applyCustGrowthCustomRange()">Apply</button>
       </div>
       <canvas id="dashCustGrowthCanvas" style="display:block;width:100%;height:150px;"></canvas>
     </div>
@@ -1042,14 +1068,22 @@ img, canvas, svg, table { max-width:100%; }
   <div class="page-hdr">
     <div><div class="page-title">Analytics</div><div class="page-sub">Revenue insights & business performance</div></div>
     <div class="page-actions">
-      <select class="filter-select" id="analyticsFilter" onchange="loadAnalytics()">
+      <select class="filter-select" id="analyticsFilter" onchange="onAnalyticsFilterChange()">
         <option value="7">Last 7 Days</option>
         <option value="30" selected>Last 30 Days</option>
         <option value="90">Last 90 Days</option>
         <option value="365">All Time</option>
+        <option value="custom">Custom Range</option>
       </select>
       <button class="btn-export" onclick="openExportModal('analytics')">📤 Export ▾</button>
     </div>
+  </div>
+  <div id="analyticsCustomBar" style="display:none;align-items:center;gap:8px;margin:-10px 0 16px;flex-wrap:wrap;">
+    <span style="font-size:0.75rem;color:var(--text3);">Custom range:</span>
+    <input type="date" class="filter-input" id="analyticsDateStart" style="max-width:150px;">
+    <span style="color:var(--text3);">→</span>
+    <input type="date" class="filter-input" id="analyticsDateEnd" style="max-width:150px;">
+    <button class="btn btn-primary btn-sm" onclick="loadAnalytics()">Apply</button>
   </div>
   <div class="grid-4" style="margin-bottom:20px" id="analyticsKpis">
     <div class="kpi skel" style="height:90px"></div>
@@ -1220,6 +1254,7 @@ img, canvas, svg, table { max-width:100%; }
         <button class="view-btn" id="viewBtnTable" onclick="setProductView('table',this)">≡ Table</button>
       </div>
       <button class="btn btn-secondary btn-sm" onclick="loadProducts()">↺ Refresh</button>
+      <button class="btn btn-secondary btn-sm" id="btnSyncProducts" onclick="syncProducts()">🔄 Sync Products</button>
       <button class="btn btn-secondary btn-sm" onclick="toggleShowDeleted()" id="btnShowDeleted">🗑️ Deleted</button>
       <button class="btn-export owner-only" onclick="openExportModal('products')">📤 Export</button>
       <button class="btn btn-primary owner-only" onclick="openProductDrawer(null)">＋ New Product</button>
@@ -1358,11 +1393,19 @@ img, canvas, svg, table { max-width:100%; }
     <div class="drawer-2col">
       <div class="drawer-field">
         <div class="drawer-field-label">MRP (₹) *</div>
-        <input class="drawer-input" type="number" id="dPrice" placeholder="899" oninput="updateDrawerPricePreview()">
+        <input class="drawer-input" type="number" id="dPrice" placeholder="899" oninput="syncFromMrp()">
       </div>
       <div class="drawer-field">
         <div class="drawer-field-label">Sale Price (₹)</div>
-        <input class="drawer-input" type="number" id="dSalePrice" placeholder="Leave blank = no discount" oninput="updateDrawerPricePreview()">
+        <input class="drawer-input" type="number" id="dSalePrice" placeholder="Leave blank = no discount" oninput="syncFromSalePrice()">
+      </div>
+    </div>
+    <!-- Flat % discount — auto-calculates Sale Price above, and vice versa -->
+    <div class="drawer-field" style="margin-top:10px;">
+      <div class="drawer-field-label">Flat Discount % <span style="text-transform:none;font-weight:400;color:var(--text3);">(auto-linked to Sale Price)</span></div>
+      <div style="display:flex;align-items:center;gap:8px;">
+        <input class="drawer-input" type="number" min="0" max="99" id="dDiscountPct" placeholder="e.g. 20" oninput="syncFromDiscountPct()" style="max-width:140px;">
+        <span style="font-size:0.8rem;color:var(--text3);">% off MRP → Sale Price fills in automatically</span>
       </div>
     </div>
     <!-- Live price preview -->
@@ -1383,6 +1426,19 @@ img, canvas, svg, table { max-width:100%; }
         <input class="drawer-input" id="dHsn" value="30049099">
       </div>
     </div>
+
+    <!-- Quantity Tier Discount -->
+    <div class="section-ico-hdr" style="margin-top:20px;">
+      <div class="section-ico gold">📦</div>
+      <div style="flex:1;">
+        <div style="font-weight:700;font-size:0.88rem;">Quantity Tier Discount</div>
+        <div style="font-size:0.7rem;color:var(--text3);">1 pack, 2 pack, 3 pack… each with its own % off — shown as pack-deal cards on the storefront</div>
+      </div>
+      <button class="btn btn-secondary btn-sm" type="button" onclick="addTierRow()">＋ Add Tier</button>
+    </div>
+    <div id="tierRowsContainer"></div>
+    <div id="tierRowsEmpty" style="font-size:0.78rem;color:var(--text3);padding:10px 2px;">No tiers yet — click "＋ Add Tier" to create pack deals like 1 pack / 2 pack / 3 pack, each auto-calculating its rate from a % off MRP.</div>
+
     <!-- Inventory -->
     <div class="section-ico-hdr" style="margin-top:20px;"><div class="section-ico blue">📊</div><div style="font-weight:700;font-size:0.88rem;">Inventory</div></div>
     <div class="drawer-2col">
@@ -2050,6 +2106,23 @@ img, canvas, svg, table { max-width:100%; }
       <button class="modal-close" onclick="closeModal('orderModal')">✕</button>
     </div>
     <div class="modal-body" id="orderModalBody"></div>
+  </div>
+</div>
+
+<!-- Sync Products Results Modal -->
+<div class="modal-overlay" id="syncProductsModal">
+  <div class="modal">
+    <div class="modal-hdr">
+      <span class="modal-title">🔄 Product Sync</span>
+      <button class="modal-close" onclick="closeModal('syncProductsModal')">✕</button>
+    </div>
+    <div class="modal-body" id="syncProductsBody">
+      <div class="empty-state loading-dots">Syncing</div>
+    </div>
+    <div class="modal-ftr">
+      <button class="btn btn-secondary" onclick="closeModal('syncProductsModal')">Close</button>
+      <button class="btn btn-primary" onclick="syncProducts()">↺ Sync Again</button>
+    </div>
   </div>
 </div>
 
@@ -2963,11 +3036,32 @@ function drawGoalRing(canvasId, pct, color='#5EAB30') {
 // DASHBOARD — Full real-data render
 // ═══════════════════════════════════════════════
 let _revRange = 7;
+let _revCustomFrom = null, _revCustomTo = null;
 function setRevRange(days, btn) {
   _revRange = days;
+  _revCustomFrom = null; _revCustomTo = null;
+  document.getElementById('revCustomBar').style.display = 'none';
   document.querySelectorAll('[id^=revChip]').forEach(b=>b.classList.remove('active'));
   btn.classList.add('active');
   renderRevenueChart(allOrders, days);
+}
+function toggleRevCustom() {
+  const bar = document.getElementById('revCustomBar');
+  const show = bar.style.display === 'none';
+  bar.style.display = show ? 'flex' : 'none';
+  if (show) {
+    document.querySelectorAll('[id^=revChip]').forEach(b=>b.classList.remove('active'));
+    document.getElementById('revChipCustom').classList.add('active');
+  }
+}
+function applyRevCustomRange() {
+  const from = document.getElementById('revDateStart').value;
+  const to   = document.getElementById('revDateEnd').value;
+  if (!from || !to) { toast('Pick both a start and end date','error'); return; }
+  _revCustomFrom = from; _revCustomTo = to;
+  document.querySelectorAll('[id^=revChip]').forEach(b=>b.classList.remove('active'));
+  document.getElementById('revChipCustom').classList.add('active');
+  renderRevenueChart(allOrders, null, {from, to});
 }
 
 async function loadDashboard() {
@@ -3199,12 +3293,23 @@ async function loadDashboard() {
   } catch(e) { toast('Dashboard error: '+e.message, 'error'); console.error(e); }
 }
 
-function renderRevenueChart(orders, days=7) {
-  const buckets = Array.from({length:Math.min(days,30)},(_,i)=>{
-    const d=new Date(); d.setDate(d.getDate()-(Math.min(days,30)-1-i));
-    return {label:days<=7?d.toLocaleDateString('en-IN',{weekday:'short'}):d.getDate()+'/'+(d.getMonth()+1),
-      date:d.toISOString().split('T')[0], rev:0, cnt:0};
-  });
+function renderRevenueChart(orders, days=7, customRange=null) {
+  let buckets;
+  if (customRange && customRange.from && customRange.to) {
+    const start = new Date(customRange.from), end = new Date(customRange.to);
+    const spanDays = Math.max(1, Math.min(90, Math.round((end-start)/86400000) + 1));
+    buckets = Array.from({length:spanDays},(_,i)=>{
+      const d=new Date(start); d.setDate(d.getDate()+i);
+      return {label:spanDays<=14?d.toLocaleDateString('en-IN',{weekday:'short'}):d.getDate()+'/'+(d.getMonth()+1),
+        date:d.toISOString().split('T')[0], rev:0, cnt:0};
+    });
+  } else {
+    buckets = Array.from({length:Math.min(days,30)},(_,i)=>{
+      const d=new Date(); d.setDate(d.getDate()-(Math.min(days,30)-1-i));
+      return {label:days<=7?d.toLocaleDateString('en-IN',{weekday:'short'}):d.getDate()+'/'+(d.getMonth()+1),
+        date:d.toISOString().split('T')[0], rev:0, cnt:0};
+    });
+  }
   orders.forEach(o=>{
     const isPaid=(o.payment_status||'').toLowerCase().includes('paid')||o.payment_status==='SUCCESS';
     const b=buckets.find(b=>b.date===(o.created_at||'').split('T')[0]);
@@ -3254,10 +3359,25 @@ function renderHourlyChart(orders) {
 // ═══════════════════════════════════════════════
 // ANALYTICS
 // ═══════════════════════════════════════════════
+function onAnalyticsFilterChange() {
+  const val = document.getElementById('analyticsFilter').value;
+  document.getElementById('analyticsCustomBar').style.display = (val === 'custom') ? 'flex' : 'none';
+  if (val !== 'custom') loadAnalytics();
+}
 async function loadAnalytics() {
-  const days = parseInt(document.getElementById('analyticsFilter').value)||30;
-  const cutoff = new Date(); cutoff.setDate(cutoff.getDate() - days);
-  const orders = allOrders.filter(o => new Date(o.created_at) >= cutoff);
+  const filterVal = document.getElementById('analyticsFilter').value;
+  let orders;
+  if (filterVal === 'custom') {
+    const from = document.getElementById('analyticsDateStart').value;
+    const to   = document.getElementById('analyticsDateEnd').value;
+    if (!from || !to) { toast('Pick both a start and end date','error'); return; }
+    const fromD = new Date(from), toD = new Date(to); toD.setHours(23,59,59,999);
+    orders = allOrders.filter(o => { const d = new Date(o.created_at); return d >= fromD && d <= toD; });
+  } else {
+    const days = parseInt(filterVal)||30;
+    const cutoff = new Date(); cutoff.setDate(cutoff.getDate() - days);
+    orders = allOrders.filter(o => new Date(o.created_at) >= cutoff);
+  }
   const paid   = orders.filter(o => { const s=(o.payment_status||'').toLowerCase(); return s.includes('paid')||s==='success'||s.includes('cod'); });
   const revenue = paid.reduce((s,o) => s + parseFloat(o.total||0), 0);
   const avgOrder = paid.length ? revenue / paid.length : 0;
@@ -3313,10 +3433,23 @@ async function loadAnalytics() {
   `).join('') : '<div class="empty-state" style="padding:24px 0;">No data for period</div>';
 
   // Order volume by day
-  const buckets = Array.from({length:Math.min(days,30)}, (_,i) => {
-    const d = new Date(); d.setDate(d.getDate()-(Math.min(days,30)-1-i));
-    return {label: d.getDate()+'/'+(d.getMonth()+1), date: d.toISOString().split('T')[0], cnt:0};
-  });
+  let buckets;
+  if (filterVal === 'custom') {
+    const from = document.getElementById('analyticsDateStart').value;
+    const to   = document.getElementById('analyticsDateEnd').value;
+    const start = new Date(from), end = new Date(to);
+    const spanDays = Math.max(1, Math.min(90, Math.round((end-start)/86400000) + 1));
+    buckets = Array.from({length:spanDays}, (_,i) => {
+      const d = new Date(start); d.setDate(d.getDate()+i);
+      return {label: d.getDate()+'/'+(d.getMonth()+1), date: d.toISOString().split('T')[0], cnt:0};
+    });
+  } else {
+    const days = parseInt(filterVal)||30;
+    buckets = Array.from({length:Math.min(days,30)}, (_,i) => {
+      const d = new Date(); d.setDate(d.getDate()-(Math.min(days,30)-1-i));
+      return {label: d.getDate()+'/'+(d.getMonth()+1), date: d.toISOString().split('T')[0], cnt:0};
+    });
+  }
   orders.forEach(o => { const b = buckets.find(b=>b.date===(o.created_at||'').split('T')[0]); if(b) b.cnt++; });
   const maxOrds = Math.max(...buckets.map(b=>b.cnt),1);
   document.getElementById('orderVolumeChart').innerHTML = buckets.map(b => `
@@ -3597,12 +3730,30 @@ function renderAdvancedWidgets(orders, prods) {
 let _dashCustGrowthDays = 7;
 function setDashCustGrowthRange(days, btn) {
   _dashCustGrowthDays = days;
+  document.getElementById('custGrowthCustomBar').style.display = 'none';
   document.querySelectorAll('[id^=custGrowthChip]').forEach(b=>b.classList.remove('active'));
   btn.classList.add('active');
   renderDashCustGrowth(allOrders, days);
 }
+function toggleCustGrowthCustom() {
+  const bar = document.getElementById('custGrowthCustomBar');
+  const show = bar.style.display === 'none';
+  bar.style.display = show ? 'flex' : 'none';
+  if (show) {
+    document.querySelectorAll('[id^=custGrowthChip]').forEach(b=>b.classList.remove('active'));
+    document.getElementById('custGrowthChipCustom').classList.add('active');
+  }
+}
+function applyCustGrowthCustomRange() {
+  const from = document.getElementById('custGrowthDateStart').value;
+  const to   = document.getElementById('custGrowthDateEnd').value;
+  if (!from || !to) { toast('Pick both a start and end date','error'); return; }
+  document.querySelectorAll('[id^=custGrowthChip]').forEach(b=>b.classList.remove('active'));
+  document.getElementById('custGrowthChipCustom').classList.add('active');
+  renderDashCustGrowth(allOrders, null, {from, to});
+}
 
-function renderDashCustGrowth(orders, days=7) {
+function renderDashCustGrowth(orders, days=7, customRange=null) {
   const canvas = document.getElementById('dashCustGrowthCanvas');
   if (!canvas) return;
   // Build unique-customer-by-day series from orders (first order date = "new customer" day)
@@ -3614,10 +3765,20 @@ function renderDashCustGrowth(orders, days=7) {
     if (!day) return;
     if (!firstSeen[key] || day < firstSeen[key]) firstSeen[key] = day;
   });
-  const buckets = Array.from({length:days}, (_,i) => {
-    const d = new Date(); d.setDate(d.getDate() - (days-1-i));
-    return { label: d.getDate()+'/'+(d.getMonth()+1), date: d.toISOString().split('T')[0], count: 0 };
-  });
+  let buckets;
+  if (customRange && customRange.from && customRange.to) {
+    const start = new Date(customRange.from), end = new Date(customRange.to);
+    const spanDays = Math.max(1, Math.min(90, Math.round((end-start)/86400000) + 1));
+    buckets = Array.from({length:spanDays}, (_,i) => {
+      const d = new Date(start); d.setDate(d.getDate()+i);
+      return { label: d.getDate()+'/'+(d.getMonth()+1), date: d.toISOString().split('T')[0], count: 0 };
+    });
+  } else {
+    buckets = Array.from({length:days}, (_,i) => {
+      const d = new Date(); d.setDate(d.getDate() - (days-1-i));
+      return { label: d.getDate()+'/'+(d.getMonth()+1), date: d.toISOString().split('T')[0], count: 0 };
+    });
+  }
   Object.values(firstSeen).forEach(day => {
     const b = buckets.find(b => b.date === day);
     if (b) b.count++;
@@ -4595,6 +4756,27 @@ function openProductDrawer(productId) {
     document.getElementById('dDescription').value = p.description||'';
     document.getElementById('dPrice').value = p.price||'';
     document.getElementById('dSalePrice').value = p.sale_price||'';
+    if (p.price > 0 && p.sale_price > 0 && p.sale_price < p.price) {
+      document.getElementById('dDiscountPct').value = Math.round((1 - p.sale_price/p.price) * 100);
+    } else {
+      document.getElementById('dDiscountPct').value = '';
+    }
+    // Load quantity tier discounts, if any
+    drawerTiers = [];
+    _tierRowSeq = 0;
+    try {
+      const t = typeof p.tiers === 'string' ? JSON.parse(p.tiers) : p.tiers;
+      if (Array.isArray(t)) {
+        t.forEach(row => {
+          const qty = parseInt(row.qty || row.units || row.tablets) || 1;
+          const mrp = parseFloat(row.mrp || row.price) || (p.price * qty);
+          const rate = parseFloat(row.rate || row.sale_price) || mrp;
+          const discount = row.discount != null ? parseFloat(row.discount) : (mrp > 0 ? Math.round((1 - rate/mrp) * 100) : 0);
+          drawerTiers.push({ rid: ++_tierRowSeq, qty, discount, mrp, rate });
+        });
+      }
+    } catch {}
+    renderTierRows();
     document.getElementById('dOfferText').value = p.offer_text||'';
     document.getElementById('dHsn').value = p.hsn||'30049099';
     document.getElementById('dHsn2').value = p.hsn||'30049099';
@@ -4618,6 +4800,10 @@ function openProductDrawer(productId) {
     document.getElementById('dActive').value='true';
     document.getElementById('dPrice').value='';
     document.getElementById('dSalePrice').value='';
+    document.getElementById('dDiscountPct').value='';
+    drawerTiers = [];
+    _tierRowSeq = 0;
+    renderTierRows();
     document.getElementById('drawerImgPreview').src='https://via.placeholder.com/400x160/141A10/4A8A28?text=No+Image';
     document.getElementById('drawerPricePreview').style.display='none';
   }
@@ -4653,6 +4839,131 @@ function updateDrawerPricePreview() {
     box.style.display='none';
   }
 }
+
+// ── Flat % Discount ⇄ Sale Price ⇄ MRP — bidirectional auto-calculation ──
+// Editing MRP: keep whichever of Sale Price / Discount % was last touched in sync.
+function syncFromMrp() {
+  const mrp  = parseFloat(document.getElementById('dPrice').value) || 0;
+  const pctEl = document.getElementById('dDiscountPct');
+  const pct  = parseFloat(pctEl.value);
+  if (mrp > 0 && pct > 0) {
+    document.getElementById('dSalePrice').value = Math.round(mrp * (1 - pct/100));
+  }
+  updateDrawerPricePreview();
+  recalcAllTierRows();
+}
+// Editing Sale Price directly: back-calculate the Discount % field.
+function syncFromSalePrice() {
+  const mrp  = parseFloat(document.getElementById('dPrice').value) || 0;
+  const sale = parseFloat(document.getElementById('dSalePrice').value);
+  const pctEl = document.getElementById('dDiscountPct');
+  if (mrp > 0 && sale > 0 && sale < mrp) {
+    pctEl.value = Math.round((1 - sale/mrp) * 100);
+  } else if (!sale) {
+    pctEl.value = '';
+  }
+  updateDrawerPricePreview();
+}
+// Editing Discount %: forward-calculate the Sale Price field.
+function syncFromDiscountPct() {
+  const mrp = parseFloat(document.getElementById('dPrice').value) || 0;
+  let pct   = parseFloat(document.getElementById('dDiscountPct').value);
+  if (pct > 99) { pct = 99; document.getElementById('dDiscountPct').value = 99; }
+  if (pct < 0)  { pct = 0;  document.getElementById('dDiscountPct').value = 0; }
+  if (mrp > 0 && pct > 0) {
+    document.getElementById('dSalePrice').value = Math.round(mrp * (1 - pct/100));
+  } else if (!pct && pct !== 0) {
+    // cleared — leave sale price as-is
+  }
+  updateDrawerPricePreview();
+}
+
+// ── Quantity Tier Discount editor ─────────────────────────────
+// Each tier: { qty, discount, mrp, rate } — mrp/rate auto-calculated from product MRP + discount %.
+let drawerTiers = [];
+let _tierRowSeq = 0;
+
+function addTierRow(prefill) {
+  const mrp = parseFloat(document.getElementById('dPrice').value) || 0;
+  const nextQty = prefill?.qty || (drawerTiers.length ? Math.max(...drawerTiers.map(t=>t.qty||0)) + 1 : 1);
+  drawerTiers.push({
+    rid: ++_tierRowSeq,
+    qty: prefill?.qty ?? nextQty,
+    discount: prefill?.discount ?? 0,
+    mrp: prefill?.mrp ?? (mrp * (prefill?.qty ?? nextQty)),
+    rate: prefill?.rate ?? (mrp * (prefill?.qty ?? nextQty))
+  });
+  renderTierRows();
+}
+function removeTierRow(rid) {
+  drawerTiers = drawerTiers.filter(t => t.rid !== rid);
+  renderTierRows();
+}
+function updateTierRow(rid, field, value) {
+  const t = drawerTiers.find(x => x.rid === rid);
+  if (!t) return;
+  const mrp = parseFloat(document.getElementById('dPrice').value) || 0;
+  if (field === 'qty') {
+    t.qty = Math.max(1, parseInt(value) || 1);
+    t.mrp = mrp * t.qty;
+    t.rate = Math.round(t.mrp * (1 - (t.discount||0)/100));
+  } else if (field === 'discount') {
+    t.discount = Math.max(0, Math.min(99, parseFloat(value) || 0));
+    t.mrp = mrp * t.qty;
+    t.rate = Math.round(t.mrp * (1 - t.discount/100));
+  } else if (field === 'rate') {
+    t.rate = parseFloat(value) || 0;
+    t.mrp = mrp * t.qty;
+    t.discount = t.mrp > 0 ? Math.round((1 - t.rate/t.mrp) * 100) : 0;
+  }
+  renderTierRows();
+}
+function recalcAllTierRows() {
+  const mrp = parseFloat(document.getElementById('dPrice').value) || 0;
+  drawerTiers.forEach(t => {
+    t.mrp = mrp * t.qty;
+    t.rate = Math.round(t.mrp * (1 - (t.discount||0)/100));
+  });
+  renderTierRows();
+}
+function renderTierRows() {
+  const container = document.getElementById('tierRowsContainer');
+  const empty = document.getElementById('tierRowsEmpty');
+  if (!container) return;
+  drawerTiers.sort((a,b) => (a.qty||0) - (b.qty||0));
+  if (!drawerTiers.length) {
+    container.innerHTML = '';
+    if (empty) empty.style.display = 'block';
+    return;
+  }
+  if (empty) empty.style.display = 'none';
+  container.innerHTML = drawerTiers.map(t => `
+    <div class="tier-row">
+      <div class="tier-row-grid">
+        <div>
+          <div class="tier-row-label">Pack Qty</div>
+          <input class="tier-row-input" type="number" min="1" value="${t.qty}" onchange="updateTierRow(${t.rid},'qty',this.value)">
+        </div>
+        <div>
+          <div class="tier-row-label">Discount %</div>
+          <input class="tier-row-input" type="number" min="0" max="99" value="${t.discount}" onchange="updateTierRow(${t.rid},'discount',this.value)">
+        </div>
+        <div>
+          <div class="tier-row-label">Tier MRP (₹)</div>
+          <input class="tier-row-input" type="number" value="${t.mrp.toFixed(0)}" disabled style="opacity:0.6;">
+        </div>
+        <div>
+          <div class="tier-row-label">Sale Rate (₹)</div>
+          <input class="tier-row-input" type="number" min="0" value="${t.rate.toFixed(0)}" onchange="updateTierRow(${t.rid},'rate',this.value)">
+        </div>
+      </div>
+      <div class="tier-row-foot">
+        <div class="tier-row-preview">${t.qty} pack${t.qty>1?'s':''} → <b>${t.discount}% off</b> · ₹${t.rate.toFixed(0)} <span style="text-decoration:line-through;color:var(--text3);">₹${t.mrp.toFixed(0)}</span></div>
+        <button class="tier-row-remove" type="button" onclick="removeTierRow(${t.rid})">✕ Remove</button>
+      </div>
+    </div>
+  `).join('');
+}
 async function saveProductFromDrawer() {
   const name = document.getElementById('dName').value.trim();
   if(!name) { toast('Product name is required','error'); return; }
@@ -4667,6 +4978,8 @@ async function saveProductFromDrawer() {
     description:      document.getElementById('dDescription').value,
     price,
     sale_price:       parseFloat(document.getElementById('dSalePrice').value)||null,
+    discount_pct:     parseFloat(document.getElementById('dDiscountPct').value)||null,
+    tiers:            drawerTiers.map(t => ({ qty:t.qty, discount:t.discount, mrp:Math.round(t.mrp), rate:Math.round(t.rate) })),
     offer_text:       document.getElementById('dOfferText').value,
     hsn:              document.getElementById('dHsn').value||'30049099',
     stock:            parseInt(document.getElementById('dStock').value)||0,
@@ -4704,6 +5017,56 @@ async function restoreProduct(id) {
     await apiFetch(`/api/admin/products/${id}/restore`,{method:'PUT'});
     toast('Product restored ♻️'); loadProducts();
   } catch(e) { toast(e.message,'error'); }
+}
+
+// ── Force a product sync (e.g. from an external catalog / source-of-truth) ──
+async function syncProducts() {
+  const btn = document.getElementById('btnSyncProducts');
+  const body = document.getElementById('syncProductsBody');
+  openModal('syncProductsModal');
+  body.innerHTML = `<div class="empty-state loading-dots">Syncing</div>`;
+  if (btn) { btn.disabled = true; btn.textContent = '🔄 Syncing…'; }
+  try {
+    const r = await apiFetch('/api/admin/products/sync', {method:'POST', signal:AbortSignal.timeout(60000)});
+    const d = await r.json().catch(()=>({}));
+    if (!r.ok) throw new Error(d.error || `Sync failed (HTTP ${r.status})`);
+
+    // Be flexible about whatever shape the server returns
+    const synced  = d.synced  ?? d.total   ?? d.count    ?? null;
+    const created = d.created ?? d.added   ?? d.inserted ?? null;
+    const updated = d.updated ?? d.changed ?? null;
+    const skipped = d.skipped ?? d.unchanged ?? null;
+    const failed  = d.failed  ?? d.errors_count ?? (Array.isArray(d.errors) ? d.errors.length : null);
+    const errors  = Array.isArray(d.errors) ? d.errors : [];
+
+    const stat = (label, val, ico) => val==null ? '' : `
+      <div class="stat-tick"><span class="stat-tick-ico">${ico}</span><div><div class="stat-tick-val">${val}</div><div class="stat-tick-lbl">${label}</div></div></div>`;
+
+    body.innerHTML = `
+      <div style="font-size:0.85rem;color:var(--text2);margin-bottom:14px;">${d.message || 'Sync completed.'}</div>
+      <div class="stat-row" style="flex-wrap:wrap;margin-bottom:${errors.length?14:0}px;">
+        ${stat('Synced', synced, '🔄')}
+        ${stat('Created', created, '✨')}
+        ${stat('Updated', updated, '✏️')}
+        ${stat('Unchanged', skipped, '⏭️')}
+        ${stat('Failed', failed, '⚠️')}
+      </div>
+      ${errors.length ? `
+        <div style="font-size:0.75rem;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:6px;">Errors</div>
+        <div style="max-height:180px;overflow-y:auto;background:var(--bg2);border-radius:8px;padding:10px 12px;">
+          ${errors.map(e => `<div style="font-size:0.78rem;color:#E53535;padding:3px 0;">• ${typeof e==='string'?e:(e.message||JSON.stringify(e))}</div>`).join('')}
+        </div>` : ''}
+      ${(synced==null && created==null && updated==null) ? `
+        <pre style="font-size:0.72rem;background:var(--bg2);border-radius:8px;padding:10px 12px;overflow-x:auto;white-space:pre-wrap;">${JSON.stringify(d,null,2)}</pre>` : ''}
+    `;
+    toast(`Products synced ✅${synced!=null?` (${synced})`:''}`);
+    loadProducts();
+  } catch(e) {
+    body.innerHTML = `<div class="empty-state"><div class="empty-ico">⚠️</div><div class="empty-msg">${e.message}</div></div>`;
+    toast('Sync failed: '+e.message, 'error');
+  } finally {
+    if (btn) { btn.disabled = false; btn.textContent = '🔄 Sync Products'; }
+  }
 }
 
 async function uploadProductImage(input) {
