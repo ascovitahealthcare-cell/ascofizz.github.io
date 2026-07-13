@@ -11047,13 +11047,8 @@ function mergeBackendProducts(backendProducts) {
       // Rating
       if (bp.rating != null) p.rating   = parseFloat(bp.rating);
       if (bp.reviews != null) p.reviews = parseInt(bp.reviews);
-      // Tags — only overwrite local curation tags (featured/new/etc.) if the backend
-      // actually sent a non-empty list. An empty array is truthy in JS, so a bare
-      // `if (bp.tags)` check was wiping out "featured"/"new" tags whenever the
-      // Supabase `tags` column was empty or not kept in sync, silently hiding the
-      // product from the Featured/New Arrivals sections after the backend sync ran.
-      const incomingTags = parseArr(bp.tags);
-      if (incomingTags.length) p.tags = incomingTags;
+      // Tags
+      if (bp.tags) p.tags = parseArr(bp.tags);
       // Media — support media[] JSON array (up to 10 images/videos) OR individual fields
       // ✅ Only apply backend images if products-images.js has NOT already set them
       const alreadyHasImage = p.image && p.image.startsWith('http');
@@ -11109,7 +11104,7 @@ function mergeBackendProducts(backendProducts) {
         allImages:   imgs,
         rating:      parseFloat(bp.rating) || 4.5,
         reviews:     parseInt(bp.reviews) || 0,
-        stock:       parseInt(bp.stock) || 100,
+        stock:       parseInt(bp.stock) || 0,
         badge:       bp.badge || '',
         description: bp.description || '',
         keyIngredients: ki,
@@ -11301,7 +11296,7 @@ const PRODUCTS = [
   {id:8, name:"Multidiata – Ascovita Premium Multivitamin", brand:"Ascovita Premium", category:"premium", tags:["featured","bestseller","immunity","premium"],
    price:120, salePrice:null, offer:"Box Pack 30 Tabs ₹120 | Bottle Pack 60 Tabs ₹231",
    image:"", image2:"",
-   rating:4.8, reviews:567, stock:200, badge:"🏆 Premium",
+   rating:4.8, reviews:567, stock:0, badge:"🏆 Premium",
    hasTiers:true,
    seoKeywords:["multivitamin India","best multivitamin India","daily multivitamin"],
    description:"Complete daily multivitamin for immunity, energy, and overall health. Multidiata is Ascovita's flagship precision-crafted multivitamin — a comprehensive formula delivering essential vitamins and minerals in one daily tablet. Formulated to address India's most common nutritional gaps with Vitamin D3, B12, Iron, and Zinc.",
@@ -11312,7 +11307,7 @@ const PRODUCTS = [
   {id:1, name:"L-Glutathione Effervescent – Orange Flavour", brand:"Ascovita", category:"effervescent", tags:["featured","sale","premium","skin","bestseller","new"],
    price:827, salePrice:null, offer:"Up to 14% OFF on larger packs",
    image:"", image2:"",
-   rating:4.9, reviews:312, stock:45, badge:"🔥 Best Seller",
+   rating:4.9, reviews:312, stock:0, badge:"🔥 Best Seller",
    hasTiers:true,
    seoKeywords:["glutathione tablets India","effervescent tablets India","skin whitening glutathione","L-Glutathione effervescent"],
    description:"The master antioxidant supplement for radiant skin. Fights free radical damage, brightens complexion, detoxifies the liver, and boosts immunity. Each tablet contains 650mg Glutathione with L-Cysteine, Vitamin C, and Astaxanthin for maximum glow, detox, and defense. Vegan. No Added Colour. Sugar Free.",
@@ -11322,7 +11317,7 @@ const PRODUCTS = [
   {id:2, name:"Apple Cider Vinegar + Moringa – Green Apple Flavour", brand:"Ascovita", category:"effervescent", tags:["featured","sale","new","weight","effervescent"],
    price:321, salePrice:null, offer:"Up to 14% OFF on larger packs",
    image:"", image2:"",
-   rating:4.7, reviews:198, stock:80, badge:"New",
+   rating:4.7, reviews:198, stock:0, badge:"New",
    hasTiers:true,
    seoKeywords:["apple cider vinegar tablets India","ACV moringa effervescent","weight management supplement India"],
    description:"ACV + Moringa Effervescent combines Apple Cider Vinegar (750mg), Moringa Leaf Extract (500mg), and Garcinia Cambogia for weight management, metabolic wellness, and energy support. Green Apple flavour. Vegan. Sugar Free.",
@@ -11332,7 +11327,7 @@ const PRODUCTS = [
   {id:3, name:"L-Carnitine Effervescent – Orange Flavour", brand:"Ascovita", category:"effervescent", tags:["featured","sale","weight","energy","effervescent"],
    price:399, salePrice:null, offer:"Up to 35% OFF on larger packs",
    image:"", image2:"",
-   rating:4.6, reviews:154, stock:70, badge:"On Sale",
+   rating:4.6, reviews:154, stock:0, badge:"On Sale",
    hasTiers:true,
    seoKeywords:["L-Carnitine effervescent India","L-Carnitine supplement India","weight management effervescent"],
    description:"L-Carnitine Effervescent in refreshing Orange flavour. Supports fat metabolism, energy production, and physical performance. With Moringa superfood, multivitamins, and multiminerals for overall health & energy. Vegan. Sugar Free. Fast Absorption.",
@@ -11342,7 +11337,7 @@ const PRODUCTS = [
   {id:4, name:"B12 + Biotin Effervescent – Guava Flavour", brand:"Ascovita", category:"effervescent", tags:["featured","sale","skin","energy","effervescent"],
    price:449, salePrice:null, offer:"Up to 35% OFF on larger packs",
    image:"", image2:"",
-   rating:4.9, reviews:389, stock:95, badge:"Bestseller",
+   rating:4.9, reviews:389, stock:0, badge:"Bestseller",
    hasTiers:true,
    seoKeywords:["biotin effervescent India","B12 biotin tablet India","biotin for hair growth India"],
    description:"B12 + Biotin Effervescent in delicious Guava flavour — hair, skin, and nail powerhouse. Vitamin B12 supports energy & vitality and helps boost metabolism. Biotin promotes healthy hair, skin & nails and supports stronger & thicker hair growth. Sugar Free. Fast Absorption. Vegan.",
@@ -11352,7 +11347,7 @@ const PRODUCTS = [
   {id:5, name:"Vitamin C Effervescent – Orange Flavour", brand:"Ascovita", category:"effervescent", tags:["featured","sale","bestseller","immunity","effervescent"],
    price:249, salePrice:null, offer:"Up to 34% OFF on larger packs",
    image:"", image2:"",
-   rating:4.8, reviews:334, stock:180, badge:"Bestseller",
+   rating:4.8, reviews:334, stock:0, badge:"Bestseller",
    hasTiers:true,
    seoKeywords:["vitamin C effervescent India","immunity booster supplement India","Vitamin C tablet India"],
    description:"Vitamin C Effervescent with Moringa, multivitamins and multiminerals. Delivers Vitamin C power in a refreshing orange fizzy drink. Moringa superfood provides rich antioxidants, vitamins & minerals. Ensures optimal body functions with Zinc and Magnesium. Sugar Free. Vegan. Fast Absorption.",
@@ -11363,7 +11358,7 @@ const PRODUCTS = [
   {id:10, name:"VitaPlus B12 + D3 Vegan – with Certified Organic Spirulina", brand:"Ascovita Spirulina", category:"spirulina", tags:["featured","new","immunity","energy","spirulina"],
    price:399, salePrice:null, offer:"20% OFF – Introductory Price",
    image:"", image2:"",
-   rating:4.7, reviews:89, stock:120, badge:"New",
+   rating:4.7, reviews:89, stock:0, badge:"New",
    hasTiers:true,
    seoKeywords:["spirulina B12 D3 tablet India","spirulina vegan vitamin","spirulina capsules India"],
    description:"VitaPlus B12 + D3 Vegan combines the extraordinary power of Certified Organic Spirulina with essential Vitamin B12 and Vitamin D3 (Plant Based). Spirulina is a nutrient-dense superfood with high-quality protein, essential amino acids, and important minerals including iron. Vitamin D3 aids calcium absorption for bone density and prevents osteoporosis. Vitamin B12 is vital for energy production, red blood cell formation, and nerve health. FSSAI Approved. In-house grown India Certified Spirulina.",
@@ -11373,7 +11368,7 @@ const PRODUCTS = [
   {id:11, name:"MG+++ Magnesium – B12 + D3 with Magnesium", brand:"Ascovita Spirulina", category:"spirulina", tags:["featured","new","energy","spirulina"],
    price:367, salePrice:null, offer:"20% OFF – Introductory Price",
    image:"", image2:"",
-   rating:4.5, reviews:56, stock:85, badge:"New",
+   rating:4.5, reviews:56, stock:0, badge:"New",
    hasTiers:true,
    seoKeywords:["spirulina magnesium supplement India","magnesium B12 tablet India","spirulina muscle support"],
    description:"MG+++ combines Certified Organic Spirulina with MG Citrate, MG Gluconate, MG Oxide, Vitamin D3 and Vitamin B12. Magnesium contributes to muscle and nerve function, works with calcium and Vitamin D to maintain bone density, and plays a key role in converting food into energy. Combined with Spirulina, it supports overall wellness and effective nutrient absorption. In-house grown India Certified Spirulina.",
@@ -11383,7 +11378,7 @@ const PRODUCTS = [
   {id:12, name:"CS++ + Iron++ – Calcium + Iron with B12+D3", brand:"Ascovita Spirulina", category:"spirulina", tags:["featured","new","immunity","spirulina"],
    price:383, salePrice:null, offer:"20% OFF – Introductory Price",
    image:"", image2:"",
-   rating:4.6, reviews:44, stock:100, badge:"New",
+   rating:4.6, reviews:44, stock:0, badge:"New",
    hasTiers:true,
    seoKeywords:["spirulina calcium iron tablet India","spirulina bone health","iron supplement spirulina India"],
    description:"CA++ & Iron++ combines Certified Organic Spirulina with Calcium Citrate Malate, Vitamin K, Zinc, Iron, Magnesium, Vitamin D3 and B12 for complete bone and blood health. Calcium is key for maintaining strong bones and teeth, especially for women during pregnancy and lactation. Vitamin B12 is crucial for energy production and reduces fatigue. Vitamin D supports immune function, guards against infections, and supports mood regulation. In-house grown India Certified Spirulina.",
@@ -11394,7 +11389,7 @@ const PRODUCTS = [
   {id:20, name:"Moringa Tablets", brand:"Ascovita Ayurvedic", category:"ayurvedic", tags:["featured","new","immunity","energy","ayurvedic"],
    price:249, salePrice:null, offer:"Price to be updated",
    image:"", image2:"",
-   rating:4.7, reviews:156, stock:100, badge:"Ayurvedic",
+   rating:4.7, reviews:156, stock:0, badge:"Ayurvedic",
    hasTiers:false,
    seoKeywords:["moringa tablets India","moringa oleifera supplement India","moringa veggie tablets"],
    description:"Pure Organic Moringa Tablets — the miracle tree in its most potent form. Boosts energy levels, improves digestive system, increases metabolism, and builds up stamina. Each 750mg tablet provides Moringa's full spectrum of nutrients. FSSAI Approved. Vegan. Dietary Supplement.",
@@ -11405,7 +11400,7 @@ const PRODUCTS = [
   {id:22, name:"Power Pro Tablets", brand:"Ascovita Immunity", category:"immunity", tags:["featured","new","immunity","energy"],
    price:null, salePrice:null, offer:"Price coming soon",
    image:"", image2:"",
-   rating:4.7, reviews:34, stock:60, badge:"Coming Soon",
+   rating:4.7, reviews:34, stock:0, badge:"Coming Soon",
    hasTiers:false,
    seoKeywords:["immunity booster India","power pro tablet India","stamina supplement India","ashwagandha immunity"],
    description:"Energy Pro+ for Vigour, Vitality & Stamina. Enhances Stamina & Physical Performance. Inhibits Fatigue & Stress. Promotes a Healthy Immune Response. Power | Strength | Stamina. Contains a synergistic blend of Withania somnifera (Ashwagandha), Emblica officinalis, Rauvolfia serpentina, Asparagus racemosus, Withania coagulans, Mucuna pruriens, Tribulus terrestris, Abelmoschus moschatus, Chlorophytum borivilianum, Purified Shilajit, Myristica fragrans, and Astaxanthin.",
@@ -13065,6 +13060,9 @@ function bootApp() {
   try { if(document.getElementById('bundleProdList')) renderBundleBuilder(); } catch(e) {}
   // 🔗 Sync live product data from Supabase backend (non-blocking)
   syncProductsFromBackend();
+  // Keep syncing every 2 minutes so a customer with the page already open
+  // sees stock/price changes made in the admin panel without reloading.
+  setInterval(() => { syncProductsFromBackend(); }, 2 * 60 * 1000);
 
   // 📡 Ping backend to register this visitor session (for Live Visitors in admin)
   (function pingVisitor() {
