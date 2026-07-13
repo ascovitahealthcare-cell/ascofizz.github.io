@@ -107,6 +107,7 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);min-height:1
 
 /* ═══ BUTTONS ═══ */
 .btn{display:inline-flex;align-items:center;gap:7px;border:none;border-radius:var(--radius-sm);padding:8px 16px;font-family:var(--font);font-size:0.82rem;font-weight:600;cursor:pointer;transition:all 0.2s;}
+.btn:disabled{opacity:0.4;cursor:not-allowed;}
 .btn-primary{background:linear-gradient(135deg,var(--green),var(--green-bright));color:white;}
 .btn-primary:hover{box-shadow:0 4px 16px rgba(74,138,40,0.5);transform:translateY(-1px);}
 .btn-secondary{background:var(--surface2);color:var(--text2);border:1px solid var(--border);}
@@ -702,6 +703,7 @@ img, canvas, svg, table { max-width:100%; }
 .stream-item { display:flex; align-items:center; gap:8px; padding:6px 0; border-bottom:1px solid var(--border); }
 .nav-new { margin-left:auto; width:6px; height:6px; border-radius:50%; background:var(--green-text); }
 </style>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
 </head>
 <body>
 
@@ -1050,6 +1052,16 @@ img, canvas, svg, table { max-width:100%; }
     <div class="card-hdr"><span class="card-title">Order Volume by Day</span></div>
     <div id="orderVolumeChart" style="height:100px;display:flex;align-items:flex-end;gap:4px;padding:0 4px;overflow-x:auto;"></div>
   </div>
+  <div class="grid-2" style="margin-top:20px">
+    <div class="card">
+      <div class="card-hdr"><span class="card-title">💳 Payment Methods</span></div>
+      <div style="max-width:280px;margin:0 auto;"><canvas id="paymentMethodChart" height="220"></canvas></div>
+    </div>
+    <div class="card">
+      <div class="card-hdr"><span class="card-title">📦 Order Status Breakdown</span></div>
+      <div style="max-width:280px;margin:0 auto;"><canvas id="orderStatusChart" height="220"></canvas></div>
+    </div>
+  </div>
 </div>
 
 <!-- ═════════════ LIVE VISITORS ═════════════ -->
@@ -1139,11 +1151,40 @@ img, canvas, svg, table { max-width:100%; }
       <option value="Failed">Failed</option>
     </select>
   </div>
+  <div class="filter-bar" style="margin-top:8px;align-items:center;">
+    <div style="display:flex;gap:4px;">
+      <button class="ep-chip active" id="ordDateChipAll" onclick="setOrderDateRange('all',this)" style="padding:5px 12px;font-size:0.75rem;">All Time</button>
+      <button class="ep-chip" id="ordDateChip7" onclick="setOrderDateRange(7,this)" style="padding:5px 12px;font-size:0.75rem;">7D</button>
+      <button class="ep-chip" id="ordDateChip30" onclick="setOrderDateRange(30,this)" style="padding:5px 12px;font-size:0.75rem;">30D</button>
+      <button class="ep-chip" id="ordDateChip90" onclick="setOrderDateRange(90,this)" style="padding:5px 12px;font-size:0.75rem;">90D</button>
+    </div>
+    <select class="filter-select" id="orderMonthFilter" onchange="setOrderMonthYear()" style="max-width:130px;">
+      <option value="">Any Month</option>
+      <option value="1">January</option><option value="2">February</option><option value="3">March</option>
+      <option value="4">April</option><option value="5">May</option><option value="6">June</option>
+      <option value="7">July</option><option value="8">August</option><option value="9">September</option>
+      <option value="10">October</option><option value="11">November</option><option value="12">December</option>
+    </select>
+    <select class="filter-select" id="orderYearFilter" onchange="setOrderMonthYear()" style="max-width:100px;"></select>
+    <span style="font-size:0.75rem;color:var(--text3);">or custom:</span>
+    <input type="date" class="filter-input" id="orderDateStart" onchange="setOrderCustomRange()" style="max-width:150px;">
+    <span style="color:var(--text3);">→</span>
+    <input type="date" class="filter-input" id="orderDateEnd" onchange="setOrderCustomRange()" style="max-width:150px;">
+    <button class="btn btn-secondary btn-sm" onclick="clearOrderDateFilters()">✕ Clear dates</button>
+  </div>
   <div class="table-wrap">
     <table>
       <thead><tr><th>Order ID</th><th>Customer</th><th>Items</th><th>Amount</th><th>Payment</th><th>Status</th><th>Date</th><th>Actions</th></tr></thead>
       <tbody id="ordersTbody"><tr><td colspan="8"><div class="empty-state"><div class="loading-dots">Loading</div></div></td></tr></tbody>
     </table>
+  </div>
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-top:14px;flex-wrap:wrap;gap:10px;">
+    <div style="font-size:0.8rem;color:var(--text3);" id="ordersPageInfo">Showing 0 orders</div>
+    <div style="display:flex;gap:6px;align-items:center;">
+      <button class="btn btn-secondary btn-sm" id="ordersPrevBtn" onclick="ordersGoToPage(ordersPage-1)">← Prev</button>
+      <span style="font-size:0.8rem;color:var(--text2);padding:0 8px;" id="ordersPageLabel">Page 1 of 1</span>
+      <button class="btn btn-secondary btn-sm" id="ordersNextBtn" onclick="ordersGoToPage(ordersPage+1)">Next →</button>
+    </div>
   </div>
 </div>
 
@@ -2786,7 +2827,7 @@ async function loadDashboard() {
   try {
     const [statsR, ordersR, prodsR] = await Promise.all([
       apiFetch('/api/admin/stats'),
-      apiFetch('/api/admin/orders'),
+      apiFetch('/api/admin/orders?limit=2000'),
       apiFetch('/api/admin/products')
     ]);
     const stats   = (await statsR.json()).stats || {};
@@ -3138,6 +3179,66 @@ async function loadAnalytics() {
       <div style="font-size:0.6rem;color:var(--text3);transform:rotate(-45deg);transform-origin:top left;white-space:nowrap;margin-top:4px;">${b.label}</div>
     </div>
   `).join('');
+
+  renderAnalyticsDoughnuts(orders);
+}
+
+let _paymentMethodChart = null, _orderStatusChart = null;
+function renderAnalyticsDoughnuts(orders) {
+  if (typeof Chart === 'undefined') return; // chart lib failed to load — skip gracefully
+
+  // Payment methods
+  const methodCounts = {};
+  orders.forEach(o => {
+    const m = o.payment_method || (o.payment_status||'').includes('COD') ? 'COD' : (o.payment_method || 'Online');
+    methodCounts[m] = (methodCounts[m]||0) + 1;
+  });
+  const pmCtx = document.getElementById('paymentMethodChart');
+  if (pmCtx) {
+    if (_paymentMethodChart) _paymentMethodChart.destroy();
+    _paymentMethodChart = new Chart(pmCtx, {
+      type: 'doughnut',
+      data: {
+        labels: Object.keys(methodCounts),
+        datasets: [{
+          data: Object.values(methodCounts),
+          backgroundColor: ['#5EAB30','#2080E8','#E8AD2C','#E85C5C','#9B59B6'],
+          borderColor: 'transparent',
+        }]
+      },
+      options: {
+        responsive: true,
+        plugins: { legend: { position: 'bottom', labels: { color: '#a8b0b8', font: { size: 11 }, padding: 12 } } }
+      }
+    });
+  }
+
+  // Order status
+  const statusCounts = {};
+  orders.forEach(o => {
+    const s = o.fulfillment || 'Pending';
+    statusCounts[s] = (statusCounts[s]||0) + 1;
+  });
+  const statusColors = { Pending:'#E8AD2C', Processing:'#2080E8', Shipped:'#9B59B6', Delivered:'#5EAB30', Cancelled:'#E85C5C' };
+  const osCtx = document.getElementById('orderStatusChart');
+  if (osCtx) {
+    if (_orderStatusChart) _orderStatusChart.destroy();
+    _orderStatusChart = new Chart(osCtx, {
+      type: 'doughnut',
+      data: {
+        labels: Object.keys(statusCounts),
+        datasets: [{
+          data: Object.values(statusCounts),
+          backgroundColor: Object.keys(statusCounts).map(s => statusColors[s] || '#999'),
+          borderColor: 'transparent',
+        }]
+      },
+      options: {
+        responsive: true,
+        plugins: { legend: { position: 'bottom', labels: { color: '#a8b0b8', font: { size: 11 }, padding: 12 } } }
+      }
+    });
+  }
 }
 
 // Area Chart (smooth curve)
@@ -3697,13 +3798,73 @@ function startLiveVisitors() {
 // ═══════════════════════════════════════════════
 // ORDERS
 // ═══════════════════════════════════════════════
+const ORDERS_PER_PAGE = 50;
+let ordersPage = 1;
+let ordersDateMode = 'all'; // 'all' | 7 | 30 | 90 | 'month' | 'custom'
+let ordersFilteredList = [];
+
 async function loadOrders() {
   try {
-    const r = await apiFetch('/api/admin/orders');
+    // Full dataset (up to 2000) — pagination below is a client-side view over
+    // this, so it stays in sync with everything else that reads allOrders
+    // (order modal, status updates, global search, payments, invoices).
+    const r = await apiFetch('/api/admin/orders?limit=2000');
     const d = await r.json();
     allOrders = d.data || d.orders || (Array.isArray(d)?d:[]);
+    populateOrderYearFilter();
     filterOrders();
   } catch(e) { toast('Orders error: '+e.message,'error'); }
+}
+
+function populateOrderYearFilter() {
+  const sel = document.getElementById('orderYearFilter');
+  if (!sel || sel.options.length > 1) return; // already populated
+  const years = new Set(allOrders.map(o => (o.created_at||'').slice(0,4)).filter(Boolean));
+  years.add(String(new Date().getFullYear()));
+  sel.innerHTML = '<option value="">Any Year</option>' +
+    [...years].sort().reverse().map(y => `<option value="${y}">${y}</option>`).join('');
+}
+
+function setOrderDateRange(days, btn) {
+  ordersDateMode = days;
+  document.querySelectorAll('[id^=ordDateChip]').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById('orderMonthFilter').value = '';
+  document.getElementById('orderYearFilter').value = '';
+  document.getElementById('orderDateStart').value = '';
+  document.getElementById('orderDateEnd').value = '';
+  ordersPage = 1;
+  filterOrders();
+}
+
+function setOrderMonthYear() {
+  ordersDateMode = 'month';
+  document.querySelectorAll('[id^=ordDateChip]').forEach(b=>b.classList.remove('active'));
+  document.getElementById('orderDateStart').value = '';
+  document.getElementById('orderDateEnd').value = '';
+  ordersPage = 1;
+  filterOrders();
+}
+
+function setOrderCustomRange() {
+  ordersDateMode = 'custom';
+  document.querySelectorAll('[id^=ordDateChip]').forEach(b=>b.classList.remove('active'));
+  document.getElementById('orderMonthFilter').value = '';
+  document.getElementById('orderYearFilter').value = '';
+  ordersPage = 1;
+  filterOrders();
+}
+
+function clearOrderDateFilters() {
+  ordersDateMode = 'all';
+  document.querySelectorAll('[id^=ordDateChip]').forEach(b=>b.classList.remove('active'));
+  document.getElementById('ordDateChipAll').classList.add('active');
+  document.getElementById('orderMonthFilter').value = '';
+  document.getElementById('orderYearFilter').value = '';
+  document.getElementById('orderDateStart').value = '';
+  document.getElementById('orderDateEnd').value = '';
+  ordersPage = 1;
+  filterOrders();
 }
 
 function filterOrders() {
@@ -3711,10 +3872,56 @@ function filterOrders() {
   const st   = document.getElementById('orderStatusFilter').value;
   const pay  = document.getElementById('orderPayFilter').value;
   let list   = allOrders;
+
   if(q)   list = list.filter(o => (o.id+o.customer_name+o.customer_email).toLowerCase().includes(q));
   if(st)  list = list.filter(o => (o.status||o.fulfillment) === st);
   if(pay) list = list.filter(o => o.payment_status === pay);
-  renderOrders(list);
+
+  if (ordersDateMode === 7 || ordersDateMode === 30 || ordersDateMode === 90) {
+    const cutoff = Date.now() - ordersDateMode * 86400000;
+    list = list.filter(o => new Date(o.created_at).getTime() >= cutoff);
+  } else if (ordersDateMode === 'month') {
+    const m = document.getElementById('orderMonthFilter').value;
+    const y = document.getElementById('orderYearFilter').value;
+    if (m) list = list.filter(o => (o.created_at||'').slice(5,7) === m.padStart(2,'0'));
+    if (y) list = list.filter(o => (o.created_at||'').slice(0,4) === y);
+  } else if (ordersDateMode === 'custom') {
+    const start = document.getElementById('orderDateStart').value;
+    const end   = document.getElementById('orderDateEnd').value;
+    if (start) list = list.filter(o => o.created_at >= start);
+    if (end)   list = list.filter(o => o.created_at <= end + 'T23:59:59');
+  }
+
+  ordersFilteredList = list;
+  // Reset to page 1 if current page no longer exists (e.g. after a filter narrows results)
+  const totalPages = Math.max(1, Math.ceil(list.length / ORDERS_PER_PAGE));
+  if (ordersPage > totalPages) ordersPage = 1;
+  renderOrdersPage();
+}
+
+function ordersGoToPage(page) {
+  const totalPages = Math.max(1, Math.ceil(ordersFilteredList.length / ORDERS_PER_PAGE));
+  ordersPage = Math.min(Math.max(1, page), totalPages);
+  renderOrdersPage();
+}
+
+function renderOrdersPage() {
+  const totalPages = Math.max(1, Math.ceil(ordersFilteredList.length / ORDERS_PER_PAGE));
+  const start = (ordersPage - 1) * ORDERS_PER_PAGE;
+  const pageItems = ordersFilteredList.slice(start, start + ORDERS_PER_PAGE);
+
+  renderOrders(pageItems);
+
+  const infoEl = document.getElementById('ordersPageInfo');
+  if (infoEl) {
+    const rangeEnd = Math.min(start + ORDERS_PER_PAGE, ordersFilteredList.length);
+    infoEl.textContent = ordersFilteredList.length
+      ? `Showing ${start+1}–${rangeEnd} of ${ordersFilteredList.length} orders`
+      : 'No orders match these filters';
+  }
+  document.getElementById('ordersPageLabel').textContent = `Page ${ordersPage} of ${totalPages}`;
+  document.getElementById('ordersPrevBtn').disabled = ordersPage <= 1;
+  document.getElementById('ordersNextBtn').disabled = ordersPage >= totalPages;
 }
 
 function renderOrders(list) {
@@ -4632,7 +4839,7 @@ function filterCustomers() {
 // PAYMENTS
 // ═══════════════════════════════════════════════
 async function loadPayments() {
-  if(!allOrders.length) { const r = await apiFetch('/api/admin/orders'); allOrders = (await r.json()).data||[]; }
+  if(!allOrders.length) { const r = await apiFetch('/api/admin/orders?limit=2000'); allOrders = (await r.json()).data||[]; }
   allPayments = allOrders;
   filterPayments();
   const paid = allOrders.filter(o=>o.payment_status==='Paid');
@@ -4664,7 +4871,7 @@ function filterPayments() {
 // INVOICES
 // ═══════════════════════════════════════════════
 async function loadInvoices() {
-  if(!allOrders.length) { const r = await apiFetch('/api/admin/orders'); allOrders = (await r.json()).data||[]; }
+  if(!allOrders.length) { const r = await apiFetch('/api/admin/orders?limit=2000'); allOrders = (await r.json()).data||[]; }
   filterInvoices();
 }
 
