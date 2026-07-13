@@ -1008,6 +1008,25 @@ img, canvas, svg, table { max-width:100%; }
     </div>
   </div>
 
+  <!-- ══ ROW 7B: Customer Growth + Order Funnel Flow ══ -->
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px;">
+    <div class="card">
+      <div class="card-hdr">
+        <span class="card-title">📈 Customer Growth</span>
+        <div style="display:flex;gap:4px;">
+          <button class="ep-chip active" id="custGrowthChip7" onclick="setDashCustGrowthRange(7,this)" style="padding:3px 10px;font-size:0.7rem;">7D</button>
+          <button class="ep-chip" id="custGrowthChip30" onclick="setDashCustGrowthRange(30,this)" style="padding:3px 10px;font-size:0.7rem;">30D</button>
+          <button class="ep-chip" id="custGrowthChip90" onclick="setDashCustGrowthRange(90,this)" style="padding:3px 10px;font-size:0.7rem;">90D</button>
+        </div>
+      </div>
+      <canvas id="dashCustGrowthCanvas" style="display:block;width:100%;height:150px;"></canvas>
+    </div>
+    <div class="card">
+      <div class="card-hdr"><span class="card-title">🚦 Order Fulfilment Flow</span><span class="badge badge-gray" id="funnelTotal">0 orders</span></div>
+      <div id="orderFunnelWidget" style="padding:8px 0;"></div>
+    </div>
+  </div>
+
   <!-- ══ ROW 8: Recent Orders Table ══ -->
   <div class="card">
     <div class="card-hdr"><span class="card-title">📦 Recent Orders</span><button class="btn btn-secondary btn-sm" onclick="showPage('orders')">View All →</button></div>
@@ -1468,20 +1487,72 @@ img, canvas, svg, table { max-width:100%; }
 <!-- ═════════════ CUSTOMERS ═════════════ -->
 <div class="page" id="page-customers">
   <div class="page-hdr">
-    <div><div class="page-title">Customers</div><div class="page-sub">Customer database & order history</div></div>
+    <div><div class="page-title">Customers</div><div class="page-sub">Customer database, loyalty & order history</div></div>
     <div class="page-actions">
       <button class="btn btn-secondary" onclick="loadCustomers()">↺ Refresh</button>
       <button class="btn-export" onclick="openExportModal('customers')">📤 Export ▾</button>
     </div>
   </div>
+
+  <!-- ══ KPI ROW ══ -->
+  <div class="grid-4" style="margin-bottom:16px;" id="custKpis">
+    <div class="kpi"><div class="kpi-label">Customers in Range</div><div class="kpi-val" id="custKpiTotal">–</div><span class="kpi-ico">👥</span></div>
+    <div class="kpi"><div class="kpi-label">New Customers</div><div class="kpi-val" id="custKpiNew">–</div><span class="kpi-ico">✨</span></div>
+    <div class="kpi"><div class="kpi-label">Repeat Customers</div><div class="kpi-val" id="custKpiRepeat">–</div><span class="kpi-ico">🔁</span></div>
+    <div class="kpi"><div class="kpi-label">Avg. Spend / Customer</div><div class="kpi-val" id="custKpiAvg">–</div><span class="kpi-ico">💰</span></div>
+  </div>
+
+  <!-- ══ CHARTS ══ -->
+  <div class="grid-2" style="margin-bottom:16px;">
+    <div class="card">
+      <div class="card-hdr"><span class="card-title">📈 New Customer Growth</span><span class="badge badge-green" id="custGrowthTotal">0</span></div>
+      <canvas id="custGrowthCanvas" style="display:block;width:100%;height:160px;"></canvas>
+    </div>
+    <div class="card">
+      <div class="card-hdr"><span class="card-title">🔁 New vs Returning</span></div>
+      <canvas id="custRepeatCanvas" style="display:block;width:100%;height:160px;"></canvas>
+    </div>
+  </div>
+
+  <!-- ══ FILTERS ══ -->
   <div class="filter-bar">
     <input class="filter-input" placeholder="🔍 Search name, email, phone..." id="custSearch" oninput="filterCustomers()">
   </div>
+  <div class="filter-bar" style="margin-top:8px;align-items:center;">
+    <div style="display:flex;gap:4px;">
+      <button class="ep-chip active" id="custDateChipAll" onclick="setCustomerDateRange('all',this)" style="padding:5px 12px;font-size:0.75rem;">All Time</button>
+      <button class="ep-chip" id="custDateChip7" onclick="setCustomerDateRange(7,this)" style="padding:5px 12px;font-size:0.75rem;">7D</button>
+      <button class="ep-chip" id="custDateChip30" onclick="setCustomerDateRange(30,this)" style="padding:5px 12px;font-size:0.75rem;">30D</button>
+      <button class="ep-chip" id="custDateChip90" onclick="setCustomerDateRange(90,this)" style="padding:5px 12px;font-size:0.75rem;">90D</button>
+    </div>
+    <select class="filter-select" id="custMonthFilter" onchange="setCustomerMonthYear()" style="max-width:130px;">
+      <option value="">Any Month</option>
+      <option value="1">January</option><option value="2">February</option><option value="3">March</option>
+      <option value="4">April</option><option value="5">May</option><option value="6">June</option>
+      <option value="7">July</option><option value="8">August</option><option value="9">September</option>
+      <option value="10">October</option><option value="11">November</option><option value="12">December</option>
+    </select>
+    <select class="filter-select" id="custYearFilter" onchange="setCustomerMonthYear()" style="max-width:100px;"></select>
+    <span style="font-size:0.75rem;color:var(--text3);">or custom:</span>
+    <input type="date" class="filter-input" id="custDateStart" onchange="setCustomerCustomRange()" style="max-width:150px;">
+    <span style="color:var(--text3);">→</span>
+    <input type="date" class="filter-input" id="custDateEnd" onchange="setCustomerCustomRange()" style="max-width:150px;">
+    <button class="btn btn-secondary btn-sm" onclick="clearCustomerDateFilters()">✕ Clear dates</button>
+  </div>
+
   <div class="table-wrap">
     <table>
       <thead><tr><th>Name</th><th>Email</th><th>Phone</th><th>City</th><th>Orders</th><th>Spent</th><th>Joined</th></tr></thead>
       <tbody id="customersTbody"><tr><td colspan="7"><div class="empty-state loading-dots">Loading</div></td></tr></tbody>
     </table>
+  </div>
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-top:14px;flex-wrap:wrap;gap:10px;">
+    <div style="font-size:0.8rem;color:var(--text3);" id="customersPageInfo">Showing 0 customers</div>
+    <div style="display:flex;gap:6px;align-items:center;">
+      <button class="btn btn-secondary btn-sm" id="customersPrevBtn" onclick="customersGoToPage(customersPage-1)">← Prev</button>
+      <span style="font-size:0.8rem;color:var(--text2);padding:0 8px;" id="customersPageLabel">Page 1 of 1</span>
+      <button class="btn btn-secondary btn-sm" id="customersNextBtn" onclick="customersGoToPage(customersPage+1)">Next →</button>
+    </div>
   </div>
 </div>
 
@@ -1526,12 +1597,54 @@ img, canvas, svg, table { max-width:100%; }
       <button class="btn-export" onclick="openExportModal('payments')">📤 Export ▾</button>
     </div>
   </div>
-  <div class="grid-3" style="margin-bottom:20px" id="payKpis"></div>
+  <div class="grid-3" style="margin-bottom:16px" id="payKpis"></div>
+
+  <div class="grid-2" style="margin-bottom:16px;">
+    <div class="card">
+      <div class="card-hdr"><span class="card-title">📈 Payment Revenue Trend</span></div>
+      <canvas id="payTrendCanvas" style="display:block;width:100%;height:150px;"></canvas>
+    </div>
+    <div class="card">
+      <div class="card-hdr"><span class="card-title">💳 Method Split</span></div>
+      <canvas id="payMethodSplitCanvas" style="display:block;width:100%;height:150px;"></canvas>
+    </div>
+  </div>
+
+  <div class="filter-bar" style="align-items:center;">
+    <div style="display:flex;gap:4px;">
+      <button class="ep-chip active" id="payDateChipAll" onclick="setPaymentDateRange('all',this)" style="padding:5px 12px;font-size:0.75rem;">All Time</button>
+      <button class="ep-chip" id="payDateChip7" onclick="setPaymentDateRange(7,this)" style="padding:5px 12px;font-size:0.75rem;">7D</button>
+      <button class="ep-chip" id="payDateChip30" onclick="setPaymentDateRange(30,this)" style="padding:5px 12px;font-size:0.75rem;">30D</button>
+      <button class="ep-chip" id="payDateChip90" onclick="setPaymentDateRange(90,this)" style="padding:5px 12px;font-size:0.75rem;">90D</button>
+    </div>
+    <select class="filter-select" id="payMonthFilter" onchange="setPaymentMonthYear()" style="max-width:130px;">
+      <option value="">Any Month</option>
+      <option value="1">January</option><option value="2">February</option><option value="3">March</option>
+      <option value="4">April</option><option value="5">May</option><option value="6">June</option>
+      <option value="7">July</option><option value="8">August</option><option value="9">September</option>
+      <option value="10">October</option><option value="11">November</option><option value="12">December</option>
+    </select>
+    <select class="filter-select" id="payYearFilter" onchange="setPaymentMonthYear()" style="max-width:100px;"></select>
+    <span style="font-size:0.75rem;color:var(--text3);">or custom:</span>
+    <input type="date" class="filter-input" id="payDateStart" onchange="setPaymentCustomRange()" style="max-width:150px;">
+    <span style="color:var(--text3);">→</span>
+    <input type="date" class="filter-input" id="payDateEnd" onchange="setPaymentCustomRange()" style="max-width:150px;">
+    <button class="btn btn-secondary btn-sm" onclick="clearPaymentDateFilters()">✕ Clear dates</button>
+  </div>
+
   <div class="table-wrap">
     <table>
       <thead><tr><th>Order ID</th><th>Customer</th><th>Amount</th><th>Method</th><th>Status</th><th>Date</th></tr></thead>
       <tbody id="paymentsTbody"></tbody>
     </table>
+  </div>
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-top:14px;flex-wrap:wrap;gap:10px;">
+    <div style="font-size:0.8rem;color:var(--text3);" id="paymentsPageInfo">Showing 0 payments</div>
+    <div style="display:flex;gap:6px;align-items:center;">
+      <button class="btn btn-secondary btn-sm" id="paymentsPrevBtn" onclick="paymentsGoToPage(paymentsPage-1)">← Prev</button>
+      <span style="font-size:0.8rem;color:var(--text2);padding:0 8px;" id="paymentsPageLabel">Page 1 of 1</span>
+      <button class="btn btn-secondary btn-sm" id="paymentsNextBtn" onclick="paymentsGoToPage(paymentsPage+1)">Next →</button>
+    </div>
   </div>
 </div>
 
@@ -1545,11 +1658,46 @@ img, canvas, svg, table { max-width:100%; }
       <button class="btn-export" onclick="openExportModal('invoices')">📤 Export ▾</button>
     </div>
   </div>
+  <div class="grid-4" style="margin-bottom:16px;" id="invKpis">
+    <div class="kpi"><div class="kpi-label">Invoices in Range</div><div class="kpi-val" id="invKpiCount">–</div><span class="kpi-ico">🧾</span></div>
+    <div class="kpi"><div class="kpi-label">Taxable Value</div><div class="kpi-val" id="invKpiTaxable">–</div><span class="kpi-ico">💵</span></div>
+    <div class="kpi"><div class="kpi-label">Total GST Collected</div><div class="kpi-val" id="invKpiGst">–</div><span class="kpi-ico">🏛️</span></div>
+    <div class="kpi"><div class="kpi-label">Total Invoiced</div><div class="kpi-val" id="invKpiTotal">–</div><span class="kpi-ico">📊</span></div>
+  </div>
+  <div class="filter-bar" style="align-items:center;">
+    <div style="display:flex;gap:4px;">
+      <button class="ep-chip active" id="invDateChipAll" onclick="setInvoiceDateRange('all',this)" style="padding:5px 12px;font-size:0.75rem;">All Time</button>
+      <button class="ep-chip" id="invDateChip7" onclick="setInvoiceDateRange(7,this)" style="padding:5px 12px;font-size:0.75rem;">7D</button>
+      <button class="ep-chip" id="invDateChip30" onclick="setInvoiceDateRange(30,this)" style="padding:5px 12px;font-size:0.75rem;">30D</button>
+      <button class="ep-chip" id="invDateChip90" onclick="setInvoiceDateRange(90,this)" style="padding:5px 12px;font-size:0.75rem;">90D</button>
+    </div>
+    <select class="filter-select" id="invMonthFilter" onchange="setInvoiceMonthYear()" style="max-width:130px;">
+      <option value="">Any Month</option>
+      <option value="1">January</option><option value="2">February</option><option value="3">March</option>
+      <option value="4">April</option><option value="5">May</option><option value="6">June</option>
+      <option value="7">July</option><option value="8">August</option><option value="9">September</option>
+      <option value="10">October</option><option value="11">November</option><option value="12">December</option>
+    </select>
+    <select class="filter-select" id="invYearFilter" onchange="setInvoiceMonthYear()" style="max-width:100px;"></select>
+    <span style="font-size:0.75rem;color:var(--text3);">or custom:</span>
+    <input type="date" class="filter-input" id="invDateStart" onchange="setInvoiceCustomRange()" style="max-width:150px;">
+    <span style="color:var(--text3);">→</span>
+    <input type="date" class="filter-input" id="invDateEnd" onchange="setInvoiceCustomRange()" style="max-width:150px;">
+    <button class="btn btn-secondary btn-sm" onclick="clearInvoiceDateFilters()">✕ Clear dates</button>
+  </div>
   <div class="table-wrap">
     <table>
       <thead><tr><th>Invoice #</th><th>Customer</th><th>Amount</th><th>CGST (2.5%)</th><th>SGST (2.5%)</th><th>IGST (5%)</th><th>Date</th><th>Actions</th></tr></thead>
       <tbody id="invoicesTbody"></tbody>
     </table>
+  </div>
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-top:14px;flex-wrap:wrap;gap:10px;">
+    <div style="font-size:0.8rem;color:var(--text3);" id="invoicesPageInfo">Showing 0 invoices</div>
+    <div style="display:flex;gap:6px;align-items:center;">
+      <button class="btn btn-secondary btn-sm" id="invoicesPrevBtn" onclick="invoicesGoToPage(invoicesPage-1)">← Prev</button>
+      <span style="font-size:0.8rem;color:var(--text2);padding:0 8px;" id="invoicesPageLabel">Page 1 of 1</span>
+      <button class="btn btn-secondary btn-sm" id="invoicesNextBtn" onclick="invoicesGoToPage(invoicesPage+1)">Next →</button>
+    </div>
   </div>
 </div>
 
@@ -3437,6 +3585,79 @@ function renderAdvancedWidgets(orders, prods) {
   const trend=(last7[last7.length-1]-last7[0])/7;
   const forecast=Array.from({length:7},(_,i)=>Math.max(0,avg7+(trend*(i+1))*0.6));
   setTimeout(()=>drawForecastChart('forecastCanvas',last7,forecast),60);
+
+  // Customer growth (new dashboard flow widget) + order fulfilment funnel
+  renderDashCustGrowth(orders, _dashCustGrowthDays);
+  renderOrderFunnel(orders);
+}
+
+// ═══════════════════════════════════════════════
+// DASHBOARD: CUSTOMER GROWTH + ORDER FUNNEL
+// ═══════════════════════════════════════════════
+let _dashCustGrowthDays = 7;
+function setDashCustGrowthRange(days, btn) {
+  _dashCustGrowthDays = days;
+  document.querySelectorAll('[id^=custGrowthChip]').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  renderDashCustGrowth(allOrders, days);
+}
+
+function renderDashCustGrowth(orders, days=7) {
+  const canvas = document.getElementById('dashCustGrowthCanvas');
+  if (!canvas) return;
+  // Build unique-customer-by-day series from orders (first order date = "new customer" day)
+  const firstSeen = {};
+  orders.forEach(o => {
+    const key = (o.customer_email || o.customer_name || o.id || '').toLowerCase();
+    if (!key) return;
+    const day = (o.created_at || '').split('T')[0];
+    if (!day) return;
+    if (!firstSeen[key] || day < firstSeen[key]) firstSeen[key] = day;
+  });
+  const buckets = Array.from({length:days}, (_,i) => {
+    const d = new Date(); d.setDate(d.getDate() - (days-1-i));
+    return { label: d.getDate()+'/'+(d.getMonth()+1), date: d.toISOString().split('T')[0], count: 0 };
+  });
+  Object.values(firstSeen).forEach(day => {
+    const b = buckets.find(b => b.date === day);
+    if (b) b.count++;
+  });
+  const total = buckets.reduce((s,b)=>s+b.count,0);
+  const totalBadge = document.getElementById('custGrowthTotal');
+  if (totalBadge) totalBadge.textContent = total;
+  drawAreaChart('dashCustGrowthCanvas', buckets.map(b=>b.label), buckets.map(b=>b.count), '#2080E8');
+}
+
+function renderOrderFunnel(orders) {
+  const el = document.getElementById('orderFunnelWidget');
+  if (!el) return;
+  const total = orders.length;
+  const placed = total;
+  const paid = orders.filter(o => (o.payment_status||'').toLowerCase().includes('paid') || o.payment_status==='SUCCESS').length;
+  const shipped = orders.filter(o => ['Shipped','Delivered'].includes(o.fulfillment||o.status)).length;
+  const delivered = orders.filter(o => (o.fulfillment||o.status)==='Delivered').length;
+  const stages = [
+    {label:'Placed', val:placed, color:'#5EAB30'},
+    {label:'Paid', val:paid, color:'#2080E8'},
+    {label:'Shipped', val:shipped, color:'#E8AD2C'},
+    {label:'Delivered', val:delivered, color:'#8B5CF6'}
+  ];
+  const badge = document.getElementById('funnelTotal');
+  if (badge) badge.textContent = total + ' orders';
+  el.innerHTML = stages.map((s,i) => {
+    const pct = placed ? Math.round(s.val/placed*100) : 0;
+    const widthPct = Math.max(pct, s.val ? 6 : 0);
+    return `
+      <div style="margin-bottom:${i<stages.length-1?'12px':'0'};">
+        <div style="display:flex;justify-content:space-between;font-size:0.75rem;margin-bottom:4px;">
+          <span style="font-weight:600;color:var(--text2);">${s.label}</span>
+          <span style="color:var(--text3);">${s.val} · ${pct}%</span>
+        </div>
+        <div style="height:16px;background:var(--bg2);border-radius:8px;overflow:hidden;">
+          <div style="height:100%;width:${widthPct}%;background:${s.color};border-radius:8px;transition:width 0.6s ease;"></div>
+        </div>
+      </div>`;
+  }).join('');
 }
 let _emPage = 'orders';
 let _emRange = 'today';
@@ -4806,17 +5027,161 @@ async function deleteCoupon(id) {
 // ═══════════════════════════════════════════════
 // CUSTOMERS
 // ═══════════════════════════════════════════════
+// ═══════════════════════════════════════════════
+// CUSTOMERS
+// ═══════════════════════════════════════════════
+const CUSTOMERS_PER_PAGE = 50;
+let customersPage = 1;
+let customersDateMode = 'all';
+let customersFilteredList = [];
+
 async function loadCustomers() {
   try {
     const r = await apiFetch('/api/admin/customers');
     allCustomers = (await r.json()).data || [];
+    populateCustomerYearFilter();
     filterCustomers();
   } catch(e) { toast('Customers error: '+e.message,'error'); }
 }
 
+function populateCustomerYearFilter() {
+  const sel = document.getElementById('custYearFilter');
+  if (!sel || sel.options.length > 1) return;
+  const years = new Set(allCustomers.map(c => (c.created_at||'').slice(0,4)).filter(Boolean));
+  years.add(String(new Date().getFullYear()));
+  sel.innerHTML = '<option value="">Any Year</option>' +
+    [...years].sort().reverse().map(y => `<option value="${y}">${y}</option>`).join('');
+}
+
+function setCustomerDateRange(days, btn) {
+  customersDateMode = days;
+  document.querySelectorAll('[id^=custDateChip]').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById('custMonthFilter').value = '';
+  document.getElementById('custYearFilter').value = '';
+  document.getElementById('custDateStart').value = '';
+  document.getElementById('custDateEnd').value = '';
+  customersPage = 1;
+  filterCustomers();
+}
+
+function setCustomerMonthYear() {
+  customersDateMode = 'month';
+  document.querySelectorAll('[id^=custDateChip]').forEach(b=>b.classList.remove('active'));
+  document.getElementById('custDateStart').value = '';
+  document.getElementById('custDateEnd').value = '';
+  customersPage = 1;
+  filterCustomers();
+}
+
+function setCustomerCustomRange() {
+  customersDateMode = 'custom';
+  document.querySelectorAll('[id^=custDateChip]').forEach(b=>b.classList.remove('active'));
+  document.getElementById('custMonthFilter').value = '';
+  document.getElementById('custYearFilter').value = '';
+  customersPage = 1;
+  filterCustomers();
+}
+
+function clearCustomerDateFilters() {
+  customersDateMode = 'all';
+  document.querySelectorAll('[id^=custDateChip]').forEach(b=>b.classList.remove('active'));
+  document.getElementById('custDateChipAll').classList.add('active');
+  document.getElementById('custMonthFilter').value = '';
+  document.getElementById('custYearFilter').value = '';
+  document.getElementById('custDateStart').value = '';
+  document.getElementById('custDateEnd').value = '';
+  customersPage = 1;
+  filterCustomers();
+}
+
 function filterCustomers() {
   const q = (document.getElementById('custSearch').value||'').toLowerCase();
-  const list = q ? allCustomers.filter(c => (c.name+c.email+c.phone).toLowerCase().includes(q)) : allCustomers;
+  let list = allCustomers;
+
+  if (q) list = list.filter(c => (c.name+c.email+c.phone).toLowerCase().includes(q));
+
+  if (customersDateMode === 7 || customersDateMode === 30 || customersDateMode === 90) {
+    const cutoff = Date.now() - customersDateMode * 86400000;
+    list = list.filter(c => new Date(c.created_at).getTime() >= cutoff);
+  } else if (customersDateMode === 'month') {
+    const m = document.getElementById('custMonthFilter').value;
+    const y = document.getElementById('custYearFilter').value;
+    if (m) list = list.filter(c => (c.created_at||'').slice(5,7) === m.padStart(2,'0'));
+    if (y) list = list.filter(c => (c.created_at||'').slice(0,4) === y);
+  } else if (customersDateMode === 'custom') {
+    const start = document.getElementById('custDateStart').value;
+    const end   = document.getElementById('custDateEnd').value;
+    if (start) list = list.filter(c => c.created_at >= start);
+    if (end)   list = list.filter(c => c.created_at <= end + 'T23:59:59');
+  }
+
+  customersFilteredList = list;
+  const totalPages = Math.max(1, Math.ceil(list.length / CUSTOMERS_PER_PAGE));
+  if (customersPage > totalPages) customersPage = 1;
+
+  // KPIs
+  const repeat = list.filter(c => (c.total_orders||0) > 1).length;
+  const totalSpent = list.reduce((s,c)=>s+parseFloat(c.total_spent||0),0);
+  document.getElementById('custKpiTotal').textContent = list.length;
+  document.getElementById('custKpiNew').textContent = list.length;
+  document.getElementById('custKpiRepeat').textContent = repeat;
+  document.getElementById('custKpiAvg').textContent = list.length ? '₹'+fmtNum(Math.round(totalSpent/list.length)) : '₹0';
+
+  // Charts
+  renderCustomerGrowthChart(list);
+  renderCustomerRepeatChart(list, repeat);
+
+  renderCustomersPage();
+}
+
+function renderCustomerGrowthChart(list) {
+  const days = customersDateMode===90?90 : customersDateMode===30?30 : customersDateMode===7?7 : 30;
+  const buckets = Array.from({length:days}, (_,i) => {
+    const d = new Date(); d.setDate(d.getDate() - (days-1-i));
+    return { label: d.getDate()+'/'+(d.getMonth()+1), date: d.toISOString().split('T')[0], count: 0 };
+  });
+  list.forEach(c => {
+    const day = (c.created_at||'').split('T')[0];
+    const b = buckets.find(b=>b.date===day);
+    if (b) b.count++;
+  });
+  drawAreaChart('custGrowthCanvas', buckets.map(b=>b.label), buckets.map(b=>b.count), '#5EAB30');
+}
+
+function renderCustomerRepeatChart(list, repeat) {
+  const canvas = document.getElementById('custRepeatCanvas');
+  if (!canvas || typeof drawDonutChart !== 'function') return;
+  const newCust = Math.max(0, list.length - repeat);
+  drawDonutChart('custRepeatCanvas', ['New','Returning'], [newCust, repeat], ['#2080E8','#5EAB30'], String(list.length));
+}
+
+function customersGoToPage(page) {
+  const totalPages = Math.max(1, Math.ceil(customersFilteredList.length / CUSTOMERS_PER_PAGE));
+  customersPage = Math.min(Math.max(1, page), totalPages);
+  renderCustomersPage();
+}
+
+function renderCustomersPage() {
+  const totalPages = Math.max(1, Math.ceil(customersFilteredList.length / CUSTOMERS_PER_PAGE));
+  const start = (customersPage - 1) * CUSTOMERS_PER_PAGE;
+  const pageItems = customersFilteredList.slice(start, start + CUSTOMERS_PER_PAGE);
+
+  renderCustomersTable(pageItems);
+
+  const infoEl = document.getElementById('customersPageInfo');
+  if (infoEl) {
+    const rangeEnd = Math.min(start + CUSTOMERS_PER_PAGE, customersFilteredList.length);
+    infoEl.textContent = customersFilteredList.length
+      ? `Showing ${start+1}–${rangeEnd} of ${customersFilteredList.length} customers`
+      : 'No customers match these filters';
+  }
+  document.getElementById('customersPageLabel').textContent = `Page ${customersPage} of ${totalPages}`;
+  document.getElementById('customersPrevBtn').disabled = customersPage <= 1;
+  document.getElementById('customersNextBtn').disabled = customersPage >= totalPages;
+}
+
+function renderCustomersTable(list) {
   document.getElementById('customersTbody').innerHTML = list.length ? list.map(c => `
     <tr>
       <td>
@@ -4838,24 +5203,160 @@ function filterCustomers() {
 // ═══════════════════════════════════════════════
 // PAYMENTS
 // ═══════════════════════════════════════════════
+const PAYMENTS_PER_PAGE = 50;
+let paymentsPage = 1;
+let paymentsDateMode = 'all';
+let paymentsFilteredList = [];
+
 async function loadPayments() {
   if(!allOrders.length) { const r = await apiFetch('/api/admin/orders?limit=2000'); allOrders = (await r.json()).data||[]; }
   allPayments = allOrders;
+  populatePaymentYearFilter();
   filterPayments();
-  const paid = allOrders.filter(o=>o.payment_status==='Paid');
-  const cod  = allOrders.filter(o=>(o.payment_status||'').includes('COD'));
-  const rev  = paid.reduce((s,o)=>s+parseFloat(o.total||0),0);
-  document.getElementById('payKpis').innerHTML = `
-    <div class="kpi"><div class="kpi-label">Online Paid</div><div class="kpi-val">₹${fmtNum(rev)}</div><div class="kpi-change up">✅ ${paid.length} orders</div></div>
-    <div class="kpi"><div class="kpi-label">COD Pending</div><div class="kpi-val">${cod.length}</div><div class="kpi-change" style="color:var(--gold-text)">⏳ Orders</div></div>
-    <div class="kpi"><div class="kpi-label">Total Orders</div><div class="kpi-val">${allOrders.length}</div><span class="kpi-ico">📦</span></div>
-  `;
+}
+
+function populatePaymentYearFilter() {
+  const sel = document.getElementById('payYearFilter');
+  if (!sel || sel.options.length > 1) return;
+  const years = new Set(allOrders.map(o => (o.created_at||'').slice(0,4)).filter(Boolean));
+  years.add(String(new Date().getFullYear()));
+  sel.innerHTML = '<option value="">Any Year</option>' +
+    [...years].sort().reverse().map(y => `<option value="${y}">${y}</option>`).join('');
+}
+
+function setPaymentDateRange(days, btn) {
+  paymentsDateMode = days;
+  document.querySelectorAll('[id^=payDateChip]').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById('payMonthFilter').value = '';
+  document.getElementById('payYearFilter').value = '';
+  document.getElementById('payDateStart').value = '';
+  document.getElementById('payDateEnd').value = '';
+  paymentsPage = 1;
+  filterPayments();
+}
+
+function setPaymentMonthYear() {
+  paymentsDateMode = 'month';
+  document.querySelectorAll('[id^=payDateChip]').forEach(b=>b.classList.remove('active'));
+  document.getElementById('payDateStart').value = '';
+  document.getElementById('payDateEnd').value = '';
+  paymentsPage = 1;
+  filterPayments();
+}
+
+function setPaymentCustomRange() {
+  paymentsDateMode = 'custom';
+  document.querySelectorAll('[id^=payDateChip]').forEach(b=>b.classList.remove('active'));
+  document.getElementById('payMonthFilter').value = '';
+  document.getElementById('payYearFilter').value = '';
+  paymentsPage = 1;
+  filterPayments();
+}
+
+function clearPaymentDateFilters() {
+  paymentsDateMode = 'all';
+  document.querySelectorAll('[id^=payDateChip]').forEach(b=>b.classList.remove('active'));
+  document.getElementById('payDateChipAll').classList.add('active');
+  document.getElementById('payMonthFilter').value = '';
+  document.getElementById('payYearFilter').value = '';
+  document.getElementById('payDateStart').value = '';
+  document.getElementById('payDateEnd').value = '';
+  paymentsPage = 1;
+  filterPayments();
 }
 
 function filterPayments() {
   const f = document.getElementById('payFilterStatus').value;
-  const list = f ? allOrders.filter(o=>o.payment_status===f) : allOrders;
-  document.getElementById('paymentsTbody').innerHTML = list.slice(0,200).map(o => `
+  let list = allOrders;
+
+  if (f) list = list.filter(o => o.payment_status === f);
+
+  if (paymentsDateMode === 7 || paymentsDateMode === 30 || paymentsDateMode === 90) {
+    const cutoff = Date.now() - paymentsDateMode * 86400000;
+    list = list.filter(o => new Date(o.created_at).getTime() >= cutoff);
+  } else if (paymentsDateMode === 'month') {
+    const m = document.getElementById('payMonthFilter').value;
+    const y = document.getElementById('payYearFilter').value;
+    if (m) list = list.filter(o => (o.created_at||'').slice(5,7) === m.padStart(2,'0'));
+    if (y) list = list.filter(o => (o.created_at||'').slice(0,4) === y);
+  } else if (paymentsDateMode === 'custom') {
+    const start = document.getElementById('payDateStart').value;
+    const end   = document.getElementById('payDateEnd').value;
+    if (start) list = list.filter(o => o.created_at >= start);
+    if (end)   list = list.filter(o => o.created_at <= end + 'T23:59:59');
+  }
+
+  paymentsFilteredList = list;
+  const totalPages = Math.max(1, Math.ceil(list.length / PAYMENTS_PER_PAGE));
+  if (paymentsPage > totalPages) paymentsPage = 1;
+
+  // KPIs (based on filtered range)
+  const paid = list.filter(o=>o.payment_status==='Paid');
+  const cod  = list.filter(o=>(o.payment_status||'').includes('COD'));
+  const rev  = paid.reduce((s,o)=>s+parseFloat(o.total||0),0);
+  document.getElementById('payKpis').innerHTML = `
+    <div class="kpi"><div class="kpi-label">Online Paid (range)</div><div class="kpi-val">₹${fmtNum(rev)}</div><div class="kpi-change up">✅ ${paid.length} orders</div></div>
+    <div class="kpi"><div class="kpi-label">COD Pending (range)</div><div class="kpi-val">${cod.length}</div><div class="kpi-change" style="color:var(--gold-text)">⏳ Orders</div></div>
+    <div class="kpi"><div class="kpi-label">Total Orders (range)</div><div class="kpi-val">${list.length}</div><span class="kpi-ico">📦</span></div>
+  `;
+
+  renderPaymentTrendChart(list);
+  renderPaymentMethodChart(list);
+
+  renderPaymentsPage();
+}
+
+function renderPaymentTrendChart(list) {
+  const days = paymentsDateMode===90?90 : paymentsDateMode===30?30 : paymentsDateMode===7?7 : 30;
+  const buckets = Array.from({length:days}, (_,i) => {
+    const d = new Date(); d.setDate(d.getDate() - (days-1-i));
+    return { label: d.getDate()+'/'+(d.getMonth()+1), date: d.toISOString().split('T')[0], rev: 0 };
+  });
+  list.filter(o=>o.payment_status==='Paid').forEach(o => {
+    const day = (o.created_at||'').split('T')[0];
+    const b = buckets.find(b=>b.date===day);
+    if (b) b.rev += parseFloat(o.total||0);
+  });
+  drawAreaChart('payTrendCanvas', buckets.map(b=>b.label), buckets.map(b=>b.rev), '#5EAB30');
+}
+
+function renderPaymentMethodChart(list) {
+  if (typeof drawDonutChart !== 'function') return;
+  const modes = {};
+  list.forEach(o => { const m = o.payment_mode || 'UPI'; modes[m] = (modes[m]||0)+1; });
+  const colors = ['#5EAB30','#2080E8','#E8AD2C','#8B5CF6','#EF4444'];
+  const entries = Object.entries(modes);
+  drawDonutChart('payMethodSplitCanvas', entries.map(e=>e[0]), entries.map(e=>e[1]), colors, String(list.length));
+}
+
+function paymentsGoToPage(page) {
+  const totalPages = Math.max(1, Math.ceil(paymentsFilteredList.length / PAYMENTS_PER_PAGE));
+  paymentsPage = Math.min(Math.max(1, page), totalPages);
+  renderPaymentsPage();
+}
+
+function renderPaymentsPage() {
+  const totalPages = Math.max(1, Math.ceil(paymentsFilteredList.length / PAYMENTS_PER_PAGE));
+  const start = (paymentsPage - 1) * PAYMENTS_PER_PAGE;
+  const pageItems = paymentsFilteredList.slice(start, start + PAYMENTS_PER_PAGE);
+
+  renderPaymentsTable(pageItems);
+
+  const infoEl = document.getElementById('paymentsPageInfo');
+  if (infoEl) {
+    const rangeEnd = Math.min(start + PAYMENTS_PER_PAGE, paymentsFilteredList.length);
+    infoEl.textContent = paymentsFilteredList.length
+      ? `Showing ${start+1}–${rangeEnd} of ${paymentsFilteredList.length} payments`
+      : 'No payments match these filters';
+  }
+  document.getElementById('paymentsPageLabel').textContent = `Page ${paymentsPage} of ${totalPages}`;
+  document.getElementById('paymentsPrevBtn').disabled = paymentsPage <= 1;
+  document.getElementById('paymentsNextBtn').disabled = paymentsPage >= totalPages;
+}
+
+function renderPaymentsTable(list) {
+  document.getElementById('paymentsTbody').innerHTML = list.length ? list.map(o => `
     <tr>
       <td class="td-id">${o.id}</td>
       <td>${esc(o.customer_name)||'-'}</td>
@@ -4864,21 +5365,141 @@ function filterPayments() {
       <td>${payBadge(o.payment_status)}</td>
       <td style="font-size:0.72rem;color:var(--text3);">${fmtDate(o.created_at)}</td>
     </tr>
-  `).join('') || '<tr><td colspan="6" class="empty-state">No payments</td></tr>';
+  `).join('') : '<tr><td colspan="6" class="empty-state">No payments match these filters</td></tr>';
 }
 
 // ═══════════════════════════════════════════════
 // INVOICES
 // ═══════════════════════════════════════════════
+const INVOICES_PER_PAGE = 50;
+let invoicesPage = 1;
+let invoicesDateMode = 'all';
+let invoicesFilteredList = [];
+
 async function loadInvoices() {
   if(!allOrders.length) { const r = await apiFetch('/api/admin/orders?limit=2000'); allOrders = (await r.json()).data||[]; }
+  populateInvoiceYearFilter();
+  filterInvoices();
+}
+
+function populateInvoiceYearFilter() {
+  const sel = document.getElementById('invYearFilter');
+  if (!sel || sel.options.length > 1) return;
+  const years = new Set(allOrders.map(o => (o.created_at||'').slice(0,4)).filter(Boolean));
+  years.add(String(new Date().getFullYear()));
+  sel.innerHTML = '<option value="">Any Year</option>' +
+    [...years].sort().reverse().map(y => `<option value="${y}">${y}</option>`).join('');
+}
+
+function setInvoiceDateRange(days, btn) {
+  invoicesDateMode = days;
+  document.querySelectorAll('[id^=invDateChip]').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById('invMonthFilter').value = '';
+  document.getElementById('invYearFilter').value = '';
+  document.getElementById('invDateStart').value = '';
+  document.getElementById('invDateEnd').value = '';
+  invoicesPage = 1;
+  filterInvoices();
+}
+
+function setInvoiceMonthYear() {
+  invoicesDateMode = 'month';
+  document.querySelectorAll('[id^=invDateChip]').forEach(b=>b.classList.remove('active'));
+  document.getElementById('invDateStart').value = '';
+  document.getElementById('invDateEnd').value = '';
+  invoicesPage = 1;
+  filterInvoices();
+}
+
+function setInvoiceCustomRange() {
+  invoicesDateMode = 'custom';
+  document.querySelectorAll('[id^=invDateChip]').forEach(b=>b.classList.remove('active'));
+  document.getElementById('invMonthFilter').value = '';
+  document.getElementById('invYearFilter').value = '';
+  invoicesPage = 1;
+  filterInvoices();
+}
+
+function clearInvoiceDateFilters() {
+  invoicesDateMode = 'all';
+  document.querySelectorAll('[id^=invDateChip]').forEach(b=>b.classList.remove('active'));
+  document.getElementById('invDateChipAll').classList.add('active');
+  document.getElementById('invMonthFilter').value = '';
+  document.getElementById('invYearFilter').value = '';
+  document.getElementById('invDateStart').value = '';
+  document.getElementById('invDateEnd').value = '';
+  invoicesPage = 1;
   filterInvoices();
 }
 
 function filterInvoices() {
   const q = (document.getElementById('invoiceSearch').value||'').toLowerCase();
-  const list = q ? allOrders.filter(o => o.id.toLowerCase().includes(q)||o.customer_name?.toLowerCase().includes(q)) : allOrders;
-  document.getElementById('invoicesTbody').innerHTML = list.slice(0,200).map((o,i) => {
+  let list = allOrders;
+
+  if (q) list = list.filter(o => o.id.toLowerCase().includes(q)||(o.customer_name||'').toLowerCase().includes(q));
+
+  if (invoicesDateMode === 7 || invoicesDateMode === 30 || invoicesDateMode === 90) {
+    const cutoff = Date.now() - invoicesDateMode * 86400000;
+    list = list.filter(o => new Date(o.created_at).getTime() >= cutoff);
+  } else if (invoicesDateMode === 'month') {
+    const m = document.getElementById('invMonthFilter').value;
+    const y = document.getElementById('invYearFilter').value;
+    if (m) list = list.filter(o => (o.created_at||'').slice(5,7) === m.padStart(2,'0'));
+    if (y) list = list.filter(o => (o.created_at||'').slice(0,4) === y);
+  } else if (invoicesDateMode === 'custom') {
+    const start = document.getElementById('invDateStart').value;
+    const end   = document.getElementById('invDateEnd').value;
+    if (start) list = list.filter(o => o.created_at >= start);
+    if (end)   list = list.filter(o => o.created_at <= end + 'T23:59:59');
+  }
+
+  invoicesFilteredList = list;
+  const totalPages = Math.max(1, Math.ceil(list.length / INVOICES_PER_PAGE));
+  if (invoicesPage > totalPages) invoicesPage = 1;
+
+  // KPIs
+  let taxableSum = 0, gstSum = 0, totalSum = 0;
+  list.forEach(o => {
+    const t = parseFloat(o.total||0);
+    const taxable = Math.round(t / 1.05);
+    totalSum += t; taxableSum += taxable; gstSum += (t - taxable);
+  });
+  document.getElementById('invKpiCount').textContent = list.length;
+  document.getElementById('invKpiTaxable').textContent = '₹'+fmtNum(Math.round(taxableSum));
+  document.getElementById('invKpiGst').textContent = '₹'+fmtNum(Math.round(gstSum));
+  document.getElementById('invKpiTotal').textContent = '₹'+fmtNum(Math.round(totalSum));
+
+  renderInvoicesPage();
+}
+
+function invoicesGoToPage(page) {
+  const totalPages = Math.max(1, Math.ceil(invoicesFilteredList.length / INVOICES_PER_PAGE));
+  invoicesPage = Math.min(Math.max(1, page), totalPages);
+  renderInvoicesPage();
+}
+
+function renderInvoicesPage() {
+  const totalPages = Math.max(1, Math.ceil(invoicesFilteredList.length / INVOICES_PER_PAGE));
+  const start = (invoicesPage - 1) * INVOICES_PER_PAGE;
+  const pageItems = invoicesFilteredList.slice(start, start + INVOICES_PER_PAGE);
+
+  renderInvoicesTable(pageItems);
+
+  const infoEl = document.getElementById('invoicesPageInfo');
+  if (infoEl) {
+    const rangeEnd = Math.min(start + INVOICES_PER_PAGE, invoicesFilteredList.length);
+    infoEl.textContent = invoicesFilteredList.length
+      ? `Showing ${start+1}–${rangeEnd} of ${invoicesFilteredList.length} invoices`
+      : 'No invoices match these filters';
+  }
+  document.getElementById('invoicesPageLabel').textContent = `Page ${invoicesPage} of ${totalPages}`;
+  document.getElementById('invoicesPrevBtn').disabled = invoicesPage <= 1;
+  document.getElementById('invoicesNextBtn').disabled = invoicesPage >= totalPages;
+}
+
+function renderInvoicesTable(list) {
+  document.getElementById('invoicesTbody').innerHTML = list.length ? list.map((o) => {
     const t = parseFloat(o.total||0);
     const taxable = Math.round(t / 1.05);
     const gst = t - taxable;
@@ -4886,7 +5507,7 @@ function filterInvoices() {
     const cgst = isGuj ? (gst/2) : 0;
     const sgst = isGuj ? (gst/2) : 0;
     const igst = isGuj ? 0 : gst;
-    const invNo = `INV-${String(i+1).padStart(4,'0')}`;
+    const invNo = 'INV-' + (o.id||'').replace('AVC-','').replace('DEMO-','D');
     return `<tr>
       <td class="td-id">${invNo}</td>
       <td>${esc(o.customer_name)||'-'}</td>
@@ -4899,7 +5520,7 @@ function filterInvoices() {
         <button class="btn btn-secondary btn-sm" onclick="printInvoice('${o.id}')">🖨️ Print</button>
       </td>
     </tr>`;
-  }).join('') || '<tr><td colspan="8" class="empty-state">No invoices</td></tr>';
+  }).join('') : '<tr><td colspan="8" class="empty-state">No invoices match these filters</td></tr>';
 }
 
 function printInvoice(orderId) {
