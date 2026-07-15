@@ -712,10 +712,114 @@ img, canvas, svg, table { max-width:100%; }
 .topbar { backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); }
 .stream-item { display:flex; align-items:center; gap:8px; padding:6px 0; border-bottom:1px solid var(--border); }
 .nav-new { margin-left:auto; width:6px; height:6px; border-radius:50%; background:var(--green-text); }
+
+/* ═══════════════════════════════════════════════
+   INTERFACE THEMES — Deluxe (default) / Neomorphism / Liquid Glass
+   All three themes reuse the exact same HTML/JS/data — only visual
+   presentation changes. Selection is stored server-side (settings)
+   and in localStorage, and can be changed by both Admin and Owner.
+   ═══════════════════════════════════════════════ */
+
+/* ---- Theme picker UI (Settings page) ---- */
+.theme-picker{display:flex;gap:16px;flex-wrap:wrap;}
+.theme-opt{flex:1;min-width:150px;max-width:220px;cursor:pointer;text-align:center;}
+.theme-preview{position:relative;border-radius:14px;padding:14px;height:104px;margin-bottom:10px;border:2px solid transparent;transition:all 0.2s;overflow:hidden;}
+.theme-opt.selected .theme-preview{border-color:var(--green);box-shadow:0 0 0 3px var(--green-glow);}
+.theme-preview .tp-dots{display:flex;gap:4px;margin-bottom:10px;}
+.theme-preview .tp-dot{width:6px;height:6px;border-radius:50%;}
+.theme-preview .tp-bars{display:flex;flex-direction:column;gap:6px;}
+.theme-preview .tp-bar{height:8px;border-radius:4px;}
+.theme-preview .tp-bar.w60{width:60%;}
+.theme-preview .tp-bar.w40{width:40%;}
+.theme-preview .tp-bar.w80{width:80%;}
+.theme-opt-label{font-size:0.82rem;font-weight:600;color:var(--text2);}
+.theme-opt.selected .theme-opt-label{color:var(--green-text);}
+.theme-check{position:absolute;top:8px;right:8px;width:20px;height:20px;border-radius:50%;background:var(--green);color:#fff;display:none;align-items:center;justify-content:center;font-size:0.68rem;box-shadow:0 2px 6px rgba(0,0,0,0.4);}
+.theme-opt.selected .theme-check{display:flex;}
+
+.theme-preview-deluxe{background:#0F1410;}
+.theme-preview-deluxe .tp-bar{background:#1C2418;}
+.theme-preview-deluxe .tp-dot:nth-child(1){background:#E53535}
+.theme-preview-deluxe .tp-dot:nth-child(2){background:#C4920E}
+.theme-preview-deluxe .tp-dot:nth-child(3){background:#4A8A28}
+
+.theme-preview-neo{background:#1b1f1d;box-shadow:7px 7px 14px rgba(0,0,0,0.55),-7px -7px 14px rgba(255,255,255,0.03);}
+.theme-preview-neo .tp-bar{background:#1b1f1d;box-shadow:inset 2px 2px 4px rgba(0,0,0,0.5),inset -2px -2px 4px rgba(255,255,255,0.03);}
+.theme-preview-neo .tp-dot{background:#33403a;box-shadow:1px 1px 2px rgba(0,0,0,0.5);}
+
+.theme-preview-glass{background:linear-gradient(135deg, rgba(74,138,40,0.35), rgba(32,128,232,0.25));backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);border:1px solid rgba(255,255,255,0.25);}
+.theme-preview-glass .tp-bar{background:rgba(255,255,255,0.3);backdrop-filter:blur(4px);}
+.theme-preview-glass .tp-dot{background:rgba(255,255,255,0.65);}
+
+/* ═══ THEME: NEOMORPHISM (Soft UI) ═══
+   Monochrome extruded surfaces — no borders, dual soft shadows. */
+body.theme-neo{background:#1b1f1d;}
+body.theme-neo .main{background:#1b1f1d;}
+body.theme-neo #loginScreen{background:#1b1f1d;}
+body.theme-neo .card, body.theme-neo .kpi, body.theme-neo .modal, body.theme-neo .sidebar,
+body.theme-neo .topbar, body.theme-neo .login-card, body.theme-neo .stat-tick{
+  background:#1b1f1d !important;border:none !important;border-radius:18px;
+  box-shadow:9px 9px 18px rgba(0,0,0,0.55),-9px -9px 18px rgba(255,255,255,0.025) !important;
+}
+body.theme-neo .table-wrap{background:#1b1f1d;border:none;box-shadow:9px 9px 18px rgba(0,0,0,0.5),-9px -9px 18px rgba(255,255,255,0.02);border-radius:18px;}
+body.theme-neo th{background:transparent;}
+body.theme-neo td{border-top:1px solid rgba(0,0,0,0.3);}
+body.theme-neo .form-control, body.theme-neo .filter-input, body.theme-neo .filter-select, body.theme-neo .drawer-input{
+  background:#1b1f1d !important;border:none !important;border-radius:10px;
+  box-shadow:inset 4px 4px 8px rgba(0,0,0,0.5),inset -4px -4px 8px rgba(255,255,255,0.02);
+}
+body.theme-neo .btn-primary{background:#1b1f1d !important;color:var(--green-text) !important;box-shadow:6px 6px 12px rgba(0,0,0,0.5),-6px -6px 12px rgba(255,255,255,0.03) !important;}
+body.theme-neo .btn-primary:hover{box-shadow:3px 3px 8px rgba(0,0,0,0.5),-3px -3px 8px rgba(255,255,255,0.03) !important;transform:none;}
+body.theme-neo .btn-secondary, body.theme-neo .btn-danger, body.theme-neo .btn-export{
+  background:#1b1f1d !important;border:none !important;box-shadow:5px 5px 10px rgba(0,0,0,0.5),-5px -5px 10px rgba(255,255,255,0.025) !important;
+}
+body.theme-neo .badge{box-shadow:3px 3px 6px rgba(0,0,0,0.4),-3px -3px 6px rgba(255,255,255,0.02);}
+body.theme-neo .toggle-slider{background:#1b1f1d;box-shadow:inset 2px 2px 4px rgba(0,0,0,0.5),inset -2px -2px 4px rgba(255,255,255,0.03);border:none;}
+body.theme-neo .nav-item{border-left:none;}
+body.theme-neo .nav-item.active{background:#1b1f1d;box-shadow:inset 3px 3px 6px rgba(0,0,0,0.5),inset -3px -3px 6px rgba(255,255,255,0.02);border-left:none;border-radius:10px;}
+body.theme-neo .tab-btn.active{box-shadow:inset 3px 3px 6px rgba(0,0,0,0.5),inset -3px -3px 6px rgba(255,255,255,0.02);border-radius:8px;border-bottom-color:transparent;}
+
+/* ═══ THEME: LIQUID GLASS ═══
+   Frosted translucent panels floating over blurred colour blobs. */
+body.theme-glass{background:transparent;}
+html:has(body.theme-glass){background:#0A0D0A;}
+body.theme-glass::before{
+  content:'';position:fixed;inset:-10%;z-index:-1;
+  background:
+    radial-gradient(circle at 12% 18%, rgba(74,138,40,0.45), transparent 38%),
+    radial-gradient(circle at 88% 8%, rgba(32,128,232,0.35), transparent 42%),
+    radial-gradient(circle at 55% 92%, rgba(196,146,14,0.3), transparent 40%),
+    #0A0D0A;
+  filter:blur(70px) saturate(140%);
+}
+body.theme-glass .main{background:transparent;}
+body.theme-glass #loginScreen{background:transparent;}
+body.theme-glass .card, body.theme-glass .kpi, body.theme-glass .modal, body.theme-glass .sidebar,
+body.theme-glass .topbar, body.theme-glass .login-card, body.theme-glass .stat-tick, body.theme-glass .table-wrap{
+  background:rgba(255,255,255,0.06) !important;
+  border:1px solid rgba(255,255,255,0.16) !important;
+  backdrop-filter:blur(20px) saturate(160%) !important;-webkit-backdrop-filter:blur(20px) saturate(160%) !important;
+  box-shadow:0 8px 32px rgba(0,0,0,0.3),inset 0 1px 0 rgba(255,255,255,0.08) !important;
+}
+body.theme-glass th{background:rgba(255,255,255,0.05);backdrop-filter:blur(10px);}
+body.theme-glass td{border-top:1px solid rgba(255,255,255,0.08);}
+body.theme-glass .form-control, body.theme-glass .filter-input, body.theme-glass .filter-select, body.theme-glass .drawer-input{
+  background:rgba(255,255,255,0.05) !important;border:1px solid rgba(255,255,255,0.16) !important;
+  backdrop-filter:blur(12px) !important;-webkit-backdrop-filter:blur(12px) !important;
+}
+body.theme-glass .btn-primary{background:linear-gradient(135deg,rgba(74,138,40,0.85),rgba(94,171,48,0.85)) !important;border:1px solid rgba(255,255,255,0.25) !important;backdrop-filter:blur(10px) !important;}
+body.theme-glass .btn-secondary, body.theme-glass .btn-danger, body.theme-glass .btn-export{
+  background:rgba(255,255,255,0.06) !important;border:1px solid rgba(255,255,255,0.16) !important;backdrop-filter:blur(10px) !important;
+}
+body.theme-glass .badge{background:rgba(255,255,255,0.1) !important;backdrop-filter:blur(6px);}
+body.theme-glass .toggle-slider{background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.16);}
+body.theme-glass .nav-item.active{background:rgba(255,255,255,0.08);backdrop-filter:blur(10px);border-left-color:var(--green-bright);}
+body.theme-glass .modal-overlay{backdrop-filter:blur(8px);}
 </style>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
 </head>
 <body>
+<script>(function(){try{var t=localStorage.getItem('ascovita_theme')||'deluxe';document.body.classList.add('theme-'+t);}catch(e){}})();</script>
 
 <!-- ══════════════ LOGIN ══════════════ -->
 <div id="loginScreen">
@@ -1925,6 +2029,38 @@ img, canvas, svg, table { max-width:100%; }
     <div><div class="page-title">Settings</div><div class="page-sub">Store configuration & admin preferences</div></div>
     <div class="page-actions"><button class="btn btn-primary" onclick="saveSettings()">💾 Save Settings</button></div>
   </div>
+
+  <div class="card" style="margin-bottom:16px">
+    <div class="card-hdr"><span class="card-title">🎨 Interface Settings</span></div>
+    <div style="color:var(--text3);font-size:0.8rem;margin:-10px 0 16px;">Customize your application theme — this changes the look of the entire backoffice for every admin. Data and functionality stay exactly the same. Editable by both Admin and Owner.</div>
+    <div class="theme-picker">
+      <div class="theme-opt" data-theme="deluxe" onclick="setInterfaceTheme('deluxe')">
+        <div class="theme-preview theme-preview-deluxe">
+          <div class="theme-check">✓</div>
+          <div class="tp-dots"><span class="tp-dot"></span><span class="tp-dot"></span><span class="tp-dot"></span></div>
+          <div class="tp-bars"><div class="tp-bar w80"></div><div class="tp-bar w60"></div><div class="tp-bar w40"></div></div>
+        </div>
+        <div class="theme-opt-label">Deluxe</div>
+      </div>
+      <div class="theme-opt" data-theme="neo" onclick="setInterfaceTheme('neo')">
+        <div class="theme-preview theme-preview-neo">
+          <div class="theme-check">✓</div>
+          <div class="tp-dots"><span class="tp-dot"></span><span class="tp-dot"></span><span class="tp-dot"></span></div>
+          <div class="tp-bars"><div class="tp-bar w80"></div><div class="tp-bar w60"></div><div class="tp-bar w40"></div></div>
+        </div>
+        <div class="theme-opt-label">Neomorphism</div>
+      </div>
+      <div class="theme-opt" data-theme="glass" onclick="setInterfaceTheme('glass')">
+        <div class="theme-preview theme-preview-glass">
+          <div class="theme-check">✓</div>
+          <div class="tp-dots"><span class="tp-dot"></span><span class="tp-dot"></span><span class="tp-dot"></span></div>
+          <div class="tp-bars"><div class="tp-bar w80"></div><div class="tp-bar w60"></div><div class="tp-bar w40"></div></div>
+        </div>
+        <div class="theme-opt-label">Liquid Glass</div>
+      </div>
+    </div>
+  </div>
+
   <div class="grid-2">
     <div class="card">
       <div class="card-hdr"><span class="card-title">🏪 Store Settings</span></div>
@@ -7135,7 +7271,43 @@ async function checkIntegrations() {
 // ═══════════════════════════════════════════════
 // SETTINGS
 // ═══════════════════════════════════════════════
+
+// ─── Interface Theme (Deluxe / Neomorphism / Liquid Glass) ───
+// All three themes share the same HTML, JS and data — only the visual
+// skin changes. Stored in localStorage for instant, flash-free load,
+// and synced to the shared backend settings so the choice is visible
+// to every admin/owner who opens the backoffice, not just this device.
+const THEME_KEY = 'ascovita_theme';
+const VALID_THEMES = ['deluxe','neo','glass'];
+
+function applyThemeClass(theme) {
+  theme = VALID_THEMES.includes(theme) ? theme : 'deluxe';
+  document.body.classList.remove('theme-deluxe','theme-neo','theme-glass');
+  document.body.classList.add('theme-' + theme);
+  document.querySelectorAll('.theme-opt').forEach(el => {
+    el.classList.toggle('selected', el.dataset.theme === theme);
+  });
+}
+
+async function setInterfaceTheme(theme, opts) {
+  opts = opts || {};
+  applyThemeClass(theme);
+  try { localStorage.setItem(THEME_KEY, theme); } catch {}
+  if (opts.silent) return;
+  try {
+    const r = await apiFetch('/api/admin/settings', {method:'PUT', body:JSON.stringify({interface_theme: theme})});
+    if (r && r.ok) toast('Theme updated ✅');
+    else toast('Theme applied locally — server save failed', 'warning');
+  } catch (e) {
+    // Theme is already applied client-side; backend sync is best-effort.
+    toast('Theme applied locally — offline', 'warning');
+  }
+}
+
 async function loadSettings() {
+  // Apply the locally-remembered theme immediately so the Settings page
+  // (and rest of the app) never flashes the wrong skin before the network call resolves.
+  applyThemeClass(localStorage.getItem(THEME_KEY));
   try {
     const r = await apiFetch('/api/admin/settings');
     if(!r.ok) return; // silently skip if endpoint doesn't exist yet
@@ -7146,10 +7318,16 @@ async function loadSettings() {
     if(d.whatsapp_number) document.getElementById('whatsappNumber').value = d.whatsapp_number;
     if(d.gst_rate) { document.getElementById('cgstRate').value = d.gst_rate.cgst||2.5; document.getElementById('sgstRate').value = d.gst_rate.sgst||2.5; }
     if(d.razorpay_mode) document.getElementById('pgMode').value = d.razorpay_mode;
+    if(d.interface_theme) {
+      // Backend is the source of truth once reachable — keep localStorage in sync too.
+      applyThemeClass(d.interface_theme);
+      try { localStorage.setItem(THEME_KEY, d.interface_theme); } catch {}
+    }
   } catch {}
 }
 
 async function saveSettings() {
+  const activeThemeOpt = document.querySelector('.theme-opt.selected');
   const settings = {
     store_online: document.getElementById('storeOnline').checked,
     cod_available: document.getElementById('codAvailable').checked,
@@ -7157,6 +7335,7 @@ async function saveSettings() {
     whatsapp_number: document.getElementById('whatsappNumber').value,
     gst_rate: {cgst: parseFloat(document.getElementById('cgstRate').value)||2.5, sgst: parseFloat(document.getElementById('sgstRate').value)||2.5},
     razorpay_mode: document.getElementById('pgMode').value,
+    interface_theme: activeThemeOpt ? activeThemeOpt.dataset.theme : (localStorage.getItem(THEME_KEY) || 'deluxe'),
   };
   try {
     const r = await apiFetch('/api/admin/settings', {method:'PUT', body:JSON.stringify(settings)});
