@@ -85,6 +85,49 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);min-height:1
 .tb-btn:hover{border-color:var(--green);color:var(--green-text);}
 .hamburger-btn{display:none;background:none;border:none;color:var(--text);font-size:1.2rem;cursor:pointer;padding:4px;}
 
+/* ═══ NOTIFICATIONS ═══ */
+.notif-wrap{position:relative;}
+.notif-btn{position:relative;background:none;border:1px solid var(--border);border-radius:8px;color:var(--text2);width:34px;height:34px;cursor:pointer;font-size:0.95rem;display:flex;align-items:center;justify-content:center;transition:all 0.2s;}
+.notif-btn:hover{border-color:var(--green);color:var(--green-text);}
+.notif-count{position:absolute;top:-5px;right:-5px;background:var(--red);color:#fff;font-size:0.6rem;font-weight:700;min-width:16px;height:16px;border-radius:9px;display:flex;align-items:center;justify-content:center;padding:0 4px;}
+.notif-dropdown{position:absolute;top:calc(100% + 8px);right:0;width:340px;max-height:420px;overflow-y:auto;background:var(--surface);border:1px solid var(--border2);border-radius:14px;box-shadow:var(--shadow-lg);z-index:400;display:none;}
+.notif-dropdown.open{display:block;}
+.notif-hdr{padding:12px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;background:var(--surface);}
+.notif-hdr-title{font-family:var(--display);font-weight:700;font-size:0.88rem;color:var(--white);}
+.notif-clear{background:none;border:none;color:var(--text3);font-size:0.72rem;cursor:pointer;}
+.notif-clear:hover{color:var(--green-text);}
+.notif-item{display:flex;gap:10px;padding:11px 16px;border-bottom:1px solid var(--border);cursor:pointer;transition:background 0.15s;}
+.notif-item:hover{background:rgba(74,138,40,0.06);}
+.notif-item.unread{background:rgba(74,138,40,0.05);}
+.notif-ico{width:30px;height:30px;border-radius:8px;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:0.9rem;}
+.notif-body{flex:1;min-width:0;}
+.notif-title{font-size:0.8rem;font-weight:600;color:var(--text);}
+.notif-sub{font-size:0.72rem;color:var(--text3);margin-top:2px;}
+.notif-time{font-size:0.65rem;color:var(--text3);margin-top:3px;}
+.notif-empty{padding:30px 16px;text-align:center;color:var(--text3);font-size:0.8rem;}
+
+/* ═══ CALENDAR ═══ */
+.cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:6px;}
+.cal-dow{font-size:0.68rem;font-weight:700;text-transform:uppercase;letter-spacing:0.8px;color:var(--text3);text-align:center;padding:4px 0 8px;}
+.cal-cell{background:var(--surface);border:1px solid var(--border);border-radius:10px;min-height:92px;padding:6px;cursor:pointer;transition:border-color 0.15s;display:flex;flex-direction:column;gap:3px;}
+.cal-cell:hover{border-color:var(--green);}
+.cal-cell.other-month{opacity:0.35;}
+.cal-cell.today{border-color:var(--green);box-shadow:0 0 0 1px var(--green);}
+.cal-daynum{font-size:0.75rem;font-weight:700;color:var(--text2);}
+.cal-evt{font-size:0.62rem;font-weight:600;padding:2px 5px;border-radius:5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.cal-evt.delivery{background:rgba(32,128,232,0.18);color:#60a5fa;}
+.cal-evt.manufacturing{background:rgba(196,146,14,0.18);color:var(--gold-text);}
+.cal-evt.reminder{background:rgba(74,138,40,0.18);color:var(--green-text);}
+.cal-evt.order{background:rgba(255,255,255,0.08);color:var(--text2);}
+.cal-evt-more{font-size:0.6rem;color:var(--text3);}
+
+/* ═══ MEDIA LIBRARY V2 ═══ */
+.media-dropzone{border:2px dashed var(--border2);border-radius:14px;padding:26px;text-align:center;color:var(--text3);font-size:0.82rem;margin-bottom:16px;transition:all 0.2s;}
+.media-dropzone.drag{border-color:var(--green);background:rgba(74,138,40,0.06);color:var(--green-text);}
+.photo-item.selected{border-color:var(--green-bright);box-shadow:0 0 0 2px var(--green-glow);}
+.photo-select{position:absolute;top:6px;left:6px;width:18px;height:18px;z-index:2;accent-color:var(--green);}
+.photo-alt-tag{position:absolute;bottom:0;left:0;right:0;background:rgba(0,0,0,0.75);color:var(--text2);font-size:0.6rem;padding:3px 6px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+
 /* ═══ SIDEBAR ═══ */
 .sidebar{background:var(--surface);border-right:1px solid var(--border);padding:12px 0;overflow-y:auto;height:100%;position:relative;z-index:10;}
 .nav-section{margin-bottom:4px;}
@@ -712,195 +755,10 @@ img, canvas, svg, table { max-width:100%; }
 .topbar { backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); }
 .stream-item { display:flex; align-items:center; gap:8px; padding:6px 0; border-bottom:1px solid var(--border); }
 .nav-new { margin-left:auto; width:6px; height:6px; border-radius:50%; background:var(--green-text); }
-
-/* ═══════════════════════════════════════════════
-   INTERFACE THEMES — Deluxe (default) / Neomorphism / Liquid Glass
-   All three themes reuse the exact same HTML/JS/data — only visual
-   presentation changes. Selection is stored server-side (settings)
-   and in localStorage, and can be changed by both Admin and Owner.
-   ═══════════════════════════════════════════════ */
-
-/* ---- Theme picker UI (Settings page) ---- */
-.theme-picker{display:flex;gap:16px;flex-wrap:wrap;}
-.theme-opt{flex:1;min-width:150px;max-width:220px;cursor:pointer;text-align:center;}
-.theme-preview{position:relative;border-radius:14px;padding:14px;height:104px;margin-bottom:10px;border:2px solid transparent;transition:all 0.2s;overflow:hidden;}
-.theme-opt.selected .theme-preview{border-color:var(--green);box-shadow:0 0 0 3px var(--green-glow);}
-.theme-preview .tp-dots{display:flex;gap:4px;margin-bottom:10px;}
-.theme-preview .tp-dot{width:6px;height:6px;border-radius:50%;}
-.theme-preview .tp-bars{display:flex;flex-direction:column;gap:6px;}
-.theme-preview .tp-bar{height:8px;border-radius:4px;}
-.theme-preview .tp-bar.w60{width:60%;}
-.theme-preview .tp-bar.w40{width:40%;}
-.theme-preview .tp-bar.w80{width:80%;}
-.theme-opt-label{font-size:0.82rem;font-weight:600;color:var(--text2);}
-.theme-opt.selected .theme-opt-label{color:var(--green-text);}
-.theme-check{position:absolute;top:8px;right:8px;width:20px;height:20px;border-radius:50%;background:var(--green);color:#fff;display:none;align-items:center;justify-content:center;font-size:0.68rem;box-shadow:0 2px 6px rgba(0,0,0,0.4);}
-.theme-opt.selected .theme-check{display:flex;}
-
-.theme-preview-deluxe{background:#0F1410;}
-.theme-preview-deluxe .tp-bar{background:#1C2418;}
-.theme-preview-deluxe .tp-dot:nth-child(1){background:#E53535}
-.theme-preview-deluxe .tp-dot:nth-child(2){background:#C4920E}
-.theme-preview-deluxe .tp-dot:nth-child(3){background:#4A8A28}
-
-.theme-preview-neo{background:#e6e9ef;box-shadow:7px 7px 14px rgba(163,177,198,0.55),-7px -7px 14px rgba(255,255,255,0.85);}
-.theme-preview-neo .tp-bar{background:#e6e9ef;box-shadow:inset 2px 2px 4px rgba(163,177,198,0.5),inset -2px -2px 4px rgba(255,255,255,0.75);}
-.theme-preview-neo .tp-dot{background:#aab4c4;box-shadow:1px 1px 2px rgba(163,177,198,0.45);}
-
-.theme-preview-glass{
-  background:radial-gradient(circle at 20% 20%, rgba(94,171,48,0.55), transparent 45%),
-             radial-gradient(circle at 80% 15%, rgba(32,128,232,0.5), transparent 45%),
-             radial-gradient(circle at 65% 90%, rgba(168,85,247,0.45), transparent 45%),
-             #1b1440;
-  backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);border:1px solid rgba(255,255,255,0.3);
-}
-.theme-preview-glass .tp-bar{background:rgba(255,255,255,0.35);backdrop-filter:blur(4px);}
-.theme-preview-glass .tp-dot{background:rgba(255,255,255,0.75);}
-
-/* ═══ THEME: NEOMORPHISM (classic light Soft UI) ═══
-   One flat surface colour — every element is either "extruded" (raised,
-   dual light+dark shadow) or "pressed" (inset shadow). No borders, ever. */
-body.theme-neo{
-  --bg:#e6e9ef; --bg2:#e6e9ef; --bg3:#e6e9ef;
-  --surface:#e6e9ef; --surface2:#e6e9ef;
-  --border:transparent; --border2:transparent;
-  --text:#333a45; --text2:#5b6472; --text3:#8891a0; --white:#20242c;
-  --green:#3f7a22; --green-bright:#4d9129; --green-text:#2f6018; --green-glow:rgba(63,122,34,0.18);
-  --gold:#a97a0a; --gold-text:#8a6207;
-  --red:#c0392b; --red-soft:rgba(192,57,43,0.12);
-  --blue:#2569c9;
-  --shadow:6px 6px 14px rgba(163,177,198,0.55),-6px -6px 14px rgba(255,255,255,0.85);
-  --shadow-lg:12px 12px 24px rgba(163,177,198,0.55),-12px -12px 24px rgba(255,255,255,0.85);
-  background:#e6e9ef;
-}
-body.theme-neo .main, body.theme-neo #loginScreen{background:#e6e9ef;}
-body.theme-neo ::-webkit-scrollbar-thumb{background:#b9c1cf;}
-body.theme-neo .card, body.theme-neo .kpi, body.theme-neo .modal, body.theme-neo .sidebar,
-body.theme-neo .topbar, body.theme-neo .login-card, body.theme-neo .stat-tick, body.theme-neo .table-wrap{
-  background:#e6e9ef !important;border:none !important;border-radius:20px;
-  box-shadow:8px 8px 16px rgba(163,177,198,0.55),-8px -8px 16px rgba(255,255,255,0.85) !important;
-}
-body.theme-neo th{background:transparent;}
-body.theme-neo td{border-top:1px solid rgba(163,177,198,0.3);}
-body.theme-neo .form-control, body.theme-neo .filter-input, body.theme-neo .filter-select, body.theme-neo .drawer-input{
-  background:#e6e9ef !important;border:none !important;border-radius:12px;color:var(--text) !important;
-  box-shadow:inset 5px 5px 10px rgba(163,177,198,0.5),inset -5px -5px 10px rgba(255,255,255,0.75) !important;
-}
-body.theme-neo .form-control::placeholder{color:var(--text3);}
-body.theme-neo .btn{border-radius:14px;}
-body.theme-neo .btn-primary{background:#e6e9ef !important;color:var(--green-text) !important;font-weight:700;box-shadow:6px 6px 12px rgba(163,177,198,0.5),-6px -6px 12px rgba(255,255,255,0.8) !important;}
-body.theme-neo .btn-primary:hover{box-shadow:inset 3px 3px 8px rgba(163,177,198,0.5),inset -3px -3px 8px rgba(255,255,255,0.7) !important;transform:none;}
-body.theme-neo .btn-secondary, body.theme-neo .btn-danger, body.theme-neo .btn-export{
-  background:#e6e9ef !important;border:none !important;color:var(--text2) !important;
-  box-shadow:5px 5px 10px rgba(163,177,198,0.5),-5px -5px 10px rgba(255,255,255,0.8) !important;
-}
-body.theme-neo .btn-danger{color:var(--red) !important;}
-body.theme-neo .btn-export{color:var(--green-text) !important;}
-body.theme-neo .badge{background:#e6e9ef;box-shadow:3px 3px 6px rgba(163,177,198,0.4),-3px -3px 6px rgba(255,255,255,0.7);}
-body.theme-neo .badge-blue{color:#1d4ed8;}
-body.theme-neo .badge-gray{color:var(--text2);}
-body.theme-neo .filter-chip{background:#e6e9ef;box-shadow:3px 3px 6px rgba(163,177,198,0.4),-3px -3px 6px rgba(255,255,255,0.7);}
-body.theme-neo .filter-chip.active{box-shadow:inset 2px 2px 5px rgba(63,122,34,0.3),inset -2px -2px 5px rgba(255,255,255,0.6);}
-body.theme-neo .toggle-slider{background:#e6e9ef;box-shadow:inset 3px 3px 6px rgba(163,177,198,0.5),inset -3px -3px 6px rgba(255,255,255,0.75);border:none;}
-body.theme-neo .toggle-slider::before{background:#fff;box-shadow:2px 2px 4px rgba(163,177,198,0.6);}
-body.theme-neo .toggle input:checked + .toggle-slider{background:#e6e9ef;box-shadow:inset 3px 3px 6px rgba(63,122,34,0.35),inset -3px -3px 6px rgba(255,255,255,0.6);}
-body.theme-neo .toggle input:checked + .toggle-slider::before{background:var(--green);}
-body.theme-neo .nav-item{border-left:none;}
-body.theme-neo .nav-item:hover{background:rgba(163,177,198,0.15);}
-body.theme-neo .nav-item.active{background:#e6e9ef;box-shadow:inset 3px 3px 7px rgba(163,177,198,0.5),inset -3px -3px 7px rgba(255,255,255,0.75);border-left:none;border-radius:12px;margin:0 8px;}
-body.theme-neo .tab-btn.active{box-shadow:inset 3px 3px 6px rgba(163,177,198,0.5),inset -3px -3px 6px rgba(255,255,255,0.75);border-radius:10px;border-bottom-color:transparent;}
-body.theme-neo .tb-stat{box-shadow:3px 3px 6px rgba(163,177,198,0.4),-3px -3px 6px rgba(255,255,255,0.7);}
-
-/* Colour variety on top of the white base — cards & KPIs cycle through a
-   soft accent tint + a coloured edge, so the dashboard doesn't read as
-   flat grey while the page background stays clean white. */
-body.theme-neo .kpi, body.theme-neo .card{position:relative;overflow:hidden;}
-body.theme-neo .kpi:nth-child(4n+1){background:linear-gradient(150deg, rgba(63,122,34,0.10), #e6e9ef 58%) !important;box-shadow:8px 8px 16px rgba(163,177,198,0.55),-8px -8px 16px rgba(255,255,255,0.85), inset 3px 0 0 rgba(63,122,34,0.55) !important;}
-body.theme-neo .kpi:nth-child(4n+2){background:linear-gradient(150deg, rgba(37,105,201,0.10), #e6e9ef 58%) !important;box-shadow:8px 8px 16px rgba(163,177,198,0.55),-8px -8px 16px rgba(255,255,255,0.85), inset 3px 0 0 rgba(37,105,201,0.55) !important;}
-body.theme-neo .kpi:nth-child(4n+3){background:linear-gradient(150deg, rgba(169,122,10,0.10), #e6e9ef 58%) !important;box-shadow:8px 8px 16px rgba(163,177,198,0.55),-8px -8px 16px rgba(255,255,255,0.85), inset 3px 0 0 rgba(169,122,10,0.55) !important;}
-body.theme-neo .kpi:nth-child(4n+4){background:linear-gradient(150deg, rgba(192,57,43,0.09), #e6e9ef 58%) !important;box-shadow:8px 8px 16px rgba(163,177,198,0.55),-8px -8px 16px rgba(255,255,255,0.85), inset 3px 0 0 rgba(192,57,43,0.5) !important;}
-body.theme-neo .card:nth-child(4n+1)::before,
-body.theme-neo .kpi:nth-child(4n+1)::after{content:'';position:absolute;top:0;left:0;right:0;height:4px;background:linear-gradient(90deg,#3f7a22,#6fbf3f);}
-body.theme-neo .card:nth-child(4n+2)::before,
-body.theme-neo .kpi:nth-child(4n+2)::after{content:'';position:absolute;top:0;left:0;right:0;height:4px;background:linear-gradient(90deg,#2569c9,#6fa8dc);}
-body.theme-neo .card:nth-child(4n+3)::before,
-body.theme-neo .kpi:nth-child(4n+3)::after{content:'';position:absolute;top:0;left:0;right:0;height:4px;background:linear-gradient(90deg,#a97a0a,#e0b84a);}
-body.theme-neo .card:nth-child(4n+4)::before,
-body.theme-neo .kpi:nth-child(4n+4)::after{content:'';position:absolute;top:0;left:0;right:0;height:4px;background:linear-gradient(90deg,#c0392b,#e0685a);}
-body.theme-neo .card::before, body.theme-neo .kpi::after{border-radius:20px 20px 0 0;}
-body.theme-neo .kpi-val{color:var(--white) !important;}
-body.theme-neo .tab-btn.active{color:var(--green-text);}
-
-/* ═══ THEME: LIQUID GLASS ═══
-   Glossy, translucent panels floating over a vivid blurred colour field —
-   inspired by Apple's Liquid Glass / iOS control surfaces. Colour zones are
-   kept apart and blended with "screen" so they stay distinct and jewel-bright
-   instead of muddying into brown where they overlap. */
-body.theme-glass{
-  --border:rgba(255,255,255,0.16); --border2:rgba(255,255,255,0.28);
-  --shadow-lg:0 20px 60px rgba(0,0,0,0.35), inset 0 1px 0 rgba(255,255,255,0.35);
-  background:transparent;
-}
-html:has(body.theme-glass){background:#0d0b24;}
-body.theme-glass::before{
-  content:'';position:fixed;inset:-20%;z-index:-2;
-  background:
-    radial-gradient(circle at 6% 10%, rgba(74,222,128,0.85), transparent 26%),
-    radial-gradient(circle at 94% 6%, rgba(56,152,255,0.8), transparent 28%),
-    radial-gradient(circle at 92% 92%, rgba(192,110,255,0.75), transparent 28%),
-    radial-gradient(circle at 6% 92%, rgba(255,110,180,0.7), transparent 28%),
-    radial-gradient(circle at 50% 50%, rgba(255,200,90,0.35), transparent 30%),
-    #0d0b24;
-  background-blend-mode:screen;
-  filter:blur(55px) saturate(190%);
-  animation:glassDrift 24s ease-in-out infinite alternate;
-}
-body.theme-glass::after{
-  content:'';position:fixed;inset:0;z-index:-1;
-  background:radial-gradient(ellipse 70% 60% at 55% 45%, rgba(8,6,22,0.4), transparent 70%);
-}
-@keyframes glassDrift{0%{transform:translate(0,0) scale(1);}100%{transform:translate(-3%,3%) scale(1.08);}}
-body.theme-glass .main, body.theme-glass #loginScreen{background:transparent;}
-body.theme-glass .card, body.theme-glass .kpi, body.theme-glass .modal,
-body.theme-glass .login-card, body.theme-glass .stat-tick, body.theme-glass .table-wrap{
-  background:linear-gradient(160deg, rgba(255,255,255,0.22), rgba(255,255,255,0.05)) !important;
-  border:1px solid rgba(255,255,255,0.32) !important;border-radius:22px;
-  backdrop-filter:blur(30px) saturate(200%) !important;-webkit-backdrop-filter:blur(30px) saturate(200%) !important;
-  box-shadow:0 16px 48px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.4) !important;
-}
-body.theme-glass .topbar, body.theme-glass .sidebar{
-  background:linear-gradient(160deg, rgba(255,255,255,0.12), rgba(255,255,255,0.02)) !important;
-  border-color:rgba(255,255,255,0.2) !important;
-  backdrop-filter:blur(28px) saturate(200%) !important;-webkit-backdrop-filter:blur(28px) saturate(200%) !important;
-}
-body.theme-glass .kpi::before{background:radial-gradient(circle,rgba(255,255,255,0.3),transparent);}
-body.theme-glass .card:nth-child(4n+1), body.theme-glass .kpi:nth-child(4n+1){border-top:2px solid rgba(74,222,128,0.65) !important;}
-body.theme-glass .card:nth-child(4n+2), body.theme-glass .kpi:nth-child(4n+2){border-top:2px solid rgba(56,152,255,0.6) !important;}
-body.theme-glass .card:nth-child(4n+3), body.theme-glass .kpi:nth-child(4n+3){border-top:2px solid rgba(255,200,90,0.65) !important;}
-body.theme-glass .card:nth-child(4n+4), body.theme-glass .kpi:nth-child(4n+4){border-top:2px solid rgba(255,110,180,0.6) !important;}
-body.theme-glass th{background:rgba(255,255,255,0.08);backdrop-filter:blur(10px);}
-body.theme-glass td{border-top:1px solid rgba(255,255,255,0.1);}
-body.theme-glass .form-control, body.theme-glass .filter-input, body.theme-glass .filter-select, body.theme-glass .drawer-input{
-  background:rgba(255,255,255,0.1) !important;border:1px solid rgba(255,255,255,0.24) !important;border-radius:12px;
-  backdrop-filter:blur(16px) !important;-webkit-backdrop-filter:blur(16px) !important;
-}
-body.theme-glass .btn{border-radius:999px;}
-body.theme-glass .btn-primary{background:linear-gradient(135deg,rgba(94,171,48,0.9),rgba(74,138,40,0.75)) !important;border:1px solid rgba(255,255,255,0.35) !important;backdrop-filter:blur(10px) !important;box-shadow:0 4px 16px rgba(74,138,40,0.4),inset 0 1px 0 rgba(255,255,255,0.4) !important;}
-body.theme-glass .btn-secondary, body.theme-glass .btn-danger, body.theme-glass .btn-export{
-  background:rgba(255,255,255,0.12) !important;border:1px solid rgba(255,255,255,0.26) !important;backdrop-filter:blur(10px) !important;
-}
-body.theme-glass .badge{background:rgba(255,255,255,0.16) !important;border:1px solid rgba(255,255,255,0.22);backdrop-filter:blur(8px);border-radius:999px;}
-body.theme-glass .filter-chip{border-radius:999px;backdrop-filter:blur(8px);}
-body.theme-glass .toggle-slider{background:rgba(255,255,255,0.14);border:1px solid rgba(255,255,255,0.26);}
-body.theme-glass .toggle-slider::before{box-shadow:0 1px 3px rgba(0,0,0,0.3);}
-body.theme-glass .nav-item{border-radius:14px;margin:0 8px;}
-body.theme-glass .nav-item.active{background:linear-gradient(135deg,rgba(255,255,255,0.2),rgba(255,255,255,0.06));backdrop-filter:blur(10px);border-left-color:transparent;box-shadow:inset 0 1px 0 rgba(255,255,255,0.35);}
-body.theme-glass .modal-overlay{backdrop-filter:blur(10px);}
 </style>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
 </head>
 <body>
-<script>(function(){try{var t=localStorage.getItem('ascovita_theme')||'deluxe';document.body.classList.add('theme-'+t);}catch(e){}})();</script>
 
 <!-- ══════════════ LOGIN ══════════════ -->
 <div id="loginScreen">
@@ -1006,6 +864,16 @@ body.theme-glass .modal-overlay{backdrop-filter:blur(10px);}
       <span class="tb-dot"></span>
       <span style="color:var(--text3);font-size:0.72rem;">Checking…</span>
     </div>
+    <div class="notif-wrap">
+      <button class="notif-btn" onclick="toggleNotifDropdown()" title="Notifications">🔔<span class="notif-count" id="notifCount" style="display:none;">0</span></button>
+      <div class="notif-dropdown" id="notifDropdown">
+        <div class="notif-hdr">
+          <span class="notif-hdr-title">Notifications</span>
+          <button class="notif-clear" onclick="markAllNotifsRead()">Mark all read</button>
+        </div>
+        <div id="notifList"><div class="notif-empty">No notifications yet</div></div>
+      </div>
+    </div>
     <button class="tb-btn" onclick="refreshCurrent()">↺ Refresh</button>
     <button class="tb-btn" onclick="doLogout()" style="color:var(--red)">Sign Out</button>
   </div>
@@ -1018,6 +886,7 @@ body.theme-glass .modal-overlay{backdrop-filter:blur(10px);}
     <div class="nav-item active" onclick="showPage('dashboard')"><span class="nav-ico">📊</span> Dashboard</div>
     <div class="nav-item" onclick="showPage('analytics')"><span class="nav-ico">📈</span> Analytics</div>
     <div class="nav-item" onclick="showPage('livevisitors')"><span class="nav-ico">👁️</span> Live Visitors</div>
+    <div class="nav-item" onclick="showPage('calendar')"><span class="nav-ico">🗓️</span> Calendar</div>
   </div>
   <div class="nav-section">
     <div class="nav-sec-label">Commerce</div>
@@ -1653,6 +1522,51 @@ body.theme-glass .modal-overlay{backdrop-filter:blur(10px);}
       <div class="drawer-field-label">SEO Keywords (comma-separated)</div>
       <input class="drawer-input" id="dSeoKeywords" placeholder="glutathione tablet, vitamin c effervescent…">
     </div>
+    <div class="drawer-field">
+      <div class="drawer-field-label">URL Slug</div>
+      <input class="drawer-input" id="dSeoSlug" placeholder="vitamin-c-effervescent-20-tablets">
+    </div>
+    <div class="drawer-field">
+      <div class="drawer-field-label">Canonical URL</div>
+      <input class="drawer-input" id="dSeoCanonical" placeholder="https://ascovita.com/product/vitamin-c-effervescent">
+    </div>
+    <div class="drawer-field" style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+      <div>
+        <div class="drawer-field-label">Open Graph Image URL</div>
+        <input class="drawer-input" id="dSeoOgImage" placeholder="https://…og-image.jpg">
+      </div>
+      <div>
+        <div class="drawer-field-label">Twitter Card Image URL</div>
+        <input class="drawer-input" id="dSeoTwitterImage" placeholder="https://…twitter-card.jpg">
+      </div>
+    </div>
+    <div class="drawer-field" style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+      <div>
+        <div class="drawer-field-label">Schema Type</div>
+        <select class="drawer-input" id="dSeoSchemaType">
+          <option value="Product">Product</option>
+          <option value="Article">Article</option>
+          <option value="FAQPage">FAQPage</option>
+          <option value="">None</option>
+        </select>
+      </div>
+      <div>
+        <div class="drawer-field-label">Robots</div>
+        <select class="drawer-input" id="dSeoRobots">
+          <option value="index,follow">index, follow</option>
+          <option value="noindex,follow">noindex, follow</option>
+          <option value="index,nofollow">index, nofollow</option>
+          <option value="noindex,nofollow">noindex, nofollow</option>
+        </select>
+      </div>
+    </div>
+    <div class="drawer-field">
+      <div class="toggle-wrap">
+        <label class="toggle"><input type="checkbox" id="dSeoSitemap" checked><span class="toggle-slider"></span></label>
+        <span class="drawer-field-label" style="margin:0;">Include in sitemap</span>
+      </div>
+    </div>
+    <div class="form-hint" style="margin-top:-6px;">These extended SEO fields need matching columns on the products table (e.g. seo_slug, seo_canonical_url, seo_og_image, seo_twitter_image, seo_schema_type, seo_robots, seo_sitemap_include) — add them in Supabase before relying on the server to persist them.</div>
   </div>
   <div style="padding:16px 20px;border-top:1px solid var(--border);display:flex;gap:8px;position:sticky;bottom:0;background:var(--surface);">
     <button class="btn btn-secondary" style="flex:1;" onclick="closeProductDrawer()">Cancel</button>
@@ -1807,17 +1721,102 @@ body.theme-glass .modal-overlay{backdrop-filter:blur(10px);}
   <div class="page-hdr">
     <div><div class="page-title">Photo Library</div><div class="page-sub">All uploaded product images</div></div>
     <div class="page-actions">
-      <input type="file" id="photoFileInput" accept="image/*,.svg" onchange="uploadPhoto(this)">
-      <button class="btn btn-primary" onclick="document.getElementById('photoFileInput').click()">＋ Upload Image</button>
+      <label class="toggle-wrap" style="background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:6px 10px;">
+        <label class="toggle"><input type="checkbox" id="mediaWebpToggle" checked><span class="toggle-slider"></span></label>
+        <span style="font-size:0.75rem;color:var(--text2);">Convert to WebP on upload</span>
+      </label>
+      <input type="file" id="photoFileInput" accept="image/*,.svg" multiple onchange="uploadPhotos(this.files)">
+      <button class="btn btn-primary" onclick="document.getElementById('photoFileInput').click()">＋ Upload Images</button>
     </div>
   </div>
+
+  <div class="media-dropzone" id="mediaDropzone">
+    📥 Drag & drop images here to upload — multiple files supported
+  </div>
+
   <div id="uploadProgress" style="display:none;margin-bottom:16px;">
     <div style="background:var(--surface2);border-radius:8px;height:6px;overflow:hidden;">
       <div id="uploadBar" style="height:100%;background:linear-gradient(90deg,var(--green),var(--green-bright));width:0%;transition:width 0.3s;"></div>
     </div>
     <div style="font-size:0.75rem;color:var(--text3);margin-top:6px;" id="uploadStatus">Uploading…</div>
   </div>
+
+  <div class="filter-bar" style="justify-content:space-between;">
+    <div style="display:flex;gap:8px;align-items:center;">
+      <label style="display:flex;align-items:center;gap:6px;font-size:0.78rem;color:var(--text2);cursor:pointer;">
+        <input type="checkbox" id="mediaSelectAll" onchange="toggleSelectAllPhotos(this.checked)"> Select all
+      </label>
+      <span style="font-size:0.78rem;color:var(--text3);" id="mediaSelectedCount">0 selected</span>
+    </div>
+    <button class="btn btn-danger btn-sm" onclick="deleteSelectedPhotos()">🗑️ Delete Selected</button>
+  </div>
+
   <div class="photo-grid" id="photoGrid"></div>
+  <div class="form-hint" style="margin-top:14px;">Alt text is saved in this browser for now (the backend has no alt-text column yet) — add one to the images table to persist it for real accessibility/SEO benefit.</div>
+</div>
+
+<!-- ═════════════ CALENDAR ═════════════ -->
+<div class="page" id="page-calendar">
+  <div class="page-hdr">
+    <div><div class="page-title">Calendar</div><div class="page-sub">Delivery dates, manufacturing deadlines & team reminders</div></div>
+    <div class="page-actions">
+      <button class="btn btn-secondary" onclick="calChangeMonth(-1)">‹ Prev</button>
+      <button class="btn btn-secondary" onclick="calGoToday()">Today</button>
+      <button class="btn btn-secondary" onclick="calChangeMonth(1)">Next ›</button>
+      <button class="btn btn-primary" onclick="openCalEventModal()">＋ Add Event</button>
+    </div>
+  </div>
+  <div class="card" style="margin-bottom:16px;">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;">
+      <div class="card-title" id="calMonthLabel" style="font-family:var(--display);font-size:1.05rem;">—</div>
+      <div style="display:flex;gap:10px;font-size:0.72rem;color:var(--text3);">
+        <span><span class="badge-dot" style="background:#60a5fa;display:inline-block;width:6px;height:6px;border-radius:50%;margin-right:4px;"></span>Delivery</span>
+        <span><span class="badge-dot" style="background:var(--gold-text);display:inline-block;width:6px;height:6px;border-radius:50%;margin-right:4px;"></span>Manufacturing</span>
+        <span><span class="badge-dot" style="background:var(--green-text);display:inline-block;width:6px;height:6px;border-radius:50%;margin-right:4px;"></span>Reminder</span>
+        <span><span class="badge-dot" style="background:var(--text2);display:inline-block;width:6px;height:6px;border-radius:50%;margin-right:4px;"></span>Orders placed</span>
+      </div>
+    </div>
+    <div class="cal-grid" id="calDowRow">
+      <div class="cal-dow">Sun</div><div class="cal-dow">Mon</div><div class="cal-dow">Tue</div><div class="cal-dow">Wed</div><div class="cal-dow">Thu</div><div class="cal-dow">Fri</div><div class="cal-dow">Sat</div>
+    </div>
+    <div class="cal-grid" id="calGrid" style="margin-top:6px;"></div>
+  </div>
+  <div class="card">
+    <div class="card-hdr"><span class="card-title">📌 Upcoming (next 14 days)</span></div>
+    <div id="calUpcomingList"><div class="empty-state">No upcoming events</div></div>
+  </div>
+</div>
+
+<!-- Calendar event modal -->
+<div class="modal-overlay" id="calEventModal">
+  <div class="modal">
+    <div class="modal-hdr"><span class="modal-title" id="calEventModalTitle">Add Event</span><button class="modal-close" onclick="closeModal('calEventModal')">✕</button></div>
+    <div class="modal-body">
+      <input type="hidden" id="calEventId">
+      <div class="form-row">
+        <div class="form-group"><label class="form-label">Title</label><input class="form-control" id="calEventTitle" placeholder="e.g. Vitamin C batch — manufacturing due"></div>
+      </div>
+      <div class="form-row col2">
+        <div class="form-group"><label class="form-label">Date</label><input type="date" class="form-control" id="calEventDate"></div>
+        <div class="form-group"><label class="form-label">Type</label>
+          <select class="form-control" id="calEventType">
+            <option value="delivery">Delivery date</option>
+            <option value="manufacturing">Manufacturing deadline</option>
+            <option value="reminder">Team reminder</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group"><label class="form-label">Notes</label><textarea class="form-control" id="calEventNotes" rows="3" placeholder="Optional details…"></textarea></div>
+      </div>
+      <div class="form-hint">Saved locally in this browser (calendar events aren't wired to the backend yet — see note in code).</div>
+    </div>
+    <div class="modal-ftr">
+      <button class="btn btn-danger" id="calEventDeleteBtn" style="display:none;margin-right:auto;" onclick="deleteCalEvent()">🗑️ Delete</button>
+      <button class="btn btn-secondary" onclick="closeModal('calEventModal')">Cancel</button>
+      <button class="btn btn-primary" onclick="saveCalEvent()">💾 Save</button>
+    </div>
+  </div>
 </div>
 
 <!-- ═════════════ PAYMENTS ═════════════ -->
@@ -2110,38 +2109,6 @@ body.theme-glass .modal-overlay{backdrop-filter:blur(10px);}
     <div><div class="page-title">Settings</div><div class="page-sub">Store configuration & admin preferences</div></div>
     <div class="page-actions"><button class="btn btn-primary" onclick="saveSettings()">💾 Save Settings</button></div>
   </div>
-
-  <div class="card" style="margin-bottom:16px">
-    <div class="card-hdr"><span class="card-title">🎨 Interface Settings</span></div>
-    <div style="color:var(--text3);font-size:0.8rem;margin:-10px 0 16px;">Customize your application theme — this changes the look of the entire backoffice for every admin. Data and functionality stay exactly the same. Editable by both Admin and Owner.</div>
-    <div class="theme-picker">
-      <div class="theme-opt" data-theme="deluxe" onclick="setInterfaceTheme('deluxe')">
-        <div class="theme-preview theme-preview-deluxe">
-          <div class="theme-check">✓</div>
-          <div class="tp-dots"><span class="tp-dot"></span><span class="tp-dot"></span><span class="tp-dot"></span></div>
-          <div class="tp-bars"><div class="tp-bar w80"></div><div class="tp-bar w60"></div><div class="tp-bar w40"></div></div>
-        </div>
-        <div class="theme-opt-label">Deluxe</div>
-      </div>
-      <div class="theme-opt" data-theme="neo" onclick="setInterfaceTheme('neo')">
-        <div class="theme-preview theme-preview-neo">
-          <div class="theme-check">✓</div>
-          <div class="tp-dots"><span class="tp-dot"></span><span class="tp-dot"></span><span class="tp-dot"></span></div>
-          <div class="tp-bars"><div class="tp-bar w80"></div><div class="tp-bar w60"></div><div class="tp-bar w40"></div></div>
-        </div>
-        <div class="theme-opt-label">Neomorphism</div>
-      </div>
-      <div class="theme-opt" data-theme="glass" onclick="setInterfaceTheme('glass')">
-        <div class="theme-preview theme-preview-glass">
-          <div class="theme-check">✓</div>
-          <div class="tp-dots"><span class="tp-dot"></span><span class="tp-dot"></span><span class="tp-dot"></span></div>
-          <div class="tp-bars"><div class="tp-bar w80"></div><div class="tp-bar w60"></div><div class="tp-bar w40"></div></div>
-        </div>
-        <div class="theme-opt-label">Liquid Glass</div>
-      </div>
-    </div>
-  </div>
-
   <div class="grid-2">
     <div class="card">
       <div class="card-hdr"><span class="card-title">🏪 Store Settings</span></div>
@@ -2758,6 +2725,8 @@ async function initApp() {
   loadAuditLog();
   startLiveVisitors();
   renderSqlSnippets();
+  setTimeout(refreshNotifications, 2500); // let orders/products/customers finish loading first
+  setInterval(refreshNotifications, 90000);
 }
 
 async function checkServerStatus() {
@@ -2844,6 +2813,7 @@ function showPage(name) {
   if(name === 'banners') loadBanners();
   if(name === 'settings') { loadSettings(); }
   if(name === 'aiteam') { loadAITeamPage(); }
+  if(name === 'calendar') { renderCalendar(); }
 }
 
 function toggleSidebar() {
@@ -2859,7 +2829,7 @@ function refreshCurrent() {
   const active = document.querySelector('.page.active');
   if(!active) return;
   const id = active.id.replace('page-','');
-  const fns = {dashboard:loadDashboard,orders:loadOrders,products:loadProducts,inventory:loadInventory,discounts:loadDiscounts,customers:loadCustomers,analytics:loadAnalytics,payments:loadPayments,invoices:loadInvoices,photolibrary:loadPhotoLibrary,banners:loadBanners};
+  const fns = {dashboard:loadDashboard,orders:loadOrders,products:loadProducts,inventory:loadInventory,discounts:loadDiscounts,customers:loadCustomers,analytics:loadAnalytics,payments:loadPayments,invoices:loadInvoices,photolibrary:loadPhotoLibrary,banners:loadBanners,calendar:renderCalendar};
   if(fns[id]) fns[id]();
 }
 
@@ -5067,10 +5037,20 @@ function openProductDrawer(productId) {
     document.getElementById('dImage3').value = p.image3||'';
     document.getElementById('dMetaDesc').value = p.meta_description||'';
     document.getElementById('dSeoKeywords').value = Array.isArray(p.seo_keywords)?p.seo_keywords.join(', '):(p.seo_keywords||'');
+    document.getElementById('dSeoSlug').value = p.seo_slug||'';
+    document.getElementById('dSeoCanonical').value = p.seo_canonical_url||'';
+    document.getElementById('dSeoOgImage').value = p.seo_og_image||'';
+    document.getElementById('dSeoTwitterImage').value = p.seo_twitter_image||'';
+    document.getElementById('dSeoSchemaType').value = p.seo_schema_type||'Product';
+    document.getElementById('dSeoRobots').value = p.seo_robots||'index,follow';
+    document.getElementById('dSeoSitemap').checked = p.seo_sitemap_include !== false;
     updateDrawerImgPreview();
     updateDrawerPricePreview();
   } else {
-    ['dName','dBadge','dDescription','dOfferText','dHowToUse','dIngredients','dTags','dImage','dImage2','dImage3','dMetaDesc','dSeoKeywords'].forEach(id => document.getElementById(id).value='');
+    ['dName','dBadge','dDescription','dOfferText','dHowToUse','dIngredients','dTags','dImage','dImage2','dImage3','dMetaDesc','dSeoKeywords','dSeoSlug','dSeoCanonical','dSeoOgImage','dSeoTwitterImage'].forEach(id => document.getElementById(id).value='');
+    document.getElementById('dSeoSchemaType').value = 'Product';
+    document.getElementById('dSeoRobots').value = 'index,follow';
+    document.getElementById('dSeoSitemap').checked = true;
     document.getElementById('dBrand').value='Ascovita';
     document.getElementById('dHsn').value='30049099';
     document.getElementById('dHsn2').value='30049099';
@@ -5269,6 +5249,13 @@ async function saveProductFromDrawer() {
     image3:           document.getElementById('dImage3').value,
     meta_description: document.getElementById('dMetaDesc').value,
     seo_keywords:     document.getElementById('dSeoKeywords').value.split(',').map(s=>s.trim()).filter(Boolean),
+    seo_slug:            document.getElementById('dSeoSlug').value.trim(),
+    seo_canonical_url:   document.getElementById('dSeoCanonical').value.trim(),
+    seo_og_image:        document.getElementById('dSeoOgImage').value.trim(),
+    seo_twitter_image:   document.getElementById('dSeoTwitterImage').value.trim(),
+    seo_schema_type:     document.getElementById('dSeoSchemaType').value,
+    seo_robots:          document.getElementById('dSeoRobots').value,
+    seo_sitemap_include: document.getElementById('dSeoSitemap').checked,
   };
   try {
     const url  = drawerProductId ? `/api/admin/products/${drawerProductId}` : '/api/admin/products';
@@ -6600,50 +6587,144 @@ async function uploadBanner(input) {
 // ═══════════════════════════════════════════════
 // PHOTO LIBRARY
 // ═══════════════════════════════════════════════
+let _mediaLibraryImgs = [];
+let _mediaSelected = new Set();
+
+function _mediaAltMap() {
+  try { return JSON.parse(localStorage.getItem('ascovita_media_alt')||'{}'); }
+  catch(e) { return {}; }
+}
+function _mediaSaveAlt(map) { localStorage.setItem('ascovita_media_alt', JSON.stringify(map)); }
+function setPhotoAlt(filename, value) {
+  const map = _mediaAltMap(); map[filename] = value; _mediaSaveAlt(map);
+  toast('Alt text saved');
+}
+
 async function loadPhotoLibrary() {
   try {
     const r = await apiFetch('/api/upload/library');
     const d = await r.json();
     // Handle multiple possible response shapes from backend
     const imgs = d.data || d.images || d.files || d.photos || (Array.isArray(d) ? d : []);
-    document.getElementById('photoGrid').innerHTML = imgs.length ? imgs.map(img => `
-      <div class="photo-item">
-        <img src="${img.url}" alt="${img.original_name||''}" loading="lazy">
-        <div class="photo-overlay">
-          <button class="btn btn-primary btn-sm btn-icon" onclick="navigator.clipboard.writeText('${img.url}').then(()=>{toast('URL Copied! Paste in product Images tab.');})" title="Copy URL">📋</button>
-          <button class="btn btn-secondary btn-sm btn-icon" onclick="mediaAddSlot({url:'${img.url}',type:'image',thumb:'${img.url}'}); showPage('products'); toast('Image added to current product!')" title="Add to product">➕</button>
-          <button class="btn btn-danger btn-sm btn-icon" onclick="deletePhoto('${encodeURIComponent(img.filename)}')" title="Delete">🗑️</button>
-        </div>
-      </div>
-    `).join('') : '<div class="empty-state" style="grid-column:1/-1;"><div class="empty-ico">📸</div><div class="empty-msg">No images uploaded yet</div></div>';
+    _mediaLibraryImgs = imgs;
+    _mediaSelected.clear();
+    renderPhotoGrid();
   } catch(e) {
     console.error('loadPhotoLibrary error:', e);
     document.getElementById('photoGrid').innerHTML = '<div class="empty-state" style="grid-column:1/-1;"><div class="empty-ico">📸</div><div class="empty-msg">Could not load images — see browser console for details</div></div>';
   }
 }
 
-async function uploadPhoto(input) {
-  const file = input.files[0]; if(!file) return;
-  document.getElementById('uploadProgress').style.display='block';
+function renderPhotoGrid() {
+  const altMap = _mediaAltMap();
+  const imgs = _mediaLibraryImgs;
+  document.getElementById('photoGrid').innerHTML = imgs.length ? imgs.map(img => {
+    const fname = img.filename;
+    const alt = altMap[fname] || img.original_name || '';
+    return `
+    <div class="photo-item ${_mediaSelected.has(fname)?'selected':''}">
+      <input type="checkbox" class="photo-select" ${_mediaSelected.has(fname)?'checked':''} onclick="event.stopPropagation(); togglePhotoSelect('${fname}', this.checked)">
+      <img src="${img.url}" alt="${alt}" loading="lazy">
+      <div class="photo-overlay">
+        <button class="btn btn-primary btn-sm btn-icon" onclick="navigator.clipboard.writeText('${img.url}').then(()=>{toast('URL Copied! Paste in product Images tab.');})" title="Copy URL">📋</button>
+        <button class="btn btn-secondary btn-sm btn-icon" onclick="mediaAddSlot({url:'${img.url}',type:'image',thumb:'${img.url}'}); showPage('products'); toast('Image added to current product!')" title="Add to product">➕</button>
+        <button class="btn btn-secondary btn-sm btn-icon" onclick="promptPhotoAlt('${fname}')" title="Edit alt text">🏷️</button>
+        <button class="btn btn-danger btn-sm btn-icon" onclick="deletePhoto('${encodeURIComponent(fname)}')" title="Delete">🗑️</button>
+      </div>
+      ${alt ? `<div class="photo-alt-tag" title="${alt}">${alt}</div>` : ''}
+    </div>
+  `;
+  }).join('') : '<div class="empty-state" style="grid-column:1/-1;"><div class="empty-ico">📸</div><div class="empty-msg">No images uploaded yet</div></div>';
+  updateMediaSelectedCount();
+}
+
+function promptPhotoAlt(filename) {
+  const current = _mediaAltMap()[filename] || '';
+  const value = prompt('Alt text for this image (used for accessibility & image SEO):', current);
+  if(value === null) return;
+  setPhotoAlt(filename, value.trim());
+  renderPhotoGrid();
+}
+
+function togglePhotoSelect(filename, checked) {
+  if(checked) _mediaSelected.add(filename); else _mediaSelected.delete(filename);
+  updateMediaSelectedCount();
+}
+function toggleSelectAllPhotos(checked) {
+  _mediaSelected = checked ? new Set(_mediaLibraryImgs.map(i=>i.filename)) : new Set();
+  renderPhotoGrid();
+}
+function updateMediaSelectedCount() {
+  const el = document.getElementById('mediaSelectedCount');
+  if(el) el.textContent = _mediaSelected.size + ' selected';
+}
+
+async function deleteSelectedPhotos() {
+  if(!_mediaSelected.size) { toast('Nothing selected','error'); return; }
+  if(!confirm(`Delete ${_mediaSelected.size} selected image(s)? This can't be undone.`)) return;
+  const targets = [..._mediaSelected];
+  let ok = 0, fail = 0;
+  for(const fname of targets) {
+    try { await apiFetch(`/api/upload/library/${encodeURIComponent(fname)}`,{method:'DELETE'}); ok++; }
+    catch(e) { fail++; }
+  }
+  toast(`Deleted ${ok} image(s)${fail?`, ${fail} failed`:''}`, fail ? 'warning' : 'success');
+  loadPhotoLibrary();
+}
+
+// Convert an image file to WebP client-side (skips SVGs, which don't rasterize meaningfully)
+function _mediaMaybeConvertToWebP(file) {
+  return new Promise(resolve => {
+    const wantWebp = document.getElementById('mediaWebpToggle')?.checked;
+    if(!wantWebp || file.type === 'image/svg+xml' || file.type === 'image/webp') { resolve(file); return; }
+    const img = new Image();
+    const url = URL.createObjectURL(file);
+    img.onload = () => {
+      try {
+        const canvas = document.createElement('canvas');
+        canvas.width = img.naturalWidth; canvas.height = img.naturalHeight;
+        canvas.getContext('2d').drawImage(img, 0, 0);
+        canvas.toBlob(blob => {
+          URL.revokeObjectURL(url);
+          if(!blob) { resolve(file); return; }
+          const newName = file.name.replace(/\.[^.]+$/, '') + '.webp';
+          resolve(new File([blob], newName, {type:'image/webp'}));
+        }, 'image/webp', 0.85);
+      } catch(e) { URL.revokeObjectURL(url); resolve(file); }
+    };
+    img.onerror = () => { URL.revokeObjectURL(url); resolve(file); };
+    img.src = url;
+  });
+}
+
+async function uploadPhotos(fileList) {
+  const files = Array.from(fileList||[]);
+  if(!files.length) return;
+  document.getElementById('uploadProgress').style.display = 'block';
   const bar = document.getElementById('uploadBar');
   const status = document.getElementById('uploadStatus');
-  status.textContent = 'Uploading '+file.name+'…';
-  bar.style.width='10%';
-  const fd = new FormData(); fd.append('image', file);
-  try {
-    bar.style.width = '50%';
-    const r = await fetch(`${API}/api/upload/image`, {method:'POST', headers:{'Authorization':`Bearer ${authToken}`}, body:fd});
-    bar.style.width = '90%';
-    const d = await r.json();
-    if(!r.ok) throw new Error(d.error||'Upload failed');
-    bar.style.width='100%';
-    status.textContent = '✅ Uploaded: '+file.name;
-    toast('Image uploaded ✅');
-    setTimeout(() => { document.getElementById('uploadProgress').style.display='none'; bar.style.width='0%'; }, 2000);
-    loadPhotoLibrary();
-  } catch(e) { toast(e.message,'error'); bar.style.width='0%'; document.getElementById('uploadProgress').style.display='none'; }
-  input.value='';
+  let done = 0;
+  for(const rawFile of files) {
+    status.textContent = `Uploading ${rawFile.name}… (${done+1}/${files.length})`;
+    bar.style.width = Math.round((done/files.length)*90 + 5) + '%';
+    try {
+      const file = await _mediaMaybeConvertToWebP(rawFile);
+      const fd = new FormData(); fd.append('image', file);
+      const r = await fetch(`${API}/api/upload/image`, {method:'POST', headers:{'Authorization':`Bearer ${authToken}`}, body:fd});
+      const d = await r.json();
+      if(!r.ok) throw new Error(d.error||'Upload failed');
+    } catch(e) { toast(`${rawFile.name}: ${e.message}`, 'error'); }
+    done++;
+  }
+  bar.style.width = '100%';
+  status.textContent = `✅ Uploaded ${done}/${files.length} image(s)`;
+  toast('Upload complete ✅');
+  setTimeout(() => { document.getElementById('uploadProgress').style.display='none'; bar.style.width='0%'; }, 2000);
+  loadPhotoLibrary();
+  document.getElementById('photoFileInput').value = '';
 }
+// Back-compat alias for any old callers of the single-file version
+async function uploadPhoto(input) { return uploadPhotos(input.files); }
 
 async function deletePhoto(filename) {
   if(!confirm('Delete this image?')) return;
@@ -6651,6 +6732,212 @@ async function deletePhoto(filename) {
     await apiFetch(`/api/upload/library/${filename}`,{method:'DELETE'});
     toast('Image deleted'); loadPhotoLibrary();
   } catch(e) { toast(e.message,'error'); }
+}
+
+// Drag & drop upload zone
+(function initMediaDropzone(){
+  const zone = document.getElementById('mediaDropzone');
+  if(!zone) return;
+  ['dragenter','dragover'].forEach(evt => zone.addEventListener(evt, e => { e.preventDefault(); zone.classList.add('drag'); }));
+  ['dragleave','drop'].forEach(evt => zone.addEventListener(evt, e => { e.preventDefault(); zone.classList.remove('drag'); }));
+  zone.addEventListener('drop', e => {
+    const files = e.dataTransfer?.files;
+    if(files && files.length) uploadPhotos(files);
+  });
+})();
+
+// ═══════════════════════════════════════════════
+// NOTIFICATION CENTER
+// Built from data already loaded elsewhere (allOrders, allProducts,
+// allCustomers) — no new backend endpoint required. "Read" state is
+// tracked client-side in localStorage per notification id.
+// ═══════════════════════════════════════════════
+function _notifReadIds() {
+  try { return new Set(JSON.parse(localStorage.getItem('ascovita_notif_read')||'[]')); }
+  catch(e) { return new Set(); }
+}
+function _notifSaveRead(set) {
+  localStorage.setItem('ascovita_notif_read', JSON.stringify([...set]));
+}
+function _notifTimeAgo(iso) {
+  if(!iso) return '';
+  const diff = Date.now() - new Date(iso).getTime();
+  const m = Math.round(diff/60000);
+  if(m < 1) return 'just now';
+  if(m < 60) return m+'m ago';
+  const h = Math.round(m/60);
+  if(h < 24) return h+'h ago';
+  return Math.round(h/24)+'d ago';
+}
+function buildNotifications() {
+  const items = [];
+  const cutoff = Date.now() - 48*3600*1000; // look back 48h for activity-based alerts
+  (allOrders||[]).forEach(o => {
+    const t = new Date(o.created_at||0).getTime();
+    if(t >= cutoff) {
+      items.push({id:'order-'+o.id, ico:'🛒', color:'rgba(32,128,232,0.15)', title:'New order '+o.id, sub:(o.customer_name||'Customer')+' · ₹'+(o.total||0), time:o.created_at});
+      const ps = (o.payment_status||'').toLowerCase();
+      if(ps.includes('paid') || ps==='success') items.push({id:'paid-'+o.id, ico:'💰', color:'rgba(74,138,40,0.15)', title:'Payment received — '+o.id, sub:(o.payment_method||'')+' · ₹'+(o.total||0), time:o.created_at});
+      const st = (o.status||o.fulfillment||'').toLowerCase();
+      if(st.includes('ship') || st.includes('dispatch')) items.push({id:'ship-'+o.id, ico:'🚚', color:'rgba(196,146,14,0.15)', title:'Shipment dispatched — '+o.id, sub:o.shiprocket_id?('Tracking: '+o.shiprocket_id):'On the way', time:o.created_at});
+    }
+  });
+  (allProducts||[]).filter(p=>!p.deleted_at && (p.stock||0) < 20).forEach(p => {
+    items.push({id:'lowstock-'+p.id, ico:'⚠️', color:'var(--red-soft)', title:'Low stock: '+p.name, sub:(p.stock||0)+' units left', time:null});
+  });
+  (allCustomers||[]).forEach(c => {
+    const t = new Date(c.created_at||0).getTime();
+    if(t >= cutoff) items.push({id:'cust-'+(c.id||c.email||c.phone), ico:'✨', color:'rgba(74,138,40,0.15)', title:'New customer: '+(c.name||c.email||'Unknown'), sub:c.email||c.phone||'', time:c.created_at});
+  });
+  items.sort((a,b) => new Date(b.time||0) - new Date(a.time||0));
+  return items.slice(0, 40);
+}
+function refreshNotifications() {
+  const items = buildNotifications();
+  const read = _notifReadIds();
+  const unread = items.filter(i => !read.has(i.id));
+  const countEl = document.getElementById('notifCount');
+  if(countEl) { countEl.textContent = unread.length > 9 ? '9+' : unread.length; countEl.style.display = unread.length ? 'flex' : 'none'; }
+  const list = document.getElementById('notifList');
+  if(!list) return;
+  list.innerHTML = items.length ? items.map(i => `
+    <div class="notif-item ${read.has(i.id)?'':'unread'}" onclick="markNotifRead('${i.id}')">
+      <div class="notif-ico" style="background:${i.color}">${i.ico}</div>
+      <div class="notif-body">
+        <div class="notif-title">${i.title}</div>
+        <div class="notif-sub">${i.sub}</div>
+        ${i.time?`<div class="notif-time">${_notifTimeAgo(i.time)}</div>`:''}
+      </div>
+    </div>
+  `).join('') : '<div class="notif-empty">No notifications yet</div>';
+}
+function markNotifRead(id) {
+  const read = _notifReadIds(); read.add(id); _notifSaveRead(read); refreshNotifications();
+}
+function markAllNotifsRead() {
+  const read = _notifReadIds();
+  buildNotifications().forEach(i => read.add(i.id));
+  _notifSaveRead(read); refreshNotifications();
+}
+function toggleNotifDropdown() {
+  document.getElementById('notifDropdown').classList.toggle('open');
+}
+document.addEventListener('click', e => {
+  const wrap = document.querySelector('.notif-wrap');
+  if(wrap && !wrap.contains(e.target)) document.getElementById('notifDropdown')?.classList.remove('open');
+});
+
+// ═══════════════════════════════════════════════
+// CALENDAR
+// Order-placed markers come from allOrders (already loaded).
+// Delivery dates / manufacturing deadlines / team reminders are
+// user-added events, stored locally for now — promote to a real
+// `calendar_events` table + API once the backend is ready.
+// ═══════════════════════════════════════════════
+let calViewDate = new Date();
+function _calEvents() {
+  try { return JSON.parse(localStorage.getItem('ascovita_calendar_events')||'[]'); }
+  catch(e) { return []; }
+}
+function _calSaveEvents(list) { localStorage.setItem('ascovita_calendar_events', JSON.stringify(list)); }
+function _calDateKey(d) { return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0'); }
+
+function calChangeMonth(delta) { calViewDate.setMonth(calViewDate.getMonth()+delta); renderCalendar(); }
+function calGoToday() { calViewDate = new Date(); renderCalendar(); }
+
+function renderCalendar() {
+  const grid = document.getElementById('calGrid');
+  if(!grid) return;
+  const year = calViewDate.getFullYear(), month = calViewDate.getMonth();
+  document.getElementById('calMonthLabel').textContent = calViewDate.toLocaleDateString('en-IN',{month:'long',year:'numeric'});
+
+  const events = _calEvents();
+  const ordersByDay = {};
+  (allOrders||[]).forEach(o => {
+    if(!o.created_at) return;
+    const k = _calDateKey(new Date(o.created_at));
+    ordersByDay[k] = (ordersByDay[k]||0) + 1;
+  });
+
+  const firstOfMonth = new Date(year, month, 1);
+  const startDow = firstOfMonth.getDay();
+  const daysInMonth = new Date(year, month+1, 0).getDate();
+  const todayKey = _calDateKey(new Date());
+
+  let cells = [];
+  for(let i=0; i<startDow; i++) {
+    const d = new Date(year, month, 1-(startDow-i));
+    cells.push({date:d, otherMonth:true});
+  }
+  for(let d=1; d<=daysInMonth; d++) cells.push({date:new Date(year,month,d), otherMonth:false});
+  while(cells.length % 7 !== 0 || cells.length < 35) cells.push({date:new Date(year, month, daysInMonth + (cells.length - startDow - daysInMonth) + 1), otherMonth:true});
+
+  grid.innerHTML = cells.map(c => {
+    const key = _calDateKey(c.date);
+    const dayEvents = events.filter(e => e.date === key);
+    const orderCount = ordersByDay[key];
+    let evtHtml = dayEvents.slice(0,2).map(e => `<div class="cal-evt ${e.type}" title="${e.title}" onclick="event.stopPropagation();openCalEventModal('${e.id}')">${e.title}</div>`).join('');
+    if(orderCount) evtHtml += `<div class="cal-evt order">${orderCount} order${orderCount>1?'s':''}</div>`;
+    if(dayEvents.length > 2) evtHtml += `<div class="cal-evt-more">+${dayEvents.length-2} more</div>`;
+    return `<div class="cal-cell ${c.otherMonth?'other-month':''} ${key===todayKey?'today':''}" onclick="openCalEventModal(null,'${key}')">
+      <div class="cal-daynum">${c.date.getDate()}</div>${evtHtml}
+    </div>`;
+  }).join('');
+
+  // Upcoming list (next 14 days)
+  const now = new Date(); now.setHours(0,0,0,0);
+  const horizon = new Date(now); horizon.setDate(horizon.getDate()+14);
+  const upcoming = events.filter(e => { const d = new Date(e.date); return d >= now && d <= horizon; })
+    .sort((a,b)=> new Date(a.date)-new Date(b.date));
+  const upcomingEl = document.getElementById('calUpcomingList');
+  if(upcomingEl) {
+    upcomingEl.innerHTML = upcoming.length ? upcoming.map(e => `
+      <div class="tl-item">
+        <div class="tl-dot" style="background:${e.type==='delivery'?'rgba(32,128,232,0.18)':e.type==='manufacturing'?'rgba(196,146,14,0.18)':'rgba(74,138,40,0.18)'}">${e.type==='delivery'?'🚚':e.type==='manufacturing'?'🏭':'📌'}</div>
+        <div class="tl-content" style="cursor:pointer;" onclick="openCalEventModal('${e.id}')">
+          <div class="tl-title">${e.title}</div>
+          <div class="tl-time">${new Date(e.date).toLocaleDateString('en-IN',{weekday:'short',day:'numeric',month:'short'})}${e.notes?' · '+e.notes:''}</div>
+        </div>
+      </div>
+    `).join('') : '<div class="empty-state">No upcoming events</div>';
+  }
+}
+
+function openCalEventModal(id, presetDate) {
+  const ev = id ? _calEvents().find(e => e.id === id) : null;
+  document.getElementById('calEventModalTitle').textContent = ev ? 'Edit Event' : 'Add Event';
+  document.getElementById('calEventId').value = ev ? ev.id : '';
+  document.getElementById('calEventTitle').value = ev ? ev.title : '';
+  document.getElementById('calEventDate').value = ev ? ev.date : (presetDate || _calDateKey(new Date()));
+  document.getElementById('calEventType').value = ev ? ev.type : 'reminder';
+  document.getElementById('calEventNotes').value = ev ? (ev.notes||'') : '';
+  document.getElementById('calEventDeleteBtn').style.display = ev ? 'inline-flex' : 'none';
+  openModal('calEventModal');
+}
+function saveCalEvent() {
+  const title = document.getElementById('calEventTitle').value.trim();
+  if(!title) { toast('Title is required','error'); return; }
+  const date = document.getElementById('calEventDate').value;
+  if(!date) { toast('Date is required','error'); return; }
+  const id = document.getElementById('calEventId').value;
+  let events = _calEvents();
+  if(id) {
+    events = events.map(e => e.id === id ? {...e, title, date, type:document.getElementById('calEventType').value, notes:document.getElementById('calEventNotes').value} : e);
+  } else {
+    events.push({id:'ev-'+Date.now(), title, date, type:document.getElementById('calEventType').value, notes:document.getElementById('calEventNotes').value});
+  }
+  _calSaveEvents(events);
+  closeModal('calEventModal');
+  toast('Event saved ✅');
+  renderCalendar();
+}
+function deleteCalEvent() {
+  const id = document.getElementById('calEventId').value;
+  if(!id || !confirm('Delete this event?')) return;
+  _calSaveEvents(_calEvents().filter(e => e.id !== id));
+  closeModal('calEventModal');
+  toast('Event deleted');
+  renderCalendar();
 }
 
 // ═══════════════════════════════════════════════
@@ -7352,43 +7639,7 @@ async function checkIntegrations() {
 // ═══════════════════════════════════════════════
 // SETTINGS
 // ═══════════════════════════════════════════════
-
-// ─── Interface Theme (Deluxe / Neomorphism / Liquid Glass) ───
-// All three themes share the same HTML, JS and data — only the visual
-// skin changes. Stored in localStorage for instant, flash-free load,
-// and synced to the shared backend settings so the choice is visible
-// to every admin/owner who opens the backoffice, not just this device.
-const THEME_KEY = 'ascovita_theme';
-const VALID_THEMES = ['deluxe','neo','glass'];
-
-function applyThemeClass(theme) {
-  theme = VALID_THEMES.includes(theme) ? theme : 'deluxe';
-  document.body.classList.remove('theme-deluxe','theme-neo','theme-glass');
-  document.body.classList.add('theme-' + theme);
-  document.querySelectorAll('.theme-opt').forEach(el => {
-    el.classList.toggle('selected', el.dataset.theme === theme);
-  });
-}
-
-async function setInterfaceTheme(theme, opts) {
-  opts = opts || {};
-  applyThemeClass(theme);
-  try { localStorage.setItem(THEME_KEY, theme); } catch {}
-  if (opts.silent) return;
-  try {
-    const r = await apiFetch('/api/admin/settings', {method:'PUT', body:JSON.stringify({interface_theme: theme})});
-    if (r && r.ok) toast('Theme updated ✅');
-    else toast('Theme applied locally — server save failed', 'warning');
-  } catch (e) {
-    // Theme is already applied client-side; backend sync is best-effort.
-    toast('Theme applied locally — offline', 'warning');
-  }
-}
-
 async function loadSettings() {
-  // Apply the locally-remembered theme immediately so the Settings page
-  // (and rest of the app) never flashes the wrong skin before the network call resolves.
-  applyThemeClass(localStorage.getItem(THEME_KEY));
   try {
     const r = await apiFetch('/api/admin/settings');
     if(!r.ok) return; // silently skip if endpoint doesn't exist yet
@@ -7399,16 +7650,10 @@ async function loadSettings() {
     if(d.whatsapp_number) document.getElementById('whatsappNumber').value = d.whatsapp_number;
     if(d.gst_rate) { document.getElementById('cgstRate').value = d.gst_rate.cgst||2.5; document.getElementById('sgstRate').value = d.gst_rate.sgst||2.5; }
     if(d.razorpay_mode) document.getElementById('pgMode').value = d.razorpay_mode;
-    if(d.interface_theme) {
-      // Backend is the source of truth once reachable — keep localStorage in sync too.
-      applyThemeClass(d.interface_theme);
-      try { localStorage.setItem(THEME_KEY, d.interface_theme); } catch {}
-    }
   } catch {}
 }
 
 async function saveSettings() {
-  const activeThemeOpt = document.querySelector('.theme-opt.selected');
   const settings = {
     store_online: document.getElementById('storeOnline').checked,
     cod_available: document.getElementById('codAvailable').checked,
@@ -7416,7 +7661,6 @@ async function saveSettings() {
     whatsapp_number: document.getElementById('whatsappNumber').value,
     gst_rate: {cgst: parseFloat(document.getElementById('cgstRate').value)||2.5, sgst: parseFloat(document.getElementById('sgstRate').value)||2.5},
     razorpay_mode: document.getElementById('pgMode').value,
-    interface_theme: activeThemeOpt ? activeThemeOpt.dataset.theme : (localStorage.getItem(THEME_KEY) || 'deluxe'),
   };
   try {
     const r = await apiFetch('/api/admin/settings', {method:'PUT', body:JSON.stringify(settings)});
