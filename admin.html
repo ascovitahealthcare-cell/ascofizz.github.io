@@ -964,11 +964,6 @@ body.theme-glass .modal-overlay{backdrop-filter:blur(10px);}
       </div>
       <div class="login-error" id="loginError">Invalid credentials. Please try again.</div>
       <button class="btn-login" onclick="doLogin()" style="margin-top:20px">Sign In →</button>
-      <div class="login-hint" style="text-align:center;color:var(--text3);font-size:0.72rem;margin-top:16px;">
-  Login as <strong style="color:var(--gold-text);">owner</strong> for full control or
-  <strong style="color:var(--green-text);">admin</strong> for order management
-</div>
-<div class="login-hint">🔒 Secured by JWT · Backend: ascovitahealthcare-cell-github-io.onrender.com</div>
     </div>
   </div>
 </div>
@@ -1707,6 +1702,51 @@ body.theme-glass .modal-overlay{backdrop-filter:blur(10px);}
       <div class="drawer-field-label">SEO Keywords (comma-separated)</div>
       <input class="drawer-input" id="dSeoKeywords" placeholder="glutathione tablet, vitamin c effervescent…">
     </div>
+    <div class="drawer-field">
+      <div class="drawer-field-label">URL Slug</div>
+      <input class="drawer-input" id="dSeoSlug" placeholder="vitamin-c-effervescent-20-tablets">
+    </div>
+    <div class="drawer-field">
+      <div class="drawer-field-label">Canonical URL</div>
+      <input class="drawer-input" id="dSeoCanonical" placeholder="https://ascovita.com/product/vitamin-c-effervescent">
+    </div>
+    <div class="drawer-field" style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+      <div>
+        <div class="drawer-field-label">Open Graph Image URL</div>
+        <input class="drawer-input" id="dSeoOgImage" placeholder="https://…og-image.jpg">
+      </div>
+      <div>
+        <div class="drawer-field-label">Twitter Card Image URL</div>
+        <input class="drawer-input" id="dSeoTwitterImage" placeholder="https://…twitter-card.jpg">
+      </div>
+    </div>
+    <div class="drawer-field" style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+      <div>
+        <div class="drawer-field-label">Schema Type</div>
+        <select class="drawer-input" id="dSeoSchemaType">
+          <option value="Product">Product</option>
+          <option value="Article">Article</option>
+          <option value="FAQPage">FAQPage</option>
+          <option value="">None</option>
+        </select>
+      </div>
+      <div>
+        <div class="drawer-field-label">Robots</div>
+        <select class="drawer-input" id="dSeoRobots">
+          <option value="index,follow">index, follow</option>
+          <option value="noindex,follow">noindex, follow</option>
+          <option value="index,nofollow">index, nofollow</option>
+          <option value="noindex,nofollow">noindex, nofollow</option>
+        </select>
+      </div>
+    </div>
+    <div class="drawer-field">
+      <div class="toggle-wrap">
+        <label class="toggle"><input type="checkbox" id="dSeoSitemap" checked><span class="toggle-slider"></span></label>
+        <span class="drawer-field-label" style="margin:0;">Include in sitemap</span>
+      </div>
+    </div>
+    <div class="form-hint" style="margin-top:-6px;">These extended SEO fields need matching columns on the products table (e.g. seo_slug, seo_canonical_url, seo_og_image, seo_twitter_image, seo_schema_type, seo_robots, seo_sitemap_include) — add them in Supabase before relying on the server to persist them.</div>
   </div>
   <div style="padding:16px 20px;border-top:1px solid var(--border);display:flex;gap:8px;position:sticky;bottom:0;background:var(--surface);">
     <button class="btn btn-secondary" style="flex:1;" onclick="closeProductDrawer()">Cancel</button>
@@ -1861,17 +1901,38 @@ body.theme-glass .modal-overlay{backdrop-filter:blur(10px);}
   <div class="page-hdr">
     <div><div class="page-title">Photo Library</div><div class="page-sub">All uploaded product images</div></div>
     <div class="page-actions">
-      <input type="file" id="photoFileInput" accept="image/*,.svg" onchange="uploadPhoto(this)">
-      <button class="btn btn-primary" onclick="document.getElementById('photoFileInput').click()">＋ Upload Image</button>
+      <label class="toggle-wrap" style="background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:6px 10px;">
+        <label class="toggle"><input type="checkbox" id="mediaWebpToggle" checked><span class="toggle-slider"></span></label>
+        <span style="font-size:0.75rem;color:var(--text2);">Convert to WebP on upload</span>
+      </label>
+      <input type="file" id="photoFileInput" accept="image/*,.svg" multiple onchange="uploadPhotos(this.files)">
+      <button class="btn btn-primary" onclick="document.getElementById('photoFileInput').click()">＋ Upload Images</button>
     </div>
   </div>
+
+  <div class="media-dropzone" id="mediaDropzone">
+    📥 Drag & drop images here to upload — multiple files supported
+  </div>
+
   <div id="uploadProgress" style="display:none;margin-bottom:16px;">
     <div style="background:var(--surface2);border-radius:8px;height:6px;overflow:hidden;">
       <div id="uploadBar" style="height:100%;background:linear-gradient(90deg,var(--green),var(--green-bright));width:0%;transition:width 0.3s;"></div>
     </div>
     <div style="font-size:0.75rem;color:var(--text3);margin-top:6px;" id="uploadStatus">Uploading…</div>
   </div>
+
+  <div class="filter-bar" style="justify-content:space-between;">
+    <div style="display:flex;gap:8px;align-items:center;">
+      <label style="display:flex;align-items:center;gap:6px;font-size:0.78rem;color:var(--text2);cursor:pointer;">
+        <input type="checkbox" id="mediaSelectAll" onchange="toggleSelectAllPhotos(this.checked)"> Select all
+      </label>
+      <span style="font-size:0.78rem;color:var(--text3);" id="mediaSelectedCount">0 selected</span>
+    </div>
+    <button class="btn btn-danger btn-sm" onclick="deleteSelectedPhotos()">🗑️ Delete Selected</button>
+  </div>
+
   <div class="photo-grid" id="photoGrid"></div>
+  <div class="form-hint" style="margin-top:14px;">Alt text is saved in this browser for now (the backend has no alt-text column yet) — add one to the images table to persist it for real accessibility/SEO benefit.</div>
 </div>
 
 <!-- ═════════════ CALENDAR ═════════════ -->
@@ -2876,6 +2937,8 @@ async function initApp() {
   loadAuditLog();
   startLiveVisitors();
   renderSqlSnippets();
+  setTimeout(refreshNotifications, 2500); // let orders/products/customers finish loading first
+  setInterval(refreshNotifications, 90000);
 }
 
 async function checkServerStatus() {
@@ -2962,6 +3025,7 @@ function showPage(name) {
   if(name === 'banners') loadBanners();
   if(name === 'settings') { loadSettings(); }
   if(name === 'aiteam') { loadAITeamPage(); }
+  if(name === 'calendar') { renderCalendar(); }
 }
 
 function toggleSidebar() {
@@ -2977,7 +3041,7 @@ function refreshCurrent() {
   const active = document.querySelector('.page.active');
   if(!active) return;
   const id = active.id.replace('page-','');
-  const fns = {dashboard:loadDashboard,orders:loadOrders,products:loadProducts,inventory:loadInventory,discounts:loadDiscounts,customers:loadCustomers,analytics:loadAnalytics,payments:loadPayments,invoices:loadInvoices,photolibrary:loadPhotoLibrary,banners:loadBanners};
+  const fns = {dashboard:loadDashboard,orders:loadOrders,products:loadProducts,inventory:loadInventory,discounts:loadDiscounts,customers:loadCustomers,analytics:loadAnalytics,payments:loadPayments,invoices:loadInvoices,photolibrary:loadPhotoLibrary,banners:loadBanners,calendar:renderCalendar};
   if(fns[id]) fns[id]();
 }
 
@@ -5185,10 +5249,20 @@ function openProductDrawer(productId) {
     document.getElementById('dImage3').value = p.image3||'';
     document.getElementById('dMetaDesc').value = p.meta_description||'';
     document.getElementById('dSeoKeywords').value = Array.isArray(p.seo_keywords)?p.seo_keywords.join(', '):(p.seo_keywords||'');
+    document.getElementById('dSeoSlug').value = p.seo_slug||'';
+    document.getElementById('dSeoCanonical').value = p.seo_canonical_url||'';
+    document.getElementById('dSeoOgImage').value = p.seo_og_image||'';
+    document.getElementById('dSeoTwitterImage').value = p.seo_twitter_image||'';
+    document.getElementById('dSeoSchemaType').value = p.seo_schema_type||'Product';
+    document.getElementById('dSeoRobots').value = p.seo_robots||'index,follow';
+    document.getElementById('dSeoSitemap').checked = p.seo_sitemap_include !== false;
     updateDrawerImgPreview();
     updateDrawerPricePreview();
   } else {
-    ['dName','dBadge','dDescription','dOfferText','dHowToUse','dIngredients','dTags','dImage','dImage2','dImage3','dMetaDesc','dSeoKeywords'].forEach(id => document.getElementById(id).value='');
+    ['dName','dBadge','dDescription','dOfferText','dHowToUse','dIngredients','dTags','dImage','dImage2','dImage3','dMetaDesc','dSeoKeywords','dSeoSlug','dSeoCanonical','dSeoOgImage','dSeoTwitterImage'].forEach(id => document.getElementById(id).value='');
+    document.getElementById('dSeoSchemaType').value = 'Product';
+    document.getElementById('dSeoRobots').value = 'index,follow';
+    document.getElementById('dSeoSitemap').checked = true;
     document.getElementById('dBrand').value='Ascovita';
     document.getElementById('dHsn').value='30049099';
     document.getElementById('dHsn2').value='30049099';
@@ -5387,6 +5461,13 @@ async function saveProductFromDrawer() {
     image3:           document.getElementById('dImage3').value,
     meta_description: document.getElementById('dMetaDesc').value,
     seo_keywords:     document.getElementById('dSeoKeywords').value.split(',').map(s=>s.trim()).filter(Boolean),
+    seo_slug:            document.getElementById('dSeoSlug').value.trim(),
+    seo_canonical_url:   document.getElementById('dSeoCanonical').value.trim(),
+    seo_og_image:        document.getElementById('dSeoOgImage').value.trim(),
+    seo_twitter_image:   document.getElementById('dSeoTwitterImage').value.trim(),
+    seo_schema_type:     document.getElementById('dSeoSchemaType').value,
+    seo_robots:          document.getElementById('dSeoRobots').value,
+    seo_sitemap_include: document.getElementById('dSeoSitemap').checked,
   };
   try {
     const url  = drawerProductId ? `/api/admin/products/${drawerProductId}` : '/api/admin/products';
@@ -6718,50 +6799,144 @@ async function uploadBanner(input) {
 // ═══════════════════════════════════════════════
 // PHOTO LIBRARY
 // ═══════════════════════════════════════════════
+let _mediaLibraryImgs = [];
+let _mediaSelected = new Set();
+
+function _mediaAltMap() {
+  try { return JSON.parse(localStorage.getItem('ascovita_media_alt')||'{}'); }
+  catch(e) { return {}; }
+}
+function _mediaSaveAlt(map) { localStorage.setItem('ascovita_media_alt', JSON.stringify(map)); }
+function setPhotoAlt(filename, value) {
+  const map = _mediaAltMap(); map[filename] = value; _mediaSaveAlt(map);
+  toast('Alt text saved');
+}
+
 async function loadPhotoLibrary() {
   try {
     const r = await apiFetch('/api/upload/library');
     const d = await r.json();
     // Handle multiple possible response shapes from backend
     const imgs = d.data || d.images || d.files || d.photos || (Array.isArray(d) ? d : []);
-    document.getElementById('photoGrid').innerHTML = imgs.length ? imgs.map(img => `
-      <div class="photo-item">
-        <img src="${img.url}" alt="${img.original_name||''}" loading="lazy">
-        <div class="photo-overlay">
-          <button class="btn btn-primary btn-sm btn-icon" onclick="navigator.clipboard.writeText('${img.url}').then(()=>{toast('URL Copied! Paste in product Images tab.');})" title="Copy URL">📋</button>
-          <button class="btn btn-secondary btn-sm btn-icon" onclick="mediaAddSlot({url:'${img.url}',type:'image',thumb:'${img.url}'}); showPage('products'); toast('Image added to current product!')" title="Add to product">➕</button>
-          <button class="btn btn-danger btn-sm btn-icon" onclick="deletePhoto('${encodeURIComponent(img.filename)}')" title="Delete">🗑️</button>
-        </div>
-      </div>
-    `).join('') : '<div class="empty-state" style="grid-column:1/-1;"><div class="empty-ico">📸</div><div class="empty-msg">No images uploaded yet</div></div>';
+    _mediaLibraryImgs = imgs;
+    _mediaSelected.clear();
+    renderPhotoGrid();
   } catch(e) {
     console.error('loadPhotoLibrary error:', e);
     document.getElementById('photoGrid').innerHTML = '<div class="empty-state" style="grid-column:1/-1;"><div class="empty-ico">📸</div><div class="empty-msg">Could not load images — see browser console for details</div></div>';
   }
 }
 
-async function uploadPhoto(input) {
-  const file = input.files[0]; if(!file) return;
-  document.getElementById('uploadProgress').style.display='block';
+function renderPhotoGrid() {
+  const altMap = _mediaAltMap();
+  const imgs = _mediaLibraryImgs;
+  document.getElementById('photoGrid').innerHTML = imgs.length ? imgs.map(img => {
+    const fname = img.filename;
+    const alt = altMap[fname] || img.original_name || '';
+    return `
+    <div class="photo-item ${_mediaSelected.has(fname)?'selected':''}">
+      <input type="checkbox" class="photo-select" ${_mediaSelected.has(fname)?'checked':''} onclick="event.stopPropagation(); togglePhotoSelect('${fname}', this.checked)">
+      <img src="${img.url}" alt="${alt}" loading="lazy">
+      <div class="photo-overlay">
+        <button class="btn btn-primary btn-sm btn-icon" onclick="navigator.clipboard.writeText('${img.url}').then(()=>{toast('URL Copied! Paste in product Images tab.');})" title="Copy URL">📋</button>
+        <button class="btn btn-secondary btn-sm btn-icon" onclick="mediaAddSlot({url:'${img.url}',type:'image',thumb:'${img.url}'}); showPage('products'); toast('Image added to current product!')" title="Add to product">➕</button>
+        <button class="btn btn-secondary btn-sm btn-icon" onclick="promptPhotoAlt('${fname}')" title="Edit alt text">🏷️</button>
+        <button class="btn btn-danger btn-sm btn-icon" onclick="deletePhoto('${encodeURIComponent(fname)}')" title="Delete">🗑️</button>
+      </div>
+      ${alt ? `<div class="photo-alt-tag" title="${alt}">${alt}</div>` : ''}
+    </div>
+  `;
+  }).join('') : '<div class="empty-state" style="grid-column:1/-1;"><div class="empty-ico">📸</div><div class="empty-msg">No images uploaded yet</div></div>';
+  updateMediaSelectedCount();
+}
+
+function promptPhotoAlt(filename) {
+  const current = _mediaAltMap()[filename] || '';
+  const value = prompt('Alt text for this image (used for accessibility & image SEO):', current);
+  if(value === null) return;
+  setPhotoAlt(filename, value.trim());
+  renderPhotoGrid();
+}
+
+function togglePhotoSelect(filename, checked) {
+  if(checked) _mediaSelected.add(filename); else _mediaSelected.delete(filename);
+  updateMediaSelectedCount();
+}
+function toggleSelectAllPhotos(checked) {
+  _mediaSelected = checked ? new Set(_mediaLibraryImgs.map(i=>i.filename)) : new Set();
+  renderPhotoGrid();
+}
+function updateMediaSelectedCount() {
+  const el = document.getElementById('mediaSelectedCount');
+  if(el) el.textContent = _mediaSelected.size + ' selected';
+}
+
+async function deleteSelectedPhotos() {
+  if(!_mediaSelected.size) { toast('Nothing selected','error'); return; }
+  if(!confirm(`Delete ${_mediaSelected.size} selected image(s)? This can't be undone.`)) return;
+  const targets = [..._mediaSelected];
+  let ok = 0, fail = 0;
+  for(const fname of targets) {
+    try { await apiFetch(`/api/upload/library/${encodeURIComponent(fname)}`,{method:'DELETE'}); ok++; }
+    catch(e) { fail++; }
+  }
+  toast(`Deleted ${ok} image(s)${fail?`, ${fail} failed`:''}`, fail ? 'warning' : 'success');
+  loadPhotoLibrary();
+}
+
+// Convert an image file to WebP client-side (skips SVGs, which don't rasterize meaningfully)
+function _mediaMaybeConvertToWebP(file) {
+  return new Promise(resolve => {
+    const wantWebp = document.getElementById('mediaWebpToggle')?.checked;
+    if(!wantWebp || file.type === 'image/svg+xml' || file.type === 'image/webp') { resolve(file); return; }
+    const img = new Image();
+    const url = URL.createObjectURL(file);
+    img.onload = () => {
+      try {
+        const canvas = document.createElement('canvas');
+        canvas.width = img.naturalWidth; canvas.height = img.naturalHeight;
+        canvas.getContext('2d').drawImage(img, 0, 0);
+        canvas.toBlob(blob => {
+          URL.revokeObjectURL(url);
+          if(!blob) { resolve(file); return; }
+          const newName = file.name.replace(/\.[^.]+$/, '') + '.webp';
+          resolve(new File([blob], newName, {type:'image/webp'}));
+        }, 'image/webp', 0.85);
+      } catch(e) { URL.revokeObjectURL(url); resolve(file); }
+    };
+    img.onerror = () => { URL.revokeObjectURL(url); resolve(file); };
+    img.src = url;
+  });
+}
+
+async function uploadPhotos(fileList) {
+  const files = Array.from(fileList||[]);
+  if(!files.length) return;
+  document.getElementById('uploadProgress').style.display = 'block';
   const bar = document.getElementById('uploadBar');
   const status = document.getElementById('uploadStatus');
-  status.textContent = 'Uploading '+file.name+'…';
-  bar.style.width='10%';
-  const fd = new FormData(); fd.append('image', file);
-  try {
-    bar.style.width = '50%';
-    const r = await fetch(`${API}/api/upload/image`, {method:'POST', headers:{'Authorization':`Bearer ${authToken}`}, body:fd});
-    bar.style.width = '90%';
-    const d = await r.json();
-    if(!r.ok) throw new Error(d.error||'Upload failed');
-    bar.style.width='100%';
-    status.textContent = '✅ Uploaded: '+file.name;
-    toast('Image uploaded ✅');
-    setTimeout(() => { document.getElementById('uploadProgress').style.display='none'; bar.style.width='0%'; }, 2000);
-    loadPhotoLibrary();
-  } catch(e) { toast(e.message,'error'); bar.style.width='0%'; document.getElementById('uploadProgress').style.display='none'; }
-  input.value='';
+  let done = 0;
+  for(const rawFile of files) {
+    status.textContent = `Uploading ${rawFile.name}… (${done+1}/${files.length})`;
+    bar.style.width = Math.round((done/files.length)*90 + 5) + '%';
+    try {
+      const file = await _mediaMaybeConvertToWebP(rawFile);
+      const fd = new FormData(); fd.append('image', file);
+      const r = await fetch(`${API}/api/upload/image`, {method:'POST', headers:{'Authorization':`Bearer ${authToken}`}, body:fd});
+      const d = await r.json();
+      if(!r.ok) throw new Error(d.error||'Upload failed');
+    } catch(e) { toast(`${rawFile.name}: ${e.message}`, 'error'); }
+    done++;
+  }
+  bar.style.width = '100%';
+  status.textContent = `✅ Uploaded ${done}/${files.length} image(s)`;
+  toast('Upload complete ✅');
+  setTimeout(() => { document.getElementById('uploadProgress').style.display='none'; bar.style.width='0%'; }, 2000);
+  loadPhotoLibrary();
+  document.getElementById('photoFileInput').value = '';
 }
+// Back-compat alias for any old callers of the single-file version
+async function uploadPhoto(input) { return uploadPhotos(input.files); }
 
 async function deletePhoto(filename) {
   if(!confirm('Delete this image?')) return;
@@ -6769,6 +6944,212 @@ async function deletePhoto(filename) {
     await apiFetch(`/api/upload/library/${filename}`,{method:'DELETE'});
     toast('Image deleted'); loadPhotoLibrary();
   } catch(e) { toast(e.message,'error'); }
+}
+
+// Drag & drop upload zone
+(function initMediaDropzone(){
+  const zone = document.getElementById('mediaDropzone');
+  if(!zone) return;
+  ['dragenter','dragover'].forEach(evt => zone.addEventListener(evt, e => { e.preventDefault(); zone.classList.add('drag'); }));
+  ['dragleave','drop'].forEach(evt => zone.addEventListener(evt, e => { e.preventDefault(); zone.classList.remove('drag'); }));
+  zone.addEventListener('drop', e => {
+    const files = e.dataTransfer?.files;
+    if(files && files.length) uploadPhotos(files);
+  });
+})();
+
+// ═══════════════════════════════════════════════
+// NOTIFICATION CENTER
+// Built from data already loaded elsewhere (allOrders, allProducts,
+// allCustomers) — no new backend endpoint required. "Read" state is
+// tracked client-side in localStorage per notification id.
+// ═══════════════════════════════════════════════
+function _notifReadIds() {
+  try { return new Set(JSON.parse(localStorage.getItem('ascovita_notif_read')||'[]')); }
+  catch(e) { return new Set(); }
+}
+function _notifSaveRead(set) {
+  localStorage.setItem('ascovita_notif_read', JSON.stringify([...set]));
+}
+function _notifTimeAgo(iso) {
+  if(!iso) return '';
+  const diff = Date.now() - new Date(iso).getTime();
+  const m = Math.round(diff/60000);
+  if(m < 1) return 'just now';
+  if(m < 60) return m+'m ago';
+  const h = Math.round(m/60);
+  if(h < 24) return h+'h ago';
+  return Math.round(h/24)+'d ago';
+}
+function buildNotifications() {
+  const items = [];
+  const cutoff = Date.now() - 48*3600*1000; // look back 48h for activity-based alerts
+  (allOrders||[]).forEach(o => {
+    const t = new Date(o.created_at||0).getTime();
+    if(t >= cutoff) {
+      items.push({id:'order-'+o.id, ico:'🛒', color:'rgba(32,128,232,0.15)', title:'New order '+o.id, sub:(o.customer_name||'Customer')+' · ₹'+(o.total||0), time:o.created_at});
+      const ps = (o.payment_status||'').toLowerCase();
+      if(ps.includes('paid') || ps==='success') items.push({id:'paid-'+o.id, ico:'💰', color:'rgba(74,138,40,0.15)', title:'Payment received — '+o.id, sub:(o.payment_method||'')+' · ₹'+(o.total||0), time:o.created_at});
+      const st = (o.status||o.fulfillment||'').toLowerCase();
+      if(st.includes('ship') || st.includes('dispatch')) items.push({id:'ship-'+o.id, ico:'🚚', color:'rgba(196,146,14,0.15)', title:'Shipment dispatched — '+o.id, sub:o.shiprocket_id?('Tracking: '+o.shiprocket_id):'On the way', time:o.created_at});
+    }
+  });
+  (allProducts||[]).filter(p=>!p.deleted_at && (p.stock||0) < 20).forEach(p => {
+    items.push({id:'lowstock-'+p.id, ico:'⚠️', color:'var(--red-soft)', title:'Low stock: '+p.name, sub:(p.stock||0)+' units left', time:null});
+  });
+  (allCustomers||[]).forEach(c => {
+    const t = new Date(c.created_at||0).getTime();
+    if(t >= cutoff) items.push({id:'cust-'+(c.id||c.email||c.phone), ico:'✨', color:'rgba(74,138,40,0.15)', title:'New customer: '+(c.name||c.email||'Unknown'), sub:c.email||c.phone||'', time:c.created_at});
+  });
+  items.sort((a,b) => new Date(b.time||0) - new Date(a.time||0));
+  return items.slice(0, 40);
+}
+function refreshNotifications() {
+  const items = buildNotifications();
+  const read = _notifReadIds();
+  const unread = items.filter(i => !read.has(i.id));
+  const countEl = document.getElementById('notifCount');
+  if(countEl) { countEl.textContent = unread.length > 9 ? '9+' : unread.length; countEl.style.display = unread.length ? 'flex' : 'none'; }
+  const list = document.getElementById('notifList');
+  if(!list) return;
+  list.innerHTML = items.length ? items.map(i => `
+    <div class="notif-item ${read.has(i.id)?'':'unread'}" onclick="markNotifRead('${i.id}')">
+      <div class="notif-ico" style="background:${i.color}">${i.ico}</div>
+      <div class="notif-body">
+        <div class="notif-title">${i.title}</div>
+        <div class="notif-sub">${i.sub}</div>
+        ${i.time?`<div class="notif-time">${_notifTimeAgo(i.time)}</div>`:''}
+      </div>
+    </div>
+  `).join('') : '<div class="notif-empty">No notifications yet</div>';
+}
+function markNotifRead(id) {
+  const read = _notifReadIds(); read.add(id); _notifSaveRead(read); refreshNotifications();
+}
+function markAllNotifsRead() {
+  const read = _notifReadIds();
+  buildNotifications().forEach(i => read.add(i.id));
+  _notifSaveRead(read); refreshNotifications();
+}
+function toggleNotifDropdown() {
+  document.getElementById('notifDropdown').classList.toggle('open');
+}
+document.addEventListener('click', e => {
+  const wrap = document.querySelector('.notif-wrap');
+  if(wrap && !wrap.contains(e.target)) document.getElementById('notifDropdown')?.classList.remove('open');
+});
+
+// ═══════════════════════════════════════════════
+// CALENDAR
+// Order-placed markers come from allOrders (already loaded).
+// Delivery dates / manufacturing deadlines / team reminders are
+// user-added events, stored locally for now — promote to a real
+// `calendar_events` table + API once the backend is ready.
+// ═══════════════════════════════════════════════
+let calViewDate = new Date();
+function _calEvents() {
+  try { return JSON.parse(localStorage.getItem('ascovita_calendar_events')||'[]'); }
+  catch(e) { return []; }
+}
+function _calSaveEvents(list) { localStorage.setItem('ascovita_calendar_events', JSON.stringify(list)); }
+function _calDateKey(d) { return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0'); }
+
+function calChangeMonth(delta) { calViewDate.setMonth(calViewDate.getMonth()+delta); renderCalendar(); }
+function calGoToday() { calViewDate = new Date(); renderCalendar(); }
+
+function renderCalendar() {
+  const grid = document.getElementById('calGrid');
+  if(!grid) return;
+  const year = calViewDate.getFullYear(), month = calViewDate.getMonth();
+  document.getElementById('calMonthLabel').textContent = calViewDate.toLocaleDateString('en-IN',{month:'long',year:'numeric'});
+
+  const events = _calEvents();
+  const ordersByDay = {};
+  (allOrders||[]).forEach(o => {
+    if(!o.created_at) return;
+    const k = _calDateKey(new Date(o.created_at));
+    ordersByDay[k] = (ordersByDay[k]||0) + 1;
+  });
+
+  const firstOfMonth = new Date(year, month, 1);
+  const startDow = firstOfMonth.getDay();
+  const daysInMonth = new Date(year, month+1, 0).getDate();
+  const todayKey = _calDateKey(new Date());
+
+  let cells = [];
+  for(let i=0; i<startDow; i++) {
+    const d = new Date(year, month, 1-(startDow-i));
+    cells.push({date:d, otherMonth:true});
+  }
+  for(let d=1; d<=daysInMonth; d++) cells.push({date:new Date(year,month,d), otherMonth:false});
+  while(cells.length % 7 !== 0 || cells.length < 35) cells.push({date:new Date(year, month, daysInMonth + (cells.length - startDow - daysInMonth) + 1), otherMonth:true});
+
+  grid.innerHTML = cells.map(c => {
+    const key = _calDateKey(c.date);
+    const dayEvents = events.filter(e => e.date === key);
+    const orderCount = ordersByDay[key];
+    let evtHtml = dayEvents.slice(0,2).map(e => `<div class="cal-evt ${e.type}" title="${e.title}" onclick="event.stopPropagation();openCalEventModal('${e.id}')">${e.title}</div>`).join('');
+    if(orderCount) evtHtml += `<div class="cal-evt order">${orderCount} order${orderCount>1?'s':''}</div>`;
+    if(dayEvents.length > 2) evtHtml += `<div class="cal-evt-more">+${dayEvents.length-2} more</div>`;
+    return `<div class="cal-cell ${c.otherMonth?'other-month':''} ${key===todayKey?'today':''}" onclick="openCalEventModal(null,'${key}')">
+      <div class="cal-daynum">${c.date.getDate()}</div>${evtHtml}
+    </div>`;
+  }).join('');
+
+  // Upcoming list (next 14 days)
+  const now = new Date(); now.setHours(0,0,0,0);
+  const horizon = new Date(now); horizon.setDate(horizon.getDate()+14);
+  const upcoming = events.filter(e => { const d = new Date(e.date); return d >= now && d <= horizon; })
+    .sort((a,b)=> new Date(a.date)-new Date(b.date));
+  const upcomingEl = document.getElementById('calUpcomingList');
+  if(upcomingEl) {
+    upcomingEl.innerHTML = upcoming.length ? upcoming.map(e => `
+      <div class="tl-item">
+        <div class="tl-dot" style="background:${e.type==='delivery'?'rgba(32,128,232,0.18)':e.type==='manufacturing'?'rgba(196,146,14,0.18)':'rgba(74,138,40,0.18)'}">${e.type==='delivery'?'🚚':e.type==='manufacturing'?'🏭':'📌'}</div>
+        <div class="tl-content" style="cursor:pointer;" onclick="openCalEventModal('${e.id}')">
+          <div class="tl-title">${e.title}</div>
+          <div class="tl-time">${new Date(e.date).toLocaleDateString('en-IN',{weekday:'short',day:'numeric',month:'short'})}${e.notes?' · '+e.notes:''}</div>
+        </div>
+      </div>
+    `).join('') : '<div class="empty-state">No upcoming events</div>';
+  }
+}
+
+function openCalEventModal(id, presetDate) {
+  const ev = id ? _calEvents().find(e => e.id === id) : null;
+  document.getElementById('calEventModalTitle').textContent = ev ? 'Edit Event' : 'Add Event';
+  document.getElementById('calEventId').value = ev ? ev.id : '';
+  document.getElementById('calEventTitle').value = ev ? ev.title : '';
+  document.getElementById('calEventDate').value = ev ? ev.date : (presetDate || _calDateKey(new Date()));
+  document.getElementById('calEventType').value = ev ? ev.type : 'reminder';
+  document.getElementById('calEventNotes').value = ev ? (ev.notes||'') : '';
+  document.getElementById('calEventDeleteBtn').style.display = ev ? 'inline-flex' : 'none';
+  openModal('calEventModal');
+}
+function saveCalEvent() {
+  const title = document.getElementById('calEventTitle').value.trim();
+  if(!title) { toast('Title is required','error'); return; }
+  const date = document.getElementById('calEventDate').value;
+  if(!date) { toast('Date is required','error'); return; }
+  const id = document.getElementById('calEventId').value;
+  let events = _calEvents();
+  if(id) {
+    events = events.map(e => e.id === id ? {...e, title, date, type:document.getElementById('calEventType').value, notes:document.getElementById('calEventNotes').value} : e);
+  } else {
+    events.push({id:'ev-'+Date.now(), title, date, type:document.getElementById('calEventType').value, notes:document.getElementById('calEventNotes').value});
+  }
+  _calSaveEvents(events);
+  closeModal('calEventModal');
+  toast('Event saved ✅');
+  renderCalendar();
+}
+function deleteCalEvent() {
+  const id = document.getElementById('calEventId').value;
+  if(!id || !confirm('Delete this event?')) return;
+  _calSaveEvents(_calEvents().filter(e => e.id !== id));
+  closeModal('calEventModal');
+  toast('Event deleted');
+  renderCalendar();
 }
 
 // ═══════════════════════════════════════════════
