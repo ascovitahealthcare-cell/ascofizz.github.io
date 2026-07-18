@@ -1891,16 +1891,55 @@ body.theme-glass .modal-overlay{backdrop-filter:blur(10px);}
 <!-- ═════════════ MARKETING AUTOMATION ═════════════ -->
 <div class="page" id="page-marketing">
   <div class="page-hdr">
-    <div><div class="page-title">Marketing</div><div class="page-sub">AI campaign generation, daily performance analysis, and product opportunity scanning</div></div>
+    <div><div class="page-title">Marketing</div><div class="page-sub">Live ad performance, budget control, campaign generation, and reporting</div></div>
     <div class="page-actions">
-      <button class="btn btn-secondary btn-sm" onclick="mktShowTab('campaigns')">Campaigns</button>
-      <button class="btn btn-secondary btn-sm" onclick="mktShowTab('reports')">Daily reports</button>
-      <button class="btn btn-secondary btn-sm" onclick="mktShowTab('opportunities')">Opportunities</button>
+      <button class="btn btn-secondary btn-sm mkt-navbtn" data-tab="overview" onclick="mktShowTab('overview')">Overview</button>
+      <button class="btn btn-secondary btn-sm mkt-navbtn" data-tab="liveads" onclick="mktShowTab('liveads')">Live ads</button>
+      <button class="btn btn-secondary btn-sm mkt-navbtn" data-tab="winners" onclick="mktShowTab('winners')">Winners</button>
+      <button class="btn btn-secondary btn-sm mkt-navbtn" data-tab="campaigns" onclick="mktShowTab('campaigns')">Campaigns</button>
+      <button class="btn btn-secondary btn-sm mkt-navbtn" data-tab="reports" onclick="mktShowTab('reports')">Reports</button>
+      <button class="btn btn-secondary btn-sm mkt-navbtn" data-tab="opportunities" onclick="mktShowTab('opportunities')">Opportunities</button>
     </div>
   </div>
 
+  <!-- OVERVIEW TAB -->
+  <div id="mkt-tab-overview" class="mkt-tab">
+    <div class="mkt-kpi-row">
+      <div class="mkt-kpi"><div class="mkt-kpi-label">Active ad sets</div><div class="mkt-kpi-value" id="mkt-kpi-active">–</div></div>
+      <div class="mkt-kpi"><div class="mkt-kpi-label">Spend (latest pull)</div><div class="mkt-kpi-value" id="mkt-kpi-spend">–</div></div>
+      <div class="mkt-kpi"><div class="mkt-kpi-label">Blended ROAS</div><div class="mkt-kpi-value" id="mkt-kpi-roas">–</div></div>
+      <div class="mkt-kpi"><div class="mkt-kpi-label">Pending approvals</div><div class="mkt-kpi-value" id="mkt-kpi-pending">–</div></div>
+    </div>
+
+    <div class="mkt-split">
+      <div>
+        <h3 style="margin-bottom:8px;">Top performers</h3>
+        <div id="mkt-overview-winners"><p class="mkt-empty">Loading…</p></div>
+      </div>
+      <div>
+        <h3 style="margin-bottom:8px;">Needs attention</h3>
+        <div id="mkt-overview-losers"><p class="mkt-empty">Loading…</p></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- LIVE ADS TAB -->
+  <div id="mkt-tab-liveads" class="mkt-tab" style="display:none;">
+    <div class="card" style="padding:14px 16px;margin-bottom:16px;display:flex;justify-content:space-between;align-items:center;">
+      <div style="font-size:13px;color:var(--text2);">Live state, synced whenever a daily report runs. Pause, resume, or set a budget directly — actions go straight to Meta.</div>
+      <button class="btn btn-secondary btn-sm" onclick="mktLoadAdSets()">↻ Refresh</button>
+    </div>
+    <div id="mkt-adsets-table"><p class="mkt-empty">Loading…</p></div>
+  </div>
+
+  <!-- WINNERS TAB -->
+  <div id="mkt-tab-winners" class="mkt-tab" style="display:none;">
+    <p style="font-size:13px;color:var(--text2);margin-bottom:14px;">Ad sets currently verdict "scale" — beating your ROAS threshold, ranked best first.</p>
+    <div id="mkt-winners-grid"><p class="mkt-empty">Loading…</p></div>
+  </div>
+
   <!-- CAMPAIGNS TAB -->
-  <div id="mkt-tab-campaigns" class="mkt-tab">
+  <div id="mkt-tab-campaigns" class="mkt-tab" style="display:none;">
     <div class="card" style="padding:16px;margin-bottom:16px;">
       <h3 style="margin-top:0;">Generate a campaign package</h3>
       <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-bottom:12px;">
@@ -1936,12 +1975,24 @@ body.theme-glass .modal-overlay{backdrop-filter:blur(10px);}
 
   <!-- REPORTS TAB -->
   <div id="mkt-tab-reports" class="mkt-tab" style="display:none;">
-    <div class="card" style="padding:16px;margin-bottom:16px;">
-      <h3 style="margin-top:0;">Analyze performance</h3>
+    <div class="card" style="padding:16px;margin-bottom:16px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;">
+      <div>
+        <h3 style="margin:0 0 4px;">Daily report</h3>
+        <div style="font-size:13px;color:var(--text2);">Runs automatically on schedule. Trigger it manually any time to see today's verdicts right now.</div>
+      </div>
+      <div>
+        <button class="btn btn-primary" onclick="mktRunReportNow()" id="mkt-run-report-btn">▶ Run report now</button>
+        <span id="mkt-run-report-status" style="margin-left:10px;font-size:13px;color:var(--text2);"></span>
+      </div>
+    </div>
+    <div id="mkt-run-report-result"></div>
+
+    <div class="card" style="padding:16px;margin:20px 0 16px;">
+      <h3 style="margin-top:0;">Analyze pasted data</h3>
       <textarea id="mkt-report-data" rows="6" style="width:100%;font-family:monospace;font-size:12px;"
         placeholder="ad_set, spend, purchases, cpa, roas&#10;ACV Moringa - Interest Fitness, 4200, 11, 382, 2.1"></textarea>
       <div style="margin-top:8px;">
-        <button class="btn btn-primary" onclick="mktAnalyzeReport()">Analyze performance</button>
+        <button class="btn btn-secondary" onclick="mktAnalyzeReport()">Analyze performance</button>
         <span id="mkt-report-status" style="margin-left:10px;font-size:13px;color:var(--text2);"></span>
       </div>
     </div>
@@ -1966,14 +2017,39 @@ body.theme-glass .modal-overlay{backdrop-filter:blur(10px);}
 </div>
 
 <style>
+  #page-marketing .mkt-navbtn.mkt-active { background:var(--accent,#1F7A6C); color:#fff; border-color:var(--accent,#1F7A6C); }
   #page-marketing .mkt-angle { border:1px solid var(--border,#e2e2e2); border-radius:8px; padding:12px 14px; margin-bottom:10px; }
-  #page-marketing .mkt-pill { font-size:11px; font-weight:700; padding:2px 8px; border-radius:99px; }
+  #page-marketing .mkt-empty { font-size:13px; color:var(--text2); }
+  #page-marketing .mkt-pill { font-size:11px; font-weight:700; padding:2px 8px; border-radius:99px; white-space:nowrap; }
   #page-marketing .mkt-pill.scale { background:#e1f5ee; color:#0f6e56; }
   #page-marketing .mkt-pill.pause { background:#fcebeb; color:#a32d2d; }
   #page-marketing .mkt-pill.hold  { background:#efefef; color:#666; }
+  #page-marketing .mkt-pill.active { background:#e1f5ee; color:#0f6e56; }
+  #page-marketing .mkt-pill.paused { background:#efefef; color:#666; }
   #page-marketing .mkt-pill.pending_approval { background:#faeeda; color:#854f0b; }
   #page-marketing .mkt-pill.approved { background:#e1f5ee; color:#0f6e56; }
   #page-marketing .mkt-pill.rejected { background:#fcebeb; color:#a32d2d; }
+
+  #page-marketing .mkt-kpi-row { display:grid; grid-template-columns:repeat(4,1fr); gap:14px; margin-bottom:24px; }
+  #page-marketing .mkt-kpi { background:var(--card-bg,#fff); border:1px solid var(--border,#e2e2e2); border-radius:12px; padding:16px 18px; }
+  #page-marketing .mkt-kpi-label { font-size:12px; color:var(--text2); text-transform:uppercase; letter-spacing:.04em; margin-bottom:6px; }
+  #page-marketing .mkt-kpi-value { font-size:26px; font-weight:700; }
+  #page-marketing .mkt-split { display:grid; grid-template-columns:1fr 1fr; gap:20px; }
+
+  #page-marketing .mkt-table { width:100%; border-collapse:collapse; background:var(--card-bg,#fff); border:1px solid var(--border,#e2e2e2); border-radius:12px; overflow:hidden; }
+  #page-marketing .mkt-table th { text-align:left; font-size:11px; text-transform:uppercase; letter-spacing:.04em; color:var(--text2); padding:10px 12px; border-bottom:1px solid var(--border,#e2e2e2); background:rgba(0,0,0,0.02); }
+  #page-marketing .mkt-table td { padding:10px 12px; border-bottom:1px solid var(--border,#e2e2e2); font-size:13px; vertical-align:middle; }
+  #page-marketing .mkt-table tr:last-child td { border-bottom:none; }
+  #page-marketing .mkt-budget-input { width:90px; padding:5px 8px; font-size:12px; border:1px solid var(--border,#e2e2e2); border-radius:6px; }
+
+  #page-marketing .mkt-winner-card { background:var(--card-bg,#fff); border:1px solid #b9e3d4; border-left:4px solid #0f6e56; border-radius:10px; padding:14px 16px; margin-bottom:10px; }
+  #page-marketing .mkt-winner-card .mkt-wc-top { display:flex; justify-content:space-between; align-items:center; margin-bottom:6px; }
+  #page-marketing .mkt-winner-card .mkt-wc-roas { font-size:20px; font-weight:700; color:#0f6e56; }
+
+  @media (max-width: 900px) {
+    #page-marketing .mkt-kpi-row { grid-template-columns:1fr 1fr; }
+    #page-marketing .mkt-split { grid-template-columns:1fr; }
+  }
 </style>
 
 <!-- ═════════════ BANNERS ═════════════ -->
@@ -8924,11 +9000,158 @@ function mktInit() {
 function mktShowTab(tab) {
   document.querySelectorAll('.mkt-tab').forEach(t => t.style.display = 'none');
   document.getElementById('mkt-tab-' + tab).style.display = 'block';
+  document.querySelectorAll('.mkt-navbtn').forEach(b => b.classList.toggle('mkt-active', b.dataset.tab === tab));
+  if (tab === 'overview') mktLoadOverview();
+  if (tab === 'liveads') mktLoadAdSets();
+  if (tab === 'winners') mktLoadWinners();
   if (tab === 'campaigns') mktLoadCampaigns();
   if (tab === 'reports') mktLoadReportLogs();
 }
 
 function mktEsc(s) { return (s || '').toString().replace(/[&<>]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;'}[c])); }
+
+function mktFmtMoney(n) {
+  if (n === null || n === undefined) return '—';
+  return '₹' + Number(n).toLocaleString('en-IN', { maximumFractionDigits: 0 });
+}
+function mktFmtRoas(n) {
+  if (n === null || n === undefined) return '—';
+  return Number(n).toFixed(2) + 'x';
+}
+
+/* ---------- OVERVIEW ---------- */
+async function mktLoadOverview() {
+  mktInit();
+  if (!mktSupabase) return;
+  const [{ data: adSets }, { data: campaigns }] = await Promise.all([
+    mktSupabase.from('ad_sets').select('*'),
+    mktSupabase.from('campaigns').select('status'),
+  ]);
+
+  const active = (adSets || []).filter(a => a.status === 'active');
+  const totalSpend = active.reduce((s, a) => s + (Number(a.last_spend) || 0), 0);
+  const totalPurchases = active.reduce((s, a) => s + (Number(a.last_purchases) || 0), 0);
+  const weightedRoasSum = active.reduce((s, a) => s + (Number(a.last_roas) || 0) * (Number(a.last_spend) || 0), 0);
+  const blendedRoas = totalSpend > 0 ? weightedRoasSum / totalSpend : null;
+  const pending = (campaigns || []).filter(c => c.status === 'pending_approval').length;
+
+  document.getElementById('mkt-kpi-active').textContent = active.length;
+  document.getElementById('mkt-kpi-spend').textContent = mktFmtMoney(totalSpend);
+  document.getElementById('mkt-kpi-roas').textContent = blendedRoas !== null ? mktFmtRoas(blendedRoas) : '—';
+  document.getElementById('mkt-kpi-pending').textContent = pending;
+
+  const winners = active.filter(a => a.last_verdict === 'scale').sort((a, b) => (b.last_roas || 0) - (a.last_roas || 0)).slice(0, 5);
+  const losers = active.filter(a => a.last_verdict === 'pause').sort((a, b) => (a.last_roas || 0) - (b.last_roas || 0)).slice(0, 5);
+
+  document.getElementById('mkt-overview-winners').innerHTML = winners.length
+    ? winners.map(a => `<div class="mkt-angle"><div style="display:flex;justify-content:space-between;"><strong>${mktEsc(a.name)}</strong><span style="color:#0f6e56;font-weight:700;">${mktFmtRoas(a.last_roas)}</span></div></div>`).join('')
+    : '<p class="mkt-empty">No winners flagged yet — run a report first.</p>';
+
+  document.getElementById('mkt-overview-losers').innerHTML = losers.length
+    ? losers.map(a => `<div class="mkt-angle"><div style="display:flex;justify-content:space-between;"><strong>${mktEsc(a.name)}</strong><span style="color:#a32d2d;font-weight:700;">${mktFmtRoas(a.last_roas)}</span></div><div style="font-size:12px;color:var(--text2);">${mktEsc(a.last_reason || '')}</div></div>`).join('')
+    : '<p class="mkt-empty">Nothing flagged for pausing right now.</p>';
+}
+
+/* ---------- LIVE ADS ---------- */
+async function mktLoadAdSets() {
+  mktInit();
+  const box = document.getElementById('mkt-adsets-table');
+  if (!mktSupabase) { box.innerHTML = '<p class="mkt-empty">Marketing Supabase not configured.</p>'; return; }
+  const { data, error } = await mktSupabase.from('ad_sets').select('*').order('last_roas', { ascending: false });
+  if (error) { box.innerHTML = '<p class="mkt-empty">Failed to load: ' + mktEsc(error.message) + '</p>'; return; }
+  if (!data.length) { box.innerHTML = '<p class="mkt-empty">No ad sets yet — these populate once a daily report has run against a launched campaign.</p>'; return; }
+
+  box.innerHTML = `<table class="mkt-table"><tr>
+    <th>Ad set</th><th>Status</th><th>Spend</th><th>CPA</th><th>ROAS</th><th>Verdict</th><th>Budget</th><th>Actions</th>
+  </tr>${data.map(a => `
+    <tr>
+      <td>${mktEsc(a.name)}</td>
+      <td><span class="mkt-pill ${mktEsc(a.status)}">${mktEsc(a.status)}</span></td>
+      <td>${mktFmtMoney(a.last_spend)}</td>
+      <td>${mktFmtMoney(a.last_cpa)}</td>
+      <td>${mktFmtRoas(a.last_roas)}</td>
+      <td><span class="mkt-pill ${mktEsc(a.last_verdict)}">${mktEsc(a.last_verdict || '—')}</span></td>
+      <td>
+        <input type="number" class="mkt-budget-input" id="mkt-budget-${a.id}" placeholder="${a.daily_budget_cents ? Math.round(a.daily_budget_cents / 100) : ''}">
+        <button class="btn btn-secondary btn-sm" onclick="mktSetBudget('${a.id}')">Set</button>
+      </td>
+      <td>
+        ${a.status === 'active'
+          ? `<button class="btn btn-secondary btn-sm" onclick="mktPauseAdSet('${a.id}')">Pause</button>`
+          : `<button class="btn btn-secondary btn-sm" onclick="mktResumeAdSet('${a.id}')">Resume</button>`}
+      </td>
+    </tr>`).join('')}</table>`;
+}
+
+async function mktPauseAdSet(id) {
+  if (!confirm('Pause this ad set on Meta now?')) return;
+  const res = await fetch(window.MARKETING_BACKEND_URL + '/api/adsets/' + id + '/pause', { method: 'POST' });
+  if (!res.ok) { alert('Failed: ' + (await res.json()).error); return; }
+  mktLoadAdSets();
+}
+
+async function mktResumeAdSet(id) {
+  if (!confirm('Resume this ad set on Meta now?')) return;
+  const res = await fetch(window.MARKETING_BACKEND_URL + '/api/adsets/' + id + '/resume', { method: 'POST' });
+  if (!res.ok) { alert('Failed: ' + (await res.json()).error); return; }
+  mktLoadAdSets();
+}
+
+async function mktSetBudget(id) {
+  const input = document.getElementById('mkt-budget-' + id);
+  const rupees = Number(input.value);
+  if (!rupees || rupees <= 0) { alert('Enter a daily budget in rupees first.'); return; }
+  if (!confirm(`Set daily budget to ₹${rupees}?`)) return;
+  const res = await fetch(window.MARKETING_BACKEND_URL + '/api/adsets/' + id + '/budget', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ dailyBudgetCents: Math.round(rupees * 100) }),
+  });
+  if (!res.ok) { alert('Failed: ' + (await res.json()).error); return; }
+  mktLoadAdSets();
+}
+
+/* ---------- WINNERS ---------- */
+async function mktLoadWinners() {
+  mktInit();
+  const box = document.getElementById('mkt-winners-grid');
+  if (!mktSupabase) { box.innerHTML = '<p class="mkt-empty">Marketing Supabase not configured.</p>'; return; }
+  const { data, error } = await mktSupabase.from('ad_sets').select('*').eq('last_verdict', 'scale').order('last_roas', { ascending: false });
+  if (error) { box.innerHTML = '<p class="mkt-empty">Failed to load: ' + mktEsc(error.message) + '</p>'; return; }
+  if (!data.length) { box.innerHTML = '<p class="mkt-empty">Nothing crossed the scale threshold yet.</p>'; return; }
+  box.innerHTML = data.map(a => `
+    <div class="mkt-winner-card">
+      <div class="mkt-wc-top"><strong>${mktEsc(a.name)}</strong><span class="mkt-wc-roas">${mktFmtRoas(a.last_roas)}</span></div>
+      <div style="font-size:12px;color:var(--text2);">Spend ${mktFmtMoney(a.last_spend)} · CPA ${mktFmtMoney(a.last_cpa)} · ${a.last_purchases || 0} purchases</div>
+    </div>
+  `).join('');
+}
+
+/* ---------- ON-DEMAND REPORT ---------- */
+async function mktRunReportNow() {
+  const btn = document.getElementById('mkt-run-report-btn');
+  const status = document.getElementById('mkt-run-report-status');
+  const box = document.getElementById('mkt-run-report-result');
+  btn.disabled = true;
+  status.textContent = 'Running — pulling live Meta insights…';
+  box.innerHTML = '';
+  try {
+    const res = await fetch(window.MARKETING_BACKEND_URL + '/api/reports/run-now', { method: 'POST' });
+    const payload = await res.json();
+    if (!res.ok) throw new Error(payload.error || 'Request failed');
+    status.textContent = 'Done at ' + new Date(payload.ranAt).toLocaleTimeString();
+    box.innerHTML = (payload.results || []).map(r => r.error
+      ? `<div class="mkt-angle"><strong>${mktEsc(r.campaign)}</strong><div style="color:#a32d2d;font-size:12px;">${mktEsc(r.error)}</div></div>`
+      : `<div class="mkt-angle"><strong>${mktEsc(r.campaign)}</strong><p style="margin:4px 0 0;">${mktEsc(r.summary)}</p></div>`
+    ).join('') || '<p class="mkt-empty">No approved, launched campaigns to report on yet.</p>';
+    mktLoadReportLogs();
+  } catch (e) {
+    status.textContent = 'Failed: ' + e.message;
+  } finally {
+    btn.disabled = false;
+  }
+}
+
 
 async function mktGenerateCampaign() {
   const product = document.getElementById('mkt-product').value;
@@ -8959,8 +9182,11 @@ async function mktLoadCampaigns() {
   if (error) { list.innerHTML = '<p>Failed to load: ' + mktEsc(error.message) + '</p>'; return; }
   list.innerHTML = data.map(c => `
     <div class="mkt-angle">
-      <div style="display:flex;justify-content:space-between;align-items:center;">
-        <strong>${mktEsc(c.product_name)}</strong>
+      <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;">
+        <div style="display:flex;align-items:center;gap:10px;">
+          ${c.product_image_url ? `<img src="${mktEsc(c.product_image_url)}" style="width:44px;height:44px;object-fit:cover;border-radius:8px;flex-shrink:0;" onerror="this.style.display='none'">` : ''}
+          <strong>${mktEsc(c.product_name)}</strong>
+        </div>
         <span class="mkt-pill ${mktEsc(c.status)}">${mktEsc(c.status)}</span>
       </div>
       <div style="font-size:13px;color:var(--text2);margin:4px 0 8px;">${mktEsc(c.goal)} · ${mktEsc(c.tone)}</div>
