@@ -1077,6 +1077,10 @@ body.theme-glass .modal-overlay{backdrop-filter:blur(10px);}
     <div class="nav-item" onclick="showPage('customers')"><span class="nav-ico">👥</span> Customers</div>
   </div>
   <div class="nav-section">
+    <div class="nav-sec-label">Growth</div>
+    <div class="nav-item" onclick="showPage('marketing')"><span class="nav-ico">📣</span> Marketing</div>
+  </div>
+  <div class="nav-section">
     <div class="nav-sec-label">Content</div>
     <div class="nav-item" onclick="showPage('banners')"><span class="nav-ico">🖼️</span> Banners</div>
     <div class="nav-item" onclick="showPage('photolibrary')"><span class="nav-ico">📸</span> Photo Library</div>
@@ -1883,6 +1887,94 @@ body.theme-glass .modal-overlay{backdrop-filter:blur(10px);}
     </div>
   </div>
 </div>
+
+<!-- ═════════════ MARKETING AUTOMATION ═════════════ -->
+<div class="page" id="page-marketing">
+  <div class="page-hdr">
+    <div><div class="page-title">Marketing</div><div class="page-sub">AI campaign generation, daily performance analysis, and product opportunity scanning</div></div>
+    <div class="page-actions">
+      <button class="btn btn-secondary btn-sm" onclick="mktShowTab('campaigns')">Campaigns</button>
+      <button class="btn btn-secondary btn-sm" onclick="mktShowTab('reports')">Daily reports</button>
+      <button class="btn btn-secondary btn-sm" onclick="mktShowTab('opportunities')">Opportunities</button>
+    </div>
+  </div>
+
+  <!-- CAMPAIGNS TAB -->
+  <div id="mkt-tab-campaigns" class="mkt-tab">
+    <div class="card" style="padding:16px;margin-bottom:16px;">
+      <h3 style="margin-top:0;">Generate a campaign package</h3>
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-bottom:12px;">
+        <select id="mkt-product">
+          <option>Ascovita ACV + Moringa Effervescent — Green Apple</option>
+          <option>Ascovita B12 + Biotin Effervescent — Guava</option>
+          <option>Ascovita CS++ Calcium + Iron with B12, D3 and Organic Spirulina</option>
+          <option>Ascovita L-Glutathione Effervescent — Orange</option>
+          <option>Ascovita MG+++ Magnesium B12 + D3 with Organic Spirulina</option>
+          <option>Ascovita Multidiata Premium Multivitamin</option>
+          <option>Ascovita Organic Moringa Tablets</option>
+          <option>Ascovita VitaPlus B12 + D3 with Certified Organic Spirulina</option>
+        </select>
+        <select id="mkt-goal">
+          <option>New customer acquisition</option>
+          <option>Retargeting — cart abandoners</option>
+          <option>Retargeting — past purchasers</option>
+          <option>Brand awareness</option>
+        </select>
+        <select id="mkt-tone">
+          <option>Energetic and fun</option>
+          <option>Trust and science-backed</option>
+          <option>Convenience-focused</option>
+          <option>Ayurvedic and natural</option>
+        </select>
+      </div>
+      <button class="btn btn-primary" id="mkt-generate-btn" onclick="mktGenerateCampaign()">Generate campaign package</button>
+      <span id="mkt-generate-status" style="margin-left:10px;font-size:13px;color:var(--text2);"></span>
+    </div>
+
+    <div id="mkt-campaign-list"></div>
+  </div>
+
+  <!-- REPORTS TAB -->
+  <div id="mkt-tab-reports" class="mkt-tab" style="display:none;">
+    <div class="card" style="padding:16px;margin-bottom:16px;">
+      <h3 style="margin-top:0;">Analyze performance</h3>
+      <textarea id="mkt-report-data" rows="6" style="width:100%;font-family:monospace;font-size:12px;"
+        placeholder="ad_set, spend, purchases, cpa, roas&#10;ACV Moringa - Interest Fitness, 4200, 11, 382, 2.1"></textarea>
+      <div style="margin-top:8px;">
+        <button class="btn btn-primary" onclick="mktAnalyzeReport()">Analyze performance</button>
+        <span id="mkt-report-status" style="margin-left:10px;font-size:13px;color:var(--text2);"></span>
+      </div>
+    </div>
+    <div id="mkt-report-result"></div>
+    <h3>Recent logs</h3>
+    <div id="mkt-report-log-list"></div>
+  </div>
+
+  <!-- OPPORTUNITIES TAB -->
+  <div id="mkt-tab-opportunities" class="mkt-tab" style="display:none;">
+    <div class="card" style="padding:16px;margin-bottom:16px;">
+      <h3 style="margin-top:0;">Scan for opportunities</h3>
+      <textarea id="mkt-opp-data" rows="6" style="width:100%;font-family:monospace;font-size:12px;"
+        placeholder="product, units_last_30d, units_prior_30d, margin&#10;ACV Moringa Green Apple, 1240, 810, 42%"></textarea>
+      <div style="margin-top:8px;">
+        <button class="btn btn-primary" onclick="mktScanOpportunities()">Scan for opportunities</button>
+        <span id="mkt-opp-status" style="margin-left:10px;font-size:13px;color:var(--text2);"></span>
+      </div>
+    </div>
+    <div id="mkt-opp-result"></div>
+  </div>
+</div>
+
+<style>
+  #page-marketing .mkt-angle { border:1px solid var(--border,#e2e2e2); border-radius:8px; padding:12px 14px; margin-bottom:10px; }
+  #page-marketing .mkt-pill { font-size:11px; font-weight:700; padding:2px 8px; border-radius:99px; }
+  #page-marketing .mkt-pill.scale { background:#e1f5ee; color:#0f6e56; }
+  #page-marketing .mkt-pill.pause { background:#fcebeb; color:#a32d2d; }
+  #page-marketing .mkt-pill.hold  { background:#efefef; color:#666; }
+  #page-marketing .mkt-pill.pending_approval { background:#faeeda; color:#854f0b; }
+  #page-marketing .mkt-pill.approved { background:#e1f5ee; color:#0f6e56; }
+  #page-marketing .mkt-pill.rejected { background:#fcebeb; color:#a32d2d; }
+</style>
 
 <!-- ═════════════ BANNERS ═════════════ -->
 <div class="page" id="page-banners">
@@ -8809,131 +8901,20 @@ document.addEventListener('DOMContentLoaded', function() {
   }
   renderLoginAudit();
 });
+</script>
 
-  <!--
-  INTEGRATION INSTRUCTIONS
-  ========================
-  Your admin__33_.html already has a working pattern:
-    - nav items:  <div class="nav-item" onclick="showPage('name')">...
-    - pages:      <div class="page" id="page-name">...
-  showPage() (around line 3001) handles all the show/hide + active-state logic
-  already — nothing to change there.
-
-  STEP 1 — add a nav item, right after the existing Customers item (line 1077):
-
-  <div class="nav-item" onclick="showPage('marketing')"><span class="nav-ico">📣</span> Marketing</div>
-
-  STEP 2 — paste the whole block below as a new page, anywhere alongside the
-  other <div class="page" id="page-..."> blocks (e.g. after page-customers).
-
-  STEP 3 — before </body>, add these two lines to set the two values this
-  panel needs (get the anon key/url from Supabase project settings → API,
-  and set BACKEND_URL to wherever this repo ends up on Render):
-
-  <script>
-    window.MARKETING_SUPABASE_URL = "https://YOUR-PROJECT.supabase.co";
-    window.MARKETING_SUPABASE_ANON_KEY = "YOUR_ANON_KEY";
-    window.MARKETING_BACKEND_URL = "https://ascovita-marketing-automation.onrender.com";
-  </script>
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
-
-  Load order matters: the two window.MARKETING_* lines and the supabase-js
-  script tag must both come before the <script> at the bottom of this file.
--->
-
-<div class="page" id="page-marketing">
-
-  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
-    <h2 style="margin:0;">Marketing automation</h2>
-    <div style="display:flex;gap:8px;">
-      <button class="btn" onclick="mktShowTab('campaigns')">Campaigns</button>
-      <button class="btn" onclick="mktShowTab('reports')">Daily reports</button>
-      <button class="btn" onclick="mktShowTab('opportunities')">Opportunities</button>
-    </div>
-  </div>
-
-  <!-- CAMPAIGNS TAB -->
-  <div id="mkt-tab-campaigns" class="mkt-tab">
-    <div class="card" style="padding:16px;margin-bottom:16px;">
-      <h3 style="margin-top:0;">Generate a campaign package</h3>
-      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-bottom:12px;">
-        <select id="mkt-product">
-          <option>Ascovita ACV + Moringa Effervescent — Green Apple</option>
-          <option>Ascovita B12 + Biotin Effervescent — Guava</option>
-          <option>Ascovita CS++ Calcium + Iron with B12, D3 and Organic Spirulina</option>
-          <option>Ascovita L-Glutathione Effervescent — Orange</option>
-          <option>Ascovita MG+++ Magnesium B12 + D3 with Organic Spirulina</option>
-          <option>Ascovita Multidiata Premium Multivitamin</option>
-          <option>Ascovita Organic Moringa Tablets</option>
-          <option>Ascovita VitaPlus B12 + D3 with Certified Organic Spirulina</option>
-        </select>
-        <select id="mkt-goal">
-          <option>New customer acquisition</option>
-          <option>Retargeting — cart abandoners</option>
-          <option>Retargeting — past purchasers</option>
-          <option>Brand awareness</option>
-        </select>
-        <select id="mkt-tone">
-          <option>Energetic and fun</option>
-          <option>Trust and science-backed</option>
-          <option>Convenience-focused</option>
-          <option>Ayurvedic and natural</option>
-        </select>
-      </div>
-      <button class="btn btn-primary" id="mkt-generate-btn" onclick="mktGenerateCampaign()">Generate campaign package</button>
-      <span id="mkt-generate-status" style="margin-left:10px;font-size:13px;color:#888;"></span>
-    </div>
-
-    <div id="mkt-campaign-list"></div>
-  </div>
-
-  <!-- REPORTS TAB -->
-  <div id="mkt-tab-reports" class="mkt-tab" style="display:none;">
-    <div class="card" style="padding:16px;margin-bottom:16px;">
-      <h3 style="margin-top:0;">Analyze performance</h3>
-      <textarea id="mkt-report-data" rows="6" style="width:100%;font-family:monospace;font-size:12px;"
-        placeholder="ad_set, spend, purchases, cpa, roas&#10;ACV Moringa - Interest Fitness, 4200, 11, 382, 2.1"></textarea>
-      <div style="margin-top:8px;">
-        <button class="btn btn-primary" onclick="mktAnalyzeReport()">Analyze performance</button>
-        <span id="mkt-report-status" style="margin-left:10px;font-size:13px;color:#888;"></span>
-      </div>
-    </div>
-    <div id="mkt-report-result"></div>
-    <h3>Recent logs</h3>
-    <div id="mkt-report-log-list"></div>
-  </div>
-
-  <!-- OPPORTUNITIES TAB -->
-  <div id="mkt-tab-opportunities" class="mkt-tab" style="display:none;">
-    <div class="card" style="padding:16px;margin-bottom:16px;">
-      <h3 style="margin-top:0;">Scan for opportunities</h3>
-      <textarea id="mkt-opp-data" rows="6" style="width:100%;font-family:monospace;font-size:12px;"
-        placeholder="product, units_last_30d, units_prior_30d, margin&#10;ACV Moringa Green Apple, 1240, 810, 42%"></textarea>
-      <div style="margin-top:8px;">
-        <button class="btn btn-primary" onclick="mktScanOpportunities()">Scan for opportunities</button>
-        <span id="mkt-opp-status" style="margin-left:10px;font-size:13px;color:#888;"></span>
-      </div>
-    </div>
-    <div id="mkt-opp-result"></div>
-  </div>
-
-</div>
-
-<style>
-  #page-marketing .card { background: var(--card-bg, #fff); border: 1px solid var(--border, #e2e2e2); border-radius: 10px; }
-  #page-marketing .mkt-angle { border:1px solid #e2e2e2; border-radius:8px; padding:12px 14px; margin-bottom:10px; }
-  #page-marketing .mkt-pill { font-size:11px; font-weight:700; padding:2px 8px; border-radius:99px; }
-  #page-marketing .mkt-pill.scale { background:#e1f5ee; color:#0f6e56; }
-  #page-marketing .mkt-pill.pause { background:#fcebeb; color:#a32d2d; }
-  #page-marketing .mkt-pill.hold  { background:#efefef; color:#666; }
-  #page-marketing .mkt-pill.pending_approval { background:#faeeda; color:#854f0b; }
-  #page-marketing .mkt-pill.approved { background:#e1f5ee; color:#0f6e56; }
-  #page-marketing .mkt-pill.rejected { background:#fcebeb; color:#a32d2d; }
-</style>
-
+<!-- ═════════════ MARKETING AUTOMATION CONFIG ═════════════ -->
+<!-- Fill these in with your marketing Supabase project's values and the
+     Render URL of the ascovita-marketing-automation backend once deployed. -->
+<script>
+  window.MARKETING_SUPABASE_URL = "https://YOUR-PROJECT.supabase.co";
+  window.MARKETING_SUPABASE_ANON_KEY = "YOUR_ANON_KEY";
+  window.MARKETING_BACKEND_URL = "https://ascovita-marketing-automation.onrender.com";
+</script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 <script>
 // Requires window.MARKETING_SUPABASE_URL / MARKETING_SUPABASE_ANON_KEY / MARKETING_BACKEND_URL
-// to be set, and the supabase-js UMD script loaded, before this runs.
+// to be set, and the supabase-js UMD script loaded, above this block.
 let mktSupabase = null;
 function mktInit() {
   if (mktSupabase || !window.supabase || !window.MARKETING_SUPABASE_URL) return;
@@ -8972,7 +8953,8 @@ async function mktGenerateCampaign() {
 async function mktLoadCampaigns() {
   mktInit();
   const list = document.getElementById('mkt-campaign-list');
-  if (!mktSupabase) { list.innerHTML = '<p>Marketing Supabase not configured yet.</p>'; return; }
+  if (!list) return;
+  if (!mktSupabase) { list.innerHTML = '<p>Marketing Supabase not configured yet — fill in window.MARKETING_SUPABASE_URL above.</p>'; return; }
   const { data, error } = await mktSupabase.from('campaigns').select('*').order('created_at', { ascending: false }).limit(20);
   if (error) { list.innerHTML = '<p>Failed to load: ' + mktEsc(error.message) + '</p>'; return; }
   list.innerHTML = data.map(c => `
@@ -8981,11 +8963,11 @@ async function mktLoadCampaigns() {
         <strong>${mktEsc(c.product_name)}</strong>
         <span class="mkt-pill ${mktEsc(c.status)}">${mktEsc(c.status)}</span>
       </div>
-      <div style="font-size:13px;color:#666;margin:4px 0 8px;">${mktEsc(c.goal)} · ${mktEsc(c.tone)}</div>
+      <div style="font-size:13px;color:var(--text2);margin:4px 0 8px;">${mktEsc(c.goal)} · ${mktEsc(c.tone)}</div>
       ${c.compliance_notes ? `<div style="font-size:12px;color:#854f0b;background:#fff7e6;border-radius:6px;padding:8px;margin-bottom:8px;">${mktEsc(c.compliance_notes)}</div>` : ''}
       ${c.status === 'pending_approval' ? `
-        <button class="btn" onclick="mktApprove('${c.id}')">Approve and launch (paused)</button>
-        <button class="btn" onclick="mktReject('${c.id}')">Reject</button>
+        <button class="btn btn-primary btn-sm" onclick="mktApprove('${c.id}')">Approve and launch (paused)</button>
+        <button class="btn btn-secondary btn-sm" onclick="mktReject('${c.id}')">Reject</button>
       ` : ''}
     </div>
   `).join('') || '<p>No campaigns yet.</p>';
@@ -9077,12 +9059,15 @@ async function mktScanOpportunities() {
   }
 }
 
-// Load campaigns when the Marketing nav item is first opened.
+// Load campaigns when the Marketing nav item is first opened — patches the
+// existing showPage() (defined earlier in this file) without touching it.
 const _mktOrigShowPage = window.showPage;
-window.showPage = function (name) {
-  _mktOrigShowPage(name);
-  if (name === 'marketing') mktLoadCampaigns();
-};
+if (typeof _mktOrigShowPage === 'function') {
+  window.showPage = function (name) {
+    _mktOrigShowPage(name);
+    if (name === 'marketing') mktLoadCampaigns();
+  };
+}
 </script>
 
 </body>
