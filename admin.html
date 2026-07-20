@@ -1084,6 +1084,7 @@ body.theme-glass .modal-overlay{backdrop-filter:blur(10px);}
     <div class="nav-sec-label">Content</div>
     <div class="nav-item" onclick="showPage('banners')"><span class="nav-ico">🖼️</span> Banners</div>
     <div class="nav-item" onclick="showPage('photolibrary')"><span class="nav-ico">📸</span> Photo Library</div>
+    <div class="nav-item" onclick="showPage('siteimages')"><span class="nav-ico">🖥️</span> Site Images</div>
   </div>
   <div class="nav-section">
     <div class="nav-sec-label">Finance</div>
@@ -2106,6 +2107,24 @@ body.theme-glass .modal-overlay{backdrop-filter:blur(10px);}
 
   <div class="photo-grid" id="photoGrid"></div>
   <div class="form-hint" style="margin-top:14px;">Alt text is saved in this browser for now (the backend has no alt-text column yet) — add one to the images table to persist it for real accessibility/SEO benefit.</div>
+</div>
+
+<!-- ═════════════ SITE IMAGES ═════════════ -->
+<div class="page" id="page-siteimages">
+  <div class="page-hdr">
+    <div><div class="page-title">Site Images</div><div class="page-sub">Every fixed image on ascovita.com, grouped by where it appears — replace or reset any of them without touching code</div></div>
+  </div>
+
+  <div id="siteImagesGroups"></div>
+
+  <div class="page-hdr" style="margin-top:34px;">
+    <div><div class="page-title">Promo Carousel</div><div class="page-sub">The scrolling promo cards on the home page — add, replace, reorder, or remove without editing PROMO_MEDIA.js</div></div>
+    <div class="page-actions">
+      <input type="file" id="promoFileInput" accept="image/*" onchange="addPromoCard(this.files[0])">
+      <button class="btn btn-primary" onclick="document.getElementById('promoFileInput').click()">＋ Add Card</button>
+    </div>
+  </div>
+  <div id="promoMediaGrid" class="grid-3"></div>
 </div>
 
 <!-- ═════════════ CALENDAR ═════════════ -->
@@ -3196,6 +3215,7 @@ function showPage(name) {
   if(name === 'payments') loadPayments();
   if(name === 'invoices') loadInvoices();
   if(name === 'banners') loadBanners();
+  if(name === 'siteimages') { loadSiteImages(); loadPromoMedia(); }
   if(name === 'settings') { loadSettings(); }
   if(name === 'aiteam') { loadAITeamPage(); }
   if(name === 'calendar') { renderCalendar(); }
@@ -3214,7 +3234,7 @@ function refreshCurrent() {
   const active = document.querySelector('.page.active');
   if(!active) return;
   const id = active.id.replace('page-','');
-  const fns = {dashboard:loadDashboard,orders:loadOrders,products:loadProducts,inventory:loadInventory,discounts:loadDiscounts,customers:loadCustomers,analytics:loadAnalytics,payments:loadPayments,invoices:loadInvoices,photolibrary:loadPhotoLibrary,banners:loadBanners,calendar:renderCalendar};
+  const fns = {dashboard:loadDashboard,orders:loadOrders,products:loadProducts,inventory:loadInventory,discounts:loadDiscounts,customers:loadCustomers,analytics:loadAnalytics,payments:loadPayments,invoices:loadInvoices,photolibrary:loadPhotoLibrary,banners:loadBanners,calendar:renderCalendar,siteimages:()=>{loadSiteImages();loadPromoMedia();}};
   if(fns[id]) fns[id]();
 }
 
@@ -7145,6 +7165,180 @@ async function deletePhoto(filename) {
     if(files && files.length) uploadPhotos(files);
   });
 })();
+
+// ═══════════════════════════════════════════════
+// SITE IMAGES — every fixed image slot on ascovita.com
+// ═══════════════════════════════════════════════
+// Catalog of every hard-coded image slot on the live site, grouped
+// by where it shows up. `fallback` is the image currently baked into
+// index.html, shown here purely as a preview default — the frontend
+// itself already has that URL hard-coded, so nothing breaks if this
+// admin page (or the backend) is ever unreachable.
+const SITE_IMAGE_CATALOG = [
+  { group:'Global',      key:'site.logo',              label:'Site Logo',                 hint:'Header + mobile menu drawer',
+    fallback:'https://static.wixstatic.com/media/f0adaf_05a2b4385ab84453aa9c2e9a1cec4b97~mv2.png' },
+  { group:'Home Page',   key:'home.hero.slide1',       label:'Hero Slide 1 — Glutathione', hint:'Main hero slideshow, slide 1 (desktop + mobile)',
+    fallback:'https://static.wixstatic.com/media/f0adaf_059d2c1e15c0421da19fa9495e205e37~mv2.jpg' },
+  { group:'Home Page',   key:'home.hero.slide2',       label:'Hero Slide 2 — Spirulina Combo', hint:'Main hero slideshow, slide 2 (desktop + mobile)',
+    fallback:'https://static.wixstatic.com/media/f0adaf_d2f1f845cbe64f11ba4599fa5b047e7e~mv2.jpg' },
+  { group:'Home Page',   key:'home.hero.slide3',       label:'Hero Slide 3 — Multidiata',  hint:'Main hero slideshow, slide 3 (desktop + mobile)',
+    fallback:'https://static.wixstatic.com/media/f0adaf_ab29bcd839104fbca2ce25f572dd0796~mv2.jpg' },
+  { group:'About Page',  key:'about.hero_background',  label:'About Hero Background',      hint:'Faint texture behind the About page header',
+    fallback:'https://static.wixstatic.com/media/f0adaf_d2f1f845cbe64f11ba4599fa5b047e7e~mv2.jpg' },
+  { group:'About Page',  key:'about.manufacturing_photo', label:'Manufacturing Photo',     hint:'Large photo in the About page story section',
+    fallback:'https://static.wixstatic.com/media/f0adaf_059d2c1e15c0421da19fa9495e205e37~mv2.jpg' },
+  { group:'B2B Page',    key:'b2b.hero_background',    label:'B2B Hero Background',        hint:'Faint texture behind the B2B page header',
+    fallback:'https://static.wixstatic.com/media/f0adaf_ab29bcd839104fbca2ce25f572dd0796~mv2.jpg' },
+];
+
+async function loadSiteImages() {
+  let overrides = {};
+  try {
+    const r = await apiFetch('/api/admin/site-media');
+    const d = await r.json();
+    (d.data || []).forEach(row => { overrides[row.key] = row.url; });
+  } catch(e) { console.error('loadSiteImages error:', e); }
+
+  const groups = {};
+  SITE_IMAGE_CATALOG.forEach(item => { (groups[item.group] = groups[item.group]||[]).push(item); });
+
+  document.getElementById('siteImagesGroups').innerHTML = Object.keys(groups).map(groupName => `
+    <div style="margin-bottom:28px;">
+      <div style="font-size:0.8rem;font-weight:700;letter-spacing:.5px;text-transform:uppercase;color:var(--text3);margin-bottom:10px;">${groupName}</div>
+      <div class="grid-3">
+        ${groups[groupName].map(item => {
+          const current = overrides[item.key] || item.fallback;
+          const isOverridden = !!overrides[item.key];
+          return `
+          <div class="card" style="padding:0;overflow:hidden;">
+            <img src="${current}" class="banner-preview" onerror="this.style.display='none'">
+            <div style="padding:12px 14px;">
+              <div style="font-size:0.85rem;font-weight:600;color:var(--text);">${item.label}</div>
+              <div style="font-size:0.72rem;color:var(--text3);margin-bottom:10px;">${item.hint}${isOverridden?' · <span style="color:var(--green-text);font-weight:600;">custom image set</span>':' · using site default'}</div>
+              <div style="display:flex;gap:6px;">
+                <input type="file" id="siteImgFile-${item.key}" accept="image/*" style="display:none" onchange="replaceSiteImage('${item.key}', this.files[0])">
+                <button class="btn btn-primary btn-sm" style="flex:1;" onclick="document.getElementById('siteImgFile-${item.key}').click()">${isOverridden?'🔄 Replace':'⬆️ Upload'}</button>
+                ${isOverridden ? `<button class="btn btn-secondary btn-sm" onclick="resetSiteImage('${item.key}')" title="Revert to default">↩️</button>` : ''}
+              </div>
+            </div>
+          </div>`;
+        }).join('')}
+      </div>
+    </div>
+  `).join('');
+}
+
+async function replaceSiteImage(key, file) {
+  if(!file) return;
+  try {
+    const fd = new FormData(); fd.append('image', file);
+    const r = await fetch(`${API}/api/upload/image`, {method:'POST', headers:{'Authorization':`Bearer ${authToken}`}, body:fd});
+    const d = await r.json();
+    if(!r.ok) throw new Error(d.error||'Upload failed');
+    await apiFetch(`/api/admin/site-media/${encodeURIComponent(key)}`, {method:'PUT', body:JSON.stringify({url:d.url})});
+    toast('Image updated ✅ — live on the site now');
+    loadSiteImages();
+  } catch(e) { toast(e.message,'error'); }
+}
+
+async function resetSiteImage(key) {
+  if(!confirm('Revert this to the site\'s built-in default image?')) return;
+  try {
+    await apiFetch(`/api/admin/site-media/${encodeURIComponent(key)}`, {method:'DELETE'});
+    toast('Reverted to default');
+    loadSiteImages();
+  } catch(e) { toast(e.message,'error'); }
+}
+
+// ═══════════════════════════════════════════════
+// PROMO CAROUSEL — home page scrolling promo cards
+// (backend-managed replacement for manually editing PROMO_MEDIA.js)
+// ═══════════════════════════════════════════════
+let _promoMediaItems = [];
+
+async function loadPromoMedia() {
+  try {
+    const r = await apiFetch('/api/admin/promo-media');
+    const d = await r.json();
+    _promoMediaItems = d.data || [];
+  } catch(e) {
+    console.error('loadPromoMedia error:', e);
+    document.getElementById('promoMediaGrid').innerHTML = '<div class="empty-state" style="grid-column:1/-1;"><div class="empty-ico">🖼️</div><div class="empty-msg">Could not load promo cards — see browser console</div></div>';
+    return;
+  }
+  renderPromoMediaGrid();
+}
+
+function renderPromoMediaGrid() {
+  const items = _promoMediaItems;
+  document.getElementById('promoMediaGrid').innerHTML = items.length ? items.map((item, i) => `
+    <div class="card" style="padding:0;overflow:hidden;${item.active===false?'opacity:0.5;':''}">
+      <img src="${item.src}" class="banner-preview" onerror="this.style.display='none'">
+      <div style="padding:12px 14px;">
+        <div style="display:flex;gap:6px;align-items:center;margin-bottom:8px;">
+          <label style="font-size:0.72rem;color:var(--text3);">Links to:</label>
+          <select class="form-control" style="flex:1;padding:4px 8px;font-size:0.78rem;" onchange="updatePromoCard(${item.id}, {cta_page:this.value})">
+            ${['shop','home','about','b2b','contact'].map(p=>`<option value="${p}" ${item.cta_page===p?'selected':''}>${p}</option>`).join('')}
+          </select>
+        </div>
+        <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;">
+          <label class="toggle-wrap">
+            <label class="toggle"><input type="checkbox" ${item.active!==false?'checked':''} onchange="updatePromoCard(${item.id}, {active:this.checked})"><span class="toggle-slider"></span></label>
+            <span style="font-size:0.75rem;color:var(--text3);">Active</span>
+          </label>
+          <div style="display:flex;gap:4px;">
+            <button class="btn btn-secondary btn-sm btn-icon" title="Move earlier" ${i===0?'disabled':''} onclick="movePromoCard(${i},-1)">⬆️</button>
+            <button class="btn btn-secondary btn-sm btn-icon" title="Move later" ${i===items.length-1?'disabled':''} onclick="movePromoCard(${i},1)">⬇️</button>
+            <button class="btn btn-danger btn-sm btn-icon" title="Delete" onclick="deletePromoCard(${item.id})">🗑️</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  `).join('') : '<div class="empty-state" style="grid-column:1/-1;"><div class="empty-ico">🖼️</div><div class="empty-msg">No promo cards yet — add one above</div></div>';
+}
+
+async function addPromoCard(file) {
+  if(!file) return;
+  try {
+    const fd = new FormData(); fd.append('image', file);
+    const r = await fetch(`${API}/api/upload/image`, {method:'POST', headers:{'Authorization':`Bearer ${authToken}`}, body:fd});
+    const d = await r.json();
+    if(!r.ok) throw new Error(d.error||'Upload failed');
+    await apiFetch('/api/admin/promo-media', {method:'POST', body:JSON.stringify({src:d.url, cta_page:'shop'})});
+    toast('Promo card added ✅');
+    loadPromoMedia();
+  } catch(e) { toast(e.message,'error'); }
+  document.getElementById('promoFileInput').value = '';
+}
+
+async function updatePromoCard(id, patch) {
+  try { await apiFetch(`/api/admin/promo-media/${id}`, {method:'PUT', body:JSON.stringify(patch)}); }
+  catch(e) { toast(e.message,'error'); }
+}
+
+async function movePromoCard(index, dir) {
+  const other = index + dir;
+  if(other < 0 || other >= _promoMediaItems.length) return;
+  const a = _promoMediaItems[index], b = _promoMediaItems[other];
+  const aOrder = a.sort_order, bOrder = b.sort_order;
+  [_promoMediaItems[index], _promoMediaItems[other]] = [b, a];
+  renderPromoMediaGrid();
+  try {
+    await Promise.all([
+      apiFetch(`/api/admin/promo-media/${a.id}`, {method:'PUT', body:JSON.stringify({sort_order:bOrder})}),
+      apiFetch(`/api/admin/promo-media/${b.id}`, {method:'PUT', body:JSON.stringify({sort_order:aOrder})}),
+    ]);
+  } catch(e) { toast(e.message,'error'); loadPromoMedia(); }
+}
+
+async function deletePromoCard(id) {
+  if(!confirm('Remove this promo card?')) return;
+  try {
+    await apiFetch(`/api/admin/promo-media/${id}`, {method:'DELETE'});
+    toast('Promo card removed');
+    loadPromoMedia();
+  } catch(e) { toast(e.message,'error'); }
+}
 
 // ═══════════════════════════════════════════════
 // NOTIFICATION CENTER
