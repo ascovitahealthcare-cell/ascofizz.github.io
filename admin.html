@@ -1667,6 +1667,11 @@ body.theme-glass .modal-overlay{backdrop-filter:blur(10px);}
       </div>
       <button class="btn btn-secondary btn-sm" type="button" onclick="addTierRow()">＋ Add Tier</button>
     </div>
+    <div class="drawer-field" style="max-width:220px;">
+      <div class="drawer-field-label">Tablets per Pack</div>
+      <input class="drawer-input" type="number" min="1" id="dTabsPerPack" value="15" onchange="recalcAllTierRows()">
+      <div style="font-size:0.68rem;color:var(--text3);margin-top:4px;">e.g. 15 — this is what turns "2 packs" into "30 Tablets" on the storefront card</div>
+    </div>
     <div id="tierRowsContainer"></div>
     <div id="tierRowsEmpty" style="font-size:0.78rem;color:var(--text3);padding:10px 2px;">No tiers yet — click "＋ Add Tier" to create pack deals like 1 pack / 2 pack / 3 pack, each auto-calculating its rate from a % off MRP.</div>
 
@@ -5390,16 +5395,24 @@ function openProductDrawer(productId) {
       document.getElementById('dDiscountPct').value = '';
     }
     // Load quantity tier discounts, if any
+    const tabletsPerPack = parseInt(p.tablets_per_pack) || 15;
+    document.getElementById('dTabsPerPack').value = tabletsPerPack;
     drawerTiers = [];
     _tierRowSeq = 0;
     try {
       const t = typeof p.tiers === 'string' ? JSON.parse(p.tiers) : p.tiers;
       if (Array.isArray(t)) {
         t.forEach(row => {
-          const qty = parseInt(row.qty || row.units || row.tablets) || 1;
+          // New format saves { tabs, discountPct }. Older products saved
+          // before this fix may only have { qty, discount } — support both
+          // so nothing already in the database breaks.
+          const tabs = row.tabs != null ? parseInt(row.tabs) : null;
+          const qty = tabs != null ? Math.max(1, Math.round(tabs / tabletsPerPack)) : (parseInt(row.qty || row.units) || 1);
           const mrp = parseFloat(row.mrp || row.price) || (p.price * qty);
           const rate = parseFloat(row.rate || row.sale_price) || mrp;
-          const discount = row.discount != null ? parseFloat(row.discount) : (mrp > 0 ? Math.round((1 - rate/mrp) * 100) : 0);
+          const discount = row.discountPct != null ? parseFloat(row.discountPct)
+                          : row.discount != null ? parseFloat(row.discount)
+                          : (mrp > 0 ? Math.round((1 - rate/mrp) * 100) : 0);
           drawerTiers.push({ rid: ++_tierRowSeq, qty, discount, mrp, rate });
         });
       }
@@ -5436,6 +5449,7 @@ function openProductDrawer(productId) {
     document.getElementById('dHsn2').value='30049099';
     document.getElementById('dStock').value='0';
     document.getElementById('dActive').value='true';
+    document.getElementById('dTabsPerPack').value='15';
     document.getElementById('dPrice').value='';
     document.getElementById('dSalePrice').value='';
     document.getElementById('dDiscountPct').value='';
@@ -5596,7 +5610,7 @@ function renderTierRows() {
         </div>
       </div>
       <div class="tier-row-foot">
-        <div class="tier-row-preview">${t.qty} pack${t.qty>1?'s':''} → <b>${t.discount}% off</b> · ₹${t.rate.toFixed(0)} <span style="text-decoration:line-through;color:var(--text3);">₹${t.mrp.toFixed(0)}</span></div>
+        <div class="tier-row-preview">${t.qty * (parseInt(document.getElementById('dTabsPerPack')?.value) || 15)} tablets (${t.qty} pack${t.qty>1?'s':''}) → <b>${t.discount}% off</b> · ₹${t.rate.toFixed(0)} <span style="text-decoration:line-through;color:var(--text3);">₹${t.mrp.toFixed(0)}</span></div>
         <button class="tier-row-remove" type="button" onclick="removeTierRow(${t.rid})">✕ Remove</button>
       </div>
     </div>
@@ -5617,7 +5631,13 @@ async function saveProductFromDrawer() {
     price,
     sale_price:       parseFloat(document.getElementById('dSalePrice').value)||null,
     discount_pct:     parseFloat(document.getElementById('dDiscountPct').value)||null,
-    tiers:            drawerTiers.map(t => ({ qty:t.qty, discount:t.discount, mrp:Math.round(t.mrp), rate:Math.round(t.rate) })),
+    tablets_per_pack: parseInt(document.getElementById('dTabsPerPack').value)||15,
+    tiers:            drawerTiers.map(t => ({
+                         tabs: t.qty * (parseInt(document.getElementById('dTabsPerPack').value)||15),
+                         discountPct: t.discount,
+                         mrp: Math.round(t.mrp),
+                         rate: Math.round(t.rate),
+                       })),
     offer_text:       document.getElementById('dOfferText').value,
     hsn:              document.getElementById('dHsn').value||'30049099',
     stock:            parseInt(document.getElementById('dStock').value)||0,
