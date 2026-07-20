@@ -2120,8 +2120,8 @@ body.theme-glass .modal-overlay{backdrop-filter:blur(10px);}
   <div class="page-hdr" style="margin-top:34px;">
     <div><div class="page-title">Promo Carousel</div><div class="page-sub">The scrolling promo cards on the home page — add, replace, reorder, or remove without editing PROMO_MEDIA.js</div></div>
     <div class="page-actions">
-      <input type="file" id="promoFileInput" accept="image/*" onchange="addPromoCard(this.files[0])">
-      <button class="btn btn-primary" onclick="document.getElementById('promoFileInput').click()">＋ Add Card</button>
+      <input type="text" id="promoUrlInput" class="form-control" placeholder="Paste imgbb direct image link" style="width:280px;">
+      <button class="btn btn-primary" onclick="addPromoCard()">＋ Add Card</button>
     </div>
   </div>
   <div id="promoMediaGrid" class="grid-3"></div>
@@ -7215,9 +7215,9 @@ async function loadSiteImages() {
             <div style="padding:12px 14px;">
               <div style="font-size:0.85rem;font-weight:600;color:var(--text);">${item.label}</div>
               <div style="font-size:0.72rem;color:var(--text3);margin-bottom:10px;">${item.hint}${isOverridden?' · <span style="color:var(--green-text);font-weight:600;">custom image set</span>':' · using site default'}</div>
+              <input type="text" id="siteImgUrl-${item.key}" class="form-control" placeholder="Paste imgbb direct image link" style="font-size:0.75rem;padding:6px 8px;margin-bottom:6px;">
               <div style="display:flex;gap:6px;">
-                <input type="file" id="siteImgFile-${item.key}" accept="image/*" style="display:none" onchange="replaceSiteImage('${item.key}', this.files[0])">
-                <button class="btn btn-primary btn-sm" style="flex:1;" onclick="document.getElementById('siteImgFile-${item.key}').click()">${isOverridden?'🔄 Replace':'⬆️ Upload'}</button>
+                <button class="btn btn-primary btn-sm" style="flex:1;" onclick="saveSiteImageUrl('${item.key}')">💾 Save Link</button>
                 ${isOverridden ? `<button class="btn btn-secondary btn-sm" onclick="resetSiteImage('${item.key}')" title="Revert to default">↩️</button>` : ''}
               </div>
             </div>
@@ -7228,14 +7228,12 @@ async function loadSiteImages() {
   `).join('');
 }
 
-async function replaceSiteImage(key, file) {
-  if(!file) return;
+async function saveSiteImageUrl(key) {
+  const input = document.getElementById(`siteImgUrl-${key}`);
+  const url = (input.value || '').trim();
+  if(!url) { toast('Paste an image link first','error'); return; }
   try {
-    const fd = new FormData(); fd.append('image', file);
-    const r = await fetch(`${API}/api/upload/image`, {method:'POST', headers:{'Authorization':`Bearer ${authToken}`}, body:fd});
-    const d = await r.json();
-    if(!r.ok) throw new Error(d.error||'Upload failed');
-    await apiFetch(`/api/admin/site-media/${encodeURIComponent(key)}`, {method:'PUT', body:JSON.stringify({url:d.url})});
+    await apiFetch(`/api/admin/site-media/${encodeURIComponent(key)}`, {method:'PUT', body:JSON.stringify({url})});
     toast('Image updated ✅ — live on the site now');
     loadSiteImages();
   } catch(e) { toast(e.message,'error'); }
@@ -7287,6 +7285,7 @@ function renderPromoMediaGrid() {
             <span style="font-size:0.75rem;color:var(--text3);">Active</span>
           </label>
           <div style="display:flex;gap:4px;">
+            <button class="btn btn-secondary btn-sm btn-icon" title="Edit link" onclick="editPromoCardUrl(${item.id})">🔗</button>
             <button class="btn btn-secondary btn-sm btn-icon" title="Move earlier" ${i===0?'disabled':''} onclick="movePromoCard(${i},-1)">⬆️</button>
             <button class="btn btn-secondary btn-sm btn-icon" title="Move later" ${i===items.length-1?'disabled':''} onclick="movePromoCard(${i},1)">⬇️</button>
             <button class="btn btn-danger btn-sm btn-icon" title="Delete" onclick="deletePromoCard(${item.id})">🗑️</button>
@@ -7297,18 +7296,25 @@ function renderPromoMediaGrid() {
   `).join('') : '<div class="empty-state" style="grid-column:1/-1;"><div class="empty-ico">🖼️</div><div class="empty-msg">No promo cards yet — add one above</div></div>';
 }
 
-async function addPromoCard(file) {
-  if(!file) return;
+async function addPromoCard() {
+  const input = document.getElementById('promoUrlInput');
+  const url = (input.value || '').trim();
+  if(!url) { toast('Paste an image link first','error'); return; }
   try {
-    const fd = new FormData(); fd.append('image', file);
-    const r = await fetch(`${API}/api/upload/image`, {method:'POST', headers:{'Authorization':`Bearer ${authToken}`}, body:fd});
-    const d = await r.json();
-    if(!r.ok) throw new Error(d.error||'Upload failed');
-    await apiFetch('/api/admin/promo-media', {method:'POST', body:JSON.stringify({src:d.url, cta_page:'shop'})});
+    await apiFetch('/api/admin/promo-media', {method:'POST', body:JSON.stringify({src:url, cta_page:'shop'})});
     toast('Promo card added ✅');
+    input.value = '';
     loadPromoMedia();
   } catch(e) { toast(e.message,'error'); }
-  document.getElementById('promoFileInput').value = '';
+}
+
+function editPromoCardUrl(id) {
+  const item = _promoMediaItems.find(i => i.id === id);
+  const url = prompt('Paste the new imgbb direct image link:', item ? item.src : '');
+  if(url === null) return;
+  const trimmed = url.trim();
+  if(!trimmed) { toast('Link can\'t be empty','error'); return; }
+  updatePromoCard(id, {src: trimmed}).then(() => loadPromoMedia());
 }
 
 async function updatePromoCard(id, patch) {
