@@ -1,0 +1,61 @@
+# Site Images system — what this adds
+
+A new **"Site Images"** tab in admin, showing every fixed image on ascovita.com
+grouped by where it lives, with upload/replace/reset per image — plus a
+**Promo Carousel** manager so those 19 cards no longer require editing
+PROMO_MEDIA.js and pushing to GitHub.
+
+## What's catalogued right now
+
+| Group | Image | Where it shows |
+|---|---|---|
+| Global | Site Logo | Header + mobile menu drawer |
+| Home Page | Hero Slide 1 | Glutathione hero slide (desktop + mobile) |
+| Home Page | Hero Slide 2 | Spirulina Combo hero slide |
+| Home Page | Hero Slide 3 | Multidiata hero slide |
+| About Page | Hero Background | Faint texture behind About header |
+| About Page | Manufacturing Photo | Big photo in the About story section |
+| B2B Page | Hero Background | Faint texture behind B2B header |
+| Home Page | Promo Carousel (19 cards) | Scrolling promo strip |
+
+Product photos (Shop page, product cards, cart, checkout) already come from
+your Products table and are already editable via the existing Photo Library
+→ "Add to product" flow, so I left those alone. The logo inside the printable
+invoice template is still hard-coded — say the word if you want that wired
+up too.
+
+## Files
+
+- **index.html** — every image above now has `data-media-key="..."` (or a
+  CSS variable for the two background textures). The current live image
+  stays hard-coded as the fallback, so if the backend is ever down the site
+  looks exactly like it does today — a script just asks the backend for
+  overrides on page load and swaps them in if present.
+- **admin.html** — new "Site Images" tab: a card per image with a live
+  preview and a text field to paste an **imgbb direct image link** (upload
+  the file to https://ascovita.imgbb.com/ yourself, same as PROMO_MEDIA.js
+  today, then paste the "Direct link" here), plus Reset-to-default. Below
+  it, a Promo Carousel grid — paste a link to add a card, and edit link /
+  reorder / activate / delete per card. Nothing is uploaded to your own
+  server or Supabase Storage for these two features — only the URL is
+  stored, exactly like your current PROMO_MEDIA.js workflow.
+- **backend/site-media-routes.js** — Express routes for both features,
+  written to match your existing patterns (Bearer auth, `apiFetch`, your
+  `/api/upload/image` endpoint for the actual file bytes).
+- **backend/supabase-site-media.sql** — the two new tables (`site_media`,
+  `promo_media`) with RLS: public read, writes only through your backend.
+- **PROMO_MEDIA.js** — unchanged, kept in the repo as an offline fallback.
+  The homepage now prefers whatever's in the `promo_media` table; if that
+  fetch fails it falls back to this file exactly like before.
+
+## To go live
+
+1. Run `backend/supabase-site-media.sql` once in the Supabase SQL editor.
+2. Add `backend/site-media-routes.js` to your Render backend repo and mount
+   it: `app.use('/api', require('./site-media-routes')(supabase, requireAdmin));`
+   — swap in your actual Supabase client and admin-auth middleware names.
+3. Deploy the backend, then push the updated `index.html` and `admin.html`.
+
+Everything degrades gracefully — until step 2 is deployed, the site just
+keeps showing today's images and the new admin tab will show "using site
+default" for everything.
