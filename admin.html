@@ -9285,13 +9285,14 @@ async function mktScanOpportunities() {
   }
 }
 
-// Load campaigns when the Marketing nav item is first opened — patches the
-// existing showPage() (defined earlier in this file) without touching it.
+// Load the Overview tab when the Marketing nav item is first opened —
+// patches the existing showPage() (defined earlier in this file) without
+// touching it.
 const _mktOrigShowPage = window.showPage;
 if (typeof _mktOrigShowPage === 'function') {
   window.showPage = function (name) {
     _mktOrigShowPage(name);
-    if (name === 'marketing') mktLoadCampaigns();
+    if (name === 'marketing') mktShowTab('overview');
   };
 }
 </script>
