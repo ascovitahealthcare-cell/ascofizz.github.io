@@ -1626,7 +1626,8 @@ textarea.form-input { resize:vertical; min-height:90px; }
 
 /* ── B2B PAGE ── */
 .b2b-hero { background:linear-gradient(145deg, #1A2409 0%, #2D5016 55%, #1A2409 100%); color:white; padding:110px 0 80px; position:relative; overflow:hidden; }
-.b2b-hero::before { content:''; position:absolute; inset:0; background:url('https://static.wixstatic.com/media/f0adaf_ab29bcd839104fbca2ce25f572dd0796~mv2.jpg/v1/fill/w_1400,h_900,al_c,q_85,enc_avif,quality_auto/f0adaf_ab29bcd839104fbca2ce25f572dd0796~mv2.jpg') center/cover; opacity:0.08; }
+:root { --b2b-hero-bg: url('https://static.wixstatic.com/media/f0adaf_ab29bcd839104fbca2ce25f572dd0796~mv2.jpg/v1/fill/w_1400,h_900,al_c,q_85,enc_avif,quality_auto/f0adaf_ab29bcd839104fbca2ce25f572dd0796~mv2.jpg'); }
+.b2b-hero::before { content:''; position:absolute; inset:0; background:var(--b2b-hero-bg) center/cover; opacity:0.08; }
 .b2b-hero-inner { position:relative; display:grid; grid-template-columns:1fr 1fr; gap:60px; align-items:center; }
 .b2b-eyebrow { display:inline-flex; align-items:center; gap:8px; background:rgba(184,134,11,0.22); border:1px solid rgba(184,134,11,0.4); border-radius:100px; padding:6px 16px; font-size:0.74rem; font-weight:600; color:#D4A520; margin-bottom:18px; letter-spacing:1px; text-transform:uppercase; }
 .b2b-title { font-family:var(--font-display); font-size:clamp(2.1rem,4vw,3.4rem); line-height:1.08; margin-bottom:18px; font-weight:700; }
@@ -8048,7 +8049,7 @@ setInterval(function() { syncAppCartBadge(); syncAppWishBadge(); }, 2000);
 <nav class="navbar">
   <div class="nav-inner">
     <a href="#" class="nav-logo" onclick="showPage('home')">
-      <img src="https://static.wixstatic.com/media/f0adaf_05a2b4385ab84453aa9c2e9a1cec4b97~mv2.png/v1/fill/w_346,h_166,al_c,q_85,usm_0.66_1.00_0.01,enc_avif,quality_auto/f0adaf_05a2b4385ab84453aa9c2e9a1cec4b97~mv2.png" alt="Ascovita Logo" onerror="this.style.display='none';document.getElementById('logoFallback').style.display='flex'">
+      <img data-media-key="site.logo" src="https://static.wixstatic.com/media/f0adaf_05a2b4385ab84453aa9c2e9a1cec4b97~mv2.png/v1/fill/w_346,h_166,al_c,q_85,usm_0.66_1.00_0.01,enc_avif,quality_auto/f0adaf_05a2b4385ab84453aa9c2e9a1cec4b97~mv2.png" alt="Ascovita Logo" onerror="this.style.display='none';document.getElementById('logoFallback').style.display='flex'">
       <div id="logoFallback" class="nav-logo-fallback" style="display:none">
         <div class="nav-logo-leaf"><svg width="22" height="22"><use href="#ico-leaf"/></svg></div>
         <div>
@@ -8125,7 +8126,7 @@ setInterval(function() { syncAppCartBadge(); syncAppWishBadge(); }, 2000);
             </div>
             <div class="slide-visual">
               <div class="slide-img-frame">
-                <img loading="lazy" decoding="async" src="https://static.wixstatic.com/media/f0adaf_059d2c1e15c0421da19fa9495e205e37~mv2.jpg/v1/fill/w_980,h_980,al_c,q_85,usm_0.66_1.00_0.01,enc_avif,quality_auto/f0adaf_059d2c1e15c0421da19fa9495e205e37~mv2.jpg" alt="Glutathione" style="height:460px;object-fit:cover">
+                <img data-media-key="home.hero.slide1" loading="lazy" decoding="async" src="https://static.wixstatic.com/media/f0adaf_059d2c1e15c0421da19fa9495e205e37~mv2.jpg/v1/fill/w_980,h_980,al_c,q_85,usm_0.66_1.00_0.01,enc_avif,quality_auto/f0adaf_059d2c1e15c0421da19fa9495e205e37~mv2.jpg" alt="Glutathione" style="height:460px;object-fit:cover">
               </div>
               <div class="slide-bubble b1"><div class="bi"><svg width="32" height="32"><use href="#ico-star"/></svg></div><div><div class="bv">4.9 / 5 Rating</div><div class="bl">312+ Reviews</div></div></div>
               <div class="slide-bubble b2"><div class="bi"><svg width="32" height="32"><use href="#ico-leaf"/></svg></div><div><div class="bv">500mg Glutathione</div><div class="bl">+ Vitamin C 1000mg</div></div></div>
@@ -8140,7 +8141,7 @@ setInterval(function() { syncAppCartBadge(); syncAppWishBadge(); }, 2000);
         <div class="m-bg-letter">G</div>
         <div class="m-product-img">
           <div class="m-img-3d">
-            <img loading="lazy" decoding="async" src="https://static.wixstatic.com/media/f0adaf_059d2c1e15c0421da19fa9495e205e37~mv2.jpg/v1/fill/w_980,h_980,al_c,q_85,usm_0.66_1.00_0.01,enc_avif,quality_auto/f0adaf_059d2c1e15c0421da19fa9495e205e37~mv2.jpg" alt="Glutathione">
+            <img data-media-key="home.hero.slide1" loading="lazy" decoding="async" src="https://static.wixstatic.com/media/f0adaf_059d2c1e15c0421da19fa9495e205e37~mv2.jpg/v1/fill/w_980,h_980,al_c,q_85,usm_0.66_1.00_0.01,enc_avif,quality_auto/f0adaf_059d2c1e15c0421da19fa9495e205e37~mv2.jpg" alt="Glutathione">
           </div>
         </div>
         <div class="m-bubble m-bubble-tl"><span class="m-bi">⭐</span><div><div class="m-bv">4.9 / 5</div><div class="m-bl">312+ Reviews</div></div></div>
@@ -8178,7 +8179,7 @@ setInterval(function() { syncAppCartBadge(); syncAppWishBadge(); }, 2000);
             </div>
             <div class="slide-visual">
               <div class="slide-img-frame">
-                <img loading="lazy" decoding="async" src="https://static.wixstatic.com/media/f0adaf_d2f1f845cbe64f11ba4599fa5b047e7e~mv2.jpg/v1/fill/w_768,h_768,al_c,q_85,enc_avif,quality_auto/f0adaf_d2f1f845cbe64f11ba4599fa5b047e7e~mv2.jpg" alt="Spirulina Combo" style="height:460px;object-fit:cover">
+                <img data-media-key="home.hero.slide2" loading="lazy" decoding="async" src="https://static.wixstatic.com/media/f0adaf_d2f1f845cbe64f11ba4599fa5b047e7e~mv2.jpg/v1/fill/w_768,h_768,al_c,q_85,enc_avif,quality_auto/f0adaf_d2f1f845cbe64f11ba4599fa5b047e7e~mv2.jpg" alt="Spirulina Combo" style="height:460px;object-fit:cover">
               </div>
               <div class="slide-bubble b1" style="background:rgba(255,255,255,0.95)"><div class="bi">💪</div><div><div class="bv">3 Variants</div><div class="bl">Ca · Mg · B12</div></div></div>
               <div class="slide-bubble b2" style="background:rgba(255,255,255,0.95)"><div class="bi">🎁</div><div><div class="bv">Save ₹98</div><div class="bl">vs buying separately</div></div></div>
@@ -8192,7 +8193,7 @@ setInterval(function() { syncAppCartBadge(); syncAppWishBadge(); }, 2000);
         <div class="m-bg-letter" style="color:rgba(255,255,255,0.1)">S</div>
         <div class="m-product-img">
           <div class="m-img-3d">
-            <img loading="lazy" decoding="async" src="https://static.wixstatic.com/media/f0adaf_d2f1f845cbe64f11ba4599fa5b047e7e~mv2.jpg/v1/fill/w_768,h_768,al_c,q_85,enc_avif,quality_auto/f0adaf_d2f1f845cbe64f11ba4599fa5b047e7e~mv2.jpg" alt="Spirulina">
+            <img data-media-key="home.hero.slide2" loading="lazy" decoding="async" src="https://static.wixstatic.com/media/f0adaf_d2f1f845cbe64f11ba4599fa5b047e7e~mv2.jpg/v1/fill/w_768,h_768,al_c,q_85,enc_avif,quality_auto/f0adaf_d2f1f845cbe64f11ba4599fa5b047e7e~mv2.jpg" alt="Spirulina">
           </div>
         </div>
         <div class="m-bubble m-bubble-tl" style="background:rgba(255,255,255,0.95)"><span class="m-bi">💪</span><div><div class="m-bv">3 Variants</div><div class="m-bl">Ca · Mg · B12</div></div></div>
@@ -8230,7 +8231,7 @@ setInterval(function() { syncAppCartBadge(); syncAppWishBadge(); }, 2000);
             </div>
             <div class="slide-visual">
               <div class="slide-img-frame">
-                <img loading="lazy" decoding="async" src="https://static.wixstatic.com/media/f0adaf_ab29bcd839104fbca2ce25f572dd0796~mv2.jpg/v1/fill/w_768,h_768,al_c,q_85,enc_avif,quality_auto/f0adaf_ab29bcd839104fbca2ce25f572dd0796~mv2.jpg" alt="Multidiata" style="height:460px;object-fit:cover">
+                <img data-media-key="home.hero.slide3" loading="lazy" decoding="async" src="https://static.wixstatic.com/media/f0adaf_ab29bcd839104fbca2ce25f572dd0796~mv2.jpg/v1/fill/w_768,h_768,al_c,q_85,enc_avif,quality_auto/f0adaf_ab29bcd839104fbca2ce25f572dd0796~mv2.jpg" alt="Multidiata" style="height:460px;object-fit:cover">
               </div>
               <div class="slide-bubble b1"><div class="bi"><svg width="32" height="32"><use href="#ico-check"/></svg></div><div><div class="bv">23 Vitamins</div><div class="bl">&amp; Minerals</div></div></div>
               <div class="slide-bubble b2"><div class="bi"><svg width="32" height="32"><use href="#ico-check"/></svg></div><div><div class="bv">FSSAI Approved</div><div class="bl">Safe &amp; Certified</div></div></div>
@@ -8244,7 +8245,7 @@ setInterval(function() { syncAppCartBadge(); syncAppWishBadge(); }, 2000);
         <div class="m-bg-letter" style="color:rgba(184,134,11,0.12)">M</div>
         <div class="m-product-img">
           <div class="m-img-3d">
-            <img loading="lazy" decoding="async" src="https://static.wixstatic.com/media/f0adaf_ab29bcd839104fbca2ce25f572dd0796~mv2.jpg/v1/fill/w_768,h_768,al_c,q_85,enc_avif,quality_auto/f0adaf_ab29bcd839104fbca2ce25f572dd0796~mv2.jpg" alt="Multidiata">
+            <img data-media-key="home.hero.slide3" loading="lazy" decoding="async" src="https://static.wixstatic.com/media/f0adaf_ab29bcd839104fbca2ce25f572dd0796~mv2.jpg/v1/fill/w_768,h_768,al_c,q_85,enc_avif,quality_auto/f0adaf_ab29bcd839104fbca2ce25f572dd0796~mv2.jpg" alt="Multidiata">
           </div>
         </div>
         <div class="m-bubble m-bubble-tl"><span class="m-bi">🏆</span><div><div class="m-bv">23 Vitamins</div><div class="m-bl">&amp; Minerals</div></div></div>
@@ -8380,14 +8381,14 @@ setInterval(function() { syncAppCartBadge(); syncAppWishBadge(); }, 2000);
         + media
         + '</div>';
     }
-    function renderPromoMedia(){
+    function paintPromoMedia(data){
       var track = document.getElementById('pmTrack');
       if(!track) return;
-      var data = (typeof PROMO_MEDIA !== 'undefined') ? PROMO_MEDIA : [];
+      data = data && data.length ? data : [];
+      var n = Math.min(Math.max(data.length,6),12); // show at least 6 slots, up to 12
       var cards = '';
-      // Build 6 cards
-      for(var i=0;i<6;i++){
-        cards += buildCard(data[i]||{}, (data[i]&&data[i].discount)||BADGES[i]);
+      for(var i=0;i<n;i++){
+        cards += buildCard(data[i]||{}, (data[i]&&data[i].discount)||BADGES[i%BADGES.length]);
       }
       // Duplicate for seamless infinite loop
       track.innerHTML = cards + cards;
@@ -8396,8 +8397,48 @@ setInterval(function() { syncAppCartBadge(); syncAppWishBadge(); }, 2000);
         v.addEventListener('mouseleave',function(){ v.pause(); v.currentTime=0; });
       });
     }
+    function renderPromoMedia(){
+      // Local PROMO_MEDIA.js paints immediately so the carousel is never empty/late.
+      var local = (typeof PROMO_MEDIA !== 'undefined') ? PROMO_MEDIA : [];
+      paintPromoMedia(local);
+      // Then try the admin-managed backend list; if it has cards, it takes over.
+      var base = (typeof API_BASE !== 'undefined') ? API_BASE : 'https://ascovitahealthcare-cell-github-io.onrender.com';
+      fetch(base + '/api/promo-media').then(function(r){ return r.ok ? r.json() : null; }).then(function(d){
+        var remote = d && (d.data || d.items || d);
+        if(Array.isArray(remote) && remote.length) paintPromoMedia(remote);
+      }).catch(function(){ /* keep local PROMO_MEDIA.js cards */ });
+    }
     if(document.readyState==='loading'){ document.addEventListener('DOMContentLoaded',renderPromoMedia); }
     else { renderPromoMedia(); }
+  })();
+  </script>
+
+  <!-- ══════════ SITE MEDIA LOADER ══════════
+       Every <img data-media-key="..."> and the CSS vars --about-hero-bg /
+       --b2b-hero-bg above already carry the current live image as a
+       hard-coded fallback. This script asks the backend for any
+       admin-uploaded replacements and swaps them in. If the request
+       fails (offline, backend down, key not set) the page simply keeps
+       showing the fallback — nothing ever breaks. -->
+  <script>
+  (function(){
+    function applySiteMedia(map){
+      if(!map) return;
+      document.querySelectorAll('[data-media-key]').forEach(function(el){
+        var key = el.getAttribute('data-media-key');
+        if(map[key]) el.src = map[key];
+      });
+      if(map['about.hero_background']) document.documentElement.style.setProperty('--about-hero-bg', "url('"+map['about.hero_background']+"')");
+      if(map['b2b.hero_background']) document.documentElement.style.setProperty('--b2b-hero-bg', "url('"+map['b2b.hero_background']+"')");
+    }
+    function loadSiteMedia(){
+      var base = (typeof API_BASE !== 'undefined') ? API_BASE : 'https://ascovitahealthcare-cell-github-io.onrender.com';
+      fetch(base + '/api/site-media').then(function(r){ return r.ok ? r.json() : null; })
+        .then(function(d){ applySiteMedia(d && (d.data || d)); })
+        .catch(function(){ /* keep hard-coded defaults already in the HTML */ });
+    }
+    if(document.readyState==='loading'){ document.addEventListener('DOMContentLoaded',loadSiteMedia); }
+    else { loadSiteMedia(); }
   })();
   </script>
 
@@ -9689,8 +9730,8 @@ function renderCheckoutSummary() {
 <div class="page" id="page-about" style="padding-top:70px">
 
   <!-- ABOUT HERO - Premium redesign -->
-  <div style="background:linear-gradient(160deg,#0d2005 0%,#1a3a09 40%,#2D5016 100%);color:white;padding:100px 0 80px;position:relative;overflow:hidden">
-    <div style="position:absolute;inset:0;opacity:.06;background:url('https://static.wixstatic.com/media/f0adaf_d2f1f845cbe64f11ba4599fa5b047e7e~mv2.jpg/v1/fill/w_1400,h_900,al_c,q_85,enc_avif,quality_auto/f0adaf_d2f1f845cbe64f11ba4599fa5b047e7e~mv2.jpg') center/cover"></div>
+  <div style="background:linear-gradient(160deg,#0d2005 0%,#1a3a09 40%,#2D5016 100%);color:white;padding:100px 0 80px;position:relative;overflow:hidden;--about-hero-bg:url('https://static.wixstatic.com/media/f0adaf_d2f1f845cbe64f11ba4599fa5b047e7e~mv2.jpg/v1/fill/w_1400,h_900,al_c,q_85,enc_avif,quality_auto/f0adaf_d2f1f845cbe64f11ba4599fa5b047e7e~mv2.jpg')">
+    <div id="aboutHeroBgLayer" style="position:absolute;inset:0;opacity:.06;background:var(--about-hero-bg) center/cover"></div>
     <!-- Animated dots decoration -->
     <div style="position:absolute;top:20%;right:5%;width:300px;height:300px;border-radius:50%;border:1px solid rgba(255,255,255,.06)"></div>
     <div style="position:absolute;top:15%;right:8%;width:200px;height:200px;border-radius:50%;border:1px solid rgba(255,255,255,.1)"></div>
@@ -9725,7 +9766,7 @@ function renderCheckoutSummary() {
           </div>
         </div>
         <div style="position:relative">
-          <img loading="lazy" decoding="async" src="https://static.wixstatic.com/media/f0adaf_059d2c1e15c0421da19fa9495e205e37~mv2.jpg/v1/fill/w_600,h_750,al_c,q_85,enc_avif,quality_auto/f0adaf_059d2c1e15c0421da19fa9495e205e37~mv2.jpg" alt="Ascovita Manufacturing" style="width:100%;aspect-ratio:4/5;object-fit:cover;border-radius:24px;box-shadow:0 30px 60px rgba(0,0,0,.4)">
+          <img data-media-key="about.manufacturing_photo" loading="lazy" decoding="async" src="https://static.wixstatic.com/media/f0adaf_059d2c1e15c0421da19fa9495e205e37~mv2.jpg/v1/fill/w_600,h_750,al_c,q_85,enc_avif,quality_auto/f0adaf_059d2c1e15c0421da19fa9495e205e37~mv2.jpg" alt="Ascovita Manufacturing" style="width:100%;aspect-ratio:4/5;object-fit:cover;border-radius:24px;box-shadow:0 30px 60px rgba(0,0,0,.4)">
           <!-- Floating cert badges -->
           <div class="about-hero-float-badge" style="position:absolute;bottom:-20px;left:-20px;background:white;border-radius:16px;padding:14px 18px;box-shadow:0 10px 30px rgba(0,0,0,.2);display:flex;align-items:center;gap:10px">
             <span style="font-size:1.6rem">&#127981;</span>
@@ -16006,7 +16047,7 @@ function closeMoreDrawer() {
 <div class="app-menu-drawer" id="appMenuDrawer">
   <!-- Header -->
   <div class="app-menu-header">
-    <img class="app-menu-logo"
+    <img class="app-menu-logo" data-media-key="site.logo"
       src="https://static.wixstatic.com/media/f0adaf_05a2b4385ab84453aa9c2e9a1cec4b97~mv2.png/v1/fill/w_346,h_166,al_c,q_85,usm_0.66_1.00_0.01,enc_avif,quality_auto/f0adaf_05a2b4385ab84453aa9c2e9a1cec4b97~mv2.png"
       alt="Ascovita" onerror="this.style.display='none'">
     <button class="app-menu-close" onclick="closeAppMenu()">✕</button>
