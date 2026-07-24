@@ -1525,6 +1525,7 @@ body.theme-glass .modal-overlay{backdrop-filter:blur(10px);}
       <option value="combos">🎁 Combos</option>
     </select>
     <select class="filter-select" id="productSortFilter" onchange="filterProducts()">
+      <option value="position">↕ Homepage Position</option>
       <option value="newest">↓ Newest</option>
       <option value="name">A–Z Name</option>
       <option value="price_low">Price: Low</option>
@@ -1546,6 +1547,7 @@ body.theme-glass .modal-overlay{backdrop-filter:blur(10px);}
       <table>
         <thead><tr>
           <th style="width:32px;"><input type="checkbox" id="selectAllProds" onchange="toggleSelectAll(this)"></th>
+          <th style="width:90px;">Position</th>
           <th>Image</th><th>Name / Brand</th><th>Category</th>
           <th>MRP (₹)</th><th>Sale Price (₹)</th><th>Discount</th>
           <th>Stock</th><th>Status</th><th>Actions</th>
@@ -1575,6 +1577,10 @@ body.theme-glass .modal-overlay{backdrop-filter:blur(10px);}
       <div style="display:flex;gap:6px;margin-top:6px;">
         <input class="drawer-input" id="dImage2" placeholder="Image 2 URL" style="font-size:0.75rem;">
         <input class="drawer-input" id="dImage3" placeholder="Image 3 URL" style="font-size:0.75rem;">
+      </div>
+      <div style="display:flex;gap:6px;margin-top:6px;">
+        <input class="drawer-input" id="dImage4" placeholder="Image 4 URL" style="font-size:0.75rem;">
+        <input class="drawer-input" id="dImage5" placeholder="Image 5 URL" style="font-size:0.75rem;">
       </div>
     </div>
     <!-- Basic -->
@@ -1687,6 +1693,11 @@ body.theme-glass .modal-overlay{backdrop-filter:blur(10px);}
         <div class="drawer-field-label">HSN Code</div>
         <input class="drawer-input" id="dHsn2" value="30049099">
       </div>
+    </div>
+    <div class="drawer-field">
+      <div class="drawer-field-label">Display Position</div>
+      <input class="drawer-input" type="number" id="dPosition" placeholder="e.g. 1 for top of shop, leave blank for default order">
+      <div style="font-size:0.68rem;color:var(--text3);margin-top:4px;">Lower number = shown first on Home &amp; Shop pages. Also editable from the Products table (Position column, with ▲▼ quick-reorder).</div>
     </div>
     <!-- Details -->
     <div class="section-ico-hdr" style="margin-top:20px;"><div class="section-ico green">📋</div><div style="font-weight:700;font-size:0.88rem;">Product Details</div></div>
@@ -5142,7 +5153,7 @@ function updateProductStats(list) {
 function filterProducts() {
   const q    = (document.getElementById('productSearch').value||'').toLowerCase();
   const cat  = document.getElementById('productCatFilter').value;
-  const sort = document.getElementById('productSortFilter')?.value || 'newest';
+  const sort = document.getElementById('productSortFilter')?.value || 'position';
   let list   = allProducts;
   if(!showDeletedProducts) list = list.filter(p => !p.deleted_at);
   if(q) list = list.filter(p =>
@@ -5156,6 +5167,7 @@ function filterProducts() {
   if(currentProductFilter === 'lowstock')  list = list.filter(p => p.stock < 20 && !p.deleted_at);
   if(currentProductFilter === 'nodiscount') list = list.filter(p => !p.sale_price && !p.deleted_at);
   // Sort
+  if(sort === 'position')     list = [...list].sort((a,b)=>(a.sort_order ?? a.position ?? 9999)-(b.sort_order ?? b.position ?? 9999));
   if(sort === 'name')         list = [...list].sort((a,b)=>(a.name||'').localeCompare(b.name||''));
   if(sort === 'price_low')    list = [...list].sort((a,b)=>parseFloat(a.price||0)-parseFloat(b.price||0));
   if(sort === 'price_high')   list = [...list].sort((a,b)=>parseFloat(b.price||0)-parseFloat(a.price||0));
@@ -5178,6 +5190,17 @@ function renderProducts(list) {
     const checked = selectedProductIds.has(p.id) ? 'checked' : '';
     return `<tr style="${p.deleted_at?'opacity:0.5;':''}">
       <td><input type="checkbox" ${checked} onchange="toggleSelectProduct(${p.id},this)"></td>
+      <td>
+        <div style="display:flex;align-items:center;gap:4px;">
+          <input class="inline-input" type="number" value="${p.sort_order ?? p.position ?? ''}" placeholder="–" id="pos_${p.id}" style="width:52px;"
+            onkeydown="if(event.key==='Enter') saveInlineField(${p.id},'sort_order',this.value===''?null:parseInt(this.value))"
+            onchange="saveInlineField(${p.id},'sort_order',this.value===''?null:parseInt(this.value))">
+          <div style="display:flex;flex-direction:column;gap:1px;">
+            <button class="btn btn-secondary btn-sm btn-icon" style="padding:0 4px;height:14px;line-height:1;font-size:0.6rem;" onclick="moveProductPosition(${p.id},'up')" title="Move up">▲</button>
+            <button class="btn btn-secondary btn-sm btn-icon" style="padding:0 4px;height:14px;line-height:1;font-size:0.6rem;" onclick="moveProductPosition(${p.id},'down')" title="Move down">▼</button>
+          </div>
+        </div>
+      </td>
       <td><img class="prod-img" src="${p.image||'https://via.placeholder.com/44'}" onerror="this.src='https://via.placeholder.com/44'" alt=""></td>
       <td>
         <div class="prod-tbl-name">${esc(p.name)}</div>
@@ -5217,7 +5240,7 @@ function renderProducts(list) {
         </div>
       </td>
     </tr>`;
-  }).join('') : '<tr><td colspan="10"><div class="empty-state"><div class="empty-ico">🛍️</div><div class="empty-msg">No products found</div></div></td></tr>';
+  }).join('') : '<tr><td colspan="11"><div class="empty-state"><div class="empty-ico">🛍️</div><div class="empty-msg">No products found</div></div></td></tr>';
 }
 
 function renderProductCards(list) {
@@ -5340,11 +5363,44 @@ async function saveQuickEdit(id) {
 // ── Inline field save (table view) ───────────
 async function saveInlineField(id, field, value) {
   const p = allProducts.find(x=>x.id===id); if(!p) return;
-  const body = { [field]: value === '' ? null : (field==='stock' ? parseInt(value) : (field==='sale_price' ? (parseFloat(value)||null) : parseFloat(value))) };
+  const body = { [field]: value === '' ? null : (field==='stock' ? parseInt(value) : (field==='sale_price' ? (parseFloat(value)||null) : (field==='sort_order' ? (value===null?null:parseInt(value)) : parseFloat(value)))) };
   try {
     await apiFetch(`/api/admin/products/${id}`, {method:'PUT', body:JSON.stringify(body)});
     Object.assign(p, body);
     toast(`${field.replace('_',' ')} updated ✅`);
+  } catch(e) { toast(e.message,'error'); }
+}
+
+// ── Reorder products (controls where they appear on the shop/homepage) ──
+// Swaps sort_order with the neighboring product in the CURRENT sorted/filtered view,
+// so "up"/"down" always matches what the admin sees on screen.
+async function moveProductPosition(id, direction) {
+  const q    = (document.getElementById('productSearch').value||'').toLowerCase();
+  const cat  = document.getElementById('productCatFilter').value;
+  let list   = allProducts.filter(p => !p.deleted_at);
+  if(q) list = list.filter(p => (p.name||'').toLowerCase().includes(q));
+  if(cat) list = list.filter(p => p.category === cat);
+  list = [...list].sort((a,b)=>(a.sort_order ?? a.position ?? 9999)-(b.sort_order ?? b.position ?? 9999));
+
+  // Normalize missing sort_order values to their current display order first,
+  // so swapping always produces a meaningful, persisted change.
+  list.forEach((p,i) => { if (p.sort_order == null) p.sort_order = (i+1)*10; });
+
+  const idx = list.findIndex(p => p.id === id);
+  if (idx === -1) return;
+  const swapIdx = direction === 'up' ? idx - 1 : idx + 1;
+  if (swapIdx < 0 || swapIdx >= list.length) return; // already at the edge
+
+  const a = list[idx], b = list[swapIdx];
+  const tmp = a.sort_order; a.sort_order = b.sort_order; b.sort_order = tmp;
+
+  try {
+    await Promise.all([
+      apiFetch(`/api/admin/products/${a.id}`, {method:'PUT', body:JSON.stringify({sort_order:a.sort_order})}),
+      apiFetch(`/api/admin/products/${b.id}`, {method:'PUT', body:JSON.stringify({sort_order:b.sort_order})}),
+    ]);
+    toast('Position updated ✅');
+    filterProducts();
   } catch(e) { toast(e.message,'error'); }
 }
 
@@ -5439,12 +5495,15 @@ function openProductDrawer(productId) {
     document.getElementById('dHsn').value = p.hsn||'30049099';
     document.getElementById('dHsn2').value = p.hsn||'30049099';
     document.getElementById('dStock').value = p.stock||0;
+    document.getElementById('dPosition').value = (p.sort_order ?? p.position ?? '');
     document.getElementById('dHowToUse').value = p.how_to_use||'';
     document.getElementById('dIngredients').value = Array.isArray(p.key_ingredients)?p.key_ingredients.join(', '):(p.key_ingredients||'');
     document.getElementById('dTags').value = Array.isArray(p.tags)?p.tags.join(', '):(p.tags||'');
     document.getElementById('dImage').value = p.image||'';
     document.getElementById('dImage2').value = p.image2||'';
     document.getElementById('dImage3').value = p.image3||'';
+    document.getElementById('dImage4').value = p.image4||'';
+    document.getElementById('dImage5').value = p.image5||'';
     document.getElementById('dMetaDesc').value = p.meta_description||'';
     document.getElementById('dSeoKeywords').value = Array.isArray(p.seo_keywords)?p.seo_keywords.join(', '):(p.seo_keywords||'');
     document.getElementById('dSeoSlug').value = p.seo_slug||'';
@@ -5457,7 +5516,7 @@ function openProductDrawer(productId) {
     updateDrawerImgPreview();
     updateDrawerPricePreview();
   } else {
-    ['dName','dBadge','dDescription','dOfferText','dHowToUse','dIngredients','dTags','dImage','dImage2','dImage3','dMetaDesc','dSeoKeywords','dSeoSlug','dSeoCanonical','dSeoOgImage','dSeoTwitterImage'].forEach(id => document.getElementById(id).value='');
+    ['dName','dBadge','dDescription','dOfferText','dHowToUse','dIngredients','dTags','dImage','dImage2','dImage3','dImage4','dImage5','dMetaDesc','dSeoKeywords','dSeoSlug','dSeoCanonical','dSeoOgImage','dSeoTwitterImage'].forEach(id => document.getElementById(id).value='');
     document.getElementById('dSeoSchemaType').value = 'Product';
     document.getElementById('dSeoRobots').value = 'index,follow';
     document.getElementById('dSeoSitemap').checked = true;
@@ -5465,6 +5524,7 @@ function openProductDrawer(productId) {
     document.getElementById('dHsn').value='30049099';
     document.getElementById('dHsn2').value='30049099';
     document.getElementById('dStock').value='0';
+    document.getElementById('dPosition').value='';
     document.getElementById('dActive').value='true';
     document.getElementById('dTabsPerPack').value='15';
     document.getElementById('dPrice').value='';
@@ -5658,12 +5718,15 @@ async function saveProductFromDrawer() {
     offer_text:       document.getElementById('dOfferText').value,
     hsn:              document.getElementById('dHsn').value||'30049099',
     stock:            parseInt(document.getElementById('dStock').value)||0,
+    sort_order:       document.getElementById('dPosition').value === '' ? null : parseInt(document.getElementById('dPosition').value),
     how_to_use:       document.getElementById('dHowToUse').value,
     key_ingredients:  document.getElementById('dIngredients').value.split(',').map(s=>s.trim()).filter(Boolean),
     tags:             document.getElementById('dTags').value.split(',').map(s=>s.trim()).filter(Boolean),
     image:            document.getElementById('dImage').value,
     image2:           document.getElementById('dImage2').value,
     image3:           document.getElementById('dImage3').value,
+    image4:           document.getElementById('dImage4').value,
+    image5:           document.getElementById('dImage5').value,
     meta_description: document.getElementById('dMetaDesc').value,
     seo_keywords:     document.getElementById('dSeoKeywords').value.split(',').map(s=>s.trim()).filter(Boolean),
     seo_slug:            document.getElementById('dSeoSlug').value.trim(),
