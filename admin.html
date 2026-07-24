@@ -5446,6 +5446,31 @@ async function bulkDelete() {
 }
 
 // ── Product Drawer ─────────────────────────────
+// Safely turn a backend field that SHOULD be an array (tags, key_ingredients,
+// seo_keywords) into a clean comma-separated string for the drawer's text
+// inputs — even if the backend actually returned it as a JSON string, or as
+// a string that's been double/triple JSON-encoded by a previous bug. This
+// prevents the "tags become unreadable escaped garbage" corruption that can
+// snowball if a raw JSON string ever gets treated as one big comma-split value.
+function arrToCsv(val) {
+  let v = val;
+  let depth = 0;
+  // Keep unwrapping JSON-encoded strings until we get a real array (or give up after 5 tries)
+  while (typeof v === 'string' && depth < 5) {
+    const trimmed = v.trim();
+    if (!trimmed) return '';
+    if (trimmed[0] !== '[' && trimmed[0] !== '"') break; // not JSON-looking — treat as plain text below
+    try { v = JSON.parse(trimmed); } catch(e) { break; }
+    depth++;
+  }
+  if (Array.isArray(v)) {
+    // Flatten in case of nested arrays from historical corruption, then dedupe empties
+    const flat = v.flat ? v.flat(Infinity) : v;
+    return flat.map(x => String(x).trim()).filter(Boolean).join(', ');
+  }
+  return typeof v === 'string' ? v : (val || '');
+}
+
 function openProductDrawer(productId) {
   drawerProductId = productId;
   const isNew = !productId;
@@ -5497,15 +5522,15 @@ function openProductDrawer(productId) {
     document.getElementById('dStock').value = p.stock||0;
     document.getElementById('dPosition').value = (p.sort_order ?? p.position ?? '');
     document.getElementById('dHowToUse').value = p.how_to_use||'';
-    document.getElementById('dIngredients').value = Array.isArray(p.key_ingredients)?p.key_ingredients.join(', '):(p.key_ingredients||'');
-    document.getElementById('dTags').value = Array.isArray(p.tags)?p.tags.join(', '):(p.tags||'');
+    document.getElementById('dIngredients').value = arrToCsv(p.key_ingredients);
+    document.getElementById('dTags').value = arrToCsv(p.tags);
     document.getElementById('dImage').value = p.image||'';
     document.getElementById('dImage2').value = p.image2||'';
     document.getElementById('dImage3').value = p.image3||'';
     document.getElementById('dImage4').value = p.image4||'';
     document.getElementById('dImage5').value = p.image5||'';
     document.getElementById('dMetaDesc').value = p.meta_description||'';
-    document.getElementById('dSeoKeywords').value = Array.isArray(p.seo_keywords)?p.seo_keywords.join(', '):(p.seo_keywords||'');
+    document.getElementById('dSeoKeywords').value = arrToCsv(p.seo_keywords);
     document.getElementById('dSeoSlug').value = p.seo_slug||'';
     document.getElementById('dSeoCanonical').value = p.seo_canonical_url||'';
     document.getElementById('dSeoOgImage').value = p.seo_og_image||'';
