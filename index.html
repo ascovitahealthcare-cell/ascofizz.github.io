@@ -11115,6 +11115,9 @@ function mergeBackendProducts(backendProducts) {
       // Rating
       if (bp.rating != null) p.rating   = parseFloat(bp.rating);
       if (bp.reviews != null) p.reviews = parseInt(bp.reviews);
+      // Display position (admin-controlled homepage/shop ordering)
+      if (bp.sort_order != null) p.position = parseInt(bp.sort_order);
+      else if (bp.position != null) p.position = parseInt(bp.position);
       // Tags
       if (bp.tags) p.tags = parseArr(bp.tags);
       // Media — support media[] JSON array (up to 10 images/videos) OR individual fields
@@ -11161,6 +11164,7 @@ function mergeBackendProducts(backendProducts) {
         name:        bp.name,
         brand:       bp.brand || 'Ascovita',
         category:    bp.category || 'effervescent',
+        position:    bp.sort_order != null ? parseInt(bp.sort_order) : (bp.position != null ? parseInt(bp.position) : null),
         // ✅ FIX 3: Use actual tags from backend, NOT auto-tagged featured/new
         tags:        parseArr(bp.tags).length ? parseArr(bp.tags) : [],
         price:       bp.price != null ? parseFloat(bp.price) : null,
@@ -11293,13 +11297,13 @@ async function pushLocalTiersToBackend(backendProducts) {
 // ✅ FIX 2 & 5: Standalone render functions used after backend sync
 function renderFeatured() {
   const visible = PRODUCTS.filter(p => !p._hidden && p.active !== false);
-  const feat = visible.filter(p => p.tags.includes('featured')).slice(0,8);
+  const feat = visible.filter(p => p.tags.includes('featured')).sort(byPosition).slice(0,8);
   const fg = document.getElementById('featuredGrid');
   if (fg) fg.innerHTML = feat.map(p => renderProductCard(p)).join('');
 }
 function renderNewArrivals() {
   const visible = PRODUCTS.filter(p => !p._hidden && p.active !== false);
-  const newP = visible.filter(p => p.tags.includes('new')).slice(0,4);
+  const newP = visible.filter(p => p.tags.includes('new')).sort(byPosition).slice(0,4);
   const nag = document.getElementById('newArrivalsGrid');
   if (nag) nag.innerHTML = newP.map(p => renderProductCard(p)).join('');
 }
@@ -11361,7 +11365,7 @@ const QTY_TIERS = {
 const PRODUCTS = [
 
   // ─── CATEGORY: PREMIUM MULTIVITAMIN ───
-  {id:8, name:"Multidiata – Ascovita Premium Multivitamin", brand:"Ascovita Premium", category:"premium", tags:["featured","bestseller","immunity","premium"],
+  {id:8, position:11, name:"Multidiata – Ascovita Premium Multivitamin", brand:"Ascovita Premium", category:"premium", tags:["featured","bestseller","immunity","premium"],
    price:120, salePrice:null, offer:"Box Pack 30 Tabs ₹120 | Bottle Pack 60 Tabs ₹231",
    image:"", image2:"",
    rating:4.8, reviews:567, stock:0, badge:"🏆 Premium",
@@ -11371,8 +11375,109 @@ const PRODUCTS = [
    keyIngredients:["Vitamin C 80mg (100% RDA)","Vitamin B3/Niacin 18mg (100% RDA)","Zinc 17mg (100% RDA)","Vitamin E 10mg (100% RDA)","Vitamin B5/Pantothenic Acid 3.6mg (72% RDA)","Vitamin B2/Riboflavin 2.5mg (100% RDA)","Vitamin B6/Pyridoxine 2.4mg (100% RDA)","Vitamin B1/Thiamine 1.8mg (100% RDA)","Manganese 250mcg (6.25% RDA)","Vitamin B12/Cobalamin 2mcg (90.9% RDA)","Iodine 140mcg (100% RDA)","Chromium 50mcg (100% RDA)","Selenium 40mcg (100% RDA)","Biotin 30mcg (75% RDA)","Copper 40mcg (2.35% RDA)","Folic Acid 150mcg (85% RDA)","Vitamin D3 5mcg (33.33% RDA)","Vitamin A 1000mcg (100% RDA)","Magnesium 4mg (0.91% RDA)","Other Ingredients: Microcrystalline Cellulose (INS 460(i)), Dicalcium Phosphate (INS 341(ii)), Sodium Bicarbonate (INS 500(ii)), Sodium Starch Glycolate, PVP K (INS 201), Magnesium Stearate (INS 470(ii)), Preservative (INS 217 & INS 219)"],
    howToUse:"Take 1 tablet daily with breakfast or as directed by healthcare professional."},
 
+  // ─── CATEGORY: EFFERVESCENT TABLETS (2026 RANGE) ───
+  {id:30, position:1, name:"Green Tea Effervescent Tablet", brand:"Ascovita", category:"effervescent", tags:["featured","new","energy","effervescent"],
+   price:425, salePrice:null, offer:"Price to be updated",
+   image:"", image2:"", image3:"", image4:"", image5:"",
+   rating:4.5, reviews:0, stock:0, badge:"New",
+   hasTiers:false,
+   seoKeywords:["green tea effervescent tablet India","green tea ashwagandha caffeine tablet","metabolism booster effervescent India"],
+   description:"Ascovita Green Tea Effervescent Tablet combines Green Tea Extract with Ashwagandha KSM-66 and Caffeine to support metabolism, boost energy, enhance fat oxidation, and improve focus and alertness. Fast-dissolving effervescent format for quick absorption. FSSAI approved. Not for medicinal use — this product is not intended to diagnose, treat, cure, or prevent any disease.",
+   keyIngredients:["Green Tea Extract 500mg","Ashwagandha KSM-66 100mg","Caffeine 100mg"],
+   howToUse:"Dissolve 1 tablet in 150–200ml water. Consume once daily as directed. Allow full fizz before drinking."},
+
+  {id:31, position:2, name:"Ashwagandha Effervescent Tablet", brand:"Ascovita", category:"effervescent", tags:["featured","new","immunity","effervescent"],
+   price:495, salePrice:null, offer:"Price to be updated",
+   image:"", image2:"", image3:"", image4:"", image5:"",
+   rating:4.5, reviews:0, stock:0, badge:"New",
+   hasTiers:false,
+   seoKeywords:["ashwagandha effervescent tablet India","KSM-66 ashwagandha supplement","stress relief effervescent India"],
+   description:"Ascovita Ashwagandha Effervescent Tablet with Ashwagandha KSM-66, Eclipta Prostrata, Vitamin D3, and Zinc helps reduce stress, supports stamina, immunity, muscle recovery, and overall wellness. Fast-dissolving effervescent format. FSSAI approved. Not for medicinal use — this product is not intended to diagnose, treat, cure, or prevent any disease.",
+   keyIngredients:["Ashwagandha KSM-66 650mg","Eclipta Prostrata 20mg","Vitamin D3 500 IU","Zinc 12mg"],
+   howToUse:"Dissolve 1 tablet in 150–200ml water. Consume once daily as directed. Allow full fizz before drinking."},
+
+  {id:32, position:3, name:"Men's Multivitamin Effervescent Tablet", brand:"Ascovita", category:"effervescent", tags:["featured","new","energy","effervescent"],
+   price:399, salePrice:null, offer:"Price to be updated",
+   image:"", image2:"", image3:"", image4:"", image5:"",
+   rating:4.5, reviews:0, stock:0, badge:"New",
+   hasTiers:false,
+   seoKeywords:["men's multivitamin effervescent India","multivitamin for men India","L-Carnitine L-Arginine tablet"],
+   description:"Ascovita Men's Multivitamin Effervescent Tablet delivers daily nutritional support for energy, immunity, vitality, muscle function and men's wellness. With Vitamin A, C, D2, L-Carnitine L-Tartrate, L-Arginine, Ashwagandha Extract, and Astaxanthin. FSSAI approved. Not for medicinal use — this product is not intended to diagnose, treat, cure, or prevent any disease.",
+   keyIngredients:["Vitamin A 1000mcg","Vitamin C 80mg","Vitamin D2 600 IU","L-Carnitine L-Tartrate 50mg","L-Arginine 50mg","Ashwagandha Extract 55mg","Astaxanthin 1mg"],
+   howToUse:"Dissolve 1 tablet in 150–200ml water. Consume once daily as directed. Allow full fizz before drinking."},
+
+  {id:33, position:4, name:"Women's Multivitamin Effervescent Tablet", brand:"Ascovita", category:"effervescent", tags:["featured","new","skin","effervescent"],
+   price:399, salePrice:null, offer:"Price to be updated",
+   image:"", image2:"", image3:"", image4:"", image5:"",
+   rating:4.5, reviews:0, stock:0, badge:"New",
+   hasTiers:false,
+   seoKeywords:["women's multivitamin effervescent India","multivitamin for women India","hyaluronic acid inositol tablet"],
+   description:"Ascovita Women's Multivitamin Effervescent Tablet supports women's health, skin hydration, hormonal balance, immunity and daily nutrition. With Vitamin A, C, D2, Iron, Hyaluronic Acid, Inositol, D-Chiro Inositol, and Astaxanthin. FSSAI approved. Not for medicinal use — this product is not intended to diagnose, treat, cure, or prevent any disease.",
+   keyIngredients:["Vitamin A 840mcg","Vitamin C 65mg","Vitamin D2 600 IU","Iron 14.5mg","Hyaluronic Acid 40mg","Inositol 205mg","D-Chiro Inositol 5mg","Astaxanthin 1mg"],
+   howToUse:"Dissolve 1 tablet in 150–200ml water. Consume once daily as directed. Allow full fizz before drinking."},
+
+  {id:34, position:5, name:"Apple Cider Vinegar Effervescent Tablet", brand:"Ascovita", category:"effervescent", tags:["featured","new","weight","effervescent"],
+   price:349, salePrice:null, offer:"Price to be updated",
+   image:"", image2:"", image3:"", image4:"", image5:"",
+   rating:4.5, reviews:0, stock:0, badge:"New",
+   hasTiers:false,
+   seoKeywords:["apple cider vinegar effervescent India","ACV garcinia tablet India","weight management effervescent India"],
+   description:"Ascovita Apple Cider Vinegar Effervescent Tablet with Garcinia Cambogia, Pomegranate Extract, Chlorophyll, Vitamin B6 and B12 supports digestion, weight management, detoxification and metabolism. Fast-dissolving effervescent format. FSSAI approved. Not for medicinal use — this product is not intended to diagnose, treat, cure, or prevent any disease.",
+   keyIngredients:["Apple Cider Vinegar 500mg","Garcinia Cambogia 500mg","Pomegranate Extract 100mg","Chlorophyll 10mg","Vitamin B6 1.3mg","Vitamin B12 2.2mcg"],
+   howToUse:"Dissolve 1 tablet in 150–200ml water. Consume once daily before a meal. Allow full fizz before drinking."},
+
+  {id:35, position:6, name:"Complete Bone Health Effervescent Tablet", brand:"Ascovita", category:"effervescent", tags:["featured","new","immunity","effervescent"],
+   price:349, salePrice:null, offer:"Price to be updated",
+   image:"", image2:"", image3:"", image4:"", image5:"",
+   rating:4.5, reviews:0, stock:0, badge:"New",
+   hasTiers:false,
+   seoKeywords:["bone health effervescent tablet India","calcium magnesium D3 K2 tablet","calcium supplement India"],
+   description:"Ascovita Complete Bone Health Effervescent Tablet strengthens bones and teeth, improves calcium absorption and supports muscle function. With Calcium Carbonate, Magnesium Carbonate, Vitamin D3, Vitamin K2-7, Vitamin C, and Vitamin B6. FSSAI approved. Not for medicinal use — this product is not intended to diagnose, treat, cure, or prevent any disease.",
+   keyIngredients:["Calcium Carbonate 500mg","Magnesium Carbonate 500mg","Vitamin D3 600 IU","Vitamin K2-7 55mcg","Vitamin C 40mg","Vitamin B6 1.9mg"],
+   howToUse:"Dissolve 1 tablet in 150–200ml water. Consume once daily as directed. Allow full fizz before drinking."},
+
+  {id:36, position:7, name:"Rehydration Effervescent Tablet", brand:"Ascovita", category:"effervescent", tags:["featured","new","energy","effervescent"],
+   price:349, salePrice:null, offer:"Price to be updated",
+   image:"", image2:"", image3:"", image4:"", image5:"",
+   rating:4.5, reviews:0, stock:0, badge:"New",
+   hasTiers:false,
+   seoKeywords:["rehydration effervescent tablet India","electrolyte BCAA tablet India","hydration supplement India"],
+   description:"Ascovita Rehydration Effervescent Tablet with BCAAs (Leucine, Isoleucine, Valine), Vitamin C, Magnesium, Chloride and Zinc delivers rapid hydration, electrolyte replenishment, muscle recovery and endurance support. FSSAI approved. Not for medicinal use — this product is not intended to diagnose, treat, cure, or prevent any disease.",
+   keyIngredients:["BCAAs 300mg (Leucine 100mg, Isoleucine 100mg, Valine 100mg)","Vitamin C 80mg","Magnesium 25mg","Chloride 130mg","Zinc 12mg"],
+   howToUse:"Dissolve 1 tablet in 150–200ml water. Consume during or after exercise, or as directed. Allow full fizz before drinking."},
+
+  {id:37, position:8, name:"Natural Vitamin C + Amla Effervescent Tablet", brand:"Ascovita", category:"effervescent", tags:["featured","new","immunity","effervescent"],
+   price:349, salePrice:null, offer:"Price to be updated",
+   image:"", image2:"", image3:"", image4:"", image5:"",
+   rating:4.5, reviews:0, stock:0, badge:"New",
+   hasTiers:false,
+   seoKeywords:["vitamin C amla effervescent India","natural amla tablet India","immunity booster effervescent India"],
+   description:"Ascovita Natural Vitamin C + Amla Effervescent Tablet boosts immunity, antioxidant protection, collagen formation and overall wellness. With Natural Amla Extract, Vitamin C, Zinc, Orange Powder and Lemon Powder. FSSAI approved. Not for medicinal use — this product is not intended to diagnose, treat, cure, or prevent any disease.",
+   keyIngredients:["Natural Amla Extract 1000mg","Vitamin C 40mg","Zinc 10mg","Orange Powder 250mg","Lemon Powder 200mg"],
+   howToUse:"Dissolve 1 tablet in 150–200ml water. Consume once daily as directed. Allow full fizz before drinking."},
+
+  {id:38, position:9, name:"Glutathione Effervescent Tablet", brand:"Ascovita", category:"effervescent", tags:["featured","new","skin","effervescent"],
+   price:650, salePrice:null, offer:"Price to be updated",
+   image:"", image2:"", image3:"", image4:"", image5:"",
+   rating:4.5, reviews:0, stock:0, badge:"New",
+   hasTiers:false,
+   seoKeywords:["glutathione effervescent tablet India","skin brightening glutathione India","glutathione hyaluronic acid tablet"],
+   description:"Ascovita Glutathione Effervescent Tablet supports skin brightening, antioxidant protection, collagen support and healthy skin hydration. With L-Glutathione, Vitamin C, Hyaluronic Acid, and Astaxanthin. FSSAI approved. Not for medicinal use — this product is not intended to diagnose, treat, cure, or prevent any disease.",
+   keyIngredients:["L-Glutathione 600mg","Vitamin C 80mg","Hyaluronic Acid 50mg","Astaxanthin 10mg"],
+   howToUse:"Dissolve 1 tablet in 150–200ml water. Consume once daily as directed. Allow full fizz before drinking."},
+
+  {id:39, position:10, name:"L-Carnitine L-Tartrate Effervescent Tablet", brand:"Ascovita", category:"effervescent", tags:["featured","new","weight","energy","effervescent"],
+   price:449, salePrice:null, offer:"Price to be updated",
+   image:"", image2:"", image3:"", image4:"", image5:"",
+   rating:4.5, reviews:0, stock:0, badge:"New",
+   hasTiers:false,
+   seoKeywords:["L-Carnitine L-Tartrate effervescent India","L-Carnitine 2000mg tablet","fat metabolism effervescent India"],
+   description:"Ascovita L-Carnitine L-Tartrate Effervescent Tablet supports fat metabolism, enhances energy production, improves exercise performance and recovery. Delivers 2000mg L-Carnitine L-Tartrate per tablet in a fast-dissolving effervescent format. FSSAI approved. Not for medicinal use — this product is not intended to diagnose, treat, cure, or prevent any disease.",
+   keyIngredients:["L-Carnitine L-Tartrate 2000mg"],
+   howToUse:"Dissolve 1 tablet in 150–200ml water. Consume once daily before exercise or as directed. Allow full fizz before drinking."},
+
   // ─── CATEGORY: SPIRULINA VITAMINS ───
-  {id:10, name:"VitaPlus B12 + D3 Vegan – with Certified Organic Spirulina", brand:"Ascovita Spirulina", category:"spirulina", tags:["featured","new","immunity","energy","spirulina"],
+  {id:10, position:12, name:"VitaPlus B12 + D3 Vegan – with Certified Organic Spirulina", brand:"Ascovita Spirulina", category:"spirulina", tags:["featured","new","immunity","energy","spirulina"],
    price:399, salePrice:null, offer:"20% OFF – Introductory Price",
    image:"", image2:"",
    rating:4.7, reviews:89, stock:0, badge:"New",
@@ -11382,7 +11487,7 @@ const PRODUCTS = [
    keyIngredients:["Organic Spirulina platensis Powder 2.00g per serving","Phycocyanin 0.24g per serving","Vitamin B12 2.40mcg per serving (100% RDA, Plant Based)","Vitamin D3 15mcg per serving (100% RDA, Plant Based)","Other Ingredients: Multivitamins, Minerals, Microcrystalline Cellulose (INS 460(i)), PVP (INS 1201), Magnesium Stearate (INS 470(ii))"],
    howToUse:"Adults: Take 2 tablets per day. Children (8–12 years): 1 tablet twice per day. Take in the morning with water or milk. Best before 18 months from packaging."},
 
-  {id:11, name:"MG+++ Magnesium – B12 + D3 with Magnesium", brand:"Ascovita Spirulina", category:"spirulina", tags:["featured","new","energy","spirulina"],
+  {id:11, position:13, name:"MG+++ Magnesium – B12 + D3 with Magnesium", brand:"Ascovita Spirulina", category:"spirulina", tags:["featured","new","energy","spirulina"],
    price:367, salePrice:null, offer:"20% OFF – Introductory Price",
    image:"", image2:"",
    rating:4.5, reviews:56, stock:0, badge:"New",
@@ -11392,7 +11497,7 @@ const PRODUCTS = [
    keyIngredients:["Magnesium (Mg Citrate, Mg Gluconate, Mg Oxide) 440mg per serving (100% RDA)","Vitamin B12 2.40mcg per serving (100% RDA)","Vitamin D3 15mcg per serving (100% RDA)","Organic Spirulina platensis Powder 1.10g per serving","Phycocyanin 0.13g","Vitamin B12 & D3 are Plant Based","Other Ingredients: Multivitamins, Minerals, Microcrystalline Cellulose (INS 460(i)), PVP (INS 1201), Magnesium Stearate (INS 470(ii))"],
    howToUse:"Adults: Take 2 tablets per day. Children (8–12 years): 1 tablet twice per day. Take in the morning with water or milk."},
 
-  {id:12, name:"CS++ + Iron++ – Calcium + Iron with B12+D3", brand:"Ascovita Spirulina", category:"spirulina", tags:["featured","new","immunity","spirulina"],
+  {id:12, position:14, name:"CS++ + Iron++ – Calcium + Iron with B12+D3", brand:"Ascovita Spirulina", category:"spirulina", tags:["featured","new","immunity","spirulina"],
    price:383, salePrice:null, offer:"20% OFF – Introductory Price",
    image:"", image2:"",
    rating:4.6, reviews:44, stock:0, badge:"New",
@@ -11403,7 +11508,7 @@ const PRODUCTS = [
    howToUse:"Adults: Take 2 tablets per day. Children (8–12 years): 1 tablet per day. Take in the morning with water or milk."},
 
   // ─── CATEGORY: AYURVEDIC ───
-  {id:20, name:"Moringa Tablets", brand:"Ascovita Ayurvedic", category:"ayurvedic", tags:["featured","new","immunity","energy","ayurvedic"],
+  {id:20, position:15, name:"Moringa Tablets", brand:"Ascovita Ayurvedic", category:"ayurvedic", tags:["featured","new","immunity","energy","ayurvedic"],
    price:249, salePrice:null, offer:"Price to be updated",
    image:"", image2:"",
    rating:4.7, reviews:156, stock:0, badge:"Ayurvedic",
@@ -11414,7 +11519,7 @@ const PRODUCTS = [
    howToUse:"Take 2 moringa tablets in the morning and 2 tablets in the evening to boost your body. Children (8–12 years): 1 moringa tablet twice per day as prescribed by nutritionist. Store in a cool & dry place."},
 
   // ─── CATEGORY: IMMUNITY ───
-  {id:22, name:"Power Pro Tablets", brand:"Ascovita Immunity", category:"immunity", tags:["featured","new","immunity","energy"],
+  {id:22, position:16, name:"Power Pro Tablets", brand:"Ascovita Immunity", category:"immunity", tags:["featured","new","immunity","energy"],
    price:null, salePrice:null, offer:"Price coming soon",
    image:"", image2:"",
    rating:4.7, reviews:34, stock:0, badge:"Coming Soon",
@@ -11424,6 +11529,14 @@ const PRODUCTS = [
    keyIngredients:["Withania somnifera (Ashwagandha) 250mg","Emblica officinalis 75mg","Mucuna pruriens 50mg","Tribulus terrestris 50mg","Purified Shilajit Extract 50mg","Astaxanthin 4mg","Asparagus racemosus 59mg","Chlorophytum borivilianum 59mg"],
    howToUse:"Adults: Take 1 tablet per day after a meal or as directed by healthcare professional. Keep container tightly closed. Keep out of reach of children."},
 ];
+
+// Admin-controlled homepage/shop display order — lower position shows first.
+// Products without an explicit position (e.g. brand-new backend additions) sort to the end.
+function byPosition(a, b) {
+  const pa = a.position ?? a.sort_order ?? 9999;
+  const pb = b.position ?? b.sort_order ?? 9999;
+  return pa - pb;
+}
 
 const REVIEWS = {
   1:[{user:"Sneha Joshi",rating:5,text:"Noticed brighter skin in 4 weeks. The orange flavour is so refreshing to drink every day!",date:"Feb 2025",verified:true},{user:"Meera Sharma",rating:4,text:"Premium Glutathione product, quality is evident. Genuine L-Glutathione 650mg.",date:"Jan 2025",verified:true}],
@@ -12293,6 +12406,7 @@ function applyFilters() {
   if (sort === 'plo') prods.sort((a,b) => (a.salePrice||a.price)-(b.salePrice||b.price));
   else if (sort === 'phi') prods.sort((a,b) => (b.salePrice||b.price)-(a.salePrice||a.price));
   else if (sort === 'rat') prods.sort((a,b) => b.rating-a.rating);
+  else prods.sort(byPosition); // default ("def") — respects admin-set display order
 
   const grid = document.getElementById('shopGrid');
   const empty = document.getElementById('shopEmpty');
