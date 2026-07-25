@@ -8931,6 +8931,7 @@ setInterval(function() { syncAppCartBadge(); syncAppWishBadge(); }, 2000);
   <div class="container">
     <div style="text-align:center;margin-bottom:44px">
       <span class="cf-section-label">VitaRewards Program</span>
+      <span style="display:inline-block;margin-left:10px;background:#F59E0B;color:#fff;font-size:0.68rem;font-weight:800;letter-spacing:0.6px;text-transform:uppercase;padding:4px 12px;border-radius:20px;vertical-align:middle">🚧 Coming Soon</span>
       <h2 class="cf-section-title">Shop. Earn. Save. Repeat.</h2>
       <p class="cf-section-sub" style="margin:0 auto">Every rupee you spend earns VitaPoints. Redeem for free products, discounts &amp; early access.</p>
     </div>
@@ -8949,7 +8950,7 @@ setInterval(function() { syncAppCartBadge(); syncAppWishBadge(); }, 2000);
       <div class="earn-card"><div class="earn-ico">🔔</div><div><div class="earn-action">Subscribe to Newsletter</div><div class="earn-pts">30 pts (one-time)</div></div></div>
     </div>
     <div style="text-align:center;margin-top:32px">
-      <button class="btn-primary" onclick="showToast('VitaRewards launching soon! 🌟','success')">Join VitaRewards — It's Free →</button>
+      <button class="btn-primary" style="opacity:0.55;cursor:not-allowed" onclick="showToast('VitaRewards is launching soon! 🌟 We\'ll notify you the moment it\'s live.','success')">🚧 Coming Soon — Join Waitlist</button>
     </div>
   </div>
 </section>
@@ -8992,6 +8993,7 @@ setInterval(function() { syncAppCartBadge(); syncAppWishBadge(); }, 2000);
   <div class="container">
     <div class="refer-card">
       <div style="font-size:3rem;margin-bottom:14px">🤝</div>
+      <span style="display:inline-block;margin-bottom:10px;background:#F59E0B;color:#fff;font-size:0.68rem;font-weight:800;letter-spacing:0.6px;text-transform:uppercase;padding:4px 12px;border-radius:20px">🚧 Coming Soon</span>
       <h2 class="refer-title">Share Ascovita, Earn Together</h2>
       <p class="refer-sub">Refer a friend and you both win. When they place their first order, you get <strong>₹100 VitaPoints</strong> and they get <strong>₹100 off</strong> their order.</p>
       <div class="refer-steps">
@@ -9005,14 +9007,14 @@ setInterval(function() { syncAppCartBadge(); syncAppWishBadge(); }, 2000);
         <div class="rr-badge"><div class="rr-amo">₹100</div><div class="rr-lbl">Friend gets off first order</div></div>
       </div>
       <div class="refer-input-row">
-        <input class="refer-input" id="referLink" value="https://ascovita.in?ref=FRIEND100" readonly onclick="this.select()">
-        <button class="btn-primary" onclick="copyReferLink()">Copy Link</button>
+        <input class="refer-input" id="referLink" value="Referral links launch soon" readonly disabled style="opacity:0.55;cursor:not-allowed">
+        <button class="btn-primary" style="opacity:0.55;cursor:not-allowed" onclick="showToast('Referral program launching soon! 🌟','success')">Coming Soon</button>
       </div>
-      <p style="font-size:.74rem;color:#A8B09A;margin-top:14px">Log in to get your personalised referral code with higher rewards</p>
+      <p style="font-size:.74rem;color:#A8B09A;margin-top:14px">We're finishing up the referral system — check back soon for your personalised link.</p>
     </div>
   </div>
 </section>
-<!-- ═══════════ CUSTOMER REVIEWS WALL ═══════════ -->
+<!-- ═══════════ CUSTOMER REVIEWS WALL — live data from SQL backend ═══════════ -->
 <section class="influencer-section" style="background:var(--green-wash)">
   <div class="container">
     <div style="text-align:center;margin-bottom:32px">
@@ -9022,106 +9024,17 @@ setInterval(function() { syncAppCartBadge(); syncAppWishBadge(); }, 2000);
       <div style="display:flex;align-items:center;justify-content:center;gap:16px;margin-top:16px;flex-wrap:wrap">
         <div style="display:flex;align-items:center;gap:6px">
           <span style="color:#F59E0B;font-size:1.3rem">★★★★★</span>
-          <span style="font-size:1.5rem;font-weight:700;color:var(--dark)">4.9</span>
+          <span style="font-size:1.5rem;font-weight:700;color:var(--dark)" id="reviewsWallAvg">—</span>
           <span style="color:var(--gray);font-size:0.85rem">/ 5.0</span>
         </div>
         <div style="width:1px;height:28px;background:var(--light-gray)"></div>
-        <span style="color:var(--gray);font-size:0.85rem">Based on <strong style="color:var(--dark)">1,800+ reviews</strong></span>
+        <span style="color:var(--gray);font-size:0.85rem" id="reviewsWallCount">Loading reviews…</span>
         <div style="width:1px;height:28px;background:var(--light-gray)"></div>
         <span style="background:var(--green-pale);color:var(--green);font-size:0.78rem;font-weight:600;padding:4px 12px;border-radius:20px">✓ Verified Purchases Only</span>
       </div>
     </div>
-    <div class="influencer-grid" style="grid-template-columns:repeat(3,1fr);gap:20px">
-      <div class="inf-card" style="background:white;border-radius:16px;padding:24px;box-shadow:0 2px 12px rgba(45,80,22,0.07);border:1px solid rgba(45,80,22,0.06)">
-        <div style="display:flex;align-items:center;gap:12px;margin-bottom:14px">
-          <div style="width:44px;height:44px;border-radius:50%;background:linear-gradient(135deg,#2D5016,#4F8A28);display:flex;align-items:center;justify-content:center;color:white;font-weight:700;font-size:1.1rem;flex-shrink:0">S</div>
-          <div>
-            <div style="font-weight:700;font-size:0.9rem;color:var(--dark)">Sneha Joshi</div>
-            <div style="font-size:0.75rem;color:var(--gray)">Mumbai · Verified Buyer</div>
-          </div>
-          <div style="margin-left:auto;color:#F59E0B;font-size:0.95rem">★★★★★</div>
-        </div>
-        <div style="font-size:0.88rem;color:var(--text);line-height:1.65;margin-bottom:12px">"Noticed brighter skin in 4 weeks with the Glutathione Effervescent. The orange flavour is so refreshing every morning. I've recommended it to everyone in my family!"</div>
-        <div style="display:flex;align-items:center;justify-content:space-between">
-          <span style="font-size:0.72rem;background:var(--green-pale);color:var(--green);padding:3px 10px;border-radius:20px;font-weight:600">L-Glutathione Effervescent</span>
-          <span style="font-size:0.72rem;color:var(--gray)">Feb 2025</span>
-        </div>
-      </div>
-      <div class="inf-card" style="background:white;border-radius:16px;padding:24px;box-shadow:0 2px 12px rgba(45,80,22,0.07);border:1px solid rgba(45,80,22,0.06)">
-        <div style="display:flex;align-items:center;gap:12px;margin-bottom:14px">
-          <div style="width:44px;height:44px;border-radius:50%;background:linear-gradient(135deg,#B8860B,#D4A520);display:flex;align-items:center;justify-content:center;color:white;font-weight:700;font-size:1.1rem;flex-shrink:0">D</div>
-          <div>
-            <div style="font-weight:700;font-size:0.9rem;color:var(--dark)">Deepa Menon</div>
-            <div style="font-size:0.75rem;color:var(--gray)">Bangalore · Verified Buyer</div>
-          </div>
-          <div style="margin-left:auto;color:#F59E0B;font-size:0.95rem">★★★★★</div>
-        </div>
-        <div style="font-size:0.88rem;color:var(--text);line-height:1.65;margin-bottom:12px">"Hair fall reduced significantly in just 6 weeks! B12 + Biotin combo is incredible. The guava taste is absolutely delicious — my kids fight me for it now."</div>
-        <div style="display:flex;align-items:center;justify-content:space-between">
-          <span style="font-size:0.72rem;background:var(--green-pale);color:var(--green);padding:3px 10px;border-radius:20px;font-weight:600">B12 + Biotin Effervescent</span>
-          <span style="font-size:0.72rem;color:var(--gray)">Feb 2025</span>
-        </div>
-      </div>
-      <div class="inf-card" style="background:white;border-radius:16px;padding:24px;box-shadow:0 2px 12px rgba(45,80,22,0.07);border:1px solid rgba(45,80,22,0.06)">
-        <div style="display:flex;align-items:center;gap:12px;margin-bottom:14px">
-          <div style="width:44px;height:44px;border-radius:50%;background:linear-gradient(135deg,#1565C0,#1976D2);display:flex;align-items:center;justify-content:center;color:white;font-weight:700;font-size:1.1rem;flex-shrink:0">R</div>
-          <div>
-            <div style="font-weight:700;font-size:0.9rem;color:var(--dark)">Ramesh Kumar</div>
-            <div style="font-size:0.75rem;color:var(--gray)">Delhi · Verified Buyer</div>
-          </div>
-          <div style="margin-left:auto;color:#F59E0B;font-size:0.95rem">★★★★★</div>
-        </div>
-        <div style="font-size:0.88rem;color:var(--text);line-height:1.65;margin-bottom:12px">"Best multivitamin at this price — literally nothing comes close. Complete nutrition in one small tablet. My B12 deficiency improved in 2 months. Doctor was pleasantly surprised."</div>
-        <div style="display:flex;align-items:center;justify-content:space-between">
-          <span style="font-size:0.72rem;background:var(--green-pale);color:var(--green);padding:3px 10px;border-radius:20px;font-weight:600">Multidiata Multivitamin</span>
-          <span style="font-size:0.72rem;color:var(--gray)">Jan 2025</span>
-        </div>
-      </div>
-      <div class="inf-card" style="background:white;border-radius:16px;padding:24px;box-shadow:0 2px 12px rgba(45,80,22,0.07);border:1px solid rgba(45,80,22,0.06)">
-        <div style="display:flex;align-items:center;gap:12px;margin-bottom:14px">
-          <div style="width:44px;height:44px;border-radius:50%;background:linear-gradient(135deg,#6A1B9A,#7B1FA2);display:flex;align-items:center;justify-content:center;color:white;font-weight:700;font-size:1.1rem;flex-shrink:0">P</div>
-          <div>
-            <div style="font-weight:700;font-size:0.9rem;color:var(--dark)">Pooja Jain</div>
-            <div style="font-size:0.75rem;color:var(--gray)">Ahmedabad · Verified Buyer</div>
-          </div>
-          <div style="margin-left:auto;color:#F59E0B;font-size:0.95rem">★★★★★</div>
-        </div>
-        <div style="font-size:0.88rem;color:var(--text);line-height:1.65;margin-bottom:12px">"ACV + Moringa in Green Apple is amazing! Noticed a real difference in my energy and digestion within 2 weeks. Cravings have reduced too — great for my weight management journey."</div>
-        <div style="display:flex;align-items:center;justify-content:space-between">
-          <span style="font-size:0.72rem;background:var(--green-pale);color:var(--green);padding:3px 10px;border-radius:20px;font-weight:600">ACV + Moringa Effervescent</span>
-          <span style="font-size:0.72rem;color:var(--gray)">Mar 2025</span>
-        </div>
-      </div>
-      <div class="inf-card" style="background:white;border-radius:16px;padding:24px;box-shadow:0 2px 12px rgba(45,80,22,0.07);border:1px solid rgba(45,80,22,0.06)">
-        <div style="display:flex;align-items:center;gap:12px;margin-bottom:14px">
-          <div style="width:44px;height:44px;border-radius:50%;background:linear-gradient(135deg,#00796B,#00897B);display:flex;align-items:center;justify-content:center;color:white;font-weight:700;font-size:1.1rem;flex-shrink:0">S</div>
-          <div>
-            <div style="font-weight:700;font-size:0.9rem;color:var(--dark)">Sunita Rao</div>
-            <div style="font-size:0.75rem;color:var(--gray)">Hyderabad · Verified Buyer</div>
-          </div>
-          <div style="margin-left:auto;color:#F59E0B;font-size:0.95rem">★★★★★</div>
-        </div>
-        <div style="font-size:0.88rem;color:var(--text);line-height:1.65;margin-bottom:12px">"VitaPlus B12+D3 Spirulina is fantastic. No fishy smell unlike other spirulina brands, easy to swallow, and the energy boost is noticeable from week one. Certified organic — worth every rupee."</div>
-        <div style="display:flex;align-items:center;justify-content:space-between">
-          <span style="font-size:0.72rem;background:var(--green-pale);color:var(--green);padding:3px 10px;border-radius:20px;font-weight:600">VitaPlus B12+D3 Spirulina</span>
-          <span style="font-size:0.72rem;color:var(--gray)">Feb 2025</span>
-        </div>
-      </div>
-      <div class="inf-card" style="background:white;border-radius:16px;padding:24px;box-shadow:0 2px 12px rgba(45,80,22,0.07);border:1px solid rgba(45,80,22,0.06)">
-        <div style="display:flex;align-items:center;gap:12px;margin-bottom:14px">
-          <div style="width:44px;height:44px;border-radius:50%;background:linear-gradient(135deg,#C62828,#D32F2F);display:flex;align-items:center;justify-content:center;color:white;font-weight:700;font-size:1.1rem;flex-shrink:0">A</div>
-          <div>
-            <div style="font-weight:700;font-size:0.9rem;color:var(--dark)">Arjun Sharma</div>
-            <div style="font-size:0.75rem;color:var(--gray)">Pune · Verified Buyer</div>
-          </div>
-          <div style="margin-left:auto;color:#F59E0B;font-size:0.95rem">★★★★★</div>
-        </div>
-        <div style="font-size:0.88rem;color:var(--text);line-height:1.65;margin-bottom:12px">"Moringa tablets are incredible! Energy levels went up noticeably after 3 weeks. Pure moringa, no fillers. As a fitness coach I'm very picky — Ascovita is the only brand I trust for my clients."</div>
-        <div style="display:flex;align-items:center;justify-content:space-between">
-          <span style="font-size:0.72rem;background:var(--green-pale);color:var(--green);padding:3px 10px;border-radius:20px;font-weight:600">Moringa Tablets</span>
-          <span style="font-size:0.72rem;color:var(--gray)">Mar 2025</span>
-        </div>
-      </div>
+    <div class="influencer-grid" style="grid-template-columns:repeat(3,1fr);gap:20px" id="reviewsWallGrid">
+      <p style="grid-column:1/-1;text-align:center;color:var(--gray);font-size:.9rem">Loading reviews…</p>
     </div>
     <div style="text-align:center;margin-top:28px">
       <button class="btn-outline" onclick="showPage('shop')" style="font-size:0.88rem">Shop Bestsellers →</button>
@@ -11555,19 +11468,41 @@ function byPosition(a, b) {
   return pa - pb;
 }
 
-const REVIEWS = {
-  1:[{user:"Sneha Joshi",rating:5,text:"Noticed brighter skin in 4 weeks. The orange flavour is so refreshing to drink every day!",date:"Feb 2025",verified:true},{user:"Meera Sharma",rating:4,text:"Premium Glutathione product, quality is evident. Genuine L-Glutathione 650mg.",date:"Jan 2025",verified:true}],
-  2:[{user:"Pooja Jain",rating:5,text:"ACV + Moringa Green Apple is amazing! Feel the difference in energy and digestion in 2 weeks.",date:"Mar 2025",verified:true},{user:"Vikram Singh",rating:5,text:"Love this product. Cravings have reduced a lot. Great for weight management.",date:"Feb 2025",verified:true}],
-  3:[{user:"Sanya Mishra",rating:5,text:"L-Carnitine Orange is so refreshing! My energy during workouts has visibly improved.",date:"Mar 2025",verified:true},{user:"Rohan Gupta",rating:4,text:"Great for fat burning support. Can feel the sustained energy throughout the day.",date:"Feb 2025",verified:true}],
-  4:[{user:"Deepa Menon",rating:5,text:"Hair fall reduced significantly in 6 weeks! The guava taste is absolutely delicious.",date:"Feb 2025",verified:true},{user:"Priya Nair",rating:5,text:"B12 + Biotin combo is incredible. Nails stopped breaking and skin is glowing!",date:"Jan 2025",verified:true}],
-  5:[{user:"Kavya Patel",rating:5,text:"Vitamin C fizz is so good! My immunity is definitely stronger this season.",date:"Feb 2025",verified:true},{user:"Ritika Desai",rating:5,text:"Best Vitamin C supplement I've tried. Love the moringa addition.",date:"Jan 2025",verified:true}],
-  8:[{user:"Ramesh Kumar",rating:5,text:"Best multivitamin at this price. Complete nutrition in one tablet!",date:"Feb 2025",verified:true},{user:"Anjali Mehta",rating:5,text:"Doctor recommended and I'm glad. B12 deficiency improved in 2 months.",date:"Feb 2025",verified:true}],
-  10:[{user:"Sunita Rao",rating:5,text:"VitaPlus B12+D3 is fantastic. No fishy smell, easy to swallow, great energy.",date:"Feb 2025",verified:true},{user:"Geeta Iyer",rating:5,text:"Spirulina quality is excellent. Certified organic and made in India!",date:"Jan 2025",verified:true}],
-  20:[{user:"Arjun Sharma",rating:5,text:"Moringa tablets are incredible! Energy levels have gone up noticeably.",date:"Mar 2025",verified:true},{user:"Nikhil Patel",rating:4,text:"Pure moringa, no filler. Good stamina and digestion improvement.",date:"Feb 2025",verified:true}],
-};
-PRODUCTS.forEach(p => {
-  if (!REVIEWS[p.id]) REVIEWS[p.id] = [{user:"Verified Buyer",rating:Math.round(p.rating),text:`${p.name} is exactly as described. Great quality from Ascovita.`,date:"Jan 2025",verified:true},{user:"Happy Customer",rating:5,text:"Ascovita products are genuine and effective.",date:"Feb 2025",verified:true}];
-});
+// ═══════════════════════════════════════════════════════════════
+// REAL REVIEW SYSTEM — backed by the SQL database on the API_BASE
+// backend (Render). No hardcoded/fake reviews anywhere on the site.
+// Every product starts with an empty review list until real
+// customers submit one; submitted reviews are POSTed to the
+// backend so they persist across reloads and index.html redeploys.
+//
+// Expected backend contract (add these routes + a `reviews` table
+// to the Node service at API_BASE — see reviews-backend.js that
+// was generated alongside this file):
+//   GET  /api/reviews/:productId        -> { data: [{id,user,rating,text,date,verified}, ...] }
+//   POST /api/reviews                   -> body {productId,user,rating,text} -> { data: {...} }
+//   GET  /api/reviews/featured?limit=6  -> { data: [{id,productId,productName,user,location,rating,text,date}, ...] }
+// ═══════════════════════════════════════════════════════════════
+const REVIEWS = {};          // productId -> array of real reviews fetched from SQL
+const REVIEWS_LOADED = {};   // productId -> true once a fetch has completed (success or fail)
+
+async function loadProductReviews(productId) {
+  try {
+    const r = await fetchWithTimeout(`${API_BASE}/api/reviews/${productId}`, { cache:'no-store' }, 8000);
+    if (!r.ok) throw new Error('reviews fetch failed: ' + r.status);
+    const data = await r.json();
+    REVIEWS[productId] = Array.isArray(data.data) ? data.data : (Array.isArray(data) ? data : []);
+  } catch (e) {
+    // Backend not reachable / route not deployed yet — show an honest
+    // "no reviews yet" state rather than fake filler text.
+    REVIEWS[productId] = REVIEWS[productId] || [];
+  } finally {
+    REVIEWS_LOADED[productId] = true;
+    // If the shopper is currently looking at this exact product, refresh the tab in place.
+    if (currentProduct && currentProduct.id === productId) {
+      try { buildProductPage(currentProduct); } catch(e) {}
+    }
+  }
+}
 
 const STORE = {
   cart:[], wishlist:[],
@@ -12394,8 +12329,9 @@ function initHome() {
   const hbg=document.getElementById('homeBlogGrid'); if(hbg) hbg.innerHTML = BLOGS.slice(0,3).map(renderBlogCard).join('');
   // FAQ
   const hfw=document.getElementById('homeFaqWrap'); if(hfw) hfw.innerHTML = FAQS.slice(0,5).map(renderFaqItem).join('');
-  // Testimonials
-  const tg=document.getElementById('testiGrid'); if(tg) tg.innerHTML = renderTestimonials();
+  // Testimonials + Customer Reviews Wall — both pull the same real, live data
+  renderTestimonials();
+  renderReviewsWall();
   STORE.updateCartUI();
 }
 
@@ -12561,7 +12497,8 @@ function updatePriceDisplay(productId, tierIdx) {
 // ── PRODUCT PAGE ──
 function buildProductPage(p) {
   const rvs = REVIEWS[p.id] || [];
-  const avg = rvs.reduce((s,r)=>s+r.rating,0)/rvs.length || p.rating;
+  if (!REVIEWS_LOADED[p.id]) loadProductReviews(p.id); // fires once; re-renders this tab when the real data arrives
+  const avg = rvs.length ? rvs.reduce((s,r)=>s+r.rating,0)/rvs.length : p.rating;
   const related = PRODUCTS.filter(r=>r.category===p.category&&r.id!==p.id).slice(0,4);
   const rg=document.getElementById('relatedGrid'); if(rg) rg.innerHTML = related.map(r=>renderProductCard(r)).join('');
 
@@ -12579,7 +12516,7 @@ function buildProductPage(p) {
     <div>
       <div class="prod-brand">${p.brand}</div>
       <h1 class="prod-title">${p.name}</h1>
-      <div class="prod-rating-row">${stars(avg)} <span class="review-ct">(${rvs.length + p.reviews} reviews)</span> <span class="write-rv" onclick="document.getElementById('rvFormWrap').scrollIntoView({behavior:'smooth'})">Write a Review</span></div>
+      <div class="prod-rating-row">${stars(avg)} <span class="review-ct">(${REVIEWS_LOADED[p.id] ? rvs.length + ' reviews' : 'loading reviews…'})</span> <span class="write-rv" onclick="document.getElementById('rvFormWrap').scrollIntoView({behavior:'smooth'})">Write a Review</span></div>
       <div class="prod-price-block">
         <span class="prod-sale" id="dynSalePrice">&#x20B9;${displayRate.toLocaleString('en-IN')}</span>
         <span class="prod-orig" id="dynOrigPrice">&#x20B9;${displayMRP.toLocaleString('en-IN')}</span>
@@ -12624,9 +12561,14 @@ function buildProductPage(p) {
       <div class="tab-content" id="tab-rvs">
         <div class="rv-summary">
           <div class="rating-big"><div class="rv-big-num">${avg.toFixed(1)}</div><div class="rv-big-stars">&#x2605;&#x2605;&#x2605;&#x2605;&#x2605;</div><div style="font-size:.72rem;color:var(--gray)">${rvs.length} reviews</div></div>
-          <div style="flex:1">${[5,4,3,2,1].map(s=>{const c=rvs.filter(r=>Math.round(r.rating)===s).length;const pct=rvs.length?(c/rvs.length)*100:(s===5?70:s===4?20:10);return`<div class="rv-bar-row"><span style="width:14px">${s}&#x2605;</span><div class="rv-bar-track"><div class="rv-bar-fill" style="width:${pct}%"></div></div><span>${Math.round(pct)}%</span></div>`;}).join('')}</div>
+          <div style="flex:1">${[5,4,3,2,1].map(s=>{const c=rvs.filter(r=>Math.round(r.rating)===s).length;const pct=rvs.length?(c/rvs.length)*100:0;return`<div class="rv-bar-row"><span style="width:14px">${s}&#x2605;</span><div class="rv-bar-track"><div class="rv-bar-fill" style="width:${pct}%"></div></div><span>${Math.round(pct)}%</span></div>`;}).join('')}</div>
         </div>
-        ${rvs.map(r=>`<div class="rv-card"><div class="rv-hdr"><div><span class="rv-name">${r.user}</span>${r.verified?'<span class="rv-verified">&#x2713; Verified</span>':''}</div><span class="rv-date">${r.date}</span></div><div class="rv-stars">${'&#x2605;'.repeat(r.rating)}${'&#x2606;'.repeat(5-r.rating)}</div><p class="rv-text">${r.text}</p></div>`).join('')}
+        ${!REVIEWS_LOADED[p.id]
+            ? `<div style="text-align:center;padding:24px;color:var(--gray);font-size:.85rem">Loading reviews…</div>`
+            : rvs.length
+              ? rvs.map(r=>`<div class="rv-card"><div class="rv-hdr"><div><span class="rv-name">${r.user}</span>${r.verified?'<span class="rv-verified">&#x2713; Verified</span>':''}</div><span class="rv-date">${r.date}</span></div><div class="rv-stars">${'&#x2605;'.repeat(r.rating)}${'&#x2606;'.repeat(5-r.rating)}</div><p class="rv-text">${r.text}</p></div>`).join('')
+              : `<div style="text-align:center;padding:24px;color:var(--gray);font-size:.85rem">No reviews yet — be the first to share your experience with this product! 🌿</div>`
+          }
         <div class="rv-form" id="rvFormWrap">
           <h3>Write a Review</h3>
           <div class="star-picker" id="starPicker">${[1,2,3,4,5].map(s=>`<span onclick="setRating(${s})" data-s="${s}">&#x2605;</span>`).join('')}</div>
@@ -12822,16 +12764,39 @@ function setRating(v) {
   selectedRating = v;
   document.querySelectorAll('#starPicker span').forEach((s,i) => s.classList.toggle('lit', i < v));
 }
-function submitReview() {
+async function submitReview() {
   const name = document.getElementById('rvName')?.value.trim();
   const text = document.getElementById('rvText')?.value.trim();
   if (!name || !text || !selectedRating) { showToast('Please fill all fields and select a rating!','error'); return; }
-  if (currentProduct) {
-    REVIEWS[currentProduct.id] = REVIEWS[currentProduct.id]||[];
-    REVIEWS[currentProduct.id].unshift({ user:name, rating:selectedRating, text, date:'Just now', verified:false });
+  if (!currentProduct) return;
+
+  const btn = document.querySelector('#rvFormWrap .btn-primary');
+  if (btn) { btn.disabled = true; btn.textContent = 'Submitting…'; }
+
+  try {
+    // Persist to the real backend (SQL) so the review survives reloads
+    // and future index.html deployments — see reviews-backend.js.
+    const r = await fetchWithTimeout(`${API_BASE}/api/reviews`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ productId: currentProduct.id, user: name, rating: selectedRating, text })
+    }, 8000);
+    if (!r.ok) throw new Error('review submit failed: ' + r.status);
+
+    // Re-fetch the authoritative list from the backend rather than
+    // trusting our own optimistic copy — guarantees what's shown
+    // matches what's actually stored in SQL.
+    REVIEWS_LOADED[currentProduct.id] = false;
+    await loadProductReviews(currentProduct.id);
     showToast('Review submitted! Thank you 🌿');
-    buildProductPage(currentProduct);
+    document.getElementById('rvName').value = '';
+    document.getElementById('rvText').value = '';
+    selectedRating = 0;
     switchTab(document.querySelectorAll('.tab')[2], 'rvs');
+  } catch (e) {
+    showToast("Couldn't submit your review — please try again in a moment.", 'error');
+  } finally {
+    if (btn) { btn.disabled = false; btn.textContent = 'Submit Review 🌱'; }
   }
 }
 
@@ -13179,16 +13144,73 @@ function toggleFaq(btn) {
 }
 
 // ── TESTIMONIALS ──
-function renderTestimonials() {
-  const testi=[
-    {stars:5,text:'"Moringa Green Apple has become my morning ritual. My energy levels have transformed in 3 weeks. The taste is genuinely delicious – not like medicine at all!"',name:'Kavya Patel',loc:'Ahmedabad, Gujarat',ico:'👩'},
-    {stars:5,text:'"B1+Biotin Guava is magical for hair. My hair fall dropped dramatically. I tell every woman in my family to get this. Ascovita is a brand I trust completely."',name:'Deepa Nair',loc:'Kochi, Kerala',ico:'👩'},
-    {stars:5,text:'"Spirulina Vita Plus improved my haemoglobin from 9.2 to 11.8 in 3 months! My doctor was impressed. Best investment in my health I\'ve ever made."',name:'Sunita Rao',loc:'Hyderabad, Telangana',ico:'👩'},
-    {stars:5,text:'"Glutathione has genuinely improved my skin tone. I noticed the change within a month. The effervescent format means fast absorption. Worth every rupee."',name:'Meera Sharma',loc:'Mumbai, Maharashtra',ico:'👩'},
-    {stars:4,text:'"Multidiata covers all my nutritional bases at a very affordable price. My B12 deficiency has improved significantly as confirmed by recent blood reports."',name:'Rahul Kumar',loc:'Delhi',ico:'👨'},
-    {stars:5,text:'"The Moringa Duo Pack is great value. Alternating flavours keeps it fun. Ascovita packaging is also very neat – feels premium."',name:'Anjali Mehta',loc:'Pune, Maharashtra',ico:'👩'},
-  ];
-  return testi.map(t=>`<div class="testi-card"><div class="testi-stars">${'★'.repeat(t.stars)}</div><p class="testi-text">${t.text}</p><div class="testi-user"><div class="testi-avatar">${t.ico}</div><div><div class="testi-name">${t.name}</div><div class="testi-loc">${t.loc}</div></div></div></div>`).join('');
+// ═══════════════════════════════════════════════════════════════
+// REAL, SITE-WIDE REVIEW FEED
+// One single backend endpoint (GET /api/reviews/featured) feeds
+// BOTH the homepage "What Our Customers Say" testimonial grid AND
+// the "Customer Reviews Wall" section further down the page, so
+// the whole site shows the same real, current data instead of two
+// different sets of hardcoded fake reviews.
+// ═══════════════════════════════════════════════════════════════
+let FEATURED_REVIEWS_CACHE = null;
+
+async function getFeaturedReviews() {
+  if (FEATURED_REVIEWS_CACHE) return FEATURED_REVIEWS_CACHE;
+  try {
+    const r = await fetchWithTimeout(`${API_BASE}/api/reviews/featured?limit=9`, { cache:'no-store' }, 8000);
+    if (!r.ok) throw new Error('featured reviews fetch failed: ' + r.status);
+    const data = await r.json();
+    FEATURED_REVIEWS_CACHE = Array.isArray(data.data) ? data.data : (Array.isArray(data) ? data : []);
+  } catch (e) {
+    FEATURED_REVIEWS_CACHE = []; // honest empty state — no fake filler
+  }
+  return FEATURED_REVIEWS_CACHE;
+}
+
+function testiCardHtml(t) {
+  const initial = (t.user || t.name || '?').trim().charAt(0).toUpperCase();
+  return `<div class="testi-card"><div class="testi-stars">${'★'.repeat(t.rating || t.stars || 5)}</div><p class="testi-text">"${t.text}"</p><div class="testi-user"><div class="testi-avatar">${initial}</div><div><div class="testi-name">${t.user || t.name}</div><div class="testi-loc">${t.location || t.loc || ''}</div></div></div></div>`;
+}
+
+async function renderTestimonials() {
+  const tg = document.getElementById('testiGrid');
+  if (!tg) return;
+  const reviews = await getFeaturedReviews();
+  tg.innerHTML = reviews.length
+    ? reviews.slice(0,6).map(testiCardHtml).join('')
+    : `<p style="grid-column:1/-1;text-align:center;color:var(--gray);font-size:.9rem">Customer reviews are on their way — check back soon! 🌿</p>`;
+}
+
+async function renderReviewsWall() {
+  const wall = document.getElementById('reviewsWallGrid');
+  const statEl = document.getElementById('reviewsWallCount');
+  const avgEl = document.getElementById('reviewsWallAvg');
+  if (!wall) return;
+  const reviews = await getFeaturedReviews();
+  if (!reviews.length) {
+    wall.innerHTML = `<p style="grid-column:1/-1;text-align:center;color:var(--gray);font-size:.9rem">No reviews yet — be the first to share your Ascovita experience! 🌿</p>`;
+    if (statEl) statEl.textContent = '0 reviews';
+    if (avgEl) avgEl.textContent = '—';
+    return;
+  }
+  const avg = (reviews.reduce((s,r)=>s+(r.rating||5),0) / reviews.length).toFixed(1);
+  if (statEl) statEl.innerHTML = `Based on <strong style="color:var(--dark)">${reviews.length}+ reviews</strong>`;
+  if (avgEl) avgEl.textContent = avg;
+  wall.innerHTML = reviews.slice(0,9).map(r => {
+    const initial = (r.user||'?').trim().charAt(0).toUpperCase();
+    return `<div class="inf-card" style="background:white;border-radius:16px;padding:24px;box-shadow:0 2px 12px rgba(45,80,22,0.07);border:1px solid rgba(45,80,22,0.06)">
+      <div style="display:flex;align-items:center;gap:12px;margin-bottom:14px">
+        <div style="width:44px;height:44px;border-radius:50%;background:linear-gradient(135deg,#2D5016,#4F8A28);display:flex;align-items:center;justify-content:center;color:white;font-weight:700;font-size:1.1rem;flex-shrink:0">${initial}</div>
+        <div><div style="font-weight:700;font-size:0.9rem;color:var(--dark)">${r.user}</div><div style="font-size:0.75rem;color:var(--gray)">${r.location||'Verified Buyer'}</div></div>
+        <div style="margin-left:auto;color:#F59E0B;font-size:0.95rem">${'★'.repeat(r.rating||5)}</div>
+      </div>
+      <div style="font-size:0.88rem;color:var(--text);line-height:1.65;margin-bottom:12px">"${r.text}"</div>
+      <div style="display:flex;align-items:center;justify-content:space-between">
+        <span style="font-size:0.72rem;background:var(--green-pale);color:var(--green);padding:3px 10px;border-radius:20px;font-weight:600">${r.productName||''}</span>
+        <span style="font-size:0.72rem;color:var(--gray)">${r.date||''}</span>
+      </div>
+    </div>`;
+  }).join('');
 }
 
 // ── CAROUSEL ──
