@@ -6783,7 +6783,8 @@ html, body { overflow-x: hidden; max-width: 100%; }
 <script>
   const SUPABASE_URL = 'https://frwsjgrrtzhjfflcdjjs.supabase.co';
   const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZyd3NqZ3JydHpoamZmbGNkampzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI3MDUzMTgsImV4cCI6MjA4ODI4MTMxOH0.iIjlG1A0BoMAmROwovyLasRZU7bVRJC5q7vhmWiMeOs';
-  const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+  if (!window.supabase) console.error('[Supabase] Client script failed to load — check that cdn.jsdelivr.net is reachable and not blocked by CSP script-src.');
+  const sb = window.supabase ? window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY) : null;
 </script>
 </head>
 <!-- Promotional Media Config -->
@@ -11499,6 +11500,7 @@ async function loadProductReviews(productId) {
       date: r.created_at, verified: r.verified
     }));
   } catch (e) {
+    console.error('[loadProductReviews] Supabase error:', JSON.stringify(e, Object.getOwnPropertyNames(e||{})), e);
     // Supabase not reachable / table not set up yet — show an honest
     // "no reviews yet" state rather than fake filler text.
     REVIEWS[productId] = REVIEWS[productId] || [];
@@ -12809,7 +12811,9 @@ async function submitReview() {
     selectedRating = 0;
     switchTab(document.querySelectorAll('.tab')[2], 'rvs');
   } catch (e) {
-    showToast("Couldn't submit your review — please try again in a moment.", 'error');
+    console.error('[submitReview] Supabase error:', JSON.stringify(e, Object.getOwnPropertyNames(e||{})), e);
+    const detail = e?.message || e?.error_description || e?.details || '';
+    showToast(detail ? `Couldn't submit review: ${detail}` : "Couldn't submit your review — please try again in a moment.", 'error');
   } finally {
     if (btn) { btn.disabled = false; btn.textContent = 'Submit Review 🌱'; }
   }
@@ -13184,6 +13188,7 @@ async function getFeaturedReviews() {
       user: r.user_name, rating: r.rating, text: r.review_text, date: r.created_at
     }));
   } catch (e) {
+    console.error('[getFeaturedReviews] Supabase error:', JSON.stringify(e, Object.getOwnPropertyNames(e||{})), e);
     FEATURED_REVIEWS_CACHE = []; // honest empty state — no fake filler
   }
   return FEATURED_REVIEWS_CACHE;
