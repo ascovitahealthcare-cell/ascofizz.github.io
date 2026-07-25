@@ -6,7 +6,7 @@
   <meta name="robots" content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1">
   <meta name="googlebot" content="index, follow, max-image-preview:large">
   <meta name="bingbot" content="index, follow">
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://www.googletagmanager.com https://accounts.google.com https://cdn.jsdelivr.net https://cdnjs.cloudflare.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://accounts.google.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: blob: https:; connect-src 'self' https://ascovitahealthcare-cell-github-io.onrender.com https://*.gokwik.co https://gkx.gokwik.co https://www.google-analytics.com https://region1.google-analytics.com https://www.googleapis.com https://oauth2.googleapis.com https://openidconnect.googleapis.com https://accounts.google.com; frame-src https://accounts.google.com https://content.googleapis.com https://oauth2.googleapis.com https://*.gokwik.co; object-src 'none'; base-uri 'self';">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://www.googletagmanager.com https://accounts.google.com https://cdn.jsdelivr.net https://cdnjs.cloudflare.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://accounts.google.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: blob: https:; connect-src 'self' https://frwsjgrrtzhjfflcdjjs.supabase.co https://ascovitahealthcare-cell-github-io.onrender.com https://*.gokwik.co https://gkx.gokwik.co https://www.google-analytics.com https://region1.google-analytics.com https://www.googleapis.com https://oauth2.googleapis.com https://openidconnect.googleapis.com https://accounts.google.com; frame-src https://accounts.google.com https://content.googleapis.com https://oauth2.googleapis.com https://*.gokwik.co; object-src 'none'; base-uri 'self';">
   <!-- Google Analytics 4 — G-PSRK3R6L0Z -->
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-PSRK3R6L0Z"></script>
 <script>
@@ -6778,6 +6778,13 @@ html, body { overflow-x: hidden; max-width: 100%; }
 /* ── (Removed duplicate "Fix slider height" block — it fought with the CLEAN REBUILD hero CSS above and collapsed the mobile hero slider to 0 height, hiding all 3 slides) ── */
 
 </style>
+<!-- Supabase client — used for direct-from-browser review reads/writes (no Render backend involved) -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script>
+  const SUPABASE_URL = 'https://frwsjgrrtzhjfflcdjjs.supabase.co';
+  const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZyd3NqZ3JydHpoamZmbGNkampzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI3MDUzMTgsImV4cCI6MjA4ODI4MTMxOH0.iIjlG1A0BoMAmROwovyLasRZU7bVRJC5q7vhmWiMeOs';
+  const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+</script>
 </head>
 <!-- Promotional Media Config -->
 <script src="PROMO_MEDIA.js"></script>
@@ -11469,30 +11476,30 @@ function byPosition(a, b) {
 }
 
 // ═══════════════════════════════════════════════════════════════
-// REAL REVIEW SYSTEM — backed by the SQL database on the API_BASE
-// backend (Render). No hardcoded/fake reviews anywhere on the site.
-// Every product starts with an empty review list until real
-// customers submit one; submitted reviews are POSTed to the
-// backend so they persist across reloads and index.html redeploys.
-//
-// Expected backend contract (add these routes + a `reviews` table
-// to the Node service at API_BASE — see reviews-backend.js that
-// was generated alongside this file):
-//   GET  /api/reviews/:productId        -> { data: [{id,user,rating,text,date,verified}, ...] }
-//   POST /api/reviews                   -> body {productId,user,rating,text} -> { data: {...} }
-//   GET  /api/reviews/featured?limit=6  -> { data: [{id,productId,productName,user,location,rating,text,date}, ...] }
+// REAL REVIEW SYSTEM — backed directly by Supabase (SQL), no Render
+// backend in the loop. No hardcoded/fake reviews anywhere on the site.
+// Every product starts with an empty review list until real customers
+// submit one; submitted reviews are inserted straight into the
+// Supabase `reviews` table (see SQL schema in the setup notes) so
+// they persist across reloads and index.html redeploys.
 // ═══════════════════════════════════════════════════════════════
 const REVIEWS = {};          // productId -> array of real reviews fetched from SQL
 const REVIEWS_LOADED = {};   // productId -> true once a fetch has completed (success or fail)
 
 async function loadProductReviews(productId) {
   try {
-    const r = await fetchWithTimeout(`${API_BASE}/api/reviews/${productId}`, { cache:'no-store' }, 8000);
-    if (!r.ok) throw new Error('reviews fetch failed: ' + r.status);
-    const data = await r.json();
-    REVIEWS[productId] = Array.isArray(data.data) ? data.data : (Array.isArray(data) ? data : []);
+    const { data, error } = await sb
+      .from('reviews')
+      .select('id, user_name, rating, review_text, created_at, verified')
+      .eq('product_id', productId)
+      .order('created_at', { ascending: false });
+    if (error) throw error;
+    REVIEWS[productId] = (data || []).map(r => ({
+      id: r.id, user: r.user_name, rating: r.rating, text: r.review_text,
+      date: r.created_at, verified: r.verified
+    }));
   } catch (e) {
-    // Backend not reachable / route not deployed yet — show an honest
+    // Supabase not reachable / table not set up yet — show an honest
     // "no reviews yet" state rather than fake filler text.
     REVIEWS[productId] = REVIEWS[productId] || [];
   } finally {
@@ -12571,10 +12578,15 @@ function buildProductPage(p) {
           }
         <div class="rv-form" id="rvFormWrap">
           <h3>Write a Review</h3>
+          ${getCurrentUser() ? `
           <div class="star-picker" id="starPicker">${[1,2,3,4,5].map(s=>`<span onclick="setRating(${s})" data-s="${s}">&#x2605;</span>`).join('')}</div>
-          <input class="form-input" type="text" placeholder="Your name" id="rvName">
+          <div style="font-size:.8rem;color:var(--gray);margin:6px 0 10px">Posting as <strong>${esc(getCurrentUser().name || 'You')}</strong></div>
           <textarea class="form-input" placeholder="Share your experience with this product..." id="rvText"></textarea>
           <button class="btn-primary" style="width:100%;justify-content:center" onclick="submitReview()">Submit Review &#x1F331;</button>
+          ` : `
+          <p style="font-size:.85rem;color:var(--gray);margin-bottom:14px">Sign in with your account to write a review — this keeps reviews tied to real customers.</p>
+          <button class="btn-primary" style="width:100%;justify-content:center" onclick="openAuth('login')">Sign In to Write a Review</button>
+          `}
         </div>
       </div>
       ${tiers ? `
@@ -12765,32 +12777,35 @@ function setRating(v) {
   document.querySelectorAll('#starPicker span').forEach((s,i) => s.classList.toggle('lit', i < v));
 }
 async function submitReview() {
-  const name = document.getElementById('rvName')?.value.trim();
+  const user = getCurrentUser();
+  if (!user) { openAuth('login'); return; }
+  const name = (user.name || 'Ascovita Customer').trim();
   const text = document.getElementById('rvText')?.value.trim();
-  if (!name || !text || !selectedRating) { showToast('Please fill all fields and select a rating!','error'); return; }
+  if (!text || !selectedRating) { showToast('Please write your experience and select a rating!','error'); return; }
   if (!currentProduct) return;
 
   const btn = document.querySelector('#rvFormWrap .btn-primary');
   if (btn) { btn.disabled = true; btn.textContent = 'Submitting…'; }
 
   try {
-    // Persist to the real backend (SQL) so the review survives reloads
-    // and future index.html deployments — see reviews-backend.js.
-    const r = await fetchWithTimeout(`${API_BASE}/api/reviews`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ productId: currentProduct.id, user: name, rating: selectedRating, text })
-    }, 8000);
-    if (!r.ok) throw new Error('review submit failed: ' + r.status);
+    // Persist straight to Supabase (SQL) — no Render backend in the
+    // loop, so no cold-start timeout to worry about.
+    const { error } = await sb.from('reviews').insert({
+      product_id: currentProduct.id,
+      product_name: currentProduct.name || '',
+      user_name: name,
+      rating: selectedRating,
+      review_text: text
+    });
+    if (error) throw error;
 
-    // Re-fetch the authoritative list from the backend rather than
+    // Re-fetch the authoritative list from Supabase rather than
     // trusting our own optimistic copy — guarantees what's shown
     // matches what's actually stored in SQL.
     REVIEWS_LOADED[currentProduct.id] = false;
     await loadProductReviews(currentProduct.id);
     showToast('Review submitted! Thank you 🌿');
-    document.getElementById('rvName').value = '';
-    document.getElementById('rvText').value = '';
+    const rvTextEl = document.getElementById('rvText'); if (rvTextEl) rvTextEl.value = '';
     selectedRating = 0;
     switchTab(document.querySelectorAll('.tab')[2], 'rvs');
   } catch (e) {
@@ -13146,7 +13161,7 @@ function toggleFaq(btn) {
 // ── TESTIMONIALS ──
 // ═══════════════════════════════════════════════════════════════
 // REAL, SITE-WIDE REVIEW FEED
-// One single backend endpoint (GET /api/reviews/featured) feeds
+// One single Supabase query (top-rated reviews across products) feeds
 // BOTH the homepage "What Our Customers Say" testimonial grid AND
 // the "Customer Reviews Wall" section further down the page, so
 // the whole site shows the same real, current data instead of two
@@ -13157,10 +13172,17 @@ let FEATURED_REVIEWS_CACHE = null;
 async function getFeaturedReviews() {
   if (FEATURED_REVIEWS_CACHE) return FEATURED_REVIEWS_CACHE;
   try {
-    const r = await fetchWithTimeout(`${API_BASE}/api/reviews/featured?limit=9`, { cache:'no-store' }, 8000);
-    if (!r.ok) throw new Error('featured reviews fetch failed: ' + r.status);
-    const data = await r.json();
-    FEATURED_REVIEWS_CACHE = Array.isArray(data.data) ? data.data : (Array.isArray(data) ? data : []);
+    const { data, error } = await sb
+      .from('reviews')
+      .select('id, product_id, product_name, user_name, rating, review_text, created_at')
+      .order('rating', { ascending: false })
+      .order('created_at', { ascending: false })
+      .limit(9);
+    if (error) throw error;
+    FEATURED_REVIEWS_CACHE = (data || []).map(r => ({
+      id: r.id, productId: r.product_id, productName: r.product_name,
+      user: r.user_name, rating: r.rating, text: r.review_text, date: r.created_at
+    }));
   } catch (e) {
     FEATURED_REVIEWS_CACHE = []; // honest empty state — no fake filler
   }
@@ -14462,6 +14484,21 @@ function getCurrentUser() {
   try { return JSON.parse(localStorage.getItem('asc_user') || 'null'); } catch(e) { return null; }
 }
 
+// Shared post-login navigation: go to the account page, UNLESS the
+// person was mid-checkout (let them stay + autofill) or mid-review on
+// a product page (rebuild it and drop them back on the reviews tab
+// instead of yanking them away from what they were doing).
+function postLoginRedirect() {
+  const onCheckout = document.getElementById('page-checkout')?.classList.contains('active');
+  if (onCheckout) return;
+  const onProduct = document.getElementById('page-product')?.classList.contains('active');
+  if (onProduct && currentProduct) {
+    try { buildProductPage(currentProduct); switchTab(document.querySelectorAll('.tab')[2], 'rvs'); } catch(e) {}
+    return;
+  }
+  showPage('account'); loadAccountPage();
+}
+
 // ── Offline-fallback password hashing (SHA-256 + per-user salt) ──
 // Used ONLY when the backend is unreachable. This is not a replacement for
 // real server-side auth (bcrypt/argon2 + JWT) — it just avoids storing
@@ -14491,7 +14528,7 @@ async function doLogin() {
     localStorage.setItem('asc_jwt', data.token);
     localStorage.setItem('asc_user', JSON.stringify(data.user));
     closeAuth(); updateAccountNavBtn();
-    showPage('account'); loadAccountPage();
+    postLoginRedirect();
     showToast('🌿 Welcome back, ' + data.user.name.split(' ')[0] + '!');
   } catch(e) {
     // Fallback to localStorage if backend offline
@@ -14514,7 +14551,7 @@ async function doLogin() {
     }
     if (!user) { showAuthError('Invalid email or password. Please try again.'); return; }
     localStorage.setItem('asc_user', JSON.stringify(user));
-    closeAuth(); updateAccountNavBtn(); showPage('account'); loadAccountPage();
+    closeAuth(); updateAccountNavBtn(); postLoginRedirect();
     showToast('🌿 Welcome back, ' + user.name.split(' ')[0] + '!');
   }
 }
@@ -14536,7 +14573,7 @@ async function doRegister() {
     if (!res.ok) { showAuthError(data.error || 'Registration failed.'); return; }
     localStorage.setItem('asc_jwt', data.token);
     localStorage.setItem('asc_user', JSON.stringify(data.user));
-    closeAuth(); updateAccountNavBtn(); showPage('account'); loadAccountPage();
+    closeAuth(); updateAccountNavBtn(); postLoginRedirect();
     showToast('🌿 Account created! Welcome to Ascovita, ' + name.split(' ')[0] + '!');
   } catch(e) {
     // Fallback to localStorage if backend offline
@@ -14547,7 +14584,7 @@ async function doRegister() {
     users.push(newUser);
     localStorage.setItem('asc_users', JSON.stringify(users));
     localStorage.setItem('asc_user', JSON.stringify(newUser));
-    closeAuth(); updateAccountNavBtn(); showPage('account'); loadAccountPage();
+    closeAuth(); updateAccountNavBtn(); postLoginRedirect();
     showToast('🌿 Account created! Welcome to Ascovita, ' + name.split(' ')[0] + '!');
   }
 }
@@ -14765,9 +14802,8 @@ async function handleGoogleCredential(response) {
     const isNew = payload.iat && (Date.now() / 1000 - payload.iat) < 10;
     showToast('🌿 ' + (isNew ? 'Welcome, ' : 'Welcome back, ') + firstName + '!');
 
-    // Navigate to account unless user is on checkout
-    const onCheckout = document.getElementById('page-checkout')?.classList.contains('active');
-    if (!onCheckout) { showPage('account'); loadAccountPage(); }
+    // Navigate to account unless mid-checkout or mid-review (see postLoginRedirect)
+    postLoginRedirect();
 
   } catch(err) {
     console.error('[Ascovita Auth] handleGoogleCredential error:', err);
