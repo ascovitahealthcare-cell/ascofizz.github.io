@@ -180,7 +180,10 @@ fbq('track', 'PageView');
       }
     })();
   </script>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <!-- viewport-fit=cover is required for env(safe-area-inset-*) to resolve to
+       anything other than 0 on notched iPhones — without it the bottom nav
+       and drawers sit under the home indicator. -->
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 
   <!-- ═══════════════════════════════════════════════════════
        Ascofizz — PRIMARY SEO META TAGS
@@ -7465,6 +7468,115 @@ input[type="date"]:focus, textarea:focus, select:focus,
 }
 .page-header > .container { position: relative; z-index: 1; }
 .page-header h1 { letter-spacing: -0.3px; }
+
+/* ══════════════════════════════════════════════════════════════════════
+   MOBILE APP LAYER — final pass. Loads last so it wins the cascade.
+   Targets the three real Indian-market device widths (360 / 390 / 414)
+   and makes the site behave like an installed app rather than a shrunk
+   desktop site.
+   ══════════════════════════════════════════════════════════════════════ */
+@media (max-width: 900px) {
+
+  /* ── iOS auto-zoom fix ──────────────────────────────────────────────
+     Mobile Safari force-zooms the viewport whenever a focused input has a
+     computed font-size below 16px, then leaves the page zoomed in. Every
+     text field on the site was 0.86–0.9rem (~14px), so tapping into the
+     login/checkout/contact fields visibly punched in and broke the layout.
+     16px is the exact threshold — this is the single biggest mobile-auth
+     friction fix on the page. */
+  input[type="text"], input[type="email"], input[type="tel"],
+  input[type="password"], input[type="number"], input[type="search"],
+  input[type="date"], select, textarea,
+  .auth-input, .form-input, .b2b-form-input, .promo-input,
+  .filter-input, .vita-input, .vita-lead-input {
+    font-size: 16px !important;
+  }
+
+  /* ── Tap targets ────────────────────────────────────────────────────
+     WCAG 2.5.8 / Apple HIG both want ~44px minimum. Icon-only buttons in
+     the top bar and bottom nav were rendering well under that. */
+  .app-topbar-btn, .app-nav-item, .auth-close,
+  .promo-nav-arrow, .shader-btn-primary, .shader-btn-ghost,
+  .app-menu-close, .qty-btn, .side-cart-close {
+    min-width: 44px; min-height: 44px;
+    touch-action: manipulation;
+  }
+
+  /* Kill the 300ms tap delay + iOS grey flash app-wide */
+  button, a, .cpill, .cat-card, .cat-card-sm, .product-card, .promo-card {
+    -webkit-tap-highlight-color: transparent;
+    touch-action: manipulation;
+  }
+
+  /* ── Safe-area (notch / home indicator) ─────────────────────────────
+     Now that viewport-fit=cover is set, these actually resolve. */
+  .app-bottom-nav { padding-bottom: env(safe-area-inset-bottom, 0px); }
+  .app-topbar     { padding-top: env(safe-area-inset-top, 0px); }
+  .app-menu-drawer, .app-more-drawer, .side-cart {
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+  }
+
+  /* ── Auth modal: full-height sheet, not a cramped floating card ───── */
+  .auth-overlay { align-items: flex-end; padding: 0; }
+  .auth-box {
+    max-width: 100%; width: 100%;
+    border-radius: 24px 24px 0 0;
+    padding: 28px 20px calc(28px + env(safe-area-inset-bottom, 0px));
+    max-height: 92vh; overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+  .auth-overlay.open .auth-box { transform: translateY(0); }
+  .auth-google-btn, .auth-btn { min-height: 48px; }
+
+  /* ── Shader hero on small screens ───────────────────────────────────
+     Tighter type scale so the headline never clips, and the ring moves
+     clear of the bottom nav. */
+  .shader-hero { padding: 96px 0 56px; min-height: auto; }
+  .shader-headline { font-size: clamp(2.1rem, 11vw, 3.2rem); letter-spacing: -1px; }
+  .sh-line-1 { font-size: clamp(1.15rem, 5.5vw, 1.6rem); }
+  .shader-sub { font-size: 0.9rem; line-height: 1.7; margin-bottom: 26px; }
+  .shader-badge { font-size: 0.68rem; padding: 8px 14px; }
+  .shader-ring-wrap { bottom: calc(76px + env(safe-area-inset-bottom, 0px)); right: 14px; }
+  .shader-cta-row { gap: 10px; }
+
+  /* ── Promo carousel: true edge-to-edge app feel ─────────────────────
+     Scroll padding makes snap land flush with the container gutter. */
+  .promo-hero-track { scroll-padding-left: 16px; }
+  .promo-card-headline { font-size: clamp(1.05rem, 4.6vw, 1.3rem); }
+  .promo-card-eyebrow { font-size: 0.76rem; }
+
+  /* Momentum scrolling for every horizontal rail */
+  .promo-hero-track, .cat-pills, .products-grid-scroll, .trust-bar {
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior-x: contain;
+  }
+
+  /* Don't let a horizontal swipe on a rail trigger browser back-nav */
+  body { overscroll-behavior-x: none; }
+}
+
+/* ── 390px and below (iPhone 12/13/14/15 base, Pixel) ── */
+@media (max-width: 400px) {
+  .shader-headline { font-size: clamp(1.95rem, 10.5vw, 2.7rem); }
+  .shader-cta-row .shader-btn-primary,
+  .shader-cta-row .shader-btn-ghost { width: 100%; padding: 14px 20px; }
+  .promo-card { width: 86vw; }
+}
+
+/* ── 360px (Galaxy A-series / Redmi — very common in India) ── */
+@media (max-width: 365px) {
+  .shader-hero { padding: 88px 0 48px; }
+  .shader-headline { font-size: 1.8rem; }
+  .shader-badge { font-size: 0.62rem; letter-spacing: 0.8px; }
+  .promo-card { width: 88vw; height: 190px; }
+  .auth-box { padding-left: 16px; padding-right: 16px; }
+}
+
+/* Standalone PWA: no browser chrome, so reclaim the top inset */
+@media (display-mode: standalone) {
+  .app-topbar { padding-top: env(safe-area-inset-top, 0px); }
+  body { overscroll-behavior-y: none; } /* kill rubber-band bounce */
+}
 </style>
 
 <!-- Supabase client — used for direct-from-browser review reads/writes (no Render backend involved) -->
@@ -12341,14 +12453,13 @@ function renderProductCard(p){
     <div style="text-align:center">
       <span class="auth-google-badge" id="googleBtnBadge">🔒 Secured by Google</span>
     </div>
-    <!-- Mobile notice: shown only on phones via JS -->
-    <div id="googleMobileNotice" style="display:none;text-align:center;font-size:0.75rem;color:#888;background:#f5f5f5;border-radius:8px;padding:8px 12px;margin-top:-4px">
-      📱 Google Sign-In available on desktop only.<br>Please use <strong>Email &amp; Password</strong> below.
-    </div>
-
-    <button class="auth-social-btn" onclick="socialLogin('phone')" style="margin-top:8px">
-      📱 Continue with Phone <span style="font-size:0.72rem;color:var(--gray)">(OTP — coming soon)</span>
-    </button>
+    <!-- The "Google Sign-In available on desktop only" notice that used to
+         sit here has been removed: no JS ever un-hid it (so customers never
+         actually saw it), and it's no longer true — the mobile redirect flow
+         works now that redirect_uri points at the real origin.
+         The "Continue with Phone (OTP — coming soon)" button was also removed:
+         it had no backend behind it and only fired a "coming soon" toast,
+         which is pure friction on the platform most of our traffic uses. -->
 
     <div class="auth-divider"><span>or continue with email</span></div>
 
@@ -15188,6 +15299,15 @@ document.addEventListener('DOMContentLoaded', function _patchAuthButtons() {
 
 const GOOGLE_CLIENT_ID = '6793142938-b9sl3d3lh2svjkmcnina8fsh31nut0bu.apps.googleusercontent.com';
 
+// Where Google sends mobile users back after they approve sign-in. Derived
+// from the live origin so it stays correct on the GitHub Pages URL, on a
+// custom domain, and in local testing — previously hardcoded to
+// https://www.ascofizz.com, which does not resolve, breaking every mobile
+// Google login. Whatever origin the site is served from must be registered
+// under "Authorised redirect URIs" for this OAuth client in Google Cloud.
+const GOOGLE_REDIRECT_URI =
+  window.location.origin + window.location.pathname.replace(/\/index\.html$/, '/');
+
 // ── State tracking ──
 let _googleInitialized = false;
 let _googleInitRetries = 0;
@@ -15221,11 +15341,17 @@ const _GOOGLE_MAX_RETRIES = 8;
     + '<p style="color:#8CC48F;margin:0;font-size:14px">Signing you in…</p>';
   document.addEventListener('DOMContentLoaded', function() { document.body.appendChild(spinner); });
 
-  // Send code to backend — server holds client_secret securely
+  // Send code to backend — server holds client_secret securely.
+  // redirect_uri MUST byte-for-byte match the one used to request the code
+  // (Google rejects the exchange otherwise) — both now derive from the live
+  // origin instead of the hardcoded non-resolving ascofizz.com.
   fetch('https://ascovitahealthcare-cell-github-io.onrender.com/api/auth/google-code', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ code: code, redirect_uri: 'https://www.ascofizz.com' })
+    body: JSON.stringify({
+      code: code,
+      redirect_uri: window.location.origin + window.location.pathname.replace(/\/index\.html$/, '/')
+    })
   })
   .then(function(r){ return r.json(); })
   .then(function(data) {
@@ -15442,7 +15568,16 @@ function _tryOAuth2Popup() {
         client_id: GOOGLE_CLIENT_ID,
         scope: 'openid profile email',
         ux_mode: 'redirect',
-        redirect_uri: 'https://www.ascofizz.com',
+        // FIX (mobile login broken): this was hardcoded to
+        // 'https://www.ascofizz.com' — a domain that does not currently
+        // resolve — so every mobile Google sign-in bounced the customer to a
+        // dead page and the session was never created. Now derived from
+        // wherever the site is actually being served, so it works on the
+        // GitHub Pages URL, the custom domain, and local testing alike.
+        // NOTE: this exact origin must also be listed under
+        // "Authorised redirect URIs" in the Google Cloud console for the
+        // OAuth client, or Google returns redirect_uri_mismatch.
+        redirect_uri: GOOGLE_REDIRECT_URI,
       });
       client.requestCode();
     } catch(e) {
