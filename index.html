@@ -1,0 +1,1726 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Ascofizz — Powered by Ascovita</title>
+<meta name="description" content="Ascofizz — WHO-GMP certified effervescent vitamins & nutraceuticals. Powered by Ascovita. Single-file demo build.">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🫧</text></svg>">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+/* =========================================================
+   ASCOFIZZ — Minimalist Neumorphic Design System
+   Powered by Ascovita
+   ========================================================= */
+
+:root{
+  --bg:#eef1f0;
+  --bg-2:#e6eae8;
+  --surface:#eef1f0;
+  --shadow-light:#ffffff;
+  --shadow-dark:#c7cdd0;
+  --shadow-dark-soft:#d3d9db;
+  --text:#28312d;
+  --text-muted:#6d7873;
+  --text-faint:#98a29d;
+  --accent:#ff7a52;
+  --accent-2:#28a874;
+  --accent-3:#2e9bd6;
+  --accent-gradient:linear-gradient(135deg,#ff8a5b 0%,#ff7a52 45%,#28a874 100%);
+  --accent-gradient-soft:linear-gradient(135deg,rgba(255,138,91,.14),rgba(40,168,116,.14));
+  --radius-lg:26px;
+  --radius:20px;
+  --radius-sm:14px;
+  --radius-pill:999px;
+  --maxw:1240px;
+  --font-head:'Manrope',sans-serif;
+  --font-body:'Inter',sans-serif;
+}
+
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+html{scroll-behavior:smooth;}
+body{
+  font-family:var(--font-body);
+  background:var(--bg);
+  color:var(--text);
+  line-height:1.55;
+  -webkit-font-smoothing:antialiased;
+  overflow-x:hidden;
+}
+img{max-width:100%;display:block;}
+a{color:inherit;text-decoration:none;}
+ul{list-style:none;}
+button{font-family:inherit;cursor:pointer;border:none;background:none;color:inherit;}
+input,select,textarea{font-family:inherit;font-size:1rem;color:var(--text);background:transparent;border:none;outline:none;}
+h1,h2,h3,h4{font-family:var(--font-head);font-weight:800;line-height:1.15;letter-spacing:-0.01em;}
+.container{max-width:var(--maxw);margin:0 auto;padding:0 24px;}
+section{padding:72px 0;}
+@media(max-width:720px){section{padding:48px 0;}}
+
+/* ---------- Neumorphic primitives ---------- */
+.neu-raised{
+  background:var(--surface);
+  border-radius:var(--radius);
+  box-shadow:9px 9px 18px var(--shadow-dark), -9px -9px 18px var(--shadow-light);
+}
+.neu-raised-sm{
+  background:var(--surface);
+  border-radius:var(--radius-sm);
+  box-shadow:5px 5px 10px var(--shadow-dark), -5px -5px 10px var(--shadow-light);
+}
+.neu-inset{
+  background:var(--surface);
+  border-radius:var(--radius-sm);
+  box-shadow:inset 4px 4px 9px var(--shadow-dark), inset -4px -4px 9px var(--shadow-light);
+}
+.neu-flat{
+  background:var(--surface);
+  border-radius:var(--radius-pill);
+  box-shadow:3px 3px 7px var(--shadow-dark-soft), -3px -3px 7px var(--shadow-light);
+}
+.neu-pressable{transition:box-shadow .18s ease, transform .18s ease;}
+.neu-pressable:active{box-shadow:inset 4px 4px 9px var(--shadow-dark), inset -4px -4px 9px var(--shadow-light); transform:translateY(1px);}
+
+/* ---------- Buttons ---------- */
+.btn{
+  display:inline-flex;align-items:center;justify-content:center;gap:8px;
+  padding:15px 30px;border-radius:var(--radius-pill);
+  font-weight:700;font-size:.95rem;letter-spacing:.01em;
+  transition:transform .2s ease, box-shadow .2s ease, opacity .2s ease;
+  white-space:nowrap;
+}
+.btn-primary{
+  background:var(--accent-gradient);
+  color:#fff;
+  box-shadow:6px 6px 14px rgba(255,122,82,.35), -4px -4px 10px #ffffff;
+}
+.btn-primary:hover{transform:translateY(-2px);box-shadow:8px 10px 20px rgba(255,122,82,.4);}
+.btn-secondary{
+  background:var(--surface);color:var(--text);
+  box-shadow:6px 6px 14px var(--shadow-dark), -6px -6px 14px var(--shadow-light);
+}
+.btn-secondary:hover{transform:translateY(-2px);}
+.btn-ghost{
+  background:transparent;color:var(--text);border:1.5px solid var(--shadow-dark-soft);
+}
+.btn-sm{padding:10px 20px;font-size:.85rem;}
+.btn-block{width:100%;}
+.btn:disabled{opacity:.5;cursor:not-allowed;transform:none !important;}
+
+.icon-btn{
+  width:46px;height:46px;border-radius:50%;
+  display:inline-flex;align-items:center;justify-content:center;
+  background:var(--surface);font-size:1.05rem;position:relative;flex-shrink:0;
+  box-shadow:5px 5px 10px var(--shadow-dark), -5px -5px 10px var(--shadow-light);
+  transition:transform .18s ease;
+}
+.icon-btn:hover{transform:translateY(-2px);}
+.icon-btn:active{box-shadow:inset 3px 3px 7px var(--shadow-dark), inset -3px -3px 7px var(--shadow-light);}
+.badge-count{
+  position:absolute;top:-4px;right:-4px;background:var(--accent-gradient);color:#fff;
+  font-size:.65rem;font-weight:800;min-width:19px;height:19px;border-radius:50%;
+  display:flex;align-items:center;justify-content:center;padding:0 3px;
+  box-shadow:0 2px 5px rgba(0,0,0,.2);
+}
+
+/* ---------- Tags / pills ---------- */
+.pill{display:inline-flex;align-items:center;gap:6px;padding:7px 16px;border-radius:var(--radius-pill);font-size:.78rem;font-weight:700;}
+.pill-accent{background:var(--accent-gradient-soft);color:var(--accent);}
+.pill-muted{color:var(--text-muted);background:var(--surface);box-shadow:3px 3px 7px var(--shadow-dark-soft), -3px -3px 7px var(--shadow-light);}
+
+/* ---------- Top utility bar ---------- */
+.topbar{
+  background:var(--text);color:#eef1f0;font-size:.78rem;font-weight:600;
+  overflow:hidden;white-space:nowrap;
+}
+.topbar-track{display:inline-flex;gap:48px;padding:9px 0;animation:marquee 26s linear infinite;}
+.topbar span{display:inline-flex;align-items:center;gap:8px;opacity:.92;}
+@keyframes marquee{from{transform:translateX(0);}to{transform:translateX(-50%);}}
+
+/* ---------- Header ---------- */
+header.site-header{position:sticky;top:0;z-index:100;background:var(--bg);padding:16px 0;border-bottom:1px solid rgba(0,0,0,.04);}
+.header-row{display:flex;align-items:center;justify-content:space-between;gap:24px;}
+.brand{display:flex;align-items:center;gap:12px;}
+.brand-mark{
+  width:48px;height:48px;border-radius:16px;background:var(--accent-gradient);
+  display:flex;align-items:center;justify-content:center;font-size:1.3rem;
+  box-shadow:5px 5px 12px var(--shadow-dark), -5px -5px 12px var(--shadow-light);
+}
+.brand-text{display:flex;flex-direction:column;line-height:1.1;}
+.brand-text .name{font-family:var(--font-head);font-weight:800;font-size:1.35rem;}
+.brand-text .tag{font-size:.68rem;color:var(--text-muted);font-weight:700;letter-spacing:.03em;}
+nav.main-nav{display:flex;gap:6px;}
+nav.main-nav a{padding:11px 18px;border-radius:var(--radius-pill);font-weight:700;font-size:.9rem;color:var(--text-muted);transition:all .2s ease;}
+nav.main-nav a:hover, nav.main-nav a.active{color:var(--text);background:var(--surface);box-shadow:4px 4px 9px var(--shadow-dark-soft), -4px -4px 9px var(--shadow-light);}
+.header-actions{display:flex;align-items:center;gap:10px;}
+.menu-toggle{display:none;}
+
+@media(max-width:960px){
+  nav.main-nav{display:none;}
+  .menu-toggle{display:inline-flex;}
+}
+
+.mobile-nav{display:none;flex-direction:column;gap:6px;padding:16px 0 4px;}
+.mobile-nav.open{display:flex;}
+.mobile-nav a{padding:13px 16px;border-radius:var(--radius-sm);font-weight:700;background:var(--surface);box-shadow:3px 3px 7px var(--shadow-dark-soft), -3px -3px 7px var(--shadow-light);}
+
+/* ---------- Breadcrumb ---------- */
+.breadcrumb{font-size:.82rem;color:var(--text-muted);padding:22px 0 0;}
+.breadcrumb a{font-weight:700;}
+.breadcrumb .sep{margin:0 6px;opacity:.5;}
+
+/* ---------- Hero ---------- */
+.hero{position:relative;padding:70px 0 40px;overflow:hidden;}
+.hero-grid{display:grid;grid-template-columns:1.1fr .9fr;gap:48px;align-items:center;}
+@media(max-width:900px){.hero-grid{grid-template-columns:1fr;}}
+.hero h1{font-size:clamp(2.2rem,4.5vw,3.6rem);margin:18px 0 20px;}
+.hero p.lead{font-size:1.08rem;color:var(--text-muted);max-width:520px;margin-bottom:32px;}
+.hero-cta{display:flex;gap:14px;flex-wrap:wrap;}
+.bubble{position:absolute;border-radius:50%;background:var(--accent-gradient);opacity:.16;filter:blur(2px);animation:float 8s ease-in-out infinite;}
+@keyframes float{0%,100%{transform:translateY(0) scale(1);}50%{transform:translateY(-22px) scale(1.06);}}
+.hero-visual{position:relative;display:flex;align-items:center;justify-content:center;}
+.hero-orb{
+  width:min(380px,80vw);height:min(380px,80vw);border-radius:50%;
+  background:var(--surface);
+  box-shadow:22px 22px 44px var(--shadow-dark), -22px -22px 44px var(--shadow-light);
+  display:flex;align-items:center;justify-content:center;font-size:5.5rem;position:relative;
+}
+.hero-orb::before{content:'';position:absolute;inset:26px;border-radius:50%;box-shadow:inset 8px 8px 16px var(--shadow-dark), inset -8px -8px 16px var(--shadow-light);}
+
+/* ---------- Trust strip ---------- */
+.trust-strip{display:flex;flex-wrap:wrap;gap:14px;justify-content:center;padding:26px 0;}
+.trust-item{display:flex;align-items:center;gap:8px;font-size:.82rem;font-weight:700;color:var(--text-muted);padding:10px 18px;}
+
+/* ---------- Section headers ---------- */
+.section-head{text-align:center;max-width:640px;margin:0 auto 44px;}
+.eyebrow{display:block;color:var(--accent);font-weight:800;font-size:.78rem;letter-spacing:.08em;text-transform:uppercase;margin-bottom:10px;}
+.section-head h2{font-size:clamp(1.7rem,3vw,2.4rem);margin-bottom:12px;}
+.section-head p{color:var(--text-muted);}
+.section-head.left{text-align:left;margin:0 0 36px;}
+
+/* ---------- Category grid ---------- */
+.cat-grid{display:grid;grid-template-columns:repeat(6,1fr);gap:18px;}
+@media(max-width:960px){.cat-grid{grid-template-columns:repeat(3,1fr);}}
+@media(max-width:560px){.cat-grid{grid-template-columns:repeat(2,1fr);}}
+.cat-card{padding:26px 16px;text-align:center;transition:transform .2s ease;}
+.cat-card:hover{transform:translateY(-4px);}
+.cat-card .ic{font-size:1.9rem;margin-bottom:10px;}
+.cat-card .lbl{font-weight:700;font-size:.85rem;}
+.cat-card .cnt{font-size:.72rem;color:var(--text-faint);margin-top:2px;}
+
+/* ---------- Product grid & card ---------- */
+.product-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:24px;}
+@media(max-width:1080px){.product-grid{grid-template-columns:repeat(3,1fr);}}
+@media(max-width:760px){.product-grid{grid-template-columns:repeat(2,1fr);}}
+@media(max-width:460px){.product-grid{grid-template-columns:1fr;}}
+
+.product-card{padding:20px;position:relative;display:flex;flex-direction:column;gap:14px;transition:transform .25s ease, box-shadow .25s ease;}
+.product-card:hover{transform:translateY(-6px);}
+.product-media{
+  aspect-ratio:1/1;border-radius:var(--radius-sm);display:flex;align-items:center;justify-content:center;
+  font-size:3rem;position:relative;background:var(--surface);
+  box-shadow:inset 5px 5px 10px var(--shadow-dark), inset -5px -5px 10px var(--shadow-light);
+}
+.product-badges{position:absolute;top:14px;left:14px;display:flex;flex-direction:column;gap:6px;z-index:2;}
+.badge{font-size:.65rem;font-weight:800;padding:5px 10px;border-radius:var(--radius-pill);color:#fff;letter-spacing:.02em;}
+.badge.sale{background:var(--accent);}
+.badge.new{background:var(--accent-3);}
+.badge.best{background:var(--accent-2);}
+.wish-btn{position:absolute;top:14px;right:14px;z-index:2;width:36px;height:36px;font-size:.95rem;}
+.wish-btn.active{color:var(--accent);}
+.product-cat{font-size:.72rem;font-weight:700;color:var(--accent-2);text-transform:uppercase;letter-spacing:.03em;}
+.product-name{font-family:var(--font-head);font-weight:800;font-size:1.02rem;margin:2px 0 2px;}
+.product-desc{font-size:.82rem;color:var(--text-muted);}
+.product-rating{font-size:.78rem;color:var(--text-muted);display:flex;align-items:center;gap:6px;}
+.product-price-row{display:flex;align-items:baseline;gap:8px;margin-top:2px;}
+.price{font-weight:800;font-size:1.15rem;}
+.price-old{font-size:.85rem;color:var(--text-faint);text-decoration:line-through;}
+.product-actions{display:flex;gap:8px;margin-top:4px;}
+.product-actions .btn{flex:1;padding:12px;font-size:.82rem;}
+
+/* ---------- Filters / shop layout ---------- */
+.shop-layout{display:grid;grid-template-columns:260px 1fr;gap:32px;align-items:start;}
+@media(max-width:900px){.shop-layout{grid-template-columns:1fr;}}
+.filters-card{padding:24px;position:sticky;top:100px;}
+.filters-card h4{font-size:.95rem;margin-bottom:14px;}
+.filter-group{margin-bottom:22px;}
+.filter-group label{display:flex;align-items:center;gap:10px;font-size:.85rem;padding:7px 0;color:var(--text-muted);cursor:pointer;}
+.chip-row{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:28px;}
+.chip{padding:9px 16px;border-radius:var(--radius-pill);font-size:.8rem;font-weight:700;color:var(--text-muted);cursor:pointer;transition:all .2s ease;}
+.chip.active{color:#fff;background:var(--accent-gradient);box-shadow:4px 4px 10px rgba(255,122,82,.3);}
+.shop-toolbar{display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;flex-wrap:wrap;gap:12px;}
+.shop-toolbar select{padding:10px 14px;border-radius:var(--radius-sm);font-weight:700;font-size:.82rem;}
+
+/* ---------- Forms ---------- */
+.field{margin-bottom:18px;}
+.field label{display:block;font-size:.8rem;font-weight:700;color:var(--text-muted);margin-bottom:8px;}
+.field input, .field select, .field textarea{
+  width:100%;padding:15px 16px;border-radius:var(--radius-sm);
+  box-shadow:inset 4px 4px 9px var(--shadow-dark), inset -4px -4px 9px var(--shadow-light);
+}
+.field textarea{resize:vertical;min-height:110px;}
+.field-row{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
+@media(max-width:560px){.field-row{grid-template-columns:1fr;}}
+.form-card{padding:34px;max-width:640px;}
+.form-card.wide{max-width:none;}
+
+/* ---------- Cards generic ---------- */
+.card{padding:28px;}
+.card-sm{padding:20px;}
+
+/* ---------- Steps ---------- */
+.steps-row{display:flex;justify-content:center;gap:10px;margin-bottom:40px;flex-wrap:wrap;}
+.step{display:flex;align-items:center;gap:10px;padding:10px 18px;font-size:.82rem;font-weight:700;color:var(--text-muted);}
+.step.active{color:var(--text);}
+.step .num{width:26px;height:26px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.75rem;background:var(--accent-gradient);color:#fff;}
+.step.pending .num{background:var(--surface);color:var(--text-muted);box-shadow:3px 3px 7px var(--shadow-dark-soft), -3px -3px 7px var(--shadow-light);}
+
+/* ---------- Cart ---------- */
+.cart-layout{display:grid;grid-template-columns:1fr 360px;gap:28px;align-items:start;}
+@media(max-width:900px){.cart-layout{grid-template-columns:1fr;}}
+.cart-item{display:grid;grid-template-columns:80px 1fr auto;gap:18px;align-items:center;padding:18px;margin-bottom:14px;}
+.cart-item .thumb{width:80px;height:80px;border-radius:var(--radius-sm);display:flex;align-items:center;justify-content:center;font-size:2rem;background:var(--surface);box-shadow:inset 4px 4px 9px var(--shadow-dark), inset -4px -4px 9px var(--shadow-light);}
+.qty-control{display:flex;align-items:center;gap:0;border-radius:var(--radius-pill);overflow:hidden;width:fit-content;}
+.qty-control button{width:34px;height:34px;font-weight:800;}
+.qty-control span{min-width:32px;text-align:center;font-weight:700;}
+.summary-row{display:flex;justify-content:space-between;font-size:.9rem;color:var(--text-muted);padding:8px 0;}
+.summary-row.total{color:var(--text);font-weight:800;font-size:1.1rem;border-top:1px dashed var(--shadow-dark-soft);margin-top:8px;padding-top:14px;}
+.empty-state{text-align:center;padding:70px 20px;}
+.empty-state .ic{font-size:3rem;margin-bottom:16px;}
+
+/* ---------- Payment options ---------- */
+.pay-option{display:flex;align-items:center;gap:14px;padding:18px;margin-bottom:12px;cursor:pointer;transition:box-shadow .2s ease;}
+.pay-option input{width:18px;height:18px;accent-color:var(--accent);}
+.pay-option .ic{font-size:1.4rem;}
+.pay-option .lbl{font-weight:700;font-size:.9rem;}
+.pay-option .sub{font-size:.76rem;color:var(--text-muted);}
+.pay-option.selected{box-shadow:inset 4px 4px 9px var(--shadow-dark), inset -4px -4px 9px var(--shadow-light);}
+
+/* ---------- Testimonials ---------- */
+.testi-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:22px;}
+@media(max-width:900px){.testi-grid{grid-template-columns:1fr;}}
+.testi-card{padding:26px;}
+.testi-stars{color:var(--accent);font-size:.85rem;margin-bottom:12px;}
+.testi-avatar{width:40px;height:40px;border-radius:50%;background:var(--accent-gradient);display:flex;align-items:center;justify-content:center;color:#fff;font-weight:800;font-size:.85rem;}
+
+/* ---------- FAQ ---------- */
+.faq-item{margin-bottom:14px;overflow:hidden;}
+.faq-q{display:flex;justify-content:space-between;align-items:center;padding:20px 22px;font-weight:700;cursor:pointer;}
+.faq-a{padding:0 22px;max-height:0;overflow:hidden;transition:max-height .3s ease, padding .3s ease;color:var(--text-muted);font-size:.9rem;}
+.faq-item.open .faq-a{max-height:300px;padding:0 22px 20px;}
+.faq-item.open .faq-q .chev{transform:rotate(180deg);}
+.chev{transition:transform .25s ease;}
+
+/* ---------- Value / feature grid ---------- */
+.feature-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:22px;}
+@media(max-width:900px){.feature-grid{grid-template-columns:repeat(2,1fr);}}
+@media(max-width:560px){.feature-grid{grid-template-columns:1fr;}}
+.feature-card{padding:28px;}
+.feature-card .ic{width:52px;height:52px;border-radius:16px;display:flex;align-items:center;justify-content:center;font-size:1.4rem;margin-bottom:16px;background:var(--accent-gradient-soft);}
+.feature-card h4{font-size:1rem;margin-bottom:8px;}
+.feature-card p{font-size:.85rem;color:var(--text-muted);}
+
+/* ---------- Timeline ---------- */
+.timeline{display:flex;flex-direction:column;gap:0;}
+.tl-item{display:grid;grid-template-columns:70px 1fr;gap:20px;padding-bottom:34px;position:relative;}
+.tl-item::before{content:'';position:absolute;left:34px;top:50px;bottom:0;width:2px;background:var(--shadow-dark-soft);}
+.tl-item:last-child::before{display:none;}
+.tl-dot{width:70px;height:70px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:1.5rem;}
+
+/* ---------- Stat strip ---------- */
+.stat-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:18px;text-align:center;}
+@media(max-width:700px){.stat-grid{grid-template-columns:repeat(2,1fr);}}
+.stat-card{padding:26px 12px;}
+.stat-num{font-family:var(--font-head);font-size:2rem;font-weight:800;color:var(--accent-2);}
+.stat-lbl{font-size:.78rem;color:var(--text-muted);font-weight:700;margin-top:4px;}
+
+/* ---------- Newsletter ---------- */
+.newsletter{padding:50px;text-align:center;}
+.newsletter-form{display:flex;gap:10px;max-width:460px;margin:24px auto 0;}
+.newsletter-form input{flex:1;padding:16px 20px;border-radius:var(--radius-pill);box-shadow:inset 4px 4px 9px var(--shadow-dark), inset -4px -4px 9px var(--shadow-light);}
+@media(max-width:520px){.newsletter-form{flex-direction:column;}}
+
+/* ---------- Footer ---------- */
+footer.site-footer{background:var(--bg-2);padding:60px 0 0;margin-top:40px;}
+.footer-grid{display:grid;grid-template-columns:1.4fr 1fr 1fr 1fr;gap:32px;padding-bottom:40px;}
+@media(max-width:800px){.footer-grid{grid-template-columns:1fr 1fr;}}
+@media(max-width:520px){.footer-grid{grid-template-columns:1fr;}}
+.footer-grid h5{font-size:.82rem;text-transform:uppercase;letter-spacing:.04em;margin-bottom:16px;color:var(--text-muted);}
+.footer-grid ul li{margin-bottom:10px;}
+.footer-grid ul li a{font-size:.86rem;font-weight:600;color:var(--text);opacity:.85;}
+.footer-grid ul li a:hover{opacity:1;}
+.footer-social{display:flex;gap:10px;margin-top:18px;}
+.footer-bottom{border-top:1px solid rgba(0,0,0,.06);padding:20px 0;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;font-size:.78rem;color:var(--text-muted);}
+
+/* ---------- Toast ---------- */
+#toast{position:fixed;bottom:26px;left:50%;transform:translateX(-50%) translateY(120%);background:var(--text);color:#fff;padding:14px 24px;border-radius:var(--radius-pill);font-weight:700;font-size:.85rem;z-index:999;transition:transform .35s ease;box-shadow:0 10px 30px rgba(0,0,0,.25);display:flex;align-items:center;gap:10px;}
+#toast.show{transform:translateX(-50%) translateY(0);}
+
+/* ---------- Utility ---------- */
+.center{text-align:center;}
+.mt-0{margin-top:0;}
+.flex{display:flex;}
+.gap-8{gap:8px;}
+.two-col{display:grid;grid-template-columns:1fr 1fr;gap:32px;}
+@media(max-width:800px){.two-col{grid-template-columns:1fr;}}
+.tabs{display:flex;gap:8px;margin-bottom:28px;flex-wrap:wrap;}
+.tab-btn{padding:11px 20px;border-radius:var(--radius-pill);font-weight:700;font-size:.85rem;color:var(--text-muted);}
+.tab-btn.active{color:#fff;background:var(--accent-gradient);}
+.tab-panel{display:none;}
+.tab-panel.active{display:block;}
+.divider-or{display:flex;align-items:center;gap:14px;color:var(--text-faint);font-size:.78rem;font-weight:700;margin:20px 0;}
+.divider-or::before,.divider-or::after{content:'';flex:1;height:1px;background:var(--shadow-dark-soft);}
+
+/* --- single-page routing --- */
+.page-section{display:none;}
+.page-section.active{display:block;}
+
+</style>
+</head>
+<body>
+<div class="topbar"><div class="topbar-track">
+<span>🔥 Buy 4 Get 40% OFF</span><span>🚚 Free Shipping above ₹599</span><span>🌿 FSSAI Approved &amp; Lab Tested</span><span>🇮🇳 Made in India · Anand, Gujarat</span><span>💊 Powered by Ascovita</span>
+<span>🔥 Buy 4 Get 40% OFF</span><span>🚚 Free Shipping above ₹599</span><span>🌿 FSSAI Approved &amp; Lab Tested</span><span>🇮🇳 Made in India · Anand, Gujarat</span><span>💊 Powered by Ascovita</span>
+</div></div><header class="site-header">
+<div class="container header-row">
+<a class="brand" href="#/home" data-route="home">
+<div class="brand-mark">🫧</div>
+<div class="brand-text"><span class="name">Ascofizz</span><span class="tag">POWERED BY ASCOVITA</span></div>
+</a>
+<nav class="main-nav"><a class="active" href="#/home" data-route="home">Home</a>\n<a class="" href="#/shop" data-route="shop">Shop</a>\n<a class="" href="#/about" data-route="about">About</a>\n<a class="" href="#/b2b" data-route="b2b">B2B</a>\n<a class="" href="#/blog" data-route="blog">Blog</a>\n<a class="" href="#/faq" data-route="faq">FAQ</a>\n<a class="" href="#/contact" data-route="contact">Contact</a></nav>
+<div class="header-actions">
+<a class="icon-btn" href="#/wishlist" title="Wishlist">♡<span class="badge-count wish-count">0</span></a>
+<a class="icon-btn" href="#/cart" title="Cart">🛒<span class="badge-count cart-count">0</span></a>
+<a class="icon-btn" href="#/account" title="Account">👤</a>
+<button class="icon-btn menu-toggle" title="Menu">☰</button>
+</div>
+</div>
+<div class="container"><div class="mobile-nav"><a class="active" href="#/home" data-route="home">Home</a>\n<a class="" href="#/shop" data-route="shop">Shop</a>\n<a class="" href="#/about" data-route="about">About</a>\n<a class="" href="#/b2b" data-route="b2b">B2B</a>\n<a class="" href="#/blog" data-route="blog">Blog</a>\n<a class="" href="#/faq" data-route="faq">FAQ</a>\n<a class="" href="#/contact" data-route="contact">Contact</a>\n<a href="#/account">Account</a></div></div>
+</header>
+<div class="page-section" id="page-home" data-title="Home">
+<section class="hero">
+<div class="bubble" style="width:120px;height:120px;top:10%;left:4%;"></div>
+<div class="bubble" style="width:70px;height:70px;top:60%;left:10%;animation-delay:2s;"></div>
+<div class="bubble" style="width:90px;height:90px;top:20%;right:8%;animation-delay:1s;"></div>
+<div class="container hero-grid">
+<div>
+<span class="pill pill-accent">FSSAI Approved · WHO-GMP Certified</span>
+<h1>Effervescent Wellness, <br/>Reimagined.</h1>
+<p class="lead">Fast-absorbing effervescent vitamins, spirulina blends and ayurvedic supplements — manufactured in our own WHO-GMP certified facility in Anand, Gujarat. Ascofizz, powered by Ascovita.</p>
+<div class="hero-cta">
+<a class="btn btn-primary" href="#/shop">Shop All Products →</a>
+<a class="btn btn-secondary" href="#/about">Our Story</a>
+</div>
+</div>
+<div class="hero-visual">
+<div class="hero-orb">🫧</div>
+</div>
+</div>
+</section>
+<div class="container">
+<div class="trust-strip neu-raised" style="padding:14px;">
+<span class="trust-item">🚚 Free shipping ₹599+</span>
+<span class="trust-item">🇮🇳 Made in India — Anand, Gujarat</span>
+<span class="trust-item">🔒 100% Secure Payment</span>
+<span class="trust-item">🌿 FSSAI Approved &amp; Lab Tested</span>
+<span class="trust-item">📦 Ships within 24 Hours</span>
+</div>
+</div>
+<section>
+<div class="container">
+<div class="section-head">
+<span class="eyebrow">Our Range</span>
+<h2>Shop by Category</h2>
+<p>From spirulina superfoods to effervescent wellness — find exactly what your body needs.</p>
+</div>
+<div class="cat-grid">
+<a class="cat-card neu-raised" href="#/shop?cat=Skin%20%26%20Glow"><div class="ic">✨</div><div class="lbl">Skin &amp; Glow</div><div class="cnt">2 products</div></a>
+<a class="cat-card neu-raised" href="#/shop?cat=Energy"><div class="ic">⚡</div><div class="lbl">Energy</div><div class="cnt">1 product</div></a>
+<a class="cat-card neu-raised" href="#/shop?cat=Sleep%20%26%20Recovery"><div class="ic">🌙</div><div class="lbl">Sleep</div><div class="cnt">1 product</div></a>
+<a class="cat-card neu-raised" href="#/shop?cat=Immunity"><div class="ic">🛡️</div><div class="lbl">Immunity</div><div class="cnt">1 product</div></a>
+<a class="cat-card neu-raised" href="#/shop?cat=Weight%20Management"><div class="ic">🍏</div><div class="lbl">Weight</div><div class="cnt">1 product</div></a>
+<a class="cat-card neu-raised" href="#/shop?cat=Daily%20Foundation"><div class="ic">🏆</div><div class="lbl">Multivitamin</div><div class="cnt">1 product</div></a>
+</div>
+</div>
+</section>
+<section>
+<div class="container">
+<div class="section-head">
+<span class="eyebrow">Top Picks</span>
+<h2>Featured &amp; Bestsellers</h2>
+<p>Products our customers love and reorder every month.</p>
+</div>
+<div class="product-grid" id="featuredGrid"></div>
+<div class="center" style="margin-top:32px;"><a class="btn btn-secondary" href="#/shop">View All Products →</a></div>
+</div>
+</section>
+<section>
+<div class="container">
+<div class="neu-raised" style="padding:44px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:24px;">
+<div>
+<span class="eyebrow">Build Your Stack</span>
+<h2 style="font-size:1.7rem;">Mix. Match. Save up to 20%.</h2>
+<p style="color:var(--text-muted);max-width:440px;margin-top:8px;">Pick any 3 or more Ascofizz effervescent tablets and the discount applies automatically at checkout — no code needed.</p>
+</div>
+<a class="btn btn-primary" href="#/shop">Build Your Bundle →</a>
+</div>
+</div>
+</section>
+<section>
+<div class="container">
+<div class="section-head">
+<span class="eyebrow">Trust &amp; Quality</span>
+<h2>Certified. Tested. Trusted.</h2>
+<p>Every Ascofizz product meets the highest standards of purity, safety and efficacy.</p>
+</div>
+<div class="feature-grid">
+<div class="feature-card neu-raised"><div class="ic">🌿</div><h4>FSSAI Approved</h4><p>All products carry a valid FSSAI licence under Indian food safety regulations.</p></div>
+<div class="feature-card neu-raised"><div class="ic">🔬</div><h4>3rd Party Lab Tested</h4><p>Independent laboratory testing for purity, potency, and absence of contaminants.</p></div>
+<div class="feature-card neu-raised"><div class="ic">🏭</div><h4>WHO-GMP Manufacturing</h4><p>Produced in a WHO-GMP compliant facility in Anand, Gujarat, India.</p></div>
+</div>
+</div>
+</section>
+<section>
+<div class="container">
+<div class="section-head">
+<span class="eyebrow">Customer Love</span>
+<h2>What Our Customers Say</h2>
+<p>Real reviews from real people across India.</p>
+</div>
+<div class="testi-grid">
+<div class="testi-card neu-raised"><div class="testi-stars">★★★★★</div><p style="margin-bottom:16px;">"Glow Fizz genuinely changed my skin in a month. Tastes great and easy to make part of my morning routine."</p><div class="flex gap-8" style="align-items:center;"><div class="testi-avatar">A</div><div><strong style="font-size:.85rem;">Ananya S.</strong><div style="font-size:.75rem;color:var(--text-muted);">Mumbai</div></div></div></div>
+<div class="testi-card neu-raised"><div class="testi-stars">★★★★★</div><p style="margin-bottom:16px;">"Multidiata is now a daily staple for our whole family. One tablet, all the essentials covered."</p><div class="flex gap-8" style="align-items:center;"><div class="testi-avatar">R</div><div><strong style="font-size:.85rem;">Rohit M.</strong><div style="font-size:.75rem;color:var(--text-muted);">Bangalore</div></div></div></div>
+<div class="testi-card neu-raised"><div class="testi-stars">★★★★★</div><p style="margin-bottom:16px;">"Fast delivery, quality packaging, and the Immune Shield Fizz tastes amazing. Highly recommend."</p><div class="flex gap-8" style="align-items:center;"><div class="testi-avatar">P</div><div><strong style="font-size:.85rem;">Priya K.</strong><div style="font-size:.75rem;color:var(--text-muted);">Delhi</div></div></div></div>
+</div>
+</div>
+</section>
+<section>
+<div class="container">
+<div class="newsletter neu-raised">
+<span class="eyebrow">Stay in the Loop</span>
+<h2>Get 10% off your first order</h2>
+<p style="color:var(--text-muted);">Subscribe for wellness tips, launches and exclusive offers.</p>
+<form class="newsletter-form">
+<input placeholder="Enter your email" required="" type="email"/>
+<button class="btn btn-primary" type="submit">Subscribe</button>
+</form>
+</div>
+</div>
+</section>
+</div>
+<div class="page-section" id="page-shop" data-title="Shop All Products">
+<div class="container breadcrumb"><a href="#/home">Home</a><span class="sep">/</span>Shop</div>
+<section style="padding-top:24px;">
+<div class="container">
+<div class="section-head left">
+<span class="eyebrow">All Products</span>
+<h2>Premium Organic Vitamins &amp; Supplements</h2>
+</div>
+<div class="chip-row">
+<div class="chip active" data-cat="all">All</div>
+<div class="chip" data-cat="best">🔥 Bestsellers</div>
+<div class="chip" data-cat="sale">💰 On Sale</div>
+<div class="chip" data-cat="new">🆕 New</div>
+<div class="chip" data-cat="Skin &amp; Glow">✨ Skin &amp; Glow</div>
+<div class="chip" data-cat="Immunity">🛡️ Immunity</div>
+<div class="chip" data-cat="Energy">⚡ Energy</div>
+<div class="chip" data-cat="Weight Management">⚖️ Weight</div>
+</div>
+<div class="shop-layout">
+<aside class="filters-card neu-raised">
+<h4>Filters</h4>
+<div class="filter-group">
+<label style="font-weight:700;color:var(--text);margin-bottom:6px;">Max Price: <span id="priceRangeLabel" style="color:var(--accent);">₹700</span></label>
+<input id="priceRange" max="700" min="200" style="width:100%;accent-color:var(--accent);" type="range" value="700"/>
+</div>
+<div class="filter-group">
+<h4 style="font-size:.85rem;">Sort By</h4>
+<select class="neu-inset" id="sortSelect" style="padding:12px;width:100%;">
+<option value="default">Default</option>
+<option value="price-asc">Price: Low → High</option>
+<option value="price-desc">Price: High → Low</option>
+<option value="rating">Highest Rated</option>
+</select>
+</div>
+<div class="neu-flat" style="padding:16px;text-align:center;font-size:.78rem;font-weight:700;color:var(--accent);">🌿 Buy 4 Get 40% OFF — auto-applied at checkout</div>
+</aside>
+<div>
+<div class="shop-toolbar">
+<span style="font-size:.85rem;color:var(--text-muted);">Showing <strong id="shopCount">12</strong> products</span>
+</div>
+<div class="product-grid" id="shopGrid"></div>
+</div>
+</div>
+</div>
+</section>
+</div>
+<div class="page-section" id="page-product" data-title="Product">
+<div class="container breadcrumb"><a href="#/home">Home</a><span class="sep">/</span><a href="#/shop">Shop</a><span class="sep">/</span><span id="breadcrumbName">Product</span></div>
+<section style="padding-top:24px;">
+<div class="container" id="productRoot"></div>
+</section>
+<section>
+<div class="container">
+<div class="section-head left"><span class="eyebrow">You May Also Like</span><h2>Related Products</h2></div>
+<div class="product-grid" id="relatedGrid"></div>
+</div>
+</section>
+</div>
+<div class="page-section" id="page-cart" data-title="Shopping Cart">
+<div class="container breadcrumb"><a href="#/home">Home</a><span class="sep">/</span>Cart</div>
+<section style="padding-top:24px;">
+<div class="container">
+<h1 style="font-size:1.8rem;margin-bottom:28px;">Shopping Cart</h1>
+<div id="cartRoot"></div>
+</div>
+</section>
+</div>
+<div class="page-section" id="page-checkout" data-title="Checkout">
+<div class="container breadcrumb"><a href="#/home">Home</a><span class="sep">/</span><a href="#/cart">Cart</a><span class="sep">/</span>Checkout</div>
+<section style="padding-top:24px;">
+<div class="container">
+<div class="steps-row">
+<div class="step"><span class="num">1</span>Cart</div>
+<div class="step active"><span class="num">2</span>Checkout</div>
+<div class="step pending"><span class="num">3</span>Confirmation</div>
+</div>
+<form id="checkoutForm">
+<div class="cart-layout">
+<div>
+<div class="form-card neu-raised" style="max-width:none;margin-bottom:22px;">
+<h3 style="font-size:1rem;margin-bottom:18px;">👤 Contact Details</h3>
+<div class="field-row">
+<div class="field"><label>First Name</label><input class="neu-inset" required=""/></div>
+<div class="field"><label>Last Name</label><input class="neu-inset" required=""/></div>
+</div>
+<div class="field-row">
+<div class="field"><label>Email Address</label><input class="neu-inset" required="" type="email"/></div>
+<div class="field"><label>Mobile Number</label><input class="neu-inset" required="" type="tel"/></div>
+</div>
+</div>
+<div class="form-card neu-raised" style="max-width:none;margin-bottom:22px;">
+<h3 style="font-size:1rem;margin-bottom:18px;">📍 Delivery Address</h3>
+<div class="field"><label>Address Line 1</label><input class="neu-inset" required=""/></div>
+<div class="field"><label>Address Line 2</label><input class="neu-inset"/></div>
+<div class="field-row">
+<div class="field"><label>City</label><input class="neu-inset" required=""/></div>
+<div class="field"><label>State</label><input class="neu-inset" required=""/></div>
+</div>
+<div class="field-row">
+<div class="field"><label>PIN Code</label><input class="neu-inset" required=""/></div>
+<div class="field"><label>Country</label><input class="neu-inset" readonly="" value="India"/></div>
+</div>
+</div>
+<div class="form-card neu-raised" style="max-width:none;">
+<h3 style="font-size:1rem;margin-bottom:18px;">💳 Payment Method</h3>
+<label class="pay-option neu-raised-sm selected">
+<input checked="" name="pay" type="radio"/><span class="ic">📱</span>
+<div><div class="lbl">UPI / Google Pay / PhonePe</div><div class="sub">Pay instantly via any UPI app · Recommended</div></div>
+</label>
+<label class="pay-option neu-raised-sm">
+<input name="pay" type="radio"/><span class="ic">💳</span>
+<div><div class="lbl">Credit / Debit Card</div><div class="sub">Visa, Mastercard, RuPay accepted</div></div>
+</label>
+<label class="pay-option neu-raised-sm">
+<input name="pay" type="radio"/><span class="ic">🏦</span>
+<div><div class="lbl">Net Banking</div><div class="sub">All major Indian banks supported</div></div>
+</label>
+<label class="pay-option neu-raised-sm">
+<input name="pay" type="radio"/><span class="ic">💵</span>
+<div><div class="lbl">Cash on Delivery</div><div class="sub">+₹60 COD charge · Free above ₹599</div></div>
+</label>
+<p style="font-size:.76rem;color:var(--text-muted);margin-top:10px;">🔒 All payments secured with 256-bit SSL encryption.</p>
+</div>
+</div>
+<div class="neu-raised" style="padding:26px;position:sticky;top:100px;">
+<h3 style="font-size:1.1rem;margin-bottom:16px;">Order Summary</h3>
+<div id="checkoutSummary"></div>
+<button class="btn btn-primary btn-block" id="placeOrderBtn" style="margin-top:20px;" type="submit">Place Order →</button>
+<p style="font-size:.72rem;color:var(--text-faint);margin-top:10px;text-align:center;">By ordering, you agree to our Terms &amp; Privacy Policy</p>
+</div>
+</div>
+</form>
+</div>
+</section>
+</div>
+<div class="page-section" id="page-order-confirmation" data-title="Order Confirmed">
+<section style="padding-top:60px;">
+<div class="container center" style="max-width:640px;">
+<div class="hero-orb" style="width:120px;height:120px;font-size:3rem;margin:0 auto 26px;">🌿</div>
+<h1 style="font-size:2rem;margin-bottom:12px;">Order Confirmed!</h1>
+<p style="color:var(--text-muted);margin-bottom:6px;">Your order has been received and is being processed. Thank you for choosing Ascofizz!</p>
+<p id="orderIdLabel" style="font-weight:800;margin:18px 0 34px;">Order #AFZ-00000000</p>
+<div class="neu-raised" style="padding:30px;text-align:left;margin-bottom:30px;">
+<div class="cat-grid" style="grid-template-columns:repeat(4,1fr);">
+<div class="center"><div style="font-size:1.6rem;">✅</div><div style="font-size:.78rem;font-weight:700;margin-top:6px;">Order Placed</div><div style="font-size:.7rem;color:var(--text-muted);">Just now</div></div>
+<div class="center"><div style="font-size:1.6rem;">📦</div><div style="font-size:.78rem;font-weight:700;margin-top:6px;">Processing</div><div style="font-size:.7rem;color:var(--text-muted);">1–2 hours</div></div>
+<div class="center"><div style="font-size:1.6rem;">🚚</div><div style="font-size:.78rem;font-weight:700;margin-top:6px;">Shipped</div><div style="font-size:.7rem;color:var(--text-muted);">Via Shiprocket</div></div>
+<div class="center"><div style="font-size:1.6rem;">🏠</div><div style="font-size:.78rem;font-weight:700;margin-top:6px;">Delivered</div><div style="font-size:.7rem;color:var(--text-muted);">3–5 days</div></div>
+</div>
+</div>
+<div class="hero-cta" style="justify-content:center;">
+<a class="btn btn-primary" href="#/shop">Continue Shopping</a>
+<a class="btn btn-secondary" href="#/home">Back to Home</a>
+</div>
+</div>
+</section>
+</div>
+<div class="page-section" id="page-about" data-title="Our Story">
+<div class="container breadcrumb"><a href="#/home">Home</a><span class="sep">/</span>About</div>
+<section class="hero" style="padding-top:30px;">
+<div class="container hero-grid">
+<div>
+<span class="pill pill-accent">🌿 Our Story</span>
+<h1>Rooted in Nature, <br/>Powered by Science.</h1>
+<p class="lead">Ascofizz is the direct-to-consumer wellness brand of Ascovita Healthcare — founded in Anand, Gujarat, India's nutraceutical capital — with a single mission: make premium-grade nutrition accessible to every Indian family.</p>
+<div class="hero-cta">
+<a class="btn btn-primary" href="#/shop">Shop Our Products</a>
+<a class="btn btn-secondary" href="https://wa.me/919898582650">💬 WhatsApp Us</a>
+</div>
+</div>
+<div class="hero-visual"><div class="hero-orb">🏭</div></div>
+</div>
+</section>
+<div class="container">
+<div class="stat-grid">
+<div class="stat-card neu-raised"><div class="stat-num">10K+</div><div class="stat-lbl">Happy Customers</div></div>
+<div class="stat-card neu-raised"><div class="stat-num">12+</div><div class="stat-lbl">Products</div></div>
+<div class="stat-card neu-raised"><div class="stat-num">4.8★</div><div class="stat-lbl">Avg Rating</div></div>
+<div class="stat-card neu-raised"><div class="stat-num">50+</div><div class="stat-lbl">B2B Partners</div></div>
+</div>
+</div>
+<section>
+<div class="container">
+<div class="section-head">
+<span class="eyebrow">Mission &amp; Vision</span>
+<h2>Why Ascofizz Exists</h2>
+</div>
+<div class="two-col">
+<p>India has one of the world's highest rates of micronutrient deficiency — yet most supplement brands charge a premium that keeps quality nutrition out of reach for millions. We founded Ascofizz to break that cycle.</p>
+<p>From our GMP-certified facility in Anand, Gujarat, we formulate, manufacture, and deliver premium nutraceuticals — effervescent tablets, spirulina, glutathione, biotin and more — at prices that make good health truly accessible.</p>
+</div>
+<div class="neu-raised center" style="padding:30px;margin-top:30px;font-style:italic;color:var(--text-muted);">"From formulation to manufacturing of nutraceutical products — one standard, no shortcuts." — The Ascofizz Promise</div>
+</div>
+</section>
+<section>
+<div class="container">
+<div class="section-head left"><span class="eyebrow">Our Journey</span><h2>From Formulation to Fizz</h2></div>
+<div class="timeline">
+<div class="tl-item"><div class="tl-dot neu-raised">🌿</div><div class="neu-raised" style="padding:22px;"><strong>Founded</strong><p style="color:var(--text-muted);font-size:.88rem;margin-top:6px;">Ascofizz established in Anand — India's nutraceutical capital — with a vision to make premium health accessible to all Indians.</p></div></div>
+<div class="tl-item"><div class="tl-dot neu-raised">🏭</div><div class="neu-raised" style="padding:22px;"><strong>Own GMP-Certified Plant</strong><p style="color:var(--text-muted);font-size:.88rem;margin-top:6px;">Our FSSAI-licensed plant near Rajshivalay Cinema, Anand produces effervescent, capsule, tablet and strip formats in-house.</p></div></div>
+<div class="tl-item"><div class="tl-dot neu-raised">🚀</div><div class="neu-raised" style="padding:22px;"><strong>D2C Launch &amp; B2B Expansion</strong><p style="color:var(--text-muted);font-size:.88rem;margin-top:6px;">Launched direct-to-consumer across India and opened third-party manufacturing for brands, clinics and distributors.</p></div></div>
+<div class="tl-item"><div class="tl-dot neu-raised">🌎</div><div class="neu-raised" style="padding:22px;"><strong>10,000+ Customers &amp; Growing</strong><p style="color:var(--text-muted);font-size:.88rem;margin-top:6px;">Serving retail customers across India and B2B partners globally, with franchise and export opportunities now open.</p></div></div>
+</div>
+</div>
+</section>
+<section>
+<div class="container">
+<div class="section-head"><span class="eyebrow">What We Stand For</span><h2>Our Core Values</h2></div>
+<div class="feature-grid">
+<div class="feature-card neu-raised"><div class="ic">🌿</div><h4>Organic First</h4><p>We source the finest FSSAI-certified organic ingredients with full traceability from farm to capsule.</p></div>
+<div class="feature-card neu-raised"><div class="ic">🔬</div><h4>Science-Backed</h4><p>Every formulation is developed based on peer-reviewed research and validated by certified nutritionists.</p></div>
+<div class="feature-card neu-raised"><div class="ic">💰</div><h4>Fair Pricing</h4><p>Premium-grade supplements priced for every Indian family — no markups for profit's sake.</p></div>
+<div class="feature-card neu-raised"><div class="ic">🇮🇳</div><h4>Made in India</h4><p>Proudly manufactured in Anand, Gujarat — supporting Indian agriculture, jobs and infrastructure.</p></div>
+<div class="feature-card neu-raised"><div class="ic">🤝</div><h4>Partner-First</h4><p>Our B2B partners get dedicated account support, flexible MOQs, and co-branded packaging.</p></div>
+<div class="feature-card neu-raised"><div class="ic">❤️</div><h4>Community</h4><p>We partner with local farmers and reinvest in India's health ecosystem.</p></div>
+</div>
+</div>
+</section>
+<section>
+<div class="container">
+<div class="section-head"><span class="eyebrow">The People Behind Ascofizz</span><h2>Meet Our Founders</h2></div>
+<div class="testi-grid">
+<div class="testi-card neu-raised center"><div class="testi-avatar" style="margin:0 auto 14px;width:56px;height:56px;font-size:1.2rem;">AD</div><strong>Amit Dantani</strong><div class="pill pill-muted" style="margin:8px 0;">Founder &amp; CEO</div><p style="font-size:.85rem;color:var(--text-muted);">Drives strategy, supply chain excellence and the long-term vision of making India the nutraceutical capital of Asia.</p></div>
+<div class="testi-card neu-raised center"><div class="testi-avatar" style="margin:0 auto 14px;width:56px;height:56px;font-size:1.2rem;">AG</div><strong>Aamin Ghachivahora</strong><div class="pill pill-muted" style="margin:8px 0;">Co-Founder &amp; CMO</div><p style="font-size:.85rem;color:var(--text-muted);">Leads brand identity, digital presence and the nationwide campaigns driving Ascofizz's rapid growth.</p></div>
+<div class="testi-card neu-raised center"><div class="testi-avatar" style="margin:0 auto 14px;width:56px;height:56px;font-size:1.2rem;">JP</div><strong>Jaydeep Prajapati</strong><div class="pill pill-muted" style="margin:8px 0;">Co-Founder &amp; CFO</div><p style="font-size:.85rem;color:var(--text-muted);">Manages fiscal strategy and the sustainable growth model that keeps prices fair.</p></div>
+</div>
+</div>
+</section>
+</div>
+<div class="page-section" id="page-b2b" data-title="B2B & Wholesale">
+<div class="container breadcrumb"><a href="#/home">Home</a><span class="sep">/</span>B2B &amp; Wholesale</div>
+<section class="hero" style="padding-top:30px;">
+<div class="container hero-grid">
+<div>
+<span class="pill pill-accent">B2B &amp; Wholesale Manufacturing</span>
+<h1>Your Trusted Nutraceutical Manufacturing Partner</h1>
+<p class="lead">End-to-end nutraceutical solutions — from custom formulation and third-party manufacturing to private label, franchise, and export partnerships. FSSAI certified. WHO-GMP compliant. Made in Gujarat.</p>
+<div class="hero-cta">
+<a class="btn btn-primary" href="https://wa.me/919898582650">💬 WhatsApp for B2B Enquiry</a>
+<a class="btn btn-secondary" href="#enquiry">Send Enquiry Form</a>
+</div>
+</div>
+<div class="hero-visual"><div class="hero-orb">🤝</div></div>
+</div>
+</section>
+<div class="container"><div class="stat-grid">
+<div class="stat-card neu-raised"><div class="stat-num">50+</div><div class="stat-lbl">B2B Partners</div></div>
+<div class="stat-card neu-raised"><div class="stat-num">40+</div><div class="stat-lbl">Product SKUs</div></div>
+<div class="stat-card neu-raised"><div class="stat-num">GMP</div><div class="stat-lbl">Certified Plant</div></div>
+<div class="stat-card neu-raised"><div class="stat-num">PAN India</div><div class="stat-lbl">Distribution</div></div>
+</div></div>
+<section>
+<div class="container">
+<div class="section-head"><span class="eyebrow">Solutions</span><h2>Complete B2B Solutions</h2><p>From a single SKU to an entire brand portfolio — we handle formulation, manufacturing, packaging and logistics under one roof.</p></div>
+<div class="feature-grid">
+<div class="feature-card neu-raised"><div class="ic">🏷️</div><h4>Private Label Manufacturing</h4><p>Launch your own nutraceutical brand with our ready-to-use formulations. Low MOQ, custom branding.</p></div>
+<div class="feature-card neu-raised"><div class="ic">🏭</div><h4>Third Party Manufacturing</h4><p>Already have a formulation? We manufacture to your exact spec — effervescent, capsule, tablet, softgel, powder.</p></div>
+<div class="feature-card neu-raised"><div class="ic">📦</div><h4>Specialised Packaging</h4><p>Alu-Alu, blister packs, strip packaging and effervescent tubes with custom artwork design.</p></div>
+<div class="feature-card neu-raised"><div class="ic">🏬</div><h4>Franchise Programme</h4><p>Tap into a proven brand, established supply chain and comprehensive marketing support.</p></div>
+<div class="feature-card neu-raised"><div class="ic">🌍</div><h4>Export &amp; International</h4><p>Export partnerships for brands distributing Ascofizz products internationally — via Jayraf Export.</p></div>
+<div class="feature-card neu-raised"><div class="ic">🛒</div><h4>Bulk &amp; Wholesale Orders</h4><p>Pharmacies, clinics and online retailers can source at wholesale pricing with priority dispatch.</p></div>
+</div>
+</div>
+</section>
+<section>
+<div class="container">
+<div class="section-head"><span class="eyebrow">Process</span><h2>From Enquiry to Delivery</h2><p>Go from first enquiry to first delivery in as little as 3–4 weeks.</p></div>
+<div class="cat-grid" style="grid-template-columns:repeat(4,1fr);">
+<div class="cat-card neu-raised"><div class="ic">1️⃣</div><div class="lbl">Initial Enquiry</div><div class="cnt">WhatsApp or form</div></div>
+<div class="cat-card neu-raised"><div class="ic">2️⃣</div><div class="lbl">Formulation &amp; Quote</div><div class="cnt">Within 48 hours</div></div>
+<div class="cat-card neu-raised"><div class="ic">3️⃣</div><div class="lbl">Sample Approval</div><div class="cnt">Lab samples for review</div></div>
+<div class="cat-card neu-raised"><div class="ic">4️⃣</div><div class="lbl">Production &amp; Delivery</div><div class="cnt">Pan-India dispatch</div></div>
+</div>
+</div>
+</section>
+<section>
+<div class="container">
+<div class="section-head"><span class="eyebrow">Pricing</span><h2>Volume Discounts for Every Scale</h2></div>
+<div class="cat-grid" style="grid-template-columns:repeat(4,1fr);">
+<div class="cat-card neu-raised"><div class="ic">🌱</div><div class="lbl">Starter</div><div class="cnt">500–2K units · up to 15% off</div></div>
+<div class="cat-card neu-raised"><div class="ic">📈</div><div class="lbl">Growth</div><div class="cnt">2K–10K units · up to 25% off</div></div>
+<div class="cat-card neu-raised"><div class="ic">🎯</div><div class="lbl">Partner</div><div class="cnt">10K–50K units · up to 40% off</div></div>
+<div class="cat-card neu-raised"><div class="ic">👑</div><div class="lbl">Enterprise</div><div class="cnt">50K+ · custom pricing</div></div>
+</div>
+</div>
+</section>
+<section id="enquiry">
+<div class="container">
+<div class="form-card neu-raised wide" style="max-width:720px;margin:0 auto;">
+<div class="section-head left" style="margin-bottom:24px;"><span class="eyebrow">Business Enquiries</span><h2 style="font-size:1.5rem;">Start Your B2B Partnership Today</h2></div>
+<form data-fake-submit="✓ Enquiry submitted — our B2B team will contact you within 24 hours.">
+<div class="field-row">
+<div class="field"><label>Company Name</label><input class="neu-inset" required=""/></div>
+<div class="field"><label>Contact Name</label><input class="neu-inset" required=""/></div>
+</div>
+<div class="field-row">
+<div class="field"><label>WhatsApp / Phone</label><input class="neu-inset" required=""/></div>
+<div class="field"><label>Email Address</label><input class="neu-inset" required="" type="email"/></div>
+</div>
+<div class="field">
+<label>Partnership Type</label>
+<select class="neu-inset">
+<option>Private Label Manufacturing</option>
+<option>Third Party Manufacturing</option>
+<option>Bulk / Wholesale Order</option>
+<option>Franchise Partnership</option>
+<option>Export / International</option>
+</select>
+</div>
+<div class="field"><label>Message / Requirements</label><textarea class="neu-inset"></textarea></div>
+<button class="btn btn-primary btn-block" type="submit">Submit B2B Enquiry →</button>
+</form>
+</div>
+</div>
+</section>
+</div>
+<div class="page-section" id="page-blog" data-title="Blog">
+<div class="container breadcrumb"><a href="#/home">Home</a><span class="sep">/</span>Blog</div>
+<section style="padding-top:24px;">
+<div class="container">
+<div class="section-head">
+<span class="eyebrow">Health Insights</span>
+<h2>The Ascofizz Blog</h2>
+<p>Science-backed articles on superfoods, vitamins, and optimal wellness.</p>
+</div>
+<div class="product-grid">
+<div class="product-card neu-raised">
+<div class="product-media">🧪</div>
+<div class="product-cat">Science</div>
+<div class="product-name">The Science Behind Effervescent Vitamins</div>
+<div class="product-desc">Why fizzy tablets absorb faster than regular pills — and what that means for you.</div>
+<a class="btn btn-secondary btn-block" href="#/blog">Read Article →</a>
+</div>
+<div class="product-card neu-raised">
+<div class="product-media">⚡</div>
+<div class="product-cat">Wellness</div>
+<div class="product-name">5 Signs You Need More Vitamin B12</div>
+<div class="product-desc">Fatigue, brain fog and tingling — common signs of B12 deficiency explained.</div>
+<a class="btn btn-secondary btn-block" href="#/blog">Read Article →</a>
+</div>
+<div class="product-card neu-raised">
+<div class="product-media">✨</div>
+<div class="product-cat">Skin</div>
+<div class="product-name">Glutathione for Skin: What the Research Says</div>
+<div class="product-desc">A look at the evidence behind glutathione supplementation for skin brightness.</div>
+<a class="btn btn-secondary btn-block" href="#/blog">Read Article →</a>
+</div>
+<div class="product-card neu-raised">
+<div class="product-media">🌿</div>
+<div class="product-cat">Nutrition</div>
+<div class="product-name">Spirulina 101: The Complete Superfood Guide</div>
+<div class="product-desc">Everything you need to know about this nutrient-dense blue-green algae.</div>
+<a class="btn btn-secondary btn-block" href="#/blog">Read Article →</a>
+</div>
+<div class="product-card neu-raised">
+<div class="product-media">🛡️</div>
+<div class="product-cat">Immunity</div>
+<div class="product-name">How Much Vitamin C Do You Really Need?</div>
+<div class="product-desc">Debunking myths about vitamin C dosage and immunity support.</div>
+<a class="btn btn-secondary btn-block" href="#/blog">Read Article →</a>
+</div>
+<div class="product-card neu-raised">
+<div class="product-media">🧘</div>
+<div class="product-cat">Stress Relief</div>
+<div class="product-name">Ashwagandha &amp; Stress: A Beginner's Guide</div>
+<div class="product-desc">How this adaptogenic herb helps the body manage everyday stress.</div>
+<a class="btn btn-secondary btn-block" href="#/blog">Read Article →</a>
+</div></div>
+</div>
+</section>
+<section>
+<div class="container">
+<div class="newsletter neu-raised">
+<span class="eyebrow">Never Miss an Article</span>
+<h2>Get wellness tips in your inbox</h2>
+<form class="newsletter-form">
+<input placeholder="Enter your email" required="" type="email"/>
+<button class="btn btn-primary" type="submit">Subscribe</button>
+</form>
+</div>
+</div>
+</section>
+</div>
+<div class="page-section" id="page-faq" data-title="FAQ">
+<div class="container breadcrumb"><a href="#/home">Home</a><span class="sep">/</span>FAQ</div>
+<section style="padding-top:24px;">
+<div class="container" style="max-width:760px;">
+<div class="section-head">
+<span class="eyebrow">Got Questions?</span>
+<h2>Frequently Asked Questions</h2>
+<p>Answers to the most common questions about Ascofizz products and services.</p>
+</div>
+<div class="faq-item neu-raised">
+<div class="faq-q">What makes effervescent vitamins different?<span class="chev">⌄</span></div>
+<div class="faq-a">Effervescent tablets dissolve in water before you drink them, which allows for faster absorption compared to regular swallowed tablets, and makes dosing gentler on the stomach.</div>
+</div>
+<div class="faq-item neu-raised">
+<div class="faq-q">Are Ascofizz products FSSAI approved?<span class="chev">⌄</span></div>
+<div class="faq-a">Yes. All Ascofizz products are manufactured in a WHO-GMP certified, FSSAI-licensed facility in Anand, Gujarat, and every batch is independently lab tested.</div>
+</div>
+<div class="faq-item neu-raised">
+<div class="faq-q">How long does delivery take?<span class="chev">⌄</span></div>
+<div class="faq-a">Orders are dispatched within 24–48 hours. Standard delivery takes 3–5 business days across India; express delivery to major cities takes 1–2 business days.</div>
+</div>
+<div class="faq-item neu-raised">
+<div class="faq-q">Can I cancel or modify my subscription?<span class="chev">⌄</span></div>
+<div class="faq-a">Yes, you can pause, modify or cancel your Subscribe &amp; Save plan anytime from your Account Dashboard with zero penalties.</div>
+</div>
+<div class="faq-item neu-raised">
+<div class="faq-q">What is your return policy?<span class="chev">⌄</span></div>
+<div class="faq-a">We accept returns on sealed, unused products within 7 days of delivery. Opened supplement packages cannot be returned for hygiene and safety reasons.</div>
+</div>
+<div class="faq-item neu-raised">
+<div class="faq-q">Do you offer Cash on Delivery?<span class="chev">⌄</span></div>
+<div class="faq-a">Yes, COD is available across India for a ₹60 charge, which is waived on orders above ₹599.</div>
+</div>
+<div class="faq-item neu-raised">
+<div class="faq-q">Are your supplements vegan?<span class="chev">⌄</span></div>
+<div class="faq-a">Several products, like Vita B12 Fizz, are 100% vegan. Check the product page's ingredients tab for details on each SKU.</div>
+</div>
+<div class="faq-item neu-raised">
+<div class="faq-q">Do you manufacture for other brands (B2B)?<span class="chev">⌄</span></div>
+<div class="faq-a">Yes — Ascofizz (via Ascovita Healthcare) offers private label and third-party manufacturing. Visit our B2B &amp; Wholesale page to enquire.</div>
+</div>
+<div class="center" style="margin-top:30px;"><p style="color:var(--text-muted);margin-bottom:14px;">Still have questions?</p><a class="btn btn-primary" href="#/contact">Contact Us →</a></div>
+</div>
+</section>
+</div>
+<div class="page-section" id="page-contact" data-title="Contact Us">
+<div class="container breadcrumb"><a href="#/home">Home</a><span class="sep">/</span>Contact</div>
+<section style="padding-top:24px;">
+<div class="container">
+<div class="section-head">
+<span class="eyebrow">Get in Touch</span>
+<h2>We're Here to Help</h2>
+<p>Reach out via any channel and we'll respond promptly.</p>
+</div>
+<div class="two-col">
+<div>
+<div class="neu-raised card" style="margin-bottom:16px;display:flex;gap:16px;align-items:center;"><div class="icon-btn" style="font-size:1.3rem;">📞</div><div><strong>Phone</strong><div style="font-size:.85rem;color:var(--text-muted);">+91 98985 82650 · Mon–Sat, 9:30 AM–6:30 PM</div></div></div>
+<div class="neu-raised card" style="margin-bottom:16px;display:flex;gap:16px;align-items:center;"><div class="icon-btn" style="font-size:1.3rem;">📧</div><div><strong>Email</strong><div style="font-size:.85rem;color:var(--text-muted);">ascovitahealthcare@gmail.com</div></div></div>
+<div class="neu-raised card" style="margin-bottom:16px;display:flex;gap:16px;align-items:center;"><div class="icon-btn" style="font-size:1.3rem;">📍</div><div><strong>Address</strong><div style="font-size:.85rem;color:var(--text-muted);">Near Rajshivalay Cinema, Anand – 388001, Gujarat, India</div></div></div>
+<div class="neu-raised card" style="display:flex;gap:16px;align-items:center;"><div class="icon-btn" style="font-size:1.3rem;">💬</div><div><strong>WhatsApp Support</strong><div style="font-size:.85rem;color:var(--text-muted);">Message us for quick queries — replies within 1 hour.</div></div></div>
+</div>
+<div class="form-card neu-raised wide">
+<h3 style="font-size:1.1rem;margin-bottom:18px;">Send a Message</h3>
+<form data-fake-submit="✓ Message sent — we'll get back to you shortly.">
+<div class="field-row">
+<div class="field"><label>Name</label><input class="neu-inset" required=""/></div>
+<div class="field"><label>Phone</label><input class="neu-inset"/></div>
+</div>
+<div class="field"><label>Email</label><input class="neu-inset" required="" type="email"/></div>
+<div class="field">
+<label>Subject</label>
+<select class="neu-inset">
+<option>General Inquiry</option>
+<option>Order Status / Tracking</option>
+<option>Return / Refund Request</option>
+<option>Product Question</option>
+<option>Wholesale / Bulk Order</option>
+</select>
+</div>
+<div class="field"><label>Message</label><textarea class="neu-inset" required=""></textarea></div>
+<button class="btn btn-primary btn-block" type="submit">Send Message →</button>
+</form>
+</div>
+</div>
+</div>
+</section>
+</div>
+<div class="page-section" id="page-account" data-title="My Account">
+<div class="container breadcrumb"><a href="#/home">Home</a><span class="sep">/</span>Account</div>
+<section style="padding-top:24px;">
+<div class="container" style="max-width:520px;">
+<div data-tabgroup="">
+<div class="tabs" style="justify-content:center;">
+<button class="tab-btn active" data-tab="signin">Sign In</button>
+<button class="tab-btn" data-tab="signup">Create Account</button>
+</div>
+<div class="tab-panel active form-card neu-raised" data-panel="signin" style="max-width:none;">
+<div class="center" style="margin-bottom:20px;"><div class="hero-orb" style="width:70px;height:70px;font-size:1.8rem;margin:0 auto 12px;">🌿</div><h3>Welcome Back</h3><p style="color:var(--text-muted);font-size:.85rem;">Sign in to your Ascofizz account</p></div>
+<form data-fake-submit="✓ Signed in successfully (demo)">
+<div class="field"><label>Email Address</label><input class="neu-inset" required="" type="email"/></div>
+<div class="field"><label>Password</label><input class="neu-inset" required="" type="password"/></div>
+<button class="btn btn-primary btn-block" type="submit">Sign In →</button>
+</form>
+<div class="divider-or">or</div>
+<button class="btn btn-secondary btn-block">Continue with Google</button>
+</div>
+<div class="tab-panel form-card neu-raised" data-panel="signup" style="max-width:none;">
+<div class="center" style="margin-bottom:20px;"><h3>Create Your Account</h3><p style="color:var(--text-muted);font-size:.85rem;">Join Ascofizz for rewards &amp; faster checkout</p></div>
+<form data-fake-submit="✓ Account created (demo)">
+<div class="field"><label>Full Name</label><input class="neu-inset" required=""/></div>
+<div class="field"><label>Email Address</label><input class="neu-inset" required="" type="email"/></div>
+<div class="field"><label>Phone Number</label><input class="neu-inset" required=""/></div>
+<div class="field"><label>Password</label><input class="neu-inset" required="" type="password"/></div>
+<button class="btn btn-primary btn-block" type="submit">Create Account →</button>
+</form>
+<p style="font-size:.72rem;color:var(--text-faint);margin-top:12px;text-align:center;">By creating an account you agree to our Privacy Policy &amp; Terms</p>
+</div>
+</div>
+<div class="section-head left" style="margin-top:50px;"><span class="eyebrow">Demo Dashboard</span><h2 style="font-size:1.3rem;">My Account</h2></div>
+<div class="cat-grid" style="grid-template-columns:repeat(2,1fr);">
+<a class="cat-card neu-raised" href="#"><div class="ic">📦</div><div class="lbl">My Orders</div></a>
+<a class="cat-card neu-raised" href="#"><div class="ic">🚚</div><div class="lbl">Track Shipment</div></a>
+<a class="cat-card neu-raised" href="#/wishlist"><div class="ic">♡</div><div class="lbl">Wishlist</div></a>
+<a class="cat-card neu-raised" href="#/subscribe"><div class="ic">🔔</div><div class="lbl">Subscriptions</div></a>
+</div>
+</div>
+</section>
+</div>
+<div class="page-section" id="page-wishlist" data-title="My Wishlist">
+<div class="container breadcrumb"><a href="#/home">Home</a><span class="sep">/</span>Wishlist</div>
+<section style="padding-top:24px;">
+<div class="container">
+<div class="section-head left"><span class="eyebrow">Saved Items</span><h2>My Wishlist</h2></div>
+<div class="product-grid" id="wishGrid"></div>
+<div class="empty-state neu-raised" id="wishEmpty" style="display:none;">
+<div class="ic">💚</div><h3>Your wishlist is empty</h3>
+<p style="color:var(--text-muted);margin:10px 0 20px;">Tap the ♡ on any product to save it here for later.</p>
+<a class="btn btn-primary" href="#/shop">Explore Products →</a>
+</div>
+</div>
+</section>
+</div>
+<div class="page-section" id="page-subscribe" data-title="Subscribe & Save">
+<div class="container breadcrumb"><a href="#/home">Home</a><span class="sep">/</span>Subscribe &amp; Save</div>
+<section style="padding-top:24px;">
+<div class="container">
+<div class="section-head">
+<span class="eyebrow">Never Run Out</span>
+<h2>Subscribe &amp; Save</h2>
+<p>Get your favourite Ascofizz supplements delivered automatically. Save more, stress less.</p>
+</div>
+<div class="trust-strip">
+<span class="trust-item">✅ Up to 20% savings</span>
+<span class="trust-item">🚚 Free shipping every order</span>
+<span class="trust-item">🔒 Cancel anytime</span>
+<span class="trust-item">🎁 Subscriber-only offers</span>
+</div>
+<div class="feature-grid" style="margin-top:20px;">
+<div class="feature-card neu-raised">
+<div class="ic">📅</div><h4>Monthly</h4>
+<p style="margin-bottom:14px;">Delivered every 30 days. Save 10% vs one-time purchase.</p>
+<button class="btn btn-secondary btn-block" onclick="showToast('🌿 Monthly plan selected (demo)')">Subscribe Monthly</button>
+</div>
+<div class="feature-card neu-raised" style="box-shadow:0 0 0 2px var(--accent);">
+<span class="pill pill-accent" style="margin-bottom:10px;">⭐ Most Popular</span>
+<div class="ic">📆</div><h4>Quarterly</h4>
+<p style="margin-bottom:14px;">Delivered every 90 days. Save 15% + free express shipping.</p>
+<button class="btn btn-primary btn-block" onclick="showToast('🌿 Quarterly plan selected (demo)')">Subscribe Quarterly</button>
+</div>
+<div class="feature-card neu-raised">
+<div class="ic">🗓️</div><h4>Half-Yearly</h4>
+<p style="margin-bottom:14px;">Delivered every 6 months. Save 20% — best value plan.</p>
+<button class="btn btn-secondary btn-block" onclick="showToast('🌿 Half-yearly plan selected (demo)')">Subscribe 6-Monthly</button>
+</div>
+</div>
+</div>
+</section>
+<section>
+<div class="container" style="max-width:760px;">
+<div class="section-head left"><span class="eyebrow">Subscription FAQs</span><h2 style="font-size:1.4rem;">Common Questions</h2></div>
+<div class="faq-item neu-raised"><div class="faq-q">Can I cancel my subscription anytime?<span class="chev">⌄</span></div><div class="faq-a">Yes, absolutely. Cancel, pause or modify your subscription anytime from your Account Dashboard with zero penalties.</div></div>
+<div class="faq-item neu-raised"><div class="faq-q">How do subscription payments work?<span class="chev">⌄</span></div><div class="faq-a">Payment is charged automatically via your saved payment method before each scheduled delivery, with a reminder email 3 days prior.</div></div>
+<div class="faq-item neu-raised"><div class="faq-q">Can I change my product between deliveries?<span class="chev">⌄</span></div><div class="faq-a">Yes. Update your subscription product selection from your dashboard at least 5 days before the next delivery.</div></div>
+</div>
+</section>
+</div>
+<div class="page-section" id="page-privacy" data-title="Privacy Policy">
+<div class="container breadcrumb"><a href="#/home">Home</a><span class="sep">/</span>Privacy Policy</div>
+<section style="padding-top:24px;">
+<div class="container" style="max-width:780px;">
+<div class="section-head left"><span class="eyebrow">Legal · Last Updated Jan 2026</span><h2>Privacy Policy</h2></div>
+<div class="neu-raised card" style="margin-bottom:16px;"><h4 style="margin-bottom:10px;">Information We Collect</h4><p style="color:var(--text-muted);">We collect information you provide when placing orders (name, address, phone, email), and non-personally identifiable browsing data to improve our website. We never collect sensitive financial data — payments are processed by a secure third-party gateway.</p></div><div class="neu-raised card" style="margin-bottom:16px;"><h4 style="margin-bottom:10px;">How We Use Your Data</h4><p style="color:var(--text-muted);">Your data is used solely to process orders, send tracking information, and (with consent) send promotional emails. We never sell your personal information to any third party.</p></div><div class="neu-raised card"><h4 style="margin-bottom:10px;">Contact for Privacy</h4><p style="color:var(--text-muted);">Email: ascovitahealthcare@gmail.com · Phone: +91 98985 82650</p></div>
+</div>
+</section>
+</div>
+<div class="page-section" id="page-terms" data-title="Terms & Conditions">
+<div class="container breadcrumb"><a href="#/home">Home</a><span class="sep">/</span>Terms &amp; Conditions</div>
+<section style="padding-top:24px;">
+<div class="container" style="max-width:780px;">
+<div class="section-head left"><span class="eyebrow">Legal · Last Updated Jan 2026</span><h2>Terms &amp; Conditions</h2></div>
+<div class="neu-raised card" style="margin-bottom:16px;"><h4 style="margin-bottom:10px;">Medical Disclaimer</h4><p style="color:var(--text-muted);">Ascofizz products are dietary supplements and are not intended to diagnose, treat, cure, or prevent any disease. Always consult a qualified healthcare professional before starting any supplement regimen, especially if pregnant, breastfeeding, or on medication.</p></div><div class="neu-raised card" style="margin-bottom:16px;"><h4 style="margin-bottom:10px;">Pricing &amp; Offers</h4><p style="color:var(--text-muted);">All prices are in Indian Rupees (INR) and exclude applicable taxes. Promotional offers (including Buy 4 Get 40% OFF) are valid only on eligible products and may be withdrawn at any time without notice.</p></div><div class="neu-raised card"><h4 style="margin-bottom:10px;">Contact</h4><p style="color:var(--text-muted);">Ascofizz · Near Rajshivalay Cinema, Anand – 388001, Gujarat · ascovitahealthcare@gmail.com</p></div>
+</div>
+</section>
+</div>
+<div class="page-section" id="page-shipping" data-title="Shipping Policy">
+<div class="container breadcrumb"><a href="#/home">Home</a><span class="sep">/</span>Shipping Policy</div>
+<section style="padding-top:24px;">
+<div class="container" style="max-width:780px;">
+<div class="section-head left"><span class="eyebrow">Delivery Info</span><h2>Shipping Policy</h2></div>
+<div class="feature-grid"><div class="feature-card neu-raised"><div class="ic">🚀</div><h4>Express Delivery</h4><p>Major cities (Mumbai, Delhi, Bangalore, Hyderabad, Ahmedabad): 1–2 business days · ₹99</p></div><div class="feature-card neu-raised"><div class="ic">📦</div><h4>Standard Delivery</h4><p>All India: 3–5 business days · ₹49</p></div><div class="feature-card neu-raised"><div class="ic">🎁</div><h4>Free Shipping</h4><p>On all orders above ₹599!</p></div></div><div class="neu-raised card" style="margin-top:20px;"><p style="color:var(--text-muted);">All orders are dispatched within 24–48 hours and shipped via our logistics partner. After dispatch, you will receive an SMS and email with a real-time tracking link. We deliver to all pin codes across India. Cash on Delivery available · ₹60 COD charge · FREE on orders ₹599 and above.</p></div>
+</div>
+</section>
+</div>
+<div class="page-section" id="page-refund" data-title="Refund & Return Policy">
+<div class="container breadcrumb"><a href="#/home">Home</a><span class="sep">/</span>Refund &amp; Return Policy</div>
+<section style="padding-top:24px;">
+<div class="container" style="max-width:780px;">
+<div class="section-head left"><span class="eyebrow">7-Day Return Window</span><h2>Refund &amp; Return Policy</h2></div>
+<div class="neu-raised card" style="margin-bottom:16px;"><h4 style="margin-bottom:10px;">Eligible for Return/Refund</h4><ul style="color:var(--text-muted);font-size:.9rem;line-height:2;"><li>✓ Damaged or defective products (photo proof required)</li><li>✓ Wrong item delivered</li><li>✓ Sealed, unopened products within 7 days of delivery</li></ul></div><div class="neu-raised card" style="margin-bottom:16px;"><h4 style="margin-bottom:10px;">How to Initiate a Return</h4><p style="color:var(--text-muted);">Email ascovitahealthcare@gmail.com with your order number, reason for return, and photos (if damaged). We process refunds within 5–7 working days after receiving the returned item.</p></div><div class="neu-raised card"><h4 style="margin-bottom:10px;">Non-Returnable Items</h4><p style="color:var(--text-muted);">Opened supplement packages cannot be returned for hygiene and safety reasons.</p></div>
+</div>
+</section>
+</div>
+<div class="page-section" id="page-notfound" data-title="Page Not Found">
+<section style="padding-top:80px;">
+<div class="container center" style="max-width:520px;">
+<div class="hero-orb" style="width:120px;height:120px;font-size:3rem;margin:0 auto 26px;">🫧</div>
+<h1 style="font-size:2.4rem;margin-bottom:12px;">404</h1>
+<p style="color:var(--text-muted);margin-bottom:28px;">Looks like this fizzed away. The page you're looking for doesn't exist.</p>
+<a class="btn btn-primary" href="#/home">Back to Home</a>
+</div>
+</section>
+</div>
+<footer class="site-footer">
+<div class="container footer-grid">
+<div>
+<div class="brand" style="margin-bottom:14px;">
+<div class="brand-mark">🫧</div>
+<div class="brand-text"><span class="name">Ascofizz</span><span class="tag">POWERED BY ASCOVITA</span></div>
+</div>
+<p style="font-size:.85rem;color:var(--text-muted);max-width:280px;">Effervescent vitamins &amp; nutraceuticals, made in our own WHO-GMP certified facility in Anand, Gujarat. FSSAI approved, lab tested.</p>
+<div class="footer-social">
+<a class="icon-btn" href="https://www.instagram.com/ascovita_healthcare" title="Instagram">📸</a>
+<a class="icon-btn" href="https://facebook.com/AscovitaHealthcare" title="Facebook">👥</a>
+<a class="icon-btn" href="https://wa.me/919898582650" title="WhatsApp">💬</a>
+</div>
+</div>
+<div>
+<h5>Shop</h5>
+<ul>
+<li><a href="#/shop">All Products</a></li>
+<li><a href="#/shop?cat=best">Bestsellers</a></li>
+<li><a href="#/shop?cat=sale">On Sale</a></li>
+<li><a href="#/shop?cat=new">New Launch</a></li>
+<li><a href="#/subscribe">Subscribe &amp; Save</a></li>
+</ul>
+</div>
+<div>
+<h5>Company</h5>
+<ul>
+<li><a href="#/about">About Us</a></li>
+<li><a href="#/b2b">B2B &amp; Wholesale</a></li>
+<li><a href="#/blog">Blog</a></li>
+<li><a href="#/faq">FAQ</a></li>
+<li><a href="#/contact">Contact</a></li>
+</ul>
+</div>
+<div>
+<h5>Policies</h5>
+<ul>
+<li><a href="#/privacy">Privacy Policy</a></li>
+<li><a href="#/terms">Terms &amp; Conditions</a></li>
+<li><a href="#/shipping">Shipping Policy</a></li>
+<li><a href="#/refund">Refund Policy</a></li>
+</ul>
+</div>
+</div>
+<div class="container footer-bottom">
+<span>© 2026 Ascofizz — an online brand of Ascovita Healthcare. All rights reserved.</span>
+<span>📞 +91 98985 82650  ·  ascovitahealthcare@gmail.com</span>
+</div>
+</footer>
+<script>
+/* =========================================================
+   ASCOFIZZ — Shared app logic
+   Product catalog, cart (localStorage), wishlist, UI helpers
+   ========================================================= */
+
+const ASCOFIZZ_PRODUCTS = [
+  { id:"glow-fizz", name:"Glow Fizz", sub:"L-Glutathione Effervescent 650mg", category:"Skin & Glow", tags:["best","glutathione"], icon:"✨", price:699, oldPrice:999, rating:4.8, reviews:412, badge:"best", desc:"Fast-absorbing glutathione fizz tablets for brighter, even-toned skin from within.", benefits:["Brightens & evens skin tone","Fights oxidative stress","Fast fizz absorption","Supports natural collagen"], howto:"Drop 1 tablet in 200ml water once daily, preferably morning. Sip while fizzing.", ingredients:"L-Glutathione (650mg), Vitamin C, Citric Acid, Natural Flavour, Sodium Bicarbonate." },
+  { id:"reset-fizz", name:"Reset Fizz", sub:"Apple Cider Vinegar + Moringa + Garcinia", category:"Weight Management", tags:["sale"], icon:"🍏", price:449, oldPrice:599, rating:4.6, reviews:328, badge:"sale", desc:"A daily fizzy reset combining ACV, moringa and garcinia to support metabolism and digestion.", benefits:["Supports healthy metabolism","Aids digestion","Curbs sugar cravings","100% plant-based"], howto:"Dissolve 1 tablet in a glass of water, drink before breakfast.", ingredients:"Apple Cider Vinegar (500mg), Moringa Extract, Garcinia Cambogia, Citric Acid." },
+  { id:"vita-b12-fizz", name:"Vita B12 Fizz", sub:"B12 + D3 + Organic Spirulina (Vegan)", category:"Energy", tags:["vegan","new"], icon:"⚡", price:549, oldPrice:0, rating:4.7, reviews:256, badge:"new", desc:"A 100% vegan energy fizz with B12, D3 and organic spirulina to fight fatigue naturally.", benefits:["Beats fatigue & tiredness","100% vegan formulation","Supports bone & immune health","Rich in plant protein"], howto:"1 tablet daily in water, any time of day.", ingredients:"Vitamin B12 (1500mcg), Vitamin D3, Organic Spirulina (200mg), Citric Acid." },
+  { id:"calm-sleep-fizz", name:"Calm Sleep Fizz", sub:"Magnesium + B12 + D3 + Spirulina", category:"Sleep & Recovery", tags:["sleep"], icon:"🌙", price:599, oldPrice:749, rating:4.7, reviews:189, badge:"", desc:"Magnesium-rich effervescent blend that supports deep sleep and faster muscle recovery.", benefits:["Promotes restful sleep","Eases muscle tension","Supports nervous system","Non-habit forming"], howto:"1 tablet in water, 30 minutes before bedtime.", ingredients:"Magnesium Citrate (300mg), Vitamin B12, Vitamin D3, Organic Spirulina." },
+  { id:"hair-bloom-fizz", name:"Hair Bloom Fizz", sub:"Biotin 10000mcg + B12 (Guava)", category:"Hair Growth", tags:["hair"], icon:"💇", price:449, oldPrice:0, rating:4.5, reviews:301, badge:"", desc:"High-strength guava-flavoured biotin fizz to nourish hair from root to tip.", benefits:["Reduces hair fall","Strengthens hair & nails","High-dose biotin (10000mcg)","Naturally guava flavoured"], howto:"1 tablet daily in water, morning preferred.", ingredients:"Biotin (10000mcg), Vitamin B12, Natural Guava Flavour, Citric Acid." },
+  { id:"womens-balance-fizz", name:"Women's Balance Fizz", sub:"Calcium + Iron + B12 + D3 + Spirulina", category:"Women's Wellness", tags:["women"], icon:"🌸", price:549, oldPrice:649, rating:4.8, reviews:214, badge:"", desc:"A complete effervescent formula addressing calcium, iron and B12 needs for women.", benefits:["Fights iron deficiency","Supports bone strength","Boosts energy levels","Gentle on the stomach"], howto:"1 tablet daily with meals.", ingredients:"Calcium, Ferrous Bisglycinate, Vitamin B12, Vitamin D3, Spirulina." },
+  { id:"multidiata", name:"Multidiata", sub:"23 Vitamins & Minerals Multivitamin", category:"Daily Foundation", tags:["best","premium"], icon:"🏆", price:399, oldPrice:499, rating:4.9, reviews:587, badge:"best", desc:"Ascofizz's flagship daily multivitamin — 23 essential vitamins & minerals in one tablet.", benefits:["Complete daily nutrition","23 vitamins & minerals","Supports immunity & energy","One tablet a day"], howto:"1 tablet daily in water, with or after food.", ingredients:"Vitamins A, C, D, E, B-Complex, Zinc, Selenium, Iodine and 14 more essential nutrients." },
+  { id:"calm-mind-fizz", name:"Calm Mind Fizz", sub:"Ashwagandha Effervescent", category:"Stress Relief", tags:["new"], icon:"🧘", price:349, oldPrice:0, rating:4.6, reviews:143, badge:"new", desc:"KSM-66 grade ashwagandha in a light, fizzy daily ritual for calm and steady focus.", benefits:["Reduces stress & anxiety","Improves focus","Supports adrenal health","Non-drowsy formula"], howto:"1 tablet in water, any time of day.", ingredients:"Ashwagandha Root Extract (300mg, KSM-66 grade), Citric Acid, Natural Flavour." },
+  { id:"ignite-fizz", name:"Ignite Fizz", sub:"L-Carnitine Effervescent (Orange)", category:"Fat Burn", tags:["sale"], icon:"🔥", price:499, oldPrice:649, rating:4.5, reviews:176, badge:"sale", desc:"Orange-flavoured L-Carnitine fizz to support fat metabolism during workouts.", benefits:["Supports fat metabolism","Boosts workout stamina","Refreshing orange flavour","Non-stimulant formula"], howto:"1 tablet 30 minutes before exercise.", ingredients:"L-Carnitine Tartrate (1000mg), Natural Orange Flavour, Citric Acid." },
+  { id:"immune-shield-fizz", name:"Immune Shield Fizz", sub:"Vitamin C 1000mg Effervescent", category:"Immunity", tags:["best"], icon:"🛡️", price:399, oldPrice:0, rating:4.8, reviews:498, badge:"best", desc:"High-dose Vitamin C fizz for daily immunity support, in a citrus fizz you'll enjoy.", benefits:["1000mg Vitamin C per tablet","Strengthens immunity","Antioxidant support","Zesty citrus flavour"], howto:"1 tablet daily in water.", ingredients:"Vitamin C (1000mg), Zinc, Citric Acid, Natural Citrus Flavour." },
+  { id:"moringa-pure", name:"Moringa Pure", sub:"Organic Moringa Tablets", category:"Superfood", tags:["organic"], icon:"🌿", price:299, oldPrice:349, rating:4.4, reviews:132, badge:"", desc:"100% organic moringa leaf tablets — a nutrient-dense daily superfood.", benefits:["Rich in antioxidants","Supports energy & immunity","100% organic sourced","Non-effervescent, easy to swallow"], howto:"2 tablets daily with water, after meals.", ingredients:"Organic Moringa Oleifera Leaf Powder (500mg per tablet)." },
+  { id:"power-pro", name:"Power Pro", sub:"Men's Vitality Formula", category:"Men's Wellness", tags:["new"], icon:"💪", price:599, oldPrice:0, rating:4.6, reviews:98, badge:"new", desc:"A targeted effervescent blend formulated for men's stamina, strength and vitality.", benefits:["Supports stamina & vitality","Aids muscle recovery","Boosts everyday energy","Zinc & B-Complex enriched"], howto:"1 tablet daily in water, morning preferred.", ingredients:"Zinc, B-Complex, Ashwagandha, Tribulus Extract, Citric Acid." }
+];
+
+const CART_KEY = "ascofizz_cart";
+const WISH_KEY = "ascofizz_wishlist";
+
+function getCart(){ try{ return JSON.parse(localStorage.getItem(CART_KEY)) || []; }catch(e){ return []; } }
+function saveCart(cart){ localStorage.setItem(CART_KEY, JSON.stringify(cart)); updateCartBadge(); }
+function getWishlist(){ try{ return JSON.parse(localStorage.getItem(WISH_KEY)) || []; }catch(e){ return []; } }
+function saveWishlist(w){ localStorage.setItem(WISH_KEY, JSON.stringify(w)); updateWishBadge(); }
+
+function findProduct(id){ return ASCOFIZZ_PRODUCTS.find(p=>p.id===id); }
+
+function addToCart(id, qty=1){
+  qty = parseInt(qty)||1;
+  const cart = getCart();
+  const existing = cart.find(i=>i.id===id);
+  if(existing){ existing.qty += qty; } else { cart.push({id, qty}); }
+  saveCart(cart);
+  const p = findProduct(id);
+  showToast(`✓ ${p ? p.name : 'Item'} added to cart`);
+}
+
+function removeFromCart(id){
+  saveCart(getCart().filter(i=>i.id!==id));
+  if(typeof renderCartPage === "function") renderCartPage();
+}
+
+function updateQty(id, delta){
+  const cart = getCart();
+  const item = cart.find(i=>i.id===id);
+  if(!item) return;
+  item.qty += delta;
+  if(item.qty <= 0){ return removeFromCart(id); }
+  saveCart(cart);
+  if(typeof renderCartPage === "function") renderCartPage();
+}
+
+function cartCount(){ return getCart().reduce((a,i)=>a+i.qty,0); }
+function cartSubtotal(){
+  return getCart().reduce((sum,i)=>{ const p = findProduct(i.id); return p ? sum + p.price*i.qty : sum; },0);
+}
+
+function toggleWishlist(id){
+  let w = getWishlist();
+  if(w.includes(id)){ w = w.filter(x=>x!==id); showToast("Removed from wishlist"); }
+  else { w.push(id); showToast("♡ Added to wishlist"); }
+  saveWishlist(w);
+  document.querySelectorAll(`.wish-btn[data-id="${id}"]`).forEach(b=>b.classList.toggle("active", w.includes(id)));
+}
+
+function updateCartBadge(){
+  document.querySelectorAll(".cart-count").forEach(el=>{ el.textContent = cartCount(); });
+}
+function updateWishBadge(){
+  document.querySelectorAll(".wish-count").forEach(el=>{ el.textContent = getWishlist().length; });
+}
+
+function showToast(msg){
+  let t = document.getElementById("toast");
+  if(!t){ t = document.createElement("div"); t.id="toast"; document.body.appendChild(t); }
+  t.textContent = msg;
+  t.classList.add("show");
+  clearTimeout(window._toastTimer);
+  window._toastTimer = setTimeout(()=>t.classList.remove("show"), 2200);
+}
+
+function stars(rating){
+  const full = Math.round(rating);
+  return "★".repeat(full) + "☆".repeat(5-full);
+}
+function money(n){ return "₹" + Number(n).toLocaleString("en-IN"); }
+
+function renderProductCard(p){
+  const wished = getWishlist().includes(p.id);
+  const badgeHtml = p.badge ? `<div class="product-badges"><span class="badge ${p.badge}">${p.badge==='best'?'Bestseller':p.badge==='sale'?'Sale':'New'}</span></div>` : "";
+  return `
+  <div class="product-card neu-raised" data-cat="${p.category}" data-tags="${p.tags.join(',')}" data-price="${p.price}" data-rating="${p.rating}">
+    ${badgeHtml}
+    <button class="icon-btn wish-btn ${wished?'active':''}" data-id="${p.id}" onclick="toggleWishlist('${p.id}')" title="Wishlist">${wished?'♥':'♡'}</button>
+    <a href="#/product?id=${p.id}" style="text-decoration:none;color:inherit;">
+      <div class="product-media">${p.icon}</div>
+    </a>
+    <div class="product-cat">${p.category}</div>
+    <a href="#/product?id=${p.id}" style="text-decoration:none;color:inherit;">
+      <div class="product-name">${p.name}</div>
+    </a>
+    <div class="product-desc">${p.sub}</div>
+    <div class="product-rating">${stars(p.rating)} <span>(${p.reviews})</span></div>
+    <div class="product-price-row">
+      <span class="price">${money(p.price)}</span>
+      ${p.oldPrice ? `<span class="price-old">${money(p.oldPrice)}</span>` : ""}
+    </div>
+    <div class="product-actions">
+      <button class="btn btn-primary" onclick="addToCart('${p.id}',1)">Add to Cart</button>
+      <a href="#/product?id=${p.id}" class="btn btn-secondary">View</a>
+    </div>
+  </div>`;
+}
+
+/* ---------- Nav / global UI ---------- */
+document.addEventListener("DOMContentLoaded", () => {
+  updateCartBadge();
+  updateWishBadge();
+
+  const toggle = document.querySelector(".menu-toggle");
+  const mobileNav = document.querySelector(".mobile-nav");
+  if(toggle && mobileNav){
+    toggle.addEventListener("click", ()=> mobileNav.classList.toggle("open"));
+  }
+
+  // FAQ accordions
+  document.querySelectorAll(".faq-item .faq-q").forEach(q=>{
+    q.addEventListener("click", ()=>{
+      q.closest(".faq-item").classList.toggle("open");
+    });
+  });
+
+  // Tabs (event delegation so dynamically-injected tab groups, e.g. the
+  // product page tabs rendered after page load, work correctly too)
+  document.addEventListener("click", (e)=>{
+    const btn = e.target.closest(".tab-btn");
+    if(!btn) return;
+    const group = btn.closest("[data-tabgroup]");
+    if(!group) return;
+    const target = btn.getAttribute("data-tab");
+    group.querySelectorAll(".tab-btn").forEach(b=>b.classList.remove("active"));
+    btn.classList.add("active");
+    group.querySelectorAll(".tab-panel").forEach(p=>p.classList.remove("active"));
+    const panel = group.querySelector(`.tab-panel[data-panel="${target}"]`);
+    if(panel) panel.classList.add("active");
+  });
+
+  // Newsletter fake-submit
+  document.querySelectorAll(".newsletter-form").forEach(form=>{
+    form.addEventListener("submit", (e)=>{
+      e.preventDefault();
+      showToast("🌿 Subscribed! Welcome to Ascofizz.");
+      form.reset();
+    });
+  });
+
+  // Generic fake-submit forms (contact, b2b, account)
+  document.querySelectorAll("form[data-fake-submit]").forEach(form=>{
+    form.addEventListener("submit", (e)=>{
+      e.preventDefault();
+      showToast(form.getAttribute("data-fake-submit") || "✓ Submitted successfully");
+      form.reset();
+    });
+  });
+});
+
+/* Shop listing: render, filter, sort */
+let SHOP_FILTER = { cat: "all", sort: "default", maxPrice: 1000 };
+
+function renderShop(){
+  const grid = document.getElementById("shopGrid");
+  if(!grid) return;
+  let items = ASCOFIZZ_PRODUCTS.slice();
+
+  if(SHOP_FILTER.cat !== "all"){
+    if(SHOP_FILTER.cat === "sale") items = items.filter(p=>p.oldPrice>0);
+    else if(SHOP_FILTER.cat === "new") items = items.filter(p=>p.tags.includes("new"));
+    else if(SHOP_FILTER.cat === "best") items = items.filter(p=>p.tags.includes("best"));
+    else items = items.filter(p=>p.category === SHOP_FILTER.cat);
+  }
+  items = items.filter(p=>p.price <= SHOP_FILTER.maxPrice);
+
+  if(SHOP_FILTER.sort === "price-asc") items.sort((a,b)=>a.price-b.price);
+  else if(SHOP_FILTER.sort === "price-desc") items.sort((a,b)=>b.price-a.price);
+  else if(SHOP_FILTER.sort === "rating") items.sort((a,b)=>b.rating-a.rating);
+
+  document.getElementById("shopCount").textContent = items.length;
+
+  grid.innerHTML = items.length ? items.map(renderProductCard).join("") :
+    `<div class="empty-state" style="grid-column:1/-1;"><div class="ic">🔍</div><h3>No products found</h3><p style="color:var(--text-muted)">Try adjusting your filters</p></div>`;
+}
+
+function initShopFromHash(){
+  const params = getHashParams();
+  const cat = params.get("cat");
+  SHOP_FILTER.cat = cat || "all";
+  document.querySelectorAll(".chip[data-cat]").forEach(chip=>{
+    chip.classList.toggle("active", chip.getAttribute("data-cat") === SHOP_FILTER.cat);
+  });
+  renderShop();
+}
+
+document.addEventListener("DOMContentLoaded", ()=>{
+  const grid = document.getElementById("shopGrid");
+  if(!grid) return;
+
+  document.querySelectorAll(".chip[data-cat]").forEach(chip=>{
+    chip.addEventListener("click", ()=>{
+      document.querySelectorAll(".chip[data-cat]").forEach(c=>c.classList.remove("active"));
+      chip.classList.add("active");
+      SHOP_FILTER.cat = chip.getAttribute("data-cat");
+      renderShop();
+    });
+  });
+
+  const sortSel = document.getElementById("sortSelect");
+  if(sortSel){
+    sortSel.addEventListener("change", ()=>{ SHOP_FILTER.sort = sortSel.value; renderShop(); });
+  }
+
+  const priceRange = document.getElementById("priceRange");
+  if(priceRange){
+    priceRange.addEventListener("input", ()=>{
+      SHOP_FILTER.maxPrice = parseInt(priceRange.value);
+      document.getElementById("priceRangeLabel").textContent = money(SHOP_FILTER.maxPrice);
+      renderShop();
+    });
+  }
+});
+
+/* Product detail page rendering */
+let CURRENT_QTY = 1;
+
+function getProductIdFromUrl(){
+  const params = getHashParams();
+  return params.get("id") || ASCOFIZZ_PRODUCTS[0].id;
+}
+
+function renderProductPage(){
+  const root = document.getElementById("productRoot");
+  if(!root) return;
+  const id = getProductIdFromUrl();
+  const p = findProduct(id) || ASCOFIZZ_PRODUCTS[0];
+  const wished = getWishlist().includes(p.id);
+
+  document.title = `${p.name} — ${p.sub} | Ascofizz`;
+  document.getElementById("breadcrumbName").textContent = p.name;
+
+  root.innerHTML = `
+    <div class="two-col">
+      <div>
+        <div class="neu-raised" style="padding:40px;display:flex;align-items:center;justify-content:center;aspect-ratio:1/1;font-size:8rem;position:relative;">
+          ${p.badge ? `<div class="product-badges"><span class="badge ${p.badge}">${p.badge==='best'?'Bestseller':p.badge==='sale'?'Sale':'New'}</span></div>` : ""}
+          ${p.icon}
+        </div>
+      </div>
+      <div>
+        <div class="product-cat">${p.category}</div>
+        <h1 style="font-size:2rem;margin:8px 0 6px;">${p.name}</h1>
+        <p style="color:var(--text-muted);margin-bottom:14px;">${p.sub}</p>
+        <div class="product-rating" style="margin-bottom:18px;">${stars(p.rating)} <span>${p.rating} · ${p.reviews} reviews</span></div>
+        <div class="product-price-row" style="margin-bottom:20px;">
+          <span class="price" style="font-size:1.8rem;">${money(p.price)}</span>
+          ${p.oldPrice ? `<span class="price-old" style="font-size:1.1rem;">${money(p.oldPrice)}</span>` : ""}
+          ${p.oldPrice ? `<span class="pill pill-accent">Save ${Math.round((1-p.price/p.oldPrice)*100)}%</span>` : ""}
+        </div>
+        <p style="margin-bottom:24px;">${p.desc}</p>
+
+        <div class="neu-raised-sm" style="padding:16px 20px;margin-bottom:22px;">
+          <strong style="font-size:.85rem;">Key Benefits</strong>
+          <ul style="margin-top:10px;">
+            ${p.benefits.map(b=>`<li style="font-size:.87rem;color:var(--text-muted);padding:4px 0;">✓ ${b}</li>`).join("")}
+          </ul>
+        </div>
+
+        <div class="flex gap-8" style="align-items:center;margin-bottom:20px;">
+          <div class="qty-control neu-raised-sm">
+            <button onclick="changeQty(-1)">−</button>
+            <span id="qtyVal">1</span>
+            <button onclick="changeQty(1)">+</button>
+          </div>
+          <button class="btn btn-primary" style="flex:1;" onclick="addToCart('${p.id}', CURRENT_QTY)">Add to Cart — ${money(p.price)}</button>
+          <button class="icon-btn wish-btn ${wished?'active':''}" data-id="${p.id}" onclick="toggleWishlist('${p.id}')">${wished?'♥':'♡'}</button>
+        </div>
+        <a href="#/checkout" class="btn btn-secondary btn-block" onclick="addToCart('${p.id}', CURRENT_QTY)">Buy It Now</a>
+
+        <div class="trust-strip" style="justify-content:flex-start;padding-left:0;">
+          <span class="trust-item">🚚 Free shipping ₹599+</span>
+          <span class="trust-item">🔒 Secure checkout</span>
+          <span class="trust-item">🌿 FSSAI Approved</span>
+        </div>
+      </div>
+    </div>
+
+    <div data-tabgroup style="margin-top:56px;">
+      <div class="tabs">
+        <button class="tab-btn active" data-tab="how">How to Use</button>
+        <button class="tab-btn" data-tab="ingredients">Ingredients</button>
+        <button class="tab-btn" data-tab="reviews">Reviews (${p.reviews})</button>
+      </div>
+      <div class="tab-panel active neu-raised" data-panel="how" style="padding:28px;">
+        <p>${p.howto}</p>
+      </div>
+      <div class="tab-panel neu-raised" data-panel="ingredients" style="padding:28px;">
+        <p>${p.ingredients}</p>
+      </div>
+      <div class="tab-panel neu-raised" data-panel="reviews" style="padding:28px;">
+        <div class="testi-grid">
+          ${sampleReviews(p).map(r=>`
+            <div class="neu-raised-sm" style="padding:20px;">
+              <div class="testi-stars">${stars(r.stars)}</div>
+              <p style="font-size:.88rem;margin-bottom:12px;">"${r.text}"</p>
+              <strong style="font-size:.82rem;">${r.name}</strong>
+            </div>`).join("")}
+        </div>
+      </div>
+    </div>
+  `;
+
+  renderRelated(p);
+}
+
+function changeQty(delta){
+  CURRENT_QTY = Math.max(1, CURRENT_QTY + delta);
+  document.getElementById("qtyVal").textContent = CURRENT_QTY;
+}
+
+function sampleReviews(p){
+  const names = ["Ananya S.","Rohit M.","Priya K.","Vikram T."];
+  const texts = [
+    `Been using ${p.name} for a month, genuinely noticed the difference. Fizzes nicely and tastes good.`,
+    `Great value for money. Ordering my second pack already.`,
+    `Easy to take, dissolves quickly, no chalky aftertaste like other brands.`,
+    `Good product, delivery was fast too. Will recommend to friends.`
+  ];
+  return names.map((n,i)=>({name:n, text:texts[i], stars: 4 + (i%2)}));
+}
+
+function renderRelated(p){
+  const wrap = document.getElementById("relatedGrid");
+  if(!wrap) return;
+  const related = ASCOFIZZ_PRODUCTS.filter(x=>x.id!==p.id && x.category===p.category);
+  const filler = ASCOFIZZ_PRODUCTS.filter(x=>x.id!==p.id && !related.includes(x));
+  const list = related.concat(filler).slice(0,4);
+  wrap.innerHTML = list.map(renderProductCard).join("");
+}
+
+
+
+/* Cart page rendering */
+function renderCartPage(){
+  const root = document.getElementById("cartRoot");
+  if(!root) return;
+  const cart = getCart();
+
+  if(!cart.length){
+    root.innerHTML = `
+      <div class="empty-state neu-raised">
+        <div class="ic">🛒</div>
+        <h3>Your cart is empty</h3>
+        <p style="color:var(--text-muted);margin:10px 0 24px;">Looks like you haven't added anything yet.</p>
+        <a href="#/shop" class="btn btn-primary">Start Shopping</a>
+      </div>`;
+    return;
+  }
+
+  const subtotal = cartSubtotal();
+  const shipping = subtotal >= 599 ? 0 : 49;
+  const total = subtotal + shipping;
+
+  root.innerHTML = `
+    <div class="cart-layout">
+      <div>
+        ${cart.map(item=>{
+          const p = findProduct(item.id);
+          if(!p) return "";
+          return `
+          <div class="cart-item neu-raised">
+            <a href="#/product?id=${p.id}" class="thumb">${p.icon}</a>
+            <div>
+              <a href="#/product?id=${p.id}" style="font-family:var(--font-head);font-weight:800;">${p.name}</a>
+              <div style="font-size:.8rem;color:var(--text-muted);margin:2px 0 10px;">${p.sub}</div>
+              <div class="qty-control neu-raised-sm">
+                <button onclick="updateQty('${p.id}',-1)">−</button>
+                <span>${item.qty}</span>
+                <button onclick="updateQty('${p.id}',1)">+</button>
+              </div>
+            </div>
+            <div style="text-align:right;">
+              <div class="price">${money(p.price*item.qty)}</div>
+              <button class="btn btn-ghost btn-sm" style="margin-top:10px;" onclick="removeFromCart('${p.id}')">Remove</button>
+            </div>
+          </div>`;
+        }).join("")}
+        <a href="#/shop" class="btn btn-secondary" style="margin-top:6px;">← Continue Shopping</a>
+      </div>
+      <div class="neu-raised" style="padding:26px;position:sticky;top:100px;">
+        <h3 style="font-size:1.1rem;margin-bottom:16px;">Order Summary</h3>
+        <div class="summary-row"><span>Subtotal</span><span>${money(subtotal)}</span></div>
+        <div class="summary-row"><span>Shipping</span><span>${shipping===0?"FREE":money(shipping)}</span></div>
+        ${subtotal < 599 ? `<div style="font-size:.76rem;color:var(--accent-2);margin:6px 0;">Add ${money(599-subtotal)} more for free shipping!</div>` : ""}
+        <div class="summary-row total"><span>Total</span><span>${money(total)}</span></div>
+        <a href="#/checkout" class="btn btn-primary btn-block" style="margin-top:18px;">Proceed to Checkout →</a>
+        <div class="trust-strip" style="padding:16px 0 0;justify-content:flex-start;">
+          <span class="trust-item">🔒 Secure Checkout</span>
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+
+
+/* Checkout page: order summary + fake order placement */
+function renderCheckoutSummary(){
+  const wrap = document.getElementById("checkoutSummary");
+  if(!wrap) return;
+  const cart = getCart();
+  if(!cart.length){
+    wrap.innerHTML = `<p style="color:var(--text-muted)">Your cart is empty. <a href="#/shop" style="font-weight:700;">Go shopping →</a></p>`;
+    const btn = document.getElementById("placeOrderBtn");
+    if(btn) btn.disabled = true;
+    return;
+  }
+  const subtotal = cartSubtotal();
+  const shipping = subtotal >= 599 ? 0 : 49;
+  const total = subtotal + shipping;
+
+  wrap.innerHTML = `
+    ${cart.map(item=>{
+      const p = findProduct(item.id);
+      if(!p) return "";
+      return `<div style="display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px dashed var(--shadow-dark-soft);">
+        <div style="display:flex;align-items:center;gap:10px;">
+          <span style="font-size:1.4rem;">${p.icon}</span>
+          <div><div style="font-weight:700;font-size:.88rem;">${p.name}</div><div style="font-size:.76rem;color:var(--text-muted);">Qty ${item.qty}</div></div>
+        </div>
+        <span style="font-weight:700;">${money(p.price*item.qty)}</span>
+      </div>`;
+    }).join("")}
+    <div class="summary-row" style="margin-top:14px;"><span>Subtotal</span><span>${money(subtotal)}</span></div>
+    <div class="summary-row"><span>Shipping</span><span>${shipping===0?"FREE":money(shipping)}</span></div>
+    <div class="summary-row total"><span>Total</span><span>${money(total)}</span></div>
+  `;
+}
+
+function selectPayOption(el){
+  document.querySelectorAll(".pay-option").forEach(o=>o.classList.remove("selected"));
+  el.classList.add("selected");
+  el.querySelector("input[type=radio]").checked = true;
+}
+
+function placeOrder(e){
+  e.preventDefault();
+  const cart = getCart();
+  if(!cart.length){ showToast("Your cart is empty"); return; }
+  const orderId = "AFZ-" + Math.floor(10000000 + Math.random()*89999999);
+  localStorage.setItem("ascofizz_last_order", orderId);
+  saveCart([]);
+  location.hash = "#/order-confirmation?order=" + orderId;
+}
+
+document.addEventListener("DOMContentLoaded", ()=>{
+  document.querySelectorAll(".pay-option").forEach(o=>{
+    o.addEventListener("click", ()=>selectPayOption(o));
+  });
+  const form = document.getElementById("checkoutForm");
+  if(form) form.addEventListener("submit", placeOrder);
+});
+
+
+/* ---------- Page-specific render helpers ---------- */
+function renderFeatured(){
+  const g = document.getElementById("featuredGrid");
+  if(g) g.innerHTML = ASCOFIZZ_PRODUCTS.filter(p=>p.tags.includes("best")||p.badge).slice(0,4).map(renderProductCard).join("");
+}
+function renderWishlistPage(){
+  const ids = getWishlist();
+  const grid = document.getElementById("wishGrid");
+  const empty = document.getElementById("wishEmpty");
+  if(!grid || !empty) return;
+  if(!ids.length){ empty.style.display="block"; grid.innerHTML=""; return; }
+  empty.style.display="none";
+  grid.innerHTML = ids.map(id=>findProduct(id)).filter(Boolean).map(renderProductCard).join("");
+}
+function renderOrderConfirmation(){
+  const params = getHashParams();
+  const order = params.get("order") || localStorage.getItem("ascofizz_last_order") || "AFZ-00000000";
+  const el = document.getElementById("orderIdLabel");
+  if(el) el.textContent = "Order #" + order;
+}
+
+/* ---------- Hash router ---------- */
+const ROUTE_TITLES = {
+  home:"Home", shop:"Shop All Products", product:"Product", cart:"Shopping Cart",
+  checkout:"Checkout", "order-confirmation":"Order Confirmed", about:"Our Story",
+  b2b:"B2B & Wholesale", blog:"Blog", faq:"FAQ", contact:"Contact Us",
+  account:"My Account", wishlist:"My Wishlist", subscribe:"Subscribe & Save",
+  privacy:"Privacy Policy", terms:"Terms & Conditions", shipping:"Shipping Policy",
+  refund:"Refund & Return Policy", notfound:"Page Not Found"
+};
+const ROUTE_NAV_GROUP = {"home": "home", "shop": "shop", "product": "shop", "cart": "shop", "checkout": "shop", "about": "about", "b2b": "b2b", "blog": "blog", "faq": "faq", "contact": "contact"};
+const VALID_ROUTES = Object.keys(ROUTE_TITLES);
+
+function getHashParams(){
+  const q = location.hash.split("?")[1] || "";
+  return new URLSearchParams(q);
+}
+function getHashPath(){
+  let h = location.hash.replace(/^#\/?/, "");
+  h = h.split("?")[0];
+  return h || "home";
+}
+
+function navigate(){
+  let route = getHashPath();
+  if(!VALID_ROUTES.includes(route)) route = "notfound";
+
+  document.querySelectorAll(".page-section").forEach(s=>s.classList.remove("active"));
+  const target = document.getElementById("page-"+route);
+  if(target) target.classList.add("active");
+  window.scrollTo(0, 0);
+
+  document.title = (ROUTE_TITLES[route] || "Ascofizz") + " | Ascofizz \u2014 Powered by Ascovita";
+
+  document.querySelectorAll(".main-nav a[data-route], .mobile-nav a[data-route]").forEach(a=>{
+    a.classList.toggle("active", a.getAttribute("data-route") === ROUTE_NAV_GROUP[route]);
+  });
+
+  if(route === "shop" && typeof initShopFromHash === "function") initShopFromHash();
+  if(route === "product" && typeof renderProductPage === "function") renderProductPage();
+  if(route === "cart" && typeof renderCartPage === "function") renderCartPage();
+  if(route === "checkout" && typeof renderCheckoutSummary === "function") renderCheckoutSummary();
+  if(route === "wishlist" && typeof renderWishlistPage === "function") renderWishlistPage();
+  if(route === "home" && typeof renderFeatured === "function") renderFeatured();
+  if(route === "order-confirmation" && typeof renderOrderConfirmation === "function") renderOrderConfirmation();
+
+  const mnav = document.querySelector(".mobile-nav");
+  if(mnav) mnav.classList.remove("open");
+}
+
+window.addEventListener("hashchange", navigate);
+window.addEventListener("DOMContentLoaded", navigate);
+
+</script>
+</body>
+</html>
