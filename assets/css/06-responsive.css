@@ -1,0 +1,147 @@
+/* ════════════════════════════════════════════════════════════════════
+   EFFERVESCENT BLOOM — 06 · RESPONSIVE
+   Every asymmetric composition collapses to a single column with full
+   width below 768px. The mobile app chrome replaces the floating bar.
+   ════════════════════════════════════════════════════════════════════ */
+
+/* ── ≤1180px ───────────────────────────────────────────────────── */
+@media (max-width: 1180px) {
+  .nav-links a { padding: 9px 10px; font-size: .82rem; }
+  .product-page { gap: 30px; }
+  .testi-grid, .influencer-grid { columns: 2 268px; }
+}
+
+/* ── ≤1024px ───────────────────────────────────────────────────── */
+@media (max-width: 1024px) {
+  .shop-layout { grid-template-columns: 1fr; }
+  .filter-sidebar { position: static; }
+  .filter-box { display: grid; gap: 0 24px; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); }
+  .filter-hdr { grid-column: 1 / -1; }
+  .cart-layout, .checkout-layout { grid-template-columns: 1fr; }
+  .cart-summary-box, .bundle-summary { position: static; }
+  .account-layout { grid-template-columns: 1fr; }
+  .account-sidebar { position: static; }
+  .account-nav { flex-direction: row; flex-wrap: wrap; justify-content: center; }
+  .account-nav-item { width: auto; }
+  .ig-card, .ig-skeleton { flex: 0 0 calc((100% - 42px) / 4); }
+  .b2b-contact-grid, .contact-grid { grid-template-columns: 1fr; }
+}
+
+/* ── ≤900px ────────────────────────────────────────────────────── */
+@media (max-width: 900px) {
+  .product-page { grid-template-columns: 1fr; }
+  .prod-images, .media-gallery { position: static; }
+  .about-hero-grid, .vita-home-inner, .bundle-layout, .mix-match-banner { grid-template-columns: 1fr; }
+  .vita-home-right { order: -1; }
+  .mix-match-visual { min-height: 210px; }
+  .rewards-tiers { grid-template-columns: 1fr; }
+  .ig-card, .ig-skeleton { flex: 0 0 calc((100% - 28px) / 3); }
+  .shader-ring-wrap { width: 118px; right: 20px; bottom: 30px; }
+  .promo-card { flex-basis: min(86vw, 400px); }
+  .vita-preview-chat { transform: none; }
+}
+
+/* ── ≤768px — mobile app chrome takes over ─────────────────────── */
+@media (max-width: 768px) {
+  :root { --gutter: 18px; }
+
+  .navbar, .ann-bar, .mobile-menu { display: none !important; }
+  .app-topbar, .app-bottom-nav, .app-ann-ticker { display: flex !important; }
+
+  .page { padding-top: 96px; padding-bottom: 84px; }
+  #page-home { padding-top: 0; padding-bottom: 84px; }
+  .page-header { padding-top: 24px; }
+
+  .shader-hero {
+    min-height: auto;
+    padding: calc(env(safe-area-inset-top, 0px) + 128px) 0 34px;
+  }
+  .sh-line-2 { font-size: clamp(3rem, 15vw, 4.6rem); }
+  .sh-line-3 { font-size: clamp(2rem, 10vw, 3rem); }
+  .shader-sub { font-size: .95rem; }
+  .shader-cta-row { flex-direction: column; align-items: stretch; }
+  .shader-cta-row > * { width: 100%; }
+  .shader-ring-wrap { display: none; }
+  .shader-badge { font-size: .625rem; letter-spacing: .09em; padding: 7px 14px 7px 11px; }
+  .section-label, .sec-overline, .cf-section-label { font-size: .64rem; letter-spacing: .12em; }
+
+  .promo-card { flex-basis: 84vw; min-height: 216px; }
+  .promo-card-text { padding: 18px 6px 18px 18px; }
+  .promo-card-headline { font-size: 1.3rem; }
+  .promo-nav-arrow { display: none; }
+
+  .products-grid { grid-template-columns: repeat(2, 1fr); gap: 12px; }
+  .product-card { padding: 5px; border-radius: var(--r-md); }
+  .p-img-wrap { border-radius: calc(var(--r-md) - 5px); }
+  .p-img-wrap img { padding: 10px; }
+  .p-info { padding: 11px 8px 10px; gap: 3px; }
+  .p-name { font-size: .855rem; }
+  .sale-price, .p-price .sale-price { font-size: 1.05rem; }
+  .product-card:hover { transform: none; }
+  .product-card:active { transform: scale(.975); }
+  /* Touch has no hover — actions are always visible on the plate */
+  .p-actions { position: static; transform: none; opacity: 1; margin: 8px 4px 0; }
+  .btn-wishlist { width: 34px; height: 34px; }
+  .btn-qadd { padding: 9px; font-size: .74rem; }
+
+  .cat-grid-new, .cat-grid-marketing { grid-template-columns: repeat(2, 1fr); gap: 11px; }
+  .cat-card-sm, .cat-card { padding: 20px 12px; }
+  .ci, .cat-icon { width: 46px; height: 46px; font-size: 1.3rem; }
+
+  .testi-grid, .influencer-grid { columns: 1; }
+  .ig-card, .ig-skeleton { flex: 0 0 calc((100% - 14px) / 2); min-height: 148px; }
+  .ig-prev, .ig-next { display: none; }
+
+  .form-row, .profile-row, .inv-cust-grid { grid-template-columns: 1fr; }
+  .fizz-counters-grid { grid-template-columns: repeat(2, 1fr); }
+  .fizz-counter + .fizz-counter::before { display: none; }
+  .fizz-counter:nth-child(n+3) { border-top: 1px solid var(--edge); }
+
+  .rv-summary { grid-template-columns: 1fr; gap: 18px; text-align: center; }
+  .tabs { overflow-x: auto; flex-wrap: nowrap; }
+  .tab { white-space: nowrap; }
+
+  .cart-row, .ck-item-row { flex-wrap: wrap; }
+  .cart-img, .ck-item-img { width: 68px; height: 68px; }
+
+  .footer-grid { grid-template-columns: 1fr 1fr; gap: 30px 20px; }
+  .footer-grid > *:first-child { grid-column: 1 / -1; }
+  .footer-bottom { flex-direction: column; align-items: flex-start; }
+
+  .wa-fab { bottom: calc(env(safe-area-inset-bottom, 0px) + 76px); right: 14px; }
+  .wa-chat-popup { bottom: calc(env(safe-area-inset-bottom, 0px) + 142px); right: 14px; }
+  .wa-tooltip { display: none; }
+
+  .refer-steps { gap: 20px; }
+  .b2b-stats { gap: 24px; }
+  .about-timeline { padding-left: 28px; }
+
+  /* Touch targets never fall under 44px */
+  .nav-icon-btn, .app-topbar-btn, .qty-btn, .sc-qty-btn, .cpill { min-height: 40px; }
+}
+
+/* ── ≤480px ────────────────────────────────────────────────────── */
+@media (max-width: 480px) {
+  .products-grid { gap: 10px; }
+  .footer-grid { grid-template-columns: 1fr; }
+  .fizz-counters-grid { grid-template-columns: 1fr 1fr; }
+  .refer-rewards { flex-direction: column; align-items: stretch; }
+  .rr-badge { min-width: 0; }
+  .qm-body { padding: 22px 18px; }
+  .auth-box { padding: 26px 20px 24px; }
+  .ty-steps, .pf-steps { flex-direction: column; align-items: center; }
+}
+
+/* ── Coarse pointers: no tilt, no hover-only reveals ───────────── */
+@media (hover: none) {
+  [data-tilt], .tilt-3d { transform: none !important; }
+  .product-card:hover, .cat-card:hover, .cat-card-sm:hover,
+  .cert-card:hover, .blog-card:hover, .testi-card:hover { transform: none; }
+  .al-spec:hover::after { animation: none; }
+}
+
+/* ── Very short viewports (landscape phones) ───────────────────── */
+@media (max-height: 560px) and (orientation: landscape) {
+  .shader-hero { min-height: auto; padding: 110px 0 50px; }
+  .vita-chat-wrap { height: 78vh; }
+}

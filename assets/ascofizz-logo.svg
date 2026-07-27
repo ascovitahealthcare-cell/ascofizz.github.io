@@ -1,0 +1,45 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 260 64" width="260" height="64" role="img" aria-label="Ascofizz — organic vitamins">
+  <title>Ascofizz</title>
+  <defs>
+    <linearGradient id="fzWater" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#1DBFA6"/>
+      <stop offset=".55" stop-color="#0B6A63"/>
+      <stop offset="1" stop-color="#052C33"/>
+    </linearGradient>
+    <radialGradient id="fzTablet" cx="38%" cy="30%" r="72%">
+      <stop offset="0" stop-color="#FFFFFF"/>
+      <stop offset=".45" stop-color="#C6FFF2"/>
+      <stop offset="1" stop-color="#3EE3C4"/>
+    </radialGradient>
+    <linearGradient id="fzSeal" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#FFE49A"/>
+      <stop offset=".5" stop-color="#E8B33C"/>
+      <stop offset="1" stop-color="#B8841E"/>
+    </linearGradient>
+    <clipPath id="fzTube"><rect x="4" y="6" width="52" height="52" rx="16"/></clipPath>
+  </defs>
+
+  <!-- Tube: a section of the aluminium wall, filled with water -->
+  <rect x="4" y="6" width="52" height="52" rx="16" fill="url(#fzWater)"/>
+  <g clip-path="url(#fzTube)">
+    <!-- meniscus -->
+    <path d="M4 19 Q17 13 30 19 T56 19 V6 H4 Z" fill="#2CD9BE" opacity=".35"/>
+    <!-- the tablet, mid-dissolve -->
+    <circle cx="30" cy="36" r="12.5" fill="url(#fzTablet)"/>
+    <circle cx="30" cy="36" r="12.5" fill="none" stroke="#EAFFFA" stroke-opacity=".55"/>
+    <path d="M23 36h14M30 29v14" stroke="#0B6A63" stroke-opacity=".38" stroke-width="1.6" stroke-linecap="round"/>
+    <!-- bubbles rising off it -->
+    <circle cx="40" cy="22" r="3.1" fill="none" stroke="#EAFFFA" stroke-opacity=".85" stroke-width="1.3"/>
+    <circle cx="19" cy="17" r="2.2" fill="none" stroke="#EAFFFA" stroke-opacity=".7" stroke-width="1.1"/>
+    <circle cx="45" cy="31" r="1.7" fill="none" stroke="#EAFFFA" stroke-opacity=".6" stroke-width="1"/>
+    <circle cx="15" cy="27" r="1.4" fill="#EAFFFA" fill-opacity=".55"/>
+    <circle cx="36" cy="14" r="1.2" fill="#EAFFFA" fill-opacity=".45"/>
+  </g>
+  <rect x="4.5" y="6.5" width="51" height="51" rx="15.5" fill="none" stroke="#BFF6EB" stroke-opacity=".38"/>
+
+  <!-- Wordmark -->
+  <text x="70" y="35" font-family="'Bricolage Grotesque','Arial Narrow',sans-serif"
+        font-size="27" font-weight="800" letter-spacing="-1.15" fill="#F4FEFB">Ascofizz</text>
+  <text x="71" y="49" font-family="'Schibsted Grotesk',system-ui,sans-serif"
+        font-size="8" font-weight="700" letter-spacing="2.6" fill="url(#fzSeal)">ORGANIC VITAMINS</text>
+</svg>
