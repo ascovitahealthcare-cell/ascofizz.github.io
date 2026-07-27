@@ -10,7 +10,7 @@
  * compressed AVIF versions on the fly (that's what "enc_avif,quality_auto"
  * in those URLs does). imgbb does NOT do this — whatever file you
  * upload here is served byte-for-byte as-is, full resolution, to
- * every mobile visitor. These 19 cards are one of the heaviest asset
+ * every mobile visitor. These cards are one of the heaviest asset
  * groups on the site if uploaded as raw phone-camera JPG/PNG.
  *
  * BEFORE uploading each image to imgbb:
@@ -43,127 +43,55 @@
  *              Options: "shop", "home", "about", "contact"
  * ─────────────────────────────────────────────────────────────────
  */
-
 var PROMO_MEDIA = [
-
   {
-    src: '',
+    src:     'https://i.ibb.co/TqpscFt7/post-acv.webp',
     type:    'image',
     ctaPage: 'shop'
   },
-
   {
-    src: '',
+    src:     'https://i.ibb.co/MkwXyj1T/post-ashwagandha.webp',
     type:    'image',
     ctaPage: 'shop'
   },
-
   {
-    src: '',
+    src:     'https://i.ibb.co/Jwcr6bnd/post-bone-health.webp',
     type:    'image',
     ctaPage: 'shop'
   },
-
   {
-    src: '',
+    src:     'https://i.ibb.co/q3gnj02j/post-glutathione.webp',
     type:    'image',
     ctaPage: 'shop'
   },
-
   {
-    src: '',
+    src:     'https://i.ibb.co/My7fGnSH/post-green-tea.webp',
     type:    'image',
     ctaPage: 'shop'
   },
-
   {
-    src: '',
+    src:     'https://i.ibb.co/CK6rBfjD/post-lcarnitine.webp',
     type:    'image',
     ctaPage: 'shop'
   },
-
   {
-    src: '',
+    src:     'https://i.ibb.co/Xxwfv8MZ/post-mens-multi.webp',
     type:    'image',
     ctaPage: 'shop'
   },
-
   {
-    src: '',
+    src:     'https://i.ibb.co/pjvGggG9/post-rehydration.webp',
     type:    'image',
     ctaPage: 'shop'
   },
-
   {
-    src: '',
+    src:     'https://i.ibb.co/5hn0S7Dj/post-vit-c.webp',
     type:    'image',
     ctaPage: 'shop'
   },
-
   {
-    src: '',
-    type:    'image',
-    ctaPage: 'shop'
-  },
-
-  {
-    src: '',
-    type:    'image',
-    ctaPage: 'shop'
-  },
-
-  {
-    src: '',
-    type:    'image',
-    ctaPage: 'shop'
-  },
-
-  {
-    src: '',
-    type:    'image',
-    ctaPage: 'shop'
-  },
-
-  {
-    src: '',
-    type:    'image',
-    ctaPage: 'shop'
-  },
-
-  {
-    src: '',
-    type:    'image',
-    ctaPage: 'shop'
-  },
-
-  {
-    src: '',
-    type:    'image',
-    ctaPage: 'shop'
-  },
-
-  {
-    src: '',
-    type:    'image',
-    ctaPage: 'shop'
-  },
-
-  {
-    src: '',
-    type:    'image',
-    ctaPage: 'shop'
-  },
-
-  {
-    src: '',
-    type:    'image',
-    ctaPage: 'shop'
-  },
-
-  {
-    src: '',
+    src:     'https://i.ibb.co/60WYZVQ0/post-womens-multi.webp',
     type:    'image',
     ctaPage: 'shop'
   }
-
 ];
