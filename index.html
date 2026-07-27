@@ -1523,6 +1523,7 @@ body::before, body::after { content: none; }
 /* ══ 3D ═══════════════════════════════════════════════════════════ */
 .a3-scene { perspective: var(--depth); perspective-origin: 50% 40%; }
 [data-tilt], .tilt-3d {
+  position: relative;
   transform-style: preserve-3d;
   transition: transform var(--dur-3) var(--rise), box-shadow var(--dur-3) var(--rise);
 }
@@ -1642,6 +1643,77 @@ button:disabled, .btn-primary:disabled, .btn-gold:disabled {
   box-shadow: var(--neo-in);
   border: none;
 }
+
+/* ══ VIVID PASS ═══════════════════════════════════════════════════
+   A livelier layer on top of the soft-white base: a slow liquid-foil
+   field in the background (reads the same --mx/--my/--scrollv
+   channels the tilt system already publishes), a light sheen that
+   sweeps across any tiltable card on hover, and a five-way flavour
+   cycle so card grids pick up colour from the real product range
+   instead of sitting in indigo alone.                               */
+@keyframes fz-hue    { 0%{filter:blur(64px) saturate(1.55) hue-rotate(0deg)} 100%{filter:blur(64px) saturate(1.55) hue-rotate(360deg)} }
+@keyframes fz-blob-a { 0%,100%{transform:translate3d(0,0,0) scale(1)}   50%{transform:translate3d(4vw,-3vh,0) scale(1.12)} }
+@keyframes fz-blob-b { 0%,100%{transform:translate3d(0,0,0) scale(1)}   50%{transform:translate3d(-5vw,4vh,0) scale(1.08)} }
+@keyframes fz-blob-c { 0%,100%{transform:translate3d(0,0,0) scale(1)}   50%{transform:translate3d(3vw,5vh,0) scale(1.1)} }
+@keyframes fz-blob-d { 0%,100%{transform:translate3d(0,0,0) scale(1)}   50%{transform:translate3d(-4vw,-4vh,0) scale(1.14)} }
+@keyframes fz-sheen  { 0%{transform:translateX(-130%) rotate(8deg)} 100%{transform:translateX(230%) rotate(8deg)} }
+
+#liquidFoil {
+  position: fixed; inset: 0; z-index: -1; overflow: hidden;
+  pointer-events: none; contain: strict;
+}
+.foil-blob {
+  position: absolute; border-radius: 50%;
+  filter: blur(64px) saturate(1.55);
+  opacity: .5; mix-blend-mode: multiply;
+  will-change: transform;
+}
+.foil-blob.b1 {
+  width: 52vw; height: 52vw; top: -18vh; left: -14vw;
+  background: radial-gradient(circle at 32% 30%, var(--f-citrus), transparent 70%);
+  animation: fz-blob-a 26s var(--settle) infinite, fz-hue 34s linear infinite;
+  transform: translate3d(calc(var(--mx,0) * 26px - var(--scrollv,0) * 90px), calc(var(--my,0) * 20px + var(--scrollv,0) * 60px), 0);
+}
+.foil-blob.b2 {
+  width: 46vw; height: 46vw; top: 10vh; right: -16vw;
+  background: radial-gradient(circle at 65% 35%, var(--f-cobalt), transparent 70%);
+  animation: fz-blob-b 30s var(--settle) infinite 1.2s, fz-hue 40s linear infinite reverse;
+  transform: translate3d(calc(var(--mx,0) * -22px + var(--scrollv,0) * 70px), calc(var(--my,0) * -18px - var(--scrollv,0) * 50px), 0);
+}
+.foil-blob.b3 {
+  width: 42vw; height: 42vw; bottom: -14vh; left: 8vw;
+  background: radial-gradient(circle at 40% 60%, var(--f-guava), transparent 70%);
+  animation: fz-blob-c 24s var(--settle) infinite .6s, fz-hue 30s linear infinite;
+  transform: translate3d(calc(var(--mx,0) * 18px), calc(var(--my,0) * 24px - var(--scrollv,0) * 80px), 0);
+}
+.foil-blob.b4 {
+  width: 38vw; height: 38vw; bottom: 2vh; right: 2vw;
+  background: radial-gradient(circle at 50% 50%, var(--f-apple), transparent 70%);
+  animation: fz-blob-d 28s var(--settle) infinite 2s, fz-hue 36s linear infinite reverse;
+  transform: translate3d(calc(var(--mx,0) * -16px), calc(var(--my,0) * -16px + var(--scrollv,0) * 60px), 0);
+}
+@media (max-width: 900px), (hover: none) {
+  .foil-blob.b3, .foil-blob.b4 { display: none; }
+  .foil-blob { filter: blur(46px) saturate(1.4); opacity: .4; }
+}
+
+/* A light sheen crosses tiltable cards as the pointer passes */
+[data-tilt]::after {
+  content: ""; position: absolute; inset: 0; z-index: 2; border-radius: inherit;
+  overflow: hidden; opacity: 0; pointer-events: none;
+  background: linear-gradient(115deg, transparent 34%, rgba(255,255,255,.6) 48%, transparent 62%);
+  transform: translateX(-130%) rotate(8deg);
+  transition: opacity var(--dur-2) var(--rise);
+}
+[data-tilt].fz-live::after { opacity: 1; animation: fz-sheen 1.15s var(--rise); }
+
+/* Five-way flavour cycle, colouring card grids from the real range */
+.product-card, .cat-card, .cat-card-sm { --card-flavour: var(--indigo); }
+.products-grid .product-card:nth-child(5n+1), .cat-card:nth-child(5n+1), .cat-card-sm:nth-child(5n+1) { --card-flavour: var(--f-citrus); }
+.products-grid .product-card:nth-child(5n+2), .cat-card:nth-child(5n+2), .cat-card-sm:nth-child(5n+2) { --card-flavour: var(--f-apple); }
+.products-grid .product-card:nth-child(5n+3), .cat-card:nth-child(5n+3), .cat-card-sm:nth-child(5n+3) { --card-flavour: var(--f-guava); }
+.products-grid .product-card:nth-child(5n+4), .cat-card:nth-child(5n+4), .cat-card-sm:nth-child(5n+4) { --card-flavour: var(--f-cobalt); }
+.products-grid .product-card:nth-child(5n+5), .cat-card:nth-child(5n+5), .cat-card-sm:nth-child(5n+5) { --card-flavour: var(--f-mineral); }
 
 @media (prefers-reduced-motion: reduce) {
   html { scroll-behavior: auto; }
@@ -2398,16 +2470,22 @@ img[src=""], img[data-awaiting-upload] { visibility: hidden; width: 100%; }
   transition: transform var(--dur-3) var(--rise), box-shadow var(--dur-3) var(--rise);
 }
 .cat-card-sm::after, .cat-card::after { content: none; }
-.cat-card-sm:hover, .cat-card:hover { transform: translateY(-6px); box-shadow: var(--neo-3); }
+.cat-card-sm:hover, .cat-card:hover {
+  transform: translateY(-6px);
+  box-shadow: var(--neo-3), 0 14px 34px -16px var(--card-flavour, var(--indigo));
+}
 .cat-card-sm:active, .cat-card:active { transform: none; box-shadow: var(--neo-in); }
 .ci, .cat-icon {
   position: relative; z-index: 1;
   display: grid; place-items: center; width: 56px; height: 56px;
   border-radius: 50%; font-size: 1.5rem;
   background: var(--paper); box-shadow: var(--neo-in);
-  transition: transform var(--dur-3) var(--fizz);
+  transition: transform var(--dur-3) var(--fizz), box-shadow var(--dur-3) var(--fizz);
 }
-.cat-card-sm:hover .ci, .cat-card:hover .cat-icon { transform: translateZ(20px) scale(1.06); }
+.cat-card-sm:hover .ci, .cat-card:hover .cat-icon {
+  transform: translateZ(20px) scale(1.06);
+  box-shadow: var(--neo-in), 0 0 0 3px color-mix(in srgb, var(--card-flavour, var(--indigo)) 30%, transparent);
+}
 .ci svg, .cat-icon svg { width: 28px; height: 28px; color: var(--indigo); }
 .cn, .cat-name {
   position: relative; z-index: 1;
@@ -2719,8 +2797,17 @@ img[src=""], img[data-awaiting-upload] { visibility: hidden; width: 100%; }
 .product-card:hover {
   transform: translateY(-8px) translateZ(28px);
   border-color: transparent;
-  box-shadow: var(--sink-3), 0 0 44px rgba(52,50,200,.10);
+  box-shadow: var(--sink-3), 0 16px 40px -16px var(--card-flavour, var(--indigo));
 }
+/* Flavour rail, drawn from the card's own accent colour */
+.product-card::before {
+  content: ""; position: absolute; top: 0; left: 16px; right: 16px; height: 3px; z-index: 2;
+  border-radius: 0 0 5px 5px;
+  background: var(--card-flavour, var(--indigo));
+  transform: scaleX(0); transform-origin: 50% 0;
+  transition: transform var(--dur-3) var(--fizz);
+}
+.product-card:hover::before { transform: scaleX(1); }
 /* The lit well — product photography reads true on it */
 .p-img-wrap {
   position: relative; overflow: hidden;
@@ -2775,7 +2862,10 @@ img[src=""], img[data-awaiting-upload] { visibility: hidden; width: 100%; }
   box-shadow: 0 4px 14px rgba(52,50,200,.34);
   transition: transform var(--dur-2) var(--fizz), filter var(--dur-2) var(--rise);
 }
-.btn-qadd:hover { transform: translateY(-2px); filter: brightness(1.06); }
+.btn-qadd:hover {
+  transform: translateY(-2px); filter: brightness(1.06);
+  box-shadow: 0 10px 22px -10px var(--card-flavour, var(--indigo));
+}
 .btn-qadd.in-cart { background: var(--indigo); color: #fff; }
 
 .p-info { display: flex; flex-direction: column; gap: 5px; padding: 15px 12px 13px; }
@@ -13649,11 +13739,30 @@ document.addEventListener('DOMContentLoaded', function() {
     }
   }
 
+  /* ══ 3b · LIQUID FOIL ════════════════════════════════════════════
+     A soft field of colour behind the paper, built from the product
+     range's own flavours. Drifts on its own and leans with the
+     pointer and scroll position via the --mx/--my/--scrollv channels
+     channels() already publishes.                                   */
+  function liquidFoil() {
+    if (reduce || document.getElementById('liquidFoil')) return;
+    var field = document.createElement('div');
+    field.id = 'liquidFoil';
+    var count = LOW ? 2 : 4;
+    for (var i = 1; i <= count; i++) {
+      var blob = document.createElement('div');
+      blob.className = 'foil-blob b' + i;
+      field.appendChild(blob);
+    }
+    document.body.insertBefore(field, document.body.firstChild);
+  }
+
   /* ══ 4 · WIRING ══════════════════════════════════════════════════ */
   function boot() {
     startWater();
     channels();
     bubbles();
+    liquidFoil();
     scanTilt();
     magnetise();
 
