@@ -3,10 +3,12 @@
 // Place this file in ROOT of your GitHub Pages repo
 // ============================================================
 
-const CACHE_NAME = 'ascovita-pwa-v2-bloom';
+const CACHE_NAME = 'ascovita-pwa-v3-merged';
 const OFFLINE_URL = '/offline.html';
 
 // Files to cache on install (your core pages)
+// Note: CSS/JS are now inlined directly in index.html, so they no longer
+// need separate cache entries here.
 const CORE_FILES = [
   '/',
   '/index.html',
@@ -16,13 +18,6 @@ const CORE_FILES = [
   '/contact',
   '/faq',
   '/offline.html',
-  '/assets/css/01-core.css',
-  '/assets/css/02-shell.css',
-  '/assets/css/03-home.css',
-  '/assets/css/04-commerce.css',
-  '/assets/css/05-pages.css',
-  '/assets/css/06-responsive.css',
-  '/assets/js/bloom-engine.js',
   '/assets/ascofizz-logo.svg',
   '/assets/ascofizz-mark.svg',
   '/assets/favicon.svg'
