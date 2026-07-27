@@ -6,4 +6,4 @@ Disallow: /admin.html
 Disallow: /offline.html
 Disallow: /free/
 
-Sitemap: https://www.ascovita.com/sitemap.xml
+Sitemap: https://www.ascofizz.com/sitemap.xml
