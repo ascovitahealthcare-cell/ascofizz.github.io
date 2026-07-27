@@ -1,131 +1,125 @@
 /* ════════════════════════════════════════════════════════════════════
-   ASCOFIZZ · EFFERVESCENT BLOOM — 01 · CORE
-   Tokens · reset · type · water column · aluminium · motion primitives
+   ASCOFIZZ · SOFT WHITE — 01 · CORE
+   Tokens · reset · type · neumorphic material · motion
 
-   THESIS  The site is the inside of a glass of water with a tablet
-           dropped in it. Not a wellness page about effervescence — the
-           effervescence itself, running as the interface.
-   WORLD   Mineral-water ground, light from the surface above, depth
-           below. Components are machined aluminium tube walls and foil
-           seals. Product photography sits on lit specimen plates.
-           Flavour colour blooms through the water and owns whole
-           regions: citrus, green apple, guava, cobalt.
+   THESIS  White paper, softly pressed. Nothing is drawn on the surface —
+           everything is raised out of it or sunk into it. The only
+           colour on the page is the logo's own: indigo, with a green
+           that appears exactly where Ascovita signs its name.
    ════════════════════════════════════════════════════════════════════ */
 
 :root {
-  /* ── The water column (top = surface light, bottom = depth) ── */
-  --w-surface: #0E5A5E;
-  --w-upper:   #0A4247;
-  --w-mid:     #072E36;
-  --w-deep:    #041D24;
-  --w-abyss:   #02141A;
+  /* ── The surface. One tone; light and shadow do all the work. ── */
+  --paper:    #F1F3F8;   /* the page */
+  --paper-hi: #FFFFFF;   /* raised faces catch this */
+  --paper-lo: #E4E7F0;   /* sunk faces fall to this */
+  --white:    #FFFFFF;
 
-  /* ── Flavour blooms — real product flavours, each owns regions ── */
-  --f-citrus:  #FF8A3D;   /* Vitamin C · Glutathione · L-Carnitine — orange */
-  --f-apple:   #8EE05A;   /* ACV + Moringa — green apple                    */
-  --f-guava:   #FF5C82;   /* B12 + Biotin — guava                           */
-  --f-cobalt:  #4A9BFF;   /* B12 · D3 · Magnesium — cobalt                  */
-  --f-mineral: #17E0C0;   /* the water itself — connective tissue           */
-  --f-mineral-d: #0FA891;
-  --seal:      #E8B33C;   /* foil seal / certification gold                 */
+  /* ── Ink, sampled from the logo artwork ── */
+  --ink:      #070B23;   /* the A — near-black navy      */
+  --navy:     #171C63;   /* mid wordmark                 */
+  --indigo:   #3432C8;   /* the bubbles, the ZZ — accent */
+  --indigo-lo:#2825A8;
+  --indigo-hi:#5B58E4;
+  --green:    #2A6614;   /* "powered by Ascovita"        */
+  --green-hi: #3A8A1D;
 
-  /* ── Aluminium (the tube wall) ── */
-  --al-hi:   #C9D6D6;
-  --al-mid:  #8FA3A5;
-  --al-low:  #55686C;
-  --al-dark: #2C3B40;
-  --al-brush: repeating-linear-gradient(92deg,
-                rgba(255,255,255,.055) 0 1px, rgba(0,0,0,.04) 1px 2px,
-                rgba(255,255,255,.018) 2px 4px, rgba(0,0,0,.015) 4px 6px);
+  /* ── Text ── */
+  --t-hi:  #0B1030;
+  --t-mid: #414A72;
+  --t-low: #545C80;
+  --t-dim: #5E6689;
 
-  /* ── Ink on water ── */
-  --t-hi:  #F4FEFB;
-  --t-mid: #A8C8C7;
-  --t-low: #93B7B8;
-  --t-dim: #7EA3A5;
-  --t-onlight: #06272B;   /* text placed on a specimen plate */
+  /* ── Soft shadow, tinted with the navy rather than black ── */
+  --sh-d: rgba(23,29,90,.13);
+  --sh-d2:rgba(23,29,90,.09);
+  --sh-l: #FFFFFF;
 
-  /* ── Submerged surfaces ── */
-  --sub-0: rgba(255,255,255,.035);
-  --sub-1: rgba(255,255,255,.062);
-  --sub-2: rgba(255,255,255,.095);
-  --plate: linear-gradient(168deg, #FBFEFD 0%, #EDF5F4 46%, #DCE9E8 100%);
-  --ink-panel: rgba(3,20,25,.58);
+  /* Neumorphic elevation. Raised = light top-left, shadow bottom-right. */
+  --neo-1: 3px 3px 7px var(--sh-d),  -3px -3px 7px var(--sh-l);
+  --neo-2: 6px 6px 14px var(--sh-d), -6px -6px 14px var(--sh-l);
+  --neo-3: 10px 10px 24px var(--sh-d), -8px -8px 20px var(--sh-l);
+  --neo-4: 16px 16px 38px var(--sh-d), -12px -12px 30px var(--sh-l);
+  --neo-in:    inset 3px 3px 7px var(--sh-d), inset -3px -3px 7px var(--sh-l);
+  --neo-in-lg: inset 6px 6px 13px var(--sh-d), inset -5px -5px 11px var(--sh-l);
+  --lit-indigo: 0 6px 18px rgba(52,50,200,.24);
+  --lit-green:  0 6px 18px rgba(42,102,20,.20);
 
-  /* ── Edges: aluminium bevel, lit from the water surface above ── */
-  --bevel: inset 0 1px 0 rgba(255,255,255,.26),
-           inset 0 -1px 0 rgba(0,0,0,.42),
-           inset 1px 0 0 rgba(255,255,255,.07),
-           inset -1px 0 0 rgba(0,0,0,.20);
-  --edge:    rgba(163,208,206,.16);
-  --edge-hi: rgba(200,240,238,.30);
+  /* Hairlines, used sparingly — the shadow is the edge */
+  --edge:    rgba(23,29,90,.07);
+  --edge-hi: rgba(23,29,90,.12);
 
-  /* ── Depth: shadows carry offset + soft blur, tinted with the water ── */
-  --sink-1: 0 2px 4px rgba(2,16,20,.42), 0 6px 16px rgba(2,20,26,.34);
-  --sink-2: 0 6px 12px rgba(2,16,20,.46), 0 20px 44px rgba(2,20,26,.40);
-  --sink-3: 0 14px 26px rgba(2,16,20,.50), 0 40px 90px rgba(2,20,26,.46);
-  --sink-4: 0 24px 44px rgba(2,16,20,.54), 0 70px 150px rgba(2,20,26,.52);
-  --lit-mineral: 0 6px 20px rgba(23,224,192,.26), 0 18px 48px rgba(23,224,192,.14);
-  --lit-seal:    0 6px 20px rgba(232,179,60,.28), 0 18px 48px rgba(232,179,60,.14);
-
-  /* ── Motion: bubbles rise fast then settle; nothing eases linearly ── */
+  /* ── Motion — soft, no bounce ── */
   --rise:   cubic-bezier(.16,1,.3,1);
-  --fizz:   cubic-bezier(.2,1.06,.32,1);
-  --settle: cubic-bezier(.4,0,.15,1);
-  --dur-1: .16s; --dur-2: .32s; --dur-3: .58s; --dur-4: .9s;
+  --fizz:   cubic-bezier(.2,1.02,.3,1);
+  --settle: cubic-bezier(.4,0,.2,1);
+  --dur-1: .16s; --dur-2: .3s; --dur-3: .55s; --dur-4: .85s;
 
-  /* ── Geometry: tube radii — tight inside, soft outside ── */
-  --r-xs: 6px; --r-sm: 10px; --r-md: 16px; --r-lg: 24px; --r-xl: 32px; --r-pill: 999px;
-  --depth: 1300px;
+  /* ── Geometry — generous, soft ── */
+  --r-xs: 8px; --r-sm: 12px; --r-md: 18px; --r-lg: 26px; --r-xl: 36px; --r-pill: 999px;
+  --depth: 1400px;
   --gutter: clamp(18px, 4.2vw, 44px);
-  --shell: 1300px;
+  --shell: 1280px;
 
-  /* ── Faces ── */
-  --font-display: 'Bricolage Grotesque', 'Arial Narrow', sans-serif;
+  /* ── Faces. Jost is geometric like the wordmark. ── */
+  --font-display: 'Jost', system-ui, sans-serif;
   --font-ui:      'Schibsted Grotesk', system-ui, sans-serif;
   --font-body:    'Schibsted Grotesk', system-ui, sans-serif;
 
   /* ══ LEGACY TOKEN BRIDGE ══════════════════════════════════════════
-     ~1,100 inline styles in the markup call these names. They are
-     re-pointed into the water world so every legacy call site inherits
-     the rebuild instead of fighting it. Do not delete.               */
-  --bg: var(--w-deep);          --bg-2: var(--w-mid);
-  --white: var(--t-hi);         --hi: rgba(255,255,255,.20);
-  --lo: rgba(0,0,0,.44);
-  --ink: var(--t-hi);           --ink-2: var(--t-mid);   --ink-3: var(--t-low);
+     ~1,100 inline styles in the markup call these names. Re-pointed at
+     the soft-white world so every legacy call site inherits it.       */
+  --bg: var(--paper);           --bg-2: var(--paper);
+  --hi: var(--paper-hi);        --lo: var(--sh-d);
+  --ink-2: var(--t-mid);        --ink-3: var(--t-low);
   --line: var(--edge);
-  --green: var(--f-mineral);    --green-d: var(--f-mineral-d);  --green-l: #6BF0DA;
-  --gold: var(--seal);
-  --green-mid: var(--f-mineral-d);  --green-light: #6BF0DA;
-  --green-pale: var(--sub-1);       --green-wash: var(--sub-0);
-  --gold-light: #F5CC6B;            --gold-pale: rgba(232,179,60,.14);
-  --amber: var(--seal);
-  --cream: var(--sub-1);            --off-white: var(--sub-0);
-  --dark: var(--t-hi);              --text: var(--t-hi);
-  --gray: var(--t-mid);             --gray-3: var(--t-low);
-  --light-gray: var(--sub-1);
-  --success: var(--f-mineral);      --red: var(--f-guava);
-  --coral: var(--f-mineral);        --coral-dark: var(--f-mineral-d);  --coral-light: #6BF0DA;
-  --brand-green: var(--f-mineral);
-  --glass: var(--sub-1);            --glass-bg: var(--sub-1);
-  --glass-bg-dark: var(--ink-panel);
-  --glass-border: var(--edge);      --glass-blur: 22px;
-  --neo-surface: var(--sub-1);      --neo-light: rgba(255,255,255,.16); --neo-dark: rgba(0,0,0,.46);
-  --neo-shadow: var(--sink-2);      --neo-shadow-sm: var(--sink-1);
-  --neo-shadow-in: inset 0 2px 12px rgba(0,0,0,.44);
-  --radius: var(--r-md);            --radius-sm: var(--r-sm);
-  --shadow: var(--sink-1);          --shadow-xs: var(--sink-1);  --shadow-sm: var(--sink-1);
-  --shadow-md: var(--sink-2);       --shadow-lg: var(--sink-3);  --shadow-xl: var(--sink-4);
-  --shadow-3d: var(--sink-2);       --shadow-gold: var(--lit-seal); --shadow-green: var(--lit-mineral);
-  --shadow-inner: inset 0 2px 12px rgba(0,0,0,.42);
+  --green-d: var(--green);      --green-l: var(--green-hi);
+  --gold: var(--indigo);
+  --green-mid: var(--green);    --green-light: var(--green-hi);
+  --green-pale: var(--paper);   --green-wash: var(--paper);
+  --gold-light: var(--indigo-hi); --gold-pale: rgba(52,50,200,.10);
+  --amber: var(--indigo);
+  --cream: var(--paper);        --off-white: var(--paper);
+  --dark: var(--t-hi);          --text: var(--t-hi);
+  --gray: var(--t-mid);         --gray-3: var(--t-low);
+  --light-gray: var(--paper-lo);
+  --success: var(--green);      --red: #C0304A;
+  --coral: var(--indigo);       --coral-dark: var(--indigo-lo);  --coral-light: var(--indigo-hi);
+  --brand-green: var(--indigo);
+  --glass: var(--paper);        --glass-bg: rgba(255,255,255,.72);
+  --glass-bg-dark: rgba(255,255,255,.86);
+  --glass-border: var(--edge);  --glass-blur: 18px;
+  --neo-surface: var(--paper);  --neo-light: var(--paper-hi); --neo-dark: var(--sh-d);
+  --neo-shadow: var(--neo-2);   --neo-shadow-sm: var(--neo-1);
+  --neo-shadow-in: var(--neo-in);
+  --radius: var(--r-md);        --radius-sm: var(--r-sm);
+  --shadow: var(--neo-1);       --shadow-xs: var(--neo-1);  --shadow-sm: var(--neo-1);
+  --shadow-md: var(--neo-2);    --shadow-lg: var(--neo-3);  --shadow-xl: var(--neo-4);
+  --shadow-3d: var(--neo-2);    --shadow-gold: var(--lit-indigo); --shadow-green: var(--lit-green);
+  --shadow-inner: var(--neo-in);
+  --seal: var(--indigo);
+  --f-mineral: var(--indigo);   --f-mineral-d: var(--indigo-lo);
+  --f-citrus: var(--indigo);    --f-apple: var(--green);
+  --f-guava: #C0304A;           --f-cobalt: var(--navy);
+  --al-brush: none;
+  --ink-panel: var(--paper);
+  --plate: var(--paper);
+  --sub-0: var(--paper);        --sub-1: var(--paper);       --sub-2: var(--paper-lo);
+  --w-surface: var(--paper);    --w-upper: var(--paper);     --w-mid: var(--paper);
+  --w-deep: var(--paper);       --w-abyss: var(--paper);
+  --t-onlight: var(--t-hi);
+  --bevel: none;
+  --sink-1: var(--neo-1);       --sink-2: var(--neo-2);
+  --sink-3: var(--neo-3);       --sink-4: var(--neo-4);
+  --al-hi: var(--paper-hi);     --al-mid: var(--t-dim);      --al-low: var(--t-low);
+  --al-dark: var(--t-mid);
   --transition:        all var(--dur-2) var(--rise);
   --transition-smooth: all var(--dur-2) var(--settle);
-  --transition-spring: all .48s var(--fizz);
+  --transition-spring: all .45s var(--fizz);
   --transition-fast:   all var(--dur-1) var(--settle);
 
-  /* Runtime channels written by the bloom engine */
   --mx: 0; --my: 0; --scrollv: 0; --rx: 0deg; --ry: 0deg; --drift: 0px;
-  --bloom: var(--f-mineral);      /* the flavour currently blooming */
+  --bloom: var(--indigo);
 }
 
 /* ── RESET ─────────────────────────────────────────────────────── */
@@ -134,15 +128,16 @@
 html {
   -webkit-text-size-adjust: 100%;
   scroll-behavior: smooth;
-  scrollbar-color: var(--f-mineral-d) rgba(0,0,0,.4);
+  scrollbar-color: #C3C9DC transparent;
+  background: var(--paper);
 }
 body {
   font-family: var(--font-body);
   font-size: 16.5px;
-  line-height: 1.6;
+  line-height: 1.62;
   font-variant-numeric: tabular-nums;
   color: var(--t-mid);
-  background: var(--w-abyss);
+  background: var(--paper);
   overflow-x: hidden;
   min-height: 100dvh;
   -webkit-font-smoothing: antialiased;
@@ -157,86 +152,78 @@ a { color: inherit; text-decoration: none; -webkit-tap-highlight-color: transpar
 ul, ol { list-style: none; }
 table { border-collapse: collapse; width: 100%; }
 hr { border: none; height: 1px; background: var(--edge); }
-::selection { background: rgba(23,224,192,.32); color: #fff; }
-:focus-visible { outline: 2px solid var(--f-mineral); outline-offset: 3px; border-radius: 4px; }
+::selection { background: rgba(52,50,200,.16); color: var(--ink); }
+:focus-visible { outline: 2px solid var(--indigo); outline-offset: 3px; border-radius: 4px; }
 
-::-webkit-scrollbar { width: 10px; height: 10px; }
-::-webkit-scrollbar-track { background: rgba(0,0,0,.42); }
+::-webkit-scrollbar { width: 11px; height: 11px; }
+::-webkit-scrollbar-track { background: var(--paper); }
 ::-webkit-scrollbar-thumb {
-  background: linear-gradient(180deg, #1AA894, #0B6357);
-  border-radius: 99px; border: 3px solid transparent; background-clip: padding-box;
+  background: #C6CBDE; border-radius: 99px;
+  border: 3px solid var(--paper); background-clip: padding-box;
 }
-::-webkit-scrollbar-thumb:hover { background: linear-gradient(180deg, var(--f-mineral), #0E8C7B); background-clip: padding-box; }
+::-webkit-scrollbar-thumb:hover { background: #A9B0CA; background-clip: padding-box; }
 
 input::placeholder, textarea::placeholder { color: var(--t-dim); }
-input[type=checkbox], input[type=radio] { accent-color: var(--f-mineral); width: 17px; height: 17px; cursor: pointer; }
-input[type=range] { accent-color: var(--f-mineral); }
+input[type=checkbox], input[type=radio] { accent-color: var(--indigo); width: 17px; height: 17px; cursor: pointer; }
+input[type=range] { accent-color: var(--indigo); }
 
-/* Native selects keep their UA skin unless the appearance is reset —
-   without this they render as white plates in the middle of the water. */
 select {
   appearance: none; -webkit-appearance: none; -moz-appearance: none;
   padding-right: 38px;
-  background-color: #06282C;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1.5 6 6.5 11 1.5' stroke='%2317E0C0' stroke-width='1.8' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
-  background-repeat: no-repeat;
-  background-position: right 14px center;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1.5 6 6.5 11 1.5' stroke='%233432C8' stroke-width='1.8' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+  background-repeat: no-repeat; background-position: right 14px center;
   color: var(--t-hi);
 }
-select option { background: #06282C; color: var(--t-hi); }
+select option { background: #fff; color: var(--t-hi); }
 
-/* Keyboard escape hatch — first tab stop on the page */
 .skip-link {
   position: fixed; top: -80px; left: 16px; z-index: 100000;
   padding: 12px 22px; border-radius: var(--r-pill);
-  background: var(--f-mineral); color: #04231F; font-weight: 700;
+  background: var(--indigo); color: #fff; font-weight: 600;
   transition: top var(--dur-2) var(--rise);
 }
 .skip-link:focus { top: 16px; }
 
 /* ── TYPE ──────────────────────────────────────────────────────────
-   Bricolage Grotesque set tight and heavy for display — the compressed
-   print on a supplement tube. Schibsted Grotesk carries everything
-   else. Emphasis comes from weight and size, never from gradient fill. */
+   Jost, light and open, echoing the wordmark's geometry. Emphasis is
+   scale and space, not weight piled on colour.                      */
 h1, h2, h3, h4, h5, h6 {
   font-family: var(--font-display);
-  font-weight: 700;
-  color: var(--t-hi);
-  line-height: 1.02;
-  letter-spacing: -.035em;
+  font-weight: 400;
+  color: var(--ink);
+  line-height: 1.08;
+  letter-spacing: -.02em;
   text-wrap: balance;
 }
-h1 { font-size: clamp(2.6rem, 6.4vw, 5.6rem); font-weight: 800; letter-spacing: -.048em; }
-h2 { font-size: clamp(1.95rem, 4.2vw, 3.4rem); letter-spacing: -.042em; }
-h3 { font-size: clamp(1.25rem, 2.3vw, 1.85rem); letter-spacing: -.03em; }
-h4 { font-size: 1.08rem; letter-spacing: -.02em; }
-p  { color: var(--t-mid); text-wrap: pretty; max-width: 72ch; }
-strong, b { color: var(--t-hi); font-weight: 700; }
+h1 { font-size: clamp(2.4rem, 5.6vw, 4.6rem); font-weight: 300; letter-spacing: -.03em; }
+h2 { font-size: clamp(1.85rem, 3.8vw, 3rem);  font-weight: 300; letter-spacing: -.028em; }
+h3 { font-size: clamp(1.2rem, 2.1vw, 1.65rem); font-weight: 400; letter-spacing: -.02em; }
+h4 { font-size: 1.05rem; font-weight: 500; letter-spacing: -.01em; }
+p  { color: var(--t-mid); text-wrap: pretty; max-width: 70ch; }
+strong, b { color: var(--ink); font-weight: 600; }
 
-/* The one named kicker in the system — a foil-stamped tube marking */
+/* The one kicker in the system — Ascovita's own signature colour */
 .section-label, .sec-overline, .cf-section-label {
   display: inline-block;
   font-family: var(--font-ui);
-  font-size: .70rem; font-weight: 700; letter-spacing: .16em; text-transform: uppercase;
-  color: var(--seal);
-  margin-bottom: 14px;
-  padding-bottom: 7px;
-  border-bottom: 1px solid rgba(232,179,60,.32);
+  font-size: .68rem; font-weight: 600; letter-spacing: .22em; text-transform: uppercase;
+  color: var(--green);
+  margin-bottom: 16px;
 }
 .section-title, .cf-section-title {
   font-family: var(--font-display);
-  font-size: clamp(2.1rem, 4.6vw, 3.7rem);
-  font-weight: 800; line-height: 1.0; letter-spacing: -.046em;
-  color: var(--t-hi);
+  font-size: clamp(2rem, 4.2vw, 3.2rem);
+  font-weight: 300; line-height: 1.06; letter-spacing: -.03em;
+  color: var(--ink);
   margin-bottom: 18px;
   text-wrap: balance;
 }
 .section-sub, .cf-section-sub {
-  font-size: clamp(.98rem, 1.3vw, 1.1rem);
-  color: var(--t-low); max-width: 68ch; line-height: 1.66;
+  font-size: clamp(.95rem, 1.25vw, 1.06rem);
+  color: var(--t-low); max-width: 64ch; line-height: 1.7;
 }
 .text-center { text-align: center; }
-.text-center .section-sub, .text-center .cf-section-sub { margin-left: auto; margin-right: auto; }
+.text-center .section-sub, .text-center .cf-section-sub,
 .text-center p { margin-left: auto; margin-right: auto; }
 
 /* ── SHELL ─────────────────────────────────────────────────────── */
@@ -247,82 +234,32 @@ strong, b { color: var(--t-hi); font-weight: 700; }
 }
 .section {
   position: relative;
-  padding: clamp(72px, 9.5vw, 148px) 0 clamp(64px, 8.5vw, 132px);
+  padding: clamp(72px, 9vw, 140px) 0 clamp(64px, 8vw, 124px);
   perspective: var(--depth);
 }
 .section > .container { transform-style: preserve-3d; }
+/* No rules between sections — space separates them */
+.section + .section::before { content: none; }
 
-/* Waterline — where one depth stratum meets the next */
-.section + .section::before {
-  content: ''; position: absolute; inset: 0 0 auto; height: 1px;
-  background: linear-gradient(90deg, transparent, rgba(23,224,192,.22) 22%, rgba(23,224,192,.22) 78%, transparent);
-}
+/* Floating bubbles, the logo's own mark, drifting behind the page */
+#bloomCanvas, #shaderHeroCanvas { display: none; }
+body::before, body::after { content: none; }
 
-/* ══ WATER COLUMN ═════════════════════════════════════════════════
-   The fixed ground: light entering from the surface above, falling off
-   into depth. The WebGL canvas paints bubbles and bloom on top of it. */
-#bloomCanvas {
-  position: fixed; inset: 0; z-index: -3;
-  width: 100%; height: 100%; pointer-events: none;
-}
-body::before {
-  content: ''; position: fixed; inset: 0; z-index: -4; pointer-events: none;
-  background:
-    radial-gradient(120% 62% at 50% -14%, rgba(120,255,238,.20), transparent 62%),
-    radial-gradient(80% 46% at 8% 6%,  rgba(23,224,192,.10), transparent 64%),
-    radial-gradient(70% 46% at 94% 22%, rgba(74,155,255,.09), transparent 66%),
-    linear-gradient(180deg,
-      var(--w-surface) 0%, var(--w-upper) 12%, var(--w-mid) 38%,
-      var(--w-deep) 70%, var(--w-abyss) 100%);
-  background-attachment: fixed;
-}
-/* Caustics + grain: the light pattern on the wall of a filled glass */
-body::after {
-  content: ''; position: fixed; inset: 0; z-index: -2; pointer-events: none; opacity: .40;
-  background-image:
-    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.8' numOctaves='3'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)' opacity='.34'/%3E%3C/svg%3E");
-  mix-blend-mode: overlay;
-}
-
-/* ══ ALUMINIUM ════════════════════════════════════════════════════
-   The tube wall. Brushed metal, a real bevel lit from above, sunk into
-   the water. Used for every card in the system.                      */
-.al {
-  position: relative;
-  background:
-    var(--al-brush),
-    linear-gradient(166deg, rgba(255,255,255,.11) 0%, rgba(255,255,255,.045) 34%, rgba(0,0,0,.16) 100%),
-    var(--ink-panel);
-  border: 1px solid var(--edge);
+/* ══ NEUMORPHIC MATERIAL ══════════════════════════════════════════
+   Three states only: raised, flush, pressed. A card is the paper
+   itself lifted — never a box drawn on top of it.                   */
+.neo, .al {
+  background: var(--paper);
+  border: none;
   border-radius: var(--r-lg);
-  box-shadow: var(--sink-2), var(--bevel);
+  box-shadow: var(--neo-2);
 }
-/* Specular band that travels the metal as the card tilts */
-.al-spec { position: relative; overflow: hidden; }
-.al-spec::after {
-  content: ''; position: absolute; inset: -50% -30%;
-  background: linear-gradient(102deg, transparent 34%, rgba(255,255,255,.20) 48%, rgba(255,255,255,.05) 54%, transparent 66%);
-  transform: translateX(-110%) rotate(4deg);
-  opacity: 0; pointer-events: none;
-}
-.al-spec:hover::after { animation: fz-spec 1s var(--rise) forwards; }
+.neo-in { background: var(--paper); border-radius: var(--r-lg); box-shadow: var(--neo-in); }
+.al-spec::after { content: none; }
+.plate { background: var(--paper); color: var(--t-hi); box-shadow: var(--neo-in); }
 
-/* ══ SPECIMEN PLATE ═══════════════════════════════════════════════
-   A lit white well. Product photography and anything that must read as
-   physical evidence sits here. Works for white-ground product shots
-   and cut-outs alike.                                                */
-.plate {
-  background: var(--plate);
-  color: var(--t-onlight);
-  box-shadow:
-    inset 0 1px 0 rgba(255,255,255,.9),
-    inset 0 -14px 30px rgba(6,39,43,.10),
-    0 0 30px rgba(210,255,250,.10);
-}
-.plate p, .plate .section-sub { color: #3C5F63; }
-
-/* ══ 3D SCENE ═════════════════════════════════════════════════════ */
-.a3-scene { perspective: var(--depth); perspective-origin: 50% 38%; }
+/* ══ 3D ═══════════════════════════════════════════════════════════ */
+.a3-scene { perspective: var(--depth); perspective-origin: 50% 40%; }
 [data-tilt], .tilt-3d {
   transform-style: preserve-3d;
   transition: transform var(--dur-3) var(--rise), box-shadow var(--dur-3) var(--rise);
@@ -332,159 +269,116 @@ body::after {
   transform: perspective(var(--depth)) rotateX(var(--tx,0deg)) rotateY(var(--ty,0deg)) translate3d(0,0,var(--pz,0px));
 }
 [data-tilt] > * { transform-style: preserve-3d; }
-.fz-z1 { transform: translateZ(16px); }
-.fz-z2 { transform: translateZ(34px); }
-.fz-z3 { transform: translateZ(56px); }
+.fz-z1 { transform: translateZ(14px); }
+.fz-z2 { transform: translateZ(28px); }
+.fz-z3 { transform: translateZ(46px); }
 
-/* ══ CONTROLS ═════════════════════════════════════════════════════
-   The primary action is a foil-sealed pill: the flavour bloom fills it,
-   the trailing mark sits in its own machined recess.                  */
+/* ══ CONTROLS ═════════════════════════════════════════════════════ */
 .btn-primary, .btn-gold, .btn-outline,
 .shader-btn-primary, .shader-btn-ghost {
-  position: relative; isolation: isolate;
-  display: inline-flex; align-items: center; justify-content: center; gap: 11px;
-  font-family: var(--font-ui); font-size: .90rem; font-weight: 700; letter-spacing: -.005em;
-  padding: 15px 26px; border-radius: var(--r-pill);
-  cursor: pointer; overflow: hidden;
-  transform-style: preserve-3d;
-  transition: transform var(--dur-2) var(--fizz), box-shadow var(--dur-2) var(--rise), filter var(--dur-2) var(--rise);
+  position: relative;
+  display: inline-flex; align-items: center; justify-content: center; gap: 10px;
+  font-family: var(--font-ui); font-size: .89rem; font-weight: 600; letter-spacing: .005em;
+  padding: 15px 28px; border-radius: var(--r-pill);
+  cursor: pointer; border: none;
+  transition: transform var(--dur-2) var(--fizz), box-shadow var(--dur-2) var(--rise),
+              background var(--dur-2) var(--rise), color var(--dur-2) var(--rise);
 }
-.btn-primary, .shader-btn-primary {
-  color: #032A25;
-  background: linear-gradient(178deg, #4CF5DA 0%, var(--f-mineral) 44%, #0FA189 100%);
-  box-shadow: var(--lit-mineral), var(--bevel);
+/* Primary: the one filled element on the page */
+.btn-primary, .shader-btn-primary, .btn-gold {
+  background: var(--indigo); color: #fff;
+  box-shadow: var(--lit-indigo);
 }
-.btn-gold {
-  color: #2A1D04;
-  background: linear-gradient(178deg, #FFDE8E 0%, var(--seal) 46%, #B8841E 100%);
-  box-shadow: var(--lit-seal), var(--bevel);
+.btn-primary:hover, .shader-btn-primary:hover, .btn-gold:hover {
+  background: var(--indigo-lo);
+  transform: translateY(-2px);
+  box-shadow: 0 10px 26px rgba(52,50,200,.30);
 }
-.btn-primary::before, .btn-gold::before, .shader-btn-primary::before {
-  content: ''; position: absolute; inset: 0; z-index: -1; border-radius: inherit;
-  background: linear-gradient(180deg, rgba(255,255,255,.42), rgba(255,255,255,0) 44%);
+.btn-primary:active, .shader-btn-primary:active, .btn-gold:active {
+  transform: translateY(0); box-shadow: var(--neo-in);
 }
-.btn-primary:hover, .btn-gold:hover, .shader-btn-primary:hover {
-  transform: translateY(-3px) translateZ(22px);
-  filter: brightness(1.06) saturate(1.05);
-}
-.btn-primary:active, .btn-gold:active, .shader-btn-primary:active { transform: translateY(0) scale(.975); }
-
+/* Secondary: raised paper */
 .btn-outline, .shader-btn-ghost {
-  color: var(--t-hi);
-  background: var(--al-brush), linear-gradient(170deg, rgba(255,255,255,.10), rgba(255,255,255,.02));
-  border: 1px solid var(--edge-hi);
-  box-shadow: var(--sink-1), var(--bevel);
+  background: var(--paper); color: var(--ink);
+  box-shadow: var(--neo-1);
 }
 .btn-outline:hover, .shader-btn-ghost:hover {
-  transform: translateY(-3px) translateZ(18px);
-  border-color: rgba(23,224,192,.46);
-  box-shadow: var(--sink-2), 0 0 30px rgba(23,224,192,.18), var(--bevel);
+  color: var(--indigo); transform: translateY(-2px); box-shadow: var(--neo-2);
 }
+.btn-outline:active, .shader-btn-ghost:active { transform: translateY(0); box-shadow: var(--neo-in); }
 button:disabled, .btn-primary:disabled, .btn-gold:disabled {
-  opacity: .42; cursor: not-allowed; transform: none !important; filter: saturate(.25);
+  opacity: .45; cursor: not-allowed; transform: none !important; box-shadow: none;
 }
-
-/* Trailing mark in its own recess — only on the page's leading actions */
-.nav-cta::after, .shader-btn-primary::after, .promo-card-cta::after {
-  content: '↗';
-  display: grid; place-items: center;
-  width: 25px; height: 25px; margin: -4px -8px -4px 2px;
-  border-radius: 50%; font-size: .74rem; line-height: 1;
-  background: rgba(3,42,37,.16);
-  box-shadow: inset 0 1px 0 rgba(255,255,255,.30), inset 0 -1px 0 rgba(0,0,0,.16);
-  transition: transform var(--dur-2) var(--fizz), background var(--dur-2) var(--rise);
-}
-.nav-cta:hover::after, .shader-btn-primary:hover::after, .promo-card-cta:hover::after {
-  transform: translate(2px,-2px) scale(1.09);
-  background: rgba(3,42,37,.26);
-}
+/* No decorative trailing marks in a minimal system */
+.nav-cta::after, .shader-btn-primary::after, .promo-card-cta::after { content: none; }
 [data-magnet] { transition: transform .2s var(--rise); }
 
-/* ══ REVEAL — everything surfaces like a bubble ═══════════════════ */
+/* ══ REVEAL ═══════════════════════════════════════════════════════ */
 [data-reveal] {
   opacity: 0;
   transform-style: preserve-3d;
-  transition: opacity .8s var(--rise), transform .95s var(--rise), filter .8s var(--rise);
-  filter: blur(7px);
+  transition: opacity .8s var(--rise), transform .9s var(--rise);
 }
-[data-reveal="up"],   .reveal-up  { transform: translate3d(0,42px,-60px); }
-[data-reveal="down"]              { transform: translate3d(0,-36px,-50px); }
-[data-reveal="left"]              { transform: perspective(var(--depth)) translate3d(-50px,0,-70px) rotateY(-10deg); }
-[data-reveal="right"]             { transform: perspective(var(--depth)) translate3d(50px,0,-70px) rotateY(10deg); }
-[data-reveal="scale"]             { transform: perspective(var(--depth)) scale(.92) translateZ(-70px); }
-[data-reveal="flip"]              { transform: perspective(var(--depth)) rotateX(-44deg) translateZ(-50px); transform-origin: 50% 100%; }
+[data-reveal="up"],   .reveal-up  { transform: translate3d(0,28px,0); }
+[data-reveal="down"]              { transform: translate3d(0,-24px,0); }
+[data-reveal="left"]              { transform: translate3d(-30px,0,0); }
+[data-reveal="right"]             { transform: translate3d(30px,0,0); }
+[data-reveal="scale"]             { transform: scale(.97); }
+[data-reveal="flip"]              { transform: perspective(var(--depth)) rotateX(-16deg); transform-origin: 50% 100%; }
 [data-reveal="fade"], .reveal-fade{ transform: none; }
 [data-reveal].revealed, .revealed, .in-view {
-  opacity: 1; filter: blur(0);
-  transform: perspective(var(--depth)) translate3d(0,0,0) rotateX(0) rotateY(0) scale(1);
+  opacity: 1; transform: translate3d(0,0,0) rotateX(0) rotateY(0) scale(1);
 }
-[data-delay="1"]{transition-delay:.06s} [data-delay="2"]{transition-delay:.12s}
-[data-delay="3"]{transition-delay:.18s} [data-delay="4"]{transition-delay:.24s}
-[data-delay="5"]{transition-delay:.30s} [data-delay="6"]{transition-delay:.36s}
+[data-delay="1"]{transition-delay:.05s} [data-delay="2"]{transition-delay:.1s}
+[data-delay="3"]{transition-delay:.15s} [data-delay="4"]{transition-delay:.2s}
+[data-delay="5"]{transition-delay:.25s} [data-delay="6"]{transition-delay:.3s}
 
-/* ══ AMBIENT ══════════════════════════════════════════════════════ */
+/* ══ AMBIENT — the logo's three bubbles, drifting ═════════════════ */
 .particle {
-  position: fixed; bottom: -20px; z-index: -1; border-radius: 50%;
+  position: fixed; bottom: -20px; z-index: 0; border-radius: 50%;
   pointer-events: none;
-  background: radial-gradient(circle at 34% 28%, rgba(255,255,255,.55), rgba(180,250,242,.14) 42%, rgba(120,220,210,.02) 70%) !important;
-  box-shadow: inset 0 0 6px rgba(255,255,255,.22), 0 0 12px rgba(120,240,225,.16);
-  opacity: .7; filter: blur(.4px);
+  background: rgba(52,50,200,.09) !important;
+  box-shadow: none;
   animation: fz-rise linear infinite;
 }
-.click-wave {
-  position: fixed; z-index: 99999; width: 10px; height: 10px; margin: -5px 0 0 -5px;
-  border-radius: 50%; pointer-events: none;
-  border: 1.5px solid rgba(120,255,238,.75);
-  animation: fz-wave .7s var(--rise) forwards;
-}
-.ripple-effect {
-  position: absolute; border-radius: 50%; pointer-events: none;
-  background: radial-gradient(circle, rgba(255,255,255,.5), rgba(255,255,255,0) 70%);
-  transform: scale(0); animation: fz-ripple .7s var(--rise) forwards;
-}
+.click-wave, .ripple-effect { display: none; }
 #scrollBar {
   position: fixed; top: 0; left: 0; height: 2px; width: 0; z-index: 9999; pointer-events: none;
-  background: linear-gradient(90deg, var(--f-mineral), var(--f-cobalt) 40%, var(--f-citrus) 72%, var(--seal));
-  box-shadow: 0 0 12px rgba(23,224,192,.7);
+  background: var(--indigo);
 }
 #pageTransition {
   position: fixed; inset: 0; z-index: 9998; pointer-events: none; opacity: 0;
-  background: radial-gradient(58% 58% at 50% 45%, rgba(23,224,192,.16), transparent 72%), var(--w-abyss);
-  backdrop-filter: blur(7px); -webkit-backdrop-filter: blur(7px);
+  background: var(--paper);
 }
-#pageTransition.show { animation: fz-curtain .6s var(--rise) forwards; }
+#pageTransition.show { animation: fz-curtain .5s var(--rise) forwards; }
 
 /* ══ KEYFRAMES ════════════════════════════════════════════════════ */
-@keyframes fz-spec    { 0%{transform:translateX(-110%) rotate(4deg);opacity:0} 18%{opacity:1} 100%{transform:translateX(110%) rotate(4deg);opacity:0} }
-@keyframes fz-wave    { to { width:170px; height:170px; margin:-85px 0 0 -85px; opacity:0; border-width:.5px } }
-@keyframes fz-ripple  { to { transform:scale(2.5); opacity:0 } }
-@keyframes fz-rise    { 0%{transform:translate3d(0,0,0) scale(.5);opacity:0}
-                        10%{opacity:.9}
-                        50%{transform:translate3d(16px,-52vh,0) scale(1)}
-                        90%{opacity:.55}
-                        100%{transform:translate3d(-10px,-106vh,0) scale(1.25);opacity:0} }
-@keyframes fz-curtain { 0%{opacity:0} 42%{opacity:1} 100%{opacity:0} }
+@keyframes fz-rise    { 0%{transform:translate3d(0,0,0) scale(.6);opacity:0}
+                        14%{opacity:1}
+                        86%{opacity:.7}
+                        100%{transform:translate3d(-14px,-108vh,0) scale(1.1);opacity:0} }
+@keyframes fz-curtain { 0%{opacity:0} 45%{opacity:1} 100%{opacity:0} }
 @keyframes fz-spin    { to { transform: rotate(360deg) } }
-@keyframes fz-bob     { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-13px)} }
-@keyframes fz-bob-z   { 0%,100%{transform:translate3d(0,0,0) rotateY(0)} 50%{transform:translate3d(0,-15px,26px) rotateY(5deg)} }
-@keyframes fz-drift   { 0%,100%{transform:translate3d(0,0,0)} 34%{transform:translate3d(26px,-20px,0)} 67%{transform:translate3d(-18px,15px,0)} }
+@keyframes fz-bob     { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-10px)} }
+@keyframes fz-bob-z   { 0%,100%{transform:translate3d(0,0,0)} 50%{transform:translate3d(0,-12px,18px)} }
+@keyframes fz-drift   { 0%,100%{transform:translate3d(0,0,0)} 34%{transform:translate3d(18px,-14px,0)} 67%{transform:translate3d(-12px,10px,0)} }
 @keyframes fz-shimmer { 0%{background-position:-220% 0} 100%{background-position:220% 0} }
 @keyframes fz-marquee { from{transform:translate3d(0,0,0)} to{transform:translate3d(-50%,0,0)} }
-@keyframes fz-pulse   { 0%,100%{opacity:.4;transform:scale(1)} 50%{opacity:.9;transform:scale(1.07)} }
-@keyframes fz-bump    { 0%{transform:scale(1)} 45%{transform:scale(1.5) rotate(-8deg)} 100%{transform:scale(1)} }
-@keyframes fz-dot     { 0%,100%{transform:scale(1);opacity:1} 50%{transform:scale(1.65);opacity:.4} }
-@keyframes fz-in      { from{opacity:0;transform:translate3d(0,22px,-30px)} to{opacity:1;transform:none} }
+@keyframes fz-pulse   { 0%,100%{opacity:.5;transform:scale(1)} 50%{opacity:.9;transform:scale(1.04)} }
+@keyframes fz-bump    { 0%{transform:scale(1)} 45%{transform:scale(1.35)} 100%{transform:scale(1)} }
+@keyframes fz-dot     { 0%,100%{transform:scale(1);opacity:1} 50%{transform:scale(1.5);opacity:.45} }
+@keyframes fz-in      { from{opacity:0;transform:translate3d(0,14px,0)} to{opacity:1;transform:none} }
 
 .fz-bob { animation: fz-bob 6s var(--settle) infinite; }
-.fz-in  { animation: fz-in .62s var(--rise) both; }
+.fz-in  { animation: fz-in .55s var(--rise) both; }
 
-/* Loading: skeletons shaped like the thing that is coming */
 .fz-skeleton, .ig-skeleton {
-  background: linear-gradient(100deg, rgba(255,255,255,.04) 20%, rgba(255,255,255,.11) 42%, rgba(255,255,255,.04) 64%);
+  background: linear-gradient(100deg, var(--paper-lo) 20%, #EFF1F7 42%, var(--paper-lo) 64%);
   background-size: 220% 100%;
-  animation: fz-shimmer 1.4s linear infinite;
+  animation: fz-shimmer 1.5s linear infinite;
   border-radius: var(--r-md);
-  border: 1px solid var(--edge);
+  box-shadow: var(--neo-in);
+  border: none;
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -493,6 +387,19 @@ button:disabled, .btn-primary:disabled, .btn-gold:disabled {
     animation-duration: .001ms !important; animation-iteration-count: 1 !important;
     transition-duration: .001ms !important; scroll-behavior: auto !important;
   }
-  [data-reveal] { opacity: 1 !important; transform: none !important; filter: none !important; }
+  [data-reveal] { opacity: 1 !important; transform: none !important; }
   .particle { display: none !important; }
+}
+
+/* ── Images awaiting their new links ────────────────────────────────
+   Every marketing photograph was cleared for re-upload. Until the
+   links land, show the empty well rather than a broken-image glyph. */
+img[src=""], img[data-awaiting-upload] { visibility: hidden; width: 100%; }
+.promo-card-media:has(img[src=""]),
+.promo-card-media:has(img[data-awaiting-upload]),
+.blog-img:has(img[src=""]), .pm-card-media:has(img[src=""]) {
+  border-radius: var(--r-md);
+  background: var(--paper);
+  box-shadow: var(--neo-in);
+  min-height: 120px;
 }

@@ -1,4 +1,29 @@
-# DESIGN.md — Ascofizz · "Effervescent Bloom"
+# DESIGN.md — Ascofizz · "Soft White"
+
+> **Superseded.** The "Effervescent Bloom" water world below was replaced by
+> **Soft White** at the client's direction: white ground, minimal colour taken
+> from the logo, minimalist neumorphism. The record of the current system is:
+>
+> - **Ground** `--paper #F1F3F8`. One tone. Every surface is that same paper
+>   raised out of the page (`--neo-1..4`) or pressed into it (`--neo-in`).
+>   There are almost no borders — the shadow is the edge.
+> - **Colour**, sampled from `assets/ascofizz-logo.png`: `--indigo #3432C8`
+>   (the three bubbles and the ZZ) is the single accent; `--green #2A6614`
+>   ("powered by Ascovita") appears only on kickers and confirmations;
+>   `--ink #070B23` for headings.
+> - **Type** Jost 200–500 for display, echoing the wordmark's geometry;
+>   Schibsted Grotesk for everything else.
+> - **Motion** the mark's own bubbles drifting up the page, a 4–5° paper flex
+>   under the pointer, and press-in feedback. No WebGL.
+> - **Imagery** every marketing and product image link was cleared for
+>   re-upload. `data-media-key` attributes are intact, so Admin → Site Images
+>   still drives them. Product cards show an indigo-bubble
+>   "image coming soon" plate until links land. Head `og:image` and JSON-LD
+>   still point at the old Wix URLs — replace those when the new links exist.
+>
+> Everything below describes the retired world and is kept as the record of
+> what this replaced.
+
 
 Recorded from the built storefront, not from intention. Source of truth is
 `assets/css/01-core.css`; everything below describes what that file and its

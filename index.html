@@ -1254,7 +1254,7 @@ best supplement brand 2024 2025, Ascofizz review, Ascofizz vs competitors India,
 
   <!-- Effervescent Bloom — type -->
   <link rel="icon" type="image/svg+xml" href="assets/favicon.svg">
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,300..800&family=Schibsted+Grotesk:ital,wght@0,400..800;1,400..700&display=swap">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Jost:wght@200;300;400;500;600&family=Schibsted+Grotesk:wght@400..700&display=swap">
 
   <!-- Effervescent Bloom — design system (rebuilt from scratch) -->
   <link rel="stylesheet" href="assets/css/01-core.css">
@@ -2175,7 +2175,7 @@ setInterval(function() { syncAppCartBadge(); syncAppWishBadge(); }, 2000);
 <nav class="navbar">
   <div class="nav-inner">
     <a href="#" class="nav-logo" onclick="showPage('home')">
-      <img data-media-key="site.logo" src="assets/ascofizz-logo.svg" alt="Ascofizz Logo" onerror="this.style.display='none';document.getElementById('logoFallback').style.display='flex'">
+      <img data-media-key="site.logo" src="assets/ascofizz-logo.png" alt="Ascofizz Logo" onerror="this.style.display='none';document.getElementById('logoFallback').style.display='flex'">
       <div id="logoFallback" class="nav-logo-fallback" style="display:none">
         <div class="nav-logo-leaf"><svg width="22" height="22"><use href="#ico-leaf"/></svg></div>
         <div>
@@ -2290,7 +2290,7 @@ setInterval(function() { syncAppCartBadge(); syncAppWishBadge(); }, 2000);
           <h3 class="promo-card-headline">Radiance<br>Begins Inside</h3>
           <button class="promo-card-cta" onclick="openProduct(1)">Shop Glutathione</button>
         </div>
-        <div class="promo-card-media"><img data-media-key="home.hero.slide1" src="https://i.ibb.co/pBY2WFQ1/6.png" alt="Glutathione Effervescent" loading="lazy"></div>
+        <div class="promo-card-media"><img data-media-key="home.hero.slide1" src="" data-awaiting-upload="true" alt="Glutathione Effervescent" loading="lazy"></div>
       </div>
 
       <div class="promo-card promo-card-2">
@@ -2300,7 +2300,7 @@ setInterval(function() { syncAppCartBadge(); syncAppWishBadge(); }, 2000);
           <h3 class="promo-card-headline">Stronger Immunity.<br>Better Energy.</h3>
           <button class="promo-card-cta" onclick="showShop('spirulina')">View Spirulina Range</button>
         </div>
-        <div class="promo-card-media"><img data-media-key="home.hero.slide2" src="https://static.wixstatic.com/media/f0adaf_d2f1f845cbe64f11ba4599fa5b047e7e~mv2.jpg" alt="Spirulina Combo" loading="lazy"></div>
+        <div class="promo-card-media"><img data-media-key="home.hero.slide2" src="" data-awaiting-upload="true" alt="Spirulina Combo" loading="lazy"></div>
       </div>
 
       <div class="promo-card promo-card-3">
@@ -2310,7 +2310,7 @@ setInterval(function() { syncAppCartBadge(); syncAppWishBadge(); }, 2000);
           <h3 class="promo-card-headline">The Foundation<br>of Daily Health</h3>
           <button class="promo-card-cta" onclick="openProduct(8)">Buy Multidiata</button>
         </div>
-        <div class="promo-card-media"><img data-media-key="home.hero.slide3" src="https://static.wixstatic.com/media/f0adaf_ab29bcd839104fbca2ce25f572dd0796~mv2.jpg" alt="Multidiata Multivitamin" loading="lazy"></div>
+        <div class="promo-card-media"><img data-media-key="home.hero.slide3" src="" data-awaiting-upload="true" alt="Multidiata Multivitamin" loading="lazy"></div>
       </div>
 
       <div class="promo-card promo-card-4">
@@ -3535,7 +3535,7 @@ function renderCheckoutSummary() {
 <div class="page" id="page-about" style="padding-top:70px">
 
   <!-- ABOUT HERO - Premium redesign -->
-  <div style="background:linear-gradient(165deg,#02141A 0%,#062E33 38%,#0B4A4E 74%,#0E5A5E 100%);color:white;padding:100px 0 80px;position:relative;overflow:hidden;--about-hero-bg:url('https://static.wixstatic.com/media/f0adaf_d2f1f845cbe64f11ba4599fa5b047e7e~mv2.jpg/v1/fill/w_1400,h_900,al_c,q_85,enc_avif,quality_auto/f0adaf_d2f1f845cbe64f11ba4599fa5b047e7e~mv2.jpg')">
+  <div style="background:linear-gradient(165deg,#02141A 0%,#062E33 38%,#0B4A4E 74%,#0E5A5E 100%);color:white;padding:100px 0 80px;position:relative;overflow:hidden;--about-hero-bg:none">
     <div id="aboutHeroBgLayer" style="position:absolute;inset:0;opacity:.06;background:var(--about-hero-bg) center/cover"></div>
     <!-- Animated dots decoration -->
     <div style="position:absolute;top:20%;right:5%;width:300px;height:300px;border-radius:50%;border:1px solid rgba(255,255,255,.06)"></div>
@@ -5148,7 +5148,7 @@ function updateAllProductCards() {
 
 // Updated: New products, GoKwik payment, Shiprocket integration
 
-const ASCOVITA_LOGO = "assets/ascofizz-logo.svg";
+const ASCOVITA_LOGO = "assets/ascofizz-logo.png";
 
 // GoKwik config is handled via backend (GOKWIK_APP_ID, GOKWIK_APP_SECRET) environment variables
 
@@ -5290,7 +5290,7 @@ const PRODUCTS = [
 
   {id:38, position:1, name:"Glutathione Effervescent Tablet", brand:"Ascofizz", category:"effervescent", tags:["featured","new","skin","effervescent"],
    price:650, salePrice:null, offer:"Price to be updated",
-   image:"https://i.ibb.co/pBY2WFQ1/6.png", image2:"", image3:"", image4:"", image5:"",
+   image:"", image2:"", image3:"", image4:"", image5:"",
    rating:4.5, reviews:0, stock:0, badge:"New",
    hasTiers:false,
    seoKeywords:["glutathione effervescent tablet India","skin brightening glutathione tablet","glutathione hyaluronic acid supplement","antioxidant skin tablet India","glow skin supplement India"],
@@ -5434,13 +5434,13 @@ function showToast(msg,type=''){const t=document.createElement('div');t.classNam
 // URLs back into this object — just don't reuse a specific product's photo.
 const NO_IMAGE_PLACEHOLDER = 'data:image/svg+xml;utf8,' + encodeURIComponent(
   '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 240">' +
-  '<rect width="240" height="240" fill="#F3F1EA"/>' +
-  '<g fill="none" stroke="#C9C3B4" stroke-width="2.5">' +
-  '<rect x="48" y="70" width="144" height="104" rx="8"/>' +
-  '<circle cx="82" cy="102" r="11"/>' +
-  '<path d="M48 156 L94 118 L128 146 L156 122 L192 156" />' +
+  '<rect width="240" height="240" fill="#F1F3F8"/>' +
+  '<g fill="#3432C8" opacity=".22">' +
+  '<circle cx="104" cy="96" r="17"/>' +
+  '<circle cx="142" cy="112" r="19"/>' +
+  '<circle cx="108" cy="136" r="14"/>' +
   '</g>' +
-  '<text x="120" y="200" text-anchor="middle" font-family="system-ui,sans-serif" font-size="13" fill="#A39D8C">No image yet</text>' +
+  '<text x="120" y="192" text-anchor="middle" font-family="system-ui,sans-serif" font-size="12" letter-spacing="1.6" fill="#7A82A4">IMAGE COMING SOON</text>' +
   '</svg>'
 );
 const PRODUCT_FALLBACKS = {
@@ -10056,7 +10056,7 @@ function closeMoreDrawer() {
   <!-- Header -->
   <div class="app-menu-header">
     <img class="app-menu-logo" data-media-key="site.logo"
-      src="assets/ascofizz-logo.svg"
+      src="assets/ascofizz-logo.png"
       alt="Ascofizz" onerror="this.style.display='none'">
     <button class="app-menu-close" onclick="closeAppMenu()">✕</button>
   </div>

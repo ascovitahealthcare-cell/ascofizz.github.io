@@ -47,121 +47,121 @@
 var PROMO_MEDIA = [
 
   {
-    src:     'https://i.ibb.co/k2GdH7L2/Whats-App-Image-2026-06-09-at-3-50-09-PM-1.jpg',
+    src: '',
     type:    'image',
     ctaPage: 'shop'
   },
 
   {
-    src:     'https://i.ibb.co/BVBz7zTN/Whats-App-Image-2026-06-09-at-3-50-09-PM.jpg',
+    src: '',
     type:    'image',
     ctaPage: 'shop'
   },
 
   {
-    src:     'https://i.ibb.co/GfbN8yhB/Whats-App-Image-2026-06-09-at-3-50-10-PM.jpg',
+    src: '',
     type:    'image',
     ctaPage: 'shop'
   },
 
   {
-    src:     'https://i.ibb.co/0p953MkV/Whats-App-Image-2026-06-09-at-3-50-09-PM-4.jpg',
+    src: '',
     type:    'image',
     ctaPage: 'shop'
   },
 
   {
-    src:     'https://i.ibb.co/b5v1Pk48/Whats-App-Image-2026-06-09-at-3-50-09-PM-3.jpg',
+    src: '',
     type:    'image',
     ctaPage: 'shop'
   },
 
   {
-    src:     'https://i.ibb.co/Q3pqYnp8/Whats-App-Image-2026-06-09-at-3-50-09-PM-2.jpg',
+    src: '',
     type:    'image',
     ctaPage: 'shop'
   },
 
   {
-    src:     'https://i.ibb.co/Z1WZTgDK/ascovita-post-3.png',
+    src: '',
     type:    'image',
     ctaPage: 'shop'
   },
 
   {
-    src:     'https://i.ibb.co/b0nGcrx/ascovita-post-4.png',
+    src: '',
     type:    'image',
     ctaPage: 'shop'
   },
 
   {
-    src:     'https://i.ibb.co/0yQXZVQ5/ascovita-post-5.png',
+    src: '',
     type:    'image',
     ctaPage: 'shop'
   },
 
   {
-    src:     'https://i.ibb.co/Ngkczkb0/ascovita-b2b-insta-3.png',
+    src: '',
     type:    'image',
     ctaPage: 'shop'
   },
 
   {
-    src:     'https://i.ibb.co/XZs7pPxy/ascovita-b2b-insta-1.png',
+    src: '',
     type:    'image',
     ctaPage: 'shop'
   },
 
   {
-    src:     'https://i.ibb.co/cc9y9XfC/ascovita-b2b-insta-2.png',
+    src: '',
     type:    'image',
     ctaPage: 'shop'
   },
 
   {
-    src:     'https://i.ibb.co/mVxKFNQG/post4-family.png',
+    src: '',
     type:    'image',
     ctaPage: 'shop'
   },
 
   {
-    src:     'https://i.ibb.co/sv2kTr3f/post5-gym.png',
+    src: '',
     type:    'image',
     ctaPage: 'shop'
   },
 
   {
-    src:     'https://i.ibb.co/bjCJ21t2/post6-nutrition.png',
+    src: '',
     type:    'image',
     ctaPage: 'shop'
   },
 
   {
-    src:     'https://i.ibb.co/x8R0ryxd/post7-service.png',
+    src: '',
     type:    'image',
     ctaPage: 'shop'
   },
 
   {
-    src:     'https://i.ibb.co/W4WSG7Pp/post9-standards.png',
+    src: '',
     type:    'image',
     ctaPage: 'shop'
   },
 
   {
-    src:     'https://i.ibb.co/cSyLT5NM/multidiata-poster.png',
+    src: '',
     type:    'image',
     ctaPage: 'shop'
   },
 
   {
-    src:     'https://i.ibb.co/KpwzhdMk/glutathione-poster.png',
+    src: '',
     type:    'image',
     ctaPage: 'shop'
   },
 
   {
-    src:     'https://i.ibb.co/MxxNxXV3/magnesium-poster.png',
+    src: '',
     type:    'image',
     ctaPage: 'shop'
   }
