@@ -598,6 +598,10 @@ best supplement brand 2024 2025, Ascofizz review, Ascofizz vs competitors India,
           },
           "query-input": "required name=search_term_string"
         },
+        "speakable": {
+          "@type": "SpeakableSpecification",
+          "cssSelector": [".hero-title", ".hero-subtitle", ".product-name", ".faq-question", "h1", "h2"]
+        },
         "inLanguage": "en-IN"
       },
 
@@ -680,7 +684,12 @@ best supplement brand 2024 2025, Ascofizz review, Ascofizz vs competitors India,
         "category": "Nutraceutical Manufacturer, Health Supplement Brand, Pharmaceutical Manufacturer",
         "description": "Ascovita is a WHO-GMP certified, FSSAI approved nutraceutical manufacturer in Anand, Gujarat. Co-founded by Aamin Ghachivahora. Makes premium effervescent vitamins and health supplements for both B2B private label and D2C sales.",
         "founder": { "@id": "https://www.ascofizz.com/#founder" },
-        "sameAs": "https://www.ascofizz.com/#organization"
+        "sameAs": [
+          "https://www.instagram.com/ascovita_healthcare",
+          "https://www.linkedin.com/company/ascovita-healthcare",
+          "https://www.facebook.com/Ascofizz",
+          "https://www.indiamart.com/ascovita-healthcare"
+        ]
       },
 
       {
@@ -841,10 +850,28 @@ best supplement brand 2024 2025, Ascofizz review, Ascofizz vs competitors India,
         "@type": "Service",
         "@id": "https://www.ascofizz.com/#b2b-service",
         "name": "B2B Private Label Nutraceutical Manufacturing by Ascovita",
-        "serviceType": "Contract Nutraceutical Manufacturing, Private Label Supplement Manufacturing",
-        "description": "Ascovita offers WHO-GMP certified private label and contract manufacturing of effervescent tablets, capsules, and nutraceutical supplements for health brands in India and globally. Low MOQ. Custom formulations. End-to-end support including packaging design and regulatory compliance.",
+        "serviceType": "Contract Nutraceutical Manufacturing, Private Label Supplement Manufacturing, Custom Formulation",
+        "description": "Ascovita offers WHO-GMP certified private label and contract manufacturing of effervescent tablets, capsules, sachets and nutraceutical supplements for health brands across India and globally. Services include custom formulation, packaging design, FSSAI compliance, and low MOQ manufacturing from our facility in Anand, Gujarat.",
         "provider": { "@id": "https://www.ascofizz.com/#organization" },
-        "areaServed": { "@type": "Country", "name": "India" },
+        "areaServed": [
+          { "@type": "Country", "name": "India" },
+          { "@type": "AdministrativeArea", "name": "Gujarat" },
+          { "@type": "AdministrativeArea", "name": "Maharashtra" },
+          { "@type": "AdministrativeArea", "name": "Delhi" },
+          { "@type": "AdministrativeArea", "name": "Karnataka" },
+          { "@type": "AdministrativeArea", "name": "Tamil Nadu" }
+        ],
+        "hasOfferCatalog": {
+          "@type": "OfferCatalog",
+          "name": "Private Label Manufacturing Services",
+          "itemListElement": [
+            { "@type": "Offer", "itemOffered": { "@type": "Service", "name": "Effervescent Tablet Manufacturing", "description": "Custom effervescent tablet manufacturing with formulations including vitamins, minerals, amino acids, and herbal blends." } },
+            { "@type": "Offer", "itemOffered": { "@type": "Service", "name": "Capsule Manufacturing", "description": "Hard gelatin and HPMC (vegan) capsule manufacturing for nutraceutical supplements." } },
+            { "@type": "Offer", "itemOffered": { "@type": "Service", "name": "Tablet Manufacturing", "description": "Coated and uncoated tablet manufacturing for vitamins, multivitamins and herbal supplements." } },
+            { "@type": "Offer", "itemOffered": { "@type": "Service", "name": "Custom Formulation Development", "description": "End-to-end custom supplement formulation development and stability testing." } },
+            { "@type": "Offer", "itemOffered": { "@type": "Service", "name": "FSSAI Regulatory Support", "description": "Complete FSSAI licensing, product registration and labelling compliance support for new supplement brands." } }
+          ]
+        },
         "offers": {
           "@type": "Offer",
           "description": "Low MOQ private label supplement manufacturing. Custom formulations. WHO-GMP certified plant.",
@@ -1044,82 +1071,6 @@ best supplement brand 2024 2025, Ascofizz review, Ascofizz vs competitors India,
       },
 
       {
-        "@type": "WebSite",
-        "@id": "https://www.ascofizz.com/#website",
-        "url": "https://www.ascofizz.com/",
-        "name": "Ascofizz — Premium Supplements India",
-        "description": "Buy WHO-GMP certified, FSSAI approved effervescent vitamin supplements online India. Glutathione, ACV Moringa, B12+D3 Spirulina, Multivitamins. Pan-India free delivery.",
-        "publisher": { "@id": "https://www.ascofizz.com/#organization" },
-        "inLanguage": "en-IN",
-        "potentialAction": {
-          "@type": "SearchAction",
-          "target": {
-            "@type": "EntryPoint",
-            "urlTemplate": "https://www.ascofizz.com/?search={search_term_string}"
-          },
-          "query-input": "required name=search_term_string"
-        },
-        "speakable": {
-          "@type": "SpeakableSpecification",
-          "cssSelector": [".hero-title", ".hero-subtitle", ".product-name", ".faq-question", "h1", "h2"]
-        }
-      },
-
-      {
-        "@type": "BreadcrumbList",
-        "itemListElement": [
-          { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://www.ascofizz.com/" },
-          { "@type": "ListItem", "position": 2, "name": "Supplements", "item": "https://www.ascofizz.com/products" },
-          { "@type": "ListItem", "position": 3, "name": "Effervescent Vitamins", "item": "https://www.ascofizz.com/products/effervescent" },
-          { "@type": "ListItem", "position": 4, "name": "Spirulina Supplements", "item": "https://www.ascofizz.com/products/spirulina" },
-          { "@type": "ListItem", "position": 5, "name": "B2B Private Label", "item": "https://www.ascofizz.com/b2b" }
-        ]
-      },
-
-      {
-        "@type": "LocalBusiness",
-        "@id": "https://www.ascofizz.com/#localbusiness",
-        "name": "Ascofizz",
-        "description": "WHO-GMP certified nutraceutical manufacturer and supplement brand. Effervescent vitamins, spirulina supplements, private label manufacturing. Based in Anand, Gujarat, India.",
-        "url": "https://www.ascofizz.com",
-        "telephone": "+91-98985-82650",
-        "email": "ascovitahealthcare@gmail.com",
-        "address": {
-          "@type": "PostalAddress",
-          "streetAddress": "R.S.Cinema, 5, Rajeshree Society Rd, behind R & S Cinemas, Vivekanand Wadi",
-          "addressLocality": "Anand",
-          "addressRegion": "Gujarat",
-          "postalCode": "388001",
-          "addressCountry": "IN"
-        },
-        "geo": {
-          "@type": "GeoCoordinates",
-          "latitude": 22.5645,
-          "longitude": 72.9289
-        },
-        "openingHoursSpecification": [
-          {
-            "@type": "OpeningHoursSpecification",
-            "dayOfWeek": ["Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"],
-            "opens": "09:00",
-            "closes": "18:00"
-          }
-        ],
-        "priceRange": "₹120 - ₹899",
-        "currenciesAccepted": "INR",
-        "paymentAccepted": "Credit Card, Debit Card, UPI, Net Banking, Cash on Delivery",
-        "image": "assets/ascofizz-icon-512.png",
-        "sameAs": [
-          "https://www.instagram.com/ascovita_healthcare",
-          "https://www.linkedin.com/company/ascovita-healthcare",
-          "https://www.facebook.com/Ascofizz",
-          "https://www.indiamart.com/ascovita-healthcare"
-        ],
-        "hasMap": "https://maps.google.com/?q=22.5645,72.9289",
-        "areaServed": { "@type": "Country", "name": "India" }
-      },
-
-      {
         "@type": "MedicalOrganization",
         "@id": "https://www.ascofizz.com/#medicalorg",
         "name": "Ascofizz",
@@ -1130,39 +1081,6 @@ best supplement brand 2024 2025, Ascofizz review, Ascofizz vs competitors India,
           { "@type": "EducationalOccupationalCredential", "credentialCategory": "FSSAI Licensed", "recognizedBy": { "@type": "GovernmentOrganization", "name": "Food Safety and Standards Authority of India" } },
           { "@type": "EducationalOccupationalCredential", "credentialCategory": "WHO-GMP Certified", "recognizedBy": { "@type": "GovernmentOrganization", "name": "World Health Organization" } }
         ]
-      },
-
-      {
-        "@type": "Service",
-        "@id": "https://www.ascofizz.com/#b2b-service",
-        "name": "B2B Private Label Nutraceutical Manufacturing by Ascovita",
-        "serviceType": "Contract Nutraceutical Manufacturing, Private Label Supplement Manufacturing, Custom Formulation",
-        "description": "Ascovita offers WHO-GMP certified private label and contract manufacturing of effervescent tablets, capsules, sachets and nutraceutical supplements for health brands across India and globally. Services include custom formulation, packaging design, FSSAI compliance, and low MOQ manufacturing from our facility in Anand, Gujarat.",
-        "provider": { "@id": "https://www.ascofizz.com/#organization" },
-        "areaServed": [
-          { "@type": "Country", "name": "India" },
-          { "@type": "AdministrativeArea", "name": "Gujarat" },
-          { "@type": "AdministrativeArea", "name": "Maharashtra" },
-          { "@type": "AdministrativeArea", "name": "Delhi" },
-          { "@type": "AdministrativeArea", "name": "Karnataka" },
-          { "@type": "AdministrativeArea", "name": "Tamil Nadu" }
-        ],
-        "hasOfferCatalog": {
-          "@type": "OfferCatalog",
-          "name": "Private Label Manufacturing Services",
-          "itemListElement": [
-            { "@type": "Offer", "itemOffered": { "@type": "Service", "name": "Effervescent Tablet Manufacturing", "description": "Custom effervescent tablet manufacturing with formulations including vitamins, minerals, amino acids, and herbal blends." } },
-            { "@type": "Offer", "itemOffered": { "@type": "Service", "name": "Capsule Manufacturing", "description": "Hard gelatin and HPMC (vegan) capsule manufacturing for nutraceutical supplements." } },
-            { "@type": "Offer", "itemOffered": { "@type": "Service", "name": "Tablet Manufacturing", "description": "Coated and uncoated tablet manufacturing for vitamins, multivitamins and herbal supplements." } },
-            { "@type": "Offer", "itemOffered": { "@type": "Service", "name": "Custom Formulation Development", "description": "End-to-end custom supplement formulation development and stability testing." } },
-            { "@type": "Offer", "itemOffered": { "@type": "Service", "name": "FSSAI Regulatory Support", "description": "Complete FSSAI licensing, product registration and labelling compliance support for new supplement brands." } }
-          ]
-        },
-        "offers": {
-          "@type": "Offer",
-          "description": "Low MOQ private label supplement manufacturing. Custom formulations. WHO-GMP certified plant.",
-          "url": "https://www.ascofizz.com/b2b"
-        }
       },
 
       {
