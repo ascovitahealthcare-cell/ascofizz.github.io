@@ -1,4 +1,41 @@
-# DESIGN.md — Ascofizz · "Soft White"
+# DESIGN.md — Ascofizz · "Coastal Sage"
+
+> **Current system.** One file: `index.html` holds the markup, the whole
+> stylesheet (`<style>`, sections banner-marked `01-core` … `07-accents` in
+> cascade order) and the motion engine (`<script>`). `assets/` holds only
+> the logo and icons. There are no separate CSS or JS files to keep in sync.
+>
+> - **Ground** `--paper #FBF3E8`, warm parchment. Every surface is that same
+>   paper raised (`--neo-1..4`) or pressed in (`--neo-in`). The shadow is
+>   the edge; there are almost no borders.
+> - **Colour**, taken from the uploaded swatches: `--indigo #547177` dusty
+>   sky-blue is the primary voice, `--green #7D6259` clay signs the brand's
+>   moments, `--ink #1D2320` deep olive carries every word.
+> - **The second palette**, five families each with a job rather than a
+>   decoration: `--sky` trust, `--clay` sale and urgency, `--sage` organic,
+>   `--fern` confirmation, `--harbour` ratings and certification. Each has a
+>   `-lo` (text-safe on parchment) and a `-bg` (chip tint).
+>
+>   **The rule that governs them:** anything a customer clicks or reads a
+>   product off — every card, every button — has a soft light face, one of
+>   `--face #FFFFFF`, `--face-soft #FCF7EF` or `--face-warm #FFFBF3`.
+>   Colour arrives as a ring, a label, an icon well, a 3px top cap or a glow
+>   underneath. **Never as the fill.** Section `07-accents` enforces this and
+>   loads last on purpose.
+> - **Text tones** were measured, not chosen by eye: `--t-low` and `--t-dim`
+>   are set where they are because the previous values fell under 4.5:1 on
+>   parchment. Same olive hue, darker step.
+> - **B2B** is not a page here. Every B2B affordance is an external link to
+>   `https://www.ascovita.com/#/capabilities`, and a deep link to `/b2b`
+>   redirects there. Those URLs are deliberate — do not rewrite them to the
+>   ascofizz domain.
+> - **Imagery** every marketing and product image link is cleared for
+>   re-upload; `data-media-key` attributes are intact, so Admin → Site Images
+>   still drives them.
+>
+> Everything below describes retired worlds and is kept as the record of
+> what this replaced. Its file map no longer exists — see the note above.
+
 
 > **Superseded.** The "Effervescent Bloom" water world below was replaced by
 > **Soft White** at the client's direction: white ground, minimal colour taken

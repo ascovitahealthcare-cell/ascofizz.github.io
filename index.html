@@ -6,7 +6,7 @@
   <meta name="robots" content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1">
   <meta name="googlebot" content="index, follow, max-image-preview:large">
   <meta name="bingbot" content="index, follow">
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://www.googletagmanager.com https://accounts.google.com https://cdn.jsdelivr.net https://cdnjs.cloudflare.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://accounts.google.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: blob: https:; connect-src 'self' https://frwsjgrrtzhjfflcdjjs.supabase.co https://ascovitahealthcare-cell-github-io.onrender.com https://*.gokwik.co https://gkx.gokwik.co https://www.google-analytics.com https://region1.google-analytics.com https://www.googleapis.com https://oauth2.googleapis.com https://openidconnect.googleapis.com https://accounts.google.com; frame-src https://accounts.google.com https://content.googleapis.com https://oauth2.googleapis.com https://*.gokwik.co; object-src 'none'; base-uri 'self';">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://www.googletagmanager.com https://accounts.google.com https://cdn.jsdelivr.net https://cdnjs.cloudflare.com https://connect.facebook.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://accounts.google.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: blob: https:; connect-src 'self' https://www.facebook.com https://connect.facebook.net https://frwsjgrrtzhjfflcdjjs.supabase.co https://ascovitahealthcare-cell-github-io.onrender.com https://*.gokwik.co https://gkx.gokwik.co https://www.google-analytics.com https://region1.google-analytics.com https://www.googleapis.com https://oauth2.googleapis.com https://openidconnect.googleapis.com https://accounts.google.com; frame-src https://accounts.google.com https://content.googleapis.com https://oauth2.googleapis.com https://*.gokwik.co; object-src 'none'; base-uri 'self';">
   <!-- Google Analytics 4 — G-PSRK3R6L0Z -->
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-PSRK3R6L0Z"></script>
 <script>
@@ -152,15 +152,20 @@
 </script>
 <!-- End Google Analytics -->
 
-<!-- Meta Pixel — replace YOUR_PIXEL_ID with the real one from Events Manager -->
+<!-- Meta Pixel. Put the real ID from Events Manager in META_PIXEL_ID below;
+     until then nothing loads, because initialising on a placeholder sends
+     every pageview to a pixel that does not exist. -->
 <script>
+window.META_PIXEL_ID = '';
+if (window.META_PIXEL_ID) {
 !function(f,b,e,v,n,t,s){if(f.fbq)return;n=f.fbq=function(){n.callMethod?
 n.callMethod.apply(n,arguments):n.queue.push(arguments)};if(!f._fbq)f._fbq=n;
 n.push=n;n.loaded=!0;n.version='2.0';n.queue=[];t=b.createElement(e);t.async=!0;
 t.src=v;s=b.getElementsByTagName(e)[0];s.parentNode.insertBefore(t,s)}(window,
 document,'script','https://connect.facebook.net/en_US/fbevents.js');
-fbq('init', 'YOUR_PIXEL_ID');
+fbq('init', window.META_PIXEL_ID);
 fbq('track', 'PageView');
+}
 </script>
 <!-- End Meta Pixel -->
   <script>
@@ -1100,7 +1105,6 @@ best supplement brand 2024 2025, Ascofizz review, Ascofizz vs competitors India,
   </script>
 
   <!-- Favicon -->
-  <link rel="icon" type="image/x-icon" href="assets/favicon.ico">
   <link rel="icon" type="image/png" sizes="32x32" href="assets/ascofizz-icon-32.png">
   <link rel="icon" type="image/png" sizes="16x16" href="assets/ascofizz-icon-16.png">
   <link rel="apple-touch-icon" href="assets/ascofizz-icon-180.png">
@@ -1202,14 +1206,17 @@ best supplement brand 2024 2025, Ascofizz review, Ascofizz vs competitors India,
   --indigo:   #547177;   /* primary accent — dusty sky-blue, deepened */
   --indigo-lo:#3F565B;
   --indigo-hi:#99CDD8;   /* the sky-blue swatch itself, for highlights */
-  --green:    #866B62;   /* "powered by Ascovita" — clay, from the peach swatch */
+  --green:    #7D6259;   /* "powered by Ascovita" — clay, 5.0:1 on --paper */
   --green-hi: #F3C3B2;   /* the peach swatch itself, for light accents */
 
   /* ── Text — every tone drawn from the palette's own dark olive ── */
   --t-hi:  #1D2320;
   --t-mid: #5B665C;
-  --t-low: #657166;   /* the palette's dark olive swatch, used directly */
-  --t-dim: #778278;
+  /* Both steps were set by eye and fell under 4.5:1 on the parchment
+     (#657166 measured 4.66, #778278 only 3.66). Darkened along the same
+     olive so the hue is unchanged and every tone clears the threshold. */
+  --t-low: #5C6A5D;   /* 5.2:1 on --paper */
+  --t-dim: #5C6A59;   /* 5.0:1 on --paper, 4.8:1 on a raised card */
 
   /* ── Soft shadow, tinted with the olive rather than navy ── */
   --sh-d: rgba(101,113,102,.14);
@@ -1294,10 +1301,26 @@ best supplement brand 2024 2025, Ascofizz review, Ascofizz vs competitors India,
   --sink-3: var(--neo-3);       --sink-4: var(--neo-4);
   --al-hi: var(--paper-hi);     --al-mid: var(--t-dim);      --al-low: var(--t-low);
   --al-dark: var(--t-mid);
-  --transition:        all var(--dur-2) var(--rise);
-  --transition-smooth: all var(--dur-2) var(--settle);
-  --transition-spring: all .45s var(--fizz);
-  --transition-fast:   all var(--dur-1) var(--settle);
+  /* Never `all` — it makes layout properties animatable by accident and
+     forces the compositor to watch every property on every card. Written
+     out because a comma-separated custom property cannot carry a shared
+     duration through the `transition` shorthand. */
+  --transition:
+    transform var(--dur-2) var(--rise), opacity var(--dur-2) var(--rise),
+    box-shadow var(--dur-2) var(--rise), background-color var(--dur-2) var(--rise),
+    color var(--dur-2) var(--rise), border-color var(--dur-2) var(--rise);
+  --transition-smooth:
+    transform var(--dur-2) var(--settle), opacity var(--dur-2) var(--settle),
+    box-shadow var(--dur-2) var(--settle), background-color var(--dur-2) var(--settle),
+    color var(--dur-2) var(--settle), border-color var(--dur-2) var(--settle);
+  --transition-spring:
+    transform .45s var(--fizz), opacity .45s var(--fizz),
+    box-shadow .45s var(--fizz), background-color .45s var(--fizz),
+    color .45s var(--fizz), border-color .45s var(--fizz);
+  --transition-fast:
+    transform var(--dur-1) var(--settle), opacity var(--dur-1) var(--settle),
+    box-shadow var(--dur-1) var(--settle), background-color var(--dur-1) var(--settle),
+    color var(--dur-1) var(--settle), border-color var(--dur-1) var(--settle);
 
   --mx: 0; --my: 0; --scrollv: 0; --rx: 0deg; --ry: 0deg; --drift: 0px;
   --bloom: var(--indigo);
@@ -1311,6 +1334,11 @@ html {
   scroll-behavior: smooth;
   scrollbar-color: #C3C9DC transparent;
   background: var(--paper);
+  /* `clip`, not `hidden`: hidden makes html a scroll container and kills
+     every position:sticky descendant. iOS ignores overflow-x set only on
+     body, so it has to be declared here too. */
+  overflow-x: hidden;
+  overflow-x: clip;
 }
 body {
   font-family: var(--font-body);
@@ -1320,6 +1348,7 @@ body {
   color: var(--t-mid);
   background: var(--paper);
   overflow-x: hidden;
+  overflow-x: clip;
   min-height: 100dvh;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
@@ -1499,7 +1528,7 @@ button:disabled, .btn-primary:disabled, .btn-gold:disabled {
 [data-reveal] {
   opacity: 0;
   transform-style: preserve-3d;
-  transition: opacity .8s var(--rise), transform .9s var(--rise);
+  transition: opacity .5s var(--rise), transform .6s var(--rise);
 }
 [data-reveal="up"],   .reveal-up  { transform: translate3d(0,28px,0); }
 [data-reveal="down"]              { transform: translate3d(0,-24px,0); }
@@ -1508,6 +1537,11 @@ button:disabled, .btn-primary:disabled, .btn-gold:disabled {
 [data-reveal="scale"]             { transform: scale(.97); }
 [data-reveal="flip"]              { transform: perspective(var(--depth)) rotateX(-16deg); transform-origin: 50% 100%; }
 [data-reveal="fade"], .reveal-fade{ transform: none; }
+/* Sideways reveals overhang the viewport and give phones a phantom
+   horizontal scrollbar. Below the shell width they come up instead. */
+@media (max-width: 900px) {
+  [data-reveal="left"], [data-reveal="right"] { transform: translate3d(0,22px,0); }
+}
 [data-reveal].revealed, .revealed, .in-view {
   opacity: 1; transform: translate3d(0,0,0) rotateX(0) rotateY(0) scale(1);
 }
@@ -2124,7 +2158,8 @@ img[src=""], img[data-awaiting-upload] { visibility: hidden; width: 100%; }
 }
 .auth-error   { background: rgba(192,48,74,.08); color: #A62740; }
 .auth-success { background: rgba(134,107,98,.09); color: var(--green); }
-.auth-link { color: var(--indigo); font-weight: 600; cursor: pointer; }
+.auth-link { color: var(--t-mid); font-size: .85rem; font-weight: 400; text-align: center; }
+.auth-link a { color: var(--indigo-lo); font-weight: 700; cursor: pointer; }
 .auth-link:hover { text-decoration: underline; }
 .auth-terms { font-size: .72rem; color: var(--t-dim); text-align: center; margin-top: 16px; line-height: 1.6; }
 
@@ -2585,7 +2620,7 @@ img[src=""], img[data-awaiting-upload] { visibility: hidden; width: 100%; }
 .b-prod-name { font-size: .87rem; font-weight: 600; color: var(--ink); line-height: 1.3; }
 .b-prod-cat { font-size: .66rem; font-weight: 600; letter-spacing: .14em; text-transform: uppercase; color: var(--t-dim); margin-top: 3px; }
 .b-prod-price { font-size: .95rem; font-weight: 600; color: var(--indigo); white-space: nowrap; }
-.b-prod-badge { padding: 3px 9px; border-radius: 99px; font-size: .6rem; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; background: rgba(84,113,119,.10); color: var(--indigo); }
+.b-prod-badge { padding: 3px 9px; border-radius: 99px; font-size: .6rem; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; background: rgba(84,113,119,.10); color: var(--indigo-lo); }
 .bundle-summary {
   position: sticky; top: 100px;
   padding: 28px; border-radius: var(--r-lg);
@@ -3044,9 +3079,17 @@ img[src=""], img[data-awaiting-upload] { visibility: hidden; width: 100%; }
 .qty-discount-footer { font-size: .74rem; color: var(--t-dim); margin-top: 11px; }
 
 /* ── Tabs & reviews ── */
-.tabs { display: flex; gap: 4px; flex-wrap: wrap; border-bottom: 1px solid var(--edge); margin: 46px 0 26px; }
+/* A wrapping tab row reflows the page when a label changes length; one
+   scrollable line keeps the reading position stable. */
+.tabs {
+  display: flex; gap: 4px; flex-wrap: nowrap;
+  border-bottom: 1px solid var(--edge); margin: 46px 0 26px;
+  overflow-x: auto; overscroll-behavior-x: contain;
+  scrollbar-width: none; -webkit-overflow-scrolling: touch;
+}
+.tabs::-webkit-scrollbar { display: none; }
 .tab {
-  position: relative; padding: 13px 20px;
+  position: relative; padding: 13px 20px; flex: 0 0 auto; white-space: nowrap;
   font-size: .875rem; font-weight: 700; color: var(--t-low);
   transition: color var(--dur-1) var(--settle);
 }
@@ -3674,7 +3717,7 @@ textarea.b2b-form-input { min-height: 110px; resize: vertical; font-family: inhe
 .blog-tag {
   align-self: flex-start; padding: 4px 11px; border-radius: 99px;
   font-size: .625rem; font-weight: 800; letter-spacing: .1em; text-transform: uppercase;
-  background: rgba(84,113,119,.12); color: var(--indigo); border: none;
+  background: rgba(84,113,119,.12); color: var(--indigo-lo); border: none;
 }
 .blog-title { font-family: var(--font-display); font-size: 1.12rem; font-weight: 700; letter-spacing: -.032em; line-height: 1.24; color: var(--t-hi); }
 .blog-exc { font-size: .855rem; color: var(--t-low); line-height: 1.62; }
@@ -4030,6 +4073,198 @@ textarea.b2b-form-input { min-height: 110px; resize: vertical; font-family: inhe
 }
 
 
+
+
+/* ═══════════════════════════════════════════════════════════════════
+   07 · ACCENTS  —  loads last, so it settles the fills set above.
+
+   THE RULE  Anything a customer clicks or reads a product off — every
+             card, every button — has a soft light face: white,
+             off-white or cream. Colour arrives as a ring, a label, an
+             icon well, a top cap or a glow underneath. Never the fill.
+
+   The families below are the uploaded swatches themselves, grouped so
+   each one carries a meaning rather than a decoration.
+   ═══════════════════════════════════════════════════════════════════ */
+:root {
+  /* The three faces a card or button is ever allowed to be. */
+  --face:      #FFFFFF;   /* white     — cards, panels        */
+  --face-soft: #FCF7EF;   /* off-white — secondary controls   */
+  --face-warm: #FFFBF3;   /* cream     — primary actions      */
+
+  /* Sky — trust, immunity, logistics.  #99CDD8 / #DAEBE9 */
+  --sky:    #7FB3C4;  --sky-lo: #35555C;  --sky-bg: #DAEBE9;
+  /* Clay — sale, urgency, the brand's signature warmth.  #F3C3B2 */
+  --clay:   #D9917A;  --clay-lo:#8A4A33;  --clay-bg:#FDE8D3;
+  /* Sage — organic, ayurvedic, ingredients.  #B6C99B / #E7F5DC */
+  --sage:   #98A77C;  --sage-lo:#4C5F33;  --sage-bg:#E7F5DC;
+  /* Fern — confirmation, subscription, in-cart.  #8EB69B / #DAF1DE */
+  --fern:   #5E9179;  --fern-lo:#1B4437;  --fern-bg:#DAF1DE;
+  /* Harbour — ratings, certification, tiers.  #5483B3 / #C1E8FF */
+  --harbour:#5483B3;  --harbour-lo:#274A73; --harbour-bg:#DDECFA;
+}
+
+/* ══ BUTTONS ══════════════════════════════════════════════════════
+   One recipe; a variant only moves --accent-gl and --accent-lo.    */
+.btn-primary, .shader-btn-primary, .btn-gold,
+.add-cart-btn, .buy-now-btn, .checkout-btn, .cfPayBtn, .gk-pay-btn, .sc-checkout-btn,
+.nav-cta, .auth-btn, .footer-nl button, .ig-follow-btn, .promo-card-cta,
+.ck-reco-add-btn, .pay-error-try, .qm-next, .sa-use-btn, .upsell-add,
+.btn-export-solid, .vita-rec-add, .vita-send-btn, .btn-qadd,
+.wa-btn, .wa-open-btn, .app-menu-wa-btn, .b2b-wa-btn {
+  --accent-gl: 84,113,119;
+  --accent-lo: var(--indigo-lo);
+  color: var(--accent-lo);
+  background: var(--face-warm);
+  box-shadow:
+    inset 0 0 0 1.5px rgba(var(--accent-gl), .30),
+    0 6px 16px rgba(var(--accent-gl), .16),
+    var(--neo-1);
+  transition: transform var(--dur-1) var(--settle), box-shadow var(--dur-2) var(--rise),
+              background-color var(--dur-2) var(--rise), color var(--dur-2) var(--rise);
+}
+.btn-primary:hover, .shader-btn-primary:hover, .btn-gold:hover,
+.add-cart-btn:hover, .buy-now-btn:hover, .checkout-btn:hover, .cfPayBtn:hover,
+.gk-pay-btn:hover, .sc-checkout-btn:hover, .nav-cta:hover, .auth-btn:hover,
+.footer-nl button:hover, .ig-follow-btn:hover, .promo-card-cta:hover,
+.ck-reco-add-btn:hover, .pay-error-try:hover, .qm-next:hover, .sa-use-btn:hover,
+.upsell-add:hover, .btn-export-solid:hover, .vita-rec-add:hover, .vita-send-btn:hover,
+.btn-qadd:hover, .wa-btn:hover, .wa-open-btn:hover, .app-menu-wa-btn:hover, .b2b-wa-btn:hover {
+  background: var(--white);
+  transform: translateY(-2px);
+  box-shadow:
+    inset 0 0 0 1.5px rgba(var(--accent-gl), .55),
+    0 13px 28px rgba(var(--accent-gl), .24),
+    var(--neo-2);
+}
+/* On a phone there is no hover, so the press is the only feedback. */
+.btn-primary:active, .shader-btn-primary:active, .btn-gold:active,
+.add-cart-btn:active, .buy-now-btn:active, .checkout-btn:active, .cfPayBtn:active,
+.gk-pay-btn:active, .sc-checkout-btn:active, .nav-cta:active, .auth-btn:active,
+.footer-nl button:active, .ig-follow-btn:active, .promo-card-cta:active,
+.ck-reco-add-btn:active, .pay-error-try:active, .qm-next:active, .sa-use-btn:active,
+.upsell-add:active, .btn-export-solid:active, .vita-rec-add:active, .vita-send-btn:active,
+.btn-qadd:active, .wa-btn:active, .wa-open-btn:active, .app-menu-wa-btn:active, .b2b-wa-btn:active,
+.btn-outline:active, .shader-btn-ghost:active {
+  transform: translateY(0) scale(.97);
+  box-shadow: var(--neo-in);
+  transition-duration: var(--dur-1);
+}
+.btn-outline, .shader-btn-ghost { background: var(--face-soft); box-shadow: var(--neo-1); }
+.btn-outline:hover, .shader-btn-ghost:hover { background: var(--white); box-shadow: var(--neo-2); }
+
+/* Buying is warm, browsing is cool, confirming is fern. */
+.buy-now-btn, .upsell-add, .ck-reco-add-btn, .sa-use-btn { --accent-gl: 217,145,122; --accent-lo: var(--clay-lo); }
+.nav-cta, .btn-export-solid                              { --accent-gl: 84,131,179;  --accent-lo: var(--harbour-lo); }
+.ig-follow-btn                                           { --accent-gl: 152,167,124; --accent-lo: var(--sage-lo); }
+.wa-btn, .wa-open-btn, .app-menu-wa-btn, .b2b-wa-btn     { --accent-gl: 94,145,121;  --accent-lo: var(--fern-lo); }
+.btn-qadd.in-cart {
+  color: var(--fern-lo); background: var(--fern-bg);
+  box-shadow: inset 0 0 0 1.5px rgba(94,145,121,.36);
+}
+
+/* ══ BADGES ═══════════════════════════════════════════════════════
+   Tinted chips. A saturated slab in a card's corner reads louder
+   than the product it sits on.                                     */
+.p-badge, .promo-badge, .offer-tag {
+  max-width: calc(100% - 22px);
+  color: var(--sky-lo); background: var(--sky-bg);
+  box-shadow: inset 0 0 0 1px rgba(53,85,92,.20);
+  font-size: .58rem; letter-spacing: .06em; line-height: 1.35;
+  text-align: center; text-wrap: balance; white-space: normal;
+}
+.p-disc-badge, .mm-badge, .vid-badge, .ck-reco-badge {
+  color: var(--clay-lo); background: var(--clay-bg);
+  box-shadow: inset 0 0 0 1px rgba(138,74,51,.24); text-shadow: none;
+}
+.p-badge.is-new  { color: var(--sage-lo); background: var(--sage-bg); box-shadow: inset 0 0 0 1px rgba(76,95,51,.24); }
+.p-badge.is-low  { color: var(--clay-lo); background: var(--clay-bg); box-shadow: inset 0 0 0 1px rgba(138,74,51,.26); }
+.p-badge.is-out  { color: var(--t-low);   background: var(--paper-lo); box-shadow: inset 0 0 0 1px var(--edge-hi); }
+.rv-stars, .stars, .rv-big-stars, .p-rating { color: var(--clay-lo); }
+.cert-card .cert-ico, .rv-verified {
+  color: var(--harbour-lo); background: var(--harbour-bg);
+  box-shadow: inset 0 0 0 1px rgba(39,74,115,.26);
+}
+
+/* ══ CARDS ════════════════════════════════════════════════════════
+   White faces, and a 3px cap of whichever family the card belongs
+   to, so a grid reads as a set at a glance.                        */
+.product-card, .cat-card, .cat-card-sm, .cert-card, .value-card,
+.blog-card, .rt-card, .pkg-card, .sub-card, .brochure-card,
+.testi-card, .access-card, .fizz-counter { background: var(--face); }
+.value-card, .cat-card-sm, .fizz-counter { position: relative; }
+.fizz-counter { overflow: hidden; }
+
+.cat-card::before, .cat-card-sm::before, .cert-card::before,
+.value-card::before, .pkg-card::before, .rt-card::before,
+.fizz-counter::after {
+  content: ''; position: absolute; inset: 0 0 auto; height: 3px;
+  background: var(--card-accent, var(--indigo));
+  opacity: .8; pointer-events: none;
+  transition: opacity var(--dur-2) var(--rise);
+}
+.fizz-counter::after { inset: auto 0 0; }
+.cat-card:hover::before, .cat-card-sm:hover::before, .cert-card:hover::before,
+.value-card:hover::before, .pkg-card:hover::before, .rt-card:hover::before { opacity: 1; }
+
+.cat-card:nth-child(5n+1), .cat-card-sm:nth-child(5n+1), .cert-card:nth-child(5n+1),
+.value-card:nth-child(5n+1), .rt-card:nth-child(5n+1) { --card-accent: var(--sage); }
+.cat-card:nth-child(5n+2), .cat-card-sm:nth-child(5n+2), .cert-card:nth-child(5n+2),
+.value-card:nth-child(5n+2), .rt-card:nth-child(5n+2) { --card-accent: var(--sky); }
+.cat-card:nth-child(5n+3), .cat-card-sm:nth-child(5n+3), .cert-card:nth-child(5n+3),
+.value-card:nth-child(5n+3), .rt-card:nth-child(5n+3) { --card-accent: var(--fern); }
+.cat-card:nth-child(5n+4), .cat-card-sm:nth-child(5n+4), .cert-card:nth-child(5n+4),
+.value-card:nth-child(5n+4), .rt-card:nth-child(5n+4) { --card-accent: var(--harbour); }
+.cat-card:nth-child(5n+5), .cat-card-sm:nth-child(5n+5), .cert-card:nth-child(5n+5),
+.value-card:nth-child(5n+5), .rt-card:nth-child(5n+5) { --card-accent: var(--clay); }
+
+.cat-card .ci, .cat-card-sm .ci, .cat-card .cat-icon,
+.cert-card .cert-ico, .value-card .value-ico {
+  color: var(--card-accent, var(--indigo));
+  background: color-mix(in srgb, var(--card-accent, var(--indigo)) 14%, var(--white));
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--card-accent, var(--indigo)) 26%, transparent);
+}
+.cat-card .ci svg, .cat-card-sm .ci svg, .cat-card .cat-icon svg,
+.cert-card .cert-ico svg, .value-card .value-ico svg { color: inherit; }
+
+/* Four identical numerals is the dullest block on the site. */
+.fizz-counter:nth-child(4n+1) { --card-accent: var(--sky);     }
+.fizz-counter:nth-child(4n+2) { --card-accent: var(--sage);    }
+.fizz-counter:nth-child(4n+3) { --card-accent: var(--fern);    }
+.fizz-counter:nth-child(4n+4) { --card-accent: var(--clay);    }
+.fizz-counter:nth-child(4n+1) .fc-num { color: var(--sky-lo);     }
+.fizz-counter:nth-child(4n+2) .fc-num { color: var(--sage-lo);    }
+.fizz-counter:nth-child(4n+3) .fc-num { color: var(--fern-lo);    }
+.fizz-counter:nth-child(4n+4) .fc-num { color: var(--clay-lo);    }
+
+/* Selected states are tinted, not inverted. */
+.cpill.active, .auth-tab.active, .account-nav-item.active {
+  color: var(--indigo-lo); background: var(--sky-bg);
+  box-shadow: inset 0 0 0 1.4px rgba(84,113,119,.32);
+}
+.tier-tabs > button.active, .tier-tabs > button.selected, .qty-tiers-grid > .selected {
+  color: var(--fern-lo); background: var(--fern-bg);
+  box-shadow: inset 0 0 0 1.5px rgba(94,145,121,.36);
+}
+.section-label { color: var(--sage-lo); }
+
+/* ══ LAYOUT SAFETY ════════════════════════════════════════════════
+   Grid and flex children default to min-width:auto, so one wide
+   child pushes its track out and the phone scrolls sideways.       */
+.product-page > *, .about-hero-grid > *, .about-contact-grid > *,
+.about-stats-grid > *, .about-team-grid > *, .contact-grid > *,
+.bundle-layout > *, .vita-home-inner > *, .cart-layout > *,
+.checkout-layout > *, .account-layout > * { min-width: 0; }
+
+@media (hover: none) {
+  .product-card:active, .cat-card:active, .blog-card:active,
+  .pkg-card:active, .rt-card:active { transform: scale(.985); transition-duration: var(--dur-1); }
+}
+/* 44px is the floor for a touch target, not the goal. */
+@media (max-width: 900px) {
+  .nav-cta, .btn-primary, .btn-outline, .shader-btn-primary, .shader-btn-ghost,
+  .add-cart-btn, .buy-now-btn, .checkout-btn, .tab, .cpill { min-height: 44px; }
+}
 </style>
 </head>
 <!-- Promotional Media Config -->
@@ -5259,7 +5494,7 @@ setInterval(function() { syncAppCartBadge(); syncAppWishBadge(); }, 2000);
           <h3 class="promo-card-headline">Steady Mind.<br>Steady Strength.</h3>
           <button class="promo-card-cta" onclick="openProduct(31)">Shop Ashwagandha</button>
         </div>
-        <div class="promo-card-media"><img data-media-key="home.hero.slide4" src="assets/hero-ashwagandha.svg" alt="Ashwagandha Effervescent" loading="lazy"></div>
+        <div class="promo-card-media"><img data-media-key="home.hero.slide4" src="" data-awaiting-upload="true" alt="Ashwagandha Effervescent" loading="lazy"></div>
       </div>
 
       <div class="promo-card promo-card-5">
@@ -5269,7 +5504,7 @@ setInterval(function() { syncAppCartBadge(); syncAppWishBadge(); }, 2000);
           <h3 class="promo-card-headline">Your Daily<br>Reset Ritual</h3>
           <button class="promo-card-cta" onclick="openProduct(34)">Shop Apple Cider Vinegar</button>
         </div>
-        <div class="promo-card-media"><img data-media-key="home.hero.slide5" src="assets/hero-acv-reset.svg" alt="Apple Cider Vinegar Effervescent" loading="lazy"></div>
+        <div class="promo-card-media"><img data-media-key="home.hero.slide5" src="" data-awaiting-upload="true" alt="Apple Cider Vinegar Effervescent" loading="lazy"></div>
       </div>
 
     </div>
@@ -5465,7 +5700,7 @@ setInterval(function() { syncAppCartBadge(); syncAppWishBadge(); }, 2000);
       <div class="mix-match-banner">
         <div class="mix-match-text">
           <div class="section-label" style="color:var(--gold)">Build Your Own Bundle</div>
-          <h2 class="section-title" style="margin-bottom:14px">Mix. Match.<br>Save Up to <em style="color:var(--green-l);font-style:italic">20%</em>.</h2>
+          <h2 class="section-title" style="margin-bottom:14px">Mix. Match.<br>Save Up to <em style="color:var(--clay-lo);font-style:italic">20%</em>.</h2>
           <p class="section-sub" style="margin-bottom:26px">Pick any 3 or more Ascofizz effervescent tablets and the discount applies automatically at checkout — no code needed.</p>
           <button class="btn-primary" onclick="showShop('combos')">Build Your Bundle →</button>
         </div>
@@ -5483,7 +5718,7 @@ setInterval(function() { syncAppCartBadge(); syncAppWishBadge(); }, 2000);
   <section class="section certs">
     <div class="container">
       <div class="text-center" style="margin-bottom:36px">
-        <div class="section-label" style="color:var(--gold-light)">Trust &amp; Quality</div>
+        <div class="section-label" style="color:var(--harbour-lo)">Trust &amp; Quality</div>
         <h2 class="section-title">Certified. Tested. Trusted.</h2>
         <p class="section-sub">Every Ascofizz product meets the highest standards of purity, safety and efficacy.</p>
       </div>
@@ -5769,7 +6004,7 @@ setInterval(function() { syncAppCartBadge(); syncAppWishBadge(); }, 2000);
   <div class="container">
     <div style="text-align:center;margin-bottom:44px">
       <span class="cf-section-label">VitaRewards Program</span>
-      <span style="display:inline-block;margin-left:10px;background:var(--seal);color:#fff;font-size:0.68rem;font-weight:800;letter-spacing:0.6px;text-transform:uppercase;padding:4px 12px;border-radius:20px;vertical-align:middle">🚧 Coming Soon</span>
+      <span style="display:inline-block;margin-left:10px;background:var(--harbour-bg);color:var(--harbour-lo);box-shadow:inset 0 0 0 1px rgba(39,74,115,.28);font-size:0.68rem;font-weight:800;letter-spacing:0.6px;text-transform:uppercase;padding:4px 12px;border-radius:20px;vertical-align:middle">🚧 Coming Soon</span>
       <h2 class="cf-section-title">Shop. Earn. Save. Repeat.</h2>
       <p class="cf-section-sub" style="margin:0 auto">Every rupee you spend earns VitaPoints. Redeem for free products, discounts &amp; early access.</p>
     </div>
@@ -5831,7 +6066,7 @@ setInterval(function() { syncAppCartBadge(); syncAppWishBadge(); }, 2000);
   <div class="container">
     <div class="refer-card">
       <div style="font-size:3rem;margin-bottom:14px">🤝</div>
-      <span style="display:inline-block;margin-bottom:10px;background:var(--seal);color:#fff;font-size:0.68rem;font-weight:800;letter-spacing:0.6px;text-transform:uppercase;padding:4px 12px;border-radius:20px">🚧 Coming Soon</span>
+      <span style="display:inline-block;margin-bottom:10px;background:var(--harbour-bg);color:var(--harbour-lo);box-shadow:inset 0 0 0 1px rgba(39,74,115,.28);font-size:0.68rem;font-weight:800;letter-spacing:0.6px;text-transform:uppercase;padding:4px 12px;border-radius:20px">🚧 Coming Soon</span>
       <h2 class="refer-title">Share Ascofizz, Earn Together</h2>
       <p class="refer-sub">Refer a friend and you both win. When they place their first order, you get <strong>₹100 VitaPoints</strong> and they get <strong>₹100 off</strong> their order.</p>
       <div class="refer-steps">
@@ -5871,7 +6106,7 @@ setInterval(function() { syncAppCartBadge(); syncAppWishBadge(); }, 2000);
         <span style="background:var(--green-pale);color:var(--green);font-size:0.78rem;font-weight:600;padding:4px 12px;border-radius:20px">✓ Verified Purchases Only</span>
       </div>
     </div>
-    <div class="influencer-grid" style="grid-template-columns:repeat(3,1fr);gap:20px" id="reviewsWallGrid">
+    <div class="influencer-grid" style="grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:20px" id="reviewsWallGrid">
       <p style="grid-column:1/-1;text-align:center;color:var(--gray);font-size:.9rem">Loading reviews…</p>
     </div>
     <div style="text-align:center;margin-top:28px">
@@ -5882,19 +6117,19 @@ setInterval(function() { syncAppCartBadge(); syncAppWishBadge(); }, 2000);
 
 
 <!-- ══ AI ADVISOR HOMEPAGE SECTION ══ -->
-<section class="section vita-home-section" style="background:linear-gradient(135deg,var(--green) 0%,#2A302B 100%);padding:70px 0;">
+<section class="section vita-home-section" style="background:var(--sage-bg);padding:70px 0;">
   <div class="container">
     <div class="vita-home-inner">
       <div class="vita-home-left">
-        <div class="section-label" style="color:var(--gold-light)">AI Health Advisor</div>
-        <h2 class="section-title" style="color:white;font-size:clamp(1.8rem,3.5vw,2.8rem)">Meet Vita — Your Personal<br><em style="color:var(--gold-light);font-style:italic">Wellness Expert</em></h2>
-        <p style="color:rgba(255,255,255,0.78);font-size:0.97rem;line-height:1.8;margin:16px 0 28px;max-width:480px">Tell Vita your age, health goals and lifestyle. She'll recommend the exact Ascofizz supplements suited for you — and add them to your cart instantly.</p>
+        <div class="section-label" style="color:var(--harbour-lo)">AI Health Advisor</div>
+        <h2 class="section-title" style="color:var(--t-hi);font-size:clamp(1.8rem,3.5vw,2.8rem)">Meet Vita — Your Personal<br><em style="color:var(--harbour-lo);font-style:italic">Wellness Expert</em></h2>
+        <p style="color:var(--t-mid);font-size:0.97rem;line-height:1.8;margin:16px 0 28px;max-width:480px">Tell Vita your age, health goals and lifestyle. She'll recommend the exact Ascofizz supplements suited for you — and add them to your cart instantly.</p>
         <div style="display:flex;flex-wrap:wrap;gap:10px;margin-bottom:28px">
-          <span style="background:rgba(255,255,255,0.12);color:white;padding:7px 15px;border-radius:100px;font-size:0.8rem;font-weight:500">✅ Skin & Glow</span>
-          <span style="background:rgba(255,255,255,0.12);color:white;padding:7px 15px;border-radius:100px;font-size:0.8rem;font-weight:500">⚡ Energy & Focus</span>
-          <span style="background:rgba(255,255,255,0.12);color:white;padding:7px 15px;border-radius:100px;font-size:0.8rem;font-weight:500">💪 Immunity</span>
-          <span style="background:rgba(255,255,255,0.12);color:white;padding:7px 15px;border-radius:100px;font-size:0.8rem;font-weight:500">⚖️ Weight Loss</span>
-          <span style="background:rgba(255,255,255,0.12);color:white;padding:7px 15px;border-radius:100px;font-size:0.8rem;font-weight:500">💇 Hair & Nails</span>
+          <span style="background:rgba(255,255,255,0.12);color:var(--t-hi);padding:7px 15px;border-radius:100px;font-size:0.8rem;font-weight:500">✅ Skin & Glow</span>
+          <span style="background:rgba(255,255,255,0.12);color:var(--t-hi);padding:7px 15px;border-radius:100px;font-size:0.8rem;font-weight:500">⚡ Energy & Focus</span>
+          <span style="background:rgba(255,255,255,0.12);color:var(--t-hi);padding:7px 15px;border-radius:100px;font-size:0.8rem;font-weight:500">💪 Immunity</span>
+          <span style="background:rgba(255,255,255,0.12);color:var(--t-hi);padding:7px 15px;border-radius:100px;font-size:0.8rem;font-weight:500">⚖️ Weight Loss</span>
+          <span style="background:rgba(255,255,255,0.12);color:var(--t-hi);padding:7px 15px;border-radius:100px;font-size:0.8rem;font-weight:500">💇 Hair & Nails</span>
         </div>
         <button class="btn-gold" onclick="showPage('advisor')" style="font-size:0.95rem;padding:15px 34px">Chat with Vita Now →</button>
       </div>
@@ -5904,8 +6139,8 @@ setInterval(function() { syncAppCartBadge(); syncAppWishBadge(); }, 2000);
           <div class="vpc-header">
             <div class="vpc-avatar">🌿</div>
             <div>
-              <div style="font-weight:700;font-size:0.9rem;color:white">Vita</div>
-              <div style="font-size:0.72rem;color:rgba(255,255,255,0.7)">● Online Now</div>
+              <div style="font-weight:700;font-size:0.9rem;color:var(--t-hi)">Vita</div>
+              <div style="font-size:0.72rem;color:var(--t-mid)">● Online Now</div>
             </div>
           </div>
           <div class="vpc-body">
@@ -6064,7 +6299,7 @@ setInterval(function() { syncAppCartBadge(); syncAppWishBadge(); }, 2000);
             <div class="f-opt"><input type="checkbox" id="fBest" onchange="applyFilters()"><label for="fBest">Bestsellers</label></div>
           </div>
         </div>
-        <div style="background:linear-gradient(135deg,var(--green),var(--green-light));border-radius:var(--radius);padding:22px;margin-top:18px;color:white;text-align:center">
+        <div style="background:linear-gradient(135deg,var(--green),var(--green-light));border-radius:var(--radius);padding:22px;margin-top:18px;color:var(--t-hi);text-align:center">
           <div style="font-size:1.8rem;margin-bottom:8px">🌿</div>
           <div style="font-weight:700;font-size:.88rem;margin-bottom:5px">Buy 4 Get 50% OFF</div>
           <div style="font-size:.75rem;opacity:.85;margin-bottom:14px">Add 4 units to your cart and the discount applies automatically!</div>
@@ -6201,7 +6436,7 @@ setInterval(function() { syncAppCartBadge(); syncAppWishBadge(); }, 2000);
           <!-- ── CHECKOUT RECOMMENDATIONS ── -->
           <div id="ckRecoSection" style="margin-top:18px;display:none">
             <div style="font-size:.78rem;font-weight:700;color:var(--dark);margin-bottom:10px;display:flex;align-items:center;gap:6px">
-              <span style="background:linear-gradient(135deg,var(--green),var(--green-light));color:white;border-radius:6px;padding:2px 8px;font-size:.65rem;font-weight:800;letter-spacing:.4px">COMPLETE YOUR ORDER</span>
+              <span style="background:linear-gradient(135deg,var(--green),var(--green-light));color:var(--t-hi);border-radius:6px;padding:2px 8px;font-size:.65rem;font-weight:800;letter-spacing:.4px">COMPLETE YOUR ORDER</span>
               <span style="color:var(--gray);font-size:.72rem;font-weight:400">Customers also bought</span>
             </div>
             <div id="ckRecoItems"></div>
@@ -6225,7 +6460,7 @@ setInterval(function() { syncAppCartBadge(); syncAppWishBadge(); }, 2000);
           <!-- Online Payment Button -->
           <button class="checkout-btn" id="onlinePayBtn" onclick="initiatePayment()" style="margin-top:14px">🔒 Pay Securely via GoKwik</button>
           <!-- COD Button -->
-          <button id="codBtn" onclick="initiateCOD()" style="width:100%;margin-top:10px;padding:15px;background:linear-gradient(135deg,var(--seal),var(--f-citrus));color:white;border:none;border-radius:14px;font-size:.95rem;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:10px">
+          <button id="codBtn" onclick="initiateCOD()" style="width:100%;margin-top:10px;padding:15px;background:linear-gradient(135deg,var(--seal),var(--f-citrus));color:var(--t-hi);border:none;border-radius:14px;font-size:.95rem;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:10px">
             <span style="font-size:1.2rem">💵</span>
             <div style="text-align:left">
               <div>Cash on Delivery (COD)</div>
@@ -6397,7 +6632,7 @@ function renderCheckoutSummary() {
       <div id="srOrderRow" style="display:none;align-items:center;gap:8px;background:var(--sub-1);border:1px solid var(--t-low);border-radius:8px;padding:8px 16px;font-size:.82rem;font-weight:600;margin-bottom:4px">
         <span>🚚 Shiprocket ID:</span><span id="srOrderId" style="color:var(--green)">—</span>
       </div>
-      <a id="trackOrderBtn" href="https://shiprocket.in/shipment-tracking/" target="_blank" rel="noopener" style="display:none;align-items:center;gap:6px;background:var(--green);color:white;border-radius:100px;padding:10px 22px;font-weight:600;font-size:.82rem;text-decoration:none;margin:8px 0">📦 Track on Shiprocket →</a>
+      <a id="trackOrderBtn" href="https://shiprocket.in/shipment-tracking/" target="_blank" rel="noopener" style="display:none;align-items:center;gap:6px;background:var(--face-warm);color:var(--clay-lo);box-shadow:inset 0 0 0 1.5px rgba(138,74,51,.32);border-radius:100px;padding:10px 22px;font-weight:600;font-size:.82rem;text-decoration:none;margin:8px 0">📦 Track on Shiprocket →</a>
       <p style="font-size:.83rem;color:var(--gray)">Confirmation &amp; tracking details will be sent to your email and SMS.</p>
       <div class="ty-steps">
         <div class="ty-step"><div style="font-size:1.8rem"></div><div style="font-size:.8rem;font-weight:700;margin:6px 0">Order Placed</div><div style="font-size:.72rem;color:var(--gray)">Just now</div></div>
@@ -6474,19 +6709,19 @@ function renderCheckoutSummary() {
 <div class="page" id="page-about" style="padding-top:70px">
 
   <!-- ABOUT HERO - Premium redesign -->
-  <div style="background:linear-gradient(165deg,#0A0D0B 0%,#2A302B 38%,#454E46 74%,#657166 100%);color:white;padding:100px 0 80px;position:relative;overflow:hidden;--about-hero-bg:none">
+  <div style="background:var(--face-warm);color:var(--t-hi);padding:100px 0 80px;position:relative;overflow:hidden;--about-hero-bg:none">
     <div id="aboutHeroBgLayer" style="position:absolute;inset:0;opacity:.06;background:var(--about-hero-bg) center/cover"></div>
     <!-- Animated dots decoration -->
     <div style="position:absolute;top:20%;right:5%;width:300px;height:300px;border-radius:50%;border:1px solid rgba(255,255,255,.06)"></div>
     <div style="position:absolute;top:15%;right:8%;width:200px;height:200px;border-radius:50%;border:1px solid rgba(255,255,255,.1)"></div>
     <div class="container" style="position:relative">
-      <div class="about-hero-grid" style="display:grid;grid-template-columns:1fr 1fr;gap:60px;align-items:center">
+      <div class="about-hero-grid" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:60px;align-items:center">
         <div>
           <div style="display:inline-flex;align-items:center;gap:8px;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2);border-radius:100px;padding:6px 16px;font-size:.75rem;font-weight:700;letter-spacing:2px;text-transform:uppercase;margin-bottom:24px;color:var(--f-mineral)">&#127807; Our Story</div>
           <h1 style="font-size:clamp(2.2rem,4.5vw,3.5rem);font-family:var(--font-display);line-height:1.1;margin-bottom:20px;font-weight:800">Rooted in Nature,<br><em style="color:var(--f-mineral);font-style:italic">Powered by Science</em></h1>
           <p style="font-size:.95rem;opacity:.85;line-height:1.85;margin-bottom:28px">Founded in Anand, Gujarat — India's nutraceutical capital — Ascofizz began with a single mission: make premium-grade nutrition accessible to every Indian family, without compromise on quality or affordability.</p>
           <!-- Hero Stats Row -->
-          <div class="about-stats-grid" style="display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:32px">
+          <div class="about-stats-grid" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:16px;margin-bottom:32px">
             <div data-reveal="up" data-delay="1" style="text-align:center;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.15);border-radius:14px;padding:16px 8px">
               <div data-count="10000" data-suffix="+" style="font-size:1.9rem;font-weight:800;color:var(--f-mineral);font-family:var(--font-display)">10K+</div>
               <div style="font-size:.7rem;opacity:.75;margin-top:3px">Happy Customers</div>
@@ -6505,12 +6740,12 @@ function renderCheckoutSummary() {
             </div>
           </div>
           <div style="display:flex;gap:12px;flex-wrap:wrap">
-            <button onclick="showPage('shop')" style="display:inline-flex;align-items:center;gap:8px;background:var(--f-mineral);color:#0A0D0B;border:none;border-radius:100px;padding:14px 26px;font-weight:800;font-size:.88rem;cursor:pointer;font-family:var(--font-body)">&#127807; Shop Our Products</button>
-            <button onclick="openWhatsApp('Hello Ascofizz! I want to learn more about your products.')" style="display:inline-flex;align-items:center;gap:8px;background:rgba(255,255,255,.12);color:white;border:2px solid rgba(255,255,255,.3);border-radius:100px;padding:13px 22px;font-weight:600;font-size:.86rem;cursor:pointer;font-family:var(--font-body)">&#128172; WhatsApp Us</button>
+            <button onclick="showPage('shop')" style="display:inline-flex;align-items:center;gap:8px;background:var(--face-warm);color:var(--indigo-lo);box-shadow:inset 0 0 0 1.5px rgba(84,113,119,.32);border:none;border-radius:100px;padding:14px 26px;font-weight:800;font-size:.88rem;cursor:pointer;font-family:var(--font-body)">&#127807; Shop Our Products</button>
+            <button onclick="openWhatsApp('Hello Ascofizz! I want to learn more about your products.')" style="display:inline-flex;align-items:center;gap:8px;background:rgba(255,255,255,.12);color:var(--t-hi);border:2px solid rgba(255,255,255,.3);border-radius:100px;padding:13px 22px;font-weight:600;font-size:.86rem;cursor:pointer;font-family:var(--font-body)">&#128172; WhatsApp Us</button>
           </div>
         </div>
         <div style="position:relative">
-          <img data-media-key="about.manufacturing_photo" loading="lazy" decoding="async" src="assets/plant-placeholder.svg" alt="Ascofizz's WHO-GMP certified manufacturing floor in Anand, Gujarat" data-needs-upload="true" style="width:100%;aspect-ratio:4/5;object-fit:cover;border-radius:24px;box-shadow:0 30px 60px rgba(0,0,0,.4)">
+          <img data-media-key="about.manufacturing_photo" loading="lazy" decoding="async" src="" data-awaiting-upload="true" alt="Ascofizz's WHO-GMP certified manufacturing floor in Anand, Gujarat" data-needs-upload="true" style="width:100%;aspect-ratio:4/5;object-fit:cover;border-radius:24px;box-shadow:0 30px 60px rgba(0,0,0,.4)">
           <!-- Floating cert badges -->
           <div class="about-hero-float-badge" style="position:absolute;bottom:-20px;left:-20px;background:var(--sub-1);border-radius:16px;padding:14px 18px;box-shadow:0 10px 30px rgba(0,0,0,.2);display:flex;align-items:center;gap:10px">
             <span style="font-size:1.6rem">&#127981;</span>
@@ -6545,7 +6780,7 @@ function renderCheckoutSummary() {
   <!-- OUR STORY TIMELINE -->
   <section style="padding:80px 0;background:var(--green-wash)">
     <div class="container">
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:60px;align-items:start">
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:60px;align-items:start">
         <div>
           <div class="section-label">Mission & Vision</div>
           <h2 class="section-title">Why Ascofizz Exists</h2>
@@ -6587,7 +6822,7 @@ function renderCheckoutSummary() {
         <h2 class="section-title">State-of-the-Art Manufacturing</h2>
         <p class="section-sub">Every Ascofizz product is made in our own GMP-certified facility — giving us total control over quality from raw material to finished product.</p>
       </div>
-      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:24px;margin-bottom:40px">
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:24px;margin-bottom:40px">
         <div style="background:linear-gradient(135deg,var(--green-wash),white);border-radius:20px;padding:32px 24px;border:1px solid rgba(23,224,192,.1);text-align:center">
           <div style="font-size:2.5rem;margin-bottom:12px">&#127981;</div>
           <div style="font-size:1rem;font-weight:700;color:var(--dark);margin-bottom:8px">FSSAI-Licensed Plant</div>
@@ -6648,11 +6883,11 @@ function renderCheckoutSummary() {
         <h2 class="section-title">Meet Our Founders</h2>
         <p class="section-sub">Four entrepreneurs united by a single vision — making premium health accessible to every Indian.</p>
       </div>
-      <div class="about-team-grid" style="display:grid;grid-template-columns:repeat(4,1fr);gap:28px">
+      <div class="about-team-grid" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(215px,1fr));gap:28px">
         <div style="background:var(--sub-1);border-radius:20px;overflow:hidden;border:1px solid rgba(0,0,0,.06);box-shadow:0 8px 30px rgba(23,224,192,.1);transition:transform .25s,box-shadow .25s" onmouseover="this.style.transform='translateY(-6px)';this.style.boxShadow='0 16px 40px rgba(46,125,50,.18)'" onmouseout="this.style.transform='';this.style.boxShadow='0 8px 30px rgba(46,125,50,.1)'">
           <div style="background:linear-gradient(135deg,var(--f-mineral-d),var(--f-mineral));padding:36px 20px 24px;text-align:center">
             <div style="width:80px;height:80px;background:rgba(255,255,255,.18);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:2rem;margin:0 auto 14px;border:3px solid rgba(255,255,255,.4)">&#128084;</div>
-            <div style="color:white;font-weight:800;font-size:1.05rem">Amit Dantani</div>
+            <div style="color:var(--t-hi);font-weight:800;font-size:1.05rem">Amit Dantani</div>
             <div style="display:inline-block;background:rgba(87,80,77,.9);color:white;font-size:.7rem;font-weight:700;padding:3px 12px;border-radius:100px;margin-top:6px">Founder &amp; CEO</div>
           </div>
           <div style="padding:22px">
@@ -6667,9 +6902,9 @@ function renderCheckoutSummary() {
           </div>
         </div>
         <div style="background:var(--sub-1);border-radius:20px;overflow:hidden;border:1px solid rgba(0,0,0,.06);box-shadow:0 8px 30px rgba(26,58,107,.1);transition:transform .25s,box-shadow .25s" onmouseover="this.style.transform='translateY(-6px)';this.style.boxShadow='0 16px 40px rgba(26,58,107,.18)'" onmouseout="this.style.transform='';this.style.boxShadow='0 8px 30px rgba(26,58,107,.1)'">
-          <div style="background:linear-gradient(135deg,#1a3a6b,#2451a0);padding:36px 20px 24px;text-align:center">
+          <div style="background:var(--harbour-bg);padding:36px 20px 24px;text-align:center">
             <div style="width:80px;height:80px;background:rgba(255,255,255,.18);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:2rem;margin:0 auto 14px;border:3px solid rgba(255,255,255,.4)">&#128226;</div>
-            <div style="color:white;font-weight:800;font-size:1.05rem">Aamin Ghachivahora</div>
+            <div style="color:var(--t-hi);font-weight:800;font-size:1.05rem">Aamin Ghachivahora</div>
             <div style="display:inline-block;background:rgba(87,80,77,.9);color:white;font-size:.7rem;font-weight:700;padding:3px 12px;border-radius:100px;margin-top:6px">Co-Founder &amp; CMO</div>
           </div>
           <div style="padding:22px">
@@ -6684,9 +6919,9 @@ function renderCheckoutSummary() {
           </div>
         </div>
         <div style="background:var(--sub-1);border-radius:20px;overflow:hidden;border:1px solid rgba(0,0,0,.06);box-shadow:0 8px 30px rgba(123,45,0,.1);transition:transform .25s,box-shadow .25s" onmouseover="this.style.transform='translateY(-6px)';this.style.boxShadow='0 16px 40px rgba(123,45,0,.18)'" onmouseout="this.style.transform='';this.style.boxShadow='0 8px 30px rgba(123,45,0,.1)'">
-          <div style="background:linear-gradient(135deg,#7b2d00,#b34700);padding:36px 20px 24px;text-align:center">
+          <div style="background:var(--clay-bg);padding:36px 20px 24px;text-align:center">
             <div style="width:80px;height:80px;background:rgba(255,255,255,.18);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:2rem;margin:0 auto 14px;border:3px solid rgba(255,255,255,.4)">&#128202;</div>
-            <div style="color:white;font-weight:800;font-size:1.05rem">Jaydeep Prajapati</div>
+            <div style="color:var(--t-hi);font-weight:800;font-size:1.05rem">Jaydeep Prajapati</div>
             <div style="display:inline-block;background:rgba(87,80,77,.9);color:white;font-size:.7rem;font-weight:700;padding:3px 12px;border-radius:100px;margin-top:6px">Co-Founder &amp; CFO</div>
           </div>
           <div style="padding:22px">
@@ -6706,7 +6941,7 @@ function renderCheckoutSummary() {
   <!-- CONTACT CTA -->
   <section style="padding:80px 0;background:var(--sub-1)">
     <div class="container">
-      <div class="about-contact-grid" style="display:grid;grid-template-columns:1fr 1fr;gap:48px;align-items:center">
+      <div class="about-contact-grid" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:48px;align-items:center">
         <div>
           <div class="section-label">Get in Touch</div>
           <h2 class="section-title" style="margin-bottom:14px">Talk Directly to Our Team</h2>
@@ -6717,8 +6952,8 @@ function renderCheckoutSummary() {
             <div style="display:flex;align-items:center;gap:12px;background:var(--off-white);border-radius:12px;padding:14px 18px"><span style="font-size:1.3rem">&#128205;</span><div><div style="font-size:.72rem;color:var(--gray);font-weight:700;text-transform:uppercase;letter-spacing:1px">Address</div><div style="font-weight:700;color:var(--dark);font-size:.85rem">Near Rajshivalay Cinema, Anand – 388001, Gujarat</div></div></div>
           </div>
           <div style="display:flex;gap:12px;flex-wrap:wrap">
-            <button onclick="openWhatsApp('Hello! I have a question about Ascofizz.')" style="display:inline-flex;align-items:center;gap:8px;background:#25D366;color:white;border:none;border-radius:100px;padding:13px 24px;font-weight:700;font-size:.86rem;cursor:pointer;font-family:var(--font-body)">&#128172; Chat on WhatsApp</button>
-            <button onclick="window.open('https://www.ascovita.com/#/capabilities','_blank')" style="display:inline-flex;align-items:center;gap:8px;background:var(--green);color:white;border:none;border-radius:100px;padding:13px 24px;font-weight:600;font-size:.86rem;cursor:pointer;font-family:var(--font-body)">&#127981; B2B &amp; Wholesale &#8594;</button>
+            <button onclick="openWhatsApp('Hello! I have a question about Ascofizz.')" style="display:inline-flex;align-items:center;gap:8px;background:var(--face-warm);color:var(--fern-lo);box-shadow:inset 0 0 0 1.5px rgba(94,145,121,.34);border:none;border-radius:100px;padding:13px 24px;font-weight:700;font-size:.86rem;cursor:pointer;font-family:var(--font-body)">&#128172; Chat on WhatsApp</button>
+            <button onclick="window.open('https://www.ascovita.com/#/capabilities','_blank')" style="display:inline-flex;align-items:center;gap:8px;background:var(--face-warm);color:var(--clay-lo);box-shadow:inset 0 0 0 1.5px rgba(138,74,51,.32);border:none;border-radius:100px;padding:13px 24px;font-weight:600;font-size:.86rem;cursor:pointer;font-family:var(--font-body)">&#127981; B2B &amp; Wholesale &#8594;</button>
           </div>
         </div>
         <div style="background:var(--sub-1);border-radius:20px;padding:32px;border:1px solid var(--light-gray);box-shadow:0 8px 30px rgba(23,224,192,.08)">
@@ -8196,15 +8431,15 @@ function _updateStrength(val) {
             <li><a href="tel:+919898582650">📞 +91 9898 582 650</a></li>
             <li><a href="mailto:ascovitahealthcare@gmail.com">ascovitahealthcare@gmail.com</a></li>
           </ul>
-          <div style="margin-top:16px;font-size:.7rem;color:rgba(255,255,255,0.38);line-height:1.7">
+          <div style="margin-top:16px;font-size:.7rem;color:var(--t-dim);line-height:1.7">
             Ascofizz — an online brand of Ascovita Healthcare<br>Near Rajshivalay Cinema<br>Anand – 388001, Gujarat, India
           </div>
           <div style="margin-top:14px">
-            <div style="font-size:.68rem;color:rgba(255,255,255,0.38);text-transform:uppercase;letter-spacing:1px;margin-bottom:7px">We Accept</div>
+            <div style="font-size:.68rem;color:var(--t-dim);text-transform:uppercase;letter-spacing:1px;margin-bottom:7px">We Accept</div>
             <div style="display:flex;gap:5px;flex-wrap:wrap">
-              <span class="pay-icon" style="background:rgba(255,255,255,0.08);color:rgba(255,255,255,0.6);border-color:rgba(255,255,255,0.1)">UPI</span>
-              <span class="pay-icon" style="background:rgba(255,255,255,0.08);color:rgba(255,255,255,0.6);border-color:rgba(255,255,255,0.1)">Visa</span>
-              <span class="pay-icon" style="background:rgba(255,255,255,0.08);color:rgba(255,255,255,0.6);border-color:rgba(255,255,255,0.1)">MC</span>
+              <span class="pay-icon" style="background:rgba(255,255,255,0.08);color:var(--t-mid);border-color:var(--t-dim)">UPI</span>
+              <span class="pay-icon" style="background:rgba(255,255,255,0.08);color:var(--t-mid);border-color:var(--t-dim)">Visa</span>
+              <span class="pay-icon" style="background:rgba(255,255,255,0.08);color:var(--t-mid);border-color:var(--t-dim)">MC</span>
               
             </div>
           </div>
@@ -8702,7 +8937,7 @@ function buildTierWidget(p) {
                onclick="selectTier(${p.id}, ${i})">
             <div class="tier-tabs">${tier.tabs}</div>
             <span class="tier-tabs-label">Tablets</span>
-            <span class="tier-units-label" style="font-size:.62rem;color:rgba(255,255,255,.5);font-weight:500;margin-top:1px">${tier.tabs===15?'1 Pack':tier.tabs===30?'2 Packs':tier.tabs===45?'3 Packs':'4 Packs'}</span>
+            <span class="tier-units-label" style="font-size:.62rem;color:var(--t-low);font-weight:500;margin-top:1px">${tier.tabs===15?'1 Pack':tier.tabs===30?'2 Packs':tier.tabs===45?'3 Packs':'4 Packs'}</span>
             <span class="tier-disc">${tier.discountPct}% OFF</span>
             <span class="tier-rate">₹${tier.rate.toLocaleString('en-IN')}</span>
             <span class="tier-mrp">₹${tier.mrp.toLocaleString('en-IN')}</span>
@@ -8862,7 +9097,7 @@ function buildProductPage(p) {
       <div class="tab-content" id="tab-pricing">
         <div style="overflow-x:auto">
           <table style="width:100%;border-collapse:collapse;font-size:.85rem">
-            <thead><tr style="background:var(--green);color:white">
+            <thead><tr style="background:var(--green);color:var(--t-hi)">
               <th style="padding:12px 16px;text-align:left;border-radius:8px 0 0 0">Pack Size</th>
               <th style="padding:12px 16px;text-align:right">MRP (&#x20B9;)</th>
               <th style="padding:12px 16px;text-align:right">Your Price (&#x20B9;)</th>
@@ -8870,7 +9105,7 @@ function buildProductPage(p) {
               <th style="padding:12px 16px;text-align:right;border-radius:0 8px 0 0">You Save</th>
             </tr></thead>
             <tbody>
-              ${tiers.map((t,i)=>{const isBest=t.discountPct===Math.max(...tiers.map(x=>x.discountPct));return`<tr style="background:${isBest?'var(--gold-pale)':i%2?'var(--green-wash)':'white'};cursor:pointer" onclick="selectTier(${p.id},${i})"><td style="padding:12px 16px;font-weight:700">${t.tabs} Tabs${isBest?' <span style="background:var(--gold);color:white;font-size:.6rem;padding:2px 7px;border-radius:100px;font-weight:800;vertical-align:middle">BEST VALUE</span>':''}</td><td style="padding:12px 16px;text-align:right;text-decoration:line-through;color:var(--gray)">&#x20B9;${t.mrp.toLocaleString('en-IN')}</td><td style="padding:12px 16px;text-align:right;font-weight:800;color:var(--green)">&#x20B9;${t.rate.toLocaleString('en-IN')}</td><td style="padding:12px 16px;text-align:right"><span style="background:${isBest?'var(--gold)':'var(--gold-pale)'};color:${isBest?'white':'var(--gold)'};padding:3px 9px;border-radius:100px;font-weight:700;font-size:.78rem">${t.discountPct}% OFF</span></td><td style="padding:12px 16px;text-align:right;color:var(--success);font-weight:700">&#x20B9;${(t.mrp-t.rate).toLocaleString('en-IN')}</td></tr>`;}).join('')}
+              ${tiers.map((t,i)=>{const isBest=t.discountPct===Math.max(...tiers.map(x=>x.discountPct));return`<tr style="background:${isBest?'var(--gold-pale)':i%2?'var(--green-wash)':'white'};cursor:pointer" onclick="selectTier(${p.id},${i})"><td style="padding:12px 16px;font-weight:700">${t.tabs} Tabs${isBest?' <span style="background:var(--gold);color:var(--t-hi);font-size:.6rem;padding:2px 7px;border-radius:100px;font-weight:800;vertical-align:middle">BEST VALUE</span>':''}</td><td style="padding:12px 16px;text-align:right;text-decoration:line-through;color:var(--gray)">&#x20B9;${t.mrp.toLocaleString('en-IN')}</td><td style="padding:12px 16px;text-align:right;font-weight:800;color:var(--green)">&#x20B9;${t.rate.toLocaleString('en-IN')}</td><td style="padding:12px 16px;text-align:right"><span style="background:${isBest?'var(--gold)':'var(--gold-pale)'};color:${isBest?'white':'var(--gold)'};padding:3px 9px;border-radius:100px;font-weight:700;font-size:.78rem">${t.discountPct}% OFF</span></td><td style="padding:12px 16px;text-align:right;color:var(--success);font-weight:700">&#x20B9;${(t.mrp-t.rate).toLocaleString('en-IN')}</td></tr>`;}).join('')}
             </tbody>
           </table>
           <p style="font-size:.76rem;color:var(--gray);margin-top:12px">Click any row to select that pack. All prices incl. taxes.</p>
@@ -9145,7 +9380,7 @@ function renderCart() {
               <div>
                 <div class="ci-name" onclick="openProduct(${p.id})" style="cursor:pointer">${p.name}</div>
                 ${packLabel ? `<div style="font-size:.72rem;background:var(--green-pale);color:var(--green);display:inline-flex;align-items:center;gap:4px;padding:3px 10px;border-radius:100px;margin-bottom:5px;font-weight:600">📦 ${packLabel}</div>` : ''}
-                <div class="ci-price">₹${unitPrice.toLocaleString('en-IN')}<span class="ci-orig">${unitMRP !== unitPrice ? ' ₹' + unitMRP.toLocaleString('en-IN') : ''}</span>${discPct > 0 ? `<span style="background:var(--f-guava);color:white;font-size:.58rem;font-weight:800;padding:2px 6px;border-radius:100px;margin-left:6px">${discPct}% OFF</span>` : ''}</div>
+                <div class="ci-price">₹${unitPrice.toLocaleString('en-IN')}<span class="ci-orig">${unitMRP !== unitPrice ? ' ₹' + unitMRP.toLocaleString('en-IN') : ''}</span>${discPct > 0 ? `<span style="background:var(--f-guava);color:var(--t-hi);font-size:.58rem;font-weight:800;padding:2px 6px;border-radius:100px;margin-left:6px">${discPct}% OFF</span>` : ''}</div>
                 ${unitMRP !== unitPrice ? `<div style="font-size:.7rem;color:var(--success);font-weight:600;margin-top:2px">💰 Save ₹${((unitMRP - unitPrice) * item.qty).toLocaleString('en-IN')} on this item</div>` : ''}
               </div>
               <div style="text-align:right">
@@ -9220,16 +9455,16 @@ function renderCartUpsell() {
   var cards = ups.map(function(p){
     var price = p.salePrice||p.price;
     var disc = p.salePrice ? Math.round((1-p.salePrice/p.price)*100) : 0;
-    var discBadge = disc > 0 ? '<span style="font-size:.68rem;color:var(--t-low);text-decoration:line-through">&#x20B9;' + p.price.toLocaleString('en-IN') + '</span> <span style="background:var(--f-guava);color:white;font-size:.62rem;font-weight:700;padding:1px 5px;border-radius:100px">' + disc + '% OFF</span>' : '';
+    var discBadge = disc > 0 ? '<span style="font-size:.68rem;color:var(--t-low);text-decoration:line-through">&#x20B9;' + p.price.toLocaleString('en-IN') + '</span> <span style="background:var(--f-guava);color:var(--t-hi);font-size:.62rem;font-weight:700;padding:1px 5px;border-radius:100px">' + disc + '% OFF</span>' : '';
     return '<div id="upsell_' + p.id + '" style="background:var(--sub-1);border-radius:14px;padding:14px;border:1px solid rgba(240,180,41,.3);display:flex;gap:10px;align-items:flex-start;cursor:pointer" onclick="addUpsellToCart(' + p.id + ')">'
       + '<img src="' + (typeof getProductImg==="function"?getProductImg(p):p.image||PRODUCT_FALLBACKS.default) + '" style="width:54px;height:54px;object-fit:cover;border-radius:10px;flex-shrink:0" onerror="this.src=PRODUCT_FALLBACKS.default" alt="' + p.name + '">'
       + '<div style="flex:1;min-width:0"><div style="font-size:.78rem;font-weight:700;color:var(--t-mid);line-height:1.35;margin-bottom:5px">' + p.name + '</div>'
       + '<div style="display:flex;align-items:center;gap:5px;flex-wrap:wrap"><span style="font-size:.88rem;font-weight:800;color:var(--green)">&#x20B9;' + price.toLocaleString('en-IN') + '</span>' + discBadge + '</div>'
-      + '<button style="margin-top:8px;background:var(--green);color:white;border:none;border-radius:100px;padding:5px 14px;font-size:.72rem;font-weight:700;cursor:pointer;font-family:var(--font-body)" onclick="event.stopPropagation();addUpsellToCart(' + p.id + ')">+ Add</button></div></div>';
+      + '<button style="margin-top:8px;background:var(--face-warm);color:var(--clay-lo);box-shadow:inset 0 0 0 1.5px rgba(138,74,51,.32);border:none;border-radius:100px;padding:5px 14px;font-size:.72rem;font-weight:700;cursor:pointer;font-family:var(--font-body)" onclick="event.stopPropagation();addUpsellToCart(' + p.id + ')">+ Add</button></div></div>';
   }).join('');
   return '<div style="margin-top:32px"><div style="background:linear-gradient(135deg,#fffdf0,#fff8e0);border:2px solid var(--seal);border-radius:20px;padding:26px">'
     + shipMsg
-    + '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px"><div><div style="font-size:.7rem;color:var(--f-mineral-d);font-weight:700;text-transform:uppercase;letter-spacing:1.5px">&#x1F4A1; Complete Your Wellness Stack</div><div style="font-size:1rem;font-weight:800;color:var(--t-mid);margin-top:3px">Customers Also Bought</div></div><span style="background:var(--seal);color:white;font-size:.69rem;font-weight:700;padding:3px 10px;border-radius:100px">SAVE MORE</span></div>'
+    + '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px"><div><div style="font-size:.7rem;color:var(--f-mineral-d);font-weight:700;text-transform:uppercase;letter-spacing:1.5px">&#x1F4A1; Complete Your Wellness Stack</div><div style="font-size:1rem;font-weight:800;color:var(--t-mid);margin-top:3px">Customers Also Bought</div></div><span style="background:var(--seal);color:var(--t-hi);font-size:.69rem;font-weight:700;padding:3px 10px;border-radius:100px">SAVE MORE</span></div>'
     + '<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:12px">' + cards + '</div>'
     + '</div></div>';
 }
@@ -9395,7 +9630,7 @@ function renderBlogCard(b) {
   const shopBtn = b.relatedProduct
     ? `<div style="margin-top:12px">
         <button onclick="event.preventDefault();event.stopPropagation();openProduct(${b.relatedProduct})"
-          style="background:var(--green);color:white;border:none;border-radius:8px;padding:7px 16px;font-size:0.76rem;font-weight:700;cursor:pointer;letter-spacing:0.3px">
+          style="background:var(--face-warm);color:var(--clay-lo);box-shadow:inset 0 0 0 1.5px rgba(138,74,51,.32);border:none;border-radius:8px;padding:7px 16px;font-size:0.76rem;font-weight:700;cursor:pointer;letter-spacing:0.3px">
           🛒 Shop This Product →
         </button>
        </div>`
@@ -9494,7 +9729,7 @@ async function renderReviewsWall() {
     const initial = (r.user||'?').trim().charAt(0).toUpperCase();
     return `<div class="inf-card" style="background:var(--sub-1);border-radius:16px;padding:24px;box-shadow:0 2px 12px rgba(23,224,192,0.07);border:1px solid rgba(23,224,192,0.06)">
       <div style="display:flex;align-items:center;gap:12px;margin-bottom:14px">
-        <div style="width:44px;height:44px;border-radius:50%;background:linear-gradient(135deg,var(--f-mineral-d),var(--f-mineral));display:flex;align-items:center;justify-content:center;color:white;font-weight:700;font-size:1.1rem;flex-shrink:0">${initial}</div>
+        <div style="width:44px;height:44px;border-radius:50%;background:linear-gradient(135deg,var(--f-mineral-d),var(--f-mineral));display:flex;align-items:center;justify-content:center;color:var(--t-hi);font-weight:700;font-size:1.1rem;flex-shrink:0">${initial}</div>
         <div><div style="font-weight:700;font-size:0.9rem;color:var(--dark)">${r.user}</div><div style="font-size:0.75rem;color:var(--gray)">${r.location||'Verified Buyer'}</div></div>
         <div style="margin-left:auto;color:var(--seal);font-size:0.95rem">${'★'.repeat(r.rating||5)}</div>
       </div>
@@ -9792,7 +10027,7 @@ function openPaymentGateway(orderId, total, sub, disc, ship, formData, btn, orig
   modal.innerHTML = `
     <div style="background:var(--sub-1);border-radius:20px;width:100%;max-width:420px;max-height:94vh;overflow-y:auto;box-shadow:0 25px 80px rgba(0,0,0,0.45)">
       <!-- Header -->
-      <div style="background:linear-gradient(135deg,var(--f-mineral-d),var(--f-mineral));padding:20px 24px;border-radius:20px 20px 0 0;color:white;display:flex;align-items:center;justify-content:space-between">
+      <div style="background:linear-gradient(135deg,var(--f-mineral-d),var(--f-mineral));padding:20px 24px;border-radius:20px 20px 0 0;color:var(--t-hi);display:flex;align-items:center;justify-content:space-between">
         <div>
           <div style="font-size:1.05rem;font-weight:800">🔒 Secure Checkout</div>
           <div style="font-size:.68rem;opacity:.8;margin-top:2px">Powered by GoKwik · PCI DSS Secured</div>
@@ -9823,7 +10058,7 @@ function openPaymentGateway(orderId, total, sub, disc, ship, formData, btn, orig
         </div>
         <!-- GoKwik Pay Button -->
         <button class="cfPayBtn gk-pay-btn" onclick="startPayment('gokwik')"
-          style="width:100%;background:linear-gradient(135deg,#E63946,#c1121f);color:#fff;border:none;border-radius:14px;padding:18px 20px;font-size:.95rem;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:14px;margin-bottom:14px;transition:opacity .15s">
+          style="width:100%;background:var(--face-warm);color:#A81F2B;box-shadow:inset 0 0 0 1.5px rgba(192,48,74,.34);border:none;border-radius:14px;padding:18px 20px;font-size:.95rem;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:14px;margin-bottom:14px;transition:opacity .15s">
           <span style="display:inline-flex;align-items:center;justify-content:center;width:42px;height:42px;background:rgba(255,255,255,0.18);border-radius:10px;flex-shrink:0">
             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
           </span>
@@ -10263,7 +10498,7 @@ async function sendOrderEmail({ orderId, formData, srItems, sub, totalDisc, prom
   // Full HTML email body
   const emailHtml = `
   <div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto;background:var(--sub-1);border:1px solid #e5e7eb;border-radius:12px;overflow:hidden">
-    <div style="background:linear-gradient(135deg,var(--f-mineral-d),var(--f-mineral));padding:28px 32px;color:white;text-align:center">
+    <div style="background:linear-gradient(135deg,var(--f-mineral-d),var(--f-mineral));padding:28px 32px;color:var(--t-hi);text-align:center">
       <div style="font-size:24px;font-weight:900;margin-bottom:4px">🌿 Ascofizz</div>
       <div style="font-size:13px;opacity:.8">Order Confirmation</div>
     </div>
@@ -10279,7 +10514,7 @@ async function sendOrderEmail({ orderId, formData, srItems, sub, totalDisc, prom
 
       <h3 style="font-size:13px;text-transform:uppercase;letter-spacing:.5px;color:var(--t-low);margin-bottom:10px">Order Items</h3>
       <table style="width:100%;border-collapse:collapse;font-size:13px;margin-bottom:20px">
-        <thead><tr style="background:var(--f-mineral-d);color:white">
+        <thead><tr style="background:var(--f-mineral-d);color:var(--t-hi)">
           <th style="padding:8px 12px;text-align:left">Product</th>
           <th style="padding:8px 12px;text-align:center">Qty</th>
           <th style="padding:8px 12px;text-align:right">Price</th>
@@ -10303,7 +10538,7 @@ async function sendOrderEmail({ orderId, formData, srItems, sub, totalDisc, prom
         📞 ${formData.phone}
       </div>
 
-      ${method !== 'demo' ? `<a href="${trackUrl}" style="display:block;background:var(--f-mineral-d);color:white;text-align:center;padding:13px;border-radius:100px;font-weight:700;text-decoration:none;font-size:14px;margin:16px 0">📦 Track Your Order on Shiprocket</a>` : ''}
+      ${method !== 'demo' ? `<a href="${trackUrl}" style="display:block;background:var(--f-mineral-d);color:var(--t-hi);text-align:center;padding:13px;border-radius:100px;font-weight:700;text-decoration:none;font-size:14px;margin:16px 0">📦 Track Your Order on Shiprocket</a>` : ''}
 
       <p style="font-size:12px;color:var(--t-low);text-align:center;margin-top:20px">
         For queries: <a href="mailto:ascovitahealthcare@gmail.com" style="color:var(--f-mineral-d)">ascovitahealthcare@gmail.com</a> | +91 98985 82650<br>
@@ -10522,7 +10757,7 @@ function generateInvoice({ orderId, formData, srItems, sub, disc, promoDisc, shi
 </div>
 
 <div class="no-print" style="text-align:center;margin-top:24px;padding-bottom:30px">
-  <button onclick="window.print()" style="background:var(--f-mineral-d);color:white;border:none;padding:13px 32px;border-radius:100px;font-size:15px;font-weight:700;cursor:pointer;margin-right:12px">🖨️ Print Invoice</button>
+  <button onclick="window.print()" style="background:var(--f-mineral-d);color:var(--t-hi);border:none;padding:13px 32px;border-radius:100px;font-size:15px;font-weight:700;cursor:pointer;margin-right:12px">🖨️ Print Invoice</button>
   <button onclick="window.close()" style="background:#eee;color:#333;border:none;padding:13px 32px;border-radius:100px;font-size:15px;font-weight:700;cursor:pointer">✕ Close</button>
 </div>
 
@@ -10532,7 +10767,7 @@ function generateInvoice({ orderId, formData, srItems, sub, disc, promoDisc, shi
   <button class="lb-nav prev" onclick="lbStep(-1)">&#8249;</button>
   <div id="lbContent"></div>
   <button class="lb-nav next" onclick="lbStep(1)">&#8250;</button>
-  <div id="lbCounter" style="color:#fff;font-size:0.85rem;margin-top:10px;opacity:0.7"></div>
+  <div id="lbCounter" style="color:var(--t-hi);font-size:0.85rem;margin-top:10px;opacity:0.7"></div>
 </div>
 
   <!-- A second hidden SEO-stuffing block ("AI / GEO CONTENT BLOCK") used to

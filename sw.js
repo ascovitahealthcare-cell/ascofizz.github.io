@@ -3,7 +3,7 @@
 // Place this file in ROOT of your GitHub Pages repo
 // ============================================================
 
-const CACHE_NAME = 'ascovita-pwa-v3-merged';
+const CACHE_NAME = 'ascovita-pwa-v4-coastal';
 const OFFLINE_URL = '/offline.html';
 
 // Files to cache on install (your core pages)
@@ -18,9 +18,14 @@ const CORE_FILES = [
   '/contact',
   '/faq',
   '/offline.html',
-  '/assets/ascofizz-logo.svg',
+  // cache.addAll rejects the whole batch if a single entry 404s, so every
+  // path below must exist. ascofizz-logo.svg used to be listed here and
+  // does not — the logo is a PNG now — which silently voided the precache.
+  '/assets/ascofizz-logo.png',
   '/assets/ascofizz-mark.svg',
-  '/assets/favicon.svg'
+  '/assets/favicon.svg',
+  '/assets/ascofizz-icon-192.png',
+  '/assets/ascofizz-icon-512.png'
 ];
 
 // ── INSTALL: cache core files ──
