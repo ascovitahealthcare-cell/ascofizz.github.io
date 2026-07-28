@@ -169,9 +169,9 @@ fbq('track', 'PageView');
 </script>
 <!-- End Meta Pixel -->
   <script>
-    // Only load Google Identity Services for real users — NOT bots/crawlers
-    // The gsi/client script injects <meta name="robots" content="noindex"> when
-    // rendered by Googlebot, which blocks indexing. Skip it entirely for crawlers.
+    // Only load Google Identity Services for real users — NOT bots/crawlers.
+    // The gsi/client script injects a robots no-index directive when it is
+    // rendered by Googlebot, which blocks indexing. Skip it for crawlers.
     (function() {
       var ua = navigator.userAgent || '';
       var isBot = /googlebot|bingbot|slurp|duckduckbot|baiduspider|yandexbot|sogou|exabot|facebot|ia_archiver|crawler|spider|headlesschrome|bot\b/i.test(ua);
@@ -202,7 +202,7 @@ fbq('track', 'PageView');
   ════════════════════════════════════════════════════ -->
   <title>Ascofizz | Premium Effervescent Vitamins & Nutraceutical Manufacturer — Anand, Gujarat, India</title>
 
-  <meta name="description" content="Ascovita — WHO-GMP certified, FSSAI approved nutraceutical manufacturer in Anand, Gujarat, India. Shop Glutathione Effervescent, B12+D3 with Spirulina, ACV Moringa, Magnesium, Multivitamins. Co-founded by Aamin Ghachivahora. B2B private label & D2C. Free shipping ₹599+. ascovita.com">
+  <meta name="description" content="Ascofizz effervescent vitamins, made in our own WHO-GMP certified factory in Anand, Gujarat — Glutathione, Vitamin C + Amla, ACV, Ashwagandha, multivitamins. Free shipping over ₹599.">
 
   <meta name="keywords" content="
 Ascofizz, Ascofizz, Ascofizz Health, ascofizz.com, Aamin Ghachivahora, co-founder Ascofizz,
@@ -271,23 +271,13 @@ best supplement brand 2024 2025, Ascofizz review, Ascofizz vs competitors India,
 
   <!-- Canonical & Alternate Languages -->
   <link rel="canonical" href="https://www.ascofizz.com/">
+  <link rel="alternate" hreflang="en-IN" href="https://www.ascofizz.com/">
+  <link rel="alternate" hreflang="x-default" href="https://www.ascofizz.com/">
 
   <!-- ═══ GEO META — Pan-India targeting ═══ -->
-  <meta name="geo.region" content="IN-GJ">
-  <meta name="geo.placename" content="Anand, Gujarat, India">
-  <meta name="geo.position" content="22.5645;72.9289">
-  <meta name="ICBM" content="22.5645, 72.9289">
   <meta name="geo.country" content="IN">
 
   <!-- ═══ AI/GEO DISCOVERY META — ChatGPT, Gemini, Perplexity, Copilot ═══ -->
-  <meta name="robots" content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1">
-  <meta name="googlebot" content="index, follow, max-snippet:-1, max-image-preview:large">
-  <meta name="bingbot" content="index, follow">
-  <meta name="author" content="Ascofizz — Aamin Ghachivahora">
-  <meta name="copyright" content="Ascofizz 2024-2026">
-  <meta name="language" content="English">
-  <meta name="revisit-after" content="3 days">
-  <meta name="rating" content="general">
   <meta name="category" content="Health, Nutraceuticals, Supplements, Vitamins, Wellness">
   <meta name="classification" content="Health & Wellness, Nutraceuticals, Supplements">
   <meta name="coverage" content="India">
@@ -311,16 +301,14 @@ best supplement brand 2024 2025, Ascofizz review, Ascofizz vs competitors India,
   <meta name="twitter:site" content="@ascovita_healthcare">
   <meta name="twitter:creator" content="@ascovita_healthcare">
   <meta name="twitter:title" content="Ascofizz | Premium Effervescent Vitamins & Supplements — India">
-  <meta name="twitter:description" content="Buy WHO-GMP certified, FSSAI approved effervescent vitamins online India. Glutathione, ACV Moringa, B12+D3 Spirulina, Multivitamins. Free delivery ₹599+. Pan-India shipping.">
-  <meta name="twitter:image" content="https://static.wixstatic.com/media/f0adaf_0632dc96f8db425a9211154fc0a7ab6f~mv2.jpg/v1/fill/w_1200,h_630,al_c,q_85,enc_avif,quality_auto/f0adaf_0632dc96f8db425a9211154fc0a7ab6f~mv2.jpg">
+  <meta name="twitter:description" content="Ascofizz effervescent vitamins from our own WHO-GMP certified factory in Anand, Gujarat. Glutathione, Vitamin C + Amla, ACV, Ashwagandha and daily multivitamins.">
+  <meta name="twitter:image" content="https://www.ascofizz.com/assets/ascofizz-og.png">
   <meta name="twitter:image:alt" content="Ascofizz — Premium Effervescent Vitamins, India">
 
   <!-- ═══ MOBILE/APP META ═══ -->
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="default">
   <meta name="apple-mobile-web-app-title" content="Ascofizz">
-  <meta name="application-name" content="Ascofizz">
-  <meta name="theme-color" content="#2E7D32">
   <meta name="mobile-web-app-capable" content="yes">
   <link rel="alternate" href="https://www.ascofizz.com/" hreflang="en-IN">
   <link rel="alternate" href="https://www.ascofizz.com/" hreflang="x-default">
@@ -343,7 +331,8 @@ best supplement brand 2024 2025, Ascofizz review, Ascofizz vs competitors India,
   <!-- Preconnect for performance -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link rel="preconnect" href="https://static.wixstatic.com">
+  <link rel="preconnect" href="https://i.ibb.co" crossorigin>
+  <link rel="dns-prefetch" href="https://cdn.jsdelivr.net">
 
   <!-- ═══════════════════════════════════════════════════════
        OPEN GRAPH — Facebook, WhatsApp, LinkedIn, Instagram
@@ -351,8 +340,8 @@ best supplement brand 2024 2025, Ascofizz review, Ascofizz vs competitors India,
   <meta property="og:type" content="website">
   <meta property="og:site_name" content="Ascofizz">
   <meta property="og:title" content="Ascofizz | Premium Nutraceutical Manufacturer — Anand, Gujarat, India">
-  <meta property="og:description" content="Ascovita — WHO-GMP certified effervescent vitamin manufacturer. Glutathione, ACV Moringa, B12+D3 Spirulina, Magnesium, Multivitamins. Co-founded by Aamin Ghachivahora. B2B private label & D2C. ascovita.com">
-  <meta property="og:image" content="https://static.wixstatic.com/media/f0adaf_0632dc96f8db425a9211154fc0a7ab6f~mv2.jpg/v1/fill/w_1200,h_630,al_c,q_85,enc_avif,quality_auto/f0adaf_0632dc96f8db425a9211154fc0a7ab6f~mv2.jpg">
+  <meta property="og:description" content="Ascofizz effervescent vitamins from our own WHO-GMP certified factory in Anand, Gujarat. Glutathione, Vitamin C + Amla, ACV, Ashwagandha and daily multivitamins.">
+  <meta property="og:image" content="https://www.ascofizz.com/assets/ascofizz-og.png">
   <meta property="og:image:width" content="1200">
   <meta property="og:image:height" content="630">
   <meta property="og:image:alt" content="Ascofizz — Premium Effervescent Vitamins & Nutraceuticals, Anand Gujarat India. L-Glutathione, ACV Moringa, B12+D3 Spirulina supplements.">
@@ -363,13 +352,6 @@ best supplement brand 2024 2025, Ascofizz review, Ascofizz vs competitors India,
   <!-- ═══════════════════════════════════════════════════════
        TWITTER / X CARD
   ════════════════════════════════════════════════════════ -->
-  <meta name="twitter:card" content="summary_large_image">
-  <meta name="twitter:site" content="@AscovitaHealth">
-  <meta name="twitter:creator" content="@AscovitaHealth">
-  <meta name="twitter:title" content="Ascofizz | Premium Nutraceutical Manufacturer, Anand Gujarat India">
-  <meta name="twitter:description" content="WHO-GMP certified effervescent vitamins by Ascofizz. Glutathione (skin glow), ACV Moringa (weight), B12+D3 Spirulina (energy). Co-founded by Aamin Ghachivahora. FSSAI Approved. ascofizz.com">
-  <meta name="twitter:image" content="https://static.wixstatic.com/media/f0adaf_0632dc96f8db425a9211154fc0a7ab6f~mv2.jpg/v1/fill/w_1200,h_630,al_c,q_85,enc_avif,quality_auto/f0adaf_0632dc96f8db425a9211154fc0a7ab6f~mv2.jpg">
-  <meta name="twitter:image:alt" content="Ascofizz Effervescent Vitamin Supplements — Made in Gujarat India">
 
   <!-- ═══════════════════════════════════════════════════════
        SCHEMA.ORG STRUCTURED DATA — JSON-LD
@@ -377,731 +359,1998 @@ best supplement brand 2024 2025, Ascofizz review, Ascofizz vs competitors India,
        WebPage, LocalBusiness, Products, FAQ, BreadcrumbList
   ════════════════════════════════════════════════════════ -->
   <script type="application/ld+json">
-  {
-    "@context": "https://schema.org",
-    "@graph": [
-      {
-        "@type": "Organization",
-        "@id": "https://www.ascofizz.com/#organization",
-        "name": "Ascofizz",
-        "alternateName": ["Ascofizz", "Ascofizz Health", "Ascofizz Nutraceuticals", "Ascofizz India", "ascofizz.com"],
-        "url": "https://www.ascofizz.com/",
-        "logo": {
-          "@type": "ImageObject",
-          "@id": "https://www.ascofizz.com/#logo",
-          "url": "assets/ascofizz-icon-512.png",
-          "caption": "Ascofizz Logo — Empower Your Health",
-          "width": 346,
-          "height": 166
-        },
-        "image": {
-          "@type": "ImageObject",
-          "url": "https://static.wixstatic.com/media/f0adaf_0632dc96f8db425a9211154fc0a7ab6f~mv2.jpg/v1/fill/w_1200,h_630,al_c,q_85,enc_avif,quality_auto/f0adaf_0632dc96f8db425a9211154fc0a7ab6f~mv2.jpg",
-          "caption": "Ascofizz — Premium Effervescent Vitamin Supplements, Anand Gujarat India"
-        },
-        "description": "Ascovita is a WHO-GMP certified, FSSAI approved nutraceutical manufacturer and supplement brand co-founded by Aamin Ghachivahora, based in Anand, Gujarat, India. Ascovita specialises in premium effervescent vitamin tablets including L-Glutathione, Apple Cider Vinegar with Moringa, B12+D3 with Organic Spirulina, Magnesium supplements, Biotin, Calcium+Iron, and the Multidiata 23-vitamin multivitamin. The company serves both B2B private label clients and D2C consumers across India.",
-        "slogan": "Empower Your Health",
-        "foundingDate": "2022",
-        "foundingLocation": {
-          "@type": "Place",
-          "name": "Anand, Gujarat, India"
-        },
-        "founder": {
-          "@type": "Person",
-          "@id": "https://www.ascofizz.com/#founder",
-          "name": "Aamin Ghachivahora",
-          "alternateName": "Aamin Ghachivahora",
-          "jobTitle": "Co-Founder, Ascofizz",
-          "worksFor": { "@id": "https://www.ascofizz.com/#organization" },
-          "sameAs": "https://www.linkedin.com/in/aamin-ghachivahora-416985332",
-          "url": "https://www.linkedin.com/in/aamin-ghachivahora-416985332"
-        },
-        "address": {
-          "@type": "PostalAddress",
-          "streetAddress": "R.S.Cinema, 5, Rajeshree Society Rd, behind R & S Cinemas, Vivekanand Wadi",
-          "addressLocality": "Anand",
-          "addressRegion": "Gujarat",
-          "postalCode": "388001",
-          "addressCountry": "IN"
-        },
-        "geo": {
-          "@type": "GeoCoordinates",
-          "latitude": 22.5645,
-          "longitude": 72.9289
-        },
-        "telephone": "+91-98985-82650",
-        "email": "ascovitahealthcare@gmail.com",
-        "contactPoint": [
-          {
-            "@type": "ContactPoint",
-            "telephone": "+91-98985-82650",
-            "contactType": "customer service",
-            "areaServed": "IN",
-            "availableLanguage": ["English", "Hindi", "Gujarati"]
-          },
-          {
-            "@type": "ContactPoint",
-            "telephone": "+91-98985-82650",
-            "contactType": "sales",
-            "areaServed": "IN",
-            "availableLanguage": ["English", "Hindi", "Gujarati"]
-          }
-        ],
-        "sameAs": [
-          "https://www.ascofizz.com",
-          "https://AscovitaHealthcare-cell.github.io",
-          "https://www.instagram.com/ascovita_healthcare",
-          "https://www.linkedin.com/company/ascovita-healthcare",
-          "https://www.facebook.com/Ascofizz",
-          "https://www.indiamart.com/ascovita-healthcare",
-          "https://www.1mg.com/otc/Ascofizz-multidiata-tablet",
-          "https://www.wikidata.org/wiki/ascovita_healthcare"
-        ],
-        "hasCredential": [
-          {
-            "@type": "EducationalOccupationalCredential",
-            "credentialCategory": "FSSAI Licensed",
-            "recognizedBy": { "@type": "GovernmentOrganization", "name": "Food Safety and Standards Authority of India" }
-          },
-          {
-            "@type": "EducationalOccupationalCredential",
-            "credentialCategory": "WHO-GMP Certified",
-            "recognizedBy": { "@type": "GovernmentOrganization", "name": "World Health Organization" }
-          }
-        ],
-        "knowsAbout": [
-          "Effervescent Nutraceutical Manufacturing",
-          "L-Glutathione Supplements for Skin Brightening",
-          "Apple Cider Vinegar Weight Management Supplements",
-          "Organic Spirulina B12 D3 Vegan Supplements",
-          "Magnesium Sleep and Recovery Supplements",
-          "Biotin Hair Growth Supplements",
-          "Calcium Iron Women Wellness Supplements",
-          "Multivitamin Daily Nutrition Supplements",
-          "Moringa Immunity Supplements",
-          "L-Carnitine Fat Burning Supplements",
-          "Vitamin C Effervescent Immunity Boosters",
-          "Private Label Supplement Manufacturing India",
-          "Contract Nutraceutical Manufacturing Gujarat",
-          "WHO-GMP Certified Pharmaceutical Manufacturing",
-          "FSSAI Licensed Food Supplement Production",
-          "B2B Nutraceutical Manufacturing Low MOQ",
-          "D2C Health Supplement E-commerce India",
-          "Effervescent Tablet Formulation and Manufacturing",
-          "Ayurvedic and Modern Nutraceutical Integration",
-          "Pan-India Supplement Distribution",
-          "Skin Health Antioxidant Supplements",
-          "Women Health Supplements India",
-          "Men Vitality Supplements India",
-          "Vegan Plant-Based Nutrition Supplements",
-          "Sports Nutrition and Recovery Supplements India"
-        ],
-        "makesOffer": [
-          {
-            "@type": "Offer",
-            "itemOffered": {
-              "@type": "Service",
-              "name": "B2B Private Label Nutraceutical Manufacturing",
-              "description": "WHO-GMP certified contract manufacturing of effervescent tablets, capsules, sachets and nutraceutical supplements under client brand names. Low MOQ. Custom formulations. Pan-India and global supply.",
-              "areaServed": { "@type": "Country", "name": "India" }
-            }
-          },
-          {
-            "@type": "Offer",
-            "itemOffered": {
-              "@type": "Service",
-              "name": "Custom Effervescent Tablet Formulation",
-              "description": "End-to-end custom effervescent tablet manufacturing with proprietary and custom formulations. Suitable for vitamins, minerals, amino acids, herbal blends.",
-              "areaServed": { "@type": "Country", "name": "India" }
-            }
-          },
-          {
-            "@type": "Offer",
-            "itemOffered": {
-              "@type": "Service",
-              "name": "D2C Nutraceutical Supplement Sales — Pan-India",
-              "description": "Direct-to-consumer sales of Ascofizz premium supplements across all Indian states. Free shipping on orders above ₹599. Delivery to all PIN codes in India.",
-              "areaServed": { "@type": "Country", "name": "India" }
-            }
-          },
-          {
-            "@type": "Offer",
-            "itemOffered": {
-              "@type": "Service",
-              "name": "Regulatory Compliance & FSSAI Support for Supplement Brands",
-              "description": "Complete regulatory documentation, FSSAI licensing support, and quality compliance for supplement brands launching in India.",
-              "areaServed": { "@type": "Country", "name": "India" }
-            }
-          }
-        ],
-        "numberOfEmployees": { "@type": "QuantitativeValue", "value": "11-50" },
-        "legalName": "Ascofizz",
-        "areaServed": [
-          { "@type": "Country", "name": "India" },
-          { "@type": "AdministrativeArea", "name": "Gujarat" },
-          { "@type": "AdministrativeArea", "name": "Maharashtra" },
-          { "@type": "AdministrativeArea", "name": "Rajasthan" },
-          { "@type": "AdministrativeArea", "name": "Karnataka" },
-          { "@type": "AdministrativeArea", "name": "Tamil Nadu" },
-          { "@type": "AdministrativeArea", "name": "Telangana" },
-          { "@type": "AdministrativeArea", "name": "Uttar Pradesh" },
-          { "@type": "AdministrativeArea", "name": "West Bengal" },
-          { "@type": "AdministrativeArea", "name": "Delhi" },
-          { "@type": "AdministrativeArea", "name": "Kerala" },
-          { "@type": "AdministrativeArea", "name": "Madhya Pradesh" },
-          { "@type": "AdministrativeArea", "name": "Punjab" },
-          { "@type": "AdministrativeArea", "name": "Haryana" },
-          { "@type": "AdministrativeArea", "name": "Bihar" },
-          { "@type": "AdministrativeArea", "name": "Andhra Pradesh" },
-          { "@type": "City", "name": "Mumbai" },
-          { "@type": "City", "name": "Delhi" },
-          { "@type": "City", "name": "Bangalore" },
-          { "@type": "City", "name": "Hyderabad" },
-          { "@type": "City", "name": "Chennai" },
-          { "@type": "City", "name": "Kolkata" },
-          { "@type": "City", "name": "Pune" },
-          { "@type": "City", "name": "Ahmedabad" },
-          { "@type": "City", "name": "Surat" },
-          { "@type": "City", "name": "Jaipur" },
-          { "@type": "City", "name": "Lucknow" },
-          { "@type": "City", "name": "Kochi" },
-          { "@type": "City", "name": "Indore" },
-          { "@type": "City", "name": "Chandigarh" },
-          { "@type": "City", "name": "Bhopal" },
-          { "@type": "City", "name": "Nagpur" },
-          { "@type": "City", "name": "Visakhapatnam" },
-          { "@type": "City", "name": "Vadodara" },
-          { "@type": "City", "name": "Anand" }
-        ]
+{
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "Organization",
+      "@id": "https://www.ascofizz.com/#organization",
+      "name": "Ascofizz",
+      "alternateName": [
+        "Ascofizz",
+        "Ascofizz Health",
+        "Ascofizz Nutraceuticals",
+        "Ascofizz India",
+        "ascofizz.com"
+      ],
+      "url": "https://www.ascofizz.com/",
+      "logo": {
+        "@type": "ImageObject",
+        "@id": "https://www.ascofizz.com/#logo",
+        "url": "assets/ascofizz-icon-512.png",
+        "caption": "Ascofizz Logo — Empower Your Health",
+        "width": 346,
+        "height": 166
       },
-
-      {
+      "image": {
+        "@type": "ImageObject",
+        "url": "https://static.wixstatic.com/media/f0adaf_0632dc96f8db425a9211154fc0a7ab6f~mv2.jpg/v1/fill/w_1200,h_630,al_c,q_85,enc_avif,quality_auto/f0adaf_0632dc96f8db425a9211154fc0a7ab6f~mv2.jpg",
+        "caption": "Ascofizz — Premium Effervescent Vitamin Supplements, Anand Gujarat India"
+      },
+      "description": "Ascovita is a WHO-GMP certified, FSSAI approved nutraceutical manufacturer and supplement brand co-founded by Aamin Ghachivahora, based in Anand, Gujarat, India. Ascovita specialises in premium effervescent vitamin tablets including L-Glutathione, Apple Cider Vinegar with Moringa, B12+D3 with Organic Spirulina, Magnesium supplements, Biotin, Calcium+Iron, and the Multidiata 23-vitamin multivitamin. The company serves both B2B private label clients and D2C consumers across India.",
+      "slogan": "Empower Your Health",
+      "foundingDate": "2022",
+      "foundingLocation": {
+        "@type": "Place",
+        "name": "Anand, Gujarat, India"
+      },
+      "founder": {
         "@type": "Person",
         "@id": "https://www.ascofizz.com/#founder",
         "name": "Aamin Ghachivahora",
-        "jobTitle": "Co-Founder",
-        "affiliation": { "@id": "https://www.ascofizz.com/#organization" },
-        "worksFor": { "@id": "https://www.ascofizz.com/#organization" },
-        "knowsAbout": ["Nutraceuticals", "Health Supplements", "Pharmaceutical Manufacturing", "Effervescent Vitamins", "B2B Private Label"],
+        "alternateName": "Aamin Ghachivahora",
+        "jobTitle": "Co-Founder, Ascofizz",
+        "worksFor": {
+          "@id": "https://www.ascofizz.com/#organization"
+        },
         "sameAs": "https://www.linkedin.com/in/aamin-ghachivahora-416985332",
         "url": "https://www.linkedin.com/in/aamin-ghachivahora-416985332"
       },
-
-      {
-        "@type": "WebSite",
-        "@id": "https://www.ascofizz.com/#website",
-        "url": "https://www.ascofizz.com/",
-        "name": "Ascofizz",
-        "alternateName": "ascofizz.com",
-        "description": "Official website of Ascofizz — India's premium WHO-GMP certified effervescent vitamin and nutraceutical supplement brand, co-founded by Aamin Ghachivahora in Anand, Gujarat.",
-        "publisher": { "@id": "https://www.ascofizz.com/#organization" },
-        "potentialAction": {
-          "@type": "SearchAction",
-          "target": {
-            "@type": "EntryPoint",
-            "urlTemplate": "https://www.ascofizz.com/?q={search_term_string}"
-          },
-          "query-input": "required name=search_term_string"
-        },
-        "speakable": {
-          "@type": "SpeakableSpecification",
-          "cssSelector": [".hero-title", ".hero-subtitle", ".product-name", ".faq-question", "h1", "h2"]
-        },
-        "inLanguage": "en-IN"
+      "address": {
+        "@type": "PostalAddress",
+        "streetAddress": "R.S.Cinema, 5, Rajeshree Society Rd, behind R & S Cinemas, Vivekanand Wadi",
+        "addressLocality": "Anand",
+        "addressRegion": "Gujarat",
+        "postalCode": "388001",
+        "addressCountry": "IN"
       },
-
-      {
-        "@type": "WebPage",
-        "@id": "https://www.ascofizz.com/#webpage",
-        "url": "https://www.ascofizz.com/",
-        "name": "Ascofizz | Premium Effervescent Vitamins & Nutraceutical Manufacturer — Anand, Gujarat, India",
-        "isPartOf": { "@id": "https://www.ascofizz.com/#website" },
-        "about": { "@id": "https://www.ascofizz.com/#organization" },
-        "description": "Shop India's best effervescent vitamins — Glutathione (skin glow), ACV+Moringa (weight), B12+D3+Spirulina (energy), Magnesium (sleep), Biotin (hair). WHO-GMP certified, FSSAI approved. Free shipping ₹599+. B2B private label manufacturing by Ascovita, Anand, Gujarat.",
-        "breadcrumb": { "@id": "https://www.ascofizz.com/#breadcrumb" },
-        "author": { "@id": "https://www.ascofizz.com/#organization" },
-        "primaryImageOfPage": {
-          "@type": "ImageObject",
-          "url": "https://static.wixstatic.com/media/f0adaf_0632dc96f8db425a9211154fc0a7ab6f~mv2.jpg/v1/fill/w_1200,h_630,al_c,q_85,enc_avif,quality_auto/f0adaf_0632dc96f8db425a9211154fc0a7ab6f~mv2.jpg",
-          "caption": "Ascofizz — L-Glutathione Effervescent Tablet, Skin Brightening Supplement, Anand Gujarat India"
-        },
-        "inLanguage": "en-IN",
-        "specialty": "Nutraceuticals, Effervescent Vitamins, Health Supplements India"
+      "geo": {
+        "@type": "GeoCoordinates",
+        "latitude": 22.5645,
+        "longitude": 72.9289
       },
-
-      {
-        "@type": "BreadcrumbList",
-        "@id": "https://www.ascofizz.com/#breadcrumb",
-        "itemListElement": [
-          { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://www.ascofizz.com/" },
-          { "@type": "ListItem", "position": 2, "name": "Shop Supplements", "item": "https://www.ascofizz.com/shop" },
-          { "@type": "ListItem", "position": 3, "name": "About Ascofizz", "item": "https://www.ascofizz.com/about" },
-          { "@type": "ListItem", "position": 4, "name": "Blog & Health Tips", "item": "https://www.ascofizz.com/blog" },
-          { "@type": "ListItem", "position": 5, "name": "Contact Us", "item": "https://www.ascofizz.com/contact" }
+      "telephone": "+91-98985-82650",
+      "email": "ascovitahealthcare@gmail.com",
+      "contactPoint": [
+        {
+          "@type": "ContactPoint",
+          "telephone": "+91-98985-82650",
+          "contactType": "customer service",
+          "areaServed": "IN",
+          "availableLanguage": [
+            "English",
+            "Hindi",
+            "Gujarati"
+          ]
+        },
+        {
+          "@type": "ContactPoint",
+          "telephone": "+91-98985-82650",
+          "contactType": "sales",
+          "areaServed": "IN",
+          "availableLanguage": [
+            "English",
+            "Hindi",
+            "Gujarati"
+          ]
+        }
+      ],
+      "sameAs": [
+        "https://www.ascofizz.com",
+        "https://AscovitaHealthcare-cell.github.io",
+        "https://www.instagram.com/ascovita_healthcare",
+        "https://www.linkedin.com/company/ascovita-healthcare",
+        "https://www.facebook.com/Ascofizz",
+        "https://www.indiamart.com/ascovita-healthcare",
+        "https://www.1mg.com/otc/Ascofizz-multidiata-tablet",
+        "https://www.wikidata.org/wiki/ascovita_healthcare"
+      ],
+      "hasCredential": [
+        {
+          "@type": "EducationalOccupationalCredential",
+          "credentialCategory": "FSSAI Licensed",
+          "recognizedBy": {
+            "@type": "GovernmentOrganization",
+            "name": "Food Safety and Standards Authority of India"
+          }
+        },
+        {
+          "@type": "EducationalOccupationalCredential",
+          "credentialCategory": "WHO-GMP Certified",
+          "recognizedBy": {
+            "@type": "GovernmentOrganization",
+            "name": "World Health Organization"
+          }
+        }
+      ],
+      "knowsAbout": [
+        "Effervescent Nutraceutical Manufacturing",
+        "L-Glutathione Supplements for Skin Brightening",
+        "Apple Cider Vinegar Weight Management Supplements",
+        "Organic Spirulina B12 D3 Vegan Supplements",
+        "Magnesium Sleep and Recovery Supplements",
+        "Biotin Hair Growth Supplements",
+        "Calcium Iron Women Wellness Supplements",
+        "Multivitamin Daily Nutrition Supplements",
+        "Moringa Immunity Supplements",
+        "L-Carnitine Fat Burning Supplements",
+        "Vitamin C Effervescent Immunity Boosters",
+        "Private Label Supplement Manufacturing India",
+        "Contract Nutraceutical Manufacturing Gujarat",
+        "WHO-GMP Certified Pharmaceutical Manufacturing",
+        "FSSAI Licensed Food Supplement Production",
+        "B2B Nutraceutical Manufacturing Low MOQ",
+        "D2C Health Supplement E-commerce India",
+        "Effervescent Tablet Formulation and Manufacturing",
+        "Ayurvedic and Modern Nutraceutical Integration",
+        "Pan-India Supplement Distribution",
+        "Skin Health Antioxidant Supplements",
+        "Women Health Supplements India",
+        "Men Vitality Supplements India",
+        "Vegan Plant-Based Nutrition Supplements",
+        "Sports Nutrition and Recovery Supplements India"
+      ],
+      "makesOffer": [
+        {
+          "@type": "Offer",
+          "itemOffered": {
+            "@type": "Service",
+            "name": "B2B Private Label Nutraceutical Manufacturing",
+            "description": "WHO-GMP certified contract manufacturing of effervescent tablets, capsules, sachets and nutraceutical supplements under client brand names. Low MOQ. Custom formulations. Pan-India and global supply.",
+            "areaServed": {
+              "@type": "Country",
+              "name": "India"
+            }
+          }
+        },
+        {
+          "@type": "Offer",
+          "itemOffered": {
+            "@type": "Service",
+            "name": "Custom Effervescent Tablet Formulation",
+            "description": "End-to-end custom effervescent tablet manufacturing with proprietary and custom formulations. Suitable for vitamins, minerals, amino acids, herbal blends.",
+            "areaServed": {
+              "@type": "Country",
+              "name": "India"
+            }
+          }
+        },
+        {
+          "@type": "Offer",
+          "itemOffered": {
+            "@type": "Service",
+            "name": "D2C Nutraceutical Supplement Sales — Pan-India",
+            "description": "Direct-to-consumer sales of Ascofizz premium supplements across all Indian states. Free shipping on orders above ₹599. Delivery to all PIN codes in India.",
+            "areaServed": {
+              "@type": "Country",
+              "name": "India"
+            }
+          }
+        },
+        {
+          "@type": "Offer",
+          "itemOffered": {
+            "@type": "Service",
+            "name": "Regulatory Compliance & FSSAI Support for Supplement Brands",
+            "description": "Complete regulatory documentation, FSSAI licensing support, and quality compliance for supplement brands launching in India.",
+            "areaServed": {
+              "@type": "Country",
+              "name": "India"
+            }
+          }
+        }
+      ],
+      "numberOfEmployees": {
+        "@type": "QuantitativeValue",
+        "value": "11-50"
+      },
+      "legalName": "Ascofizz",
+      "areaServed": [
+        {
+          "@type": "Country",
+          "name": "India"
+        },
+        {
+          "@type": "AdministrativeArea",
+          "name": "Gujarat"
+        },
+        {
+          "@type": "AdministrativeArea",
+          "name": "Maharashtra"
+        },
+        {
+          "@type": "AdministrativeArea",
+          "name": "Rajasthan"
+        },
+        {
+          "@type": "AdministrativeArea",
+          "name": "Karnataka"
+        },
+        {
+          "@type": "AdministrativeArea",
+          "name": "Tamil Nadu"
+        },
+        {
+          "@type": "AdministrativeArea",
+          "name": "Telangana"
+        },
+        {
+          "@type": "AdministrativeArea",
+          "name": "Uttar Pradesh"
+        },
+        {
+          "@type": "AdministrativeArea",
+          "name": "West Bengal"
+        },
+        {
+          "@type": "AdministrativeArea",
+          "name": "Delhi"
+        },
+        {
+          "@type": "AdministrativeArea",
+          "name": "Kerala"
+        },
+        {
+          "@type": "AdministrativeArea",
+          "name": "Madhya Pradesh"
+        },
+        {
+          "@type": "AdministrativeArea",
+          "name": "Punjab"
+        },
+        {
+          "@type": "AdministrativeArea",
+          "name": "Haryana"
+        },
+        {
+          "@type": "AdministrativeArea",
+          "name": "Bihar"
+        },
+        {
+          "@type": "AdministrativeArea",
+          "name": "Andhra Pradesh"
+        },
+        {
+          "@type": "City",
+          "name": "Mumbai"
+        },
+        {
+          "@type": "City",
+          "name": "Delhi"
+        },
+        {
+          "@type": "City",
+          "name": "Bangalore"
+        },
+        {
+          "@type": "City",
+          "name": "Hyderabad"
+        },
+        {
+          "@type": "City",
+          "name": "Chennai"
+        },
+        {
+          "@type": "City",
+          "name": "Kolkata"
+        },
+        {
+          "@type": "City",
+          "name": "Pune"
+        },
+        {
+          "@type": "City",
+          "name": "Ahmedabad"
+        },
+        {
+          "@type": "City",
+          "name": "Surat"
+        },
+        {
+          "@type": "City",
+          "name": "Jaipur"
+        },
+        {
+          "@type": "City",
+          "name": "Lucknow"
+        },
+        {
+          "@type": "City",
+          "name": "Kochi"
+        },
+        {
+          "@type": "City",
+          "name": "Indore"
+        },
+        {
+          "@type": "City",
+          "name": "Chandigarh"
+        },
+        {
+          "@type": "City",
+          "name": "Bhopal"
+        },
+        {
+          "@type": "City",
+          "name": "Nagpur"
+        },
+        {
+          "@type": "City",
+          "name": "Visakhapatnam"
+        },
+        {
+          "@type": "City",
+          "name": "Vadodara"
+        },
+        {
+          "@type": "City",
+          "name": "Anand"
+        }
+      ]
+    },
+    {
+      "@type": "Person",
+      "@id": "https://www.ascofizz.com/#founder",
+      "name": "Aamin Ghachivahora",
+      "jobTitle": "Co-Founder",
+      "affiliation": {
+        "@id": "https://www.ascofizz.com/#organization"
+      },
+      "worksFor": {
+        "@id": "https://www.ascofizz.com/#organization"
+      },
+      "knowsAbout": [
+        "Nutraceuticals",
+        "Health Supplements",
+        "Pharmaceutical Manufacturing",
+        "Effervescent Vitamins",
+        "B2B Private Label"
+      ],
+      "sameAs": "https://www.linkedin.com/in/aamin-ghachivahora-416985332",
+      "url": "https://www.linkedin.com/in/aamin-ghachivahora-416985332"
+    },
+    {
+      "@type": "WebSite",
+      "@id": "https://www.ascofizz.com/#website",
+      "url": "https://www.ascofizz.com/",
+      "name": "Ascofizz",
+      "alternateName": "ascofizz.com",
+      "description": "Official website of Ascofizz — India's premium WHO-GMP certified effervescent vitamin and nutraceutical supplement brand, co-founded by Aamin Ghachivahora in Anand, Gujarat.",
+      "publisher": {
+        "@id": "https://www.ascofizz.com/#organization"
+      },
+      "potentialAction": {
+        "@type": "SearchAction",
+        "target": {
+          "@type": "EntryPoint",
+          "urlTemplate": "https://www.ascofizz.com/?q={search_term_string}"
+        },
+        "query-input": "required name=search_term_string"
+      },
+      "speakable": {
+        "@type": "SpeakableSpecification",
+        "cssSelector": [
+          ".hero-title",
+          ".hero-subtitle",
+          ".product-name",
+          ".faq-question",
+          "h1",
+          "h2"
         ]
       },
-
-      {
-        "@type": "LocalBusiness",
-        "@id": "https://www.ascofizz.com/#localbusiness",
-        "name": "Ascofizz",
-        "alternateName": ["Ascofizz", "Ascofizz Nutraceuticals"],
-        "image": [
-          "assets/ascofizz-icon-512.png",
-          "https://static.wixstatic.com/media/f0adaf_0632dc96f8db425a9211154fc0a7ab6f~mv2.jpg/v1/fill/w_1200,h_630,al_c,q_85,enc_avif,quality_auto/f0adaf_0632dc96f8db425a9211154fc0a7ab6f~mv2.jpg"
-        ],
-        "url": "https://www.ascofizz.com/",
-        "telephone": "+91-98985-82650",
-        "email": "ascovitahealthcare@gmail.com",
-        "priceRange": "₹120 – ₹900",
-        "currenciesAccepted": "INR",
-        "paymentAccepted": "UPI, Credit Card, Debit Card, Net Banking, EMI, COD",
-        "address": {
-          "@type": "PostalAddress",
-          "streetAddress": "R.S.Cinema, 5, Rajeshree Society Rd, behind R & S Cinemas, Vivekanand Wadi",
-          "addressLocality": "Anand",
-          "addressRegion": "Gujarat",
-          "postalCode": "388001",
-          "addressCountry": "IN"
+      "inLanguage": "en-IN"
+    },
+    {
+      "@type": "WebPage",
+      "@id": "https://www.ascofizz.com/#webpage",
+      "url": "https://www.ascofizz.com/",
+      "name": "Ascofizz | Premium Effervescent Vitamins & Nutraceutical Manufacturer — Anand, Gujarat, India",
+      "isPartOf": {
+        "@id": "https://www.ascofizz.com/#website"
+      },
+      "about": {
+        "@id": "https://www.ascofizz.com/#organization"
+      },
+      "description": "Shop India's best effervescent vitamins — Glutathione (skin glow), ACV+Moringa (weight), B12+D3+Spirulina (energy), Magnesium (sleep), Biotin (hair). WHO-GMP certified, FSSAI approved. Free shipping ₹599+. B2B private label manufacturing by Ascovita, Anand, Gujarat.",
+      "breadcrumb": {
+        "@id": "https://www.ascofizz.com/#breadcrumb"
+      },
+      "author": {
+        "@id": "https://www.ascofizz.com/#organization"
+      },
+      "primaryImageOfPage": {
+        "@type": "ImageObject",
+        "url": "https://static.wixstatic.com/media/f0adaf_0632dc96f8db425a9211154fc0a7ab6f~mv2.jpg/v1/fill/w_1200,h_630,al_c,q_85,enc_avif,quality_auto/f0adaf_0632dc96f8db425a9211154fc0a7ab6f~mv2.jpg",
+        "caption": "Ascofizz — L-Glutathione Effervescent Tablet, Skin Brightening Supplement, Anand Gujarat India"
+      },
+      "inLanguage": "en-IN",
+      "specialty": "Nutraceuticals, Effervescent Vitamins, Health Supplements India"
+    },
+    {
+      "@type": "BreadcrumbList",
+      "@id": "https://www.ascofizz.com/#breadcrumb",
+      "itemListElement": [
+        {
+          "@type": "ListItem",
+          "position": 1,
+          "name": "Home",
+          "item": "https://www.ascofizz.com/"
         },
-        "geo": {
+        {
+          "@type": "ListItem",
+          "position": 2,
+          "name": "Shop Supplements",
+          "item": "https://www.ascofizz.com/shop"
+        },
+        {
+          "@type": "ListItem",
+          "position": 3,
+          "name": "About Ascofizz",
+          "item": "https://www.ascofizz.com/about"
+        },
+        {
+          "@type": "ListItem",
+          "position": 4,
+          "name": "Blog & Health Tips",
+          "item": "https://www.ascofizz.com/blog"
+        },
+        {
+          "@type": "ListItem",
+          "position": 5,
+          "name": "Contact Us",
+          "item": "https://www.ascofizz.com/contact"
+        }
+      ]
+    },
+    {
+      "@type": "LocalBusiness",
+      "@id": "https://www.ascofizz.com/#localbusiness",
+      "name": "Ascofizz",
+      "alternateName": [
+        "Ascofizz",
+        "Ascofizz Nutraceuticals"
+      ],
+      "image": [
+        "assets/ascofizz-icon-512.png",
+        "https://static.wixstatic.com/media/f0adaf_0632dc96f8db425a9211154fc0a7ab6f~mv2.jpg/v1/fill/w_1200,h_630,al_c,q_85,enc_avif,quality_auto/f0adaf_0632dc96f8db425a9211154fc0a7ab6f~mv2.jpg"
+      ],
+      "url": "https://www.ascofizz.com/",
+      "telephone": "+91-98985-82650",
+      "email": "ascovitahealthcare@gmail.com",
+      "priceRange": "₹120 – ₹900",
+      "currenciesAccepted": "INR",
+      "paymentAccepted": "UPI, Credit Card, Debit Card, Net Banking, EMI, COD",
+      "address": {
+        "@type": "PostalAddress",
+        "streetAddress": "R.S.Cinema, 5, Rajeshree Society Rd, behind R & S Cinemas, Vivekanand Wadi",
+        "addressLocality": "Anand",
+        "addressRegion": "Gujarat",
+        "postalCode": "388001",
+        "addressCountry": "IN"
+      },
+      "geo": {
+        "@type": "GeoCoordinates",
+        "latitude": 22.5645,
+        "longitude": 72.9289
+      },
+      "openingHoursSpecification": {
+        "@type": "OpeningHoursSpecification",
+        "dayOfWeek": [
+          "Monday",
+          "Tuesday",
+          "Wednesday",
+          "Thursday",
+          "Friday",
+          "Saturday"
+        ],
+        "opens": "09:00",
+        "closes": "18:00"
+      },
+      "hasMap": "https://maps.google.com/?q=Ascofizz+Healthcare,Anand,Gujarat,India",
+      "areaServed": [
+        {
+          "@type": "Country",
+          "name": "India"
+        },
+        {
+          "@type": "AdministrativeArea",
+          "name": "Gujarat"
+        }
+      ],
+      "serviceArea": {
+        "@type": "GeoCircle",
+        "geoMidpoint": {
           "@type": "GeoCoordinates",
           "latitude": 22.5645,
           "longitude": 72.9289
         },
-        "openingHoursSpecification": {
-          "@type": "OpeningHoursSpecification",
-          "dayOfWeek": ["Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"],
-          "opens": "09:00",
-          "closes": "18:00"
-        },
-        "hasMap": "https://maps.google.com/?q=Ascofizz+Healthcare,Anand,Gujarat,India",
-        "areaServed": [
-          { "@type": "Country", "name": "India" },
-          { "@type": "AdministrativeArea", "name": "Gujarat" }
-        ],
-        "serviceArea": {
-          "@type": "GeoCircle",
-          "geoMidpoint": { "@type": "GeoCoordinates", "latitude": 22.5645, "longitude": 72.9289 },
-          "geoRadius": "500000"
-        },
-        "category": "Nutraceutical Manufacturer, Health Supplement Brand, Pharmaceutical Manufacturer",
-        "description": "Ascovita is a WHO-GMP certified, FSSAI approved nutraceutical manufacturer in Anand, Gujarat. Co-founded by Aamin Ghachivahora. Makes premium effervescent vitamins and health supplements for both B2B private label and D2C sales.",
-        "founder": { "@id": "https://www.ascofizz.com/#founder" },
-        "sameAs": [
-          "https://www.instagram.com/ascovita_healthcare",
-          "https://www.linkedin.com/company/ascovita-healthcare",
-          "https://www.facebook.com/Ascofizz",
-          "https://www.indiamart.com/ascovita-healthcare"
-        ]
+        "geoRadius": "500000"
       },
-
-      {
-        "@type": "ItemList",
-        "name": "Ascofizz — Product Catalogue",
-        "description": "Complete range of premium effervescent vitamins and nutraceutical supplements by Ascofizz, manufactured in WHO-GMP certified facility in Anand, Gujarat, India.",
-        "numberOfItems": 12,
-        "itemListElement": [
-          {
-            "@type": "ListItem", "position": 1,
-            "item": {
-              "@type": "Product",
-              "name": "Ascofizz L-Glutathione Effervescent — Orange Flavour",
-              "description": "650mg Reduced L-Glutathione with Vitamin C 1000mg, L-Cysteine and Astaxanthin. Supports skin brightening, glow, and detoxification. 15 effervescent tablets. Gluten-free, sugar-free.",
-              "brand": { "@type": "Brand", "name": "Ascofizz" },
-              "sku": "ASC-GLUT-001",
-              "mpn": "ASC-GLUT-ORG-15",
-              "image": "https://static.wixstatic.com/media/f0adaf_0632dc96f8db425a9211154fc0a7ab6f~mv2.jpg/v1/fill/w_600,h_600,al_c,q_85,usm_0.66_1.00_0.01,enc_avif,quality_auto/f0adaf_0632dc96f8db425a9211154fc0a7ab6f~mv2.jpg",
-              "keywords": "glutathione effervescent India, glutathione 650mg, skin glow supplement, buy glutathione online India, best glutathione tablets India",
-              "url": "https://www.ascofizz.com/products/glutathione-effervescent-tablets",
-              "image": "https://static.wixstatic.com/media/f0adaf_0632dc96f8db425a9211154fc0a7ab6f~mv2.jpg/v1/fill/w_800,h_800,al_c,q_85,usm_0.66_1.00_0.01,enc_avif,quality_auto/f0adaf_0632dc96f8db425a9211154fc0a7ab6f~mv2.jpg",
-              "category": "Skin Health, Antioxidants",
-              "aggregateRating": { "@type": "AggregateRating", "ratingValue": "4.9", "reviewCount": "312", "bestRating": "5", "worstRating": "1" },
-              "review": { "@type": "Review", "reviewRating": { "@type": "Rating", "ratingValue": "4.9", "bestRating": "5" }, "author": { "@type": "Organization", "name": "Verified Ascofizz Customers" }, "reviewBody": "Trusted by 312+ verified customers across India for quality and effectiveness." },
-              "offers": { "@type": "Offer", "priceCurrency": "INR", "price": "449", "availability": "https://schema.org/InStock", "priceValidUntil": "2026-12-31", "shippingDetails": { "@type": "OfferShippingDetails", "shippingRate": { "@type": "MonetaryAmount", "value": "0", "currency": "INR" }, "shippingDestination": { "@type": "DefinedRegion", "addressCountry": "IN" }, "deliveryTime": { "@type": "ShippingDeliveryTime", "handlingTime": { "@type": "QuantitativeValue", "minValue": 0, "maxValue": 1, "unitCode": "DAY" }, "transitTime": { "@type": "QuantitativeValue", "minValue": 2, "maxValue": 7, "unitCode": "DAY" } } }, "hasMerchantReturnPolicy": { "@type": "MerchantReturnPolicy", "applicableCountry": "IN", "returnPolicyCategory": "https://schema.org/MerchantReturnFiniteReturnWindow", "merchantReturnDays": 7, "returnMethod": "https://schema.org/ReturnByMail", "returnFees": "https://schema.org/FreeReturn" }, "seller": { "@id": "https://www.ascofizz.com/#organization" } }
-            }
-          },
-          {
-            "@type": "ListItem", "position": 2,
-            "item": {
-              "@type": "Product",
-              "name": "Ascofizz ACV + Moringa Effervescent — Green Apple Flavour",
-              "description": "Apple Cider Vinegar with Garcinia Cambogia and Moringa. Supports weight management, metabolic wellness, and energy. 15 effervescent tablets. Gluten-free, non-GMO, sugar-free.",
-              "brand": { "@type": "Brand", "name": "Ascofizz" },
-              "sku": "ASC-ACV-002",
-              "mpn": "ASC-ACV-GA-15",
-              "image": "https://static.wixstatic.com/media/f0adaf_1d97e722692a46cbb7e6701d688bdcda~mv2.jpg/v1/fill/w_600,h_600,al_c,q_85,usm_0.66_1.00_0.01,enc_avif,quality_auto/f0adaf_1d97e722692a46cbb7e6701d688bdcda~mv2.jpg",
-              "keywords": "ACV moringa effervescent India, apple cider vinegar supplement India, weight management supplement India, garcinia cambogia effervescent",
-              "url": "https://www.ascofizz.com/products/acv-moringa-effervescent",
-              "category": "Weight Management, Metabolism",
-              "aggregateRating": { "@type": "AggregateRating", "ratingValue": "4.7", "reviewCount": "198", "bestRating": "5", "worstRating": "1" },
-              "review": { "@type": "Review", "reviewRating": { "@type": "Rating", "ratingValue": "4.7", "bestRating": "5" }, "author": { "@type": "Organization", "name": "Verified Ascofizz Customers" }, "reviewBody": "Trusted by 198+ verified customers across India for quality and effectiveness." },
-              "offers": { "@type": "Offer", "priceCurrency": "INR", "price": "399", "availability": "https://schema.org/InStock", "priceValidUntil": "2026-12-31", "shippingDetails": { "@type": "OfferShippingDetails", "shippingRate": { "@type": "MonetaryAmount", "value": "0", "currency": "INR" }, "shippingDestination": { "@type": "DefinedRegion", "addressCountry": "IN" }, "deliveryTime": { "@type": "ShippingDeliveryTime", "handlingTime": { "@type": "QuantitativeValue", "minValue": 0, "maxValue": 1, "unitCode": "DAY" }, "transitTime": { "@type": "QuantitativeValue", "minValue": 2, "maxValue": 7, "unitCode": "DAY" } } }, "hasMerchantReturnPolicy": { "@type": "MerchantReturnPolicy", "applicableCountry": "IN", "returnPolicyCategory": "https://schema.org/MerchantReturnFiniteReturnWindow", "merchantReturnDays": 7, "returnMethod": "https://schema.org/ReturnByMail", "returnFees": "https://schema.org/FreeReturn" }, "seller": { "@id": "https://www.ascofizz.com/#organization" } }
-            }
-          },
-          {
-            "@type": "ListItem", "position": 3,
-            "item": {
-              "@type": "Product",
-              "name": "Ascofizz VitaPlus B12 + D3 with Certified Organic Spirulina",
-              "description": "Vegan B12 and D3 with certified organic Spirulina. Fights fatigue, boosts energy and vitality, supports immune system, antioxidant rich. 60 tablets. 100% vegan, plant-based.",
-              "brand": { "@type": "Brand", "name": "Ascofizz" },
-              "sku": "ASC-VIT-010",
-              "mpn": "ASC-VIT-SPR-60",
-              "image": "https://static.wixstatic.com/media/f0adaf_902199f4d8c74178a5be5b997e4a2e4d~mv2.jpg/v1/fill/w_600,h_600,al_c,q_85,usm_0.66_1.00_0.01,enc_avif,quality_auto/f0adaf_902199f4d8c74178a5be5b997e4a2e4d~mv2.jpg",
-              "keywords": "vegan B12 D3 India, spirulina B12 supplement India, plant based B12 India, organic spirulina tablet India",
-              "url": "https://www.ascofizz.com/products/vitaplus-spirulina-b12-d3",
-              "category": "Energy, Vegan Nutrition",
-              "aggregateRating": { "@type": "AggregateRating", "ratingValue": "4.7", "reviewCount": "89", "bestRating": "5", "worstRating": "1" },
-              "review": { "@type": "Review", "reviewRating": { "@type": "Rating", "ratingValue": "4.7", "bestRating": "5" }, "author": { "@type": "Organization", "name": "Verified Ascofizz Customers" }, "reviewBody": "Trusted by 89+ verified customers across India for quality and effectiveness." },
-              "offers": { "@type": "Offer", "priceCurrency": "INR", "price": "549", "availability": "https://schema.org/InStock", "priceValidUntil": "2026-12-31", "shippingDetails": { "@type": "OfferShippingDetails", "shippingRate": { "@type": "MonetaryAmount", "value": "0", "currency": "INR" }, "shippingDestination": { "@type": "DefinedRegion", "addressCountry": "IN" }, "deliveryTime": { "@type": "ShippingDeliveryTime", "handlingTime": { "@type": "QuantitativeValue", "minValue": 0, "maxValue": 1, "unitCode": "DAY" }, "transitTime": { "@type": "QuantitativeValue", "minValue": 2, "maxValue": 7, "unitCode": "DAY" } } }, "hasMerchantReturnPolicy": { "@type": "MerchantReturnPolicy", "applicableCountry": "IN", "returnPolicyCategory": "https://schema.org/MerchantReturnFiniteReturnWindow", "merchantReturnDays": 7, "returnMethod": "https://schema.org/ReturnByMail", "returnFees": "https://schema.org/FreeReturn" }, "seller": { "@id": "https://www.ascofizz.com/#organization" } }
-            }
-          },
-          {
-            "@type": "ListItem", "position": 4,
-            "item": {
-              "@type": "Product",
-              "name": "Ascofizz MG+++ Magnesium B12 + D3 with Organic Spirulina",
-              "description": "Magnesium, B12, D3 with certified organic Spirulina. Supports rest, recovery and rejuvenation. Fights fatigue, energy booster, immune support. 60 tablets. 100% vegan.",
-              "brand": { "@type": "Brand", "name": "Ascofizz" },
-              "sku": "ASC-MAG-011",
-              "mpn": "ASC-MAG-SPR-60",
-              "image": "https://static.wixstatic.com/media/f0adaf_110567acf3b045e0a0998a68f50e4aae~mv2.jpg/v1/fill/w_1100,h_1100,al_c,q_85,usm_0.66_1.00_0.01,enc_avif,quality_auto/f0adaf_110567acf3b045e0a0998a68f50e4aae~mv2.jpg",
-              "keywords": "magnesium supplement India, magnesium B12 D3 India, sleep supplement India, muscle recovery supplement India, spirulina magnesium India",
-              "url": "https://www.ascofizz.com/products/magnesium-b12-d3-spirulina",
-              "category": "Sleep, Recovery, Stress",
-              "aggregateRating": { "@type": "AggregateRating", "ratingValue": "4.5", "reviewCount": "56", "bestRating": "5", "worstRating": "1" },
-              "review": { "@type": "Review", "reviewRating": { "@type": "Rating", "ratingValue": "4.5", "bestRating": "5" }, "author": { "@type": "Organization", "name": "Verified Ascofizz Customers" }, "reviewBody": "Trusted by 56+ verified customers across India for quality and effectiveness." },
-              "offers": { "@type": "Offer", "priceCurrency": "INR", "price": "599", "availability": "https://schema.org/InStock", "priceValidUntil": "2026-12-31", "shippingDetails": { "@type": "OfferShippingDetails", "shippingRate": { "@type": "MonetaryAmount", "value": "0", "currency": "INR" }, "shippingDestination": { "@type": "DefinedRegion", "addressCountry": "IN" }, "deliveryTime": { "@type": "ShippingDeliveryTime", "handlingTime": { "@type": "QuantitativeValue", "minValue": 0, "maxValue": 1, "unitCode": "DAY" }, "transitTime": { "@type": "QuantitativeValue", "minValue": 2, "maxValue": 7, "unitCode": "DAY" } } }, "hasMerchantReturnPolicy": { "@type": "MerchantReturnPolicy", "applicableCountry": "IN", "returnPolicyCategory": "https://schema.org/MerchantReturnFiniteReturnWindow", "merchantReturnDays": 7, "returnMethod": "https://schema.org/ReturnByMail", "returnFees": "https://schema.org/FreeReturn" }, "seller": { "@id": "https://www.ascofizz.com/#organization" } }
-            }
-          },
-          {
-            "@type": "ListItem", "position": 5,
-            "item": {
-              "@type": "Product",
-              "name": "Ascofizz B12 + Biotin Effervescent — Guava Flavour",
-              "description": "B12 and Biotin effervescent for hair growth, nail strength and energy support. Guava flavour. 15 effervescent tablets.",
-              "brand": { "@type": "Brand", "name": "Ascofizz" },
-              "sku": "ASC-BIO-004",
-              "mpn": "ASC-BIO-GU-15",
-              "image": "https://static.wixstatic.com/media/f0adaf_ff7808219dc64cfab2102ea067910a6a~mv2.png/v1/fill/w_1100,h_1100,al_c,q_90,usm_0.66_1.00_0.01,enc_avif,quality_auto/f0adaf_ff7808219dc64cfab2102ea067910a6a~mv2.png",
-              "keywords": "biotin effervescent India, biotin hair growth supplement India, B12 biotin guava India, hair fall supplement India, biotin 10000mcg India",
-              "url": "https://www.ascofizz.com/products/b12-biotin-effervescent",
-              "category": "Hair Growth, Biotin",
-              "aggregateRating": { "@type": "AggregateRating", "ratingValue": "4.9", "reviewCount": "389", "bestRating": "5", "worstRating": "1" },
-              "review": { "@type": "Review", "reviewRating": { "@type": "Rating", "ratingValue": "4.9", "bestRating": "5" }, "author": { "@type": "Organization", "name": "Verified Ascofizz Customers" }, "reviewBody": "Trusted by 389+ verified customers across India for quality and effectiveness." },
-              "offers": { "@type": "Offer", "priceCurrency": "INR", "price": "349", "availability": "https://schema.org/InStock", "priceValidUntil": "2026-12-31", "shippingDetails": { "@type": "OfferShippingDetails", "shippingRate": { "@type": "MonetaryAmount", "value": "0", "currency": "INR" }, "shippingDestination": { "@type": "DefinedRegion", "addressCountry": "IN" }, "deliveryTime": { "@type": "ShippingDeliveryTime", "handlingTime": { "@type": "QuantitativeValue", "minValue": 0, "maxValue": 1, "unitCode": "DAY" }, "transitTime": { "@type": "QuantitativeValue", "minValue": 2, "maxValue": 7, "unitCode": "DAY" } } }, "hasMerchantReturnPolicy": { "@type": "MerchantReturnPolicy", "applicableCountry": "IN", "returnPolicyCategory": "https://schema.org/MerchantReturnFiniteReturnWindow", "merchantReturnDays": 7, "returnMethod": "https://schema.org/ReturnByMail", "returnFees": "https://schema.org/FreeReturn" }, "seller": { "@id": "https://www.ascofizz.com/#organization" } }
-            }
-          },
-          {
-            "@type": "ListItem", "position": 6,
-            "item": {
-              "@type": "Product",
-              "name": "Ascofizz CS++ Calcium + Iron with B12 + D3 and Organic Spirulina",
-              "description": "Calcium and Iron with B12, D3 and Organic Spirulina for women's bone health, energy and immunity. 60 tablets. 100% vegan.",
-              "brand": { "@type": "Brand", "name": "Ascofizz" },
-              "sku": "ASC-CAL-012",
-              "mpn": "ASC-CAL-SPR-60",
-              "image": "https://static.wixstatic.com/media/f0adaf_fb4f54451eb94ce38d361b1e0186522d~mv2.png/v1/fill/w_1100,h_1100,al_c,q_90,usm_0.66_1.00_0.01,enc_avif,quality_auto/f0adaf_fb4f54451eb94ce38d361b1e0186522d~mv2.png",
-              "keywords": "calcium iron supplement India, women supplement India, iron deficiency supplement India, calcium B12 D3 India, women wellness India",
-              "url": "https://www.ascofizz.com/products/calcium-iron-b12-d3-spirulina",
-              "category": "Women's Health, Bone Health",
-              "aggregateRating": { "@type": "AggregateRating", "ratingValue": "4.6", "reviewCount": "44", "bestRating": "5", "worstRating": "1" },
-              "review": { "@type": "Review", "reviewRating": { "@type": "Rating", "ratingValue": "4.6", "bestRating": "5" }, "author": { "@type": "Organization", "name": "Verified Ascofizz Customers" }, "reviewBody": "Trusted by 44+ verified customers across India for quality and effectiveness." },
-              "offers": { "@type": "Offer", "priceCurrency": "INR", "price": "549", "availability": "https://schema.org/InStock", "priceValidUntil": "2026-12-31", "shippingDetails": { "@type": "OfferShippingDetails", "shippingRate": { "@type": "MonetaryAmount", "value": "0", "currency": "INR" }, "shippingDestination": { "@type": "DefinedRegion", "addressCountry": "IN" }, "deliveryTime": { "@type": "ShippingDeliveryTime", "handlingTime": { "@type": "QuantitativeValue", "minValue": 0, "maxValue": 1, "unitCode": "DAY" }, "transitTime": { "@type": "QuantitativeValue", "minValue": 2, "maxValue": 7, "unitCode": "DAY" } } }, "hasMerchantReturnPolicy": { "@type": "MerchantReturnPolicy", "applicableCountry": "IN", "returnPolicyCategory": "https://schema.org/MerchantReturnFiniteReturnWindow", "merchantReturnDays": 7, "returnMethod": "https://schema.org/ReturnByMail", "returnFees": "https://schema.org/FreeReturn" }, "seller": { "@id": "https://www.ascofizz.com/#organization" } }
-            }
-          },
-          {
-            "@type": "ListItem", "position": 7,
-            "item": {
-              "@type": "Product",
-              "name": "Ascofizz Multidiata Premium Multivitamin — 23 Vitamins & Minerals",
-              "description": "Premium multivitamin with 23 essential vitamins and minerals. Complete daily nutrition for adults. Manufactured in WHO-GMP certified facility.",
-              "brand": { "@type": "Brand", "name": "Ascofizz" },
-              "sku": "ASC-MUL-008",
-              "mpn": "ASC-MUL-TAB-60",
-              "image": "https://static.wixstatic.com/media/f0adaf_389d6b29ad5446bb81ad305de9756f17~mv2.jpg/v1/fill/w_600,h_600,al_c,q_85,usm_0.66_1.00_0.01,enc_avif,quality_auto/f0adaf_389d6b29ad5446bb81ad305de9756f17~mv2.jpg",
-              "keywords": "best multivitamin India, 23 vitamins minerals India, daily multivitamin tablet India, multivitamin supplement India, Multidiata review",
-              "url": "https://www.ascofizz.com/products/multidiata-premium-multivitamin",
-              "category": "Multivitamin, Daily Nutrition",
-              "aggregateRating": { "@type": "AggregateRating", "ratingValue": "4.8", "reviewCount": "567", "bestRating": "5", "worstRating": "1" },
-              "review": { "@type": "Review", "reviewRating": { "@type": "Rating", "ratingValue": "4.8", "bestRating": "5" }, "author": { "@type": "Organization", "name": "Verified Ascofizz Customers" }, "reviewBody": "Trusted by 567+ verified customers across India for quality and effectiveness." },
-              "offers": { "@type": "Offer", "priceCurrency": "INR", "price": "649", "availability": "https://schema.org/InStock", "priceValidUntil": "2026-12-31", "shippingDetails": { "@type": "OfferShippingDetails", "shippingRate": { "@type": "MonetaryAmount", "value": "0", "currency": "INR" }, "shippingDestination": { "@type": "DefinedRegion", "addressCountry": "IN" }, "deliveryTime": { "@type": "ShippingDeliveryTime", "handlingTime": { "@type": "QuantitativeValue", "minValue": 0, "maxValue": 1, "unitCode": "DAY" }, "transitTime": { "@type": "QuantitativeValue", "minValue": 2, "maxValue": 7, "unitCode": "DAY" } } }, "hasMerchantReturnPolicy": { "@type": "MerchantReturnPolicy", "applicableCountry": "IN", "returnPolicyCategory": "https://schema.org/MerchantReturnFiniteReturnWindow", "merchantReturnDays": 7, "returnMethod": "https://schema.org/ReturnByMail", "returnFees": "https://schema.org/FreeReturn" }, "seller": { "@id": "https://www.ascofizz.com/#organization" } }
-            }
-          },
-          {
-            "@type": "ListItem", "position": 8,
-            "item": {
-              "@type": "Product",
-              "name": "Ascofizz Organic Moringa Tablets",
-              "description": "Pure organic Moringa oleifera tablets. Natural immunity booster, anti-inflammatory, rich in vitamins A, C, K and minerals. 60 tablets.",
-              "brand": { "@type": "Brand", "name": "Ascofizz" },
-              "sku": "ASC-MOR-020",
-              "mpn": "ASC-MOR-TAB-60",
-              "image": "https://static.wixstatic.com/media/f0adaf_e51841f203d548248c371d2e4f93dbf0~mv2.jpg/v1/fill/w_600,h_600,al_c,q_85,usm_0.66_1.00_0.01,enc_avif,quality_auto/f0adaf_e51841f203d548248c371d2e4f93dbf0~mv2.jpg",
-              "keywords": "moringa tablets India, organic moringa supplement India, immunity booster India, moringa oleifera India, natural immunity India",
-              "url": "https://www.ascofizz.com/products/organic-moringa-tablets",
-              "category": "Immunity, Superfoods",
-              "aggregateRating": { "@type": "AggregateRating", "ratingValue": "4.7", "reviewCount": "156", "bestRating": "5", "worstRating": "1" },
-              "review": { "@type": "Review", "reviewRating": { "@type": "Rating", "ratingValue": "4.7", "bestRating": "5" }, "author": { "@type": "Organization", "name": "Verified Ascofizz Customers" }, "reviewBody": "Trusted by 156+ verified customers across India for quality and effectiveness." },
-              "offers": { "@type": "Offer", "priceCurrency": "INR", "price": "299", "availability": "https://schema.org/InStock", "priceValidUntil": "2026-12-31", "shippingDetails": { "@type": "OfferShippingDetails", "shippingRate": { "@type": "MonetaryAmount", "value": "0", "currency": "INR" }, "shippingDestination": { "@type": "DefinedRegion", "addressCountry": "IN" }, "deliveryTime": { "@type": "ShippingDeliveryTime", "handlingTime": { "@type": "QuantitativeValue", "minValue": 0, "maxValue": 1, "unitCode": "DAY" }, "transitTime": { "@type": "QuantitativeValue", "minValue": 2, "maxValue": 7, "unitCode": "DAY" } } }, "hasMerchantReturnPolicy": { "@type": "MerchantReturnPolicy", "applicableCountry": "IN", "returnPolicyCategory": "https://schema.org/MerchantReturnFiniteReturnWindow", "merchantReturnDays": 7, "returnMethod": "https://schema.org/ReturnByMail", "returnFees": "https://schema.org/FreeReturn" }, "seller": { "@id": "https://www.ascofizz.com/#organization" } }
-            }
+      "category": "Nutraceutical Manufacturer, Health Supplement Brand, Pharmaceutical Manufacturer",
+      "description": "Ascovita is a WHO-GMP certified, FSSAI approved nutraceutical manufacturer in Anand, Gujarat. Co-founded by Aamin Ghachivahora. Makes premium effervescent vitamins and health supplements for both B2B private label and D2C sales.",
+      "founder": {
+        "@id": "https://www.ascofizz.com/#founder"
+      },
+      "sameAs": [
+        "https://www.instagram.com/ascovita_healthcare",
+        "https://www.linkedin.com/company/ascovita-healthcare",
+        "https://www.facebook.com/Ascofizz",
+        "https://www.indiamart.com/ascovita-healthcare"
+      ]
+    },
+    {
+      "@type": "ItemList",
+      "name": "Ascofizz — Product Catalogue",
+      "description": "Complete range of premium effervescent vitamins and nutraceutical supplements by Ascofizz, manufactured in WHO-GMP certified facility in Anand, Gujarat, India.",
+      "numberOfItems": 16,
+      "itemListElement": [
+        {
+          "@type": "ListItem",
+          "position": 1,
+          "item": {
+            "@type": "Product",
+            "@id": "https://www.ascofizz.com/product/multidiata-ascofizz-premium-multivitamin#product",
+            "name": "Multidiata – Ascofizz Premium Multivitamin",
+            "description": "Complete daily multivitamin for immunity, energy, and overall health. Multidiata is Ascofizz's flagship precision-crafted Multivitamin, Multimineral & Antioxidant formula — 19 essential nutrients in one daily tablet, each dosed at 72-100% RDA. Bridges nutritional gaps from diet and lifestyle, supports immune health with antioxidants like Vitamin C and Zinc, and boosts energy and mood via B-Vitamins. Not intended to replace a balanced, nutritious diet. 60 Tablets per bottle. FSSAI approved.",
+            "brand": {
+              "@type": "Brand",
+              "name": "Ascofizz"
+            },
+            "manufacturer": {
+              "@id": "https://www.ascofizz.com/#organization"
+            },
+            "sku": "ASC-008",
+            "url": "https://www.ascofizz.com/product/multidiata-ascofizz-premium-multivitamin",
+            "category": "Multivitamins",
+            "offers": {
+              "@type": "Offer",
+              "@id": "https://www.ascofizz.com/product/multidiata-ascofizz-premium-multivitamin#offer",
+              "url": "https://www.ascofizz.com/product/multidiata-ascofizz-premium-multivitamin",
+              "priceCurrency": "INR",
+              "price": "120",
+              "availability": "https://schema.org/OutOfStock",
+              "itemCondition": "https://schema.org/NewCondition",
+              "seller": {
+                "@id": "https://www.ascofizz.com/#organization"
+              },
+              "areaServed": {
+                "@type": "Country",
+                "name": "India"
+              }
+            },
+            "keywords": [
+              "multivitamin India",
+              "best multivitamin India",
+              "daily multivitamin"
+            ],
+            "additionalProperty": [
+              {
+                "@type": "PropertyValue",
+                "name": "Key ingredient",
+                "value": "Vitamin C 80mg (100% RDA)"
+              },
+              {
+                "@type": "PropertyValue",
+                "name": "Key ingredient",
+                "value": "Vitamin B3/Niacin 18mg (100% RDA)"
+              },
+              {
+                "@type": "PropertyValue",
+                "name": "Key ingredient",
+                "value": "Zinc 17mg (100% RDA)"
+              },
+              {
+                "@type": "PropertyValue",
+                "name": "Key ingredient",
+                "value": "Vitamin E 10mg (100% RDA)"
+              },
+              {
+                "@type": "PropertyValue",
+                "name": "Key ingredient",
+                "value": "Vitamin B5/Pantothenic Acid 3.6mg (72% RDA)"
+              },
+              {
+                "@type": "PropertyValue",
+                "name": "Key ingredient",
+                "value": "Vitamin B2/Riboflavin 2.5mg (100% RDA)"
+              }
+            ]
           }
-        ]
-      },
-
-      {
-        "@type": "Service",
-        "@id": "https://www.ascofizz.com/#b2b-service",
-        "name": "B2B Private Label Nutraceutical Manufacturing by Ascovita",
-        "serviceType": "Contract Nutraceutical Manufacturing, Private Label Supplement Manufacturing, Custom Formulation",
-        "description": "Ascovita offers WHO-GMP certified private label and contract manufacturing of effervescent tablets, capsules, sachets and nutraceutical supplements for health brands across India and globally. Services include custom formulation, packaging design, FSSAI compliance, and low MOQ manufacturing from our facility in Anand, Gujarat.",
-        "provider": { "@id": "https://www.ascofizz.com/#organization" },
-        "areaServed": [
-          { "@type": "Country", "name": "India" },
-          { "@type": "AdministrativeArea", "name": "Gujarat" },
-          { "@type": "AdministrativeArea", "name": "Maharashtra" },
-          { "@type": "AdministrativeArea", "name": "Delhi" },
-          { "@type": "AdministrativeArea", "name": "Karnataka" },
-          { "@type": "AdministrativeArea", "name": "Tamil Nadu" }
-        ],
-        "hasOfferCatalog": {
-          "@type": "OfferCatalog",
-          "name": "Private Label Manufacturing Services",
-          "itemListElement": [
-            { "@type": "Offer", "itemOffered": { "@type": "Service", "name": "Effervescent Tablet Manufacturing", "description": "Custom effervescent tablet manufacturing with formulations including vitamins, minerals, amino acids, and herbal blends." } },
-            { "@type": "Offer", "itemOffered": { "@type": "Service", "name": "Capsule Manufacturing", "description": "Hard gelatin and HPMC (vegan) capsule manufacturing for nutraceutical supplements." } },
-            { "@type": "Offer", "itemOffered": { "@type": "Service", "name": "Tablet Manufacturing", "description": "Coated and uncoated tablet manufacturing for vitamins, multivitamins and herbal supplements." } },
-            { "@type": "Offer", "itemOffered": { "@type": "Service", "name": "Custom Formulation Development", "description": "End-to-end custom supplement formulation development and stability testing." } },
-            { "@type": "Offer", "itemOffered": { "@type": "Service", "name": "FSSAI Regulatory Support", "description": "Complete FSSAI licensing, product registration and labelling compliance support for new supplement brands." } }
-          ]
         },
-        "offers": {
-          "@type": "Offer",
-          "description": "Low MOQ private label supplement manufacturing. Custom formulations. WHO-GMP certified plant.",
-          "url": "https://www.ascovita.com/#/capabilities"
+        {
+          "@type": "ListItem",
+          "position": 2,
+          "item": {
+            "@type": "Product",
+            "@id": "https://www.ascofizz.com/product/green-tea-effervescent-tablet#product",
+            "name": "Green Tea Effervescent Tablet",
+            "description": "Ascofizz Green Tea Effervescent Tablet combines Green Tea Extract with Ashwagandha KSM-66 and Caffeine to support metabolism, boost energy, enhance fat oxidation, and improve focus and alertness. Fast-dissolving effervescent format for quick absorption. FSSAI approved. Not for medicinal use — this product is not intended to diagnose, treat, cure, or prevent any disease.",
+            "brand": {
+              "@type": "Brand",
+              "name": "Ascofizz"
+            },
+            "manufacturer": {
+              "@id": "https://www.ascofizz.com/#organization"
+            },
+            "sku": "ASC-030",
+            "url": "https://www.ascofizz.com/product/green-tea-effervescent-tablet",
+            "category": "Effervescent Tablets",
+            "offers": {
+              "@type": "Offer",
+              "@id": "https://www.ascofizz.com/product/green-tea-effervescent-tablet#offer",
+              "url": "https://www.ascofizz.com/product/green-tea-effervescent-tablet",
+              "priceCurrency": "INR",
+              "price": "425",
+              "availability": "https://schema.org/OutOfStock",
+              "itemCondition": "https://schema.org/NewCondition",
+              "seller": {
+                "@id": "https://www.ascofizz.com/#organization"
+              },
+              "areaServed": {
+                "@type": "Country",
+                "name": "India"
+              }
+            },
+            "keywords": [
+              "green tea effervescent tablet India",
+              "green tea tablets online India",
+              "ashwagandha caffeine supplement",
+              "metabolism booster tablet India",
+              "energy effervescent tablet",
+              "fat burner tablet India"
+            ],
+            "additionalProperty": [
+              {
+                "@type": "PropertyValue",
+                "name": "Key ingredient",
+                "value": "Green Tea Extract 500mg"
+              },
+              {
+                "@type": "PropertyValue",
+                "name": "Key ingredient",
+                "value": "Ashwagandha KSM-66 100mg"
+              },
+              {
+                "@type": "PropertyValue",
+                "name": "Key ingredient",
+                "value": "Caffeine 100mg"
+              }
+            ]
+          }
+        },
+        {
+          "@type": "ListItem",
+          "position": 3,
+          "item": {
+            "@type": "Product",
+            "@id": "https://www.ascofizz.com/product/ashwagandha-effervescent-tablet#product",
+            "name": "Ashwagandha Effervescent Tablet",
+            "description": "Ascofizz Ashwagandha Effervescent Tablet with Ashwagandha KSM-66, Eclipta Prostrata, Vitamin D3, and Zinc helps reduce stress, supports stamina, immunity, muscle recovery, and overall wellness. Fast-dissolving effervescent format. FSSAI approved. Not for medicinal use — this product is not intended to diagnose, treat, cure, or prevent any disease.",
+            "brand": {
+              "@type": "Brand",
+              "name": "Ascofizz"
+            },
+            "manufacturer": {
+              "@id": "https://www.ascofizz.com/#organization"
+            },
+            "sku": "ASC-031",
+            "url": "https://www.ascofizz.com/product/ashwagandha-effervescent-tablet",
+            "category": "Effervescent Tablets",
+            "offers": {
+              "@type": "Offer",
+              "@id": "https://www.ascofizz.com/product/ashwagandha-effervescent-tablet#offer",
+              "url": "https://www.ascofizz.com/product/ashwagandha-effervescent-tablet",
+              "priceCurrency": "INR",
+              "price": "495",
+              "availability": "https://schema.org/OutOfStock",
+              "itemCondition": "https://schema.org/NewCondition",
+              "seller": {
+                "@id": "https://www.ascofizz.com/#organization"
+              },
+              "areaServed": {
+                "@type": "Country",
+                "name": "India"
+              }
+            },
+            "keywords": [
+              "ashwagandha effervescent tablet India",
+              "KSM-66 ashwagandha tablets",
+              "stress relief supplement India",
+              "ashwagandha zinc vitamin D3 tablet",
+              "immunity ashwagandha tablet",
+              "stamina booster India"
+            ],
+            "additionalProperty": [
+              {
+                "@type": "PropertyValue",
+                "name": "Key ingredient",
+                "value": "Ashwagandha KSM-66 650mg"
+              },
+              {
+                "@type": "PropertyValue",
+                "name": "Key ingredient",
+                "value": "Eclipta Prostrata 20mg"
+              },
+              {
+                "@type": "PropertyValue",
+                "name": "Key ingredient",
+                "value": "Vitamin D3 500 IU"
+              },
+              {
+                "@type": "PropertyValue",
+                "name": "Key ingredient",
+                "value": "Zinc 12mg"
+              }
+            ]
+          }
+        },
+        {
+          "@type": "ListItem",
+          "position": 4,
+          "item": {
+            "@type": "Product",
+            "@id": "https://www.ascofizz.com/product/men-s-multivitamin-effervescent-tablet#product",
+            "name": "Men's Multivitamin Effervescent Tablet",
+            "description": "Ascofizz Men's Multivitamin Effervescent Tablet delivers daily nutritional support for energy, immunity, vitality, muscle function and men's wellness. With Vitamin A, C, D2, L-Carnitine L-Tartrate, L-Arginine, Ashwagandha Extract, and Astaxanthin. FSSAI approved. Not for medicinal use — this product is not intended to diagnose, treat, cure, or prevent any disease.",
+            "brand": {
+              "@type": "Brand",
+              "name": "Ascofizz"
+            },
+            "manufacturer": {
+              "@id": "https://www.ascofizz.com/#organization"
+            },
+            "sku": "ASC-032",
+            "url": "https://www.ascofizz.com/product/men-s-multivitamin-effervescent-tablet",
+            "category": "Effervescent Tablets",
+            "offers": {
+              "@type": "Offer",
+              "@id": "https://www.ascofizz.com/product/men-s-multivitamin-effervescent-tablet#offer",
+              "url": "https://www.ascofizz.com/product/men-s-multivitamin-effervescent-tablet",
+              "priceCurrency": "INR",
+              "price": "399",
+              "availability": "https://schema.org/OutOfStock",
+              "itemCondition": "https://schema.org/NewCondition",
+              "seller": {
+                "@id": "https://www.ascofizz.com/#organization"
+              },
+              "areaServed": {
+                "@type": "Country",
+                "name": "India"
+              }
+            },
+            "keywords": [
+              "men's multivitamin effervescent India",
+              "multivitamin tablets for men",
+              "L-Carnitine L-Arginine supplement",
+              "men's energy vitality tablet",
+              "ashwagandha multivitamin for men"
+            ],
+            "additionalProperty": [
+              {
+                "@type": "PropertyValue",
+                "name": "Key ingredient",
+                "value": "Vitamin A 1000mcg"
+              },
+              {
+                "@type": "PropertyValue",
+                "name": "Key ingredient",
+                "value": "Vitamin C 80mg"
+              },
+              {
+                "@type": "PropertyValue",
+                "name": "Key ingredient",
+                "value": "Vitamin D2 600 IU"
+              },
+              {
+                "@type": "PropertyValue",
+                "name": "Key ingredient",
+                "value": "L-Carnitine L-Tartrate 50mg"
+              },
+              {
+                "@type": "PropertyValue",
+                "name": "Key ingredient",
+                "value": "L-Arginine 50mg"
+              },
+              {
+                "@type": "PropertyValue",
+                "name": "Key ingredient",
+                "value": "Ashwagandha Extract 55mg"
+              }
+            ]
+          }
+        },
+        {
+          "@type": "ListItem",
+          "position": 5,
+          "item": {
+            "@type": "Product",
+            "@id": "https://www.ascofizz.com/product/women-s-multivitamin-effervescent-tablet#product",
+            "name": "Women's Multivitamin Effervescent Tablet",
+            "description": "Ascofizz Women's Multivitamin Effervescent Tablet supports women's health, skin hydration, hormonal balance, immunity and daily nutrition. With Vitamin A, C, D2, Iron, Hyaluronic Acid, Inositol, D-Chiro Inositol, and Astaxanthin. FSSAI approved. Not for medicinal use — this product is not intended to diagnose, treat, cure, or prevent any disease.",
+            "brand": {
+              "@type": "Brand",
+              "name": "Ascofizz"
+            },
+            "manufacturer": {
+              "@id": "https://www.ascofizz.com/#organization"
+            },
+            "sku": "ASC-033",
+            "url": "https://www.ascofizz.com/product/women-s-multivitamin-effervescent-tablet",
+            "category": "Effervescent Tablets",
+            "offers": {
+              "@type": "Offer",
+              "@id": "https://www.ascofizz.com/product/women-s-multivitamin-effervescent-tablet#offer",
+              "url": "https://www.ascofizz.com/product/women-s-multivitamin-effervescent-tablet",
+              "priceCurrency": "INR",
+              "price": "399",
+              "availability": "https://schema.org/OutOfStock",
+              "itemCondition": "https://schema.org/NewCondition",
+              "seller": {
+                "@id": "https://www.ascofizz.com/#organization"
+              },
+              "areaServed": {
+                "@type": "Country",
+                "name": "India"
+              }
+            },
+            "keywords": [
+              "women's multivitamin effervescent India",
+              "multivitamin tablets for women",
+              "hyaluronic acid inositol tablet",
+              "iron multivitamin for women",
+              "hormonal balance supplement India"
+            ],
+            "additionalProperty": [
+              {
+                "@type": "PropertyValue",
+                "name": "Key ingredient",
+                "value": "Vitamin A 840mcg"
+              },
+              {
+                "@type": "PropertyValue",
+                "name": "Key ingredient",
+                "value": "Vitamin C 65mg"
+              },
+              {
+                "@type": "PropertyValue",
+                "name": "Key ingredient",
+                "value": "Vitamin D2 600 IU"
+              },
+              {
+                "@type": "PropertyValue",
+                "name": "Key ingredient",
+                "value": "Iron 14.5mg"
+              },
+              {
+                "@type": "PropertyValue",
+                "name": "Key ingredient",
+                "value": "Hyaluronic Acid 40mg"
+              },
+              {
+                "@type": "PropertyValue",
+                "name": "Key ingredient",
+                "value": "Inositol 205mg"
+              }
+            ]
+          }
+        },
+        {
+          "@type": "ListItem",
+          "position": 6,
+          "item": {
+            "@type": "Product",
+            "@id": "https://www.ascofizz.com/product/apple-cider-vinegar-effervescent-tablet#product",
+            "name": "Apple Cider Vinegar Effervescent Tablet",
+            "description": "Ascofizz Apple Cider Vinegar Effervescent Tablet with Garcinia Cambogia, Pomegranate Extract, Chlorophyll, Vitamin B6 and B12 supports digestion, weight management, detoxification and metabolism. Fast-dissolving effervescent format. FSSAI approved. Not for medicinal use — this product is not intended to diagnose, treat, cure, or prevent any disease.",
+            "brand": {
+              "@type": "Brand",
+              "name": "Ascofizz"
+            },
+            "manufacturer": {
+              "@id": "https://www.ascofizz.com/#organization"
+            },
+            "sku": "ASC-034",
+            "url": "https://www.ascofizz.com/product/apple-cider-vinegar-effervescent-tablet",
+            "category": "Effervescent Tablets",
+            "offers": {
+              "@type": "Offer",
+              "@id": "https://www.ascofizz.com/product/apple-cider-vinegar-effervescent-tablet#offer",
+              "url": "https://www.ascofizz.com/product/apple-cider-vinegar-effervescent-tablet",
+              "priceCurrency": "INR",
+              "price": "349",
+              "availability": "https://schema.org/OutOfStock",
+              "itemCondition": "https://schema.org/NewCondition",
+              "seller": {
+                "@id": "https://www.ascofizz.com/#organization"
+              },
+              "areaServed": {
+                "@type": "Country",
+                "name": "India"
+              }
+            },
+            "keywords": [
+              "apple cider vinegar effervescent India",
+              "ACV garcinia cambogia tablet",
+              "weight management effervescent tablet",
+              "digestion supplement India",
+              "ACV tablets online India"
+            ],
+            "additionalProperty": [
+              {
+                "@type": "PropertyValue",
+                "name": "Key ingredient",
+                "value": "Apple Cider Vinegar 500mg"
+              },
+              {
+                "@type": "PropertyValue",
+                "name": "Key ingredient",
+                "value": "Garcinia Cambogia 500mg"
+              },
+              {
+                "@type": "PropertyValue",
+                "name": "Key ingredient",
+                "value": "Pomegranate Extract 100mg"
+              },
+              {
+                "@type": "PropertyValue",
+                "name": "Key ingredient",
+                "value": "Chlorophyll 10mg"
+              },
+              {
+                "@type": "PropertyValue",
+                "name": "Key ingredient",
+                "value": "Vitamin B6 1.3mg"
+              },
+              {
+                "@type": "PropertyValue",
+                "name": "Key ingredient",
+                "value": "Vitamin B12 2.2mcg"
+              }
+            ]
+          }
+        },
+        {
+          "@type": "ListItem",
+          "position": 7,
+          "item": {
+            "@type": "Product",
+            "@id": "https://www.ascofizz.com/product/complete-bone-health-effervescent-tablet#product",
+            "name": "Complete Bone Health Effervescent Tablet",
+            "description": "Ascofizz Complete Bone Health Effervescent Tablet strengthens bones and teeth, improves calcium absorption and supports muscle function. With Calcium Carbonate, Magnesium Carbonate, Vitamin D3, Vitamin K2-7, Vitamin C, and Vitamin B6. FSSAI approved. Not for medicinal use — this product is not intended to diagnose, treat, cure, or prevent any disease.",
+            "brand": {
+              "@type": "Brand",
+              "name": "Ascofizz"
+            },
+            "manufacturer": {
+              "@id": "https://www.ascofizz.com/#organization"
+            },
+            "sku": "ASC-035",
+            "url": "https://www.ascofizz.com/product/complete-bone-health-effervescent-tablet",
+            "category": "Effervescent Tablets",
+            "offers": {
+              "@type": "Offer",
+              "@id": "https://www.ascofizz.com/product/complete-bone-health-effervescent-tablet#offer",
+              "url": "https://www.ascofizz.com/product/complete-bone-health-effervescent-tablet",
+              "priceCurrency": "INR",
+              "price": "349",
+              "availability": "https://schema.org/OutOfStock",
+              "itemCondition": "https://schema.org/NewCondition",
+              "seller": {
+                "@id": "https://www.ascofizz.com/#organization"
+              },
+              "areaServed": {
+                "@type": "Country",
+                "name": "India"
+              }
+            },
+            "keywords": [
+              "bone health effervescent tablet India",
+              "calcium magnesium D3 K2 tablet",
+              "calcium supplement India",
+              "bone strength tablet online",
+              "vitamin D3 K2 effervescent tablet"
+            ],
+            "additionalProperty": [
+              {
+                "@type": "PropertyValue",
+                "name": "Key ingredient",
+                "value": "Calcium Carbonate 500mg"
+              },
+              {
+                "@type": "PropertyValue",
+                "name": "Key ingredient",
+                "value": "Magnesium Carbonate 500mg"
+              },
+              {
+                "@type": "PropertyValue",
+                "name": "Key ingredient",
+                "value": "Vitamin D3 600 IU"
+              },
+              {
+                "@type": "PropertyValue",
+                "name": "Key ingredient",
+                "value": "Vitamin K2-7 55mcg"
+              },
+              {
+                "@type": "PropertyValue",
+                "name": "Key ingredient",
+                "value": "Vitamin C 40mg"
+              },
+              {
+                "@type": "PropertyValue",
+                "name": "Key ingredient",
+                "value": "Vitamin B6 1.9mg"
+              }
+            ]
+          }
+        },
+        {
+          "@type": "ListItem",
+          "position": 8,
+          "item": {
+            "@type": "Product",
+            "@id": "https://www.ascofizz.com/product/rehydration-effervescent-tablet#product",
+            "name": "Rehydration Effervescent Tablet",
+            "description": "Ascofizz Rehydration Effervescent Tablet with BCAAs (Leucine, Isoleucine, Valine), Vitamin C, Magnesium, Chloride and Zinc delivers rapid hydration, electrolyte replenishment, muscle recovery and endurance support. FSSAI approved. Not for medicinal use — this product is not intended to diagnose, treat, cure, or prevent any disease.",
+            "brand": {
+              "@type": "Brand",
+              "name": "Ascofizz"
+            },
+            "manufacturer": {
+              "@id": "https://www.ascofizz.com/#organization"
+            },
+            "sku": "ASC-036",
+            "url": "https://www.ascofizz.com/product/rehydration-effervescent-tablet",
+            "category": "Effervescent Tablets",
+            "offers": {
+              "@type": "Offer",
+              "@id": "https://www.ascofizz.com/product/rehydration-effervescent-tablet#offer",
+              "url": "https://www.ascofizz.com/product/rehydration-effervescent-tablet",
+              "priceCurrency": "INR",
+              "price": "349",
+              "availability": "https://schema.org/OutOfStock",
+              "itemCondition": "https://schema.org/NewCondition",
+              "seller": {
+                "@id": "https://www.ascofizz.com/#organization"
+              },
+              "areaServed": {
+                "@type": "Country",
+                "name": "India"
+              }
+            },
+            "keywords": [
+              "rehydration effervescent tablet India",
+              "electrolyte BCAA tablet",
+              "hydration supplement India",
+              "sports recovery tablet India",
+              "electrolyte tablet for exercise"
+            ],
+            "additionalProperty": [
+              {
+                "@type": "PropertyValue",
+                "name": "Key ingredient",
+                "value": "BCAAs 300mg (Leucine 100mg, Isoleucine 100mg, Valine 100mg)"
+              },
+              {
+                "@type": "PropertyValue",
+                "name": "Key ingredient",
+                "value": "Vitamin C 80mg"
+              },
+              {
+                "@type": "PropertyValue",
+                "name": "Key ingredient",
+                "value": "Magnesium 25mg"
+              },
+              {
+                "@type": "PropertyValue",
+                "name": "Key ingredient",
+                "value": "Chloride 130mg"
+              },
+              {
+                "@type": "PropertyValue",
+                "name": "Key ingredient",
+                "value": "Zinc 12mg"
+              }
+            ]
+          }
+        },
+        {
+          "@type": "ListItem",
+          "position": 9,
+          "item": {
+            "@type": "Product",
+            "@id": "https://www.ascofizz.com/product/natural-vitamin-c-amla-effervescent-tablet#product",
+            "name": "Natural Vitamin C + Amla Effervescent Tablet",
+            "description": "Ascofizz Natural Vitamin C + Amla Effervescent Tablet boosts immunity, antioxidant protection, collagen formation and overall wellness. With Natural Amla Extract, Vitamin C, Zinc, Orange Powder and Lemon Powder. FSSAI approved. Not for medicinal use — this product is not intended to diagnose, treat, cure, or prevent any disease.",
+            "brand": {
+              "@type": "Brand",
+              "name": "Ascofizz"
+            },
+            "manufacturer": {
+              "@id": "https://www.ascofizz.com/#organization"
+            },
+            "sku": "ASC-037",
+            "url": "https://www.ascofizz.com/product/natural-vitamin-c-amla-effervescent-tablet",
+            "category": "Effervescent Tablets",
+            "offers": {
+              "@type": "Offer",
+              "@id": "https://www.ascofizz.com/product/natural-vitamin-c-amla-effervescent-tablet#offer",
+              "url": "https://www.ascofizz.com/product/natural-vitamin-c-amla-effervescent-tablet",
+              "priceCurrency": "INR",
+              "price": "349",
+              "availability": "https://schema.org/OutOfStock",
+              "itemCondition": "https://schema.org/NewCondition",
+              "seller": {
+                "@id": "https://www.ascofizz.com/#organization"
+              },
+              "areaServed": {
+                "@type": "Country",
+                "name": "India"
+              }
+            },
+            "keywords": [
+              "vitamin C amla effervescent India",
+              "natural amla tablet India",
+              "immunity booster effervescent tablet",
+              "vitamin C tablet India",
+              "amla vitamin C supplement"
+            ],
+            "additionalProperty": [
+              {
+                "@type": "PropertyValue",
+                "name": "Key ingredient",
+                "value": "Natural Amla Extract 1000mg"
+              },
+              {
+                "@type": "PropertyValue",
+                "name": "Key ingredient",
+                "value": "Vitamin C 40mg"
+              },
+              {
+                "@type": "PropertyValue",
+                "name": "Key ingredient",
+                "value": "Zinc 10mg"
+              },
+              {
+                "@type": "PropertyValue",
+                "name": "Key ingredient",
+                "value": "Orange Powder 250mg"
+              },
+              {
+                "@type": "PropertyValue",
+                "name": "Key ingredient",
+                "value": "Lemon Powder 200mg"
+              }
+            ]
+          }
+        },
+        {
+          "@type": "ListItem",
+          "position": 10,
+          "item": {
+            "@type": "Product",
+            "@id": "https://www.ascofizz.com/product/glutathione-effervescent-tablet#product",
+            "name": "Glutathione Effervescent Tablet",
+            "description": "Ascofizz Glutathione Effervescent Tablet supports skin brightening, antioxidant protection, collagen support and healthy skin hydration. With L-Glutathione, Vitamin C, Hyaluronic Acid, and Astaxanthin. FSSAI approved. Not for medicinal use — this product is not intended to diagnose, treat, cure, or prevent any disease.",
+            "brand": {
+              "@type": "Brand",
+              "name": "Ascofizz"
+            },
+            "manufacturer": {
+              "@id": "https://www.ascofizz.com/#organization"
+            },
+            "sku": "ASC-038",
+            "url": "https://www.ascofizz.com/product/glutathione-effervescent-tablet",
+            "category": "Effervescent Tablets",
+            "offers": {
+              "@type": "Offer",
+              "@id": "https://www.ascofizz.com/product/glutathione-effervescent-tablet#offer",
+              "url": "https://www.ascofizz.com/product/glutathione-effervescent-tablet",
+              "priceCurrency": "INR",
+              "price": "650",
+              "availability": "https://schema.org/OutOfStock",
+              "itemCondition": "https://schema.org/NewCondition",
+              "seller": {
+                "@id": "https://www.ascofizz.com/#organization"
+              },
+              "areaServed": {
+                "@type": "Country",
+                "name": "India"
+              }
+            },
+            "keywords": [
+              "glutathione effervescent tablet India",
+              "skin brightening glutathione tablet",
+              "glutathione hyaluronic acid supplement",
+              "antioxidant skin tablet India",
+              "glow skin supplement India"
+            ],
+            "additionalProperty": [
+              {
+                "@type": "PropertyValue",
+                "name": "Key ingredient",
+                "value": "L-Glutathione 600mg"
+              },
+              {
+                "@type": "PropertyValue",
+                "name": "Key ingredient",
+                "value": "Vitamin C 80mg"
+              },
+              {
+                "@type": "PropertyValue",
+                "name": "Key ingredient",
+                "value": "Hyaluronic Acid 50mg"
+              },
+              {
+                "@type": "PropertyValue",
+                "name": "Key ingredient",
+                "value": "Astaxanthin 10mg"
+              }
+            ]
+          }
+        },
+        {
+          "@type": "ListItem",
+          "position": 11,
+          "item": {
+            "@type": "Product",
+            "@id": "https://www.ascofizz.com/product/l-carnitine-l-tartrate-effervescent-tablet#product",
+            "name": "L-Carnitine L-Tartrate Effervescent Tablet",
+            "description": "Ascofizz L-Carnitine L-Tartrate Effervescent Tablet supports fat metabolism, enhances energy production, improves exercise performance and recovery. Delivers 2000mg L-Carnitine L-Tartrate per tablet in a fast-dissolving effervescent format. FSSAI approved. Not for medicinal use — this product is not intended to diagnose, treat, cure, or prevent any disease.",
+            "brand": {
+              "@type": "Brand",
+              "name": "Ascofizz"
+            },
+            "manufacturer": {
+              "@id": "https://www.ascofizz.com/#organization"
+            },
+            "sku": "ASC-039",
+            "url": "https://www.ascofizz.com/product/l-carnitine-l-tartrate-effervescent-tablet",
+            "category": "Effervescent Tablets",
+            "offers": {
+              "@type": "Offer",
+              "@id": "https://www.ascofizz.com/product/l-carnitine-l-tartrate-effervescent-tablet#offer",
+              "url": "https://www.ascofizz.com/product/l-carnitine-l-tartrate-effervescent-tablet",
+              "priceCurrency": "INR",
+              "price": "449",
+              "availability": "https://schema.org/OutOfStock",
+              "itemCondition": "https://schema.org/NewCondition",
+              "seller": {
+                "@id": "https://www.ascofizz.com/#organization"
+              },
+              "areaServed": {
+                "@type": "Country",
+                "name": "India"
+              }
+            },
+            "keywords": [
+              "L-Carnitine L-Tartrate effervescent India",
+              "L-Carnitine 2000mg tablet",
+              "fat metabolism supplement India",
+              "energy tablet for exercise",
+              "L-Carnitine tablets online India"
+            ],
+            "additionalProperty": [
+              {
+                "@type": "PropertyValue",
+                "name": "Key ingredient",
+                "value": "L-Carnitine L-Tartrate 2000mg"
+              }
+            ]
+          }
+        },
+        {
+          "@type": "ListItem",
+          "position": 12,
+          "item": {
+            "@type": "Product",
+            "@id": "https://www.ascofizz.com/product/vitaplus-b12-d3-vegan-with-certified-organic-spirulina#product",
+            "name": "VitaPlus B12 + D3 Vegan – with Certified Organic Spirulina",
+            "description": "VitaPlus B12 + D3 Vegan combines the extraordinary power of Certified Organic Spirulina (2g per serving) with Vitamin B12 and Vitamin D3, both Plant Based and dosed at 100% RDA. Spirulina is a nutrient-dense superfood rich in high-quality protein, essential amino acids, iron, and antioxidants like phycocyanin — helping combat oxidative stress and support immune function. Vitamin D3 aids calcium absorption for bone density and helps prevent osteoporosis. Vitamin B12 is vital for energy production, red blood cell formation, and nerve health. Ideal for vegans, vegetarians, and those with limited sun exposure. 60 Tablets per bottle (serving size 2 tablets/2g). FSSAI approved. In-house grown India Certified Spirulina.",
+            "brand": {
+              "@type": "Brand",
+              "name": "Ascofizz"
+            },
+            "manufacturer": {
+              "@id": "https://www.ascofizz.com/#organization"
+            },
+            "sku": "ASC-010",
+            "url": "https://www.ascofizz.com/product/vitaplus-b12-d3-vegan-with-certified-organic-spirulina",
+            "category": "Spirulina & Plant Nutrition",
+            "offers": {
+              "@type": "Offer",
+              "@id": "https://www.ascofizz.com/product/vitaplus-b12-d3-vegan-with-certified-organic-spirulina#offer",
+              "url": "https://www.ascofizz.com/product/vitaplus-b12-d3-vegan-with-certified-organic-spirulina",
+              "priceCurrency": "INR",
+              "price": "399",
+              "availability": "https://schema.org/OutOfStock",
+              "itemCondition": "https://schema.org/NewCondition",
+              "seller": {
+                "@id": "https://www.ascofizz.com/#organization"
+              },
+              "areaServed": {
+                "@type": "Country",
+                "name": "India"
+              }
+            },
+            "keywords": [
+              "spirulina B12 D3 tablet India",
+              "spirulina vegan vitamin",
+              "spirulina capsules India"
+            ],
+            "additionalProperty": [
+              {
+                "@type": "PropertyValue",
+                "name": "Key ingredient",
+                "value": "Organic Spirulina platensis Powder 2.00g per serving"
+              },
+              {
+                "@type": "PropertyValue",
+                "name": "Key ingredient",
+                "value": "Phycocyanin 0.24g per serving"
+              },
+              {
+                "@type": "PropertyValue",
+                "name": "Key ingredient",
+                "value": "Vitamin B12 2.40mcg per serving (100% RDA, Plant Based)"
+              },
+              {
+                "@type": "PropertyValue",
+                "name": "Key ingredient",
+                "value": "Vitamin D3 15mcg per serving (100% RDA, Plant Based)"
+              },
+              {
+                "@type": "PropertyValue",
+                "name": "Key ingredient",
+                "value": "Other Ingredients: Multivitamins, Minerals, Microcrystalline Cellulose (INS 460(i)), PVP (INS 1201), Magnesium Stearate (INS 470(ii))"
+              }
+            ]
+          }
+        },
+        {
+          "@type": "ListItem",
+          "position": 13,
+          "item": {
+            "@type": "Product",
+            "@id": "https://www.ascofizz.com/product/mg-magnesium-b12-d3-with-magnesium#product",
+            "name": "MG+++ Magnesium – B12 + D3 with Magnesium",
+            "description": "MG+++ combines Certified Organic Spirulina with a triple-source Magnesium blend (Mg Citrate, Mg Gluconate, Mg Oxide) delivering 100% RDA Magnesium, plus Vitamin D3 and Vitamin B12 (both 100% RDA). Magnesium supports muscle and nerve function, works with calcium and Vitamin D to maintain bone density, aids energy conversion, and helps reduce stress and anxiety. Combined with Spirulina, it supports enhanced energy levels, better digestion, and effective nutrient absorption. 60 Tablets per bottle (serving size 2 tablets/2g). 100% Vegan. In-house grown India Certified Spirulina. FSSAI approved.",
+            "brand": {
+              "@type": "Brand",
+              "name": "Ascofizz"
+            },
+            "manufacturer": {
+              "@id": "https://www.ascofizz.com/#organization"
+            },
+            "sku": "ASC-011",
+            "url": "https://www.ascofizz.com/product/mg-magnesium-b12-d3-with-magnesium",
+            "category": "Spirulina & Plant Nutrition",
+            "offers": {
+              "@type": "Offer",
+              "@id": "https://www.ascofizz.com/product/mg-magnesium-b12-d3-with-magnesium#offer",
+              "url": "https://www.ascofizz.com/product/mg-magnesium-b12-d3-with-magnesium",
+              "priceCurrency": "INR",
+              "price": "367",
+              "availability": "https://schema.org/OutOfStock",
+              "itemCondition": "https://schema.org/NewCondition",
+              "seller": {
+                "@id": "https://www.ascofizz.com/#organization"
+              },
+              "areaServed": {
+                "@type": "Country",
+                "name": "India"
+              }
+            },
+            "keywords": [
+              "spirulina magnesium supplement India",
+              "magnesium B12 tablet India",
+              "spirulina muscle support"
+            ],
+            "additionalProperty": [
+              {
+                "@type": "PropertyValue",
+                "name": "Key ingredient",
+                "value": "Magnesium (Mg Citrate, Mg Gluconate, Mg Oxide) 440mg per serving (100% RDA)"
+              },
+              {
+                "@type": "PropertyValue",
+                "name": "Key ingredient",
+                "value": "Vitamin B12 2.40mcg per serving (100% RDA)"
+              },
+              {
+                "@type": "PropertyValue",
+                "name": "Key ingredient",
+                "value": "Vitamin D3 15mcg per serving (100% RDA)"
+              },
+              {
+                "@type": "PropertyValue",
+                "name": "Key ingredient",
+                "value": "Organic Spirulina platensis Powder 1.10g per serving"
+              },
+              {
+                "@type": "PropertyValue",
+                "name": "Key ingredient",
+                "value": "Phycocyanin 0.13g"
+              },
+              {
+                "@type": "PropertyValue",
+                "name": "Key ingredient",
+                "value": "Vitamin B12 & D3 are Plant Based"
+              }
+            ]
+          }
+        },
+        {
+          "@type": "ListItem",
+          "position": 14,
+          "item": {
+            "@type": "Product",
+            "@id": "https://www.ascofizz.com/product/cs-iron-calcium-iron-with-b12-d3#product",
+            "name": "CS++ + Iron++ – Calcium + Iron with B12+D3",
+            "description": "CA++ & Iron++ combines Certified Organic Spirulina with Calcium Citrate Malate, Vitamin K2-7, Zinc, Iron, Magnesium, Vitamin D3 and B12 (all key nutrients at 100% RDA except K2-7 at 50%) for complete bone and blood health. Formulated to address common nutritional needs for women through reproductive years and beyond. Calcium supports strong bones and teeth, Iron ensures efficient oxygen transport and helps prevent fatigue (especially important for menstruating women), Vitamin B12 supports energy, nerve and brain function, and Vitamin D3 supports immunity and mood regulation. 60 Tablets per bottle (serving size 2 tablets/2g). 100% Vegan. In-house grown India Certified Spirulina. FSSAI approved.",
+            "brand": {
+              "@type": "Brand",
+              "name": "Ascofizz"
+            },
+            "manufacturer": {
+              "@id": "https://www.ascofizz.com/#organization"
+            },
+            "sku": "ASC-012",
+            "url": "https://www.ascofizz.com/product/cs-iron-calcium-iron-with-b12-d3",
+            "category": "Spirulina & Plant Nutrition",
+            "offers": {
+              "@type": "Offer",
+              "@id": "https://www.ascofizz.com/product/cs-iron-calcium-iron-with-b12-d3#offer",
+              "url": "https://www.ascofizz.com/product/cs-iron-calcium-iron-with-b12-d3",
+              "priceCurrency": "INR",
+              "price": "383",
+              "availability": "https://schema.org/OutOfStock",
+              "itemCondition": "https://schema.org/NewCondition",
+              "seller": {
+                "@id": "https://www.ascofizz.com/#organization"
+              },
+              "areaServed": {
+                "@type": "Country",
+                "name": "India"
+              }
+            },
+            "keywords": [
+              "spirulina calcium iron tablet India",
+              "spirulina bone health",
+              "iron supplement spirulina India"
+            ],
+            "additionalProperty": [
+              {
+                "@type": "PropertyValue",
+                "name": "Key ingredient",
+                "value": "Calcium (Calcium Citrate Malate) 800mg per serving (100% RDA)"
+              },
+              {
+                "@type": "PropertyValue",
+                "name": "Key ingredient",
+                "value": "Iron (Elemental) 19mg per serving (100% RDA)"
+              },
+              {
+                "@type": "PropertyValue",
+                "name": "Key ingredient",
+                "value": "Zinc (Elemental) 17mg per serving (100% RDA)"
+              },
+              {
+                "@type": "PropertyValue",
+                "name": "Key ingredient",
+                "value": "Vitamin B12 2.40mcg per serving (100% RDA)"
+              },
+              {
+                "@type": "PropertyValue",
+                "name": "Key ingredient",
+                "value": "Vitamin D3 15mcg per serving (100% RDA)"
+              },
+              {
+                "@type": "PropertyValue",
+                "name": "Key ingredient",
+                "value": "Vitamin K2-7 55mcg per serving (50% RDA)"
+              }
+            ]
+          }
+        },
+        {
+          "@type": "ListItem",
+          "position": 15,
+          "item": {
+            "@type": "Product",
+            "@id": "https://www.ascofizz.com/product/moringa-tablets#product",
+            "name": "Moringa Tablets",
+            "description": "Pure Organic Moringa Tablets — the miracle tree in its most potent form. Boosts energy levels, improves digestive system, increases metabolism, and builds up stamina. Each 750mg tablet provides Moringa's full spectrum of nutrients. FSSAI Approved. Vegan. Dietary Supplement.",
+            "brand": {
+              "@type": "Brand",
+              "name": "Ascofizz"
+            },
+            "manufacturer": {
+              "@id": "https://www.ascofizz.com/#organization"
+            },
+            "sku": "ASC-020",
+            "url": "https://www.ascofizz.com/product/moringa-tablets",
+            "category": "Ayurvedic Wellness",
+            "offers": {
+              "@type": "Offer",
+              "@id": "https://www.ascofizz.com/product/moringa-tablets#offer",
+              "url": "https://www.ascofizz.com/product/moringa-tablets",
+              "priceCurrency": "INR",
+              "price": "249",
+              "availability": "https://schema.org/OutOfStock",
+              "itemCondition": "https://schema.org/NewCondition",
+              "seller": {
+                "@id": "https://www.ascofizz.com/#organization"
+              },
+              "areaServed": {
+                "@type": "Country",
+                "name": "India"
+              }
+            },
+            "keywords": [
+              "moringa tablets India",
+              "moringa oleifera supplement India",
+              "moringa veggie tablets"
+            ],
+            "additionalProperty": [
+              {
+                "@type": "PropertyValue",
+                "name": "Key ingredient",
+                "value": "Organic Moringa (Moringa oleifera) 750mg per tablet"
+              },
+              {
+                "@type": "PropertyValue",
+                "name": "Key ingredient",
+                "value": "Acaciaegum (binder)"
+              }
+            ]
+          }
+        },
+        {
+          "@type": "ListItem",
+          "position": 16,
+          "item": {
+            "@type": "Product",
+            "@id": "https://www.ascofizz.com/product/power-pro-tablets#product",
+            "name": "Power Pro Tablets",
+            "description": "Energy Pro+ for Vigour, Vitality & Stamina. Enhances Stamina & Physical Performance. Inhibits Fatigue & Stress. Promotes a Healthy Immune Response. Power | Strength | Stamina. Contains a synergistic blend of Withania somnifera (Ashwagandha), Emblica officinalis, Rauvolfia serpentina, Asparagus racemosus, Withania coagulans, Mucuna pruriens, Tribulus terrestris, Abelmoschus moschatus, Chlorophytum borivilianum, Purified Shilajit, Myristica fragrans, and Astaxanthin.",
+            "brand": {
+              "@type": "Brand",
+              "name": "Ascofizz"
+            },
+            "manufacturer": {
+              "@id": "https://www.ascofizz.com/#organization"
+            },
+            "sku": "ASC-022",
+            "url": "https://www.ascofizz.com/product/power-pro-tablets",
+            "category": "Immunity Support",
+            "offers": {
+              "@type": "Offer",
+              "@id": "https://www.ascofizz.com/product/power-pro-tablets#offer",
+              "url": "https://www.ascofizz.com/product/power-pro-tablets",
+              "priceCurrency": "INR",
+              "price": "499",
+              "availability": "https://schema.org/OutOfStock",
+              "itemCondition": "https://schema.org/NewCondition",
+              "seller": {
+                "@id": "https://www.ascofizz.com/#organization"
+              },
+              "areaServed": {
+                "@type": "Country",
+                "name": "India"
+              }
+            },
+            "keywords": [
+              "immunity booster India",
+              "power pro tablet India",
+              "stamina supplement India",
+              "ashwagandha immunity"
+            ],
+            "additionalProperty": [
+              {
+                "@type": "PropertyValue",
+                "name": "Key ingredient",
+                "value": "Withania somnifera (Ashwagandha) 250mg"
+              },
+              {
+                "@type": "PropertyValue",
+                "name": "Key ingredient",
+                "value": "Emblica officinalis 75mg"
+              },
+              {
+                "@type": "PropertyValue",
+                "name": "Key ingredient",
+                "value": "Mucuna pruriens 50mg"
+              },
+              {
+                "@type": "PropertyValue",
+                "name": "Key ingredient",
+                "value": "Tribulus terrestris 50mg"
+              },
+              {
+                "@type": "PropertyValue",
+                "name": "Key ingredient",
+                "value": "Purified Shilajit Extract 50mg"
+              },
+              {
+                "@type": "PropertyValue",
+                "name": "Key ingredient",
+                "value": "Astaxanthin 4mg"
+              }
+            ]
+          }
         }
+      ]
+    },
+    {
+      "@type": "Service",
+      "@id": "https://www.ascofizz.com/#b2b-service",
+      "name": "B2B Private Label Nutraceutical Manufacturing by Ascovita",
+      "serviceType": "Contract Nutraceutical Manufacturing, Private Label Supplement Manufacturing, Custom Formulation",
+      "description": "Ascovita offers WHO-GMP certified private label and contract manufacturing of effervescent tablets, capsules, sachets and nutraceutical supplements for health brands across India and globally. Services include custom formulation, packaging design, FSSAI compliance, and low MOQ manufacturing from our facility in Anand, Gujarat.",
+      "provider": {
+        "@id": "https://www.ascofizz.com/#organization"
       },
-
-      {
-        "@type": "FAQPage",
-        "mainEntity": [
+      "areaServed": [
+        {
+          "@type": "Country",
+          "name": "India"
+        },
+        {
+          "@type": "AdministrativeArea",
+          "name": "Gujarat"
+        },
+        {
+          "@type": "AdministrativeArea",
+          "name": "Maharashtra"
+        },
+        {
+          "@type": "AdministrativeArea",
+          "name": "Delhi"
+        },
+        {
+          "@type": "AdministrativeArea",
+          "name": "Karnataka"
+        },
+        {
+          "@type": "AdministrativeArea",
+          "name": "Tamil Nadu"
+        }
+      ],
+      "hasOfferCatalog": {
+        "@type": "OfferCatalog",
+        "name": "Private Label Manufacturing Services",
+        "itemListElement": [
           {
-            "@type": "Question",
-            "name": "What is Ascofizz?",
-            "acceptedAnswer": {
-              "@type": "Answer",
-              "text": "Ascovita (ascovita.com) is a WHO-GMP certified, FSSAI approved nutraceutical manufacturer and supplement brand based in Anand, Gujarat, India. Co-founded by Aamin Ghachivahora, Ascovita makes premium effervescent vitamins including L-Glutathione, ACV Moringa, B12+D3 Spirulina, Magnesium, Biotin, and the Multidiata multivitamin. The company also offers B2B private label manufacturing."
+            "@type": "Offer",
+            "itemOffered": {
+              "@type": "Service",
+              "name": "Effervescent Tablet Manufacturing",
+              "description": "Custom effervescent tablet manufacturing with formulations including vitamins, minerals, amino acids, and herbal blends."
             }
           },
           {
-            "@type": "Question",
-            "name": "Who is the co-founder of Ascofizz?",
-            "acceptedAnswer": {
-              "@type": "Answer",
-              "text": "Ascofizz was co-founded by Aamin Ghachivahora. The company is headquartered in Anand, Gujarat, India and manufactures WHO-GMP certified, FSSAI approved effervescent nutraceutical supplements."
+            "@type": "Offer",
+            "itemOffered": {
+              "@type": "Service",
+              "name": "Capsule Manufacturing",
+              "description": "Hard gelatin and HPMC (vegan) capsule manufacturing for nutraceutical supplements."
             }
           },
           {
-            "@type": "Question",
-            "name": "Where is Ascofizz located?",
-            "acceptedAnswer": {
-              "@type": "Answer",
-              "text": "Ascofizz is located in Anand, Gujarat, India (Pincode 388001). The manufacturing facility is WHO-GMP certified and FSSAI licensed. Address: R.S.Cinema Road, Vivekanand Wadi, Anand, Gujarat 388001."
+            "@type": "Offer",
+            "itemOffered": {
+              "@type": "Service",
+              "name": "Tablet Manufacturing",
+              "description": "Coated and uncoated tablet manufacturing for vitamins, multivitamins and herbal supplements."
             }
           },
           {
-            "@type": "Question",
-            "name": "Is Ascofizz WHO-GMP certified and FSSAI approved?",
-            "acceptedAnswer": {
-              "@type": "Answer",
-              "text": "Yes. All Ascofizz supplements are manufactured in a WHO-GMP certified, FSSAI-licensed facility in Anand, Gujarat, India. Every batch undergoes quality testing. Ascofizz is transparent about its ingredients, certifications, and manufacturing processes."
+            "@type": "Offer",
+            "itemOffered": {
+              "@type": "Service",
+              "name": "Custom Formulation Development",
+              "description": "End-to-end custom supplement formulation development and stability testing."
             }
           },
           {
-            "@type": "Question",
-            "name": "Does Ascovita offer B2B private label manufacturing?",
-            "acceptedAnswer": {
-              "@type": "Answer",
-              "text": "Yes. Ascovita offers full B2B private label nutraceutical manufacturing with low MOQ, custom formulations, and end-to-end support including packaging design. The WHO-GMP certified facility in Anand, Gujarat manufactures effervescent tablets, capsules, and other nutraceutical forms under client brand names."
-            }
-          },
-          {
-            "@type": "Question",
-            "name": "Which Ascofizz supplement is best for skin glow and brightening?",
-            "acceptedAnswer": {
-              "@type": "Answer",
-              "text": "Ascofizz's L-Glutathione Effervescent (Orange Flavour) is the best product for skin glow. It contains 650mg Reduced Glutathione, Vitamin C 1000mg, L-Cysteine, and Astaxanthin. The effervescent format absorbs 3x faster than capsules. Most users see visible results within 4-6 weeks of daily use."
-            }
-          },
-          {
-            "@type": "Question",
-            "name": "Which Ascofizz supplement is best for weight management?",
-            "acceptedAnswer": {
-              "@type": "Answer",
-              "text": "Ascofizz's ACV + Moringa Effervescent (Green Apple Flavour) is ideal for weight management. It contains Apple Cider Vinegar, Garcinia Cambogia, and Moringa — taken 15-30 minutes before a meal to manage cravings, blood sugar spikes and support healthy metabolism."
-            }
-          },
-          {
-            "@type": "Question",
-            "name": "Which is better: Glutathione capsules or effervescent tablets?",
-            "acceptedAnswer": {
-              "@type": "Answer",
-              "text": "Effervescent tablets have significantly higher bioavailability — up to 3x faster absorption than capsules. Ascofizz's L-Glutathione Effervescent delivers 650mg Reduced Glutathione with Vitamin C 1000mg for maximum antioxidant protection and skin glow."
-            }
-          },
-          {
-            "@type": "Question",
-            "name": "Are Ascofizz products safe for vegetarians and vegans?",
-            "acceptedAnswer": {
-              "@type": "Answer",
-              "text": "Yes. All Ascofizz spirulina-based products — VitaPlus B12+D3, MG+++ Magnesium, and CS++ Calcium+Iron — are 100% vegan, plant-based, made with certified organic spirulina. The effervescent range is also vegetarian. All are free from artificial additives."
-            }
-                    },
-          {
-            "@type": "Question",
-            "name": "Does Ascofizz deliver supplements across all of India?",
-            "acceptedAnswer": {
-              "@type": "Answer",
-              "text": "Yes. Ascofizz offers free shipping pan-India on orders above ₹599. We deliver to all major cities including Mumbai, Delhi, Bangalore, Hyderabad, Chennai, Kolkata, Pune, Ahmedabad, Surat, Jaipur, Lucknow, Kochi, Indore, Chandigarh, Nagpur, Bhopal, Visakhapatnam, Vadodara, and all other PIN codes across India. Standard delivery takes 2-7 business days."
-            }
-          },
-          {
-            "@type": "Question",
-            "name": "Which is the best glutathione supplement brand in India?",
-            "acceptedAnswer": {
-              "@type": "Answer",
-              "text": "Ascofizz is one of India's most trusted glutathione supplement brands. The Ascofizz L-Glutathione Effervescent contains 650mg Reduced Glutathione + 1000mg Vitamin C + L-Cysteine + Astaxanthin in an effervescent format for 3x faster absorption than capsules. WHO-GMP certified, FSSAI approved, manufactured in Anand, Gujarat. Available at ascofizz.com with pan-India delivery."
-            }
-          },
-          {
-            "@type": "Question",
-            "name": "What is the best supplement for skin glow and brightening in India?",
-            "acceptedAnswer": {
-              "@type": "Answer",
-              "text": "For skin glow and brightening in India, Ascofizz's L-Glutathione Effervescent (Orange Flavour) is the top choice. It contains 650mg Reduced Glutathione, Vitamin C 1000mg, L-Cysteine and Astaxanthin — powerful antioxidants that reduce melanin production, brighten skin tone, and protect against UV damage. Results are visible in 4-6 weeks of daily use."
-            }
-          },
-          {
-            "@type": "Question",
-            "name": "What is the best supplement for hair growth and hair fall control in India?",
-            "acceptedAnswer": {
-              "@type": "Answer",
-              "text": "Ascofizz B12 + Biotin Effervescent (Guava Flavour) is ideal for hair growth and hair fall control. It contains high-dose Biotin, Vitamin B12, and essential nutrients in a fast-absorbing effervescent tablet. Biotin supports keratin production which strengthens hair follicles and reduces hair fall. One tablet daily dissolves in water for a refreshing guava-flavoured drink."
-            }
-          },
-          {
-            "@type": "Question",
-            "name": "What is the best vegan B12 supplement in India?",
-            "acceptedAnswer": {
-              "@type": "Answer",
-              "text": "Ascofizz VitaPlus B12+D3 with Certified Organic Spirulina is India's best vegan B12 supplement. It is 100% plant-based, made with certified organic spirulina, and provides Methylcobalamin B12 + Vitamin D3 in one tablet. Ideal for vegans, vegetarians, and anyone on a plant-based diet who may be deficient in B12. Available at ascofizz.com with pan-India delivery."
-            }
-          },
-          {
-            "@type": "Question",
-            "name": "Which magnesium supplement is best for sleep and muscle recovery in India?",
-            "acceptedAnswer": {
-              "@type": "Answer",
-              "text": "Ascofizz MG+++ Magnesium B12+D3 with Organic Spirulina is the best magnesium supplement in India for sleep support and muscle recovery. It combines Magnesium, Vitamin B12, Vitamin D3, and Organic Spirulina for comprehensive nervous system and muscle support. Take one tablet daily for deeper sleep, reduced muscle cramps, and better recovery after exercise."
-            }
-          },
-          {
-            "@type": "Question",
-            "name": "Which calcium and iron supplement is best for women in India?",
-            "acceptedAnswer": {
-              "@type": "Answer",
-              "text": "Ascofizz CS++ Calcium+Iron with B12+D3 and Organic Spirulina is the best calcium and iron supplement for women in India. It addresses the most common deficiencies in Indian women — calcium, iron, B12 and D3 — all in one tablet enriched with organic spirulina. Supports bone health, reduces fatigue from iron deficiency anaemia, and boosts overall energy levels."
-            }
-          },
-          {
-            "@type": "Question",
-            "name": "What is the best multivitamin for daily nutrition in India?",
-            "acceptedAnswer": {
-              "@type": "Answer",
-              "text": "Ascofizz Multidiata is India's premium daily multivitamin with 23 essential vitamins and minerals in one tablet. It includes Vitamins A, B-complex, C, D3, E, K2, Zinc, Selenium, Chromium, and more. It is FSSAI approved, WHO-GMP certified, and manufactured in Gujarat, India. Available in Box Pack (30 tabs at ₹120) and Bottle Pack (60 tabs at ₹231) at ascofizz.com."
-            }
-          },
-          {
-            "@type": "Question",
-            "name": "What supplements does Ascofizz recommend for weight loss in India?",
-            "acceptedAnswer": {
-              "@type": "Answer",
-              "text": "For weight management and fat loss, Ascofizz recommends: (1) ACV + Moringa Effervescent — Apple Cider Vinegar with Garcinia Cambogia and Moringa, taken before meals to reduce cravings and support metabolism; (2) L-Carnitine Effervescent — supports fat burning during exercise by transporting fatty acids into mitochondria for energy. Both are FSSAI approved and available at ascofizz.com."
-            }
-          },
-          {
-            "@type": "Question",
-            "name": "Are Ascofizz supplements available in Mumbai, Delhi, Bangalore, Hyderabad and other major cities?",
-            "acceptedAnswer": {
-              "@type": "Answer",
-              "text": "Yes. Ascofizz delivers supplements to all major Indian cities including Mumbai, Delhi, Bangalore, Hyderabad, Chennai, Kolkata, Pune, Ahmedabad, Surat, Jaipur, Lucknow, Kochi, Indore, Chandigarh, Nagpur, Visakhapatnam, Bhopal, Vadodara, Patna, Coimbatore, and all other cities and towns across India. Order at ascofizz.com with delivery in 2-7 business days."
-            }
-          },
-          {
-            "@type": "Question",
-            "name": "How do I place a B2B order or private label inquiry with Ascovita?",
-            "acceptedAnswer": {
-              "@type": "Answer",
-              "text": "For B2B private label supplement manufacturing or bulk orders, contact Ascovita at ascovitahealthcare@gmail.com or call +91-98985-82650. Ascovita's WHO-GMP certified facility in Anand, Gujarat offers custom formulations, low MOQ contract manufacturing, packaging design support, and FSSAI regulatory compliance for health brands across India. Visit ascovita.com/b2b for details."
-            }
-          },
-          {
-            "@type": "Question",
-            "name": "What is the difference between Ascofizz Spirulina range and the Effervescent range?",
-            "acceptedAnswer": {
-              "@type": "Answer",
-              "text": "Ascofizz has two main supplement ranges: (1) Effervescent Range — fast-dissolving tablets (Glutathione, ACV Moringa, Biotin, Vitamin C, L-Carnitine) for rapid absorption, best for active individuals and those who prefer a drink format. (2) Spirulina Range — solid tablets (VitaPlus B12+D3, MG+++ Magnesium, CS++ Calcium+Iron) made with certified organic spirulina, 100% vegan, best for daily foundational nutrition and plant-based lifestyle."
-            }
-          },
-          {
-            "@type": "Question",
-            "name": "What makes Ascofizz different from other supplement brands in India?",
-            "acceptedAnswer": {
-              "@type": "Answer",
-              "text": "Ascofizz stands out for four key reasons: (1) WHO-GMP certified and FSSAI approved manufacturing in India; (2) Effervescent format for 3x faster absorption vs capsules; (3) Certified Organic Spirulina in the spirulina range — plant-based, vegan, and free from artificial additives; (4) Transparent ingredients and clinical dosages. Co-founded by Aamin Ghachivahora, Ascofizz is a Made-in-India brand committed to science-backed, affordable wellness for every Indian."
+            "@type": "Offer",
+            "itemOffered": {
+              "@type": "Service",
+              "name": "FSSAI Regulatory Support",
+              "description": "Complete FSSAI licensing, product registration and labelling compliance support for new supplement brands."
             }
           }
         ]
       },
-
-      {
-        "@type": "Review",
-        "itemReviewed": { "@id": "https://www.ascofizz.com/#organization" },
-        "reviewRating": { "@type": "Rating", "ratingValue": "4.8", "bestRating": "5" },
-        "name": "Best effervescent supplement brand in India",
-        "reviewBody": "Ascofizz makes some of the best effervescent vitamins in India. The Glutathione tablets showed visible results in 4 weeks. Great quality from a WHO-GMP certified manufacturer.",
-        "author": { "@type": "Person", "name": "Verified Customer" }
-      },
-
-      {
-        "@type": "MedicalOrganization",
-        "@id": "https://www.ascofizz.com/#medicalorg",
-        "name": "Ascofizz",
-        "url": "https://www.ascofizz.com",
-        "description": "FSSAI licensed, WHO-GMP certified nutraceutical and health supplement manufacturer in India.",
-        "medicalSpecialty": "Nutraceuticals, Dietary Supplements, Vitamins and Minerals",
-        "hasCredential": [
-          { "@type": "EducationalOccupationalCredential", "credentialCategory": "FSSAI Licensed", "recognizedBy": { "@type": "GovernmentOrganization", "name": "Food Safety and Standards Authority of India" } },
-          { "@type": "EducationalOccupationalCredential", "credentialCategory": "WHO-GMP Certified", "recognizedBy": { "@type": "GovernmentOrganization", "name": "World Health Organization" } }
-        ]
-      },
-
-      {
-        "@type": "ItemList",
-        "@id": "https://www.ascofizz.com/#categories",
-        "name": "Ascofizz Supplement Categories",
-        "description": "All supplement categories available at Ascofizz India",
-        "itemListElement": [
-          { "@type": "ListItem", "position": 1, "name": "Effervescent Vitamin Supplements", "url": "https://www.ascofizz.com/products/effervescent", "item": { "@type": "Thing", "name": "Effervescent Vitamins India", "description": "Fast-absorbing effervescent vitamin tablets for skin glow, immunity, weight management, hair growth, and fat burning. WHO-GMP certified, FSSAI approved." } },
-          { "@type": "ListItem", "position": 2, "name": "Spirulina Supplement Range", "url": "https://www.ascofizz.com/products/spirulina", "item": { "@type": "Thing", "name": "Spirulina Supplements India", "description": "100% vegan supplement tablets made with certified organic spirulina. B12+D3, Magnesium, Calcium+Iron. Plant-based, no artificial additives." } },
-          { "@type": "ListItem", "position": 3, "name": "Ayurvedic Supplements", "url": "https://www.ascofizz.com/products/ayurvedic", "item": { "@type": "Thing", "name": "Ayurvedic Supplements India", "description": "Organic Moringa Tablets — natural immunity booster, anti-inflammatory, rich in vitamins and minerals." } },
-          { "@type": "ListItem", "position": 4, "name": "Premium Multivitamins", "url": "https://www.ascofizz.com/products/premium", "item": { "@type": "Thing", "name": "Premium Multivitamin India", "description": "Multidiata — 23 vitamins and minerals in one daily tablet. India's premium multivitamin supplement." } },
-          { "@type": "ListItem", "position": 5, "name": "B2B Private Label Manufacturing", "url": "https://www.ascovita.com/#/capabilities", "item": { "@type": "Thing", "name": "Private Label Supplement Manufacturing India", "description": "WHO-GMP certified B2B contract manufacturing for supplement brands across India." } }
-        ]
+      "offers": {
+        "@type": "Offer",
+        "description": "Low MOQ private label supplement manufacturing. Custom formulations. WHO-GMP certified plant.",
+        "url": "https://www.ascovita.com/#/capabilities"
       }
-    ]
-  }
+    },
+    {
+      "@type": "FAQPage",
+      "mainEntity": [
+        {
+          "@type": "Question",
+          "name": "What is Ascofizz?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Ascovita (ascovita.com) is a WHO-GMP certified, FSSAI approved nutraceutical manufacturer and supplement brand based in Anand, Gujarat, India. Co-founded by Aamin Ghachivahora, Ascovita makes premium effervescent vitamins including L-Glutathione, ACV Moringa, B12+D3 Spirulina, Magnesium, Biotin, and the Multidiata multivitamin. The company also offers B2B private label manufacturing."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Who is the co-founder of Ascofizz?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Ascofizz was co-founded by Aamin Ghachivahora. The company is headquartered in Anand, Gujarat, India and manufactures WHO-GMP certified, FSSAI approved effervescent nutraceutical supplements."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Where is Ascofizz located?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Ascofizz is located in Anand, Gujarat, India (Pincode 388001). The manufacturing facility is WHO-GMP certified and FSSAI licensed. Address: R.S.Cinema Road, Vivekanand Wadi, Anand, Gujarat 388001."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Is Ascofizz WHO-GMP certified and FSSAI approved?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Yes. All Ascofizz supplements are manufactured in a WHO-GMP certified, FSSAI-licensed facility in Anand, Gujarat, India. Every batch undergoes quality testing. Ascofizz is transparent about its ingredients, certifications, and manufacturing processes."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Does Ascovita offer B2B private label manufacturing?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Yes. Ascovita offers full B2B private label nutraceutical manufacturing with low MOQ, custom formulations, and end-to-end support including packaging design. The WHO-GMP certified facility in Anand, Gujarat manufactures effervescent tablets, capsules, and other nutraceutical forms under client brand names."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Which Ascofizz supplement is best for skin glow and brightening?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Ascofizz's L-Glutathione Effervescent (Orange Flavour) is the best product for skin glow. It contains 650mg Reduced Glutathione, Vitamin C 1000mg, L-Cysteine, and Astaxanthin. The effervescent format absorbs 3x faster than capsules. Most users see visible results within 4-6 weeks of daily use."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Which Ascofizz supplement is best for weight management?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Ascofizz's ACV + Moringa Effervescent (Green Apple Flavour) is ideal for weight management. It contains Apple Cider Vinegar, Garcinia Cambogia, and Moringa — taken 15-30 minutes before a meal to manage cravings, blood sugar spikes and support healthy metabolism."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Which is better: Glutathione capsules or effervescent tablets?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Effervescent tablets have significantly higher bioavailability — up to 3x faster absorption than capsules. Ascofizz's L-Glutathione Effervescent delivers 650mg Reduced Glutathione with Vitamin C 1000mg for maximum antioxidant protection and skin glow."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Are Ascofizz products safe for vegetarians and vegans?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Yes. All Ascofizz spirulina-based products — VitaPlus B12+D3, MG+++ Magnesium, and CS++ Calcium+Iron — are 100% vegan, plant-based, made with certified organic spirulina. The effervescent range is also vegetarian. All are free from artificial additives."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Does Ascofizz deliver supplements across all of India?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Yes. Ascofizz offers free shipping pan-India on orders above ₹599. We deliver to all major cities including Mumbai, Delhi, Bangalore, Hyderabad, Chennai, Kolkata, Pune, Ahmedabad, Surat, Jaipur, Lucknow, Kochi, Indore, Chandigarh, Nagpur, Bhopal, Visakhapatnam, Vadodara, and all other PIN codes across India. Standard delivery takes 2-7 business days."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Which is the best glutathione supplement brand in India?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Ascofizz is one of India's most trusted glutathione supplement brands. The Ascofizz L-Glutathione Effervescent contains 650mg Reduced Glutathione + 1000mg Vitamin C + L-Cysteine + Astaxanthin in an effervescent format for 3x faster absorption than capsules. WHO-GMP certified, FSSAI approved, manufactured in Anand, Gujarat. Available at ascofizz.com with pan-India delivery."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "What is the best supplement for skin glow and brightening in India?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "For skin glow and brightening in India, Ascofizz's L-Glutathione Effervescent (Orange Flavour) is the top choice. It contains 650mg Reduced Glutathione, Vitamin C 1000mg, L-Cysteine and Astaxanthin — powerful antioxidants that reduce melanin production, brighten skin tone, and protect against UV damage. Results are visible in 4-6 weeks of daily use."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "What is the best supplement for hair growth and hair fall control in India?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Ascofizz B12 + Biotin Effervescent (Guava Flavour) is ideal for hair growth and hair fall control. It contains high-dose Biotin, Vitamin B12, and essential nutrients in a fast-absorbing effervescent tablet. Biotin supports keratin production which strengthens hair follicles and reduces hair fall. One tablet daily dissolves in water for a refreshing guava-flavoured drink."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "What is the best vegan B12 supplement in India?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Ascofizz VitaPlus B12+D3 with Certified Organic Spirulina is India's best vegan B12 supplement. It is 100% plant-based, made with certified organic spirulina, and provides Methylcobalamin B12 + Vitamin D3 in one tablet. Ideal for vegans, vegetarians, and anyone on a plant-based diet who may be deficient in B12. Available at ascofizz.com with pan-India delivery."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Which magnesium supplement is best for sleep and muscle recovery in India?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Ascofizz MG+++ Magnesium B12+D3 with Organic Spirulina is the best magnesium supplement in India for sleep support and muscle recovery. It combines Magnesium, Vitamin B12, Vitamin D3, and Organic Spirulina for comprehensive nervous system and muscle support. Take one tablet daily for deeper sleep, reduced muscle cramps, and better recovery after exercise."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Which calcium and iron supplement is best for women in India?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Ascofizz CS++ Calcium+Iron with B12+D3 and Organic Spirulina is the best calcium and iron supplement for women in India. It addresses the most common deficiencies in Indian women — calcium, iron, B12 and D3 — all in one tablet enriched with organic spirulina. Supports bone health, reduces fatigue from iron deficiency anaemia, and boosts overall energy levels."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "What is the best multivitamin for daily nutrition in India?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Ascofizz Multidiata is India's premium daily multivitamin with 23 essential vitamins and minerals in one tablet. It includes Vitamins A, B-complex, C, D3, E, K2, Zinc, Selenium, Chromium, and more. It is FSSAI approved, WHO-GMP certified, and manufactured in Gujarat, India. Available in Box Pack (30 tabs at ₹120) and Bottle Pack (60 tabs at ₹231) at ascofizz.com."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "What supplements does Ascofizz recommend for weight loss in India?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "For weight management and fat loss, Ascofizz recommends: (1) ACV + Moringa Effervescent — Apple Cider Vinegar with Garcinia Cambogia and Moringa, taken before meals to reduce cravings and support metabolism; (2) L-Carnitine Effervescent — supports fat burning during exercise by transporting fatty acids into mitochondria for energy. Both are FSSAI approved and available at ascofizz.com."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Are Ascofizz supplements available in Mumbai, Delhi, Bangalore, Hyderabad and other major cities?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Yes. Ascofizz delivers supplements to all major Indian cities including Mumbai, Delhi, Bangalore, Hyderabad, Chennai, Kolkata, Pune, Ahmedabad, Surat, Jaipur, Lucknow, Kochi, Indore, Chandigarh, Nagpur, Visakhapatnam, Bhopal, Vadodara, Patna, Coimbatore, and all other cities and towns across India. Order at ascofizz.com with delivery in 2-7 business days."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "How do I place a B2B order or private label inquiry with Ascovita?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "For B2B private label supplement manufacturing or bulk orders, contact Ascovita at ascovitahealthcare@gmail.com or call +91-98985-82650. Ascovita's WHO-GMP certified facility in Anand, Gujarat offers custom formulations, low MOQ contract manufacturing, packaging design support, and FSSAI regulatory compliance for health brands across India. Visit ascovita.com/b2b for details."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "What is the difference between Ascofizz Spirulina range and the Effervescent range?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Ascofizz has two main supplement ranges: (1) Effervescent Range — fast-dissolving tablets (Glutathione, ACV Moringa, Biotin, Vitamin C, L-Carnitine) for rapid absorption, best for active individuals and those who prefer a drink format. (2) Spirulina Range — solid tablets (VitaPlus B12+D3, MG+++ Magnesium, CS++ Calcium+Iron) made with certified organic spirulina, 100% vegan, best for daily foundational nutrition and plant-based lifestyle."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "What makes Ascofizz different from other supplement brands in India?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Ascofizz stands out for four key reasons: (1) WHO-GMP certified and FSSAI approved manufacturing in India; (2) Effervescent format for 3x faster absorption vs capsules; (3) Certified Organic Spirulina in the spirulina range — plant-based, vegan, and free from artificial additives; (4) Transparent ingredients and clinical dosages. Co-founded by Aamin Ghachivahora, Ascofizz is a Made-in-India brand committed to science-backed, affordable wellness for every Indian."
+          }
+        }
+      ]
+    },
+    {
+      "@type": "MedicalOrganization",
+      "@id": "https://www.ascofizz.com/#medicalorg",
+      "name": "Ascofizz",
+      "url": "https://www.ascofizz.com",
+      "description": "FSSAI licensed, WHO-GMP certified nutraceutical and health supplement manufacturer in India.",
+      "medicalSpecialty": "Nutraceuticals, Dietary Supplements, Vitamins and Minerals",
+      "hasCredential": [
+        {
+          "@type": "EducationalOccupationalCredential",
+          "credentialCategory": "FSSAI Licensed",
+          "recognizedBy": {
+            "@type": "GovernmentOrganization",
+            "name": "Food Safety and Standards Authority of India"
+          }
+        },
+        {
+          "@type": "EducationalOccupationalCredential",
+          "credentialCategory": "WHO-GMP Certified",
+          "recognizedBy": {
+            "@type": "GovernmentOrganization",
+            "name": "World Health Organization"
+          }
+        }
+      ]
+    },
+    {
+      "@type": "ItemList",
+      "@id": "https://www.ascofizz.com/#categories",
+      "name": "Ascofizz Supplement Categories",
+      "description": "All supplement categories available at Ascofizz India",
+      "itemListElement": [
+        {
+          "@type": "ListItem",
+          "position": 1,
+          "name": "Effervescent Vitamin Supplements",
+          "url": "https://www.ascofizz.com/products/effervescent",
+          "item": {
+            "@type": "Thing",
+            "name": "Effervescent Vitamins India",
+            "description": "Fast-absorbing effervescent vitamin tablets for skin glow, immunity, weight management, hair growth, and fat burning. WHO-GMP certified, FSSAI approved."
+          }
+        },
+        {
+          "@type": "ListItem",
+          "position": 2,
+          "name": "Spirulina Supplement Range",
+          "url": "https://www.ascofizz.com/products/spirulina",
+          "item": {
+            "@type": "Thing",
+            "name": "Spirulina Supplements India",
+            "description": "100% vegan supplement tablets made with certified organic spirulina. B12+D3, Magnesium, Calcium+Iron. Plant-based, no artificial additives."
+          }
+        },
+        {
+          "@type": "ListItem",
+          "position": 3,
+          "name": "Ayurvedic Supplements",
+          "url": "https://www.ascofizz.com/products/ayurvedic",
+          "item": {
+            "@type": "Thing",
+            "name": "Ayurvedic Supplements India",
+            "description": "Organic Moringa Tablets — natural immunity booster, anti-inflammatory, rich in vitamins and minerals."
+          }
+        },
+        {
+          "@type": "ListItem",
+          "position": 4,
+          "name": "Premium Multivitamins",
+          "url": "https://www.ascofizz.com/products/premium",
+          "item": {
+            "@type": "Thing",
+            "name": "Premium Multivitamin India",
+            "description": "Multidiata — 23 vitamins and minerals in one daily tablet. India's premium multivitamin supplement."
+          }
+        },
+        {
+          "@type": "ListItem",
+          "position": 5,
+          "name": "B2B Private Label Manufacturing",
+          "url": "https://www.ascovita.com/#/capabilities",
+          "item": {
+            "@type": "Thing",
+            "name": "Private Label Supplement Manufacturing India",
+            "description": "WHO-GMP certified B2B contract manufacturing for supplement brands across India."
+          }
+        }
+      ]
+    }
+  ]
+}
   </script>
 
   <!-- Favicon -->
@@ -1135,12 +2384,23 @@ best supplement brand 2024 2025, Ascofizz review, Ascofizz vs competitors India,
      Staggered text · Progress bar
 ═══════════════════════════════════════ -->
 <!-- Supabase client — used for direct-from-browser review reads/writes (no Render backend involved) -->
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 <script>
   const SUPABASE_URL = 'https://frwsjgrrtzhjfflcdjjs.supabase.co';
   const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZyd3NqZ3JydHpoamZmbGNkampzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI3MDUzMTgsImV4cCI6MjA4ODI4MTMxOH0.iIjlG1A0BoMAmROwovyLasRZU7bVRJC5q7vhmWiMeOs';
-  if (!window.supabase) console.error('[Supabase] Client script failed to load — check that cdn.jsdelivr.net is reachable and not blocked by CSP script-src.');
-  const sb = window.supabase ? window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY) : null;
+  // The library is deferred, so it does not exist yet when this runs — and
+  // it must not, because a blocking <script src> to a CDN in <head> holds
+  // up first paint for as long as the CDN takes to answer. Reviews are
+  // never needed during the first paint, so the client is built on first
+  // use instead. Every call site is inside an async function, so by the
+  // time one runs the deferred bundle has executed.
+  let _sbClient = null;
+  function sbClient() {
+    if (_sbClient) return _sbClient;
+    if (!window.supabase) return null;
+    _sbClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    return _sbClient;
+  }
 </script>
 
 <!-- ═══════════════════════════════════════════════════════════════════
@@ -1175,7 +2435,13 @@ best supplement brand 2024 2025, Ascofizz review, Ascofizz vs competitors India,
 
   <!-- Effervescent Bloom — type -->
   <link rel="icon" type="image/svg+xml" href="assets/favicon.svg">
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Jost:wght@200;300;400;500;600&family=Schibsted+Grotesk:wght@400..700&display=swap">
+  <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Jost:wght@200;300;400;500;600&family=Schibsted+Grotesk:wght@400..700&display=swap">
+  <!-- media="print" makes this non-blocking; the onload promotes it to all.
+       A blocking cross-origin stylesheet in <head> delays first paint by a
+       whole round trip to fonts.googleapis.com, which on Indian mobile is
+       often the difference between a 1s and a 3s first paint. -->
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Jost:wght@200;300;400;500;600&family=Schibsted+Grotesk:wght@400..700&display=swap" media="print" onload="this.media='all';this.onload=null">
+  <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Jost:wght@200;300;400;500;600&family=Schibsted+Grotesk:wght@400..700&display=swap"></noscript>
 
   <!-- Effervescent Bloom — design system (rebuilt from scratch) -->
 <style>
@@ -1359,6 +2625,20 @@ img { height: auto; }
 button, input, select, textarea { font: inherit; color: inherit; background: none; border: none; outline: none; }
 button { cursor: pointer; -webkit-tap-highlight-color: transparent; }
 a { color: inherit; text-decoration: none; -webkit-tap-highlight-color: transparent; }
+
+/* Double-tap-to-zoom is why the bottom nav and the review tabs jump to a
+   zoomed page when tapped twice quickly: with touch-action:auto the
+   browser holds every tap for ~300ms to see whether a second one is
+   coming, and treats it as a zoom gesture if it is. `manipulation` keeps
+   panning and pinch-zoom — the page stays zoomable, which matters for
+   accessibility — and drops only the double-tap gesture on controls,
+   where nobody wants it. */
+a, button, [role="button"], input, select, textarea, label, summary,
+.app-nav-item, .app-topbar-pill, .app-more-item, .app-menu-item,
+.tab, .cpill, .product-card, .cat-card, .cat-card-sm, .promo-dot,
+.qty-btn, .btn-wishlist, .btn-qadd, .star-picker span {
+  touch-action: manipulation;
+}
 ul, ol { list-style: none; }
 table { border-collapse: collapse; width: 100%; }
 hr { border: none; height: 1px; background: var(--edge); }
@@ -1448,6 +2728,27 @@ strong, b { color: var(--ink); font-weight: 600; }
   perspective: var(--depth);
 }
 .section > .container { transform-style: preserve-3d; }
+
+/* ══ RENDER COST ══════════════════════════════════════════════════
+   Every page of this SPA lives in the document at once, and the home
+   page alone is several screens of cards. `content-visibility: auto`
+   lets the browser skip layout, paint and style for sections that are
+   nowhere near the viewport, and pick them up as they approach.
+   `contain-intrinsic-size: auto <n>` means each section reserves a
+   plausible height first and then remembers its real one, so the
+   scrollbar does not jump. */
+.section, .fizz-counters, .trust-bar, #promo-media-section {
+  content-visibility: auto;
+  contain-intrinsic-size: auto 600px;
+}
+/* The first viewport must never be skipped — deferring it would delay
+   the one paint the visitor is actually waiting for. */
+.promo-hero-wrap, .hero, #page-home > .section:first-of-type {
+  content-visibility: visible;
+}
+/* An off-screen page costs nothing to keep in the DOM if it is never
+   styled or laid out. */
+.page:not(.active) { content-visibility: hidden; }
 /* No rules between sections — space separates them */
 .section + .section::before { content: none; }
 
@@ -5536,7 +6837,9 @@ setInterval(function() { syncAppCartBadge(); syncAppWishBadge(); }, 2000);
       var track = document.getElementById('pmTrack');
       if(!track) return;
       data = data && data.length ? data : [];
-      var n = Math.min(Math.max(data.length,6),12); // show at least 6 slots, up to 12
+      // Only ever render as many cards as there is media for (capped at 12).
+      // Padding to a minimum of 6 is what produced rows of empty "+" tiles.
+      var n = Math.min(data.length, 12);
       var cards = '';
       for(var i=0;i<n;i++){
         cards += buildCard(data[i]||{}, (data[i]&&data[i].discount)||BADGES[i%BADGES.length]);
@@ -5548,16 +6851,42 @@ setInterval(function() { syncAppCartBadge(); syncAppWishBadge(); }, 2000);
         v.addEventListener('mouseleave',function(){ v.pause(); v.currentTime=0; });
       });
     }
+    // A card is only worth showing if it actually carries media. The admin
+    // list still holds the blank rows from when every image was cleared,
+    // and `remote.length` counted those — so the uploaded images painted,
+    // then the backend answered a second later and replaced them all with
+    // empty placeholders. That is the "images appear then vanish" report.
+    function usable(list){
+      return (Array.isArray(list) ? list : []).filter(function(it){
+        return it && typeof it.src === 'string' && it.src.trim();
+      });
+    }
     function renderPromoMedia(){
       // Local PROMO_MEDIA.js paints immediately so the carousel is never empty/late.
-      var local = (typeof PROMO_MEDIA !== 'undefined') ? PROMO_MEDIA : [];
+      var local = usable(typeof PROMO_MEDIA !== 'undefined' ? PROMO_MEDIA : []);
       paintPromoMedia(local);
-      // Then try the admin-managed backend list; if it has cards, it takes over.
+
+      var section = document.getElementById('promo-media-section');
+      if (section && !local.length) section.style.display = 'none';
+
+      // Then ask the admin-managed backend. It only takes over if it has
+      // real media — never to blank out cards that are already showing.
       var base = (typeof API_BASE !== 'undefined') ? API_BASE : 'https://ascovitahealthcare-cell-github-io.onrender.com';
-      fetch(base + '/api/promo-media').then(function(r){ return r.ok ? r.json() : null; }).then(function(d){
-        var remote = d && (d.data || d.items || d);
-        if(Array.isArray(remote) && remote.length) paintPromoMedia(remote);
-      }).catch(function(){ /* keep local PROMO_MEDIA.js cards */ });
+      // The backend is a free Render instance that can be asleep; without a
+      // deadline this request can sit open for 30s holding a connection.
+      var ctl = ('AbortController' in window) ? new AbortController() : null;
+      var timer = setTimeout(function(){ ctl && ctl.abort(); }, 6000);
+      fetch(base + '/api/promo-media', ctl ? { signal: ctl.signal } : undefined)
+        .then(function(r){ return r.ok ? r.json() : null; })
+        .then(function(d){
+          clearTimeout(timer);
+          var remote = usable(d && (d.data || d.items || d));
+          if (remote.length) {
+            paintPromoMedia(remote);
+            if (section) section.style.display = '';
+          }
+        })
+        .catch(function(){ clearTimeout(timer); /* keep local PROMO_MEDIA.js cards */ });
     }
     if(document.readyState==='loading'){ document.addEventListener('DOMContentLoaded',renderPromoMedia); }
     else { renderPromoMedia(); }
@@ -7857,6 +9186,9 @@ const REVIEWS_LOADED = {};   // productId -> true once a fetch has completed (su
 
 async function loadProductReviews(productId) {
   try {
+    // Throw rather than return: the catch below already sets the honest
+    // empty state and marks the fetch complete.
+    const sb = sbClient(); if (!sb) throw new Error('Supabase client not loaded yet');
     const { data, error } = await sb
       .from('reviews')
       .select('id, user_name, rating, review_text, created_at, verified')
@@ -9234,6 +10566,7 @@ async function submitReview() {
   try {
     // Persist straight to Supabase (SQL) — no Render backend in the
     // loop, so no cold-start timeout to worry about.
+    const sb = sbClient(); if (!sb) throw new Error('Reviews are offline right now. Please try again in a moment.');
     const { error } = await sb.from('reviews').insert({
       product_id: currentProduct.id,
       product_name: currentProduct.name || '',
@@ -9618,6 +10951,9 @@ let FEATURED_REVIEWS_CACHE = null;
 async function getFeaturedReviews() {
   if (FEATURED_REVIEWS_CACHE) return FEATURED_REVIEWS_CACHE;
   try {
+    // Throw rather than return: the catch below already sets the honest
+    // empty state and marks the fetch complete.
+    const sb = sbClient(); if (!sb) throw new Error('Supabase client not loaded yet');
     const { data, error } = await sb
       .from('reviews')
       .select('id, product_id, product_name, user_name, rating, review_text, created_at')
