@@ -3,7 +3,7 @@
 // Place this file in ROOT of your GitHub Pages repo
 // ============================================================
 
-const CACHE_NAME = 'ascovita-pwa-v4-coastal';
+const CACHE_NAME = 'ascovita-pwa-v5-fetchfix';
 const OFFLINE_URL = '/offline.html';
 
 // Files to cache on install (your core pages)
@@ -60,46 +60,71 @@ self.addEventListener('activate', event => {
   self.clients.claim();
 });
 
-// ── FETCH: Network first, fallback to cache ──
+// ── FETCH ────────────────────────────────────────────────────────────
+// Two rules, and a hard requirement.
+//
+// The requirement: every path through this handler must return a real
+// Response. The previous version fell through to `undefined` whenever a
+// non-document request failed with nothing cached, and returning
+// undefined from respondWith is a *network error* — it turned every
+// flaky-signal blip into a permanently broken image that never retried.
+// That is why promo images appeared on first load and vanished after.
+//
+// Rule 1: cross-origin requests are none of our business. Image CDNs,
+// fonts and analytics are left entirely to the browser, which handles
+// their caching and retries better than we can. Intercepting them only
+// added a service-worker round trip to every image.
+//
+// Rule 2: same-origin. Documents are network-first so content is fresh;
+// static assets are cache-first so repeat views are instant.
 self.addEventListener('fetch', event => {
   const { request } = event;
-  const url = new URL(request.url);
 
-  // Skip non-GET requests (POST for orders, etc.)
   if (request.method !== 'GET') return;
 
-  // Skip external APIs (Supabase, Cashfree, Shiprocket, Render backend)
-  if (
-    url.hostname.includes('supabase.co') ||
-    url.hostname.includes('cashfree.com') ||
-    url.hostname.includes('shiprocket.in') ||
-    url.hostname.includes('onrender.com') ||
-    url.hostname.includes('wixstatic.com') ||
-    url.hostname.includes('googleapis.com')
-  ) {
-    return; // Let browser handle API calls normally
+  let url;
+  try { url = new URL(request.url); } catch (e) { return; }
+
+  // Rule 1 — anything not served from this origin.
+  if (url.origin !== self.location.origin) return;
+
+  const isDocument = request.mode === 'navigate' || request.destination === 'document';
+
+  // Rule 2a — documents: network first, cache as backup.
+  if (isDocument) {
+    event.respondWith(
+      fetch(request)
+        .then(response => {
+          if (response && response.ok) {
+            const clone = response.clone();
+            caches.open(CACHE_NAME).then(cache => cache.put(request, clone));
+          }
+          return response;
+        })
+        .catch(async () => {
+          return (await caches.match(request))
+              || (await caches.match('/index.html'))
+              || (await caches.match(OFFLINE_URL))
+              || new Response('<h1>Offline</h1>', { status: 503, headers: { 'Content-Type': 'text/html' } });
+        })
+    );
+    return;
   }
 
+  // Rule 2b — same-origin static assets: cache first, refresh in background.
   event.respondWith(
-    fetch(request)
-      .then(response => {
-        // Cache successful responses
-        if (response && response.status === 200) {
-          const clone = response.clone();
-          caches.open(CACHE_NAME).then(cache => cache.put(request, clone));
-        }
-        return response;
-      })
-      .catch(() => {
-        // Offline fallback: return cached version
-        return caches.match(request).then(cached => {
-          if (cached) return cached;
-          // If it's a page navigation, show offline page
-          if (request.destination === 'document') {
-            return caches.match(OFFLINE_URL);
+    caches.match(request).then(cached => {
+      const network = fetch(request)
+        .then(response => {
+          if (response && response.ok) {
+            const clone = response.clone();
+            caches.open(CACHE_NAME).then(cache => cache.put(request, clone));
           }
-        });
-      })
+          return response;
+        })
+        .catch(() => cached || Response.error());
+      return cached || network;
+    })
   );
 });
 
@@ -109,8 +134,8 @@ self.addEventListener('push', event => {
   const title = data.title || 'Ascovita Healthcare';
   const options = {
     body: data.body || 'Check out our latest offers!',
-    icon: 'https://static.wixstatic.com/media/f0adaf_05a2b4385ab84453aa9c2e9a1cec4b97~mv2.png',
-    badge: 'https://static.wixstatic.com/media/f0adaf_05a2b4385ab84453aa9c2e9a1cec4b97~mv2.png',
+    icon: '/assets/ascofizz-icon-192.png',
+    badge: '/assets/ascofizz-icon-192.png',
     data: { url: data.url || '/' }
   };
   event.waitUntil(self.registration.showNotification(title, options));
