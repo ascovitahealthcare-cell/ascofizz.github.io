@@ -11499,6 +11499,39 @@ function setRating(v) {
   selectedRating = v;
   document.querySelectorAll('#starPicker span').forEach((s,i) => s.classList.toggle('lit', i < v));
 }
+// ══════════════════════════════════════════════════════════════════
+// BACKEND SESSION REPAIR
+// Signing in with Google succeeds locally even when the backend is
+// asleep, so the UI can show a signed-in customer who has no API token.
+// Every authenticated call goes through here: it returns a usable JWT,
+// re-exchanging the stored Google credential first if one is missing.
+// ══════════════════════════════════════════════════════════════════
+async function ensureBackendSession() {
+  const existing = localStorage.getItem('asc_jwt');
+  if (existing) return existing;
+
+  const cred = (() => { try { return sessionStorage.getItem('asc_gcred'); } catch (e) { return null; } })();
+  if (!cred) return null;
+
+  try {
+    const res = await fetchWithTimeout(API_BASE + '/api/auth/google', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ credential: cred }),
+    }, 20000);
+    if (!res.ok) return null;
+    const data = await res.json();
+    if (!data || !data.token) return null;
+    localStorage.setItem('asc_jwt', data.token);
+    localStorage.removeItem('asc_session_degraded');
+    if (data.user) localStorage.setItem('asc_user', JSON.stringify(data.user));
+    return data.token;
+  } catch (e) {
+    console.warn('[ensureBackendSession] exchange failed:', e.message);
+    return null;
+  }
+}
+
 async function submitReview() {
   const user = getCurrentUser();
   if (!user) { openAuth('login'); return; }
@@ -11518,8 +11551,13 @@ async function submitReview() {
     // 5-star reviews under any name with no purchase. Reviews now go through
     // the backend, which takes the identity from the JWT, checks the orders
     // table to set `verified`, and allows one review per product per customer.
-    const jwt = localStorage.getItem('asc_jwt') || '';
-    if (!jwt) { openAuth('login'); return; }
+    // Was: `if (!jwt) { openAuth('login'); return; }` — which reopened the
+    // login modal for someone already signed in and gave no reason, the
+    // reported "review cannot be submitted" symptom.
+    const jwt = await ensureBackendSession();
+    if (!jwt) {
+      throw new Error('We could not reach the review service. Your sign-in is fine — please try again in a moment.');
+    }
     const resp = await fetch(API_BASE + '/api/reviews', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + jwt },
@@ -14148,8 +14186,19 @@ async function handleGoogleCredential(response) {
       verified: true,
     };
 
-    // Persist session
-    if (backendJwt) localStorage.setItem('asc_jwt', backendJwt);
+    // Persist session.
+    // The backend exchange can fail on a cold start, and when it does this
+    // used to store asc_user without asc_jwt — the customer looked signed
+    // in, but every authenticated call still had no token. Keeping the
+    // Google credential lets ensureBackendSession() retry the exchange on
+    // demand rather than silently bouncing them back to a login modal.
+    if (backendJwt) {
+      localStorage.setItem('asc_jwt', backendJwt);
+      localStorage.removeItem('asc_session_degraded');
+    } else {
+      localStorage.setItem('asc_session_degraded', '1');
+    }
+    try { sessionStorage.setItem('asc_gcred', response.credential); } catch (e) {}
     localStorage.setItem('asc_user', JSON.stringify(user));
 
     // Update UI
