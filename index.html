@@ -10386,6 +10386,7 @@ function _updateStrength(val) {
           <button class="account-nav-item" onclick="switchAccountPanel('invoices')"><span class="nav-ico">🧾</span> Invoices & Payments</button>
           <button class="account-nav-item" onclick="switchAccountPanel('vita')"><span class="nav-ico">💎</span> VitaPoints</button>
           <button class="account-nav-item" onclick="switchAccountPanel('profile')"><span class="nav-ico">✏️</span> Profile & Address</button>
+          <button class="account-nav-item" onclick="switchAccountPanel('returns')"><span class="nav-ico">↩️</span> Returns &amp; Refunds</button>
           <button class="account-nav-item" onclick="doLogout()" style="margin-top:20px;color:var(--red)"><span class="nav-ico">🚪</span> Sign Out</button>
         </nav>
       </div>
@@ -10421,6 +10422,17 @@ function _updateStrength(val) {
           <div id="vitaPanelBody"></div>
         </div>
 
+        <div class="account-panel" id="panel-returns">
+          <div class="ck-section-title" style="margin-bottom:4px">↩️ Returns &amp; Refunds</div>
+          <p style="font-size:.82rem;color:var(--t-mid);margin-bottom:18px">
+            Delivered orders can be returned within <strong id="rtWindowDays">7</strong> days.
+            Approved returns are refunded to the original payment method, and any Vita Points
+            earned on the returned items are deducted.
+          </p>
+          <div id="rtOpenList" style="margin-bottom:26px"></div>
+          <div class="ck-section-title" style="margin-bottom:10px;font-size:.82rem">Eligible orders</div>
+          <div id="rtEligibleList"></div>
+        </div>
         <div class="account-panel" id="panel-profile">
           <div class="account-panel-title">✏️ Profile & Saved Address</div>
           <div class="profile-form">
@@ -14546,10 +14558,176 @@ function switchAccountPanel(panel) {
   const el = document.getElementById('panel-' + panel);
   if (el) el.classList.add('active');
   const navItems = document.querySelectorAll('.account-nav-item');
-  const labels = ['orders','tracking','invoices','vita','profile'];
-  if (panel === 'vita') { try { renderVitaPanel(); } catch(e) { console.error('[renderVitaPanel]', e); } }
+  const labels = ['orders','tracking','invoices','vita','profile','returns'];
+  if (panel === 'vita')    { try { renderVitaPanel(); } catch(e) { console.error('[renderVitaPanel]', e); } }
+  if (panel === 'returns') { try { renderReturnsPanel(); } catch(e) { console.error('[renderReturnsPanel]', e); } }
   const idx = labels.indexOf(panel);
   if (idx >= 0 && navItems[idx]) navItems[idx].classList.add('active');
+}
+
+// ══════════════════════════════════════════════════════════════════
+// RETURNS & REFUNDS  (My Account → Returns)
+// Reads /api/returns/eligible and /api/returns. Every call carries the
+// backend JWT via ensureBackendSession(), so a cold-started backend
+// repairs the session instead of appearing as "not signed in".
+// ══════════════════════════════════════════════════════════════════
+const RT_REASONS = [
+  'Damaged or broken on arrival',
+  'Wrong item received',
+  'Missing items from the order',
+  'Sealed pack opened or tampered',
+  'Past expiry / near expiry',
+  'Not as described',
+  'Changed my mind',
+];
+const RT_STATUS_LABEL = {
+  requested: 'Under review', approved: 'Approved — send it back',
+  received: 'Received at our facility', refunded: 'Refunded',
+  rejected: 'Not approved', cancelled: 'Cancelled',
+};
+const RT_STATUS_TONE = {
+  requested: 'ocean', approved: 'sage', received: 'sage',
+  refunded: 'mint', rejected: 'clay', cancelled: 'muted',
+};
+
+async function rtFetch(path, opts) {
+  const jwt = await ensureBackendSession();
+  if (!jwt) throw new Error('We could not reach the returns service. Your sign-in is fine — please try again in a moment.');
+  const res = await fetch(API_BASE + path, Object.assign({}, opts, {
+    headers: Object.assign({ 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + jwt }, (opts && opts.headers) || {}),
+  }));
+  const body = await res.json().catch(() => ({}));
+  if (!res.ok) throw new Error(body.error || 'Request failed');
+  return body;
+}
+
+function rtChip(status) {
+  const tone = RT_STATUS_TONE[status] || 'muted';
+  const map = {
+    ocean: 'color:var(--sky-lo);background:var(--sky-bg)',
+    sage:  'color:var(--sage-lo);background:var(--sage-bg)',
+    mint:  'color:var(--fern-lo);background:var(--fern-bg)',
+    clay:  'color:var(--clay-lo);background:var(--clay-bg)',
+    muted: 'color:var(--t-low);background:var(--paper-lo)',
+  };
+  return `<span style="${map[tone]};padding:4px 11px;border-radius:99px;font-size:.66rem;font-weight:800;letter-spacing:.04em">${RT_STATUS_LABEL[status] || status}</span>`;
+}
+
+async function renderReturnsPanel() {
+  const openEl = document.getElementById('rtOpenList');
+  const eligEl = document.getElementById('rtEligibleList');
+  if (!openEl || !eligEl) return;
+  openEl.innerHTML = '<div style="color:var(--t-mid);font-size:.85rem">Loading your returns…</div>';
+  eligEl.innerHTML = '';
+
+  try {
+    const [mine, elig] = await Promise.all([
+      rtFetch('/api/returns'),
+      rtFetch('/api/returns/eligible'),
+    ]);
+
+    const wd = document.getElementById('rtWindowDays');
+    if (wd && elig.window_days) wd.textContent = elig.window_days;
+
+    const reqs = mine.data || [];
+    openEl.innerHTML = reqs.length ? reqs.map(r => {
+      const items = (r.return_request_items || []).map(i =>
+        `<div style="display:flex;justify-content:space-between;font-size:.78rem;color:var(--t-mid);padding:3px 0">
+           <span>${esc(i.product_name || 'Item')} × ${i.qty}</span>
+           <span>₹${Number(i.line_total || 0).toLocaleString('en-IN')}</span></div>`).join('');
+      const canCancel = r.status === 'requested';
+      const pts = r.points_reversed > 0
+        ? `<div style="font-size:.74rem;color:var(--clay-lo);margin-top:6px">${r.points_reversed} Vita Points deducted</div>` : '';
+      return `<div class="rt-card" style="background:var(--face);border-radius:var(--r-md);box-shadow:var(--neo-1);padding:16px;margin-bottom:12px">
+        <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:8px;flex-wrap:wrap">
+          <strong style="font-size:.86rem">Order ${esc(String(r.order_id))}</strong>${rtChip(r.status)}
+        </div>
+        <div style="font-size:.76rem;color:var(--t-low);margin-bottom:8px">${esc(r.reason || '')}</div>
+        ${items}
+        <div style="display:flex;justify-content:space-between;margin-top:8px;padding-top:8px;border-top:1px solid var(--edge);font-weight:800;font-size:.84rem">
+          <span>Refund</span><span>₹${Number(r.refund_amount || 0).toLocaleString('en-IN')}</span>
+        </div>
+        ${r.admin_note ? `<div style="font-size:.74rem;color:var(--t-mid);margin-top:6px">Note: ${esc(r.admin_note)}</div>` : ''}
+        ${pts}
+        ${canCancel ? `<button class="btn-outline" style="margin-top:10px;padding:8px 16px;font-size:.76rem" onclick="cancelReturn('${esc(String(r.id))}')">Cancel request</button>` : ''}
+      </div>`;
+    }).join('') : '<div style="color:var(--t-mid);font-size:.85rem">You have no return requests.</div>';
+
+    const orders = (elig.data || []);
+    const usable = orders.filter(o => o.eligible);
+    eligEl.innerHTML = orders.length ? orders.map(o => {
+      if (!o.eligible) {
+        return `<div style="background:var(--face-soft);border-radius:var(--r-md);padding:13px 15px;margin-bottom:10px;opacity:.75">
+          <div style="display:flex;justify-content:space-between;font-size:.8rem"><strong>Order ${esc(String(o.order_id))}</strong>
+          <span style="color:var(--t-low)">₹${Number(o.total||0).toLocaleString('en-IN')}</span></div>
+          <div style="font-size:.73rem;color:var(--t-low);margin-top:4px">${esc(o.reason || 'Not eligible')}</div></div>`;
+      }
+      const rows = o.items.map(i =>
+        `<label style="display:flex;align-items:center;gap:9px;padding:6px 0;font-size:.79rem;cursor:pointer">
+           <input type="checkbox" data-pid="${i.product_id}" data-max="${i.qty}" style="width:16px;height:16px;flex:none">
+           <span style="flex:1">${esc(i.name || 'Item')}</span>
+           <input type="number" min="1" max="${i.qty}" value="${i.qty}" data-qty="${i.product_id}"
+                  style="width:56px;padding:5px;border-radius:8px;text-align:center;background:var(--face-soft);box-shadow:var(--neo-in);border:none">
+         </label>`).join('');
+      return `<div class="rt-elig" data-order="${esc(String(o.order_id))}" style="background:var(--face);border-radius:var(--r-md);box-shadow:var(--neo-1);padding:16px;margin-bottom:12px">
+        <div style="display:flex;justify-content:space-between;font-size:.84rem;margin-bottom:8px">
+          <strong>Order ${esc(String(o.order_id))}</strong><span>₹${Number(o.total||0).toLocaleString('en-IN')}</span>
+        </div>
+        ${rows}
+        <select class="form-input" data-reason style="margin-top:10px">
+          <option value="">Why are you returning this?</option>
+          ${RT_REASONS.map(r => `<option>${r}</option>`).join('')}
+        </select>
+        <textarea class="form-input" data-comment rows="2" placeholder="Anything else we should know? (optional)" style="margin-top:8px"></textarea>
+        <button class="btn-primary" style="margin-top:10px;width:100%" onclick="submitReturn(this)">Submit return request</button>
+      </div>`;
+    }).join('') : '<div style="color:var(--t-mid);font-size:.85rem">No delivered orders yet.</div>';
+
+    if (orders.length && !usable.length) {
+      eligEl.insertAdjacentHTML('afterbegin',
+        '<div style="font-size:.78rem;color:var(--t-mid);margin-bottom:10px">None of your orders are currently within the return window.</div>');
+    }
+  } catch (e) {
+    openEl.innerHTML = `<div style="color:#A81F2B;font-size:.84rem">${esc(e.message)}</div>`;
+  }
+}
+
+async function submitReturn(btn) {
+  const card = btn.closest('.rt-elig');
+  if (!card) return;
+  const orderId = card.getAttribute('data-order');
+  const reason  = card.querySelector('[data-reason]')?.value || '';
+  const comment = card.querySelector('[data-comment]')?.value || '';
+
+  const items = [...card.querySelectorAll('input[type=checkbox]:checked')].map(cb => {
+    const pid = cb.getAttribute('data-pid');
+    const qtyEl = card.querySelector(`[data-qty="${pid}"]`);
+    return { product_id: parseInt(pid, 10), qty: Math.max(1, parseInt(qtyEl?.value, 10) || 1) };
+  });
+
+  if (!items.length) { showToast('⚠️ Select at least one item to return', 'error'); return; }
+  if (!reason)       { showToast('⚠️ Please choose a reason for the return', 'error'); return; }
+
+  btn.disabled = true; const orig = btn.textContent; btn.textContent = 'Submitting…';
+  try {
+    const out = await rtFetch('/api/returns', {
+      method: 'POST',
+      body: JSON.stringify({ order_id: orderId, reason, comment, items }),
+    });
+    showToast(out.message || 'Return request submitted');
+    await renderReturnsPanel();
+  } catch (e) {
+    showToast('❌ ' + e.message, 'error');
+    btn.disabled = false; btn.textContent = orig;
+  }
+}
+
+async function cancelReturn(id) {
+  try {
+    await rtFetch('/api/returns/' + encodeURIComponent(id) + '/cancel', { method: 'POST' });
+    showToast('Return request cancelled');
+    await renderReturnsPanel();
+  } catch (e) { showToast('❌ ' + e.message, 'error'); }
 }
 
 function _renderOrderCards(orders, container) {
