@@ -9404,8 +9404,10 @@ async function mktLoadAdSets() {
       <td>${mktFmtRoas(a.last_roas)}</td>
       <td><span class="mkt-pill ${mktEsc(a.last_verdict)}">${mktEsc(a.last_verdict || '—')}</span></td>
       <td>
-        <input type="number" class="mkt-budget-input" id="mkt-budget-${a.id}" placeholder="${a.daily_budget_cents ? Math.round(a.daily_budget_cents / 100) : ''}">
-        <button class="btn btn-secondary btn-sm" onclick="mktSetBudget('${a.id}')">Set</button>
+        <div style="display:flex;gap:6px;align-items:center;">
+          <input type="number" class="mkt-budget-input" id="mkt-budget-${a.id}" placeholder="${a.daily_budget_cents ? Math.round(a.daily_budget_cents / 100) : ''}">
+          <button class="btn btn-secondary btn-sm" onclick="mktSetBudget('${a.id}')">Set</button>
+        </div>
       </td>
       <td>
         ${a.status === 'active'
@@ -9524,8 +9526,10 @@ async function mktLoadCampaigns() {
       <div style="font-size:13px;color:var(--text2);margin:4px 0 8px;">${mktEsc(c.goal)} · ${mktEsc(c.tone)}</div>
       ${c.compliance_notes ? `<div style="font-size:12px;color:#854f0b;background:#fff7e6;border-radius:6px;padding:8px;margin-bottom:8px;">${mktEsc(c.compliance_notes)}</div>` : ''}
       ${c.status === 'pending_approval' ? `
-        <button class="btn btn-primary btn-sm" onclick="mktApprove('${c.id}')">Approve and launch (paused)</button>
-        <button class="btn btn-secondary btn-sm" onclick="mktReject('${c.id}')">Reject</button>
+        <div style="display:flex;gap:8px;margin-top:8px;flex-wrap:wrap;">
+          <button class="btn btn-primary btn-sm" onclick="mktApprove('${c.id}')">Approve and launch (paused)</button>
+          <button class="btn btn-secondary btn-sm" onclick="mktReject('${c.id}')">Reject</button>
+        </div>
       ` : ''}
     </div>
   `).join('') || '<p>No campaigns yet.</p>';
