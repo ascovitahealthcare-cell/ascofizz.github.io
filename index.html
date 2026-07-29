@@ -7065,7 +7065,7 @@ setInterval(function() { syncAppCartBadge(); syncAppWishBadge(); }, 2000);
     <div style="margin-bottom:28px">
       <span class="cf-section-label">Build Your Stack</span>
       <h2 class="cf-section-title">Mix. Match. Save Up to 20%.</h2>
-      <p class="cf-section-sub">Pick 2+ products and unlock automatic bundle savings. The more you add, the more you save.</p>
+      <p class="cf-section-sub">Pick 2+ products to build your personalised wellness stack. Apply an active coupon code at checkout to save more.</p>
     </div>
     <div class="bundle-layout">
       <div>
@@ -10673,15 +10673,25 @@ async function submitReview() {
   try {
     // Persist straight to Supabase (SQL) — no Render backend in the
     // loop, so no cold-start timeout to worry about.
-    const sb = sbClient(); if (!sb) throw new Error('Reviews are offline right now. Please try again in a moment.');
-    const { error } = await sb.from('reviews').insert({
-      product_id: currentProduct.id,
-      product_name: currentProduct.name || '',
-      user_name: name,
-      rating: selectedRating,
-      review_text: text
+    // SECURITY: this used to INSERT straight into Supabase with the public
+    // anon key, which is in this page's source. Anyone could POST unlimited
+    // 5-star reviews under any name with no purchase. Reviews now go through
+    // the backend, which takes the identity from the JWT, checks the orders
+    // table to set `verified`, and allows one review per product per customer.
+    const jwt = localStorage.getItem('asc_jwt') || '';
+    if (!jwt) { openAuth('login'); return; }
+    const resp = await fetch(API_BASE + '/api/reviews', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + jwt },
+      body: JSON.stringify({
+        product_id: currentProduct.id,
+        product_name: currentProduct.name || '',
+        rating: selectedRating,
+        review_text: text
+      }),
     });
-    if (error) throw error;
+    const result = await resp.json();
+    if (!resp.ok) throw new Error(result.error || 'Could not submit review');
 
     // Re-fetch the authoritative list from Supabase rather than
     // trusting our own optimistic copy — guarantees what's shown
@@ -10948,11 +10958,19 @@ function getOrderTotal() {
 }
 
 function generateOrderId() {
-  // Matches the "AVC-########" format used everywhere else
-  // (invoice numbers, order tracking, thank-you page placeholder).
-  const ts  = Date.now().toString().slice(-6);
-  const rnd = Math.floor(10 + Math.random() * 89);
-  return 'AVC-' + ts + rnd;
+  // SECURITY: the old version was last-6-of-timestamp + a 2-digit random.
+  // The timestamp part repeats every ~16.7 minutes and the suffix had only
+  // 80 values, so order ids were enumerable — and several endpoints take an
+  // order id directly. Now cryptographically random.
+  let rnd;
+  if (window.crypto && crypto.getRandomValues) {
+    const b = new Uint8Array(6);
+    crypto.getRandomValues(b);
+    rnd = Array.from(b).map(x => x.toString(36).padStart(2, '0')).join('').toUpperCase().slice(0, 10);
+  } else {
+    rnd = (Math.random().toString(36).slice(2, 8) + Math.random().toString(36).slice(2, 6)).toUpperCase();
+  }
+  return 'AVC-' + rnd;
 }
 
 function renderCheckoutSummary() {
@@ -11554,6 +11572,62 @@ async function startPayment(method) {
   closePaymentModal();
   showProcessingScreen(orderId, total, method);
   return startGoKwikPayment(orderId, total, formData, btn, origText);
+}
+
+// ══════════════════════════════════════════════
+// startGoKwikPayment
+// This function was CALLED by startPayment() but never defined anywhere
+// in the file, so every online payment threw "startGoKwikPayment is not
+// defined" before it ever reached the backend. Implemented here against
+// the existing /api/create-gokwik-order endpoint.
+//
+// NOTE: the backend recomputes the amount from real product prices, so
+// the `total` passed in is only used for display — the figure the
+// customer is actually charged comes back from the server.
+// ══════════════════════════════════════════════
+async function startGoKwikPayment(orderId, total, formData, btn, origText) {
+  try {
+    const resp = await fetch(API_BASE + '/api/create-gokwik-order', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        merchant_reference_id: orderId,
+        amount: total,                       // server recomputes and overrides this
+        items: STORE.cart.map(i => ({
+          id: i.id, qty: i.qty,
+          ...(i.tierTabs ? { tierTabs: i.tierTabs, tierIdx: i.tierIdx } : {})
+        })),
+        coupon_code: (typeof activePromoCode !== 'undefined' && activePromoCode) ? activePromoCode.code : null,
+        customer_name:  [formData.firstName, formData.lastName].filter(Boolean).join(' '),
+        customer_email: formData.email,
+        customer_phone: formData.phone,
+        description: 'Ascofizz order ' + orderId,
+      }),
+    });
+    const data = await resp.json();
+    if (!resp.ok || !data.success || !data.short_url) {
+      throw new Error(data.error || 'Could not start payment');
+    }
+
+    // Remember what we are waiting on so the return trip can confirm it.
+    try {
+      sessionStorage.setItem('asc_pending_gk', JSON.stringify({
+        orderId, formData, t: Date.now()
+      }));
+    } catch (e) {}
+
+    window.location.href = data.short_url;
+  } catch (err) {
+    console.error('[startGoKwikPayment]', err);
+    hideProcessingScreen && hideProcessingScreen();
+    if (btn) { btn.disabled = false; btn.textContent = origText || '💳 Pay via GoKwik'; }
+    document.querySelectorAll('.cfPayBtn').forEach(b => { b.disabled = false; b.style.opacity = '1'; });
+    if (typeof showPaymentError === 'function') {
+      showPaymentError('Payment could not be started: ' + err.message, orderId, formData, total, 'gokwik');
+    } else {
+      showToast('❌ ' + err.message, 'error');
+    }
+  }
 }
 
 // ══════════════════════════════════════════════
@@ -14575,21 +14649,21 @@ let selectedBundleIds=new Set();
 function renderBundleBuilder(){const list=document.getElementById('bundleProdList');if(!list||!PRODUCTS)return;list.innerHTML=PRODUCTS.filter(p=>p.price||p.salePrice).map(p=>{const img=typeof getProductImg==='function'?getProductImg(p):(p.image||PRODUCT_FALLBACKS&&PRODUCT_FALLBACKS.default||'');return'<div class="b-prod-row" id="brow-'+p.id+'" onclick="toggleBundle('+p.id+')"><div class="b-prod-cb" id="bcb-'+p.id+'">✓</div><div class="b-prod-img"><img src="'+esc(img)+'" alt="Ascofizz product image" style="width:54px;height:54px;object-fit:cover;border-radius:10px" onerror="this.style.opacity=0" decoding="async"></div><div class="b-prod-info"><div class="b-prod-name">'+esc(p.name)+'</div><div class="b-prod-cat">'+esc(p.category||'supplement')+'</div>'+(p.badge?'<div class="b-prod-badge">'+esc(p.badge)+'</div>':'')+'</div><div class="b-prod-price">₹'+(p.salePrice||p.price)+'</div></div>';}).join('');}
 function toggleBundle(id){if(selectedBundleIds.has(id)){selectedBundleIds.delete(id);document.getElementById('brow-'+id)?.classList.remove('sel');}else{selectedBundleIds.add(id);document.getElementById('brow-'+id)?.classList.add('sel');}updateBundleSummary();}
 function updateBundleSummary(){const sel=[...selectedBundleIds].map(id=>PRODUCTS.find(p=>p.id===id)).filter(Boolean),n=sel.length,sub=sel.reduce((s,p)=>s+(p.salePrice||p.price),0),dp=n>=4?0.20:n===3?0.15:n===2?0.10:0,sav=Math.round(sub*dp),tot=sub-sav;const box=document.getElementById('bundleItemsBox');if(box)box.innerHTML=n===0?'<div class="bundle-empty-hint">No products selected yet<\/div>':sel.map(p=>'<div class="b-item-chip"><span class="b-item-name">'+esc(p.name)+'<\/span><span class="b-item-price">₹'+(p.salePrice||p.price)+'<\/span><\/div>').join('');const s=document.getElementById('bundleSubtotal'),t=document.getElementById('bundleTotal'),dr=document.getElementById('bundleDiscountRow'),dl=document.getElementById('bundleDiscountLabel'),dv=document.getElementById('bundleDiscountVal'),sb=document.getElementById('bundleSavingsBanner');if(s)s.textContent='₹'+sub;if(t)t.textContent='₹'+tot;if(dp>0){if(dr)dr.style.display='flex';if(dl)dl.textContent='Bundle discount ('+(dp*100)+'% off)';if(dv)dv.textContent='−₹'+sav;if(sb){sb.style.display='block';sb.textContent='🎉 You\'re saving ₹'+sav+' with your '+n+'-product bundle!';}}else{if(dr)dr.style.display='none';if(sb)sb.style.display='none';}}
-function addBundleToCart(){const sel=[...selectedBundleIds].map(id=>PRODUCTS.find(p=>p.id===id)).filter(Boolean);if(!sel.length){showToast('Select at least one product 🌿','error');return;}sel.forEach(p=>STORE.addToCart(p.id,1));openSideCart();showPtsToast('+'+sel.length*10+' VitaPoints!');}
+function addBundleToCart(){const sel=[...selectedBundleIds].map(id=>PRODUCTS.find(p=>p.id===id)).filter(Boolean);if(!sel.length){showToast('Select at least one product 🌿','error');return;}sel.forEach(p=>STORE.addToCart(p.id,1));openSideCart();showToast('Bundle added to cart 🌿');}
 
 let stickyQty=1,stickyProdId=null;
 function initStickyCart(prod){if(!prod)return;stickyProdId=prod.id;stickyQty=1;const ne=document.getElementById('scProdName'),pe=document.getElementById('scProdPrice'),qe=document.getElementById('scQtyVal');if(ne)ne.textContent=prod.name;if(pe)pe.textContent='₹'+(prod.salePrice||prod.price);if(qe)qe.textContent=1;const sc=document.getElementById('stickyCart'),ab=document.getElementById('addCartBtn');if(!sc||!ab)return;const obs=new IntersectionObserver(en=>{if(!en[0].isIntersecting){sc.style.display='flex';requestAnimationFrame(()=>{sc.style.transform='translateY(0)';});}else{sc.style.transform='translateY(100%)';setTimeout(()=>{if(sc.style.transform==='translateY(100%)')sc.style.display='none';},300);}},{threshold:0.1});obs.observe(ab);}
 function scQtyChange(d){stickyQty=Math.max(1,stickyQty+d);const e=document.getElementById('scQtyVal');if(e)e.textContent=stickyQty;}
-function scAddToCart(){if(!stickyProdId)return;STORE.addToCart(stickyProdId,stickyQty);openSideCart();showPtsToast('+5 VitaPoints earned!');}
+function scAddToCart(){if(!stickyProdId)return;STORE.addToCart(stickyProdId,stickyQty);openSideCart();}
 
 function renderStockUrgency(prod){const el=document.getElementById('stockUrgency');if(!el||!prod)return;const stock=prod.stock||prod.inventory||0;if(stock<=0||stock>50){el.innerHTML='';return;}const pct=Math.min(100,Math.round((stock/50)*100)),cls=stock<=10?'danger':stock<=25?'warning':'ok',msg=stock<=10?'Only '+stock+' left — selling fast!':'Low stock — only '+stock+' remaining';el.innerHTML='<div class="su-low"'+(stock>10?' style="background:#FFF8E1;border-color:#FFD54F;color:var(--f-citrus)"':'')+'><span class="su-dot"'+(stock>10?' style="background:var(--f-citrus)"':'')+'><\/span>'+msg+'<\/div><div class="su-bar"><div class="su-bar-fill '+cls+'" style="width:'+pct+'%"><\/div><\/div>';}
 function startLiveViewers(){const el=document.getElementById('liveViewerCount');if(!el)return;let n=8+Math.floor(Math.random()*16);el.textContent=n;setInterval(()=>{n=Math.max(5,Math.min(30,n+(Math.random()>.5?1:-1)*Math.floor(Math.random()*3+1)));el.textContent=n;},6500);}
 function showPtsToast(msg){const t=document.getElementById('ptsToast');if(!t)return;t.textContent='🪙 '+msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),3500);}
-function copyReferLink(){const inp=document.getElementById('referLink');if(!inp)return;inp.select();try{document.execCommand('copy');showToast('Referral link copied! Share on WhatsApp 🤝','success');showPtsToast('Share to earn ₹100!');}catch(e){showToast('Link: '+inp.value,'info');}}
+function copyReferLink(){const inp=document.getElementById('referLink');if(!inp)return;inp.select();try{document.execCommand('copy');showToast('Referral link copied! Share on WhatsApp 🤝','success');}catch(e){showToast('Link: '+inp.value,'info');}}
 
 document.addEventListener('DOMContentLoaded',function(){
   if(document.getElementById('bundleProdList')&&typeof PRODUCTS!=='undefined')renderBundleBuilder();
-  if(typeof addToCartWithTier==='function'){const _o=addToCartWithTier;window.addToCartWithTier=function(id){_o(id);showPtsToast('+5 VitaPoints earned!');};}
+  if(typeof addToCartWithTier==='function'){/* VitaPoints are awarded on a PAID order, server-side — not on add-to-cart. */}
 });
 document.addEventListener('productPageShown',function(e){const prod=e.detail;if(!prod)return;initStickyCart(prod);renderStockUrgency(prod);startLiveViewers();});
 
