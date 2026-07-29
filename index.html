@@ -5663,6 +5663,15 @@ button, [role="button"] {
   padding: 3px 9px; margin-left: 6px;
 }
 .vb-note { font-size: .68rem; color: var(--t-low); margin-top: 6px; line-height: 1.5; }
+
+/* Product FAQ (AEO) */
+.pfaq { border-bottom: 1px solid var(--edge); padding: 13px 0; }
+.pfaq summary { font-size: .87rem; font-weight: 700; color: var(--t-hi); cursor: pointer; list-style: none; }
+.pfaq summary::-webkit-details-marker { display: none; }
+.pfaq summary::after { content: '+'; float: right; color: var(--t-low); font-weight: 400; }
+.pfaq[open] summary::after { content: '−'; }
+.pfaq p { font-size: .83rem; color: var(--t-mid); line-height: 1.75; margin-top: 9px; }
+.pfaq-note { font-size: .7rem; color: var(--t-low); margin-top: 14px; font-style: italic; }
 </style>
 </head>
 <!-- Promotional Media Config -->
@@ -10021,24 +10030,29 @@ function showPage(pg) {
   // ── SEO: Per-page keyword-rich titles (≤60 chars) + descriptions (≤155 chars) ──
   const PAGE_SEO = {
     home:          [
-      'Glutathione Effervescent Tablets | Ascofizz India',
-      'FSSAI approved effervescent vitamins from Anand, Gujarat. Glutathione, Spirulina, Moringa, ACV & Multivitamins. FSSAI Approved. Free shipping ₹599+.'
+      // The homepage title used to be a single product name ("Glutathione
+      // Effervescent Tablets"), which competed with the Glutathione PDP for
+      // the same query and gave the brand no category-level entry point.
+      'Effervescent Tablets India | Vitamins & Supplements | Ascofizz',
+      'Ascofizz effervescent tablets — Glutathione, Vitamin C + Amla, ACV, Ashwagandha, multivitamins and electrolytes. Made in our own FSSAI-licensed facility in Anand, Gujarat. Free shipping above ₹599.'
     ],
     shop:          [
-      'Shop Effervescent Vitamins & Supplements | Ascofizz India',
-      'Browse 11 premium supplements — Glutathione, Spirulina B12+D3, Organic Moringa, ACV+Moringa, Multivitamin. FSSAI approved, made in Gujarat. Up to 35% OFF on packs.'
+      'Buy Effervescent Tablets Online India | All Products | Ascofizz',
+      'Shop Ascofizz effervescent tablets online in India — glutathione, vitamin C + amla + zinc, apple cider vinegar, ashwagandha, green tea, L-carnitine, electrolytes and multivitamins. FSSAI licensed. Up to 35% off multi-packs.'
     ],
     about:         [
-      'About Ascofizz | FSSAI Licensed Supplement Manufacturer Anand Gujarat',
-      'Ascofizz — nutraceutical manufacturer in Anand, Gujarat. FSSAI approved. Effervescent tablets, organic spirulina and moringa supplements India.'
+      // Trust page — the research names this as required before AI answer
+      // engines will cite the brand. Lead with the verifiable facts.
+      'Is Ascofizz Genuine? FSSAI Licence & Factory Details | Ascofizz',
+      'Ascofizz is a brand of Ascovita Healthcare, an FSSAI-licensed nutraceutical manufacturer in Anand, Gujarat (Lic. 10024022001967). See our licence, factory address and quality checks. Every batch lab tested.'
     ],
     blog:          [
-      'Supplement & Wellness Blog | Glutathione, Spirulina Guides | Ascofizz',
-      'Expert guides on Glutathione skin glow, Spirulina for vegans, Moringa hair growth & ACV weight loss from Ascofizz\'s nutritionists. Free health tips for India.'
+      'Supplement Guides India — Benefits, Dosage & Timing | Ascofizz',
+      'Plain-English guides on glutathione, ashwagandha, vitamin C, apple cider vinegar and electrolytes — what they do, when to take them and how long results take. Written for Indian readers.'
     ],
     faq:           [
-      'FAQ – Effervescent Vitamins, Shipping & Returns | Ascofizz',
-      'Common questions about Ascofizz supplements: absorption, FSSAI certification, delivery across India, returns and all payment options including UPI and EMI.'
+      'Effervescent Tablets FAQ — Dosage, Safety, Delivery | Ascofizz',
+      'Answers on how to take effervescent tablets, whether they are safe daily, how long results take, our FSSAI licence, delivery across India, 7-day returns and UPI/card/EMI payment.'
     ],
     subscriptions: [
       'Subscribe & Save 20% on Vitamins | Ascofizz Monthly Wellness Plans',
@@ -10165,6 +10179,143 @@ function slugify(str) {
   return str.toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'');
 }
 
+// ══════════════════════════════════════════════════════════════
+// PRODUCT SEO + AEO
+//
+// Built from the Ascofizz keyword research (Priority Shortlist +
+// Keyword→Page Mapping + AEO Question Bank tabs).
+//
+// Titles lead with the researched primary keyword, not the internal
+// product name — "Glutathione Effervescent Tablets" is what people
+// search; "Multidiata" is not.
+//
+// CLAIMS DISCIPLINE: these are FSSAI-licensed food supplements, not
+// medicine. Nothing below claims to diagnose, treat, cure or prevent
+// disease, and no whitening/fairness claim is made — ASCI and FSSAI
+// both police those hard in India. Answers describe what the nutrient
+// is and how it is taken, and defer to a doctor for anything clinical.
+// ══════════════════════════════════════════════════════════════
+const PRODUCT_SEO = {
+  38: { kw: 'glutathione effervescent tablets',
+        title: 'Glutathione Effervescent Tablets India | Skin & Antioxidant | Ascofizz',
+        desc:  'Buy Ascofizz glutathione effervescent tablets online in India — with L-glutathione, vitamin C, hyaluronic acid and astaxanthin. FSSAI licensed, made in Anand Gujarat. Free shipping above ₹599.' },
+  37: { kw: 'vitamin c amla zinc effervescent tablets',
+        title: 'Vitamin C + Amla Effervescent Tablets | Immunity | Ascofizz India',
+        desc:  'Natural vitamin C with amla in a fast-dissolving effervescent tablet. One tablet a day in a glass of water. FSSAI licensed, made in Anand Gujarat. Free shipping above ₹599.' },
+  34: { kw: 'apple cider vinegar effervescent tablets india',
+        title: 'Apple Cider Vinegar Effervescent Tablets India | ACV | Ascofizz',
+        desc:  'ACV effervescent tablets — apple cider vinegar without the taste or the acid on your teeth. One tablet in water daily. FSSAI licensed, made in Gujarat. Free shipping above ₹599.' },
+  31: { kw: 'ashwagandha effervescent tablets',
+        title: 'Ashwagandha Effervescent Tablets India | Stress & Sleep | Ascofizz',
+        desc:  'Ashwagandha in an effervescent tablet that dissolves in water — easier than capsules, no powder aftertaste. FSSAI licensed, made in Anand Gujarat. Free shipping above ₹599.' },
+  30: { kw: 'green tea effervescent tablets india',
+        title: 'Green Tea Extract Effervescent Tablets India | Ascofizz',
+        desc:  'Green tea extract effervescent tablets with EGCG. Drop one in water for a daily green tea dose without brewing. FSSAI licensed, made in Gujarat. Free shipping above ₹599.' },
+  39: { kw: 'l-carnitine effervescent tablets india',
+        title: 'L-Carnitine L-Tartrate Effervescent Tablets India | Ascofizz',
+        desc:  'L-carnitine L-tartrate effervescent tablets — the amino acid that helps your body convert fat into energy. Take before training. FSSAI licensed, made in Gujarat. Free shipping above ₹599.' },
+  36: { kw: 'electrolyte rehydration tablets india',
+        title: 'Electrolyte Tablets India | Instant Hydration Drink | Ascofizz',
+        desc:  'Electrolyte effervescent tablets for gym, summer and travel — sodium, potassium and magnesium in a drink that takes ten seconds to make. FSSAI licensed. Free shipping above ₹599.' },
+  35: { kw: 'calcium magnesium zinc tablets bone health',
+        title: 'Calcium Magnesium Zinc Effervescent Tablets | Bone Health | Ascofizz',
+        desc:  'Complete bone health effervescent tablets with calcium, magnesium, zinc and vitamin D. Built for adults 35+. FSSAI licensed, made in Anand Gujarat. Free shipping above ₹599.' },
+  32: { kw: 'best multivitamin for men india',
+        title: "Men's Multivitamin Effervescent Tablets India | Daily | Ascofizz",
+        desc:  "Men's multivitamin effervescent tablets — a full daily spectrum in one glass of water, absorbed faster than a hard tablet. FSSAI licensed, made in Gujarat. Free shipping above ₹599." },
+  33: { kw: 'best multivitamin for women india',
+        title: "Women's Multivitamin Effervescent Tablets India | Daily | Ascofizz",
+        desc:  "Women's multivitamin effervescent tablets with iron, folate and B-complex. One tablet in water each morning. FSSAI licensed, made in Gujarat. Free shipping above ₹599." },
+  8:  { kw: 'ascofizz multivitamin tablets',
+        title: 'Multidiata Premium Multivitamin Tablets | Ascofizz India',
+        desc:  'Multidiata — Ascofizz premium daily multivitamin. FSSAI licensed, made in our own facility in Anand, Gujarat. Free shipping above ₹599.' },
+  20: { kw: 'moringa tablets india',
+        title: 'Organic Moringa Tablets India | Ascofizz',
+        desc:  'Organic moringa tablets from Ascofizz. FSSAI licensed, made in Anand, Gujarat. Free shipping above ₹599.' },
+};
+
+// AEO Question Bank → 5 questions per product, each answered in 40–60
+// words. That length is deliberate: featured snippets and AI answer
+// engines lift short, self-contained answers, not paragraphs.
+function productFaq(p) {
+  const n = (PRODUCT_SEO[p.id] && PRODUCT_SEO[p.id].kw) || (p.name || 'these tablets').toLowerCase();
+  return [
+    { q: `Is ${n} safe to take daily?`,
+      a: `Ascofizz ${n} are an FSSAI-licensed food supplement intended for daily use at the stated dose of one tablet per day. Stay within that dose. If you are pregnant, breastfeeding, under 18, or taking prescription medication, check with your doctor before starting any supplement.` },
+    { q: `What is the best time to take ${n}?`,
+      a: `Most people take one tablet in the morning with or just after food. Drop it into 200 ml of water, wait until it stops fizzing, and drink it. Taking it with a meal is gentler on the stomach than taking it fasted.` },
+    { q: `How long does ${n} take to show results?`,
+      a: `Supplements are not medicine and do not work overnight. Give any daily supplement 8 to 12 weeks of consistent use before judging it, and keep the rest of your routine steady. Individual results vary, and no supplement replaces a balanced diet.` },
+    { q: `Can I take ${n} on an empty stomach?`,
+      a: `You can, but with food is usually more comfortable. Effervescent tablets are dissolved in water before drinking, so they are already gentler than a hard tablet. If you notice any stomach discomfort on an empty stomach, switch to taking it after a meal.` },
+    { q: `How many ${n} should I take per day?`,
+      a: `One tablet per day unless the pack states otherwise. More is not better — stay within the stated dose. Each tube contains 15 effervescent tablets, so one tube is roughly a fifteen-day supply at one tablet daily.` },
+  ];
+}
+
+// Apply per-product title + meta description, and inject Product and
+// FAQPage structured data. Both schema types are what AI answer engines
+// and rich results read; the page had neither on product views.
+function applyProductSEO(p) {
+  if (!p) return;
+  const cfg = PRODUCT_SEO[p.id];
+  const price = p.salePrice || p.price;
+  const disc  = p.salePrice ? Math.round((1 - p.salePrice / p.price) * 100) : 0;
+
+  document.title = cfg ? cfg.title : `${p.name} | Buy Online India | Ascofizz`;
+  const md = document.querySelector('meta[name="description"]');
+  if (md) md.setAttribute('content',
+    cfg ? cfg.desc
+        : `Buy ${p.name} online in India at ₹${price}${disc ? ` (${disc}% off)` : ''}. FSSAI licensed, made in Anand, Gujarat. Free shipping above ₹599.`);
+
+  const ogT = document.querySelector('meta[property="og:title"]');
+  if (ogT) ogT.setAttribute('content', document.title);
+  const ogD = document.querySelector('meta[property="og:description"]');
+  if (ogD && md) ogD.setAttribute('content', md.getAttribute('content'));
+
+  const slug = (p.name || '').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+  const canon = document.querySelector('link[rel="canonical"]');
+  if (canon) canon.setAttribute('href', 'https://www.ascofizz.com/product/' + slug);
+
+  document.getElementById('ldProduct')?.remove();
+  document.getElementById('ldFaq')?.remove();
+
+  const ld = document.createElement('script');
+  ld.type = 'application/ld+json'; ld.id = 'ldProduct';
+  ld.textContent = JSON.stringify({
+    '@context': 'https://schema.org', '@type': 'Product',
+    name: p.name, description: (p.description || '').slice(0, 300),
+    brand: { '@type': 'Brand', name: 'Ascofizz' },
+    manufacturer: { '@type': 'Organization', name: 'Ascovita Healthcare' },
+    offers: {
+      '@type': 'Offer', priceCurrency: 'INR', price: String(price),
+      availability: (p.stock === 0) ? 'https://schema.org/OutOfStock' : 'https://schema.org/InStock',
+      url: 'https://www.ascofizz.com/product/' + slug,
+    },
+  });
+  document.head.appendChild(ld);
+
+  const faq = productFaq(p);
+  const ldf = document.createElement('script');
+  ldf.type = 'application/ld+json'; ldf.id = 'ldFaq';
+  ldf.textContent = JSON.stringify({
+    '@context': 'https://schema.org', '@type': 'FAQPage',
+    mainEntity: faq.map(f => ({
+      '@type': 'Question', name: f.q,
+      acceptedAnswer: { '@type': 'Answer', text: f.a },
+    })),
+  });
+  document.head.appendChild(ldf);
+
+  const wrap = document.getElementById('prodFaqBody');
+  if (wrap) {
+    wrap.innerHTML = faq.map(f =>
+      `<details class="pfaq"><summary>${f.q}</summary><p>${f.a}</p></details>`
+    ).join('') +
+    `<p class="pfaq-note">Food supplement — not a medicine. Not intended to diagnose, treat, cure or prevent any disease.</p>`;
+  }
+}
+
 function openProduct(id) {
   currentProduct = PRODUCTS.find(p => p.id === id);
   window._currentProductId = id; // track for backend sync re-render
@@ -10179,13 +10330,8 @@ function openProduct(id) {
     history.pushState({ page: 'product', id: id }, '', '/product/' + slug);
   } catch(e) {}
   // Update page title + meta for SEO
-  const disc = currentProduct.salePrice ? Math.round((1 - currentProduct.salePrice/currentProduct.price)*100) : 0;
-  const discText = disc > 0 ? ` – ${disc}% OFF` : '';
-  document.title = currentProduct.name + discText + ' | Ascofizz';
-  const metaDesc = document.querySelector('meta[name="description"]');
-  if (metaDesc) metaDesc.setAttribute('content',
-    'Buy ' + currentProduct.name + ' at ₹' + (currentProduct.salePrice||currentProduct.price) + discText + '. ' + (currentProduct.description||'').slice(0,120) + ' Free shipping above ₹599.'
-  );
+  // Keyword-led title, meta, canonical, Product schema and FAQPage schema.
+  try { applyProductSEO(currentProduct); } catch(e) { console.error('[applyProductSEO]', e); }
   // Show the page
   document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
   const el = document.getElementById('page-product');
@@ -10436,7 +10582,9 @@ function buildProductPage(p) {
         <button class="tab" onclick="switchTab(this,'ingr')">Ingredients</button>
         <button class="tab" onclick="switchTab(this,'rvs')">Reviews (${rvs.length})</button>
         ${tiers ? `<button class="tab" onclick="switchTab(this,'pricing')">&#x1F4CB; Pricing</button>` : ''}
+        <button class="tab" onclick="switchTab(this,'faq')">FAQ</button>
       </div>
+      <div class="tab-content" id="tab-faq"><div id="prodFaqBody"></div></div>
       <div class="tab-content active" id="tab-desc">
         <p style="font-size:.88rem;color:var(--t-mid);line-height:1.8;">${p.description}</p>
         <div style="background:var(--green-wash);border-radius:10px;padding:18px;margin-top:16px;"><div style="font-weight:700;font-size:.88rem;margin-bottom:10px;">&#x1F4CB; How to Use</div><p style="font-size:.83rem;color:var(--gray);line-height:1.75;">${p.howToUse}</p></div>
