@@ -1,4 +1,4 @@
-# Ascovita SPA — clean URL routing
+# Ascofizz SPA — clean URL routing
 # All page and product paths serve index.html
 /shop                       /index.html  200
 /blog                       /index.html  200
