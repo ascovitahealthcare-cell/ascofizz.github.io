@@ -4025,13 +4025,15 @@ img[src=""], img[data-awaiting-upload] { visibility: hidden; width: 100%; }
 .product-card:hover::before { transform: scaleX(1); }
 /* The lit well — product photography reads true on it */
 .p-img-wrap {
-  position: relative; overflow: hidden;
+  position: relative; overflow: hidden !important;
   aspect-ratio: 1; border-radius: calc(var(--r-lg) - 7px);
   background: var(--plate);
   box-shadow: var(--neo-1);
+  border: 1px solid rgba(101,113,102,.16);
 }
 .p-img-wrap img {
-  width: 100%; height: 100%; object-fit: contain; padding: 16px;
+  width: 100%; height: 100%; object-fit: contain; object-position: center;
+  padding: 20px; box-sizing: border-box;
   transition: transform var(--dur-4) var(--rise);
 }
 .product-card:hover .p-img-wrap img { transform: scale(1.07); }
@@ -5260,7 +5262,7 @@ textarea.b2b-form-input { min-height: 110px; resize: vertical; font-family: inhe
   .products-grid { grid-template-columns: repeat(2, 1fr); gap: 12px; }
   .product-card { padding: 5px; border-radius: var(--r-md); }
   .p-img-wrap { border-radius: calc(var(--r-md) - 5px); }
-  .p-img-wrap img { padding: 10px; }
+  .p-img-wrap img { padding: 12px; box-sizing: border-box; }
   .p-info { padding: 11px 8px 10px; gap: 3px; }
   .p-name { font-size: .855rem; }
   .sale-price, .p-price .sale-price { font-size: 1.05rem; }
