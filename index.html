@@ -8641,10 +8641,12 @@ function renderCheckoutSummary() {
     disc = appliedDiscount.type==='percent' ? Math.round(sub*appliedDiscount.value/100) : appliedDiscount.value;
   }
 
-  const ship  = 0;
-  const _vita = vitaCheckoutInfo(sub - disc);
-  const vitaOff = _vita.rupees;
-  const total = Math.max(0, sub - disc + ship - vitaOff);
+  // Read the charged figures rather than recomputing a second opinion.
+  const _t      = computeOrderTotals();
+  const ship    = _t.ship;
+  const _vita   = vitaCheckoutInfo(_t.afterDisc);
+  const vitaOff = _t.vitaOff;
+  const total   = _t.total;
 
   const itemsHtml = STORE.cart.map(item => {
     const p = PRODUCTS.find(p => p.id === item.id);
@@ -11882,10 +11884,17 @@ function renderCheckoutSummary() {
     disc = appliedDiscount.type==='percent' ? Math.round(sub*appliedDiscount.value/100) : appliedDiscount.value;
   }
 
-  const ship = 0; // Free shipping online
-  const _vita = vitaCheckoutInfo(sub - disc);
-  const vitaOff = _vita.rupees;
-  const total = Math.max(0, sub - disc + ship - vitaOff);
+  // NOTE: this is the SECOND definition of renderCheckoutSummary in this
+  // file. Being later, it wins — which is why the earlier "patch to include
+  // qty controls" never actually ran. The comment here claimed "free
+  // shipping online" while both payment paths charged 60 under the 599
+  // threshold, so a 300-rupee basket displayed 300 and billed 360.
+  // Both definitions now read the charged figures from computeOrderTotals().
+  const _t      = computeOrderTotals();
+  const ship    = _t.ship;
+  const _vita   = vitaCheckoutInfo(_t.afterDisc);
+  const vitaOff = _t.vitaOff;
+  const total   = _t.total;
 
   el.innerHTML = `
     ${STORE.cart.map(item => {
@@ -12401,6 +12410,85 @@ function validateCheckoutForm(opts) {
   return v;
 }
 
+// ══════════════════════════════════════════════════════════════════
+// PINCODE SERVICEABILITY  (Delhivery)
+// The backend already exposes /api/delhivery/serviceability/:pincode.
+// Checking at the PIN field turns a failed delivery days later into an
+// answer while the customer is still typing, and tells them up front
+// whether COD is available where they live.
+// ══════════════════════════════════════════════════════════════════
+let _pinCheckSeq = 0;
+const _pinCache = Object.create(null);
+
+async function checkPincodeServiceability(pin) {
+  if (_pinCache[pin]) return _pinCache[pin];
+  const res = await fetchWithTimeout(
+    API_BASE + '/api/delhivery/serviceability/' + encodeURIComponent(pin), {}, 8000);
+  if (!res.ok) throw new Error('lookup failed');
+  const data = await res.json();
+  _pinCache[pin] = data;
+  return data;
+}
+
+function _pinNote(msg, tone) {
+  const slot = document.getElementById('err-ckPin');
+  if (!slot) return;
+  const colours = { ok: 'var(--fern-lo)', warn: 'var(--clay-lo)', info: 'var(--t-mid)' };
+  slot.textContent = msg;
+  slot.style.color = colours[tone] || colours.info;
+}
+
+async function verifyPincode() {
+  const el = document.getElementById('ckPin');
+  if (!el) return;
+  const pin = String(el.value || '').replace(/\D/g, '');
+  if (pin.length !== 6) return;                 // field validation already covers this
+
+  const seq = ++_pinCheckSeq;                   // ignore results from stale lookups
+  _pinNote('Checking delivery to ' + pin + '…', 'info');
+
+  try {
+    const d = await checkPincodeServiceability(pin);
+    if (seq !== _pinCheckSeq) return;
+
+    if (!d.serviceable) {
+      ckSetError('ckPin', 'We do not deliver to this PIN code yet');
+      window._pinServiceable = false;
+      return;
+    }
+    window._pinServiceable = true;
+    el.classList.remove('input-invalid');
+
+    // Autofill city and state when they are still blank — fewer fields to
+    // mistype is fewer failed deliveries.
+    const city = document.getElementById('ckCity');
+    const state = document.getElementById('ckState');
+    if (city && !city.value.trim() && d.city) city.value = d.city;
+    if (state && !state.value.trim() && (d.state_code || d.district)) state.value = d.state_code || d.district;
+
+    const where = [d.city, d.state_code].filter(Boolean).join(', ');
+    _pinNote(d.cod
+      ? `Delivers to ${where || pin} · Cash on Delivery available`
+      : `Delivers to ${where || pin} · prepaid only, no COD here`, d.cod ? 'ok' : 'warn');
+
+    // A COD-only-unavailable pincode must not offer the COD button.
+    const codBtn = document.getElementById('codBtn');
+    if (codBtn) {
+      codBtn.disabled = !d.cod;
+      codBtn.style.display = d.cod ? '' : 'none';
+    }
+  } catch (e) {
+    if (seq !== _pinCheckSeq) return;
+    // A serviceability lookup failing must never block an order — the
+    // backend re-checks at shipment creation. Restore COD too, or a
+    // previous no-COD pincode would keep it hidden for an unknown one.
+    _pinNote('', 'info');
+    window._pinServiceable = null;
+    const codBtn = document.getElementById('codBtn');
+    if (codBtn) { codBtn.disabled = false; codBtn.style.display = ''; }
+  }
+}
+
 // Live feedback: once a field has been flagged, clear it as soon as the
 // customer fixes it rather than making them submit again to find out.
 function initCheckoutValidation() {
@@ -12408,7 +12496,10 @@ function initCheckoutValidation() {
     const el = document.getElementById(id);
     if (!el || el.__ckBound) return;
     el.__ckBound = true;
-    el.addEventListener('blur',  () => { if (el.value.trim()) validateCheckoutForm({ silent: true }) || ckSetError(id, ''); });
+    el.addEventListener('blur',  () => {
+      if (el.value.trim()) validateCheckoutForm({ silent: true }) || ckSetError(id, '');
+      if (id === 'ckPin') verifyPincode();
+    });
     el.addEventListener('input', () => { if (el.classList.contains('input-invalid')) ckSetError(id, ''); });
   });
 }
@@ -12440,23 +12531,43 @@ function validateCartStock() {
   return problems;
 }
 
+// THE single order calculator. Both payment paths and the on-screen
+// summary read from this, because they used to disagree in two ways and
+// both errors reached real customers:
+//
+//   · Shipping. renderCheckoutSummary hard-coded `ship = 0` while the
+//     payment paths charged 60 under the 599 threshold, so a 300-rupee
+//     basket displayed 300 and charged 360.
+//   · VitaPoints. The summary subtracted the redeemed rupees but
+//     getOrderTotal() never returned them, so a customer redeeming
+//     points watched the total drop, then paid the undiscounted amount
+//     and lost the points as well.
+//
+// Order of operations: discounts apply to merchandise, the free-shipping
+// threshold is judged on that discounted merchandise value, and points
+// come off last like a gift card.
+const FREE_SHIP_THRESHOLD = 599;
+const FLAT_SHIP_RATE = 60;
+
 function computeOrderTotals() {
   const { sub, disc } = getOrderTotal();
-  const netSub = sub - disc;
-  const promoD = (typeof activePromoCode !== 'undefined' && activePromoCode)
-    ? (activePromoCode.type === 'pct'
-        ? Math.round(netSub * activePromoCode.value / 100)
-        : Math.min(activePromoCode.value, netSub))
-    : (appliedDiscount
-        ? (appliedDiscount.type === 'percent'
-            ? Math.round(netSub * appliedDiscount.value / 100)
-            : appliedDiscount.value)
-        : 0);
-  // A discount must never exceed the basket, or shipping goes negative.
-  const afterDisc = Math.max(0, netSub - promoD);
-  const ship  = afterDisc >= 599 ? 0 : 60;
-  const total = Math.max(0, afterDisc + ship);
-  return { sub, disc, netSub, promoD, afterDisc, ship, total };
+  const netSub = Math.max(0, sub - disc);
+
+  // getOrderTotal already resolved the active promo into `disc`; recomputing
+  // it here would apply the same discount twice.
+  const afterDisc = netSub;
+
+  const ship = afterDisc >= FREE_SHIP_THRESHOLD ? 0 : FLAT_SHIP_RATE;
+
+  let vitaOff = 0;
+  try {
+    const v = (typeof vitaCheckoutInfo === 'function') ? vitaCheckoutInfo(afterDisc) : null;
+    vitaOff = Math.max(0, Math.min(Number(v && v.rupees) || 0, afterDisc + ship));
+  } catch (e) { vitaOff = 0; }
+
+  const total = Math.max(0, afterDisc + ship - vitaOff);
+  return { sub, disc, netSub, promoD: disc, afterDisc, ship, vitaOff, total,
+           freeShipThreshold: FREE_SHIP_THRESHOLD };
 }
 
 // One in-flight order at a time. Guards double taps, double clicks and
