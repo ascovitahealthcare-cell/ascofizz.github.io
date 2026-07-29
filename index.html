@@ -386,7 +386,7 @@ best supplement brand 2024 2025, Ascofizz review, Ascofizz vs competitors India,
       },
       "image": {
         "@type": "ImageObject",
-        "url": "https://static.wixstatic.com/media/f0adaf_0632dc96f8db425a9211154fc0a7ab6f~mv2.jpg/v1/fill/w_1200,h_630,al_c,q_85,enc_avif,quality_auto/f0adaf_0632dc96f8db425a9211154fc0a7ab6f~mv2.jpg",
+        "url": "https://www.ascofizz.com/assets/ascofizz-icon-512.png",
         "caption": "Ascofizz — Premium Effervescent Vitamin Supplements, Anand Gujarat India"
       },
       "description": "Ascofizz is the direct-to-consumer supplement brand of Ascovita Healthcare. It sells effervescent vitamin tablets online across India — L-Glutathione for skin, Vitamin C with Amla, Apple Cider Vinegar, Ashwagandha, rehydration, bone health, men's and women's multivitamins, and the Multidiata 23-vitamin multivitamin. Products are made in Ascovita Healthcare's FSSAI approved facility in Anand, Gujarat, and shipped direct from the maker with no reseller markup.",
@@ -783,7 +783,7 @@ best supplement brand 2024 2025, Ascofizz review, Ascofizz vs competitors India,
       },
       "primaryImageOfPage": {
         "@type": "ImageObject",
-        "url": "https://static.wixstatic.com/media/f0adaf_0632dc96f8db425a9211154fc0a7ab6f~mv2.jpg/v1/fill/w_1200,h_630,al_c,q_85,enc_avif,quality_auto/f0adaf_0632dc96f8db425a9211154fc0a7ab6f~mv2.jpg",
+        "url": "https://www.ascofizz.com/assets/ascofizz-icon-512.png",
         "caption": "Ascofizz — L-Glutathione Effervescent Tablet, Skin Brightening Supplement, Anand Gujarat India"
       },
       "inLanguage": "en-IN",
@@ -835,7 +835,7 @@ best supplement brand 2024 2025, Ascofizz review, Ascofizz vs competitors India,
       ],
       "image": [
         "https://www.ascofizz.com/assets/ascofizz-icon-512.png",
-        "https://static.wixstatic.com/media/f0adaf_0632dc96f8db425a9211154fc0a7ab6f~mv2.jpg/v1/fill/w_1200,h_630,al_c,q_85,enc_avif,quality_auto/f0adaf_0632dc96f8db425a9211154fc0a7ab6f~mv2.jpg"
+        "https://www.ascofizz.com/assets/ascofizz-icon-512.png"
       ],
       "url": "https://www.ascofizz.com/",
       "telephone": "+91-98985-82650",
@@ -5664,9 +5664,8 @@ button, [role="button"] {
  *
  * ⚠️ PERFORMANCE — READ BEFORE UPLOADING (important, unlike your
  * product images) ⚠️
- * Your product photos are hosted on Wix, which auto-generates
- * compressed AVIF versions on the fly (that's what "enc_avif,quality_auto"
- * in those URLs does). imgbb does NOT do this — whatever file you
+ * Your product photos are served pre-compressed as AVIF versions
+ * automatically. imgbb does NOT do this — whatever file you
  * upload here is served byte-for-byte as-is, full resolution, to
  * every mobile visitor. These 19 cards are one of the heaviest asset
  * groups on the site if uploaded as raw phone-camera JPG/PNG.
@@ -9318,7 +9317,7 @@ const STORE = {
 function fmt(p){return '₹'+p.toLocaleString('en-IN',{minimumFractionDigits:0,maximumFractionDigits:2});}
 function stars(r){const f=Math.floor(r),h=r%1>=0.5;return '<span class="stars">'+'★'.repeat(f)+(h?'☆':'')+'</span><span class="rating-n">'+r+'</span>';}
 function showToast(msg,type=''){const t=document.createElement('div');t.className='toast '+type;t.textContent=msg;document.body.appendChild(t);requestAnimationFrame(()=>t.classList.add('show'));setTimeout(()=>{t.classList.remove('show');setTimeout(()=>t.remove(),350);},3200);}
-// Category-based fallback images using Wix product images already in the page
+// Category-based fallback images using product images already in the page
 // A neutral "no image available" placeholder — used ONLY when a product
 // truly has no image. This intentionally does NOT show any other
 // product's real photo (that was the old bug: every image-less product
@@ -9382,7 +9381,7 @@ function renderProductCard(p){
 <script>
 // ============================================================
 // ASCOVITA — PRODUCT IMAGES
-// Using direct Wix CDN URLs — no local image upload needed
+// Using direct CDN URLs — no local image upload needed
 // ============================================================
 
 const PRODUCT_IMAGES = {
@@ -9455,12 +9454,12 @@ const PRODUCT_IMAGES = {
 
 // ================================================================
 // RESPONSIVE IMAGE HELPER
-// Wix media URLs embed their own resize params (w_XXX,h_XXX). Swapping
+// Product media URLs embed their own resize params (w_XXX,h_XXX). Swapping
 // that segment gives us a smaller variant of the same image for free —
 // no extra uploads, no extra CDN. Used to serve small thumbnails to
 // grid/cart/related-product cards instead of the full 600-1100px asset.
 // ================================================================
-function wixResize(url, size) {
+function resizeImageUrl(url, size) {
   if (!url || typeof url !== 'string') return url;
   return url.replace(/w_\d+,h_\d+/, 'w_' + size + ',h_' + size);
 }
@@ -9496,19 +9495,19 @@ function wixResize(url, size) {
     // thumb is now a real small variant (300px) instead of the full image,
     // so the gallery thumbnail strip doesn't download full-res images 5x over.
     p.media = imgs.map(function(url) {
-      return { url: url, type: 'image', thumb: wixResize(url, 300) };
+      return { url: url, type: 'image', thumb: resizeImageUrl(url, 300) };
     });
 
     // NEW — small (400px) variant for product-card grids, cart rows,
     // related/upsell tiles. These never need the full 600-1100px asset.
-    p.thumb400 = wixResize(imgs[0] || p.image || '', 400);
+    p.thumb400 = resizeImageUrl(imgs[0] || p.image || '', 400);
   });
 
   console.log('[Ascovita] ✅ Product images applied from PRODUCT_IMAGES map');
 })();
 
 // Export for Node.js / bundlers
-if (typeof module !== "undefined") module.exports = { PRODUCT_IMAGES: PRODUCT_IMAGES, wixResize: wixResize };
+if (typeof module !== "undefined") module.exports = { PRODUCT_IMAGES: PRODUCT_IMAGES, resizeImageUrl: resizeImageUrl };
 
 </script>
 
