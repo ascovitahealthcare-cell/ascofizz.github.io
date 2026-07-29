@@ -10,6 +10,3 @@
 /wishlist                   /index.html  200
 /subscriptions              /index.html  200
 /product/*                  /index.html  200
-
-# Catch-all for single-page app routes (put last)
-/*                         /index.html  200
