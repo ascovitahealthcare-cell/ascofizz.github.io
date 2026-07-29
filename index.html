@@ -5643,6 +5643,33 @@ button, [role="button"] {
   .vb-ring, .vb-num { animation: none; }
   .vb-spark { display: none; }
 }
+
+/* VitaPoints — checkout redemption widget */
+.vita-ck {
+  margin-top: 14px; padding: 13px 15px; border-radius: var(--r-md);
+  background: var(--face-warm); box-shadow: inset 0 0 0 1.5px rgba(94,145,121,.28);
+}
+.vita-ck-head { font-size: .8rem; font-weight: 700; color: var(--t-hi); margin-bottom: 9px; }
+.vita-ck-head b { color: var(--fern-lo); }
+.vita-ck-row { display: flex; gap: 8px; }
+.vita-ck-input {
+  flex: 1; min-width: 0; padding: 9px 12px; border-radius: var(--r-sm);
+  background: var(--white); box-shadow: var(--neo-in); font-size: .85rem;
+  font-weight: 700; color: var(--t-hi); font-variant-numeric: tabular-nums;
+}
+.vita-ck-max {
+  padding: 9px 14px; border-radius: var(--r-sm); font-size: .76rem; font-weight: 800;
+  color: var(--fern-lo); background: var(--white); box-shadow: var(--neo-1); white-space: nowrap;
+}
+.vita-ck-max:hover { background: var(--fern-bg); }
+.vita-ck-note { font-size: .68rem; color: var(--t-low); margin-top: 7px; line-height: 1.5; }
+.vita-ck-applied { font-size: .8rem; font-weight: 800; color: var(--fern-lo); margin-top: 6px; }
+.vita-pending-chip {
+  display: inline-block; font-size: .64rem; font-weight: 700; letter-spacing: .04em;
+  color: var(--clay-lo); background: var(--face-warm); border-radius: 99px;
+  padding: 3px 9px; margin-left: 6px;
+}
+.vb-note { font-size: .68rem; color: var(--t-low); margin-top: 6px; line-height: 1.5; }
 </style>
 </head>
 <!-- Promotional Media Config -->
@@ -7923,7 +7950,9 @@ function renderCheckoutSummary() {
   }
 
   const ship  = 0;
-  const total = sub - disc + ship;
+  const _vita = vitaCheckoutInfo(sub - disc);
+  const vitaOff = _vita.rupees;
+  const total = Math.max(0, sub - disc + ship - vitaOff);
 
   const itemsHtml = STORE.cart.map(item => {
     const p = PRODUCTS.find(p => p.id === item.id);
@@ -7956,8 +7985,10 @@ function renderCheckoutSummary() {
     <div class="sum-row"><span>Subtotal</span><span>₹${sub.toLocaleString('en-IN')}</span></div>
     ${disc > 0 ? `<div class="sum-row" style="color:var(--success)"><span>🏷️ Discount</span><span>-₹${disc.toLocaleString('en-IN')}</span></div>` : ''}
     <div class="sum-row"><span>Shipping</span><span>${ship === 0 ? '<span style="color:var(--success);font-weight:700">FREE</span>' : '₹' + ship}</span></div>
+    ${vitaOff > 0 ? `<div class="sum-row" style="color:var(--fern-lo)"><span>💎 VitaPoints (${_vita.applied.toLocaleString('en-IN')})</span><span>-₹${vitaOff.toFixed(2)}</span></div>` : ''}
     <hr style="border:none;border-top:1px solid var(--light-gray);margin:8px 0">
-    <div class="sum-row total"><span>Total</span><span style="color:var(--green);font-size:1.1rem">₹${total.toLocaleString('en-IN')}</span></div>`;
+    <div class="sum-row total"><span>Total</span><span style="color:var(--green);font-size:1.1rem">₹${total.toLocaleString('en-IN',{maximumFractionDigits:2})}</span></div>
+    ${vitaRedeemWidgetHTML(sub - disc)}`;
 
   // Also re-render recommendations whenever summary updates
   renderCkRecommendations();
@@ -10705,7 +10736,9 @@ function renderCart() {
   }
 
   const ship = 0; // Free shipping online
-  const total = sub - disc + ship;
+  const _vita = vitaCheckoutInfo(sub - disc);
+  const vitaOff = _vita.rupees;
+  const total = Math.max(0, sub - disc + ship - vitaOff);
 
   // Count total physical packs for display
   const totalPacks = STORE.cart.reduce((s, item) => {
@@ -10771,7 +10804,9 @@ function renderCart() {
         ${sub < 599 ? `<div style="font-size:.72rem;color:var(--gray);margin-bottom:4px;padding:6px 10px;background:#FFF8E1;border-radius:6px;border-left:1px solid var(--seal)">💡 Add ₹${(599 - sub).toLocaleString('en-IN')} more for FREE shipping + free COD</div>` : ''}
         <div class="sum-row" style="font-size:.78rem;color:var(--gray)"><span>COD charge (if applicable)</span><span>${sub >= 599 ? '<span style="color:var(--success)">FREE</span>' : '₹60'}</span></div>
         <hr style="border:none;border-top:1px solid var(--light-gray);margin:8px 0">
-        <div class="sum-row total"><span>Total</span><span style="color:var(--green)">₹${total.toLocaleString('en-IN')}</span></div>
+        ${vitaOff > 0 ? `<div class="sum-row" style="color:var(--fern-lo)"><span>💎 VitaPoints (${_vita.applied.toLocaleString('en-IN')})</span><span>-₹${vitaOff.toFixed(2)}</span></div>` : ''}
+        <div class="sum-row total"><span>Total</span><span style="color:var(--green)">₹${total.toLocaleString('en-IN',{maximumFractionDigits:2})}</span></div>
+        ${vitaRedeemWidgetHTML(sub - disc)}
         <div style="font-weight:600;font-size:.82rem;margin:16px 0 8px">Apply Coupon Code</div>
         ${(disc > 0 && discLabel) ? `<div class="disc-applied">✅ ${discLabel} applied! <span style="cursor:pointer;margin-left:auto" onclick="activePromoCode=null;appliedDiscount=null;renderCart()">✕</span></div>` : `
           <div class="coupon-row">
@@ -10947,7 +10982,9 @@ function renderCheckoutSummary() {
   }
 
   const ship = 0; // Free shipping online
-  const total = sub - disc + ship;
+  const _vita = vitaCheckoutInfo(sub - disc);
+  const vitaOff = _vita.rupees;
+  const total = Math.max(0, sub - disc + ship - vitaOff);
 
   el.innerHTML = `
     ${STORE.cart.map(item => {
@@ -10971,7 +11008,9 @@ function renderCheckoutSummary() {
     ${disc > 0 ? `<div class="sum-row" style="color:var(--success)"><span>🏷️ Discount</span><span>-₹${disc.toLocaleString('en-IN')}</span></div>` : ''}
     <div class="sum-row"><span>Shipping</span><span>${ship === 0 ? '<span style="color:var(--success);font-weight:700">FREE</span>' : '₹' + ship}</span></div>
     <hr style="border:none;border-top:1px solid var(--light-gray);margin:8px 0">
-    <div class="sum-row total"><span>Total</span><span style="color:var(--green);font-size:1.1rem">₹${total.toLocaleString('en-IN')}</span></div>`;
+    ${vitaOff > 0 ? `<div class="sum-row" style="color:var(--fern-lo)"><span>💎 VitaPoints (${_vita.applied.toLocaleString('en-IN')})</span><span>-₹${vitaOff.toFixed(2)}</span></div>` : ''}
+    <div class="sum-row total"><span>Total</span><span style="color:var(--green);font-size:1.1rem">₹${total.toLocaleString('en-IN',{maximumFractionDigits:2})}</span></div>
+    ${vitaRedeemWidgetHTML(sub - disc)}`;
 }
 
 function selPayMethod(el) { /* handled by new payment modal */ }
@@ -11807,7 +11846,16 @@ async function finalizeOrder(orderId, formData, total, method, codCharge) {
   } catch(e) {}
 
   // ── 2a. Award VitaPoints for this order ────────────────────
-  try { vitaEarn(total, orderId); } catch(e) { console.error('[vitaEarn]', e); }
+  try {
+    // Spend first, then earn — a redemption must never be funded by
+    // the points the same order generates.
+    if (typeof VITA_APPLIED !== 'undefined' && VITA_APPLIED > 0) {
+      var _r = vitaRedeem(VITA_APPLIED, orderId);
+      if (!_r.ok) console.warn('[vitaRedeem]', _r.reason);
+      vitaClearApplied();
+    }
+    vitaEarn(total, orderId);
+  } catch(e) { console.error('[vitaPoints]', e); }
 
   // ── 2b. Save order to Supabase via backend (shows in Admin) ────
   try {
@@ -12333,9 +12381,14 @@ function handleAccountNavClick() {
 const VITA = {
   EARN_PER_RUPEE:  1,
   POINTS_PER_RUPEE: 150,
-  MAX_REDEEM_PER_ORDER: 5000,
+  MAX_EARN_PER_ORDER:   5000,  // ceiling on points COLLECTED from one order
+  MAX_REDEEM_PER_ORDER: 5000,  // ceiling on points SPENT on one order
   TIER_50_THRESHOLD: 15000,
-  TIER_50_CONSUMES: true   // reaching the tier spends the 15,000 points
+  TIER_50_CONSUMES: true,      // reaching the tier spends the 15,000 points
+  // Anti-fraud: points do not become spendable until the return window
+  // has closed. Buy -> earn -> return -> keep points is the single
+  // easiest way to farm free product, so earned points are held first.
+  HOLD_DAYS: 8                 // 7-day return policy + 1 day of slack
 };
 
 // Per-user namespacing. Two customers on one device must never see
@@ -12349,7 +12402,7 @@ function _vitaKey(email) {
   return 'asc_vita_' + Math.abs(h).toString(36);
 }
 
-function _vitaBlank() { return { balance: 0, lifetime: 0, coupons: 0, history: [] }; }
+function _vitaBlank() { return { balance: 0, pending: [], lifetime: 0, coupons: 0, history: [] }; }
 
 function getVitaState() {
   const u = getCurrentUser();
@@ -12402,28 +12455,92 @@ function vitaMaxRedeemable(orderTotal) {
   return Math.max(0, Math.min(st.balance, VITA.MAX_REDEEM_PER_ORDER, byOrder));
 }
 
-function vitaEarn(orderTotal, orderId) {
+// Move any pending points whose hold window has expired into the
+// spendable balance. Safe to call as often as you like.
+function vitaMature() {
   const u = getCurrentUser();
-  if (!u || !u.email) return null;
-  const pts = Math.floor((Number(orderTotal) || 0) * VITA.EARN_PER_RUPEE);
-  if (pts <= 0) return null;
+  if (!u || !u.email) return;
   const st = getVitaState();
-  st.balance  += pts;
-  st.lifetime += pts;
-  st.history.unshift({ t: Date.now(), type: 'earn', pts: pts, ref: orderId || '' });
-
-  // Tier unlock — 15,000 points converts into one 50%-off coupon.
+  if (!st.pending || !st.pending.length) return;
+  const now = Date.now();
+  const ready = st.pending.filter(function(x){ return x.matureAt <= now; });
+  if (!ready.length) return;
+  st.pending = st.pending.filter(function(x){ return x.matureAt > now; });
   let unlocked = 0;
+  ready.forEach(function(x){
+    st.balance += x.pts;
+    st.history.unshift({ t: now, type: 'mature', pts: x.pts, ref: x.ref || '' });
+  });
   while (st.balance >= VITA.TIER_50_THRESHOLD) {
     st.coupons += 1; unlocked += 1;
     if (VITA.TIER_50_CONSUMES) st.balance -= VITA.TIER_50_THRESHOLD; else break;
   }
   if (unlocked) {
-    st.history.unshift({ t: Date.now(), type: 'tier', pts: VITA.TIER_50_CONSUMES ? -VITA.TIER_50_THRESHOLD * unlocked : 0, ref: unlocked + ' × 50% coupon' });
+    st.history.unshift({ t: now, type: 'tier',
+      pts: VITA.TIER_50_CONSUMES ? -VITA.TIER_50_THRESHOLD * unlocked : 0,
+      ref: unlocked + ' × 50% coupon' });
   }
   _saveVita(st);
-  vitaCelebrate(pts, unlocked);
-  return { earned: pts, balance: st.balance, unlocked: unlocked };
+}
+
+function vitaPendingTotal() {
+  const st = getVitaState();
+  return (st.pending || []).reduce(function(t,x){ return t + x.pts; }, 0);
+}
+
+function vitaEarn(orderTotal, orderId) {
+  const u = getCurrentUser();
+  if (!u || !u.email) return null;
+  let pts = Math.floor((Number(orderTotal) || 0) * VITA.EARN_PER_RUPEE);
+  if (pts <= 0) return null;
+  // Cap what a single order can ever be worth.
+  const capped = pts > VITA.MAX_EARN_PER_ORDER;
+  if (capped) pts = VITA.MAX_EARN_PER_ORDER;
+
+  const st = getVitaState();
+  st.lifetime += pts;
+  st.pending = st.pending || [];
+  st.pending.push({
+    pts: pts,
+    ref: orderId || '',
+    earnedAt: Date.now(),
+    matureAt: Date.now() + VITA.HOLD_DAYS * 86400000
+  });
+  st.history.unshift({ t: Date.now(), type: 'earn', pts: pts, ref: orderId || '' });
+  _saveVita(st);
+  vitaCelebrate(pts, 0, capped);
+  return { earned: pts, capped: capped, pending: vitaPendingTotal(), balance: st.balance };
+}
+
+// Called when an order is returned, refunded or cancelled. Removes the
+// points that order generated — from the pending queue if still held,
+// otherwise clawed back out of the spendable balance.
+function vitaReverse(orderId, reason) {
+  const u = getCurrentUser();
+  if (!u || !u.email) return null;
+  const st = getVitaState();
+  let removed = 0;
+  st.pending = (st.pending || []).filter(function(x){
+    if (String(x.ref) === String(orderId)) { removed += x.pts; return false; }
+    return true;
+  });
+  let clawed = 0;
+  const original = (st.history || []).filter(function(h){
+    return h.type === 'earn' && String(h.ref) === String(orderId);
+  }).reduce(function(t,h){ return t + h.pts; }, 0);
+  const stillOwed = Math.max(0, original - removed);
+  if (stillOwed > 0) {
+    clawed = Math.min(st.balance, stillOwed);
+    st.balance -= clawed;
+  }
+  const total = removed + clawed;
+  if (total > 0) {
+    st.lifetime = Math.max(0, st.lifetime - total);
+    st.history.unshift({ t: Date.now(), type: 'reverse', pts: -total,
+      ref: (orderId || '') + (reason ? ' — ' + reason : ' — returned') });
+    _saveVita(st);
+  }
+  return { reversed: total, heldRemoved: removed, clawedBack: clawed, balance: st.balance };
 }
 
 function vitaRedeem(points, orderId) {
@@ -12440,6 +12557,87 @@ function vitaRedeem(points, orderId) {
   return { ok: true, points: pts, rupees: vitaToRupees(pts), balance: st.balance };
 }
 
+// ── CHECKOUT REDEMPTION ───────────────────────────────────────
+// Points the customer has chosen to spend on the order in progress.
+// Not deducted until the order is actually placed.
+let VITA_APPLIED = 0;
+
+function vitaClearApplied() { VITA_APPLIED = 0; }
+
+// Everything the checkout needs to know, in one call.
+function vitaCheckoutInfo(orderSubtotal) {
+  vitaMature();
+  const u = getCurrentUser();
+  if (!u || !u.email) return { signedIn: false, balance: 0, max: 0, applied: 0, rupees: 0 };
+  const st = getVitaState();
+  const max = Math.max(0, Math.min(st.balance, VITA.MAX_REDEEM_PER_ORDER,
+                                   vitaFromRupees(orderSubtotal)));
+  if (VITA_APPLIED > max) VITA_APPLIED = max;
+  return {
+    signedIn: true, balance: st.balance, pending: vitaPendingTotal(),
+    max: max, applied: VITA_APPLIED, rupees: vitaToRupees(VITA_APPLIED)
+  };
+}
+
+function vitaApplyAtCheckout(points) {
+  const sub = (typeof STORE !== 'undefined' && STORE.cart)
+    ? STORE.cart.reduce(function(t,item){
+        const p = PRODUCTS.find(function(x){ return x.id === item.id; });
+        if (!p) return t;
+        const up = item.tierRate !== undefined ? item.tierRate : (p.salePrice || p.price);
+        return t + up * item.qty;
+      }, 0) : 0;
+  const info = vitaCheckoutInfo(sub);
+  if (!info.signedIn) { showToast('Please sign in to use VitaPoints', 'error'); return; }
+  let pts = Math.floor(Number(points) || 0);
+  if (pts < 0) pts = 0;
+  if (pts > info.max) {
+    pts = info.max;
+    showToast('Capped at ' + info.max.toLocaleString('en-IN') + ' VitaPoints for this order');
+  }
+  VITA_APPLIED = pts;
+  if (typeof renderCheckoutSummary === 'function') renderCheckoutSummary();
+  if (typeof renderCartPage === 'function') { try { renderCartPage(); } catch(e) {} }
+}
+
+function vitaUseMax() {
+  const sub = STORE.cart.reduce(function(t,item){
+    const p = PRODUCTS.find(function(x){ return x.id === item.id; });
+    if (!p) return t;
+    const up = item.tierRate !== undefined ? item.tierRate : (p.salePrice || p.price);
+    return t + up * item.qty;
+  }, 0);
+  vitaApplyAtCheckout(vitaCheckoutInfo(sub).max);
+}
+
+// The block that renders inside the checkout / cart summary.
+function vitaRedeemWidgetHTML(sub) {
+  const i = vitaCheckoutInfo(sub);
+  if (!i.signedIn) {
+    return '<div class="vita-ck"><div class="vita-ck-head">💎 VitaPoints</div>' +
+      '<div class="vita-ck-note">Sign in to use your VitaPoints on this order.</div></div>';
+  }
+  if (i.balance <= 0) {
+    return '<div class="vita-ck"><div class="vita-ck-head">💎 VitaPoints</div>' +
+      '<div class="vita-ck-note">No points available yet' +
+      (i.pending ? ' — ' + i.pending.toLocaleString('en-IN') + ' still in the ' + VITA.HOLD_DAYS + '-day return window.' : '.') +
+      '</div></div>';
+  }
+  return '<div class="vita-ck">' +
+    '<div class="vita-ck-head">💎 VitaPoints <b>' + i.balance.toLocaleString('en-IN') + ' available</b></div>' +
+    '<div class="vita-ck-row">' +
+      '<input id="vitaRedeemInput" type="number" min="0" step="1" max="' + i.max + '" ' +
+        'value="' + (i.applied || '') + '" placeholder="0" class="vita-ck-input" ' +
+        'oninput="vitaApplyAtCheckout(this.value)">' +
+      '<button type="button" class="vita-ck-max" onclick="vitaUseMax()">Use max</button>' +
+    '</div>' +
+    '<div class="vita-ck-note">Max ' + i.max.toLocaleString('en-IN') + ' points on this order · ' +
+      VITA.POINTS_PER_RUPEE + ' points = ₹1' +
+      (i.pending ? ' · ' + i.pending.toLocaleString('en-IN') + ' pending' : '') + '</div>' +
+    (i.applied ? '<div class="vita-ck-applied">− ₹' + i.rupees.toFixed(2) + ' applied</div>' : '') +
+  '</div>';
+}
+
 // 50% coupon is calculated against MRP, never the sale price.
 function vitaApplyTierCoupon(product) {
   const st = getVitaState();
@@ -12453,7 +12651,7 @@ function vitaApplyTierCoupon(product) {
 }
 
 // ── Collection animation ──────────────────────────────────────
-function vitaCelebrate(pts, unlocked) {
+function vitaCelebrate(pts, unlocked, capped) {
   try {
     const host = document.createElement('div');
     host.className = 'vita-burst';
@@ -12462,6 +12660,8 @@ function vitaCelebrate(pts, unlocked) {
         '<div class="vb-ring"><span class="vb-num" data-to="' + pts + '">0</span></div>' +
         '<div class="vb-lbl">VitaPoints collected</div>' +
         '<div class="vb-val">worth ₹' + vitaToRupees(pts).toFixed(2) + '</div>' +
+        (capped ? '<div class="vb-note">Capped at ' + VITA.MAX_EARN_PER_ORDER.toLocaleString('en-IN') + ' points per order</div>' : '') +
+        '<div class="vb-note">Available to spend after ' + VITA.HOLD_DAYS + ' days (return window)</div>' +
         (unlocked ? '<div class="vb-tier">🎉 50% OFF coupon unlocked!</div>' : '') +
       '</div>';
     for (let i = 0; i < 14; i++) {
@@ -12695,14 +12895,16 @@ document.addEventListener('DOMContentLoaded', function _patchAuthButtons() {
 
 const GOOGLE_CLIENT_ID = '6793142938-b9sl3d3lh2svjkmcnina8fsh31nut0bu.apps.googleusercontent.com';
 
-// Where Google sends mobile users back after they approve sign-in. Derived
-// from the live origin so it stays correct on the GitHub Pages URL, on a
-// custom domain, and in local testing — previously hardcoded to
-// https://www.ascofizz.com, which does not resolve, breaking every mobile
-// Google login. Whatever origin the site is served from must be registered
-// under "Authorised redirect URIs" for this OAuth client in Google Cloud.
-const GOOGLE_REDIRECT_URI =
-  window.location.origin + window.location.pathname.replace(/\/index\.html$/, '/');
+// Where Google sends mobile users back after they approve sign-in. Pinned to
+// the bare origin (no trailing slash, no path) so it byte-for-byte matches
+// the "Authorised redirect URIs" registered for this OAuth client in Google
+// Cloud (https://ascofizz.com and https://www.ascofizz.com — neither has a
+// trailing slash). Previously this was derived from window.location.pathname,
+// which always appended a trailing "/" (and sometimes a page path), causing
+// redirect_uri_mismatch on every mobile sign-in. The redirect-return handler
+// below runs on page load regardless of path, so a fixed origin works no
+// matter which page the user was on when they tapped "Sign in with Google".
+const GOOGLE_REDIRECT_URI = window.location.origin;
 
 // ── State tracking ──
 let _googleInitialized = false;
@@ -12746,7 +12948,7 @@ const _GOOGLE_MAX_RETRIES = 8;
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
       code: code,
-      redirect_uri: window.location.origin + window.location.pathname.replace(/\/index\.html$/, '/')
+      redirect_uri: window.location.origin
     })
   })
   .then(function(r){ return r.json(); })
