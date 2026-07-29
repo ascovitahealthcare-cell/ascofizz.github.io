@@ -5552,6 +5552,97 @@ button, [role="button"] {
   overflow: visible;
 }
 
+
+/* ══ VITAPOINTS ═══════════════════════════════════════════════════ */
+.vita-hero {
+  display: grid; grid-template-columns: 1.1fr 1.4fr; gap: 18px; align-items: center;
+  background: linear-gradient(135deg, var(--face-warm), var(--white));
+  border-radius: var(--r-lg); padding: 22px 24px; box-shadow: var(--neo-1); margin-bottom: 18px;
+}
+.vita-bal-num {
+  font-family: var(--font-display); font-size: 2.6rem; font-weight: 700;
+  line-height: 1; color: var(--indigo-lo); font-variant-numeric: tabular-nums;
+}
+.vita-bal-lbl { font-size: .72rem; letter-spacing: .14em; text-transform: uppercase; color: var(--t-low); margin-top: 6px; }
+.vita-bal-val { font-size: .86rem; font-weight: 700; color: var(--fern-lo); margin-top: 8px; }
+.vita-stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+.vita-stats > div {
+  background: var(--paper); border-radius: var(--r-md); padding: 12px 10px;
+  text-align: center; box-shadow: var(--neo-in);
+}
+.vita-stats b { display: block; font-size: 1.1rem; font-weight: 800; color: var(--t-hi); font-variant-numeric: tabular-nums; }
+.vita-stats span { display: block; font-size: .64rem; letter-spacing: .08em; text-transform: uppercase; color: var(--t-low); margin-top: 3px; }
+.vita-prog-wrap { margin-bottom: 18px; }
+.vita-prog-top { display: flex; justify-content: space-between; font-size: .78rem; font-weight: 700; color: var(--t-mid); margin-bottom: 7px; }
+.vita-prog { height: 11px; border-radius: 99px; background: var(--paper); box-shadow: var(--neo-in); overflow: hidden; }
+.vita-prog > i {
+  display: block; height: 100%; border-radius: 99px;
+  background: linear-gradient(90deg, var(--harbour), var(--fern));
+  transition: width 1s var(--rise);
+}
+.vita-prog-note { font-size: .76rem; color: var(--t-low); margin-top: 8px; }
+.vita-rules, .vita-hist {
+  background: var(--paper); border-radius: var(--r-lg); padding: 18px 20px;
+  box-shadow: var(--neo-1); margin-bottom: 16px;
+}
+.vita-rules h4, .vita-hist h4 {
+  font-size: .7rem; letter-spacing: .14em; text-transform: uppercase;
+  color: var(--indigo-lo); margin-bottom: 10px; font-weight: 800;
+}
+.vita-rules li { font-size: .84rem; color: var(--t-mid); margin: 0 0 7px 16px; line-height: 1.6; list-style: disc; }
+.vita-hist table tbody tr { border-top: 1px solid var(--edge); }
+
+/* Collection animation — fires when points are awarded */
+.vita-burst {
+  position: fixed; inset: 0; z-index: 9998; display: grid; place-items: center;
+  pointer-events: none; background: rgba(20,28,34,.28);
+  animation: vb-fade .3s var(--rise) both;
+}
+.vita-burst.out { animation: vb-fade .45s var(--rise) reverse both; }
+@keyframes vb-fade { from { opacity: 0 } to { opacity: 1 } }
+.vb-card {
+  position: relative; text-align: center; padding: 34px 44px;
+  border-radius: var(--r-xl); background: var(--white); box-shadow: var(--neo-3);
+  animation: vb-pop .55s var(--fizz) both;
+}
+@keyframes vb-pop { 0% { transform: scale(.72); opacity: 0 } 100% { transform: scale(1); opacity: 1 } }
+.vb-ring {
+  width: 108px; height: 108px; margin: 0 auto 14px; border-radius: 50%;
+  display: grid; place-items: center;
+  background: conic-gradient(var(--harbour), var(--fern), var(--harbour));
+  box-shadow: 0 0 0 6px var(--white), 0 10px 30px rgba(84,113,119,.32);
+  animation: vb-spin 2.4s linear infinite;
+}
+@keyframes vb-spin { to { transform: rotate(360deg) } }
+.vb-num {
+  display: grid; place-items: center; width: 88px; height: 88px; border-radius: 50%;
+  background: var(--white); font-family: var(--font-display); font-size: 1.5rem;
+  font-weight: 700; color: var(--indigo-lo); font-variant-numeric: tabular-nums;
+  animation: vb-spin 2.4s linear infinite reverse;
+}
+.vb-lbl { font-size: .72rem; letter-spacing: .16em; text-transform: uppercase; color: var(--t-low); }
+.vb-val { font-size: 1rem; font-weight: 800; color: var(--fern-lo); margin-top: 5px; }
+.vb-tier {
+  margin-top: 12px; font-size: .82rem; font-weight: 800; color: var(--clay-lo);
+  background: var(--clay-bg, #F7E9E2); border-radius: 99px; padding: 7px 16px;
+}
+.vb-spark {
+  position: absolute; top: 50%; left: 50%; width: 7px; height: 7px; border-radius: 50%;
+  background: var(--fern); transform-origin: 0 0;
+  animation: vb-fly .9s var(--rise) var(--d) both;
+}
+@keyframes vb-fly {
+  from { transform: rotate(var(--a)) translateX(0) scale(1); opacity: 1 }
+  to   { transform: rotate(var(--a)) translateX(120px) scale(0); opacity: 0 }
+}
+@media (max-width: 700px) {
+  .vita-hero { grid-template-columns: 1fr; }
+  .vb-card { padding: 26px 28px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .vb-ring, .vb-num { animation: none; }
+  .vb-spark { display: none; }
+}
 </style>
 </head>
 <!-- Promotional Media Config -->
@@ -9569,6 +9660,7 @@ function _updateStrength(val) {
           <button class="account-nav-item active" onclick="switchAccountPanel('orders')"><span class="nav-ico">📦</span> My Orders</button>
           <button class="account-nav-item" onclick="switchAccountPanel('tracking')"><span class="nav-ico">🚚</span> Track Shipment</button>
           <button class="account-nav-item" onclick="switchAccountPanel('invoices')"><span class="nav-ico">🧾</span> Invoices & Payments</button>
+          <button class="account-nav-item" onclick="switchAccountPanel('vita')"><span class="nav-ico">💎</span> VitaPoints</button>
           <button class="account-nav-item" onclick="switchAccountPanel('profile')"><span class="nav-ico">✏️</span> Profile & Address</button>
           <button class="account-nav-item" onclick="doLogout()" style="margin-top:20px;color:var(--red)"><span class="nav-ico">🚪</span> Sign Out</button>
         </nav>
@@ -9598,6 +9690,11 @@ function _updateStrength(val) {
         <div class="account-panel" id="panel-invoices">
           <div class="account-panel-title">🧾 Invoices & Payments</div>
           <div id="invoicesList"></div>
+        </div>
+
+        <div class="account-panel" id="panel-vita">
+          <div class="account-panel-title">💎 VitaPoints</div>
+          <div id="vitaPanelBody"></div>
         </div>
 
         <div class="account-panel" id="panel-profile">
@@ -11709,6 +11806,9 @@ async function finalizeOrder(orderId, formData, total, method, codCharge) {
     localStorage.setItem('asc_orders', JSON.stringify(orders));
   } catch(e) {}
 
+  // ── 2a. Award VitaPoints for this order ────────────────────
+  try { vitaEarn(total, orderId); } catch(e) { console.error('[vitaEarn]', e); }
+
   // ── 2b. Save order to Supabase via backend (shows in Admin) ────
   try {
       const _jwt = localStorage.getItem('asc_jwt') || '';
@@ -12212,6 +12312,245 @@ function handleAccountNavClick() {
   } else {
     openAuth('login');
   }
+}
+
+// ══════════════════════════════════════════════════════════════
+// VITAPOINTS — loyalty engine
+//
+// Rates (single source of truth — change here, nowhere else):
+//   EARN      1 point per ₹1 of order total
+//   VALUE     150 points = ₹1
+//   CAP       max 5,000 points redeemable on any one order (= ₹33.33)
+//   TIER      15,000 points unlocks one 50%-off coupon, applied to a
+//             product's MRP (not its already-discounted price)
+//
+// ⚠️ SECURITY: balances live in localStorage so the UI stays instant,
+// but localStorage is fully editable by the customer. Redemption MUST
+// be re-validated server-side before a discount is honoured — treat
+// every number arriving from the client as a claim, not a fact.
+// vitaSyncToServer() is the hook for that.
+// ══════════════════════════════════════════════════════════════
+const VITA = {
+  EARN_PER_RUPEE:  1,
+  POINTS_PER_RUPEE: 150,
+  MAX_REDEEM_PER_ORDER: 5000,
+  TIER_50_THRESHOLD: 15000,
+  TIER_50_CONSUMES: true   // reaching the tier spends the 15,000 points
+};
+
+// Per-user namespacing. Two customers on one device must never see
+// each other's balance, so the key is derived from the signed-in
+// email and every read is guarded by the current session.
+function _vitaKey(email) {
+  const e = (email || '').toLowerCase().trim();
+  if (!e) return null;
+  let h = 0;
+  for (let i = 0; i < e.length; i++) { h = ((h << 5) - h + e.charCodeAt(i)) | 0; }
+  return 'asc_vita_' + Math.abs(h).toString(36);
+}
+
+function _vitaBlank() { return { balance: 0, lifetime: 0, coupons: 0, history: [] }; }
+
+function getVitaState() {
+  const u = getCurrentUser();
+  if (!u || !u.email) return _vitaBlank();
+  const k = _vitaKey(u.email);
+  if (!k) return _vitaBlank();
+  try {
+    const raw = JSON.parse(localStorage.getItem(k) || 'null');
+    if (!raw) return _vitaBlank();
+    // Refuse a record that does not belong to this session.
+    if (raw.owner && raw.owner !== u.email.toLowerCase().trim()) return _vitaBlank();
+    return Object.assign(_vitaBlank(), raw);
+  } catch(e) { return _vitaBlank(); }
+}
+
+function _saveVita(st) {
+  const u = getCurrentUser();
+  if (!u || !u.email) return false;
+  const k = _vitaKey(u.email);
+  if (!k) return false;
+  st.owner = u.email.toLowerCase().trim();
+  st.history = (st.history || []).slice(-60);
+  try { localStorage.setItem(k, JSON.stringify(st)); } catch(e) { return false; }
+  vitaSyncToServer(st);
+  return true;
+}
+
+// Best-effort mirror to the backend. Server is the authority.
+function vitaSyncToServer(st) {
+  try {
+    const jwt = localStorage.getItem('asc_jwt') || '';
+    if (!jwt || typeof API_BASE === 'undefined') return;
+    fetch(API_BASE + '/api/vitapoints/sync', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + jwt },
+      body: JSON.stringify({ balance: st.balance, lifetime: st.lifetime, coupons: st.coupons })
+    }).catch(function(){});
+  } catch(e) {}
+}
+
+function vitaToRupees(points) { return (Number(points) || 0) / VITA.POINTS_PER_RUPEE; }
+function vitaFromRupees(rupees) { return Math.floor((Number(rupees) || 0) * VITA.POINTS_PER_RUPEE); }
+
+// How many points this customer may actually spend on an order.
+// Capped by balance, by the per-order ceiling, and by the order value
+// itself (never let a redemption exceed what is owed).
+function vitaMaxRedeemable(orderTotal) {
+  const st = getVitaState();
+  const byOrder = vitaFromRupees(orderTotal);
+  return Math.max(0, Math.min(st.balance, VITA.MAX_REDEEM_PER_ORDER, byOrder));
+}
+
+function vitaEarn(orderTotal, orderId) {
+  const u = getCurrentUser();
+  if (!u || !u.email) return null;
+  const pts = Math.floor((Number(orderTotal) || 0) * VITA.EARN_PER_RUPEE);
+  if (pts <= 0) return null;
+  const st = getVitaState();
+  st.balance  += pts;
+  st.lifetime += pts;
+  st.history.unshift({ t: Date.now(), type: 'earn', pts: pts, ref: orderId || '' });
+
+  // Tier unlock — 15,000 points converts into one 50%-off coupon.
+  let unlocked = 0;
+  while (st.balance >= VITA.TIER_50_THRESHOLD) {
+    st.coupons += 1; unlocked += 1;
+    if (VITA.TIER_50_CONSUMES) st.balance -= VITA.TIER_50_THRESHOLD; else break;
+  }
+  if (unlocked) {
+    st.history.unshift({ t: Date.now(), type: 'tier', pts: VITA.TIER_50_CONSUMES ? -VITA.TIER_50_THRESHOLD * unlocked : 0, ref: unlocked + ' × 50% coupon' });
+  }
+  _saveVita(st);
+  vitaCelebrate(pts, unlocked);
+  return { earned: pts, balance: st.balance, unlocked: unlocked };
+}
+
+function vitaRedeem(points, orderId) {
+  const st = getVitaState();
+  const pts = Math.floor(Number(points) || 0);
+  if (pts <= 0) return { ok: false, reason: 'Enter a number of points to redeem.' };
+  if (pts > VITA.MAX_REDEEM_PER_ORDER) {
+    return { ok: false, reason: 'You can use a maximum of ' + VITA.MAX_REDEEM_PER_ORDER.toLocaleString('en-IN') + ' VitaPoints on one order.' };
+  }
+  if (pts > st.balance) return { ok: false, reason: 'You only have ' + st.balance.toLocaleString('en-IN') + ' VitaPoints.' };
+  st.balance -= pts;
+  st.history.unshift({ t: Date.now(), type: 'redeem', pts: -pts, ref: orderId || '' });
+  _saveVita(st);
+  return { ok: true, points: pts, rupees: vitaToRupees(pts), balance: st.balance };
+}
+
+// 50% coupon is calculated against MRP, never the sale price.
+function vitaApplyTierCoupon(product) {
+  const st = getVitaState();
+  if (st.coupons < 1) return { ok: false, reason: 'No 50% coupon available.' };
+  const mrp = Number(product.mrp || product.price || 0);
+  if (!mrp) return { ok: false, reason: 'No MRP on this product.' };
+  st.coupons -= 1;
+  st.history.unshift({ t: Date.now(), type: 'coupon', pts: 0, ref: '50% off ' + (product.name || '') });
+  _saveVita(st);
+  return { ok: true, discount: mrp * 0.5, payable: mrp * 0.5, basis: 'MRP ₹' + mrp.toLocaleString('en-IN') };
+}
+
+// ── Collection animation ──────────────────────────────────────
+function vitaCelebrate(pts, unlocked) {
+  try {
+    const host = document.createElement('div');
+    host.className = 'vita-burst';
+    host.innerHTML =
+      '<div class="vb-card">' +
+        '<div class="vb-ring"><span class="vb-num" data-to="' + pts + '">0</span></div>' +
+        '<div class="vb-lbl">VitaPoints collected</div>' +
+        '<div class="vb-val">worth ₹' + vitaToRupees(pts).toFixed(2) + '</div>' +
+        (unlocked ? '<div class="vb-tier">🎉 50% OFF coupon unlocked!</div>' : '') +
+      '</div>';
+    for (let i = 0; i < 14; i++) {
+      const s = document.createElement('i');
+      s.className = 'vb-spark';
+      s.style.setProperty('--a', (i * 26) + 'deg');
+      s.style.setProperty('--d', (0.25 + Math.random() * 0.5) + 's');
+      host.firstChild.appendChild(s);
+    }
+    document.body.appendChild(host);
+    const numEl = host.querySelector('.vb-num');
+    const start = performance.now(), dur = 1100;
+    (function tick(now){
+      const p = Math.min(1, (now - start) / dur);
+      const eased = 1 - Math.pow(1 - p, 3);
+      numEl.textContent = '+' + Math.round(pts * eased).toLocaleString('en-IN');
+      if (p < 1) requestAnimationFrame(tick);
+    })(start);
+    setTimeout(function(){ host.classList.add('out'); }, 2600);
+    setTimeout(function(){ host.remove(); }, 3200);
+  } catch(e) {}
+}
+
+// ── Account panel ─────────────────────────────────────────────
+function renderVitaPanel() {
+  const el = document.getElementById('vitaPanelBody');
+  if (!el) return;
+  const u = getCurrentUser();
+  if (!u || !u.email) {
+    el.innerHTML = '<div style="text-align:center;padding:40px;color:var(--gray)">Sign in to see your VitaPoints.</div>';
+    return;
+  }
+  const st = getVitaState();
+  const pct = Math.min(100, (st.balance / VITA.TIER_50_THRESHOLD) * 100);
+  const toGo = Math.max(0, VITA.TIER_50_THRESHOLD - st.balance);
+
+  const rows = (st.history || []).slice(0, 12).map(function(h){
+    const sign = h.pts > 0 ? '+' : '';
+    const col  = h.pts > 0 ? 'var(--fern-lo)' : (h.pts < 0 ? 'var(--clay-lo)' : 'var(--t-mid)');
+    const lbl  = h.type === 'earn' ? 'Earned on order' :
+                 h.type === 'redeem' ? 'Redeemed on order' :
+                 h.type === 'tier' ? 'Converted to coupon' : 'Coupon used';
+    const d = new Date(h.t).toLocaleDateString('en-IN',{day:'2-digit',month:'short',year:'numeric'});
+    return '<tr><td style="padding:9px 12px;font-size:.8rem">' + d + '</td>' +
+           '<td style="padding:9px 12px;font-size:.8rem">' + lbl + '</td>' +
+           '<td style="padding:9px 12px;font-size:.75rem;color:var(--t-low)">' + (h.ref||'—') + '</td>' +
+           '<td style="padding:9px 12px;text-align:right;font-weight:800;color:' + col + '">' +
+             (h.pts ? sign + h.pts.toLocaleString('en-IN') : '—') + '</td></tr>';
+  }).join('') || '<tr><td colspan="4" style="padding:22px;text-align:center;color:var(--gray);font-size:.85rem">No VitaPoints activity yet — your first order starts the collection.</td></tr>';
+
+  el.innerHTML =
+    '<div class="vita-hero">' +
+      '<div class="vita-bal">' +
+        '<div class="vita-bal-num" id="vitaBalNum">' + st.balance.toLocaleString('en-IN') + '</div>' +
+        '<div class="vita-bal-lbl">VitaPoints available</div>' +
+        '<div class="vita-bal-val">= ₹' + vitaToRupees(st.balance).toFixed(2) + ' off your next order</div>' +
+      '</div>' +
+      '<div class="vita-stats">' +
+        '<div><b>' + st.lifetime.toLocaleString('en-IN') + '</b><span>Lifetime collected</span></div>' +
+        '<div><b>' + st.coupons + '</b><span>50% coupons</span></div>' +
+        '<div><b>' + VITA.MAX_REDEEM_PER_ORDER.toLocaleString('en-IN') + '</b><span>Max per order</span></div>' +
+      '</div>' +
+    '</div>' +
+    '<div class="vita-prog-wrap">' +
+      '<div class="vita-prog-top"><span>Progress to your 50% OFF coupon</span>' +
+        '<span>' + st.balance.toLocaleString('en-IN') + ' / ' + VITA.TIER_50_THRESHOLD.toLocaleString('en-IN') + '</span></div>' +
+      '<div class="vita-prog"><i style="width:' + pct.toFixed(1) + '%"></i></div>' +
+      '<div class="vita-prog-note">' + (toGo === 0
+        ? '🎉 Coupon ready — 50% off any product, calculated on MRP.'
+        : 'Collect ' + toGo.toLocaleString('en-IN') + ' more VitaPoints to unlock 50% off any product (on MRP).') + '</div>' +
+    '</div>' +
+    '<div class="vita-rules">' +
+      '<h4>How VitaPoints work</h4>' +
+      '<ul>' +
+        '<li>Earn <b>1 VitaPoint for every ₹1</b> you spend — a ₹1,500 order gives you 1,500 points.</li>' +
+        '<li><b>150 VitaPoints = ₹1.</b> So 1,500 points are worth ₹10 off your next order.</li>' +
+        '<li>You can use up to <b>' + VITA.MAX_REDEEM_PER_ORDER.toLocaleString('en-IN') + ' VitaPoints on one order</b> (₹' + vitaToRupees(VITA.MAX_REDEEM_PER_ORDER).toFixed(2) + ').</li>' +
+        '<li>Points you redeem are deducted from your balance straight away.</li>' +
+        '<li>Reach <b>' + VITA.TIER_50_THRESHOLD.toLocaleString('en-IN') + ' points</b> and they convert into a <b>50% OFF coupon</b>, calculated on the product MRP — not the discounted price.</li>' +
+      '</ul>' +
+    '</div>' +
+    '<div class="vita-hist"><h4>Activity</h4>' +
+      '<table style="width:100%;border-collapse:collapse">' +
+        '<thead><tr style="background:var(--face-warm)">' +
+        '<th style="padding:9px 12px;text-align:left;font-size:.68rem;letter-spacing:.1em;text-transform:uppercase;color:var(--t-low)">Date</th>' +
+        '<th style="padding:9px 12px;text-align:left;font-size:.68rem;letter-spacing:.1em;text-transform:uppercase;color:var(--t-low)">Activity</th>' +
+        '<th style="padding:9px 12px;text-align:left;font-size:.68rem;letter-spacing:.1em;text-transform:uppercase;color:var(--t-low)">Reference</th>' +
+        '<th style="padding:9px 12px;text-align:right;font-size:.68rem;letter-spacing:.1em;text-transform:uppercase;color:var(--t-low)">Points</th>' +
+        '</tr></thead><tbody>' + rows + '</tbody></table></div>';
 }
 
 function getCurrentUser() {
@@ -12755,6 +13094,14 @@ function doLogout() {
   }
   localStorage.removeItem('asc_jwt');
   localStorage.removeItem('asc_user');
+  // Privacy: drop anything cached for the outgoing session so the
+  // next person on this device cannot read it.
+  window.__INVOICE_ORDERS = null;
+  try {
+    ['invoicesList','vitaPanelBody','ordersList'].forEach(function(id){
+      var el = document.getElementById(id); if (el) el.innerHTML = '';
+    });
+  } catch(e) {}
   updateAccountNavBtn();
   showPage('home');
   showToast('👋 You have been signed out.');
@@ -12878,7 +13225,8 @@ function switchAccountPanel(panel) {
   const el = document.getElementById('panel-' + panel);
   if (el) el.classList.add('active');
   const navItems = document.querySelectorAll('.account-nav-item');
-  const labels = ['orders','tracking','invoices','profile'];
+  const labels = ['orders','tracking','invoices','vita','profile'];
+  if (panel === 'vita') { try { renderVitaPanel(); } catch(e) { console.error('[renderVitaPanel]', e); } }
   const idx = labels.indexOf(panel);
   if (idx >= 0 && navItems[idx]) navItems[idx].classList.add('active');
 }
@@ -13141,31 +13489,86 @@ function _esc(v) {
 // Normalises the many shapes an order arrives in (localStorage,
 // backend /api/orders/my, or the live checkout payload) into one
 // object the template can rely on.
+// Orders reach this function in several different shapes:
+//  • live checkout ....... items is a real array
+//  • localStorage ........ items is a real array
+//  • backend /api/orders/my  items is a JSON *string* (it is saved with
+//    JSON.stringify), which is why .map() blew up with
+//    "(o.items || ...).map is not a function"
+//  • some rows ........... items is an object map, or a plain text list
+// Coerce all of them to an array before anything touches .map().
+function _coerceInvoiceItems(o) {
+  var raw = o.items;
+  if (raw == null || raw === '') raw = o.srItems;
+  if (raw == null || raw === '') raw = o.line_items;
+  if (raw == null || raw === '') raw = o.order_items;
+  if (raw == null || raw === '') raw = o.products;
+  if (raw == null) raw = [];
+
+  // JSON string -> parse
+  if (typeof raw === 'string') {
+    var t = raw.trim();
+    if (t.charAt(0) === '[' || t.charAt(0) === '{') {
+      try { raw = JSON.parse(t); } catch(e) { raw = t; }
+    }
+  }
+  // object map {0:{..},1:{..}} or a single item object
+  if (raw && typeof raw === 'object' && !Array.isArray(raw)) {
+    raw = (raw.name || raw.product_name) ? [raw] : Object.keys(raw).map(function(k){ return raw[k]; });
+  }
+  // plain text list: "Name (30 tabs) × 1, Other × 2"
+  if (typeof raw === 'string') {
+    raw = raw.split(/\s*,\s*(?![^()]*\))/).filter(Boolean).map(function(part){
+      var m = part.match(/^(.*?)\s*[×xX]\s*(\d+)\s*$/);
+      return m ? { name: m[1].trim(), qty: Number(m[2]) } : { name: part.trim(), qty: 1 };
+    });
+  }
+  if (!Array.isArray(raw)) raw = [];
+  return raw;
+}
+
 function normaliseOrderForInvoice(o) {
-  const items = (o.items || o.srItems || o.line_items || []).map(function(i){
-    const qty   = Number(i.qty || i.units || i.quantity || 1);
-    const rate  = Number(i.price || i.selling_price || i.rate || 0);
+  o = o || {};
+  var items = _coerceInvoiceItems(o).map(function(i){
+    if (typeof i === 'string') i = { name: i, qty: 1 };
+    var qty  = Number(i.qty || i.units || i.quantity || 1) || 1;
+    var rate = Number(i.price || i.selling_price || i.rate || i.unit_price || 0) || 0;
     return {
-      name: i.name || i.product_name || 'Item',
+      name: i.name || i.product_name || i.title || 'Item',
       hsn:  i.hsn || ASCOFIZZ_LEGAL.hsnDefault,
       qty:  qty, rate: rate, gross: qty * rate
     };
   });
-  const stateRaw = (o.state || o.customer_state || (o.formData && o.formData.state) || '').toString();
+
+  var stateRaw = (o.state || o.customer_state || (o.formData && o.formData.state) || '').toString();
+  var total = Number(o.total || o.amount || o.order_total || 0) || 0;
+
+  // If the stored lines carry no prices (older rows saved only names),
+  // fall back to the order total so the tax block is still correct
+  // rather than printing a ₹0 invoice.
+  var gross = items.reduce(function(t,i){ return t + i.gross; }, 0);
+  if (!gross && total && items.length) {
+    var per = total / items.reduce(function(t,i){ return t + i.qty; }, 0);
+    items = items.map(function(i){
+      return { name:i.name, hsn:i.hsn, qty:i.qty, rate:per, gross:per*i.qty, estimated:true };
+    });
+  }
+
   return {
     orderId:  o.orderId || o.id || o.order_id || '',
     date:     o.date || (o.created_at ? new Date(o.created_at).toLocaleDateString('en-IN',
                 {day:'2-digit',month:'short',year:'numeric'}) : new Date().toLocaleDateString('en-IN')),
-    customer: o.customer || o.customer_name || [o.firstName,o.lastName].filter(Boolean).join(' ') || '',
+    customer: o.customer || o.customer_name ||
+              [o.firstName,o.lastName].filter(Boolean).join(' ') || o.name || '',
     email:    o.email || o.customer_email || '',
     phone:    o.phone || o.customer_phone || '',
-    address:  o.address || o.customer_address || '',
+    address:  o.address || o.customer_address || o.shipping_address || '',
     state:    stateRaw,
     gstinBuyer: o.buyer_gstin || o.gstin || '',
     items:    items,
-    ship:     Number(o.ship || o.shipping || 0),
-    discount: Number(o.discount || o.totalDisc || 0),
-    total:    Number(o.total || 0),
+    ship:     Number(o.ship || o.shipping || o.shipping_charge || 0) || 0,
+    discount: Number(o.discount || o.totalDisc || 0) || 0,
+    total:    total,
     method:   o.method || o.payment_method || 'Online',
     irn:      o.irn || '', ackNo: o.ack_no || '', ackDate: o.ack_date || ''
   };
@@ -13180,7 +13583,8 @@ function buildInvoiceHTML(order) {
   const buyerCode  = IN_STATE_CODES[buyerState] || '';
   const intra      = buyerState ? (buyerCode === L.stateCode) : true;
 
-  const gross    = o.items.reduce(function(t,i){ return t + i.gross; }, 0);
+  if (!o.items.length) o.items = [{ name:'Order '+o.orderId, hsn:ASCOFIZZ_LEGAL.hsnDefault, qty:1, rate:o.total, gross:o.total }];
+  const gross    = o.items.reduce(function(t,i){ return t + i.gross; }, 0) || o.total;
   const rate     = L.gstRate;
   const taxable  = gross / (1 + rate/100);
   const taxTotal = gross - taxable;
