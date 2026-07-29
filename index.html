@@ -6253,6 +6253,24 @@ button, [role="button"] {
 .pfaq-note { font-size: .7rem; color: var(--t-low); margin-top: 14px; font-style: italic; }
 
 
+/* ══ CHECKOUT FIELD VALIDATION ════════════════════════════════════
+   The error sits next to the field that caused it. A single toast
+   makes the customer hunt for which of nine inputs was wrong. */
+.form-label .req { color: var(--clay-lo); font-weight: 700; margin-left: 2px; }
+.field-err {
+  display: block; min-height: 0; margin-top: 5px;
+  font-size: .72rem; font-weight: 600; line-height: 1.35;
+  color: #A81F2B;
+}
+.field-err:empty { margin-top: 0; }
+.form-input.input-invalid {
+  box-shadow: inset 0 0 0 1.6px rgba(168,31,43,.55), var(--neo-in);
+  background: #FFF7F6;
+}
+.form-input.input-invalid:focus { outline-color: #A81F2B; }
+/* A control mid-submit must look unavailable, not merely be unavailable. */
+button[aria-busy="true"], button:disabled { cursor: not-allowed; opacity: .55; }
+
 /* ══ BUTTON STABILITY ═════════════════════════════════════════════
    Three rules that keep controls from moving the page around.
 
@@ -8418,23 +8436,35 @@ setInterval(function() { syncAppCartBadge(); syncAppWishBadge(); }, 2000);
             <span id="ckSignInLink" style="font-size:.74rem;font-weight:600;color:var(--green);cursor:pointer;text-decoration:underline" onclick="openAuth('login')">Sign in</span>
           </div>
           <div class="form-row">
-            <div class="form-group"><label class="form-label">First Name</label><input class="form-input" type="text" placeholder="Enter first name"></div>
-            <div class="form-group"><label class="form-label">Last Name</label><input class="form-input" type="text" placeholder="Enter last name"></div>
+            <div class="form-group"><label class="form-label" for="ckFirstName">First Name <span class="req">*</span></label><input class="form-input" id="ckFirstName" name="firstName" type="text" autocomplete="given-name" placeholder="Enter first name" required><span class="field-err" id="err-ckFirstName"></span></div>
+            <div class="form-group"><label class="form-label" for="ckLastName">Last Name <span class="req">*</span></label><input class="form-input" id="ckLastName" name="lastName" type="text" autocomplete="family-name" placeholder="Enter last name" required><span class="field-err" id="err-ckLastName"></span></div>
           </div>
-          <div class="form-group"><label class="form-label">Email Address</label><input class="form-input" type="email" placeholder="email@example.com"></div>
-          <div class="form-group"><label class="form-label">Mobile Number</label><input class="form-input" type="tel" placeholder="+91 98765 43210"></div>
+          <div class="form-group"><label class="form-label" for="ckEmail">Email Address <span class="req">*</span></label><input class="form-input" id="ckEmail" name="email" type="email" autocomplete="email" inputmode="email" placeholder="email@example.com" required><span class="field-err" id="err-ckEmail"></span></div>
+          <div class="form-group"><label class="form-label" for="ckPhone">Mobile Number <span class="req">*</span></label><input class="form-input" id="ckPhone" name="phone" type="tel" autocomplete="tel" inputmode="numeric" maxlength="15" placeholder="+91 98765 43210" required><span class="field-err" id="err-ckPhone"></span></div>
 
           <div class="ck-section-title" style="margin-top:24px">📍 Delivery Address</div>
-          <div class="form-group"><label class="form-label">Address Line 1</label><input class="form-input" type="text" placeholder="House / Flat No., Street"></div>
-          <div class="form-group"><label class="form-label">Address Line 2</label><input class="form-input" type="text" placeholder="Area / Locality (optional)"></div>
+          <div class="form-group"><label class="form-label" for="ckAddr1">Address Line 1 <span class="req">*</span></label><input class="form-input" id="ckAddr1" name="addr1" type="text" autocomplete="address-line1" placeholder="House / Flat No., Street" required><span class="field-err" id="err-ckAddr1"></span></div>
+          <div class="form-group"><label class="form-label" for="ckAddr2">Address Line 2</label><input class="form-input" id="ckAddr2" name="addr2" type="text" autocomplete="address-line2" placeholder="Area / Locality (optional)"></div>
           <div class="form-row">
-            <div class="form-group"><label class="form-label">City</label><input class="form-input" type="text" placeholder="City"></div>
-            <div class="form-group"><label class="form-label">State</label><input class="form-input" type="text" placeholder="State"></div>
+            <div class="form-group"><label class="form-label" for="ckCity">City <span class="req">*</span></label><input class="form-input" id="ckCity" name="city" type="text" autocomplete="address-level2" placeholder="City" required><span class="field-err" id="err-ckCity"></span></div>
+            <div class="form-group"><label class="form-label" for="ckState">State <span class="req">*</span></label><input class="form-input" id="ckState" name="state" type="text" autocomplete="address-level1" list="inStates" placeholder="State" required><span class="field-err" id="err-ckState"></span></div>
           </div>
           <div class="form-row">
-            <div class="form-group"><label class="form-label">PIN Code</label><input class="form-input" type="text" placeholder="6-digit PIN"></div>
-            <div class="form-group"><label class="form-label">Country</label><input class="form-input" type="text" value="India" readonly></div>
+            <div class="form-group"><label class="form-label" for="ckPin">PIN Code <span class="req">*</span></label><input class="form-input" id="ckPin" name="pin" type="text" autocomplete="postal-code" inputmode="numeric" maxlength="6" placeholder="6-digit PIN" required><span class="field-err" id="err-ckPin"></span></div>
+            <div class="form-group"><label class="form-label" for="ckCountry">Country <span class="req">*</span></label><input class="form-input" id="ckCountry" name="country" type="text" autocomplete="country-name" value="India" readonly required><span class="field-err" id="err-ckCountry"></span></div>
           </div>
+          <datalist id="inStates">
+            <option>Andhra Pradesh</option><option>Arunachal Pradesh</option><option>Assam</option><option>Bihar</option>
+            <option>Chhattisgarh</option><option>Goa</option><option>Gujarat</option><option>Haryana</option>
+            <option>Himachal Pradesh</option><option>Jharkhand</option><option>Karnataka</option><option>Kerala</option>
+            <option>Madhya Pradesh</option><option>Maharashtra</option><option>Manipur</option><option>Meghalaya</option>
+            <option>Mizoram</option><option>Nagaland</option><option>Odisha</option><option>Punjab</option>
+            <option>Rajasthan</option><option>Sikkim</option><option>Tamil Nadu</option><option>Telangana</option>
+            <option>Tripura</option><option>Uttar Pradesh</option><option>Uttarakhand</option><option>West Bengal</option>
+            <option>Andaman and Nicobar Islands</option><option>Chandigarh</option>
+            <option>Dadra and Nagar Haveli and Daman and Diu</option><option>Delhi</option>
+            <option>Jammu and Kashmir</option><option>Ladakh</option><option>Lakshadweep</option><option>Puducherry</option>
+          </datalist>
 
           <div class="ck-section-title" style="margin-top:24px">💳 Payment Method</div>
           <div class="pay-methods">
@@ -9473,7 +9503,8 @@ function mergeBackendProducts(backendProducts) {
       if (bp.price      != null) p.price     = parseFloat(bp.price);
       p.salePrice = bp.sale_price ? parseFloat(bp.sale_price) : null;
       // Stock & visibility
-      if (bp.stock      != null) p.stock     = parseInt(bp.stock);
+      // A real stock number arrived, so this product's count can be trusted.
+      if (bp.stock      != null) { p.stock = parseInt(bp.stock); p._stockKnown = true; window._stockSynced = true; }
       if (bp.active     != null) p.active    = bp.active;
       // Only hide if backend explicitly sets active=false (boolean), never hide on null/undefined
       if (bp.active === false)   p._hidden = true;
@@ -10827,6 +10858,7 @@ function showPage(pg) {
   if (footer) {
     footer.style.display = noFooterPages.includes(pg) ? 'none' : '';
   }
+  if (pg === 'checkout' && typeof initCheckoutValidation === 'function') initCheckoutValidation();
 }
 
 function showShop(cat) {
@@ -12227,51 +12259,200 @@ function getFormField(selector) {
   return document.querySelector('#page-checkout ' + selector)?.value?.trim() || '';
 }
 
-function validateCheckoutForm() {
-  const firstName = getFormField('input[placeholder="Enter first name"]');
-  const lastName  = getFormField('input[placeholder="Enter last name"]');
-  const email     = getFormField('input[type="email"]');
-  const phone     = getFormField('input[type="tel"]');
-  const addr1     = getFormField('input[placeholder="House / Flat No., Street"]');
-  const city      = getFormField('input[placeholder="City"]');
-  const state     = getFormField('select') || getFormField('input[placeholder="State"]');
-  const pin       = getFormField('input[placeholder="6-digit PIN"]');
+// ══════════════════════════════════════════════════════════════════
+// CHECKOUT VALIDATION
+// Every required field is checked before either payment path runs, and
+// each failure is written next to the field that caused it rather than
+// thrown as a single toast the customer has to guess at.
+//
+// Two bugs this replaces:
+//   · addr2 was read with placeholder "Apartment, Floor, Area (optional)"
+//     but the markup says "Area / Locality (optional)", so address line 2
+//     was silently dropped from every order placed on this site.
+//   · state was read via getFormField('select'), which matches nothing in
+//     #page-checkout, and was never validated even when empty.
+// ══════════════════════════════════════════════════════════════════
+const CK_FIELDS = ['ckFirstName','ckLastName','ckEmail','ckPhone','ckAddr1','ckCity','ckState','ckPin','ckCountry'];
 
-  const errors = [];
-  if (!firstName)                                               errors.push('First name is required');
-  if (!email || !/^[^@]+@[^@]+\.[^@]+$/.test(email))           errors.push('Valid email is required');
-  if (!phone || phone.replace(/\D/g,'').length < 10)           errors.push('Valid 10-digit phone is required');
-  if (!addr1)                                                   errors.push('Address is required');
-  if (!city)                                                    errors.push('City is required');
-  if (!pin  || pin.replace(/\D/g,'').length < 6)               errors.push('Valid 6-digit pincode is required');
+function ckVal(id) {
+  const el = document.getElementById(id);
+  return el ? String(el.value || '').trim() : '';
+}
+function ckSetError(id, msg) {
+  const input = document.getElementById(id);
+  const slot  = document.getElementById('err-' + id);
+  if (input) input.classList.toggle('input-invalid', !!msg);
+  if (input) msg ? input.setAttribute('aria-invalid','true') : input.removeAttribute('aria-invalid');
+  if (slot)  slot.textContent = msg || '';
+}
+function ckClearErrors() { CK_FIELDS.forEach(id => ckSetError(id, '')); }
 
-  if (errors.length) { showToast('⚠️ ' + errors[0], 'error'); return null; }
-  return { firstName, lastName, email, phone, addr1,
-           addr2: getFormField('input[placeholder="Apartment, Floor, Area (optional)"]') || '',
-           city, state, pin };
+// Indian mobile numbers are 10 digits starting 6-9; an optional +91 or
+// leading 0 is stripped first so pasted numbers are not rejected.
+function normalisePhone(raw) {
+  let d = String(raw || '').replace(/\D/g, '');
+  if (d.length === 12 && d.startsWith('91')) d = d.slice(2);
+  if (d.length === 11 && d.startsWith('0'))  d = d.slice(1);
+  return d;
+}
+
+function validateCheckoutForm(opts) {
+  const silent = opts && opts.silent;
+  ckClearErrors();
+
+  const v = {
+    firstName: ckVal('ckFirstName'), lastName: ckVal('ckLastName'),
+    email:     ckVal('ckEmail'),     phone:    ckVal('ckPhone'),
+    addr1:     ckVal('ckAddr1'),     addr2:    ckVal('ckAddr2'),
+    city:      ckVal('ckCity'),      state:    ckVal('ckState'),
+    pin:       ckVal('ckPin'),       country:  ckVal('ckCountry') || 'India'
+  };
+  const phoneDigits = normalisePhone(v.phone);
+  const pinDigits   = v.pin.replace(/\D/g, '');
+
+  const fail = [];
+  const bad = (id, msg) => { fail.push({ id, msg }); };
+
+  if (!v.firstName)                      bad('ckFirstName', 'Enter your first name');
+  else if (v.firstName.length < 2)       bad('ckFirstName', 'First name looks too short');
+  if (!v.lastName)                       bad('ckLastName',  'Enter your last name');
+  if (!v.email)                          bad('ckEmail',     'Enter your email address');
+  else if (!/^[^\s@]+@[^\s@]+\.[a-z]{2,}$/i.test(v.email)) bad('ckEmail', 'That email address is not valid');
+  if (!phoneDigits)                      bad('ckPhone',     'Enter your mobile number');
+  else if (phoneDigits.length !== 10)    bad('ckPhone',     'Mobile number must be 10 digits');
+  else if (!/^[6-9]/.test(phoneDigits))  bad('ckPhone',     'Indian mobile numbers start with 6, 7, 8 or 9');
+  if (!v.addr1)                          bad('ckAddr1',     'Enter your house or flat number and street');
+  else if (v.addr1.length < 6)           bad('ckAddr1',     'Address looks incomplete');
+  if (!v.city)                           bad('ckCity',      'Enter your city');
+  if (!v.state)                          bad('ckState',     'Enter your state');
+  if (!pinDigits)                        bad('ckPin',       'Enter your 6-digit PIN code');
+  else if (pinDigits.length !== 6)       bad('ckPin',       'PIN code must be exactly 6 digits');
+  else if (/^0/.test(pinDigits))         bad('ckPin',       'Indian PIN codes do not start with 0');
+  if (!v.country)                        bad('ckCountry',   'Country is required');
+
+  if (fail.length) {
+    if (!silent) {
+      fail.forEach(f => ckSetError(f.id, f.msg));
+      const first = document.getElementById(fail[0].id);
+      if (first) {
+        first.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        setTimeout(() => first.focus({ preventScroll: true }), 260);
+      }
+      showToast(fail.length === 1
+        ? '⚠️ ' + fail[0].msg
+        : `⚠️ ${fail.length} fields need attention — the first is highlighted`, 'error');
+    }
+    return null;
+  }
+
+  v.phone = phoneDigits;
+  v.pin   = pinDigits;
+  v.fullName = (v.firstName + ' ' + v.lastName).trim();
+  return v;
+}
+
+// Live feedback: once a field has been flagged, clear it as soon as the
+// customer fixes it rather than making them submit again to find out.
+function initCheckoutValidation() {
+  CK_FIELDS.forEach(id => {
+    const el = document.getElementById(id);
+    if (!el || el.__ckBound) return;
+    el.__ckBound = true;
+    el.addEventListener('blur',  () => { if (el.value.trim()) validateCheckoutForm({ silent: true }) || ckSetError(id, ''); });
+    el.addEventListener('input', () => { if (el.classList.contains('input-invalid')) ckSetError(id, ''); });
+  });
+}
+
+// ══════════════════════════════════════════════════════════════════
+// STOCK + TOTALS, re-checked at the moment of payment
+// The cart can sit open for hours; prices, stock and the free-shipping
+// threshold must be read again rather than trusted from render time.
+// ══════════════════════════════════════════════════════════════════
+function validateCartStock() {
+  const problems = [];
+  for (const item of STORE.cart) {
+    const p = PRODUCTS.find(x => x.id === item.id);
+    if (!p) { problems.push('An item in your cart is no longer available'); continue; }
+
+    // Every product in the bundled catalogue ships with stock: 0 as a
+    // placeholder; the real count arrives from the backend sync. Blocking
+    // on a zero we were never told is authoritative would take the entire
+    // store offline whenever that backend is slow or asleep — so a zero
+    // only means "out of stock" once a real number has been received for
+    // that product.
+    const known = p._stockKnown === true;
+    if (!known) continue;
+
+    if (p.stock === 0) problems.push(`${p.name} is out of stock`);
+    else if (typeof p.stock === 'number' && p.stock > 0 && item.qty > p.stock)
+      problems.push(`Only ${p.stock} left of ${p.name} — you have ${item.qty} in your cart`);
+  }
+  return problems;
+}
+
+function computeOrderTotals() {
+  const { sub, disc } = getOrderTotal();
+  const netSub = sub - disc;
+  const promoD = (typeof activePromoCode !== 'undefined' && activePromoCode)
+    ? (activePromoCode.type === 'pct'
+        ? Math.round(netSub * activePromoCode.value / 100)
+        : Math.min(activePromoCode.value, netSub))
+    : (appliedDiscount
+        ? (appliedDiscount.type === 'percent'
+            ? Math.round(netSub * appliedDiscount.value / 100)
+            : appliedDiscount.value)
+        : 0);
+  // A discount must never exceed the basket, or shipping goes negative.
+  const afterDisc = Math.max(0, netSub - promoD);
+  const ship  = afterDisc >= 599 ? 0 : 60;
+  const total = Math.max(0, afterDisc + ship);
+  return { sub, disc, netSub, promoD, afterDisc, ship, total };
+}
+
+// One in-flight order at a time. Guards double taps, double clicks and
+// the impatient second press while a gateway is opening.
+window._orderInFlight = false;
+function beginOrderAttempt() {
+  if (window._orderInFlight) { showToast('⏳ Your order is already being processed…', 'error'); return false; }
+  window._orderInFlight = true;
+  document.querySelectorAll('#page-checkout .checkout-btn, .cfPayBtn, #onlinePayBtn, #codBtn')
+    .forEach(b => { b.disabled = true; b.setAttribute('aria-busy','true'); });
+  return true;
+}
+function endOrderAttempt() {
+  window._orderInFlight = false;
+  document.querySelectorAll('#page-checkout .checkout-btn, .cfPayBtn, #onlinePayBtn, #codBtn')
+    .forEach(b => { b.disabled = false; b.removeAttribute('aria-busy'); });
 }
 
 // ── MAIN ENTRY — called by "Pay Online" button ──
 function initiatePayment() {
   if (STORE.cart.length === 0) { showToast('🛒 Your cart is empty!', 'error'); return; }
+
+  // Order of checks matters: validate the form before locking the button,
+  // so a customer who mistyped a PIN is not left staring at a dead control.
   const formData = validateCheckoutForm();
   if (!formData) return;
 
-  const { sub, disc } = getOrderTotal();
-  const netSub  = sub - disc;
-  const promoD  = (typeof activePromoCode !== 'undefined' && activePromoCode)
-    ? (activePromoCode.type === 'pct' ? Math.round(netSub * activePromoCode.value / 100) : Math.min(activePromoCode.value, netSub))
-    : (appliedDiscount ? (appliedDiscount.type === 'percent' ? Math.round(netSub * appliedDiscount.value / 100) : appliedDiscount.value) : 0);
-  const afterDisc = netSub - promoD;
-  const ship  = afterDisc >= 599 ? 0 : 60;
-  const total = afterDisc + ship;
+  const stockProblems = validateCartStock();
+  if (stockProblems.length) {
+    showToast('⚠️ ' + stockProblems[0], 'error');
+    if (typeof renderCart === 'function') renderCart();
+    return;
+  }
+
+  if (!beginOrderAttempt()) return;
+
+  // Totals are recomputed here, not reused from render time.
+  const t = computeOrderTotals();
+  if (!(t.total > 0)) { showToast('⚠️ Order total could not be calculated. Please review your cart.', 'error'); endOrderAttempt(); return; }
 
   const orderId = generateOrderId();
   const btn = document.getElementById('onlinePayBtn') || document.querySelector('#page-checkout .checkout-btn');
   const origText = btn ? btn.textContent : '';
-  if (btn) { btn.disabled = true; btn.textContent = '⏳ Opening Secure Checkout...'; }
+  if (btn) btn.textContent = '⏳ Opening Secure Checkout...';
 
-  openPaymentGateway(orderId, total, netSub, promoD + disc, ship, formData, btn, origText);
+  openPaymentGateway(orderId, t.total, t.netSub, t.promoD + t.disc, t.ship, formData, btn, origText);
 }
 
 // ══════════════════════════════════════════════
@@ -12359,6 +12540,7 @@ function openPaymentGateway(orderId, total, sub, disc, ship, formData, btn, orig
     </div>
   `;
   document.body.appendChild(modal);
+  endOrderAttempt();
   if (btn) { btn.disabled = false; btn.textContent = origText || '💳 Pay via GoKwik'; }
 }
 
@@ -12446,20 +12628,33 @@ async function initiateCOD() {
   const formData = validateCheckoutForm();
   if (!formData) return;
 
-  const { sub, disc } = getOrderTotal();
-  const orderId = generateOrderId();
-  const netSub = sub - disc;
-  const codCharge = netSub >= 599 ? 0 : 60;
-  const codTotal = netSub + codCharge;
+  const stockProblems = validateCartStock();
+  if (stockProblems.length) {
+    showToast('⚠️ ' + stockProblems[0], 'error');
+    if (typeof renderCart === 'function') renderCart();
+    return;
+  }
 
-  // Disable button immediately to prevent double-tap
+  if (!beginOrderAttempt()) return;
+
+  // This path used to compute `netSub + codCharge` and never subtract the
+  // promo discount, so a COD customer with a valid coupon was charged the
+  // full price while the online path charged the discounted one. Both
+  // paths now use the same recomputed totals.
+  const t = computeOrderTotals();
+  const orderId   = generateOrderId();
+  const codCharge = t.ship;
+  const codTotal  = t.total;
+  if (!(codTotal > 0)) { showToast('⚠️ Order total could not be calculated. Please review your cart.', 'error'); endOrderAttempt(); return; }
+
   const btn = document.getElementById('codBtn');
-  if (btn) { btn.disabled = true; btn.style.opacity = '0.6'; btn.innerHTML = '<span>⏳</span> <span>Placing your order...</span>'; }
+  if (btn) { btn.style.opacity = '0.6'; btn.innerHTML = '<span>⏳</span> <span>Placing your order...</span>'; }
 
   try {
     await finalizeOrder(orderId, formData, codTotal, 'cod', codCharge);
     // finalizeOrder navigates to thank-you page — done!
   } catch(err) {
+    endOrderAttempt();
     if (btn) { btn.disabled = false; btn.style.opacity = '1'; btn.innerHTML = '<span style="font-size:1.2rem">💵</span><div style="text-align:left"><div>Confirm COD Order</div><div id="codBtnNote" style="font-size:.65rem;opacity:.8;font-weight:500;margin-top:1px">+₹60 charge · Free if order ≥ ₹599</div></div>'; updateCodBtnNote(); }
     showToast('❌ Order failed: ' + err.message, 'error');
   }
