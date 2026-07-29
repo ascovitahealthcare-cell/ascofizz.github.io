@@ -11630,10 +11630,14 @@ function renderCart() {
     discLabel = appliedDiscount.label || '';
   }
 
-  const ship = 0; // Free shipping online
-  const _vita = vitaCheckoutInfo(sub - disc);
-  const vitaOff = _vita.rupees;
-  const total = Math.max(0, sub - disc + ship - vitaOff);
+  // Same rule as checkout and the charge. Showing FREE here and billing
+  // 60 at the gateway is the same mismatch fixed in the checkout summary,
+  // surfacing one screen earlier.
+  const _t      = computeOrderTotals();
+  const ship    = _t.ship;
+  const _vita   = vitaCheckoutInfo(_t.afterDisc);
+  const vitaOff = _t.vitaOff;
+  const total   = _t.total;
 
   // Count total physical packs for display
   const totalPacks = STORE.cart.reduce((s, item) => {
@@ -15652,9 +15656,11 @@ function renderSideCart() {
     const price = item.tierRate !== undefined ? item.tierRate : (p ? (p.salePrice || p.price) : 0);
     return s + price * item.qty;
   }, 0);
-  const ship = 0; // Free shipping online
-  const promoDisc = getPromoDiscount ? getPromoDiscount(sub) : 0;
-  const total = Math.max(0, sub - promoDisc + ship);
+  // The drawer quoted its own total too. One calculator for every surface.
+  const _t = computeOrderTotals();
+  const ship = _t.ship;
+  const promoDisc = _t.disc;
+  const total = _t.total;
 
   foot.innerHTML = `
     <div class="sc-totals">
