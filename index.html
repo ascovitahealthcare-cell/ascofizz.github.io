@@ -4402,8 +4402,22 @@ img[src=""], img[data-awaiting-upload] { visibility: hidden; width: 100%; }
 .rv-stars { color: var(--seal); letter-spacing: .1em; }
 .rv-text { font-size: .875rem; line-height: 1.66; color: var(--t-mid); }
 .rv-form { padding: 22px; border-radius: var(--r-lg); background: var(--paper); border: none; box-shadow: var(--neo-1); }
-.star-picker { display: flex; gap: 6px; font-size: 1.6rem; color: var(--t-dim); cursor: pointer; }
-.star-picker > .lit, .star-picker span.lit, .star-picker > .active { color: var(--seal); }
+.star-picker { display: flex; gap: 6px; font-size: 1.6rem; color: var(--light-gray); cursor: pointer; }
+.star-picker span { transition: color .12s var(--rise), transform .12s var(--rise); }
+/* Hover preview — lets a customer see what they're about to pick before
+   they click, using the same warm tone as a committed rating */
+.star-picker span.hover-lit { color: var(--clay-lo); }
+.star-picker > .lit, .star-picker span.lit, .star-picker > .active { color: var(--clay-lo); transform: scale(1.08); }
+/* Empty-field feedback for submit validation */
+.star-picker.field-error { animation: field-shake .4s var(--rise); }
+.form-input.field-error { border-color: var(--clay-lo); box-shadow: 0 0 0 3px rgba(138,74,51,.14); }
+@keyframes field-shake {
+  0%,100% { transform: translateX(0); }
+  20% { transform: translateX(-6px); }
+  40% { transform: translateX(6px); }
+  60% { transform: translateX(-4px); }
+  80% { transform: translateX(4px); }
+}
 .write-rv { margin-top: 18px; }
 .rating-big { font-family: var(--font-display); font-size: 2.2rem; font-weight: 800; color: var(--t-hi); }
 .rating-n { font-size: .8rem; color: var(--t-dim); }
@@ -7764,21 +7778,21 @@ setInterval(function() { syncAppCartBadge(); syncAppWishBadge(); }, 2000);
             <span id="ckSignInLink" style="font-size:.74rem;font-weight:600;color:var(--green);cursor:pointer;text-decoration:underline" onclick="openAuth('login')">Sign in</span>
           </div>
           <div class="form-row">
-            <div class="form-group"><label class="form-label">First Name</label><input class="form-input" type="text" placeholder="Enter first name"></div>
+            <div class="form-group"><label class="form-label">First Name</label><input class="form-input" type="text" placeholder="Enter first name" oninput="this.classList.remove('field-error')"></div>
             <div class="form-group"><label class="form-label">Last Name</label><input class="form-input" type="text" placeholder="Enter last name"></div>
           </div>
-          <div class="form-group"><label class="form-label">Email Address</label><input class="form-input" type="email" placeholder="email@example.com"></div>
-          <div class="form-group"><label class="form-label">Mobile Number</label><input class="form-input" type="tel" placeholder="+91 98765 43210"></div>
+          <div class="form-group"><label class="form-label">Email Address</label><input class="form-input" type="email" placeholder="email@example.com" oninput="this.classList.remove('field-error')"></div>
+          <div class="form-group"><label class="form-label">Mobile Number</label><input class="form-input" type="tel" placeholder="+91 98765 43210" oninput="this.classList.remove('field-error')"></div>
 
           <div class="ck-section-title" style="margin-top:24px">📍 Delivery Address</div>
-          <div class="form-group"><label class="form-label">Address Line 1</label><input class="form-input" type="text" placeholder="House / Flat No., Street"></div>
+          <div class="form-group"><label class="form-label">Address Line 1</label><input class="form-input" type="text" placeholder="House / Flat No., Street" oninput="this.classList.remove('field-error')"></div>
           <div class="form-group"><label class="form-label">Address Line 2</label><input class="form-input" type="text" placeholder="Area / Locality (optional)"></div>
           <div class="form-row">
-            <div class="form-group"><label class="form-label">City</label><input class="form-input" type="text" placeholder="City"></div>
+            <div class="form-group"><label class="form-label">City</label><input class="form-input" type="text" placeholder="City" oninput="this.classList.remove('field-error')"></div>
             <div class="form-group"><label class="form-label">State</label><input class="form-input" type="text" placeholder="State"></div>
           </div>
           <div class="form-row">
-            <div class="form-group"><label class="form-label">PIN Code</label><input class="form-input" type="text" placeholder="6-digit PIN"></div>
+            <div class="form-group"><label class="form-label">PIN Code</label><input class="form-input" type="text" placeholder="6-digit PIN" oninput="this.classList.remove('field-error')"></div>
             <div class="form-group"><label class="form-label">Country</label><input class="form-input" type="text" value="India" readonly></div>
           </div>
 
@@ -10477,9 +10491,9 @@ function buildProductPage(p) {
         <div class="rv-form" id="rvFormWrap">
           <h3>Write a Review</h3>
           ${getCurrentUser() ? `
-          <div class="star-picker" id="starPicker">${[1,2,3,4,5].map(s=>`<span onclick="setRating(${s})" data-s="${s}">&#x2605;</span>`).join('')}</div>
+          <div class="star-picker" id="starPicker">${[1,2,3,4,5].map(s=>`<span onclick="setRating(${s})" onmouseenter="previewRating(${s})" onmouseleave="clearRatingPreview()" data-s="${s}">&#x2605;</span>`).join('')}</div>
           <div style="font-size:.8rem;color:var(--gray);margin:6px 0 10px">Posting as <strong>${esc(getCurrentUser().name || 'You')}</strong></div>
-          <textarea class="form-input" placeholder="Share your experience with this product..." id="rvText"></textarea>
+          <textarea class="form-input" placeholder="Share your experience with this product..." id="rvText" oninput="this.classList.remove('field-error')"></textarea>
           <button class="btn-primary" style="width:100%;justify-content:center" onclick="submitReview()">Submit Review &#x1F331;</button>
           ` : `
           <p style="font-size:.85rem;color:var(--gray);margin-bottom:14px">Sign in with your account to write a review — this keeps reviews tied to real customers.</p>
@@ -10673,13 +10687,43 @@ function switchTab(btn, id) {
 function setRating(v) {
   selectedRating = v;
   document.querySelectorAll('#starPicker span').forEach((s,i) => s.classList.toggle('lit', i < v));
+  document.getElementById('starPicker')?.classList.remove('field-error');
+}
+function previewRating(v) {
+  document.querySelectorAll('#starPicker span').forEach((s,i) => s.classList.toggle('hover-lit', i < v));
+}
+function clearRatingPreview() {
+  document.querySelectorAll('#starPicker span').forEach(s => s.classList.remove('hover-lit'));
 }
 async function submitReview() {
   const user = getCurrentUser();
   if (!user) { openAuth('login'); return; }
   const name = (user.name || 'Ascofizz Customer').trim();
-  const text = document.getElementById('rvText')?.value.trim();
-  if (!text || !selectedRating) { showToast('Please write your experience and select a rating!','error'); return; }
+  const rvTextInput = document.getElementById('rvText');
+  const starPicker = document.getElementById('starPicker');
+  const text = rvTextInput?.value.trim();
+
+  // Clear any stale error state before re-checking
+  rvTextInput?.classList.remove('field-error');
+  starPicker?.classList.remove('field-error');
+
+  const missingText = !text;
+  const missingRating = !selectedRating;
+  if (missingText || missingRating) {
+    if (missingText) { rvTextInput?.classList.add('field-error'); rvTextInput?.focus(); }
+    if (missingRating) {
+      starPicker?.classList.add('field-error');
+      // restart the shake if it's already mid-animation from a previous attempt
+      if (starPicker) { starPicker.style.animation = 'none'; void starPicker.offsetWidth; starPicker.style.animation = ''; }
+    }
+    const msg = missingText && missingRating
+      ? 'Please write your experience and select a star rating!'
+      : missingText
+        ? 'Please write a few words about your experience!'
+        : 'Please select a star rating!';
+    showToast(msg, 'error');
+    return;
+  }
   if (!currentProduct) return;
 
   const btn = document.querySelector('#rvFormWrap .btn-primary');
@@ -11416,27 +11460,55 @@ function getFormField(selector) {
   return document.querySelector('#page-checkout ' + selector)?.value?.trim() || '';
 }
 
+function getFormEl(selector) {
+  return document.querySelector('#page-checkout ' + selector);
+}
+
 function validateCheckoutForm() {
-  const firstName = getFormField('input[placeholder="Enter first name"]');
-  const lastName  = getFormField('input[placeholder="Enter last name"]');
-  const email     = getFormField('input[type="email"]');
-  const phone     = getFormField('input[type="tel"]');
-  const addr1     = getFormField('input[placeholder="House / Flat No., Street"]');
-  const city      = getFormField('input[placeholder="City"]');
-  const state     = getFormField('select') || getFormField('input[placeholder="State"]');
-  const pin       = getFormField('input[placeholder="6-digit PIN"]');
+  // Clear any error highlights left over from a previous attempt
+  document.querySelectorAll('#page-checkout .form-input.field-error').forEach(el => el.classList.remove('field-error'));
+
+  const firstNameEl = getFormEl('input[placeholder="Enter first name"]');
+  const lastNameEl  = getFormEl('input[placeholder="Enter last name"]');
+  const emailEl     = getFormEl('input[type="email"]');
+  const phoneEl     = getFormEl('input[type="tel"]');
+  const addr1El     = getFormEl('input[placeholder="House / Flat No., Street"]');
+  const cityEl      = getFormEl('input[placeholder="City"]');
+  const stateEl     = getFormEl('select') || getFormEl('input[placeholder="State"]');
+  const pinEl       = getFormEl('input[placeholder="6-digit PIN"]');
+
+  const firstName = firstNameEl?.value.trim() || '';
+  const lastName  = lastNameEl?.value.trim() || '';
+  const email     = emailEl?.value.trim() || '';
+  const phone     = phoneEl?.value.trim() || '';
+  const addr1     = addr1El?.value.trim() || '';
+  const city      = cityEl?.value.trim() || '';
+  const state     = stateEl?.value.trim() || '';
+  const pin       = pinEl?.value.trim() || '';
 
   const errors = [];
-  if (!firstName)                                               errors.push('First name is required');
-  if (!email || !/^[^@]+@[^@]+\.[^@]+$/.test(email))           errors.push('Valid email is required');
-  if (!phone || phone.replace(/\D/g,'').length < 10)           errors.push('Valid 10-digit phone is required');
-  if (!addr1)                                                   errors.push('Address is required');
-  if (!city)                                                    errors.push('City is required');
-  if (!pin  || pin.replace(/\D/g,'').length < 6)               errors.push('Valid 6-digit pincode is required');
+  const invalidEls = [];
+  const flag = (el, msg) => { errors.push(msg); if (el) invalidEls.push(el); };
 
-  if (errors.length) { showToast('⚠️ ' + errors[0], 'error'); return null; }
+  if (!firstName)                                     flag(firstNameEl, 'First name');
+  if (!email || !/^[^@]+@[^@]+\.[^@]+$/.test(email))  flag(emailEl, 'Valid email');
+  if (!phone || phone.replace(/\D/g,'').length < 10)   flag(phoneEl, 'Valid 10-digit phone');
+  if (!addr1)                                          flag(addr1El, 'Address');
+  if (!city)                                           flag(cityEl, 'City');
+  if (!pin  || pin.replace(/\D/g,'').length < 6)       flag(pinEl, 'Valid 6-digit pincode');
+
+  if (errors.length) {
+    invalidEls.forEach(el => el.classList.add('field-error'));
+    invalidEls[0]?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    invalidEls[0]?.focus();
+    const msg = errors.length === 1
+      ? errors[0] + ' is required'
+      : 'Missing: ' + errors.join(', ');
+    showToast('⚠️ ' + msg, 'error');
+    return null;
+  }
   return { firstName, lastName, email, phone, addr1,
-           addr2: getFormField('input[placeholder="Apartment, Floor, Area (optional)"]') || '',
+           addr2: getFormField('input[placeholder="Area / Locality (optional)"]') || '',
            city, state, pin };
 }
 
