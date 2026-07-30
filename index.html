@@ -12078,7 +12078,18 @@ async function finalizeOrder(orderId, formData, total, method, codCharge) {
         payment_method: method,
         gk_order_id: orderId,
         shiprocket_id: srOrderId || null,
-        items: JSON.stringify(srItems.map(i=>({name:i.name,qty:i.units,price:i.selling_price,id:cartSnapshot.find(c=>PRODUCTS.find(p=>p.id===c.id)?.name===i.name.split(' (')[0])?.id}))),
+        items: JSON.stringify(cartSnapshot.map(item => {
+          const p = PRODUCTS.find(p => p.id === item.id);
+          if (!p) return null;
+          const price = item.tierRate !== undefined ? item.tierRate : (p.salePrice || p.price);
+          return {
+            id: p.id,
+            name: p.name + (item.tierTabs ? ` (${item.tierTabs} tabs)` : ''),
+            qty: item.qty,
+            price: price,
+            category: p.category || 'Other',
+          };
+        }).filter(Boolean)),
       };
 
       if (isOnlinePayment) {
