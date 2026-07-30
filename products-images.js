@@ -1,45 +1,18 @@
 // ============================================================
 // ASCOVITA — PRODUCT IMAGES
-// Using direct Wix CDN URLs — no local image upload needed
 // ============================================================
 
 const PRODUCT_IMAGES = {
 
   // —— id: 1 — L-Glutathione Effervescent – Orange Flavour ——
+  // (older flavour-based SKU — distinct from the new id 38 "Glutathione
+  // Effervescent Tablet"; the processed-*.webp shoot was for the new line, see below)
   1: { images: [
-    "",
-    "",
-    "",
-    "",
-    "",
-    "",
-  ]},
-
-  // —— id: 2 — Apple Cider Vinegar + Moringa – Green Apple Flavour ——
-  2: { images: [
-    "",
-    "",
-    "",
-    "",
-    "",
-  ]},
-
-  // —— id: 3 — L-Carnitine Effervescent – Orange Flavour ——
-  3: { images: [
-    "",
-  ]},
-
-  // —— id: 4 — B12 + Biotin Effervescent – Guava Flavour ——
-  4: { images: [
-    "",
-  ]},
-
-  // —— id: 5 — Vitamin C Effervescent – Orange Flavour ——
-  5: { images: [
     "",
   ]},
 
   // —— id: 8 — Multidiata – Ascovita Premium Multivitamin ——
+  // (general/unisex flagship — men's & women's versions are separate ids 32/33)
   8: { images: [
     "",
   ]},
@@ -68,6 +41,60 @@ const PRODUCT_IMAGES = {
 
   // —— id: 22 — Power Pro Tablets ——
   22: { images: [] },
+
+  // ============================================================
+  // NEW EFFERVESCENT LINE (ids 30–39) — matched from the 10-image shoot
+  // ============================================================
+
+  // —— id: 30 — Green Tea Effervescent Tablet ——
+  30: { images: [
+    "https://i.ibb.co/fdcN0Hdp/processed-4.webp",
+  ]},
+
+  // —— id: 31 — Ashwagandha Effervescent Tablet ——
+  31: { images: [
+    "https://i.ibb.co/YBCbb3TJ/processed-5.webp",
+  ]},
+
+  // —— id: 32 — Men's Multivitamin Effervescent Tablet ——
+  32: { images: [
+    "https://i.ibb.co/0ysjq102/processed-8.webp",
+  ]},
+
+  // —— id: 33 — Women's Multivitamin Effervescent Tablet ——
+  33: { images: [
+    "https://i.ibb.co/9k5Bf8Kq/processed-9.webp",
+  ]},
+
+  // —— id: 34 — Apple Cider Vinegar Effervescent Tablet ——
+  34: { images: [
+    "https://i.ibb.co/0jQd1M5g/processed-7.webp",
+  ]},
+
+  // —— id: 35 — Complete Bone Health Effervescent Tablet ——
+  35: { images: [
+    "https://i.ibb.co/Mynq6Z2J/processed-3.webp",
+  ]},
+
+  // —— id: 36 — Rehydration Effervescent Tablet ——
+  36: { images: [
+    "https://i.ibb.co/PzDW5jLs/processed-2.webp",
+  ]},
+
+  // —— id: 37 — Natural Vitamin C + Amla Effervescent Tablet ——
+  37: { images: [
+    "https://i.ibb.co/Rm9FRCn/processed-10.webp",
+  ]},
+
+  // —— id: 38 — Glutathione Effervescent Tablet ——
+  38: { images: [
+    "https://i.ibb.co/2Y50ZmrK/processed-6.webp",
+  ]},
+
+  // —— id: 39 — L-Carnitine L-Tartrate Effervescent Tablet ——
+  39: { images: [
+    "https://i.ibb.co/RTLtqjTK/processed-1.webp",
+  ]},
 
 };
 
