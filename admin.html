@@ -1097,6 +1097,7 @@ body.theme-glass .card:hover{box-shadow:0 10px 28px rgba(0,0,0,0.3), inset 0 1px
   <div class="nav-section">
     <div class="nav-sec-label">Commerce</div>
     <div class="nav-item" onclick="showPage('orders')"><span class="nav-ico">📦</span> Orders <span class="nav-badge" id="pendingBadge">0</span></div>
+    <div class="nav-item" onclick="showPage('returns')"><span class="nav-ico">↩️</span> Returns <span class="nav-badge" id="returnsBadge">0</span></div>
     <div class="nav-item" onclick="showPage('products')"><span class="nav-ico">🛍️</span> Products</div>
     <div class="nav-item" onclick="showPage('inventory')"><span class="nav-ico">📋</span> Inventory</div>
     <div class="nav-item" onclick="showPage('discounts')"><span class="nav-ico">🏷️</span> Discounts</div>
@@ -1376,6 +1377,40 @@ body.theme-glass .card:hover{box-shadow:0 10px 28px rgba(0,0,0,0.3), inset 0 1px
 </div>
 
 <!-- ═════════════ LIVE VISITORS ═════════════ -->
+<div class="page" id="page-returns">
+  <div class="page-hdr">
+    <div><div class="page-title">Returns &amp; Refunds</div>
+      <div class="page-sub">Approving a return reverses the VitaPoints that order earned — in one transaction, so points can never be left behind.</div></div>
+    <div class="page-actions">
+      <select id="retFilter" class="input" style="max-width:180px" onchange="loadReturns()">
+        <option value="">All statuses</option>
+        <option value="requested" selected>Requested</option>
+        <option value="approved">Approved</option>
+        <option value="picked_up">Picked up</option>
+        <option value="refunded">Refunded</option>
+        <option value="rejected">Rejected</option>
+        <option value="cancelled">Cancelled</option>
+      </select>
+      <button class="btn btn-secondary btn-sm" onclick="loadReturns()">↺ Refresh</button>
+    </div>
+  </div>
+
+  <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:12px;margin-bottom:18px;">
+    <div class="kpi"><div class="kpi-label">Requested</div><div class="kpi-val" id="retKpiRequested" style="color:var(--gold-text)">–</div><span class="kpi-ico">🕒</span></div>
+    <div class="kpi"><div class="kpi-label">Approved</div><div class="kpi-val" id="retKpiApproved" style="color:var(--green-text)">–</div><span class="kpi-ico">✅</span></div>
+    <div class="kpi"><div class="kpi-label">Picked up</div><div class="kpi-val" id="retKpiPicked">–</div><span class="kpi-ico">🚚</span></div>
+    <div class="kpi"><div class="kpi-label">Refunded</div><div class="kpi-val" id="retKpiRefunded">–</div><span class="kpi-ico">💸</span></div>
+    <div class="kpi"><div class="kpi-label">Rejected</div><div class="kpi-val" id="retKpiRejected">–</div><span class="kpi-ico">⛔</span></div>
+  </div>
+
+  <div class="card">
+    <div class="card-hdr"><span class="card-title">Return requests</span></div>
+    <div id="returnsTableWrap" style="overflow-x:auto">
+      <div style="padding:26px;text-align:center;color:var(--text3)">Loading…</div>
+    </div>
+  </div>
+</div>
+
 <div class="page" id="page-livevisitors">
   <div class="page-hdr">
     <div><div class="page-title">Live Visitors</div><div class="page-sub">Real-time sessions · auto-refresh every 15s · <span id="lvRefreshTime" style="color:var(--green-text);">connecting…</span></div></div>
@@ -3155,6 +3190,9 @@ async function initApp() {
   loadCustomers();
   loadDiscounts();
   loadInventory();
+  // Pending-returns badge in the sidebar. Wrapped so a returns API that
+  // is not deployed yet cannot break dashboard start-up.
+  try { refreshReturnsBadge(); setInterval(refreshReturnsBadge, 120000); } catch(e) {}
   loadPhotoLibrary();
   loadBanners();
   renderSchemaOverview();
@@ -3224,6 +3262,160 @@ window.addEventListener('resize', () => {
 // ═══════════════════════════════════════════════
 // NAVIGATION
 // ═══════════════════════════════════════════════
+// ══════════════════════════════════════════════════════════════
+// RETURNS & REFUNDS (admin)
+//
+// Approve calls the approve_return() SQL function via the backend, so
+// the status change and the VitaPoints clawback happen in ONE
+// transaction. If the clawback fails the approval rolls back — there
+// is deliberately no way from this UI to approve a return without
+// reversing its points.
+// ══════════════════════════════════════════════════════════════
+let RETURNS_CACHE = [];
+
+function retEsc(v) {
+  return String(v == null ? '' : v)
+    .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+const RET_BADGE = {
+  requested: 'badge-gold', approved: 'badge-green', rejected: 'badge-red',
+  picked_up: 'badge-blue', refunded: 'badge-blue', cancelled: 'badge-gray',
+};
+
+async function loadReturns() {
+  const wrap = document.getElementById('returnsTableWrap');
+  if (!wrap) return;
+  wrap.innerHTML = '<div style="padding:26px;text-align:center;color:var(--text3)">Loading…</div>';
+  try {
+    const status = (document.getElementById('retFilter') || {}).value || '';
+    // apiFetch returns the raw Response, not parsed JSON.
+    const d = await (await apiFetch('/api/admin/returns' + (status ? '?status=' + encodeURIComponent(status) : ''))).json();
+    RETURNS_CACHE = d.returns || [];
+    const c = d.counts || {};
+
+    const set = (id, v) => { const el = document.getElementById(id); if (el) el.textContent = v || 0; };
+    set('retKpiRequested', c.requested); set('retKpiApproved', c.approved);
+    set('retKpiPicked', c.picked_up);   set('retKpiRefunded', c.refunded);
+    set('retKpiRejected', c.rejected);
+    const badge = document.getElementById('returnsBadge');
+    if (badge) badge.textContent = c.requested || 0;
+
+    if (!RETURNS_CACHE.length) {
+      wrap.innerHTML = '<div style="padding:34px;text-align:center;color:var(--text3)">No return requests' + (status ? ' with status “' + retEsc(status) + '”' : '') + '.</div>';
+      return;
+    }
+
+    wrap.innerHTML =
+      '<table class="table"><thead><tr>'
+      + '<th>Order</th><th>Customer</th><th>Items</th><th>Reason</th>'
+      + '<th>Requested</th><th>Status</th><th>Points</th><th style="text-align:right">Action</th>'
+      + '</tr></thead><tbody>'
+      + RETURNS_CACHE.map(function(r){
+          const items = (r.items || []).map(function(i){
+            return retEsc(i.name || ('#' + i.id)) + ' × ' + i.qty;
+          }).join('<br>') || '—';
+          const when = new Date(r.created_at).toLocaleDateString('en-IN',{day:'2-digit',month:'short',year:'numeric'});
+          const cls  = RET_BADGE[r.status] || 'badge-gray';
+          let action = '';
+          if (r.status === 'requested') {
+            action = '<button class="btn btn-primary btn-sm" onclick="approveReturn(\'' + r.id + '\')">Approve</button> '
+                   + '<button class="btn btn-secondary btn-sm" onclick="rejectReturn(\'' + r.id + '\')">Reject</button>';
+          } else if (r.status === 'approved') {
+            action = '<button class="btn btn-secondary btn-sm" onclick="setReturnStatus(\'' + r.id + '\',\'picked_up\')">Mark picked up</button>';
+          } else if (r.status === 'picked_up') {
+            action = '<button class="btn btn-primary btn-sm" onclick="markRefunded(\'' + r.id + '\')">Mark refunded</button>';
+          } else if (r.status === 'refunded' && r.refund_ref) {
+            action = '<span style="font-size:.75rem;color:var(--text3)">ref ' + retEsc(r.refund_ref) + '</span>';
+          }
+          return '<tr>'
+            + '<td><strong>' + retEsc(r.order_id) + '</strong></td>'
+            + '<td style="font-size:.8rem">' + retEsc(r.customer_email) + '</td>'
+            + '<td style="font-size:.78rem">' + items + '</td>'
+            + '<td style="font-size:.8rem">' + retEsc(r.reason)
+              + (r.comments ? '<div style="color:var(--text3);font-size:.72rem;margin-top:3px">' + retEsc(r.comments) + '</div>' : '')
+              + '</td>'
+            + '<td style="font-size:.78rem">' + when + '</td>'
+            + '<td><span class="badge ' + cls + '">' + retEsc(String(r.status).replace('_',' ')) + '</span>'
+              + (r.admin_note ? '<div style="color:var(--text3);font-size:.7rem;margin-top:3px">' + retEsc(r.admin_note) + '</div>' : '')
+              + '</td>'
+            + '<td>' + (r.points_reversed ? '−' + Number(r.points_reversed).toLocaleString('en-IN') : '—') + '</td>'
+            + '<td style="text-align:right;white-space:nowrap">' + action + '</td>'
+            + '</tr>';
+        }).join('')
+      + '</tbody></table>';
+  } catch (e) {
+    wrap.innerHTML = '<div style="padding:26px;text-align:center;color:var(--red-text)">Could not load returns: ' + retEsc(e.message) + '</div>';
+  }
+}
+
+async function approveReturn(id) {
+  const r = RETURNS_CACHE.find(function(x){ return x.id === id; }) || {};
+  if (!confirm('Approve this return for ' + (r.order_id || 'this order') + '?\n\n'
+    + 'The VitaPoints earned on this order will be reversed automatically. '
+    + 'If the customer has already spent them the balance is written off to zero and logged.')) return;
+  const note = prompt('Internal note (optional):', '') || '';
+  try {
+    const d = await (await apiFetch('/api/admin/returns/' + id + '/approve', {
+      method: 'POST', body: JSON.stringify({ note: note }),
+    })).json();
+    toast('✅ Approved · ' + (d.points_reversed || 0).toLocaleString('en-IN') + ' VitaPoints reversed');
+    loadReturns();
+  } catch (e) { toast('❌ ' + e.message, 'error'); }
+}
+
+async function rejectReturn(id) {
+  const note = prompt('Reason for rejection (shown to the customer):', '');
+  if (note === null) return;
+  if (!note.trim()) { toast('Please give a reason — the customer sees this', 'error'); return; }
+  try {
+    await apiFetch('/api/admin/returns/' + id + '/reject', {
+      method: 'POST', body: JSON.stringify({ note: note }),
+    });
+    toast('Return rejected');
+    loadReturns();
+  } catch (e) { toast('❌ ' + e.message, 'error'); }
+}
+
+async function setReturnStatus(id, status) {
+  try {
+    await apiFetch('/api/admin/returns/' + id + '/status', {
+      method: 'PUT', body: JSON.stringify({ status: status }),
+    });
+    toast('Status updated');
+    loadReturns();
+  } catch (e) { toast('❌ ' + e.message, 'error'); }
+}
+
+async function markRefunded(id) {
+  const r = RETURNS_CACHE.find(function(x){ return x.id === id; }) || {};
+  const amt = prompt('Refund amount (₹):', '');
+  if (amt === null) return;
+  const ref = prompt('Gateway refund reference (so this reconciles with GoKwik):', '') || '';
+  try {
+    await apiFetch('/api/admin/returns/' + id + '/status', {
+      method: 'PUT',
+      body: JSON.stringify({
+        status: 'refunded',
+        refund_amount: Number(amt) || 0,
+        refund_method: 'gateway',
+        refund_ref: ref,
+      }),
+    });
+    toast('💸 Marked refunded');
+    loadReturns();
+  } catch (e) { toast('❌ ' + e.message, 'error'); }
+}
+
+// Keep the sidebar badge live even when the page is not open.
+async function refreshReturnsBadge() {
+  try {
+    const d = await (await apiFetch('/api/admin/returns?status=requested')).json();
+    const badge = document.getElementById('returnsBadge');
+    if (badge) badge.textContent = (d.returns || []).length;
+  } catch (e) { /* badge is cosmetic — never block the dashboard on it */ }
+}
+
 function showPage(name) {
   document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
   document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
@@ -3240,6 +3432,7 @@ function showPage(name) {
   if(_sb) _sb.classList.remove('open');
   if(_ov) _ov.style.display = 'none';
   document.body.style.overflow = '';
+  if (name === 'returns') { try { loadReturns(); } catch(e) { console.error('[loadReturns]', e); } }
   // Sync bottom nav
   if (typeof syncAbn === 'function') syncAbn(name);
   // Lazy loads
@@ -4683,7 +4876,14 @@ async function updateLiveVisitors() {
   // ── Source 1: Your own backend (ping-based sessions) ──
   let backendOk = false;
   try {
-    const r = await fetch(`${API}/api/visitors/active`, { signal: AbortSignal.timeout(6000) });
+    // GET /api/visitors/active is behind authMiddleware on the backend.
+    // This call sent no Authorization header, so it got 401 on every
+    // poll and the panel silently fell back to "simulated data" —
+    // which is why Live Visitors never showed real sessions.
+    const r = await fetch(`${API}/api/visitors/active`, {
+      headers: { 'Authorization': `Bearer ${authToken}` },
+      signal: AbortSignal.timeout(6000),
+    });
     if (r.ok) {
       const d = await r.json();
       const sessions = Array.isArray(d.sessions) ? d.sessions : [];
@@ -8613,7 +8813,8 @@ const _v26_lvOrig = updateLiveVisitors;
 updateLiveVisitors = async function() {
   let sessions=[], cnt=0, views=0, sim=false;
   try {
-    const r = await fetch(API+'/api/visitors/active', {signal:AbortSignal.timeout(6000)});
+    // Same missing Authorization header as the other poller.
+    const r = await fetch(API+'/api/visitors/active', {headers:{'Authorization':`Bearer ${authToken}`}, signal:AbortSignal.timeout(6000)});
     if (!r.ok) throw new Error('not ok');
     const d = await r.json();
     sessions = Array.isArray(d.sessions)?d.sessions:[];
