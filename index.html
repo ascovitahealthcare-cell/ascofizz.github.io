@@ -11718,9 +11718,10 @@ async function startPayment(method) {
 // the backend. Only COD works today. Implemented against the existing
 // /api/create-gokwik-order endpoint.
 //
-// The server recomputes the amount from real product prices, so the
-// `total` passed in is display-only — the customer is charged the
-// server's figure, never the browser's.
+// The server recomputes the amount from real product prices (and now also
+// factors in any VitaPoints applied), so the `total` passed in is
+// display-only — the customer is charged the server's figure, never the
+// browser's.
 // ══════════════════════════════════════════════
 async function startGoKwikPayment(orderId, total, formData, btn, origText) {
   try {
@@ -11737,6 +11738,7 @@ async function startGoKwikPayment(orderId, total, formData, btn, origText) {
           return o;
         }),
         coupon_code: (typeof activePromoCode !== 'undefined' && activePromoCode) ? activePromoCode.code : null,
+        vita_points: (typeof VITA_APPLIED !== 'undefined' && VITA_APPLIED > 0) ? VITA_APPLIED : 0,
         customer_name:  [formData.firstName, formData.lastName].filter(Boolean).join(' ') || formData.name || '',
         customer_email: formData.email,
         customer_phone: formData.phone,
@@ -12047,11 +12049,12 @@ async function finalizeOrder(orderId, formData, total, method, codCharge) {
   } catch(e) {}
 
   // ── 2a. Award VitaPoints for this order ────────────────────
+  var _vitaPointsForOrder = (typeof VITA_APPLIED !== 'undefined' && VITA_APPLIED > 0) ? VITA_APPLIED : 0;
   try {
     // Spend first, then earn — a redemption must never be funded by
     // the points the same order generates.
-    if (typeof VITA_APPLIED !== 'undefined' && VITA_APPLIED > 0) {
-      var _r = vitaRedeem(VITA_APPLIED, orderId);
+    if (_vitaPointsForOrder > 0) {
+      var _r = vitaRedeem(_vitaPointsForOrder, orderId);
       if (!_r.ok) console.warn('[vitaRedeem]', _r.reason);
       vitaClearApplied();
     }
@@ -12073,6 +12076,7 @@ async function finalizeOrder(orderId, formData, total, method, codCharge) {
         state: formData.state,
         pincode: formData.pin,
         total: total,
+        vita_points: _vitaPointsForOrder,
         payment_status: method === 'cod' ? 'COD - Pending' : 'Paid',
         fulfillment: 'Pending',
         payment_method: method,
@@ -12636,10 +12640,12 @@ const VITA = {
   MAX_REDEEM_PER_ORDER: 5000,  // ceiling on points SPENT on one order
   TIER_50_THRESHOLD: 15000,
   TIER_50_CONSUMES: true,      // reaching the tier spends the 15,000 points
-  // Anti-fraud: points do not become spendable until the return window
-  // has closed. Buy -> earn -> return -> keep points is the single
-  // easiest way to farm free product, so earned points are held first.
-  HOLD_DAYS: 8                 // 7-day return policy + 1 day of slack
+  // Points are spendable immediately after order confirmation — no hold.
+  // The buy -> earn -> return -> keep-points fraud case this used to guard
+  // against is now handled by actually clawing points back when a return
+  // is approved / marked refunded (server-side vita_reverse), not by
+  // delaying every legitimate customer's balance for over a week.
+  HOLD_DAYS: 0
 };
 
 // Per-user namespacing. Two customers on one device must never see
@@ -12694,12 +12700,67 @@ function vitaSyncToServer(st) {
   } catch(e) {}
 }
 
+// Pulls the REAL balance/lifetime/history from the server's vita_ledger
+// (via /api/vitapoints/balance + /history) and overwrites the local cache
+// with it. Server is the actual source of truth now (order confirm awards
+// into the ledger with no hold, and a return/refund claws back from it) —
+// this is what makes the account page and the checkout redemption widget
+// (both of which read getVitaState()) show the real number instead of a
+// stale or diverged local one. Safe to call often; it only ever narrows
+// the gap, never breaks anything if the fetch fails (falls back silently
+// to whatever's already cached locally).
+async function vitaRefreshFromServer() {
+  const u = getCurrentUser();
+  if (!u || !u.email) return false;
+  const jwt = localStorage.getItem('asc_jwt') || '';
+  if (!jwt || typeof API_BASE === 'undefined') return false;
+  try {
+    const [balRes, histRes] = await Promise.all([
+      fetchWithTimeout(API_BASE + '/api/vitapoints/balance', { headers: { 'Authorization': 'Bearer ' + jwt } }, 8000),
+      fetchWithTimeout(API_BASE + '/api/vitapoints/history', { headers: { 'Authorization': 'Bearer ' + jwt } }, 8000),
+    ]);
+    if (!balRes.ok || !histRes.ok) return false;
+    const bal  = await balRes.json();
+    const hist = await histRes.json();
+
+    const st = getVitaState(); // keep the coupons count — that tier feature has no server side yet
+    st.balance = Number(bal.balance) || 0;
+    st.lifetime = Number(bal.lifetime) || 0;
+    // No more client-side hold — the server no longer puts anything on a
+    // pending timer either (see the hold removal), so there's nothing left
+    // to age into balance locally.
+    st.pending = [];
+    st.history = (hist.history || []).map(function(h) {
+      const typeMap = { earn_pending: 'earn', reverse: 'return', redeem: 'redeem', admin_adjust: 'adjust', tier_coupon: 'coupon' };
+      return {
+        t: h.created_at ? new Date(h.created_at).getTime() : Date.now(),
+        type: typeMap[h.type] || h.type,
+        pts: Number(h.points) || 0,
+        ref: h.order_id || h.reason || '',
+      };
+    });
+    const k = _vitaKey(u.email);
+    if (k) {
+      st.owner = u.email.toLowerCase().trim();
+      try { localStorage.setItem(k, JSON.stringify(st)); } catch(e) {}
+    }
+    return true;
+  } catch (e) {
+    console.warn('[vita] server refresh failed:', e.message);
+    return false;
+  }
+}
+
 function vitaToRupees(points) { return (Number(points) || 0) / VITA.POINTS_PER_RUPEE; }
 function vitaFromRupees(rupees) { return Math.floor((Number(rupees) || 0) * VITA.POINTS_PER_RUPEE); }
 
 // How many points this customer may actually spend on an order.
 // Capped by balance, by the per-order ceiling, and by the order value
-// itself (never let a redemption exceed what is owed).
+// itself (never let a redemption exceed what is owed). st.balance here
+// is kept in sync with the real server ledger by vitaRefreshFromServer
+// (called on login/session-restore) — the server still independently
+// re-verifies and clamps the actual redemption at checkout regardless,
+// so this is what the customer sees, not what's ultimately trusted.
 function vitaMaxRedeemable(orderTotal) {
   const st = getVitaState();
   const byOrder = vitaFromRupees(orderTotal);
@@ -12937,7 +12998,7 @@ function vitaCelebrate(pts, unlocked, capped) {
 }
 
 // ── Account panel ─────────────────────────────────────────────
-function renderVitaPanel() {
+async function renderVitaPanel() {
   const el = document.getElementById('vitaPanelBody');
   if (!el) return;
   const u = getCurrentUser();
@@ -12945,6 +13006,15 @@ function renderVitaPanel() {
     el.innerHTML = '<div style="text-align:center;padding:40px;color:var(--gray)">Sign in to see your VitaPoints.</div>';
     return;
   }
+  // Paint whatever's cached immediately, then refresh from the real ledger
+  // and repaint — avoids a blank/loading flash while still showing the
+  // authoritative number as soon as it's back.
+  _renderVitaPanelBody(el);
+  const refreshed = await vitaRefreshFromServer();
+  if (refreshed) _renderVitaPanelBody(el);
+}
+
+function _renderVitaPanelBody(el) {
   const st = getVitaState();
   const pct = Math.min(100, (st.balance / VITA.TIER_50_THRESHOLD) * 100);
   const toGo = Math.max(0, VITA.TIER_50_THRESHOLD - st.balance);
@@ -13567,6 +13637,7 @@ function updateAccountNavBtn() {
   if (user && typeof google !== 'undefined' && google.accounts?.id) {
     try { google.accounts.id.disableAutoSelect(); } catch(e) {}
   }
+  if (user) { try { vitaRefreshFromServer(); } catch(e) {} }
   const btn  = document.getElementById('accountNavBtn');
   if (!btn) return;
   if (user) {
