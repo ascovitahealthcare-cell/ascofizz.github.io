@@ -12116,9 +12116,48 @@ async function finalizeOrder(orderId, formData, total, method, codCharge) {
   } catch(e) { console.error('Order save to backend failed:', e.message); }
 
   // ── 3. Generate invoice ────────────────────────────────────
+  // Uses buildInvoiceHTML() — the same GST-compliant "single source of
+  // truth" template My Account uses for Invoices & Payments — so the
+  // checkout invoice and the My Account invoice are identical.
   let invoiceHtml = null;
   try {
-    invoiceHtml = generateInvoice({ orderId, formData, srItems, sub, disc: totalDisc, promoDisc, ship, total, method, srOrderId });
+    invoiceHtml = buildInvoiceHTML({
+      orderId, date: new Date().toLocaleDateString('en-IN'),
+      customer: `${formData.firstName} ${formData.lastName}`.trim(),
+      email: formData.email, phone: formData.phone,
+      address: `${formData.addr1}, ${formData.city}, ${formData.state} - ${formData.pin}`,
+      state: formData.state,
+      items: srItems, ship, discount: (totalDisc || 0) + (promoDisc || 0),
+      total, method,
+    });
+    // Open it for the customer right away (the old generateInvoice()
+    // did this as a side effect internally; buildInvoiceHTML() is pure,
+    // so it's done explicitly here instead).
+    const _invBlob = new Blob([invoiceHtml], { type: 'text/html' });
+    const _invUrl = URL.createObjectURL(_invBlob);
+    const _invWin = window.open(_invUrl, '_blank', 'width=960,height=800,scrollbars=yes');
+    if (_invWin) { setTimeout(() => URL.revokeObjectURL(_invUrl), 30000); }
+    else { URL.revokeObjectURL(_invUrl); }
+    // "View Invoice" button on the thank-you page
+    setTimeout(() => {
+      const tyPage = document.getElementById('page-thankyou');
+      if (!tyPage) return;
+      const existing = document.getElementById('invoiceBtn');
+      if (existing) existing.remove();
+      const invBtn = document.createElement('a');
+      invBtn.id = 'invoiceBtn';
+      invBtn.textContent = '🧾 Download / Print Invoice';
+      invBtn.style.cssText = 'display:inline-flex;align-items:center;gap:8px;background:#2E7D32;color:white;border-radius:100px;padding:11px 26px;font-weight:700;font-size:.84rem;text-decoration:none;margin:8px 4px;cursor:pointer';
+      invBtn.onclick = function() {
+        const b = new Blob([invoiceHtml], { type: 'text/html' });
+        const u = URL.createObjectURL(b);
+        const w = window.open(u, '_blank', 'width=960,height=800,scrollbars=yes');
+        if (w) setTimeout(() => URL.revokeObjectURL(u), 30000); else URL.revokeObjectURL(u);
+      };
+      const orderNumEl = document.getElementById('orderNum');
+      if (orderNumEl && orderNumEl.parentNode) orderNumEl.parentNode.appendChild(invBtn);
+      else tyPage.appendChild(invBtn);
+    }, 0);
   } catch(e) { console.warn('Invoice:', e); }
 
   // ── 4. Send confirmation email ─────────────────────────────
