@@ -1997,6 +1997,7 @@ body.theme-glass .card:hover{box-shadow:0 10px 28px rgba(0,0,0,0.3), inset 0 1px
     <div><div class="page-title">Marketing</div><div class="page-sub">Live ad performance, budget control, campaign generation, and reporting</div></div>
     <div class="page-actions">
       <button class="btn btn-secondary btn-sm mkt-navbtn" data-tab="overview" onclick="mktShowTab('overview')">Overview</button>
+      <button class="btn btn-secondary btn-sm mkt-navbtn" data-tab="strategy" onclick="mktShowTab('strategy')">Strategy</button>
       <button class="btn btn-secondary btn-sm mkt-navbtn" data-tab="liveads" onclick="mktShowTab('liveads')">Live ads</button>
       <button class="btn btn-secondary btn-sm mkt-navbtn" data-tab="winners" onclick="mktShowTab('winners')">Winners</button>
       <button class="btn btn-secondary btn-sm mkt-navbtn" data-tab="campaigns" onclick="mktShowTab('campaigns')">Campaigns</button>
@@ -2023,6 +2024,79 @@ body.theme-glass .card:hover{box-shadow:0 10px 28px rgba(0,0,0,0.3), inset 0 1px
         <h3 style="margin-bottom:8px;">Needs attention</h3>
         <div id="mkt-overview-losers"><p class="mkt-empty">Loading…</p></div>
       </div>
+    </div>
+  </div>
+
+  <!-- STRATEGY TAB -->
+  <div id="mkt-tab-strategy" class="mkt-tab" style="display:none;">
+    <div class="card" style="padding:14px 16px;margin-bottom:16px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;">
+      <div>
+        <h3 style="margin:0 0 4px;" id="mkt-strategy-title">This month's strategy</h3>
+        <div style="font-size:13px;color:var(--text2);" id="mkt-strategy-sub">Loading…</div>
+      </div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;">
+        <button class="btn btn-secondary btn-sm" onclick="mktToggleStrategyEdit()" id="mkt-strategy-edit-btn">✎ Edit this month</button>
+        <button class="btn btn-secondary btn-sm" onclick="mktToggleStrategyHistory()">🕐 Past months</button>
+        <button class="btn btn-primary btn-sm" onclick="mktStartNewMonth()">＋ Start new month</button>
+      </div>
+    </div>
+
+    <div id="mkt-strategy-view"><p class="mkt-empty">Loading…</p></div>
+
+    <!-- Edit form — hidden until "Edit this month" or "Start new month" -->
+    <div id="mkt-strategy-form" class="card" style="padding:16px;margin-top:14px;display:none;">
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-bottom:12px;">
+        <div>
+          <label style="font-size:12px;color:var(--text2);display:block;margin-bottom:4px;">Month (e.g. 2026-08)</label>
+          <input type="text" id="mkt-strat-month" style="width:100%;padding:7px 9px;border:1px solid var(--border);border-radius:6px;">
+        </div>
+        <div>
+          <label style="font-size:12px;color:var(--text2);display:block;margin-bottom:4px;">Title</label>
+          <input type="text" id="mkt-strat-title" style="width:100%;padding:7px 9px;border:1px solid var(--border);border-radius:6px;">
+        </div>
+        <div style="display:flex;gap:8px;">
+          <div style="flex:1;">
+            <label style="font-size:12px;color:var(--text2);display:block;margin-bottom:4px;">Monthly budget (₹)</label>
+            <input type="number" id="mkt-strat-monthly-budget" style="width:100%;padding:7px 9px;border:1px solid var(--border);border-radius:6px;">
+          </div>
+          <div style="flex:1;">
+            <label style="font-size:12px;color:var(--text2);display:block;margin-bottom:4px;">Daily budget (₹)</label>
+            <input type="number" id="mkt-strat-daily-budget" style="width:100%;padding:7px 9px;border:1px solid var(--border);border-radius:6px;">
+          </div>
+        </div>
+      </div>
+
+      <label style="font-size:12px;color:var(--text2);display:block;margin-bottom:4px;">Budget split by product (JSON — product, monthly_budget, daily_budget, share_pct, ad_sets)</label>
+      <textarea id="mkt-strat-budget-split" rows="6" style="width:100%;font-family:monospace;font-size:12px;margin-bottom:10px;"></textarea>
+
+      <label style="font-size:12px;color:var(--text2);display:block;margin-bottom:4px;">Targeting (JSON — locations, age_gender, interests, language_placements, retargeting_audiences)</label>
+      <textarea id="mkt-strat-targeting" rows="8" style="width:100%;font-family:monospace;font-size:12px;margin-bottom:10px;"></textarea>
+
+      <label style="font-size:12px;color:var(--text2);display:block;margin-bottom:4px;">Creative notes (copy variants, video/image direction)</label>
+      <textarea id="mkt-strat-creative" rows="6" style="width:100%;font-size:13px;margin-bottom:10px;"></textarea>
+
+      <label style="font-size:12px;color:var(--text2);display:block;margin-bottom:4px;">Compliance notes</label>
+      <textarea id="mkt-strat-compliance" rows="5" style="width:100%;font-size:13px;margin-bottom:10px;"></textarea>
+
+      <label style="font-size:12px;color:var(--text2);display:block;margin-bottom:4px;">Expected performance (JSON — metric, target)</label>
+      <textarea id="mkt-strat-expected" rows="4" style="width:100%;font-family:monospace;font-size:12px;margin-bottom:10px;"></textarea>
+
+      <label style="font-size:12px;color:var(--text2);display:block;margin-bottom:4px;">Testing calendar (JSON — week, focus)</label>
+      <textarea id="mkt-strat-calendar" rows="4" style="width:100%;font-family:monospace;font-size:12px;margin-bottom:10px;"></textarea>
+
+      <label style="font-size:12px;color:var(--text2);display:block;margin-bottom:4px;">Raw notes (anything else — risks, next steps, freeform)</label>
+      <textarea id="mkt-strat-raw" rows="5" style="width:100%;font-size:13px;margin-bottom:12px;"></textarea>
+
+      <div style="display:flex;gap:8px;align-items:center;">
+        <button class="btn btn-primary" onclick="mktSaveStrategy()" id="mkt-strat-save-btn">Save</button>
+        <button class="btn btn-secondary" onclick="mktToggleStrategyEdit(true)">Cancel</button>
+        <span id="mkt-strat-save-status" style="font-size:13px;color:var(--text2);"></span>
+      </div>
+    </div>
+
+    <div id="mkt-strategy-history" style="display:none;margin-top:14px;">
+      <h3>Past months</h3>
+      <div id="mkt-strategy-history-list"><p class="mkt-empty">Loading…</p></div>
     </div>
   </div>
 
@@ -9552,6 +9626,7 @@ function mktShowTab(tab) {
   document.getElementById('mkt-tab-' + tab).style.display = 'block';
   document.querySelectorAll('.mkt-navbtn').forEach(b => b.classList.toggle('mkt-active', b.dataset.tab === tab));
   if (tab === 'overview') mktLoadOverview();
+  if (tab === 'strategy') mktLoadStrategy();
   if (tab === 'liveads') mktLoadAdSets();
   if (tab === 'winners') mktLoadWinners();
   if (tab === 'campaigns') mktLoadCampaigns();
@@ -9600,6 +9675,189 @@ async function mktLoadOverview() {
   document.getElementById('mkt-overview-losers').innerHTML = losers.length
     ? losers.map(a => `<div class="mkt-angle"><div style="display:flex;justify-content:space-between;"><strong>${mktEsc(a.name)}</strong><span style="color:#963848;font-weight:700;">${mktFmtRoas(a.last_roas)}</span></div><div style="font-size:12px;color:var(--text2);">${mktEsc(a.last_reason || '')}</div></div>`).join('')
     : '<p class="mkt-empty">Nothing flagged for pausing right now.</p>';
+}
+
+/* ---------- STRATEGY ---------- */
+let mktCurrentStrategy = null;
+let mktStrategyEditMode = null; // 'edit' | 'new'
+
+function mktFmtStratBudget(s) {
+  if (!s) return '—';
+  const parts = [];
+  if (s.monthly_budget) parts.push('₹' + Number(s.monthly_budget).toLocaleString('en-IN') + '/mo');
+  if (s.daily_budget) parts.push('₹' + Number(s.daily_budget).toLocaleString('en-IN') + '/day');
+  return parts.join(' · ') || '—';
+}
+
+async function mktLoadStrategy() {
+  mktInit();
+  const view = document.getElementById('mkt-strategy-view');
+  if (!mktSupabase) { view.innerHTML = '<p class="mkt-empty">Marketing Supabase not configured.</p>'; return; }
+  const { data, error } = await mktSupabase.from('monthly_strategies').select('*').eq('is_active', true).maybeSingle();
+  if (error) { view.innerHTML = '<p class="mkt-empty">Failed to load: ' + mktEsc(error.message) + '</p>'; return; }
+  mktCurrentStrategy = data;
+
+  if (!data) {
+    document.getElementById('mkt-strategy-title').textContent = 'No active strategy yet';
+    document.getElementById('mkt-strategy-sub').textContent = 'Click "Start new month" to create the first one, or run the seed SQL for month 1.';
+    view.innerHTML = '<p class="mkt-empty">Nothing configured yet.</p>';
+    return;
+  }
+
+  document.getElementById('mkt-strategy-title').textContent = (data.title || 'Strategy') + ' — ' + data.month;
+  document.getElementById('mkt-strategy-sub').textContent = mktFmtStratBudget(data) + ' · Active';
+
+  const budgetRows = (data.budget_split || []).map(b => `
+    <tr>
+      <td>${mktEsc(b.product)}</td>
+      <td>${mktFmtMoney(b.monthly_budget)}/mo</td>
+      <td>${mktFmtMoney(b.daily_budget)}/day</td>
+      <td>${b.share_pct != null ? b.share_pct + '%' : '—'}</td>
+    </tr>`).join('');
+
+  const targeting = data.targeting || {};
+  const perfRows = (data.expected_performance || []).map(p => `
+    <tr><td>${mktEsc(p.metric)}</td><td>${mktEsc(p.target)}</td></tr>`).join('');
+  const calRows = (data.testing_calendar || []).map(c => `
+    <tr><td>Week ${mktEsc(c.week)}</td><td>${mktEsc(c.focus)}</td></tr>`).join('');
+
+  view.innerHTML = `
+    <div class="mkt-split" style="margin-bottom:20px;">
+      <div>
+        <h3 style="margin-bottom:8px;">Budget split</h3>
+        ${budgetRows ? `<table class="mkt-table"><tr><th>Product</th><th>Monthly</th><th>Daily</th><th>Share</th></tr>${budgetRows}</table>` : '<p class="mkt-empty">No budget split set.</p>'}
+      </div>
+      <div>
+        <h3 style="margin-bottom:8px;">Expected performance</h3>
+        ${perfRows ? `<table class="mkt-table"><tr><th>Metric</th><th>Target</th></tr>${perfRows}</table>` : '<p class="mkt-empty">Not set.</p>'}
+      </div>
+    </div>
+
+    <div class="card" style="padding:14px 16px;margin-bottom:16px;">
+      <h3 style="margin-top:0;">Targeting</h3>
+      <div style="font-size:13px;line-height:1.7;">
+        ${targeting.locations ? `<div><strong>Locations:</strong> ${mktEsc((targeting.locations.tier1_core || []).join(', '))}${targeting.locations.tier2_secondary_fold_into_broad ? ' + Tier 2 folded into broad prospecting' : ''}</div>` : ''}
+        ${targeting.age_gender ? `<div><strong>Age/gender:</strong> ${Object.entries(targeting.age_gender).map(([k,v]) => mktEsc(k) + ': ' + mktEsc(v)).join(' · ')}</div>` : ''}
+        ${targeting.interests ? `<div><strong>Interests:</strong> ${Object.entries(targeting.interests).filter(([k])=>k!=='note').map(([k,v]) => mktEsc(k) + ': ' + (Array.isArray(v) ? mktEsc(v.join(', ')) : mktEsc(v))).join(' · ')}</div>` : ''}
+        ${targeting.language_placements ? `<div><strong>Language/placements:</strong> ${mktEsc(targeting.language_placements)}</div>` : ''}
+        ${targeting.retargeting_audiences ? `<div><strong>Retargeting audiences:</strong> ${mktEsc(targeting.retargeting_audiences.join('; '))}</div>` : ''}
+      </div>
+    </div>
+
+    ${data.creative_notes ? `<div class="card" style="padding:14px 16px;margin-bottom:16px;"><h3 style="margin-top:0;">Creative notes</h3><div style="font-size:13px;white-space:pre-wrap;">${mktEsc(data.creative_notes)}</div></div>` : ''}
+    ${data.compliance_notes ? `<div class="mkt-angle" style="background:#fff7e6;border-color:#f0dca0;"><strong>Compliance notes</strong><div style="font-size:13px;white-space:pre-wrap;margin-top:6px;">${mktEsc(data.compliance_notes)}</div></div>` : ''}
+    ${calRows ? `<h3 style="margin-top:16px;">Testing calendar</h3><table class="mkt-table"><tr><th>Week</th><th>Focus</th></tr>${calRows}</table>` : ''}
+    ${data.raw_notes ? `<div class="card" style="padding:14px 16px;margin-top:16px;"><h3 style="margin-top:0;">Other notes</h3><div style="font-size:13px;white-space:pre-wrap;">${mktEsc(data.raw_notes)}</div></div>` : ''}
+  `;
+}
+
+function mktPopulateStrategyForm(s, { keepMonth } = { keepMonth: true }) {
+  document.getElementById('mkt-strat-month').value = keepMonth ? (s?.month || '') : '';
+  document.getElementById('mkt-strat-month').disabled = !!keepMonth && !!s;
+  document.getElementById('mkt-strat-title').value = s?.title || '';
+  document.getElementById('mkt-strat-monthly-budget').value = s?.monthly_budget || '';
+  document.getElementById('mkt-strat-daily-budget').value = s?.daily_budget || '';
+  document.getElementById('mkt-strat-budget-split').value = s?.budget_split ? JSON.stringify(s.budget_split, null, 2) : '';
+  document.getElementById('mkt-strat-targeting').value = s?.targeting ? JSON.stringify(s.targeting, null, 2) : '';
+  document.getElementById('mkt-strat-creative').value = s?.creative_notes || '';
+  document.getElementById('mkt-strat-compliance').value = s?.compliance_notes || '';
+  document.getElementById('mkt-strat-expected').value = s?.expected_performance ? JSON.stringify(s.expected_performance, null, 2) : '';
+  document.getElementById('mkt-strat-calendar').value = s?.testing_calendar ? JSON.stringify(s.testing_calendar, null, 2) : '';
+  document.getElementById('mkt-strat-raw').value = s?.raw_notes || '';
+}
+
+function mktToggleStrategyEdit(forceClose) {
+  const form = document.getElementById('mkt-strategy-form');
+  const isOpen = form.style.display !== 'none';
+  if (forceClose === true || isOpen) { form.style.display = 'none'; mktStrategyEditMode = null; return; }
+  mktStrategyEditMode = 'edit';
+  document.getElementById('mkt-strat-save-btn').textContent = 'Save changes';
+  mktPopulateStrategyForm(mktCurrentStrategy, { keepMonth: true });
+  form.style.display = 'block';
+}
+
+function mktStartNewMonth() {
+  const form = document.getElementById('mkt-strategy-form');
+  mktStrategyEditMode = 'new';
+  document.getElementById('mkt-strat-save-btn').textContent = 'Create new month';
+  // Copy forward everything except month/title, so only the numbers that
+  // actually change month to month need retyping.
+  mktPopulateStrategyForm(mktCurrentStrategy, { keepMonth: false });
+  document.getElementById('mkt-strat-title').value = '';
+  form.style.display = 'block';
+  document.getElementById('mkt-strat-month').focus();
+}
+
+function mktParseJsonField(id, label) {
+  const raw = document.getElementById(id).value.trim();
+  if (!raw) return null;
+  try { return JSON.parse(raw); }
+  catch (e) { throw new Error(label + ' is not valid JSON: ' + e.message); }
+}
+
+async function mktSaveStrategy() {
+  const status = document.getElementById('mkt-strat-save-status');
+  try {
+    const payload = {
+      title: document.getElementById('mkt-strat-title').value.trim() || null,
+      monthly_budget: Number(document.getElementById('mkt-strat-monthly-budget').value) || null,
+      daily_budget: Number(document.getElementById('mkt-strat-daily-budget').value) || null,
+      budget_split: mktParseJsonField('mkt-strat-budget-split', 'Budget split'),
+      targeting: mktParseJsonField('mkt-strat-targeting', 'Targeting'),
+      creative_notes: document.getElementById('mkt-strat-creative').value.trim() || null,
+      compliance_notes: document.getElementById('mkt-strat-compliance').value.trim() || null,
+      expected_performance: mktParseJsonField('mkt-strat-expected', 'Expected performance'),
+      testing_calendar: mktParseJsonField('mkt-strat-calendar', 'Testing calendar'),
+      raw_notes: document.getElementById('mkt-strat-raw').value.trim() || null,
+    };
+
+    status.textContent = 'Saving…';
+    let res;
+    if (mktStrategyEditMode === 'new') {
+      const month = document.getElementById('mkt-strat-month').value.trim();
+      if (!month) { status.textContent = 'Month is required (e.g. 2026-08)'; return; }
+      payload.month = month;
+      res = await fetch(window.MARKETING_BACKEND_URL + '/api/strategy', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload),
+      });
+    } else {
+      if (!mktCurrentStrategy) { status.textContent = 'No active strategy to edit — start a new month instead.'; return; }
+      res = await fetch(window.MARKETING_BACKEND_URL + '/api/strategy/' + mktCurrentStrategy.id, {
+        method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload),
+      });
+    }
+    const result = await res.json();
+    if (!res.ok) throw new Error(result.error || 'Save failed');
+    status.textContent = 'Saved';
+    mktToggleStrategyEdit(true);
+    mktLoadStrategy();
+  } catch (e) {
+    status.textContent = 'Failed: ' + e.message;
+  }
+}
+
+async function mktToggleStrategyHistory() {
+  const box = document.getElementById('mkt-strategy-history');
+  const isOpen = box.style.display !== 'none';
+  box.style.display = isOpen ? 'none' : 'block';
+  if (!isOpen) mktLoadStrategyHistory();
+}
+
+async function mktLoadStrategyHistory() {
+  mktInit();
+  const list = document.getElementById('mkt-strategy-history-list');
+  if (!mktSupabase) { list.innerHTML = '<p class="mkt-empty">Marketing Supabase not configured.</p>'; return; }
+  const { data, error } = await mktSupabase.from('monthly_strategies').select('*').order('month', { ascending: false });
+  if (error) { list.innerHTML = '<p class="mkt-empty">Failed to load: ' + mktEsc(error.message) + '</p>'; return; }
+  list.innerHTML = (data || []).map(s => `
+    <div class="mkt-angle">
+      <div style="display:flex;justify-content:space-between;align-items:center;">
+        <strong>${mktEsc(s.month)} — ${mktEsc(s.title || '')}</strong>
+        ${s.is_active ? '<span class="mkt-pill active">active</span>' : ''}
+      </div>
+      <div style="font-size:12px;color:var(--text2);">${mktFmtStratBudget(s)}</div>
+    </div>
+  `).join('') || '<p class="mkt-empty">No strategies yet.</p>';
 }
 
 /* ---------- LIVE ADS ---------- */
