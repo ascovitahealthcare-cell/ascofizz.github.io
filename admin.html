@@ -9,35 +9,36 @@
 <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
 :root {
-  --bg: #0A0D0A;
-  --bg2: #0F1410;
-  --bg3: #141A10;
-  --surface: #161D12;
-  --surface2: #1C2418;
-  --border: rgba(82,183,136,0.15);
-  --border2: rgba(82,183,136,0.25);
-  --green: #1B4332;
-  --green-bright: #52B788;
-  --green-glow: rgba(82,183,136,0.25);
-  --green-text: #74C69D;
-  --gold: #C4920E;
-  --gold-text: #E8AD2C;
-  --red: #E53535;
-  --red-soft: rgba(229,53,53,0.15);
-  --orange: #E87020;
-  --blue: #2080E8;
-  --text: #E8EDE0;
-  --text2: #9EAA90;
-  --text3: #6A7860;
-  --white: #F5FAF0;
+  /* ── Ascofizz brand palette — matches index.html (the storefront) ── */
+  --bg: #FBF3E8;
+  --bg2: #EDE3D2;
+  --bg3: #F5EBDD;
+  --surface: #FFFFFF;
+  --surface2: #F7EFE3;
+  --border: rgba(84,113,119,0.16);
+  --border2: rgba(84,113,119,0.28);
+  --green: #547177;
+  --green-bright: #6C8B90;
+  --green-glow: rgba(84,113,119,0.25);
+  --green-text: #3F565B;
+  --gold: #A97A1E;
+  --gold-text: #8F6417;
+  --red: #C2434F;
+  --red-soft: rgba(194,67,79,0.14);
+  --orange: #B65B1E;
+  --blue: #3B7EA6;
+  --text: #1D2320;
+  --text2: #5B665C;
+  --text3: #5C6A5D;
+  --white: #FFFFFF;
   --mono: 'JetBrains Mono', monospace;
   --font: 'DM Sans', sans-serif;
   --display: 'Syne', sans-serif;
   --radius: 12px;
   --radius-sm: 8px;
-  --shadow: 0 4px 24px rgba(0,0,0,0.4);
-  --shadow-lg: 0 12px 48px rgba(0,0,0,0.6);
-  --glow: 0 0 24px rgba(74,138,40,0.2);
+  --shadow: 0 4px 24px rgba(101,113,102,.14);
+  --shadow-lg: 0 12px 48px rgba(101,113,102,.18);
+  --glow: 0 0 24px rgba(84,113,119,0.2);
 }
 *{margin:0;padding:0;box-sizing:border-box;}
 html{scroll-behavior:smooth;}
@@ -50,7 +51,8 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);min-height:1
 #loginScreen{position:fixed;inset:0;background:var(--bg);display:flex;align-items:center;justify-content:center;z-index:9999;padding:20px;}
 .login-wrap{width:100%;max-width:400px;}
 .login-logo{text-align:center;margin-bottom:32px;}
-.logo-mark{width:64px;height:64px;background:linear-gradient(135deg,var(--green),var(--green-bright));border-radius:20px;display:inline-flex;align-items:center;justify-content:center;font-size:2rem;margin-bottom:12px;box-shadow:0 8px 32px rgba(74,138,40,0.4);}
+.logo-mark{width:64px;height:64px;background:var(--white);border:1px solid var(--border);border-radius:20px;display:inline-flex;align-items:center;justify-content:center;font-size:2rem;margin-bottom:12px;box-shadow:var(--shadow);overflow:hidden;}
+.logo-mark img{width:100%;height:100%;object-fit:contain;padding:8px;}
 .login-title{font-family:var(--display);font-size:1.6rem;font-weight:800;color:var(--white);display:block;}
 .login-sub{color:var(--text3);font-size:0.8rem;margin-top:4px;display:block;}
 .login-card{background:var(--surface);border:1px solid var(--border2);border-radius:20px;padding:32px;box-shadow:var(--shadow-lg);}
@@ -70,7 +72,8 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);min-height:1
 /* ═══ TOPBAR ═══ */
 .topbar{grid-column:1/-1;background:var(--surface);border-bottom:1px solid var(--border);display:flex;align-items:center;padding:0 20px;gap:16px;z-index:100;height:56px;}
 .topbar-logo{display:flex;align-items:center;gap:10px;min-width:180px;text-decoration:none;}
-.logo-icon{width:32px;height:32px;background:linear-gradient(135deg,var(--green),var(--green-bright));border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:1.1rem;flex-shrink:0;}
+.logo-icon{width:32px;height:32px;background:var(--white);border:1px solid var(--border);border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:1.1rem;flex-shrink:0;overflow:hidden;}
+.logo-icon img{width:100%;height:100%;object-fit:contain;padding:3px;}
 .logo-name{font-family:var(--display);font-weight:800;font-size:1rem;color:var(--white);}
 .logo-badge{font-size:0.6rem;background:var(--green);color:white;padding:1px 6px;border-radius:4px;font-weight:600;margin-left:4px;vertical-align:middle;}
 .topbar-search{flex:1;max-width:360px;position:relative;}
@@ -306,6 +309,17 @@ textarea.form-control{resize:vertical;min-height:80px;}
 .img-upload-zone:hover,.img-upload-zone.drag{border-color:var(--green);background:var(--green-glow);}
 .img-upload-zone .uico{font-size:2.5rem;margin-bottom:8px;}
 .banner-preview{width:100%;height:160px;object-fit:cover;border-radius:10px;}
+/* ── Image slot uploader (product images + site images) ── */
+.img-slot{position:relative;aspect-ratio:1;border:2px dashed var(--border2);border-radius:10px;background:var(--bg2);cursor:pointer;overflow:hidden;transition:all 0.2s;display:flex;align-items:center;justify-content:center;}
+.img-slot:hover{border-color:var(--green);background:var(--green-glow);}
+.img-slot.filled{border-style:solid;border-color:var(--border);}
+.img-slot-preview{width:100%;height:100%;object-fit:cover;display:none;}
+.img-slot-plus{font-size:1.4rem;color:var(--text3);line-height:1;}
+.img-slot-label{position:absolute;bottom:2px;left:4px;font-size:0.55rem;font-weight:700;color:#fff;background:rgba(0,0,0,0.55);padding:1px 5px;border-radius:6px;pointer-events:none;}
+.img-slot-main-badge{position:absolute;bottom:2px;left:4px;background:var(--green);color:#fff;font-size:0.55rem;font-weight:700;padding:1px 5px;border-radius:6px;pointer-events:none;}
+.img-slot-del{position:absolute;top:2px;right:2px;width:20px;height:20px;border-radius:50%;border:none;background:rgba(0,0,0,0.6);color:#fff;font-size:0.7rem;cursor:pointer;line-height:1;display:flex;align-items:center;justify-content:center;}
+.img-slot-del:hover{background:var(--red);}
+.img-slot-spinner{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,0.45);color:#fff;font-size:0.65rem;}
 .revenue-bar{background:var(--border);border-radius:4px;height:8px;overflow:hidden;margin-top:6px;}
 .revenue-fill{height:100%;background:linear-gradient(90deg,var(--green),var(--green-bright));border-radius:4px;transition:width 0.8s ease;}
 input[type=file]{display:none;}
@@ -781,14 +795,14 @@ img, canvas, svg, table { max-width:100%; }
 .theme-opt.selected .theme-check{display:flex;}
 
 .theme-preview-deluxe{background:#0F1410;}
-.theme-preview-deluxe .tp-bar{background:#1C2418;}
+.theme-preview-deluxe .tp-bar{background:#F7EFE3;}
 .theme-preview-deluxe .tp-dot:nth-child(1){background:#E53535}
 .theme-preview-deluxe .tp-dot:nth-child(2){background:#C4920E}
 .theme-preview-deluxe .tp-dot:nth-child(3){background:#4A8A28}
 
-.theme-preview-neo{background:#EEF7F2;box-shadow:7px 7px 14px rgba(27,67,50,0.16),-7px -7px 14px rgba(255,255,255,0.85);}
-.theme-preview-neo .tp-bar{background:#EEF7F2;box-shadow:inset 2px 2px 4px rgba(27,67,50,0.14),inset -2px -2px 4px rgba(255,255,255,0.75);}
-.theme-preview-neo .tp-dot{background:#52B788;box-shadow:1px 1px 2px rgba(27,67,50,0.13);}
+.theme-preview-neo{background:#F7EFE3;box-shadow:7px 7px 14px rgba(27,67,50,0.16),-7px -7px 14px rgba(255,255,255,0.85);}
+.theme-preview-neo .tp-bar{background:#F7EFE3;box-shadow:inset 2px 2px 4px rgba(27,67,50,0.14),inset -2px -2px 4px rgba(255,255,255,0.75);}
+.theme-preview-neo .tp-dot{background:#6C8B90;box-shadow:1px 1px 2px rgba(27,67,50,0.13);}
 
 .theme-preview-glass{
   background:radial-gradient(circle at 20% 20%, rgba(82,183,136,0.6), transparent 45%),
@@ -804,8 +818,8 @@ img, canvas, svg, table { max-width:100%; }
    One flat surface colour — every element is either "extruded" (raised,
    dual light+dark shadow) or "pressed" (inset shadow). No borders, ever. */
 body.theme-neo{
-  --bg:#EEF7F2; --bg2:#EEF7F2; --bg3:#EEF7F2;
-  --surface:#EEF7F2; --surface2:#EEF7F2;
+  --bg:#F7EFE3; --bg2:#F7EFE3; --bg3:#F7EFE3;
+  --surface:#F7EFE3; --surface2:#F7EFE3;
   --border:transparent; --border2:transparent;
   --text:#333a45; --text2:#5b6472; --text3:#8891a0; --white:#20242c;
   --green:#3f7a22; --green-bright:#4d9129; --green-text:#2f6018; --green-glow:rgba(63,122,34,0.18);
@@ -814,43 +828,43 @@ body.theme-neo{
   --blue:#2569c9;
   --shadow:6px 6px 14px rgba(27,67,50,0.16),-6px -6px 14px rgba(255,255,255,0.85);
   --shadow-lg:12px 12px 24px rgba(27,67,50,0.16),-12px -12px 24px rgba(255,255,255,0.85);
-  background:#EEF7F2;
+  background:#F7EFE3;
 }
-body.theme-neo .main, body.theme-neo #loginScreen{background:#EEF7F2;}
-body.theme-neo ::-webkit-scrollbar-thumb{background:#52B788;}
+body.theme-neo .main, body.theme-neo #loginScreen{background:#F7EFE3;}
+body.theme-neo ::-webkit-scrollbar-thumb{background:#6C8B90;}
 body.theme-neo .card, body.theme-neo .kpi, body.theme-neo .modal, body.theme-neo .sidebar,
 body.theme-neo .topbar, body.theme-neo .login-card, body.theme-neo .stat-tick, body.theme-neo .table-wrap{
-  background:#EEF7F2 !important;border:none !important;border-radius:20px;
+  background:#F7EFE3 !important;border:none !important;border-radius:20px;
   box-shadow:8px 8px 16px rgba(27,67,50,0.16),-8px -8px 16px rgba(255,255,255,0.85) !important;
 }
 body.theme-neo th{background:transparent;}
 body.theme-neo td{border-top:1px solid rgba(27,67,50,0.10);}
 body.theme-neo .form-control, body.theme-neo .filter-input, body.theme-neo .filter-select, body.theme-neo .drawer-input{
-  background:#EEF7F2 !important;border:none !important;border-radius:12px;color:var(--text) !important;
+  background:#F7EFE3 !important;border:none !important;border-radius:12px;color:var(--text) !important;
   box-shadow:inset 5px 5px 10px rgba(27,67,50,0.14),inset -5px -5px 10px rgba(255,255,255,0.75) !important;
 }
 body.theme-neo .form-control::placeholder{color:var(--text3);}
 body.theme-neo .btn{border-radius:14px;}
-body.theme-neo .btn-primary{background:#EEF7F2 !important;color:var(--green-text) !important;font-weight:700;box-shadow:6px 6px 12px rgba(27,67,50,0.14),-6px -6px 12px rgba(255,255,255,0.8) !important;}
+body.theme-neo .btn-primary{background:#F7EFE3 !important;color:var(--green-text) !important;font-weight:700;box-shadow:6px 6px 12px rgba(27,67,50,0.14),-6px -6px 12px rgba(255,255,255,0.8) !important;}
 body.theme-neo .btn-primary:hover{box-shadow:inset 3px 3px 8px rgba(27,67,50,0.14),inset -3px -3px 8px rgba(255,255,255,0.7) !important;transform:none;}
 body.theme-neo .btn-secondary, body.theme-neo .btn-danger, body.theme-neo .btn-export{
-  background:#EEF7F2 !important;border:none !important;color:var(--text2) !important;
+  background:#F7EFE3 !important;border:none !important;color:var(--text2) !important;
   box-shadow:5px 5px 10px rgba(27,67,50,0.14),-5px -5px 10px rgba(255,255,255,0.8) !important;
 }
 body.theme-neo .btn-danger{color:var(--red) !important;}
 body.theme-neo .btn-export{color:var(--green-text) !important;}
-body.theme-neo .badge{background:#EEF7F2;box-shadow:3px 3px 6px rgba(27,67,50,0.12),-3px -3px 6px rgba(255,255,255,0.7);}
+body.theme-neo .badge{background:#F7EFE3;box-shadow:3px 3px 6px rgba(27,67,50,0.12),-3px -3px 6px rgba(255,255,255,0.7);}
 body.theme-neo .badge-blue{color:#1d4ed8;}
 body.theme-neo .badge-gray{color:var(--text2);}
-body.theme-neo .filter-chip{background:#EEF7F2;box-shadow:3px 3px 6px rgba(27,67,50,0.12),-3px -3px 6px rgba(255,255,255,0.7);}
+body.theme-neo .filter-chip{background:#F7EFE3;box-shadow:3px 3px 6px rgba(27,67,50,0.12),-3px -3px 6px rgba(255,255,255,0.7);}
 body.theme-neo .filter-chip.active{box-shadow:inset 2px 2px 5px rgba(27,67,50,0.22),inset -2px -2px 5px rgba(255,255,255,0.6);}
-body.theme-neo .toggle-slider{background:#EEF7F2;box-shadow:inset 3px 3px 6px rgba(27,67,50,0.14),inset -3px -3px 6px rgba(255,255,255,0.75);border:none;}
+body.theme-neo .toggle-slider{background:#F7EFE3;box-shadow:inset 3px 3px 6px rgba(27,67,50,0.14),inset -3px -3px 6px rgba(255,255,255,0.75);border:none;}
 body.theme-neo .toggle-slider::before{background:#fff;box-shadow:2px 2px 4px rgba(163,177,198,0.6);}
-body.theme-neo .toggle input:checked + .toggle-slider{background:#EEF7F2;box-shadow:inset 3px 3px 6px rgba(27,67,50,0.26),inset -3px -3px 6px rgba(255,255,255,0.6);}
+body.theme-neo .toggle input:checked + .toggle-slider{background:#F7EFE3;box-shadow:inset 3px 3px 6px rgba(27,67,50,0.26),inset -3px -3px 6px rgba(255,255,255,0.6);}
 body.theme-neo .toggle input:checked + .toggle-slider::before{background:var(--green);}
 body.theme-neo .nav-item{border-left:none;}
 body.theme-neo .nav-item:hover{background:rgba(27,67,50,0.08);}
-body.theme-neo .nav-item.active{background:#EEF7F2;box-shadow:inset 3px 3px 7px rgba(27,67,50,0.14),inset -3px -3px 7px rgba(255,255,255,0.75);border-left:none;border-radius:12px;margin:0 8px;}
+body.theme-neo .nav-item.active{background:#F7EFE3;box-shadow:inset 3px 3px 7px rgba(27,67,50,0.14),inset -3px -3px 7px rgba(255,255,255,0.75);border-left:none;border-radius:12px;margin:0 8px;}
 body.theme-neo .tab-btn.active{box-shadow:inset 3px 3px 6px rgba(27,67,50,0.14),inset -3px -3px 6px rgba(255,255,255,0.75);border-radius:10px;border-bottom-color:transparent;}
 body.theme-neo .tb-stat{box-shadow:3px 3px 6px rgba(27,67,50,0.12),-3px -3px 6px rgba(255,255,255,0.7);}
 
@@ -858,10 +872,10 @@ body.theme-neo .tb-stat{box-shadow:3px 3px 6px rgba(27,67,50,0.12),-3px -3px 6px
    soft accent tint + a coloured edge, so the dashboard doesn't read as
    flat grey while the page background stays clean white. */
 body.theme-neo .kpi, body.theme-neo .card{position:relative;overflow:hidden;}
-body.theme-neo .kpi:nth-child(4n+1){background:linear-gradient(150deg, rgba(27,67,50,0.10), #EEF7F2 58%) !important;box-shadow:8px 8px 16px rgba(27,67,50,0.16),-8px -8px 16px rgba(255,255,255,0.85), inset 3px 0 0 rgba(27,67,50,0.4) !important;}
-body.theme-neo .kpi:nth-child(4n+2){background:linear-gradient(150deg, rgba(37,105,201,0.10), #EEF7F2 58%) !important;box-shadow:8px 8px 16px rgba(27,67,50,0.16),-8px -8px 16px rgba(255,255,255,0.85), inset 3px 0 0 rgba(37,105,201,0.55) !important;}
-body.theme-neo .kpi:nth-child(4n+3){background:linear-gradient(150deg, rgba(169,122,10,0.10), #EEF7F2 58%) !important;box-shadow:8px 8px 16px rgba(27,67,50,0.16),-8px -8px 16px rgba(255,255,255,0.85), inset 3px 0 0 rgba(169,122,10,0.55) !important;}
-body.theme-neo .kpi:nth-child(4n+4){background:linear-gradient(150deg, rgba(192,57,43,0.09), #EEF7F2 58%) !important;box-shadow:8px 8px 16px rgba(27,67,50,0.16),-8px -8px 16px rgba(255,255,255,0.85), inset 3px 0 0 rgba(192,57,43,0.5) !important;}
+body.theme-neo .kpi:nth-child(4n+1){background:linear-gradient(150deg, rgba(27,67,50,0.10), #F7EFE3 58%) !important;box-shadow:8px 8px 16px rgba(27,67,50,0.16),-8px -8px 16px rgba(255,255,255,0.85), inset 3px 0 0 rgba(27,67,50,0.4) !important;}
+body.theme-neo .kpi:nth-child(4n+2){background:linear-gradient(150deg, rgba(37,105,201,0.10), #F7EFE3 58%) !important;box-shadow:8px 8px 16px rgba(27,67,50,0.16),-8px -8px 16px rgba(255,255,255,0.85), inset 3px 0 0 rgba(37,105,201,0.55) !important;}
+body.theme-neo .kpi:nth-child(4n+3){background:linear-gradient(150deg, rgba(169,122,10,0.10), #F7EFE3 58%) !important;box-shadow:8px 8px 16px rgba(27,67,50,0.16),-8px -8px 16px rgba(255,255,255,0.85), inset 3px 0 0 rgba(169,122,10,0.55) !important;}
+body.theme-neo .kpi:nth-child(4n+4){background:linear-gradient(150deg, rgba(192,57,43,0.09), #F7EFE3 58%) !important;box-shadow:8px 8px 16px rgba(27,67,50,0.16),-8px -8px 16px rgba(255,255,255,0.85), inset 3px 0 0 rgba(192,57,43,0.5) !important;}
 body.theme-neo .card:nth-child(4n+1)::before,
 body.theme-neo .kpi:nth-child(4n+1)::after{content:'';position:absolute;top:0;left:0;right:0;height:4px;background:linear-gradient(90deg,#3f7a22,#6fbf3f);}
 body.theme-neo .card:nth-child(4n+2)::before,
@@ -975,7 +989,7 @@ body.theme-glass .card:hover{box-shadow:0 10px 28px rgba(0,0,0,0.3), inset 0 1px
 <div id="loginScreen">
   <div class="login-wrap">
     <div class="login-logo">
-      <div class="logo-mark">🌿</div>
+      <div class="logo-mark"><img src="assets/ascofizz-logo.png" alt="Ascofizz" onerror="this.style.display='none';this.parentNode.textContent='🌿'"></div>
       <span class="login-title">Ascofizz</span>
       <span class="login-sub">Admin Backoffice v8.0</span>
     </div>
@@ -1057,7 +1071,7 @@ body.theme-glass .card:hover{box-shadow:0 10px 28px rgba(0,0,0,0.3), inset 0 1px
 <header class="topbar">
   <button class="hamburger-btn" onclick="toggleSidebar()">☰</button>
   <a href="#" class="topbar-logo">
-    <div class="logo-icon">🌿</div>
+    <div class="logo-icon"><img src="assets/ascofizz-logo.png" alt="Ascofizz" onerror="this.style.display='none';this.parentNode.textContent='🌿'"></div>
     <span class="logo-name">Ascofizz <span class="logo-badge">ADMIN</span></span>
   </a>
   <div class="topbar-search">
@@ -1632,17 +1646,28 @@ body.theme-glass .card:hover{box-shadow:0 10px 28px rgba(0,0,0,0.3), inset 0 1px
   <div class="prod-drawer-body">
     <!-- Image preview -->
     <div class="drawer-field">
-      <div class="drawer-field-label">Main Image URL</div>
-      <img id="drawerImgPreview" src="https://via.placeholder.com/400x160/141A10/4A8A28?text=No+Image" class="drawer-img-preview" alt="">
-      <input class="drawer-input" id="dImage" placeholder="https://...image URL" oninput="updateDrawerImgPreview()">
-      <div style="display:flex;gap:6px;margin-top:6px;">
-        <input class="drawer-input" id="dImage2" placeholder="Image 2 URL" style="font-size:0.75rem;">
-        <input class="drawer-input" id="dImage3" placeholder="Image 3 URL" style="font-size:0.75rem;">
+      <div class="drawer-field-label">Product Images <span style="font-weight:400;color:var(--text3);">— click a slot to upload, ✕ to delete everywhere</span></div>
+      <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:8px;">
+        <div class="img-slot" id="imgSlot1" data-slot="1" onclick="triggerImgSlotUpload(1)">
+          <img class="img-slot-preview" id="imgSlotPreview1"><span class="img-slot-plus" id="imgSlotPlus1">＋</span>
+        </div>
+        <div class="img-slot" id="imgSlot2" data-slot="2" onclick="triggerImgSlotUpload(2)">
+          <img class="img-slot-preview" id="imgSlotPreview2"><span class="img-slot-plus" id="imgSlotPlus2">＋</span>
+        </div>
+        <div class="img-slot" id="imgSlot3" data-slot="3" onclick="triggerImgSlotUpload(3)">
+          <img class="img-slot-preview" id="imgSlotPreview3"><span class="img-slot-plus" id="imgSlotPlus3">＋</span>
+        </div>
+        <div class="img-slot" id="imgSlot4" data-slot="4" onclick="triggerImgSlotUpload(4)">
+          <img class="img-slot-preview" id="imgSlotPreview4"><span class="img-slot-plus" id="imgSlotPlus4">＋</span>
+        </div>
+        <div class="img-slot" id="imgSlot5" data-slot="5" onclick="triggerImgSlotUpload(5)">
+          <img class="img-slot-preview" id="imgSlotPreview5"><span class="img-slot-plus" id="imgSlotPlus5">＋</span>
+        </div>
       </div>
-      <div style="display:flex;gap:6px;margin-top:6px;">
-        <input class="drawer-input" id="dImage4" placeholder="Image 4 URL" style="font-size:0.75rem;">
-        <input class="drawer-input" id="dImage5" placeholder="Image 5 URL" style="font-size:0.75rem;">
-      </div>
+      <div style="font-size:0.68rem;color:var(--text3);margin-top:6px;">JPG, PNG, WebP, SVG · Max 10MB · Slot 1 is the main product image</div>
+      <input type="file" id="imgSlotFileInput" accept="image/*,.svg" style="display:none;" onchange="handleImgSlotFileChosen(this)">
+      <!-- Hidden fields — keep existing save/load code (dImage..dImage5) working unchanged -->
+      <input type="hidden" id="dImage"><input type="hidden" id="dImage2"><input type="hidden" id="dImage3"><input type="hidden" id="dImage4"><input type="hidden" id="dImage5">
     </div>
     <!-- Basic -->
     <div class="section-ico-hdr"><div class="section-ico green">📦</div><div style="font-weight:700;font-size:0.88rem;">Basic Info</div></div>
@@ -2096,14 +2121,14 @@ body.theme-glass .card:hover{box-shadow:0 10px 28px rgba(0,0,0,0.3), inset 0 1px
   #page-marketing .mkt-angle { border:1px solid var(--border,#e2e2e2); border-radius:8px; padding:12px 14px; margin-bottom:10px; }
   #page-marketing .mkt-empty { font-size:13px; color:var(--text2); }
   #page-marketing .mkt-pill { font-size:11px; font-weight:700; padding:2px 8px; border-radius:99px; white-space:nowrap; }
-  #page-marketing .mkt-pill.scale { background:#e1f5ee; color:#0f6e56; }
-  #page-marketing .mkt-pill.pause { background:#fcebeb; color:#a32d2d; }
+  #page-marketing .mkt-pill.scale { background:#F7EFE3; color:#3F565B; }
+  #page-marketing .mkt-pill.pause { background:#fcebeb; color:#963848; }
   #page-marketing .mkt-pill.hold  { background:#efefef; color:#666; }
-  #page-marketing .mkt-pill.active { background:#e1f5ee; color:#0f6e56; }
+  #page-marketing .mkt-pill.active { background:#F7EFE3; color:#3F565B; }
   #page-marketing .mkt-pill.paused { background:#efefef; color:#666; }
   #page-marketing .mkt-pill.pending_approval { background:#faeeda; color:#854f0b; }
-  #page-marketing .mkt-pill.approved { background:#e1f5ee; color:#0f6e56; }
-  #page-marketing .mkt-pill.rejected { background:#fcebeb; color:#a32d2d; }
+  #page-marketing .mkt-pill.approved { background:#F7EFE3; color:#3F565B; }
+  #page-marketing .mkt-pill.rejected { background:#fcebeb; color:#963848; }
 
   #page-marketing .mkt-kpi-row { display:grid; grid-template-columns:repeat(4,1fr); gap:14px; margin-bottom:24px; }
   #page-marketing .mkt-kpi { background:var(--card-bg,#fff); border:1px solid var(--border,#e2e2e2); border-radius:12px; padding:16px 18px; }
@@ -2117,9 +2142,9 @@ body.theme-glass .card:hover{box-shadow:0 10px 28px rgba(0,0,0,0.3), inset 0 1px
   #page-marketing .mkt-table tr:last-child td { border-bottom:none; }
   #page-marketing .mkt-budget-input { width:90px; padding:5px 8px; font-size:12px; border:1px solid var(--border,#e2e2e2); border-radius:6px; }
 
-  #page-marketing .mkt-winner-card { background:var(--card-bg,#fff); border:1px solid #b9e3d4; border-left:4px solid #0f6e56; border-radius:10px; padding:14px 16px; margin-bottom:10px; }
+  #page-marketing .mkt-winner-card { background:var(--card-bg,#fff); border:1px solid #b9e3d4; border-left:4px solid #3F565B; border-radius:10px; padding:14px 16px; margin-bottom:10px; }
   #page-marketing .mkt-winner-card .mkt-wc-top { display:flex; justify-content:space-between; align-items:center; margin-bottom:6px; }
-  #page-marketing .mkt-winner-card .mkt-wc-roas { font-size:20px; font-weight:700; color:#0f6e56; }
+  #page-marketing .mkt-winner-card .mkt-wc-roas { font-size:20px; font-weight:700; color:#3F565B; }
 
   @media (max-width: 900px) {
     #page-marketing .mkt-kpi-row { grid-template-columns:1fr 1fr; }
@@ -3520,7 +3545,7 @@ function animateCount(el, from, to, fmt, dur=900) {
 }
 
 // 3D Bar Chart with line overlay
-function drawBarChart(canvasId, labels, data, color='#5EAB30', lineData=null) {
+function drawBarChart(canvasId, labels, data, color='#547177', lineData=null) {
   const canvas = document.getElementById(canvasId);
   if(!canvas) return;
   const dpr = window.devicePixelRatio||1;
@@ -3594,13 +3619,13 @@ function drawBarChart(canvasId, labels, data, color='#5EAB30', lineData=null) {
       const x=pad.l+i*(cW/data.length)+barW/2+(cW/data.length-barW)/2;
       const y=pad.t+cH-(v/lMax)*cH;
       ctx.beginPath();ctx.arc(x,y,3,0,Math.PI*2);
-      ctx.fillStyle='#E8AD2C';ctx.fill();
+      ctx.fillStyle='#8F6417';ctx.fill();
     });
   }
 }
 
 // Sparkline
-function drawSparkline(canvasId, data, color='#5EAB30') {
+function drawSparkline(canvasId, data, color='#547177') {
   const canvas=document.getElementById(canvasId);if(!canvas)return;
   const dpr=window.devicePixelRatio||1;
   const W0=canvas.clientWidth||120,H0=36;
@@ -3652,7 +3677,7 @@ function drawDonutChart(canvasId, labels, data, colors, centerLabel='') {
   hGrd.addColorStop(0,'#0F1410');hGrd.addColorStop(1,'#0A0D0A');
   ctx.fillStyle=hGrd;ctx.fill();
   // Center text
-  ctx.fillStyle='#E8EDE0';ctx.font=`bold ${Math.min(16,r*0.35)}px Syne,sans-serif`;
+  ctx.fillStyle='#1D2320';ctx.font=`bold ${Math.min(16,r*0.35)}px Syne,sans-serif`;
   ctx.textAlign='center';ctx.fillText(centerLabel||total,cx,cy+5);
   ctx.fillStyle='rgba(106,120,96,0.7)';ctx.font='8px DM Sans,sans-serif';
   ctx.fillText('total',cx,cy+17);
@@ -3696,7 +3721,7 @@ function drawHBarChart(canvasId, labels, data, colors) {
     ctx.fillStyle='rgba(0,0,0,0.2)';
     ctx.beginPath();ctx.roundRect(pad.l+2,bY+2,bW,bH,[3]);ctx.fill();
     // Colored bar
-    const c=colors?colors[i%colors.length]:'#5EAB30';
+    const c=colors?colors[i%colors.length]:'#547177';
     const grd=ctx.createLinearGradient(pad.l,0,pad.l+bW,0);
     grd.addColorStop(0,c);grd.addColorStop(1,c+'80');
     ctx.fillStyle=grd;ctx.beginPath();ctx.roundRect(pad.l,bY,bW,bH,[3]);ctx.fill();
@@ -3724,7 +3749,7 @@ function drawHourlyChart(canvasId, data) {
     const bH=Math.max(2,(v/max)*cH);
     const y=pad.t+cH-bH;
     const isCurrent=i===now;
-    const col=isCurrent?'#E8AD2C':v>0?'#4A8A28':'#1C2418';
+    const col=isCurrent?'#8F6417':v>0?'#4A8A28':'#F7EFE3';
     ctx.fillStyle=col+'80';ctx.fillRect(x+2,y+2,barW,bH);
     ctx.fillStyle=col;ctx.beginPath();ctx.roundRect(x,y,barW,bH,[2,2,0,0]);ctx.fill();
     if(i%4===0){
@@ -3779,7 +3804,7 @@ function renderIndiaMap(cityData) {
     const fill = orders > 0
       ? `rgba(74,138,40,${0.2 + intensity*0.7})`
       : 'var(--surface2)';
-    const stroke = orders > 0 ? '#5EAB30' : 'rgba(216,103,110,0.2)';
+    const stroke = orders > 0 ? '#547177' : 'rgba(216,103,110,0.2)';
     return `<path class="map-state" id="state-${s.id}" d="${s.d}" fill="${fill}" stroke="${stroke}"
       onmouseenter="showMapTip(event,'${s.name}',${orders})"
       onmouseleave="hideMapTip()"
@@ -3819,7 +3844,7 @@ function hideMapTip() {
 }
 
 // Goal ring
-function drawGoalRing(canvasId, pct, color='#5EAB30') {
+function drawGoalRing(canvasId, pct, color='#547177') {
   const canvas = document.getElementById(canvasId);if(!canvas)return;
   const dpr=window.devicePixelRatio||1;
   const S=100;
@@ -3833,12 +3858,12 @@ function drawGoalRing(canvasId, pct, color='#5EAB30') {
   // Progress ring
   const endAngle=-Math.PI/2+(pct/100)*Math.PI*2;
   const grd=ctx.createLinearGradient(cx-r,cy,cx+r,cy);
-  grd.addColorStop(0,color);grd.addColorStop(1,'#E8AD2C');
+  grd.addColorStop(0,color);grd.addColorStop(1,'#8F6417');
   ctx.beginPath();ctx.arc(cx,cy,r,-Math.PI/2,endAngle);
   ctx.strokeStyle=grd;ctx.lineWidth=8;ctx.lineCap='round';
   ctx.shadowColor=color;ctx.shadowBlur=12;ctx.stroke();ctx.shadowBlur=0;
   // Center
-  ctx.fillStyle='#E8EDE0';ctx.font='bold 16px Syne,sans-serif';
+  ctx.fillStyle='#1D2320';ctx.font='bold 16px Syne,sans-serif';
   ctx.textAlign='center';ctx.fillText(Math.round(pct)+'%',cx,cy+4);
   ctx.fillStyle='rgba(106,120,96,0.7)';ctx.font='8px DM Sans,sans-serif';
   ctx.fillText('achieved',cx,cy+16);
@@ -4027,8 +4052,8 @@ function renderDashboardData(orders, prods, stats) {
   document.getElementById('sparkOrdLabel').textContent = `${rangeOrders.length} orders · ${rangeLbl}`;
   document.getElementById('sparkConvLabel').textContent = `${paidRange.length} of ${rangeOrders.length} paid · ${rangeLbl}`;
   setTimeout(()=>{
-    drawSparkline('sparkRevCanvas', revSpark, '#5EAB30');
-    drawSparkline('sparkOrdCanvas', ordSpark, '#2080E8');
+    drawSparkline('sparkRevCanvas', revSpark, '#547177');
+    drawSparkline('sparkOrdCanvas', ordSpark, '#3B7EA6');
     document.getElementById('convFill').style.width = Math.min(conv,100)+'%';
   }, 80);
 
@@ -4053,7 +4078,7 @@ function renderDashboardData(orders, prods, stats) {
   // Top cities chart
   const topCities = Object.entries(cityMap).sort((a,b)=>b[1].orders-a[1].orders).slice(0,8);
   const maxCity = topCities[0]?.[1].orders||1;
-  const cityColors = ['#5EAB30','#2080E8','#E8AD2C','#7C3AED','#E87020','#E53535','#06B6D4','#EC4899'];
+  const cityColors = ['#547177','#3B7EA6','#8F6417','#7C3AED','#E87020','#E53535','#06B6D4','#EC4899'];
   document.getElementById('topCitiesChart').innerHTML = topCities.map(([city,info],i)=>`
     <div class="rank-row">
       <div class="rank-num">${i+1}</div>
@@ -4176,15 +4201,15 @@ function renderRevenueChart(orders, days=7, customRange=null) {
     const b=buckets.find(b=>b.date===(o.created_at||'').split('T')[0]);
     if(b){b.cnt++;if(isPaid)b.rev+=parseFloat(o.total||0);}
   });
-  setTimeout(()=>drawBarChart('revenueCanvas',buckets.map(b=>b.label),buckets.map(b=>b.rev),'#5EAB30',buckets.map(b=>b.cnt)),80);
+  setTimeout(()=>drawBarChart('revenueCanvas',buckets.map(b=>b.label),buckets.map(b=>b.rev),'#547177',buckets.map(b=>b.cnt)),80);
 }
 
 function renderStatusChart(orders) {
   const counts={};
   orders.forEach(o=>{const s=o.fulfillment||o.status||'Pending';counts[s]=(counts[s]||0)+1;});
-  const statusColors={Pending:'#E8AD2C',Processing:'#2080E8',Shipped:'#7C3AED',Delivered:'#5EAB30',Cancelled:'#E53535'};
+  const statusColors={Pending:'#8F6417',Processing:'#3B7EA6',Shipped:'#7C3AED',Delivered:'#547177',Cancelled:'#E53535'};
   const labels=Object.keys(counts),data=Object.values(counts);
-  const colors=labels.map(l=>statusColors[l]||'#6A7860');
+  const colors=labels.map(l=>statusColors[l]||'#5C6A5D');
   const total=data.reduce((s,v)=>s+v,0);
   const el=document.getElementById('statusTotal'); if(el) el.textContent=total;
   setTimeout(()=>drawDonutChart('statusCanvas',labels,data,colors,total),90);
@@ -4201,7 +4226,7 @@ function renderPayChart(orders) {
   });
   const labels=Object.keys(m).filter(k=>m[k]>0);
   const data=labels.map(k=>m[k]);
-  const colors=['#5EAB30','#E8AD2C','#E53535','#6A7860'];
+  const colors=['#547177','#8F6417','#E53535','#5C6A5D'];
   setTimeout(()=>drawDonutChart('payCanvas',labels,data,colors),100);
 }
 
@@ -4344,7 +4369,7 @@ function renderAnalyticsDoughnuts(orders) {
         labels: Object.keys(methodCounts),
         datasets: [{
           data: Object.values(methodCounts),
-          backgroundColor: ['#5EAB30','#2080E8','#E8AD2C','#E85C5C','#9B59B6'],
+          backgroundColor: ['#547177','#3B7EA6','#8F6417','#E85C5C','#9B59B6'],
           borderColor: 'transparent',
         }]
       },
@@ -4361,7 +4386,7 @@ function renderAnalyticsDoughnuts(orders) {
     const s = o.fulfillment || 'Pending';
     statusCounts[s] = (statusCounts[s]||0) + 1;
   });
-  const statusColors = { Pending:'#E8AD2C', Processing:'#2080E8', Shipped:'#9B59B6', Delivered:'#5EAB30', Cancelled:'#E85C5C' };
+  const statusColors = { Pending:'#8F6417', Processing:'#3B7EA6', Shipped:'#9B59B6', Delivered:'#547177', Cancelled:'#E85C5C' };
   const osCtx = document.getElementById('orderStatusChart');
   if (osCtx) {
     if (_orderStatusChart) _orderStatusChart.destroy();
@@ -4384,7 +4409,7 @@ function renderAnalyticsDoughnuts(orders) {
 }
 
 // Area Chart (smooth curve)
-function drawAreaChart(canvasId, labels, data, color='#5EAB30') {
+function drawAreaChart(canvasId, labels, data, color='#547177') {
   const canvas=document.getElementById(canvasId);if(!canvas)return;
   const dpr=window.devicePixelRatio||1;
   const W0=canvas.clientWidth||400,H0=canvas.clientHeight||160;
@@ -4493,7 +4518,7 @@ function drawRing(canvasId, pct, color, label) {
   ctx.strokeStyle=grd;ctx.lineWidth=7;ctx.lineCap='round';
   ctx.shadowColor=color;ctx.shadowBlur=10;ctx.stroke();ctx.shadowBlur=0;
   // Text
-  ctx.fillStyle='#E8EDE0';ctx.font=`bold 15px Syne,sans-serif`;ctx.textAlign='center';
+  ctx.fillStyle='#1D2320';ctx.font=`bold 15px Syne,sans-serif`;ctx.textAlign='center';
   ctx.fillText(Math.round(pct)+'%',cx,cy+4);
   ctx.fillStyle='rgba(106,120,96,0.7)';ctx.font='7px DM Sans,sans-serif';
   ctx.fillText(label||'',cx,cy+14);
@@ -4524,14 +4549,14 @@ function drawForecastChart(canvasId, actualData, forecastData) {
   ctx.fillStyle=grd;ctx.fill();
   // Actual line
   ctx.beginPath();actualData.forEach((v,i)=>i===0?ctx.moveTo(ptX(null,i),ptY(v)):ctx.lineTo(ptX(null,i),ptY(v)));
-  ctx.strokeStyle='#5EAB30';ctx.lineWidth=2;ctx.stroke();
+  ctx.strokeStyle='#547177';ctx.lineWidth=2;ctx.stroke();
   // Forecast line (dashed)
   ctx.beginPath();ctx.setLineDash([4,3]);
   forecastData.forEach((v,i)=>i===0?ctx.moveTo(ptX(null,actualData.length-1+i),ptY(actualData[actualData.length-1])):ctx.lineTo(ptX(null,actualData.length+i),ptY(v)));
-  ctx.strokeStyle='#E8AD2C';ctx.lineWidth=2;ctx.stroke();ctx.setLineDash([]);
+  ctx.strokeStyle='#8F6417';ctx.lineWidth=2;ctx.stroke();ctx.setLineDash([]);
   // Labels
   ['Past 7d','Forecast'].forEach((lbl,i)=>{
-    ctx.fillStyle=i===0?'#5EAB30':'#E8AD2C';
+    ctx.fillStyle=i===0?'#547177':'#8F6417';
     ctx.beginPath();ctx.arc(pad.l+i*(cW*0.6),H-4,4,0,Math.PI*2);ctx.fill();
     ctx.fillStyle='rgba(106,120,96,0.8)';ctx.font='7px DM Sans,sans-serif';ctx.textAlign='left';
     ctx.fillText(lbl,pad.l+i*(cW*0.6)+7,H-1);
@@ -4556,7 +4581,7 @@ function renderAdvancedWidgets(orders, prods) {
     const b=n30.find(b=>b.date===(o.created_at||'').split('T')[0]);
     if(b)b.rev+=parseFloat(o.total||0);
   });
-  drawAreaChart('areaCanvas',n30.map(b=>b.label),n30.map(b=>b.rev),'#5EAB30');
+  drawAreaChart('areaCanvas',n30.map(b=>b.label),n30.map(b=>b.rev),'#547177');
 
   // Heatmap
   renderHeatmap(orders);
@@ -4568,9 +4593,9 @@ function renderAdvancedWidgets(orders, prods) {
   const inStockProds=prods.filter(p=>!p.deleted_at&&(p.stock||0)>10).length;
   const stockPct=prods.filter(p=>!p.deleted_at).length?(inStockProds/prods.filter(p=>!p.deleted_at).length*100):100;
   setTimeout(()=>{
-    drawRing('ring1Canvas',delivPct,'#5EAB30','Delivered');
-    drawRing('ring2Canvas',paidPct,'#2080E8','Paid');
-    drawRing('ring3Canvas',stockPct,'#E8AD2C','In Stock');
+    drawRing('ring1Canvas',delivPct,'#547177','Delivered');
+    drawRing('ring2Canvas',paidPct,'#3B7EA6','Paid');
+    drawRing('ring3Canvas',stockPct,'#8F6417','In Stock');
   },50);
 
   // Forecast (simple linear from last 7 days trend)
@@ -4647,7 +4672,7 @@ function renderDashCustGrowth(orders, days=7, customRange=null) {
   const total = buckets.reduce((s,b)=>s+b.count,0);
   const totalBadge = document.getElementById('custGrowthTotal');
   if (totalBadge) totalBadge.textContent = total;
-  drawAreaChart('dashCustGrowthCanvas', buckets.map(b=>b.label), buckets.map(b=>b.count), '#2080E8');
+  drawAreaChart('dashCustGrowthCanvas', buckets.map(b=>b.label), buckets.map(b=>b.count), '#3B7EA6');
 }
 
 function renderOrderFunnel(orders) {
@@ -4659,9 +4684,9 @@ function renderOrderFunnel(orders) {
   const shipped = orders.filter(o => ['Shipped','Delivered'].includes(o.fulfillment||o.status)).length;
   const delivered = orders.filter(o => (o.fulfillment||o.status)==='Delivered').length;
   const stages = [
-    {label:'Placed', val:placed, color:'#5EAB30'},
-    {label:'Paid', val:paid, color:'#2080E8'},
-    {label:'Shipped', val:shipped, color:'#E8AD2C'},
+    {label:'Placed', val:placed, color:'#547177'},
+    {label:'Paid', val:paid, color:'#3B7EA6'},
+    {label:'Shipped', val:shipped, color:'#8F6417'},
     {label:'Delivered', val:delivered, color:'#8B5CF6'}
   ];
   const badge = document.getElementById('funnelTotal');
@@ -5483,8 +5508,8 @@ function renderProductCards(list) {
     return `
     <div class="prod-card${p.deleted_at?' deleted':''}" id="prodcard_${p.id}">
       <div class="prod-status-ribbon">${statusBadge}</div>
-      <img class="prod-card-img" src="${p.image||'https://via.placeholder.com/280x160/0F1410/4A8A28?text=No+Image'}"
-        onerror="this.src='https://via.placeholder.com/280x160/0F1410/4A8A28?text=No+Image'" alt="${p.name}"
+      <img class="prod-card-img" src="${p.image||'https://via.placeholder.com/280x160/EDE3D2/547177?text=No+Image'}"
+        onerror="this.src='https://via.placeholder.com/280x160/EDE3D2/547177?text=No+Image'" alt="${p.name}"
         onclick="openProductDrawer(${p.id})">
       <div class="prod-card-body">
         <div class="prod-card-name" title="${p.name}">${p.name}</div>
@@ -5764,7 +5789,7 @@ function openProductDrawer(productId) {
     document.getElementById('dSeoSchemaType').value = p.seo_schema_type||'Product';
     document.getElementById('dSeoRobots').value = p.seo_robots||'index,follow';
     document.getElementById('dSeoSitemap').checked = p.seo_sitemap_include !== false;
-    updateDrawerImgPreview();
+    renderAllImgSlots();
     updateDrawerPricePreview();
   } else {
     ['dName','dBadge','dDescription','dOfferText','dHowToUse','dIngredients','dTags','dImage','dImage2','dImage3','dImage4','dImage5','dMetaDesc','dSeoKeywords','dSeoSlug','dSeoCanonical','dSeoOgImage','dSeoTwitterImage'].forEach(id => document.getElementById(id).value='');
@@ -5776,6 +5801,7 @@ function openProductDrawer(productId) {
     document.getElementById('dHsn2').value='30049099';
     document.getElementById('dStock').value='0';
     document.getElementById('dPosition').value='';
+    renderAllImgSlots();
     document.getElementById('dActive').value='true';
     document.getElementById('dTabsPerPack').value='15';
     document.getElementById('dPrice').value='';
@@ -5784,7 +5810,6 @@ function openProductDrawer(productId) {
     drawerTiers = [];
     _tierRowSeq = 0;
     renderTierRows();
-    document.getElementById('drawerImgPreview').src='https://via.placeholder.com/400x160/141A10/4A8A28?text=No+Image';
     document.getElementById('drawerPricePreview').style.display='none';
   }
   document.getElementById('prodDrawer').classList.add('open');
@@ -5794,9 +5819,102 @@ function closeProductDrawer() {
   document.getElementById('prodDrawer').classList.remove('open');
   document.getElementById('prodDrawerOverlay').classList.remove('open');
 }
-function updateDrawerImgPreview() {
-  const url = document.getElementById('dImage').value;
-  document.getElementById('drawerImgPreview').src = url || 'https://via.placeholder.com/400x160/141A10/4A8A28?text=No+Image';
+const IMG_SLOT_FIELDS = {1:'dImage', 2:'dImage2', 3:'dImage3', 4:'dImage4', 5:'dImage5'};
+
+// Render every slot from its hidden field's current value (call after loading/clearing a product)
+function renderAllImgSlots() {
+  for (let s = 1; s <= 5; s++) renderImgSlot(s);
+}
+
+function renderImgSlot(slot) {
+  const url = document.getElementById(IMG_SLOT_FIELDS[slot]).value || '';
+  const box = document.getElementById('imgSlot' + slot);
+  const img = document.getElementById('imgSlotPreview' + slot);
+  const plus = document.getElementById('imgSlotPlus' + slot);
+  // clear any old delete button / badge / spinner before redrawing
+  box.querySelectorAll('.img-slot-del,.img-slot-main-badge,.img-slot-spinner').forEach(el => el.remove());
+  if (url) {
+    img.src = url; img.style.display = 'block'; plus.style.display = 'none';
+    box.classList.add('filled');
+    if (slot === 1) {
+      const badge = document.createElement('span');
+      badge.className = 'img-slot-main-badge'; badge.textContent = 'MAIN';
+      box.appendChild(badge);
+    }
+    const del = document.createElement('button');
+    del.type = 'button'; del.className = 'img-slot-del'; del.title = 'Delete this image everywhere'; del.textContent = '✕';
+    del.onclick = (e) => { e.stopPropagation(); deleteProductImageSlot(slot); };
+    box.appendChild(del);
+  } else {
+    img.style.display = 'none'; img.src=''; plus.style.display = 'block';
+    box.classList.remove('filled');
+  }
+}
+
+// Reuse an already-uploaded Photo Library image in the product drawer — no re-upload needed
+function addLibraryImageToOpenProduct(url) {
+  const emptySlot = [1,2,3,4,5].find(s => !document.getElementById(IMG_SLOT_FIELDS[s]).value);
+  if (!emptySlot) { toast('Open a product first (or all 5 image slots are full)', 'error'); return; }
+  document.getElementById(IMG_SLOT_FIELDS[emptySlot]).value = url;
+  renderImgSlot(emptySlot);
+  showPage('products');
+  toast('✅ Image added to the open product — remember to Save');
+}
+
+function triggerImgSlotUpload(slot) {
+  const inp = document.getElementById('imgSlotFileInput');
+  inp._targetSlot = slot;
+  inp.value = '';
+  inp.click();
+}
+
+async function handleImgSlotFileChosen(input) {
+  const slot = input._targetSlot;
+  const file = input.files[0];
+  if (!file || !slot) return;
+  const box = document.getElementById('imgSlot' + slot);
+  const spinner = document.createElement('div');
+  spinner.className = 'img-slot-spinner'; spinner.textContent = '⏳';
+  box.appendChild(spinner);
+  const fd = new FormData(); fd.append('image', file);
+  try {
+    const r = await fetch(`${API}/api/upload/image`, {method:'POST', headers:{'Authorization':`Bearer ${authToken}`}, body: fd});
+    const d = await r.json();
+    if (!r.ok) {
+      const msg = (d.error||'').toLowerCase();
+      if (msg.includes('bucket') || msg.includes('storage') || msg.includes('not found')) {
+        toast('❌ Storage bucket not found. Go to Supabase → Storage → Create bucket named "product-images" (public).', 'error');
+      } else {
+        throw new Error(d.error || 'Upload failed');
+      }
+      return;
+    }
+    document.getElementById(IMG_SLOT_FIELDS[slot]).value = d.url || d.public_url || '';
+    toast('✅ Image uploaded');
+  } catch(e) {
+    toast('Upload error: ' + e.message, 'error');
+  } finally {
+    spinner.remove();
+    renderImgSlot(slot);
+  }
+}
+
+async function deleteProductImageSlot(slot) {
+  const field = document.getElementById(IMG_SLOT_FIELDS[slot]);
+  const url = field.value;
+  if (!url) return;
+  if (!confirm('Delete this image from storage and remove it from every product/site slot using it? This can\'t be undone.')) return;
+  try {
+    const filename = url.split('/').pop().split('?')[0];
+    const r = await apiFetch(`/api/upload/image/${encodeURIComponent(filename)}`, {method:'DELETE'});
+    const d = await r.json().catch(()=>({}));
+    field.value = '';
+    renderImgSlot(slot);
+    const cleared = d.clearedReferences;
+    toast(cleared ? `🗑️ Image deleted — cleared from ${cleared} place(s)` : '🗑️ Image deleted');
+  } catch(e) {
+    toast('Delete failed: ' + e.message, 'error');
+  }
 }
 function updateDrawerPricePreview() {
   const mrp  = parseFloat(document.getElementById('dPrice').value);
@@ -6065,147 +6183,6 @@ async function syncProducts() {
   }
 }
 
-async function uploadProductImage(input) {
-  const file = input.files[0]; if(!file) return;
-  // Show progress
-  const zone = document.getElementById('imgDropZone');
-  if(zone) zone.innerHTML = '<div style="padding:20px;text-align:center;color:var(--text3)">⏳ Uploading…</div>';
-  const fd = new FormData(); fd.append('image', file);
-  try {
-    const r = await fetch(`${API}/api/upload/image`, {method:'POST', headers:{'Authorization':`Bearer ${authToken}`}, body:fd});
-    const d = await r.json();
-    if(!r.ok) {
-      // Friendly bucket error
-      const msg = (d.error||'').toLowerCase();
-      if(msg.includes('bucket') || msg.includes('storage') || msg.includes('not found')) {
-        toast('❌ Storage bucket not found. Go to Supabase → Storage → Create bucket named "product-images" (public).', 'error');
-      } else {
-        throw new Error(d.error||'Upload failed');
-      }
-      resetImgDropZone(); return;
-    }
-    mediaAddSlot({url: d.url || d.public_url || '', type:'image', thumb: d.url || d.public_url || ''});
-    toast('✅ Image uploaded!');
-    resetImgDropZone();
-  } catch(e) {
-    toast('Upload error: '+e.message, 'error');
-    resetImgDropZone();
-  }
-}
-
-function resetImgDropZone() {
-  const zone = document.getElementById('imgDropZone');
-  if(zone) zone.innerHTML = `
-    <input type="file" id="prodImgInput" accept="image/*,.svg,.png,.jpg,.jpeg" onchange="uploadProductImage(this)">
-    <div class="uico">🖼️</div>
-    <div style="font-size:0.85rem;font-weight:600;color:var(--text)">Click or drag to upload</div>
-    <div style="font-size:0.75rem;color:var(--text3);margin-top:4px">JPG, PNG, WebP, SVG · Max 10MB</div>
-  `;
-}
-
-
-// ── 10-Media Slot Manager ──────────────────────────────────────
-var _mediaSlots = []; // [{url, type:"image"|"video", thumb}]
-
-function renderMediaSlots(data) {
-  _mediaSlots = (data || []).slice(0, 10);
-  var grid = document.getElementById('mediaSlots');
-  if (!grid) return;
-  var html = '';
-  for (var i = 0; i < 10; i++) {
-    var m = _mediaSlots[i];
-    if (m && m.url) {
-      var isVid = m.type === 'video';
-      html += '<div class="media-slot filled" data-idx="' + i + '">'
-        + (isVid
-          ? '<video src="' + m.url + '" muted preload="metadata" style="pointer-events:none;width:100%;height:100%;object-fit:cover;"></video><span class="vid-badge">▶ Video</span>'
-          : '<img src="' + (m.thumb||m.url) + '" onerror="this.src=\'https://via.placeholder.com/80?text=?\'" style="width:100%;height:100%;object-fit:cover;">')
-        + '<button class="slot-remove" onclick="mediaRemoveSlot(' + i + ')" title="Remove">✕</button>'
-        + (i === 0 ? '<span style="position:absolute;bottom:3px;left:3px;background:var(--green);color:#fff;font-size:0.55rem;padding:1px 5px;border-radius:8px;">MAIN</span>' : '')
-        + '</div>';
-    } else {
-      html += '<div class="media-slot" data-idx="' + i + '" onclick="mediaClickSlot(' + i + ')" title="Add media ' + (i+1) + '">'
-        + '<span class="slot-ico">+</span>'
-        + '<span class="slot-label">Slot ' + (i+1) + '</span>'
-        + '</div>';
-    }
-  }
-  grid.innerHTML = html;
-  // Update hidden back-compat fields
-  document.getElementById('pImage').value  = (_mediaSlots[0]||{}).url || '';
-  document.getElementById('pImage2').value = (_mediaSlots[1]||{}).url || '';
-}
-
-function getMediaSlotData() {
-  return _mediaSlots.filter(function(m){ return m && m.url; });
-}
-
-function mediaRemoveSlot(idx) {
-  _mediaSlots.splice(idx, 1);
-  renderMediaSlots(_mediaSlots);
-}
-
-function mediaClickSlot(idx) {
-  // Open file picker targeting that slot
-  var inp = document.getElementById('mediaFileInput');
-  if (inp) { inp._targetSlot = idx; inp.click(); }
-}
-
-function mediaAddSlot(item) {
-  if (_mediaSlots.length >= 10) { toast('Maximum 10 media items per product','error'); return; }
-  _mediaSlots.push(item);
-  renderMediaSlots(_mediaSlots);
-}
-
-function mediaAddFromUrl() {
-  var url = (document.getElementById('mediaAddUrl').value||'').trim();
-  var type = document.getElementById('mediaAddType').value || 'image';
-  if (!url) { toast('Enter a URL first','error'); return; }
-  mediaAddSlot({url:url, type:type, thumb:url});
-  document.getElementById('mediaAddUrl').value = '';
-}
-
-async function uploadMediaFile(input) {
-  var files = Array.from(input.files||[]);
-  if (!files.length) return;
-  var bar = document.getElementById('mediaUploadBar');
-  var status = document.getElementById('mediaUploadStatus');
-  var prog = document.getElementById('mediaUploadProgress');
-  if (prog) prog.style.display = 'block';
-  var endpoint = files[0].type.startsWith('video/') ? '/api/upload/video' : '/api/upload/image';
-  // Fallback: try /api/upload/image for videos too if no video endpoint
-  var uploaded = 0;
-  for (var i = 0; i < files.length; i++) {
-    var file = files[i];
-    if (_mediaSlots.length >= 10) { toast('Reached 10 media limit','error'); break; }
-    if (status) status.textContent = 'Uploading ' + (i+1) + '/' + files.length + ': ' + file.name + '…';
-    if (bar) bar.style.width = Math.round(((i+0.5)/files.length)*100) + '%';
-    var isVideo = file.type.startsWith('video/');
-    var fd = new FormData();
-    fd.append(isVideo ? 'video' : 'image', file);
-    try {
-      var ep = isVideo ? '/api/upload/video' : '/api/upload/image';
-      var r = await fetch(API + ep, {method:'POST', headers:{'Authorization':'Bearer '+authToken}, body:fd});
-      if (!r.ok) {
-        // Try fallback /api/upload/image for video too
-        if (isVideo) {
-          var fd2 = new FormData(); fd2.append('image', file);
-          r = await fetch(API + '/api/upload/image', {method:'POST', headers:{'Authorization':'Bearer '+authToken}, body:fd2});
-        }
-      }
-      var d = await r.json();
-      if (!r.ok) throw new Error(d.error||'Upload failed');
-      mediaAddSlot({url: d.url||d.public_url||d.src||'', type: isVideo?'video':'image', thumb: d.thumb||d.thumbnail||d.url||d.public_url||''});
-      uploaded++;
-    } catch(e) {
-      toast('Upload failed: ' + file.name + ' — ' + e.message, 'error');
-    }
-    if (bar) bar.style.width = Math.round(((i+1)/files.length)*100) + '%';
-  }
-  if (prog) { setTimeout(function(){ prog.style.display='none'; if(bar) bar.style.width='0%'; }, 1500); }
-  if (uploaded > 0) toast('✅ ' + uploaded + ' file(s) uploaded!');
-  input.value = '';
-}
 
 // ═══════════════════════════════════════════════
 // INVENTORY
@@ -6242,8 +6219,8 @@ function filterInventory() {
     return `
     <tr>
       <td style="width:60px;">
-        <img src="${p.image||'https://via.placeholder.com/52/EAF2E0/2D5016?text=?'}"
-          onerror="this.src='https://via.placeholder.com/52/EAF2E0/2D5016?text=?'" alt="${p.name}"
+        <img src="${p.image||'https://via.placeholder.com/52/EDE3D2/547177?text=?'}"
+          onerror="this.src='https://via.placeholder.com/52/EDE3D2/547177?text=?'" alt="${p.name}"
           style="width:52px;height:52px;border-radius:10px;object-fit:contain;background:var(--bg2);padding:4px;border:1px solid var(--border);cursor:pointer;display:block;"
           onclick="openProductModal(${p.id})" title="Click to edit product">
       </td>
@@ -6505,14 +6482,14 @@ function renderCustomerGrowthChart(list) {
     const b = buckets.find(b=>b.date===day);
     if (b) b.count++;
   });
-  drawAreaChart('custGrowthCanvas', buckets.map(b=>b.label), buckets.map(b=>b.count), '#5EAB30');
+  drawAreaChart('custGrowthCanvas', buckets.map(b=>b.label), buckets.map(b=>b.count), '#547177');
 }
 
 function renderCustomerRepeatChart(list, repeat) {
   const canvas = document.getElementById('custRepeatCanvas');
   if (!canvas || typeof drawDonutChart !== 'function') return;
   const newCust = Math.max(0, list.length - repeat);
-  drawDonutChart('custRepeatCanvas', ['New','Returning'], [newCust, repeat], ['#2080E8','#5EAB30'], String(list.length));
+  drawDonutChart('custRepeatCanvas', ['New','Returning'], [newCust, repeat], ['#3B7EA6','#547177'], String(list.length));
 }
 
 function customersGoToPage(page) {
@@ -6677,14 +6654,14 @@ function renderPaymentTrendChart(list) {
     const b = buckets.find(b=>b.date===day);
     if (b) b.rev += parseFloat(o.total||0);
   });
-  drawAreaChart('payTrendCanvas', buckets.map(b=>b.label), buckets.map(b=>b.rev), '#5EAB30');
+  drawAreaChart('payTrendCanvas', buckets.map(b=>b.label), buckets.map(b=>b.rev), '#547177');
 }
 
 function renderPaymentMethodChart(list) {
   if (typeof drawDonutChart !== 'function') return;
   const modes = {};
   list.forEach(o => { const m = o.payment_mode || 'UPI'; modes[m] = (modes[m]||0)+1; });
-  const colors = ['#5EAB30','#2080E8','#E8AD2C','#8B5CF6','#EF4444'];
+  const colors = ['#547177','#3B7EA6','#8F6417','#8B5CF6','#EF4444'];
   const entries = Object.entries(modes);
   drawDonutChart('payMethodSplitCanvas', entries.map(e=>e[0]), entries.map(e=>e[1]), colors, String(list.length));
 }
@@ -7355,7 +7332,7 @@ function renderPhotoGrid() {
       <img src="${img.url}" alt="${alt}" loading="lazy">
       <div class="photo-overlay">
         <button class="btn btn-primary btn-sm btn-icon" onclick="navigator.clipboard.writeText('${img.url}').then(()=>{toast('URL Copied! Paste in product Images tab.');})" title="Copy URL">📋</button>
-        <button class="btn btn-secondary btn-sm btn-icon" onclick="mediaAddSlot({url:'${img.url}',type:'image',thumb:'${img.url}'}); showPage('products'); toast('Image added to current product!')" title="Add to product">➕</button>
+        <button class="btn btn-secondary btn-sm btn-icon" onclick="addLibraryImageToOpenProduct('${img.url}')" title="Add to the currently-open product">➕</button>
         <button class="btn btn-secondary btn-sm btn-icon" onclick="promptPhotoAlt('${fname}')" title="Edit alt text">🏷️</button>
         <button class="btn btn-danger btn-sm btn-icon" onclick="deletePhoto('${encodeURIComponent(fname)}')" title="Delete">🗑️</button>
       </div>
@@ -7455,10 +7432,12 @@ async function uploadPhotos(fileList) {
 async function uploadPhoto(input) { return uploadPhotos(input.files); }
 
 async function deletePhoto(filename) {
-  if(!confirm('Delete this image?')) return;
+  if(!confirm('Delete this image from storage? It will also be removed from any product or site slot currently using it.')) return;
   try {
-    await apiFetch(`/api/upload/library/${filename}`,{method:'DELETE'});
-    toast('Image deleted'); loadPhotoLibrary();
+    const r = await apiFetch(`/api/upload/library/${filename}`,{method:'DELETE'});
+    const d = await r.json().catch(()=>({}));
+    toast(d.clearedReferences ? `🗑️ Image deleted — cleared from ${d.clearedReferences} place(s)` : 'Image deleted');
+    loadPhotoLibrary();
   } catch(e) { toast(e.message,'error'); }
 }
 
@@ -7527,10 +7506,10 @@ async function loadSiteImages() {
             <div style="padding:12px 14px;">
               <div style="font-size:0.85rem;font-weight:600;color:var(--text);">${item.label}</div>
               <div style="font-size:0.72rem;color:var(--text3);margin-bottom:10px;">${item.hint}${isOverridden?' · <span style="color:var(--green-text);font-weight:600;">custom image set</span>':' · using site default'}</div>
-              <input type="text" id="siteImgUrl-${item.key}" class="form-control" placeholder="Paste imgbb direct image link" style="font-size:0.75rem;padding:6px 8px;margin-bottom:6px;">
+              <input type="file" accept="image/*,.svg" id="siteImgFile-${item.key}" style="display:none;" onchange="uploadSiteImage(this, '${item.key}')">
               <div style="display:flex;gap:6px;">
-                <button class="btn btn-primary btn-sm" style="flex:1;" onclick="saveSiteImageUrl('${item.key}')">💾 Save Link</button>
-                ${isOverridden ? `<button class="btn btn-secondary btn-sm" onclick="resetSiteImage('${item.key}')" title="Revert to default">↩️</button>` : ''}
+                <button class="btn btn-primary btn-sm" style="flex:1;" onclick="document.getElementById('siteImgFile-${item.key}').click()">📤 Upload Image</button>
+                ${isOverridden ? `<button class="btn btn-danger btn-sm btn-icon" onclick="resetSiteImage('${item.key}', '${current}')" title="Delete this image everywhere and revert to default">🗑️</button>` : ''}
               </div>
             </div>
           </div>`;
@@ -7540,22 +7519,39 @@ async function loadSiteImages() {
   `).join('');
 }
 
-async function saveSiteImageUrl(key) {
-  const input = document.getElementById(`siteImgUrl-${key}`);
-  const url = (input.value || '').trim();
-  if(!url) { toast('Paste an image link first','error'); return; }
+async function uploadSiteImage(input, key) {
+  const file = input.files[0]; if(!file) return;
+  const fd = new FormData(); fd.append('image', file);
   try {
+    const r = await fetch(`${API}/api/upload/image`, {method:'POST', headers:{'Authorization':`Bearer ${authToken}`}, body:fd});
+    const d = await r.json();
+    if(!r.ok) {
+      const msg = (d.error||'').toLowerCase();
+      if(msg.includes('bucket') || msg.includes('storage') || msg.includes('not found')) {
+        toast('❌ Storage bucket not found. Go to Supabase → Storage → Create bucket named "product-images" (public).', 'error');
+      } else {
+        toast(d.error || 'Upload failed', 'error');
+      }
+      return;
+    }
+    const url = d.url || d.public_url || '';
     await apiFetch(`/api/admin/site-media/${encodeURIComponent(key)}`, {method:'PUT', body:JSON.stringify({url})});
-    toast('Image updated ✅ — live on the site now');
+    toast('✅ Image uploaded — live on the site now');
     loadSiteImages();
-  } catch(e) { toast(e.message,'error'); }
+  } catch(e) { toast('Upload error: ' + e.message, 'error'); }
 }
 
-async function resetSiteImage(key) {
-  if(!confirm('Revert this to the site\'s built-in default image?')) return;
+async function resetSiteImage(key, currentUrl) {
+  if(!confirm('Delete this image from storage (removing it everywhere it\'s used) and revert this slot to the site\'s default? This can\'t be undone.')) return;
   try {
-    await apiFetch(`/api/admin/site-media/${encodeURIComponent(key)}`, {method:'DELETE'});
-    toast('Reverted to default');
+    if (currentUrl) {
+      const filename = currentUrl.split('/').pop().split('?')[0];
+      await apiFetch(`/api/upload/image/${encodeURIComponent(filename)}`, {method:'DELETE'}).catch(()=>{});
+    }
+    // Belt-and-suspenders: also clear the override row directly in case the file
+    // wasn't one of ours (e.g. an old pasted link the cascade delete couldn't match).
+    await apiFetch(`/api/admin/site-media/${encodeURIComponent(key)}`, {method:'DELETE'}).catch(()=>{});
+    toast('🗑️ Deleted — reverted to default');
     loadSiteImages();
   } catch(e) { toast(e.message,'error'); }
 }
@@ -8898,9 +8894,9 @@ function _drawLvTraffic(){
   ctx.lineTo(ptX(data.length-1),pad.t+cH); ctx.closePath(); ctx.fillStyle=grd; ctx.fill();
   ctx.beginPath();
   data.forEach((v,i)=>i===0?ctx.moveTo(ptX(i),ptY(v)):ctx.lineTo(ptX(i),ptY(v)));
-  ctx.strokeStyle='#5EAB30'; ctx.lineWidth=2; ctx.shadowColor='#5EAB30'; ctx.shadowBlur=5; ctx.stroke(); ctx.shadowBlur=0;
+  ctx.strokeStyle='#547177'; ctx.lineWidth=2; ctx.shadowColor='#547177'; ctx.shadowBlur=5; ctx.stroke(); ctx.shadowBlur=0;
   ctx.beginPath();ctx.arc(ptX(data.length-1),ptY(data[data.length-1]),4,0,Math.PI*2);
-  ctx.fillStyle='#5EAB30';ctx.shadowColor='#5EAB30';ctx.shadowBlur=10;ctx.fill();ctx.shadowBlur=0;
+  ctx.fillStyle='#547177';ctx.shadowColor='#547177';ctx.shadowBlur=10;ctx.fill();ctx.shadowBlur=0;
 }
 
 function _drawGlobe(){
@@ -8969,7 +8965,7 @@ function loadGeoAnalytics(){
   if(src&&dst) dst.innerHTML=src.innerHTML;
   const topCities=Object.entries(cityMap).sort((a,b)=>b[1].orders-a[1].orders).slice(0,10);
   const maxC=topCities[0]?.[1].orders||1;
-  const colors=['#5EAB30','#2080E8','#E8AD2C','#7C3AED','#E87020','#E53535','#06B6D4','#EC4899','#10B981','#F59E0B'];
+  const colors=['#547177','#3B7EA6','#8F6417','#7C3AED','#E87020','#E53535','#06B6D4','#EC4899','#10B981','#F59E0B'];
   const el=document.getElementById('geoCitiesChart');
   if(el) el.innerHTML=topCities.map(([city,info],i)=>`<div class="rank-row">
     <div class="rank-num">${i+1}</div>
@@ -8996,9 +8992,9 @@ function loadPerformance(){
   const fe=document.getElementById('perfFunnel');
   if(fe){
     const steps=[
-      {l:'Total Orders',n:allOrders.length,c:'#5EAB30'},
-      {l:'Paid',n:paid.length,c:'#2080E8'},
-      {l:'Processing',n:allOrders.filter(o=>(o.fulfillment||o.status||'')==='Processing').length,c:'#E8AD2C'},
+      {l:'Total Orders',n:allOrders.length,c:'#547177'},
+      {l:'Paid',n:paid.length,c:'#3B7EA6'},
+      {l:'Processing',n:allOrders.filter(o=>(o.fulfillment||o.status||'')==='Processing').length,c:'#8F6417'},
       {l:'Shipped',n:allOrders.filter(o=>(o.fulfillment||o.status||'')==='Shipped').length,c:'#E87020'},
       {l:'Delivered',n:delivered.length,c:'#7C3AED'}
     ];
@@ -9018,10 +9014,10 @@ function loadPerformance(){
   const inStock=allProducts.filter(p=>!p.deleted_at&&(p.stock||0)>10).length;
   const totP=allProducts.filter(p=>!p.deleted_at).length||1;
   setTimeout(()=>{
-    drawAreaChart('perfTrendCanvas',n30.map(b=>b.label),n30.map(b=>b.rev),'#5EAB30');
-    drawRing('perfRing1',conv,'#2080E8','Paid Rate');
-    drawRing('perfRing2',del,'#5EAB30','Delivered');
-    drawRing('perfRing3',inStock/totP*100,'#E8AD2C','Stock OK');
+    drawAreaChart('perfTrendCanvas',n30.map(b=>b.label),n30.map(b=>b.rev),'#547177');
+    drawRing('perfRing1',conv,'#3B7EA6','Paid Rate');
+    drawRing('perfRing2',del,'#547177','Delivered');
+    drawRing('perfRing3',inStock/totP*100,'#8F6417','Stock OK');
   },120);
 }
 
@@ -9577,11 +9573,11 @@ async function mktLoadOverview() {
   const losers = active.filter(a => a.last_verdict === 'pause').sort((a, b) => (a.last_roas || 0) - (b.last_roas || 0)).slice(0, 5);
 
   document.getElementById('mkt-overview-winners').innerHTML = winners.length
-    ? winners.map(a => `<div class="mkt-angle"><div style="display:flex;justify-content:space-between;"><strong>${mktEsc(a.name)}</strong><span style="color:#0f6e56;font-weight:700;">${mktFmtRoas(a.last_roas)}</span></div></div>`).join('')
+    ? winners.map(a => `<div class="mkt-angle"><div style="display:flex;justify-content:space-between;"><strong>${mktEsc(a.name)}</strong><span style="color:#3F565B;font-weight:700;">${mktFmtRoas(a.last_roas)}</span></div></div>`).join('')
     : '<p class="mkt-empty">No winners flagged yet — run a report first.</p>';
 
   document.getElementById('mkt-overview-losers').innerHTML = losers.length
-    ? losers.map(a => `<div class="mkt-angle"><div style="display:flex;justify-content:space-between;"><strong>${mktEsc(a.name)}</strong><span style="color:#a32d2d;font-weight:700;">${mktFmtRoas(a.last_roas)}</span></div><div style="font-size:12px;color:var(--text2);">${mktEsc(a.last_reason || '')}</div></div>`).join('')
+    ? losers.map(a => `<div class="mkt-angle"><div style="display:flex;justify-content:space-between;"><strong>${mktEsc(a.name)}</strong><span style="color:#963848;font-weight:700;">${mktFmtRoas(a.last_roas)}</span></div><div style="font-size:12px;color:var(--text2);">${mktEsc(a.last_reason || '')}</div></div>`).join('')
     : '<p class="mkt-empty">Nothing flagged for pausing right now.</p>';
 }
 
@@ -9676,7 +9672,7 @@ async function mktRunReportNow() {
     if (!res.ok) throw new Error(payload.error || 'Request failed');
     status.textContent = 'Done at ' + new Date(payload.ranAt).toLocaleTimeString();
     box.innerHTML = (payload.results || []).map(r => r.error
-      ? `<div class="mkt-angle"><strong>${mktEsc(r.campaign)}</strong><div style="color:#a32d2d;font-size:12px;">${mktEsc(r.error)}</div></div>`
+      ? `<div class="mkt-angle"><strong>${mktEsc(r.campaign)}</strong><div style="color:#963848;font-size:12px;">${mktEsc(r.error)}</div></div>`
       : `<div class="mkt-angle"><strong>${mktEsc(r.campaign)}</strong><p style="margin:4px 0 0;">${mktEsc(r.summary)}</p></div>`
     ).join('') || '<p class="mkt-empty">No approved, launched campaigns to report on yet.</p>';
     mktLoadReportLogs();
