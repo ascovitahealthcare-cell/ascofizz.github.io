@@ -10212,6 +10212,14 @@ function showPage(pg) {
   }
   if (pg === 'checkout') {
     renderCheckoutSummary();
+    // Pull the authoritative VitaPoints balance before the customer decides
+    // how many to redeem — the server re-verifies at order time anyway, but
+    // showing a stale local number here just produces a confusing rejection.
+    try {
+      vitaRefreshFromServer().then(function(ok){
+        if (ok && typeof renderCheckoutSummary === 'function') renderCheckoutSummary();
+      }).catch(function(){});
+    } catch(e) {}
     // Render product recommendations for checkout
     setTimeout(function() { if (typeof renderCkRecommendations === 'function') renderCkRecommendations(); }, 50);
     // ── Pre-warm backend when user opens checkout (30-50s head-start before they click Pay) ──
@@ -12048,87 +12056,127 @@ async function finalizeOrder(orderId, formData, total, method, codCharge) {
     localStorage.setItem('asc_orders', JSON.stringify(orders));
   } catch(e) {}
 
-  // ── 2a. Award VitaPoints for this order ────────────────────
+  // How many VitaPoints the customer chose to redeem. The actual debit
+  // happens SERVER-SIDE (vita_redeem, atomic and idempotent per order id)
+  // when the order is accepted below — never here. Awarding/redeeming
+  // locally first was what let the on-screen balance diverge from the real
+  // ledger, and left phantom points behind whenever the order save failed.
   var _vitaPointsForOrder = (typeof VITA_APPLIED !== 'undefined' && VITA_APPLIED > 0) ? VITA_APPLIED : 0;
-  try {
-    // Spend first, then earn — a redemption must never be funded by
-    // the points the same order generates.
-    if (_vitaPointsForOrder > 0) {
-      var _r = vitaRedeem(_vitaPointsForOrder, orderId);
-      if (!_r.ok) console.warn('[vitaRedeem]', _r.reason);
-      vitaClearApplied();
-    }
-    vitaEarn(total, orderId);
-  } catch(e) { console.error('[vitaPoints]', e); }
 
-  // ── 2b. Save order to Supabase via backend (shows in Admin) ────
+  // ── 2a. Save order to the database — the ONLY source of truth ────
+  // ROOT CAUSE OF "order confirmed but missing from My Orders": this call
+  // used to be fire-and-forget — `await fetch(...)` with no response check,
+  // wrapped in a try/catch that swallowed everything. If the request 401'd
+  // (expired token), 400'd (price recheck), or timed out (Render free tier
+  // cold-starts for 30-60s after 15 min idle, past the old 25s timeout),
+  // the order was silently lost while the customer was still shown
+  // "Order Confirmed!" with an order ID that existed nowhere.
+  //
+  // Now: the save is verified, retried through a cold start, and the
+  // thank-you page is only reached if the database actually has the order.
+  // VitaPoints are NOT computed here at all — the server awards them into
+  // vita_ledger when it accepts the order, and we read the real balance
+  // back afterwards.
+  let _savedOrder = null;
+  let _saveError = null;
   try {
-      const _jwt = localStorage.getItem('asc_jwt') || '';
-      const isOnlinePayment = (method !== 'cod');
-      const orderPayload = {
-        id: orderId,
-        customer_name: `${formData.firstName} ${formData.lastName}`,
-        customer_email: formData.email,
-        customer_phone: formData.phone,
-        address_line1: formData.addr1,
-        address_line2: formData.addr2 || '',
-        city: formData.city,
-        state: formData.state,
-        pincode: formData.pin,
-        total: total,
-        vita_points: _vitaPointsForOrder,
-        payment_status: method === 'cod' ? 'COD - Pending' : 'Paid',
-        fulfillment: 'Pending',
-        payment_method: method,
-        gk_order_id: orderId,
-        shiprocket_id: srOrderId || null,
-        items: JSON.stringify(cartSnapshot.map(item => {
-          const p = PRODUCTS.find(p => p.id === item.id);
-          if (!p) return null;
-          const price = item.tierRate !== undefined ? item.tierRate : (p.salePrice || p.price);
-          return {
-            id: p.id,
-            name: p.name + (item.tierTabs ? ` (${item.tierTabs} tabs)` : ''),
-            qty: item.qty,
-            price: price,
-            category: p.category || 'Other',
-          };
-        }).filter(Boolean)),
-      };
+    const _jwt = localStorage.getItem('asc_jwt') || '';
+    const isOnlinePayment = (method !== 'cod');
+    const orderPayload = {
+      id: orderId,
+      customer_name: `${formData.firstName} ${formData.lastName}`,
+      customer_email: formData.email,
+      customer_phone: formData.phone,
+      address_line1: formData.addr1,
+      address_line2: formData.addr2 || '',
+      city: formData.city,
+      state: formData.state,
+      pincode: formData.pin,
+      total: total,
+      vita_points: _vitaPointsForOrder,
+      payment_status: method === 'cod' ? 'COD - Pending' : 'Paid',
+      fulfillment: 'Pending',
+      payment_method: method,
+      gk_order_id: orderId,
+      shiprocket_id: srOrderId || null,
+      items: JSON.stringify(cartSnapshot.map(item => {
+        const p = PRODUCTS.find(p => p.id === item.id);
+        if (!p) return null;
+        const price = item.tierRate !== undefined ? item.tierRate : (p.salePrice || p.price);
+        return {
+          id: p.id,
+          name: p.name + (item.tierTabs ? ` (${item.tierTabs} tabs)` : ''),
+          qty: item.qty,
+          price: price,
+          category: p.category || 'Other',
+        };
+      }).filter(Boolean)),
+    };
 
-      if (isOnlinePayment) {
-        // ── ONLINE PAYMENT: save verified paid order via GoKwik confirm endpoint ──
-        const confirmResp = await fetch(API_BASE + '/api/confirm-gokwik-order', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            ..._jwt ? { 'Authorization': 'Bearer ' + _jwt } : {},
-          },
-          signal: AbortSignal.timeout(25000),
-          body: JSON.stringify({ order_id: orderId, order_data: orderPayload }),
-        });
-        const confirmResult = await confirmResp.json();
-        if (!confirmResp.ok) {
-          console.error('🚨 confirm-gokwik-order failed:', confirmResult);
-          showPaymentError(
-            confirmResult.message || 'Payment could not be confirmed by our server. If money was deducted, contact +91 98985 82650 with Order ID: ' + orderId,
-            orderId, formData, total, method
-          );
-          return;
+    const url  = API_BASE + (isOnlinePayment ? '/api/confirm-gokwik-order' : '/api/orders');
+    const body = isOnlinePayment
+      ? JSON.stringify({ order_id: orderId, order_data: orderPayload })
+      : JSON.stringify(orderPayload);
+
+    // Retry loop: three attempts, growing timeout. Re-POSTing the same
+    // order id is safe — the server upserts on id and vita_award/vita_redeem
+    // are idempotent per order_id, so a retry after a timeout that actually
+    // succeeded server-side cannot create a second order or double-award.
+    const timeouts = [30000, 45000, 45000];
+    for (let attempt = 0; attempt < timeouts.length; attempt++) {
+      try {
+        if (attempt > 0) {
+          // Likely a cold start — ping the wake endpoint and let it boot.
+          try { await fetch(API_BASE + '/api/wake').catch(function(){}); } catch(e) {}
+          await new Promise(r => setTimeout(r, 2000 * attempt));
         }
-      } else {
-        // COD: save directly, no payment verification needed
-        await fetch(API_BASE + '/api/orders', {
+        const resp = await fetch(url, {
           method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            ..._jwt ? { 'Authorization': 'Bearer ' + _jwt } : {},
-          },
-          signal: AbortSignal.timeout(25000),
-          body: JSON.stringify(orderPayload),
+          headers: Object.assign({ 'Content-Type': 'application/json' },
+            _jwt ? { 'Authorization': 'Bearer ' + _jwt } : {}),
+          signal: AbortSignal.timeout(timeouts[attempt]),
+          body: body,
         });
+        const result = await resp.json().catch(() => ({}));
+        if (resp.ok) { _savedOrder = result.data || result; _saveError = null; break; }
+
+        // 4xx (bad token, product unavailable, price mismatch) will fail the
+        // same way every time — don't burn the remaining retries on it.
+        _saveError = result.error || result.message || ('Server returned ' + resp.status);
+        if (resp.status >= 400 && resp.status < 500) break;
+      } catch (e) {
+        _saveError = (e.name === 'TimeoutError' || e.name === 'AbortError')
+          ? 'The server took too long to respond.' : e.message;
       }
-  } catch(e) { console.error('Order save to backend failed:', e.message); }
+    }
+  } catch (e) {
+    _saveError = e.message;
+  }
+
+  // Order did not reach the database — stop here. Keep the cart intact and
+  // tell the customer the truth instead of showing a fake confirmation.
+  if (!_savedOrder) {
+    console.error('[ORDER SAVE FAILED]', _saveError);
+    try {
+      showPaymentError(
+        (method === 'cod'
+          ? 'We could not place your order just now — nothing has been charged and your cart is safe. Please try again in a moment.'
+          : 'Your payment went through but we could not confirm the order on our server. Please do not pay again — contact +91 98985 82650 with Order ID: ' + orderId)
+          + (_saveError ? ' (' + _saveError + ')' : ''),
+        orderId, formData, total, method
+      );
+    } catch (e) {
+      showToast('⚠️ Could not place your order. Please try again.');
+    }
+    return;
+  }
+
+  // Order is confirmed in the database. The server has already awarded
+  // VitaPoints into the ledger and debited any redemption — pull the real
+  // numbers back so the account page and checkout widget are accurate.
+  try { await vitaRefreshFromServer(); } catch(e) {}
+  try { if (_vitaPointsForOrder > 0) vitaClearApplied(); } catch(e) {}
+
 
   // ── 3. Generate invoice ────────────────────────────────────
   // Uses buildInvoiceHTML() — the same GST-compliant "single source of
@@ -13917,6 +13965,27 @@ function _renderOrderCards(orders, container) {
     const statusCls = status.toLowerCase().includes('dispatch')||status.toLowerCase().includes('confirm') ? 'confirmed'
       : status.toLowerCase().includes('ship') ? 'shipped'
       : status.toLowerCase().includes('deliver') ? 'delivered' : 'pending';
+
+    // VitaPoints for this order, straight from the columns the server writes
+    // when it awards/redeems against the ledger. Nothing is recomputed here —
+    // if the order was returned, the points were reversed server-side, so the
+    // card says so rather than still claiming they were earned.
+    const isReturned = /return/i.test(status);
+    const earned   = Number(o.vita_points_earned || 0);
+    const redeemed = Number(o.vita_points_redeemed || 0);
+    let vitaLine = '';
+    if (earned > 0 || redeemed > 0) {
+      const bits = [];
+      if (earned > 0) {
+        bits.push(isReturned
+          ? `<span style="color:var(--clay-lo,#b4553f)">−${earned.toLocaleString('en-IN')} VitaPoints reversed</span>`
+          : `<span style="color:var(--fern-lo,#2E7D32)">+${earned.toLocaleString('en-IN')} VitaPoints</span>`);
+      }
+      if (redeemed > 0) bits.push(`<span style="color:var(--gray,#777)">${redeemed.toLocaleString('en-IN')} used</span>`);
+      vitaLine = `<div style="font-size:.76rem;margin-top:6px;display:flex;gap:10px;flex-wrap:wrap">🌿 ${bits.join(' · ')}</div>`;
+    }
+    const payStatus = o.payment_status ? `<div style="font-size:.72rem;color:var(--gray,#888);margin-top:4px">${o.payment_status}</div>` : '';
+
     return `<div class="order-card">
       <div class="order-header">
         <div>
@@ -13926,8 +13995,9 @@ function _renderOrderCards(orders, container) {
         <span class="order-status ${statusCls}">${status}</span>
       </div>
       <div class="order-items">${items.map(i => `${i.name||i.item_name||''} × ${i.qty||i.units||1}`).join(', ') || 'Order confirmed'}</div>
+      ${vitaLine}
       <div class="order-footer">
-        <div class="order-total">₹${parseFloat(total).toLocaleString('en-IN')}</div>
+        <div class="order-total">₹${parseFloat(total).toLocaleString('en-IN')}${payStatus}</div>
         <div style="display:flex;gap:8px">
           <button class="invoice-btn" onclick="downloadInvoice('${orderId}')">🧾 Invoice</button>
           <button class="order-track-btn" onclick="openTracking('${orderId}')">🚚 Track</button>
