@@ -5692,6 +5692,55 @@ button, [role="button"] {
   padding: 3px 9px; margin-left: 6px;
 }
 .vb-note { font-size: .68rem; color: var(--t-low); margin-top: 6px; line-height: 1.5; }
+
+/* Returns / refunds */
+.ret-card { background: var(--paper); border-radius: var(--r-lg); padding: 16px 18px; box-shadow: var(--neo-1); margin-bottom: 12px; }
+.ret-head { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; flex-wrap: wrap; }
+.ret-oid { font-weight: 800; font-size: .9rem; color: var(--t-hi); }
+.ret-meta { font-size: .74rem; color: var(--t-low); margin-top: 3px; }
+.ret-badge { font-size: .66rem; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; padding: 5px 11px; border-radius: 99px; white-space: nowrap; }
+.rb-requested { background: #FDF3E3; color: #9A6B1F; }
+.rb-approved  { background: #E8F3EC; color: #2F6B45; }
+.rb-rejected  { background: #FAE9E7; color: #A2402F; }
+.rb-picked_up { background: #E9EFF5; color: #35566E; }
+.rb-refunded  { background: #E6F1F2; color: #2C6068; }
+.rb-cancelled { background: var(--face-warm); color: var(--t-low); }
+.rb-closed    { background: var(--face-warm); color: var(--t-low); }
+.ret-items { margin-top: 11px; border-top: 1px solid var(--edge); padding-top: 11px; }
+.ret-item { display: flex; align-items: center; gap: 10px; font-size: .82rem; color: var(--t-mid); padding: 5px 0; }
+.ret-item input[type=checkbox] { width: 17px; height: 17px; accent-color: var(--fern-lo); flex: none; }
+.ret-item .rq { margin-left: auto; font-size: .74rem; color: var(--t-low); white-space: nowrap; }
+.ret-actions { display: flex; gap: 9px; margin-top: 13px; flex-wrap: wrap; }
+.ret-days { font-size: .72rem; font-weight: 700; color: var(--clay-lo); }
+.ret-form { margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--edge); }
+.ret-form label { display: block; font-size: .72rem; letter-spacing: .1em; text-transform: uppercase; color: var(--t-low); margin: 9px 0 5px; font-weight: 700; }
+.ret-form select, .ret-form textarea { width: 100%; padding: 10px 12px; border-radius: var(--r-sm); background: var(--white); box-shadow: var(--neo-in); font-size: .85rem; color: var(--t-hi); }
+.ret-form textarea { min-height: 74px; resize: vertical; }
+.ret-empty { text-align: center; padding: 34px 20px; color: var(--gray); font-size: .87rem; }
+
+/* Mobile: the account nav was a vertical list that pushed the panel
+   below the fold on a phone. Turn it into a horizontal scroller. */
+@media (max-width: 860px) {
+  .account-layout { grid-template-columns: 1fr !important; }
+  .account-sidebar { position: static !important; }
+  .account-nav {
+    display: flex; gap: 8px; overflow-x: auto; overflow-y: hidden;
+    -webkit-overflow-scrolling: touch; scrollbar-width: none;
+    padding: 4px 2px 8px; margin-bottom: 6px;
+  }
+  .account-nav::-webkit-scrollbar { display: none; }
+  .account-nav-item {
+    flex: 0 0 auto; white-space: nowrap; padding: 10px 15px !important;
+    font-size: .8rem !important; border-radius: 99px !important; min-height: 44px;
+  }
+  .account-nav-item .nav-ico { margin-right: 5px; }
+  .ret-head { flex-direction: column; align-items: stretch; }
+  .ret-actions .btn-primary, .ret-actions .btn-outline { width: 100%; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pm-track { animation: none !important; }
+}
 </style>
 </head>
 <!-- Promotional Media Config -->
@@ -6952,7 +7001,16 @@ setInterval(function() { syncAppCartBadge(); syncAppWishBadge(); }, 2000);
       var media = hasSrc
         ? (item.type==='video'
             ? '<video class="pm-card-media" src="'+item.src+'"'+(item.poster?' poster="'+item.poster+'"':'')+' muted playsinline loop preload="metadata"></video>'
-            : '<img class="pm-card-media" src="'+item.src+'" alt="" loading="lazy" decoding="async">')
+            // loading="lazy" is wrong on a marquee. Lazy only fires when an
+            // element enters the VIEWPORT; this track is translated
+            // horizontally, so the off-screen half never triggers a load and
+            // you get blank tiles scrolling past. That is the "10 images but
+            // 19 broken cards" report — the track renders `cards + cards`,
+            // so 10 images become 20 tiles and the clone half stayed empty.
+            // Eager + fixed dimensions (no CLS) + a hard failure path.
+            : '<img class="pm-card-media" src="'+item.src+'" alt="'+((item.alt||'Ascofizz promotion').replace(/"/g,'&quot;'))+'"'
+              + ' loading="eager" decoding="async" fetchpriority="low" width="185" height="231"'
+              + ' onerror="this.closest(\'.pm-card\').style.display=\'none\'">')
         : '<div class="pm-card-ph"><div class="pm-card-ph-inner">+</div></div>';
       return '<div class="pm-card" onclick="showPage(\''+page+'\')">'
         + media
@@ -6969,8 +7027,11 @@ setInterval(function() { syncAppCartBadge(); syncAppWishBadge(); }, 2000);
       for(var i=0;i<n;i++){
         cards += buildCard(data[i]||{}, (data[i]&&data[i].discount)||BADGES[i%BADGES.length]);
       }
-      // Duplicate for seamless infinite loop
-      track.innerHTML = cards + cards;
+      // Duplicate for seamless infinite loop. The clone is decorative and
+      // must be hidden from assistive tech, otherwise a screen reader
+      // announces every promo twice.
+      track.innerHTML = cards
+        + '<div class="pm-clone" aria-hidden="true" role="presentation" style="display:contents">' + cards + '</div>';
       track.querySelectorAll('video').forEach(function(v){
         v.addEventListener('mouseenter',function(){ v.play(); });
         v.addEventListener('mouseleave',function(){ v.pause(); v.currentTime=0; });
@@ -9714,6 +9775,7 @@ function _updateStrength(val) {
           <button class="account-nav-item" onclick="switchAccountPanel('tracking')"><span class="nav-ico">🚚</span> Track Shipment</button>
           <button class="account-nav-item" onclick="switchAccountPanel('invoices')"><span class="nav-ico">🧾</span> Invoices & Payments</button>
           <button class="account-nav-item" onclick="switchAccountPanel('vita')"><span class="nav-ico">💎</span> VitaPoints</button>
+          <button class="account-nav-item" onclick="switchAccountPanel('returns')"><span class="nav-ico">↩️</span> Returns & Refunds</button>
           <button class="account-nav-item" onclick="switchAccountPanel('profile')"><span class="nav-ico">✏️</span> Profile & Address</button>
           <button class="account-nav-item" onclick="doLogout()" style="margin-top:20px;color:var(--red)"><span class="nav-ico">🚪</span> Sign Out</button>
         </nav>
@@ -9743,6 +9805,11 @@ function _updateStrength(val) {
         <div class="account-panel" id="panel-invoices">
           <div class="account-panel-title">🧾 Invoices & Payments</div>
           <div id="invoicesList"></div>
+        </div>
+
+        <div class="account-panel" id="panel-returns">
+          <div class="account-panel-title">↩️ Returns &amp; Refunds</div>
+          <div id="returnsPanelBody"></div>
         </div>
 
         <div class="account-panel" id="panel-vita">
@@ -11644,6 +11711,60 @@ async function startPayment(method) {
 }
 
 // ══════════════════════════════════════════════
+// startGoKwikPayment
+// STILL MISSING in the deployed file — it is CALLED at the end of the
+// payment modal flow but defined nowhere, so every online payment
+// throws "startGoKwikPayment is not defined" before it ever reaches
+// the backend. Only COD works today. Implemented against the existing
+// /api/create-gokwik-order endpoint.
+//
+// The server recomputes the amount from real product prices, so the
+// `total` passed in is display-only — the customer is charged the
+// server's figure, never the browser's.
+// ══════════════════════════════════════════════
+async function startGoKwikPayment(orderId, total, formData, btn, origText) {
+  try {
+    const resp = await fetch(API_BASE + '/api/create-gokwik-order', {
+      method: 'POST',
+      headers: Object.assign({ 'Content-Type': 'application/json' },
+        localStorage.getItem('asc_jwt') ? { 'Authorization': 'Bearer ' + localStorage.getItem('asc_jwt') } : {}),
+      body: JSON.stringify({
+        merchant_reference_id: orderId,
+        amount: total,
+        items: STORE.cart.map(function(i){
+          var o = { id: i.id, qty: i.qty };
+          if (i.tierTabs) { o.tierTabs = i.tierTabs; o.tierIdx = i.tierIdx; }
+          return o;
+        }),
+        coupon_code: (typeof activePromoCode !== 'undefined' && activePromoCode) ? activePromoCode.code : null,
+        customer_name:  [formData.firstName, formData.lastName].filter(Boolean).join(' ') || formData.name || '',
+        customer_email: formData.email,
+        customer_phone: formData.phone,
+        description: 'Ascofizz order ' + orderId,
+      }),
+    });
+    const data = await resp.json();
+    if (!resp.ok || !data.success || !data.short_url) {
+      throw new Error(data.error || 'Could not start payment');
+    }
+    try {
+      sessionStorage.setItem('asc_pending_gk', JSON.stringify({ orderId: orderId, formData: formData, t: Date.now() }));
+    } catch (e) {}
+    window.location.href = data.short_url;
+  } catch (err) {
+    console.error('[startGoKwikPayment]', err);
+    if (typeof hideProcessingScreen === 'function') hideProcessingScreen();
+    if (btn) { btn.disabled = false; btn.textContent = origText || '💳 Pay via GoKwik'; }
+    document.querySelectorAll('.cfPayBtn').forEach(function(b){ b.disabled = false; b.style.opacity = '1'; });
+    if (typeof showPaymentError === 'function') {
+      showPaymentError('Payment could not be started: ' + err.message, orderId, formData, total, 'gokwik');
+    } else if (typeof showToast === 'function') {
+      showToast('❌ ' + err.message, 'error');
+    }
+  }
+}
+
+// ══════════════════════════════════════════════
 // COD — called directly from checkout page (no modal)
 // ══════════════════════════════════════════════
 async function initiateCOD() {
@@ -13501,13 +13622,160 @@ function loadAccountPage() {
   prefillProfile(user);
 }
 
+// ══════════════════════════════════════════════════════════════
+// RETURNS & REFUNDS (My Account)
+//
+// Every rule that matters — 7-day window, ownership, item validity —
+// is enforced server-side in returns-routes.js and SQL. This is the
+// display layer; it never decides eligibility, it only renders what
+// /api/returns/eligible reports.
+// ══════════════════════════════════════════════════════════════
+let RETURN_REASONS = [];
+
+function _retJwt() { return localStorage.getItem('asc_jwt') || ''; }
+
+async function renderReturnsPanel() {
+  const el = document.getElementById('returnsPanelBody');
+  if (!el) return;
+  if (!_retJwt()) {
+    el.innerHTML = '<div class="ret-empty">Please sign in to request a return.</div>';
+    return;
+  }
+  el.innerHTML = '<div class="ret-empty">Loading your orders…</div>';
+
+  try {
+    const h = { 'Authorization': 'Bearer ' + _retJwt() };
+    const [eR, mR] = await Promise.all([
+      fetch(API_BASE + '/api/returns/eligible', { headers: h }),
+      fetch(API_BASE + '/api/returns/my', { headers: h }),
+    ]);
+    const eD = await eR.json();
+    const mD = await mR.json();
+    if (!eR.ok) throw new Error(eD.error || 'Could not load your orders');
+    RETURN_REASONS = eD.reasons || [];
+
+    const existing = (mD && mD.returns) || [];
+    const orders   = (eD && eD.orders)  || [];
+
+    let html = '';
+
+    if (existing.length) {
+      html += '<h4 style="font-size:.72rem;letter-spacing:.14em;text-transform:uppercase;color:var(--t-low);margin:2px 0 11px;font-weight:800">Your requests</h4>';
+      html += existing.map(function(r){
+        const items = (r.items || []).map(function(i){ return _esc(i.name || ('Item ' + i.id)) + ' × ' + i.qty; }).join(', ');
+        return '<div class="ret-card">'
+          + '<div class="ret-head"><div><div class="ret-oid">' + _esc(r.order_id) + '</div>'
+          + '<div class="ret-meta">' + new Date(r.created_at).toLocaleDateString('en-IN',{day:'2-digit',month:'short',year:'numeric'})
+          + ' · ' + _esc(r.reason) + '</div></div>'
+          + '<span class="ret-badge rb-' + _esc(r.status) + '">' + _esc(String(r.status).replace('_',' ')) + '</span></div>'
+          + '<div class="ret-items"><div class="ret-item" style="padding:0">' + _esc(items) + '</div>'
+          + (r.points_reversed ? '<div class="ret-meta" style="margin-top:7px">💎 ' + r.points_reversed.toLocaleString('en-IN') + ' VitaPoints reversed</div>' : '')
+          + (r.refund_amount ? '<div class="ret-meta">Refund ₹' + Number(r.refund_amount).toLocaleString('en-IN') + (r.refund_ref ? ' · ref ' + _esc(r.refund_ref) : '') + '</div>' : '')
+          + (r.admin_note ? '<div class="ret-meta">Note: ' + _esc(r.admin_note) + '</div>' : '')
+          + '</div>'
+          + (r.status === 'requested'
+              ? '<div class="ret-actions"><button class="btn-outline" onclick="cancelReturn(\'' + r.id + '\')">Cancel request</button></div>'
+              : '')
+          + '</div>';
+      }).join('');
+    }
+
+    const eligible = orders.filter(function(o){ return o.eligible; });
+    html += '<h4 style="font-size:.72rem;letter-spacing:.14em;text-transform:uppercase;color:var(--t-low);margin:20px 0 11px;font-weight:800">Eligible for return</h4>';
+
+    if (!eligible.length) {
+      html += '<div class="ret-empty">No orders are currently eligible.<br>'
+            + '<span style="font-size:.78rem">Returns are open for <b>7 days</b> after delivery.</span></div>';
+    } else {
+      html += eligible.map(function(o){
+        const items = (o.items || []).map(function(i, n){
+          return '<label class="ret-item">'
+            + '<input type="checkbox" data-oid="' + _esc(o.order_id) + '" data-id="' + _esc(i.id) + '" data-max="' + (i.qty||1) + '">'
+            + '<span>' + _esc(i.name || ('Item ' + i.id)) + '</span>'
+            + '<span class="rq">qty ' + (i.qty || 1) + '</span></label>';
+        }).join('');
+        return '<div class="ret-card" id="retcard-' + _esc(o.order_id) + '">'
+          + '<div class="ret-head"><div><div class="ret-oid">' + _esc(o.order_id) + '</div>'
+          + '<div class="ret-meta">₹' + Number(o.total||0).toLocaleString('en-IN')
+          + ' · ' + new Date(o.created_at).toLocaleDateString('en-IN',{day:'2-digit',month:'short',year:'numeric'}) + '</div></div>'
+          + '<span class="ret-days">' + o.days_left + ' day' + (o.days_left === 1 ? '' : 's') + ' left</span></div>'
+          + '<div class="ret-items">' + items + '</div>'
+          + '<div class="ret-form">'
+          + '<label>Reason for return</label>'
+          + '<select id="retreason-' + _esc(o.order_id) + '">'
+          + '<option value="">Select a reason…</option>'
+          + RETURN_REASONS.map(function(r){ return '<option>' + _esc(r) + '</option>'; }).join('')
+          + '</select>'
+          + '<label>Anything else we should know? (optional)</label>'
+          + '<textarea id="retnote-' + _esc(o.order_id) + '" placeholder="Tell us what went wrong…"></textarea>'
+          + '</div>'
+          + '<div class="ret-actions"><button class="btn-primary" onclick="submitReturn(\'' + _esc(o.order_id) + '\', this)">Submit return request</button></div>'
+          + '<p class="ret-meta" style="margin-top:9px">Approved returns reverse the VitaPoints earned on this order.</p>'
+          + '</div>';
+      }).join('');
+    }
+
+    el.innerHTML = html;
+  } catch (err) {
+    console.error('[renderReturnsPanel]', err);
+    el.innerHTML = '<div class="ret-empty">Could not load returns: ' + _esc(err.message) + '</div>';
+  }
+}
+
+function _esc(v) {
+  return String(v == null ? '' : v)
+    .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+async function submitReturn(orderId, btn) {
+  const boxes = Array.from(document.querySelectorAll('input[type=checkbox][data-oid="' + orderId + '"]:checked'));
+  const reason = (document.getElementById('retreason-' + orderId) || {}).value || '';
+  const note   = (document.getElementById('retnote-' + orderId) || {}).value || '';
+
+  if (!boxes.length) { showToast('Select at least one item to return', 'error'); return; }
+  if (!reason)       { showToast('Please choose a reason for the return', 'error'); return; }
+
+  const orig = btn.textContent;
+  btn.disabled = true; btn.textContent = 'Submitting…';
+  try {
+    const resp = await fetch(API_BASE + '/api/returns', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + _retJwt() },
+      body: JSON.stringify({
+        order_id: orderId, reason: reason, comments: note,
+        items: boxes.map(function(b){ return { id: b.dataset.id, qty: Number(b.dataset.max) || 1 }; }),
+      }),
+    });
+    const d = await resp.json();
+    if (!resp.ok) throw new Error(d.error || 'Could not submit');
+    showToast('↩️ Return request submitted');
+    renderReturnsPanel();
+  } catch (err) {
+    showToast('❌ ' + err.message, 'error');
+    btn.disabled = false; btn.textContent = orig;
+  }
+}
+
+async function cancelReturn(id) {
+  try {
+    const resp = await fetch(API_BASE + '/api/returns/' + id + '/cancel', {
+      method: 'POST', headers: { 'Authorization': 'Bearer ' + _retJwt() },
+    });
+    const d = await resp.json();
+    if (!resp.ok) throw new Error(d.error || 'Could not cancel');
+    showToast('Return request cancelled');
+    renderReturnsPanel();
+  } catch (err) { showToast('❌ ' + err.message, 'error'); }
+}
+
 function switchAccountPanel(panel) {
   document.querySelectorAll('.account-panel').forEach(p => p.classList.remove('active'));
   document.querySelectorAll('.account-nav-item').forEach(b => b.classList.remove('active'));
   const el = document.getElementById('panel-' + panel);
   if (el) el.classList.add('active');
   const navItems = document.querySelectorAll('.account-nav-item');
-  const labels = ['orders','tracking','invoices','vita','profile'];
+  const labels = ['orders','tracking','invoices','vita','returns','profile'];
+  if (panel === 'returns') { try { renderReturnsPanel(); } catch(e) { console.error('[renderReturnsPanel]', e); } }
   if (panel === 'vita') { try { renderVitaPanel(); } catch(e) { console.error('[renderVitaPanel]', e); } }
   const idx = labels.indexOf(panel);
   if (idx >= 0 && navItems[idx]) navItems[idx].classList.add('active');
