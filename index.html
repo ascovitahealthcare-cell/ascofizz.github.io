@@ -14325,14 +14325,32 @@ function buildInvoiceHTML(order) {
   const intra      = buyerState ? (buyerCode === L.stateCode) : true;
 
   if (!o.items.length) o.items = [{ name:'Order '+o.orderId, hsn:ASCOFIZZ_LEGAL.hsnDefault, qty:1, rate:o.total, gross:o.total }];
-  const gross    = o.items.reduce(function(t,i){ return t + i.gross; }, 0) || o.total;
   const rate     = L.gstRate;
+  const mrpGross = o.items.reduce(function(t,i){ return t + i.gross; }, 0) || o.total;
+  const grand    = o.total || (mrpGross + o.ship - o.discount);
+
+  // RECONCILE LINE ITEMS WITH THE ACTUAL AMOUNT CHARGED.
+  // `mrpGross` is qty × the item's listed sale price — it knows nothing
+  // about coupon or VitaPoints discounts applied at checkout. `grand`
+  // (o.total) IS the real, post-discount amount the customer paid. These
+  // two used to be computed completely independently, so a ₹2,077 cart
+  // that was actually paid for at ₹650 after a discount printed line
+  // Amount/Taxable/Tax figures based on ₹2,077 while Grand Total below
+  // correctly showed ₹650 — the invoice didn't add up ("before order"
+  // vs "after order" totals mismatch). Scale every line proportionally
+  // to the real amount charged for goods (grand minus shipping) so
+  // Taxable + Tax + Shipping always equals Grand Total.
+  const netGoods = Math.max(0, grand - (o.ship || 0));
+  const scale    = mrpGross > 0 ? netGoods / mrpGross : 1;
+  o.items = o.items.map(function(i){
+    return { name:i.name, hsn:i.hsn, qty:i.qty, rate:i.rate, gross:i.gross*scale, estimated:i.estimated };
+  });
+  const gross    = netGoods;
   const taxable  = gross / (1 + rate/100);
   const taxTotal = gross - taxable;
   const cgst = intra ? taxTotal/2 : 0;
   const sgst = intra ? taxTotal/2 : 0;
   const igst = intra ? 0 : taxTotal;
-  const grand = o.total || (gross + o.ship - o.discount);
   const money = function(n){ return '₹' + Number(n||0).toLocaleString('en-IN',{minimumFractionDigits:2,maximumFractionDigits:2}); };
 
   const rows = o.items.map(function(i, n){
