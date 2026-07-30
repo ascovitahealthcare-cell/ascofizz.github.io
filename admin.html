@@ -3262,6 +3262,8 @@ function applyRole(role) {
   // for non-owner tokens regardless of what's visible in this UI.)
   const navAiTeam = document.getElementById('navAiTeam');
   if (navAiTeam) navAiTeam.style.display = (r === 'owner') ? 'flex' : 'none';
+  const moreAiTeam = document.getElementById('moreAiTeam');
+  if (moreAiTeam) moreAiTeam.style.display = (r === 'owner') ? 'flex' : 'none';
   // Re-render the login audit table so it clears/populates correctly for the active role
   if (typeof renderLoginAudit === 'function') renderLoginAudit();
 }
@@ -3325,6 +3327,8 @@ async function loadReturns() {
     set('retKpiRejected', c.rejected);
     const badge = document.getElementById('returnsBadge');
     if (badge) badge.textContent = c.requested || 0;
+    const badgeM = document.getElementById('returnsBadgeM');
+    if (badgeM) { badgeM.textContent = c.requested || 0; badgeM.style.display = c.requested ? 'flex' : 'none'; }
 
     if (!RETURNS_CACHE.length) {
       wrap.innerHTML = '<div style="padding:34px;text-align:center;color:var(--text3)">No return requests' + (status ? ' with status “' + retEsc(status) + '”' : '') + '.</div>';
@@ -3436,8 +3440,11 @@ async function markRefunded(id) {
 async function refreshReturnsBadge() {
   try {
     const d = await (await apiFetch('/api/admin/returns?status=requested')).json();
+    const n = (d.returns || []).length;
     const badge = document.getElementById('returnsBadge');
-    if (badge) badge.textContent = (d.returns || []).length;
+    if (badge) badge.textContent = n;
+    const badgeM = document.getElementById('returnsBadgeM');
+    if (badgeM) { badgeM.textContent = n; badgeM.style.display = n ? 'flex' : 'none'; }
   } catch (e) { /* badge is cosmetic — never block the dashboard on it */ }
 }
 
@@ -9054,6 +9061,9 @@ showPage = function(name){
   grid-template-columns: 1fr 1fr 1fr;
   gap: 8px;
   box-shadow: 0 -8px 30px rgba(0,0,0,0.2);
+  max-height: min(70dvh, 520px);
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
 }
 .admin-more-menu.open { display: grid !important; }
 .admin-more-overlay {
@@ -9092,15 +9102,26 @@ showPage = function(name){
 <div class="admin-more-overlay" id="adminMoreOverlay" onclick="closeAdminMoreMenu()"></div>
 <!-- More menu drawer -->
 <div class="admin-more-menu" id="adminMoreMenu">
+  <button class="admin-more-btn" onclick="showPage('returns');syncAbn('returns');closeAdminMoreMenu()" style="position:relative"><span>↩️</span><span>Returns</span><span id="returnsBadgeM" style="display:none;position:absolute;top:2px;right:14px;width:14px;height:14px;background:#e53935;border-radius:50%;font-size:8px;font-weight:800;color:#fff;align-items:center;justify-content:center;border:1.5px solid var(--surface);">0</span></button>
   <button class="admin-more-btn" onclick="showPage('customers');syncAbn('customers');closeAdminMoreMenu()"><span>👥</span><span>Customers</span></button>
-  <button class="admin-more-btn" onclick="showPage('payments');syncAbn('payments');closeAdminMoreMenu()"><span>💳</span><span>Payments</span></button>
-  <button class="admin-more-btn" onclick="showPage('discounts');syncAbn('discounts');closeAdminMoreMenu()"><span>🏷️</span><span>Discounts</span></button>
   <button class="admin-more-btn" onclick="showPage('inventory');syncAbn('inventory');closeAdminMoreMenu()"><span>📋</span><span>Inventory</span></button>
-  <button class="admin-more-btn" onclick="showPage('whatsapp');syncAbn('whatsapp');closeAdminMoreMenu()"><span>📱</span><span>WhatsApp</span></button>
+  <button class="admin-more-btn" onclick="showPage('discounts');syncAbn('discounts');closeAdminMoreMenu()"><span>🏷️</span><span>Discounts</span></button>
+  <button class="admin-more-btn" onclick="showPage('marketing');syncAbn('marketing');closeAdminMoreMenu()"><span>📣</span><span>Marketing</span></button>
+  <button class="admin-more-btn" onclick="showPage('banners');syncAbn('banners');closeAdminMoreMenu()"><span>🖼️</span><span>Banners</span></button>
+  <button class="admin-more-btn" onclick="showPage('photolibrary');syncAbn('photolibrary');closeAdminMoreMenu()"><span>📸</span><span>Photo Library</span></button>
+  <button class="admin-more-btn" onclick="showPage('siteimages');syncAbn('siteimages');closeAdminMoreMenu()"><span>🖥️</span><span>Site Images</span></button>
+  <button class="admin-more-btn" onclick="showPage('payments');syncAbn('payments');closeAdminMoreMenu()"><span>💳</span><span>Payments</span></button>
   <button class="admin-more-btn" onclick="showPage('invoices');syncAbn('invoices');closeAdminMoreMenu()"><span>🧾</span><span>Invoices</span></button>
-  <button class="admin-more-btn" onclick="showPage('settings');syncAbn('settings');closeAdminMoreMenu()"><span>⚙️</span><span>Settings</span></button>
+  <button class="admin-more-btn" onclick="showPage('whatsapp');syncAbn('whatsapp');closeAdminMoreMenu()"><span>📱</span><span>WhatsApp</span></button>
+  <button class="admin-more-btn" onclick="showPage('livevisitors');syncAbn('livevisitors');closeAdminMoreMenu()"><span>👁️</span><span>Live Visitors</span></button>
+  <button class="admin-more-btn" onclick="showPage('geoanalytics');syncAbn('geoanalytics');closeAdminMoreMenu()"><span>🌏</span><span>Geo Analytics</span></button>
+  <button class="admin-more-btn" onclick="showPage('performance');syncAbn('performance');closeAdminMoreMenu()"><span>⚡</span><span>Performance</span></button>
+  <button class="admin-more-btn" onclick="showPage('calendar');syncAbn('calendar');closeAdminMoreMenu()"><span>🗓️</span><span>Calendar</span></button>
+  <button class="admin-more-btn" onclick="showPage('database');syncAbn('database');closeAdminMoreMenu()"><span>🗄️</span><span>Database</span></button>
   <button class="admin-more-btn" onclick="showPage('integrations');syncAbn('integrations');closeAdminMoreMenu()"><span>🔗</span><span>Integrations</span></button>
   <button class="admin-more-btn" onclick="showPage('aiassistant');syncAbn('aiassistant');closeAdminMoreMenu()"><span>🤖</span><span>AI Assistant</span></button>
+  <button class="admin-more-btn" id="moreAiTeam" onclick="showPage('aiteam');syncAbn('aiteam');closeAdminMoreMenu()" style="display:none"><span>🧠</span><span>AI Team</span></button>
+  <button class="admin-more-btn" onclick="showPage('settings');syncAbn('settings');closeAdminMoreMenu()"><span>⚙️</span><span>Settings</span></button>
 </div>
 
 <script>
