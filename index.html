@@ -7215,17 +7215,10 @@ setInterval(function() { syncAppCartBadge(); syncAppWishBadge(); }, 2000);
     </div>
   </section>
 
-  <!-- TESTIMONIALS -->
-  <section class="section testi">
-    <div class="container">
-      <div class="text-center" style="margin-bottom:36px">
-        <div class="section-label">Customer Love</div>
-        <h2 class="section-title">What Our Customers Say</h2>
-        <p class="section-sub">Real reviews from real people across India.</p>
-      </div>
-      <div class="testi-grid" id="testiGrid"></div>
-    </div>
-  </section>
+  <!-- TESTIMONIALS section removed — the live "Customer Reviews Wall"
+       further down this page renders the same reviews with the average
+       rating and verified-purchase badges, so this was a duplicate
+       "What Our Customers Say" heading on the same page. -->
 
   <!-- ══════════ INSTAGRAM FEED ══════════ -->
   <section class="section ig-section" id="igSection">
@@ -7548,7 +7541,7 @@ setInterval(function() { syncAppCartBadge(); syncAppWishBadge(); }, 2000);
     <div style="text-align:center;margin-bottom:32px">
       <span class="cf-section-label">Real People. Real Results.</span>
       <h2 class="cf-section-title">What Our Customers Say</h2>
-      <p class="cf-section-sub" style="margin:0 auto">Verified reviews from customers across India. Every review is from a confirmed purchase.</p>
+      <p class="cf-section-sub" style="margin:0 auto">Our top-rated reviews from customers across India. Every review is from a confirmed purchase.</p>
       <div style="display:flex;align-items:center;justify-content:center;gap:16px;margin-top:16px;flex-wrap:wrap">
         <div style="display:flex;align-items:center;gap:6px">
           <span style="color:var(--seal);font-size:1.3rem">★★★★★</span>
@@ -11215,6 +11208,24 @@ function toggleFaq(btn) {
 // different sets of hardcoded fake reviews.
 // ═══════════════════════════════════════════════════════════════
 let FEATURED_REVIEWS_CACHE = null;
+// Real totals across ALL reviews. The displayed cards are only the top few,
+// so counting/averaging the displayed slice would understate the count and
+// overstate the rating (the slice is the highest-rated by definition).
+let FEATURED_REVIEWS_TOTAL = 0;
+let FEATURED_REVIEWS_AVG   = null;
+
+async function loadReviewStats() {
+  try {
+    const sb = sbClient(); if (!sb) return;
+    const { data, count, error } = await sb
+      .from('reviews').select('rating', { count: 'exact' });
+    if (error) throw error;
+    FEATURED_REVIEWS_TOTAL = count || (data || []).length;
+    if (data && data.length) {
+      FEATURED_REVIEWS_AVG = (data.reduce((t, r) => t + (Number(r.rating) || 0), 0) / data.length);
+    }
+  } catch (e) { /* stats are cosmetic — never block the reviews render */ }
+}
 
 async function getFeaturedReviews() {
   if (FEATURED_REVIEWS_CACHE) return FEATURED_REVIEWS_CACHE;
@@ -11326,10 +11337,14 @@ async function renderReviewsWall() {
     if (avgEl) avgEl.textContent = '—';
     return;
   }
-  const avg = (reviews.reduce((s,r)=>s+(r.rating||5),0) / reviews.length).toFixed(1);
-  if (statEl) statEl.innerHTML = `Based on <strong style="color:var(--dark)">${reviews.length}+ reviews</strong>`;
+  await loadReviewStats();
+  const total = FEATURED_REVIEWS_TOTAL || reviews.length;
+  const avg = (FEATURED_REVIEWS_AVG != null
+    ? FEATURED_REVIEWS_AVG
+    : reviews.reduce((s,r)=>s+(r.rating||5),0) / reviews.length).toFixed(1);
+  if (statEl) statEl.innerHTML = `Based on <strong style="color:var(--dark)">${total} review${total === 1 ? '' : 's'}</strong>`;
   if (avgEl) avgEl.textContent = avg;
-  wall.innerHTML = reviews.slice(0,9).map(r => {
+  wall.innerHTML = reviews.slice(0,3).map(r => {
     const initial = (r.user||'?').trim().charAt(0).toUpperCase();
     return `<div class="inf-card" style="background:var(--sub-1);border-radius:16px;padding:24px;box-shadow:0 2px 12px rgba(23,224,192,0.07);border:1px solid rgba(23,224,192,0.06)">
       <div style="display:flex;align-items:center;gap:12px;margin-bottom:14px">
@@ -11813,10 +11828,22 @@ async function initiateCOD() {
 
   try {
     await finalizeOrder(orderId, formData, codTotal, 'cod', codCharge);
-    // finalizeOrder navigates to thank-you page — done!
+    // On success finalizeOrder navigates to the thank-you page.
   } catch(err) {
-    if (btn) { btn.disabled = false; btn.style.opacity = '1'; btn.innerHTML = '<span style="font-size:1.2rem">💵</span><div style="text-align:left"><div>Confirm COD Order</div><div id="codBtnNote" style="font-size:.65rem;opacity:.8;font-weight:500;margin-top:1px">Free COD on your order</div></div>'; updateCodBtnNote(); }
     showToast('❌ Order failed: ' + err.message, 'error');
+  } finally {
+    // MUST be `finally`, not `catch`. finalizeOrder RETURNS (it does not
+    // throw) when the order fails to save, so a catch-only reset left the
+    // button stuck on "Placing your order..." until a page refresh — and
+    // the same stale state greeted the customer if they navigated back to
+    // checkout after a successful order. Resetting unconditionally is
+    // safe: on success the page has already moved to the thank-you view.
+    if (btn) {
+      btn.disabled = false;
+      btn.style.opacity = '1';
+      btn.innerHTML = '<span style="font-size:1.2rem">💵</span><div style="text-align:left"><div>Confirm COD Order</div><div id="codBtnNote" style="font-size:.65rem;opacity:.8;font-weight:500;margin-top:1px">Free COD on your order</div></div>';
+      try { updateCodBtnNote(); } catch(e) {}
+    }
   }
 }
 
