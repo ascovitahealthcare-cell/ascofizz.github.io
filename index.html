@@ -3604,17 +3604,29 @@ img[src=""], img[data-awaiting-upload] { visibility: hidden; width: 100%; }
 /* ══ PROMO CAROUSEL ══════════════════════════════════════════════ */
 .promo-hero-wrap { position: relative; padding: clamp(24px, 3.5vw, 44px) 0; overflow: hidden; }
 .promo-hero-track {
+  /* RESPONSIVE FIX — two bugs lived here:
+     1. `100vw` includes the desktop scrollbar, so the computed side padding
+        was a few px too wide and the track overflowed its wrapper on any
+        device that renders a classic scrollbar. `100%` measures the actual
+        wrapper.
+     2. The padding is now also exposed as a variable and mirrored into
+        scroll-padding, so the browser's snap position and the JS scroll
+        target agree. They didn't before, which is why cards landed
+        half-visible on some widths and looked fine on others. */
+  --promo-pad: max(var(--gutter), calc((100% - var(--shell)) / 2));
   display: flex; gap: 20px;
-  padding: 10px max(var(--gutter), calc((100vw - var(--shell)) / 2));
+  padding: 10px var(--promo-pad);
+  scroll-padding-inline-start: var(--promo-pad);
   overflow-x: auto; scroll-snap-type: x mandatory;
   scrollbar-width: none; -ms-overflow-style: none;
+  overscroll-behavior-x: contain;
 }
 .promo-hero-track::-webkit-scrollbar { display: none; }
 .promo-card {
   position: relative; flex: 0 0 min(78vw, 430px);
   display: flex; align-items: stretch;
   min-height: 250px; border-radius: var(--r-lg); overflow: hidden;
-  scroll-snap-align: center;
+  scroll-snap-align: start;
   background: var(--paper); box-shadow: var(--neo-2);
   transition: transform var(--dur-3) var(--rise), box-shadow var(--dur-3) var(--rise);
 }
@@ -3645,7 +3657,7 @@ img[src=""], img[data-awaiting-upload] { visibility: hidden; width: 100%; }
   transition: transform var(--dur-2) var(--fizz), background var(--dur-2) var(--rise);
 }
 .promo-card-cta:hover { transform: translateY(-2px); background: var(--indigo-lo); }
-.promo-card-media { position: relative; z-index: 1; flex: 0 0 42%; display: grid; place-items: center; padding: 18px; }
+.promo-card-media { position: relative; z-index: 1; flex: 0 0 42%; display: grid; place-items: center; padding: 18px; min-height: 180px; }
 .promo-card-media img { width: 100%; height: 100%; object-fit: contain; transition: transform var(--dur-4) var(--rise); }
 .promo-card:hover .promo-card-media img { transform: scale(1.04); }
 
@@ -6871,69 +6883,16 @@ setInterval(function() { syncAppCartBadge(); syncAppWishBadge(); }, 2000);
   <div class="promo-hero-wrap" id="promoHeroWrap">
     <button class="promo-nav-arrow promo-nav-prev" onclick="promoCarousel(-1)" aria-label="Previous offer">&#8249;</button>
 
-    <div class="promo-hero-track" id="promoHeroTrack">
-
-      <div class="promo-card promo-card-1">
-        <div class="promo-card-text">
-          <p class="promo-card-eyebrow">Dull skin you can't fix with creams alone?</p>
-          <span class="promo-card-tag">INTRODUCING</span>
-          <h3 class="promo-card-headline">Radiance<br>Begins Inside</h3>
-          <button class="promo-card-cta" onclick="openProduct(1)">Shop Glutathione</button>
-        </div>
-        <div class="promo-card-media"><img data-media-key="home.hero.slide1" src="https://i.ibb.co/pjhwQDQ1/Chat-GPT-Image-Jul-26-2026-06-34-47-AM.png" alt="Ascofizz Glutathione effervescent tablet tube" fetchpriority="high" decoding="async" width="800" height="800"></div>
-      </div>
-
-      <div class="promo-card promo-card-2">
-        <div class="promo-card-text">
-          <p class="promo-card-eyebrow">One combo for immunity, energy &amp; balance.</p>
-          <span class="promo-card-tag">SPECIAL COMBO PRICE — &#8377;899</span>
-          <h3 class="promo-card-headline">Stronger Immunity.<br>Better Energy.</h3>
-          <button class="promo-card-cta" onclick="showShop('spirulina')">View Spirulina Range</button>
-        </div>
-        <div class="promo-card-media"><img data-media-key="home.hero.slide2" src="" data-awaiting-upload="true" alt="Spirulina Combo" loading="lazy" decoding="async"></div>
-      </div>
-
-      <div class="promo-card promo-card-3">
-        <div class="promo-card-text">
-          <p class="promo-card-eyebrow">23 vitamins &amp; minerals, one tablet a day.</p>
-          <span class="promo-card-tag">ASCOFIZZ PREMIUM</span>
-          <h3 class="promo-card-headline">The Foundation<br>of Daily Health</h3>
-          <button class="promo-card-cta" onclick="openProduct(8)">Buy Multidiata</button>
-        </div>
-        <div class="promo-card-media"><img data-media-key="home.hero.slide3" src="" data-awaiting-upload="true" alt="Multidiata Multivitamin" loading="lazy" decoding="async"></div>
-      </div>
-
-      <div class="promo-card promo-card-4">
-        <div class="promo-card-text">
-          <p class="promo-card-eyebrow">A daily adaptogen for stress resilience.</p>
-          <span class="promo-card-tag">INTRODUCING</span>
-          <h3 class="promo-card-headline">Steady Mind.<br>Steady Strength.</h3>
-          <button class="promo-card-cta" onclick="openProduct(31)">Shop Ashwagandha</button>
-        </div>
-        <div class="promo-card-media"><img data-media-key="home.hero.slide4" src="https://i.ibb.co/99ynqrWQ/Chat-GPT-Image-Jul-26-2026-06-35-11-AM.png" alt="Ashwagandha Effervescent" loading="lazy" decoding="async"></div>
-      </div>
-
-      <div class="promo-card promo-card-5">
-        <div class="promo-card-text">
-          <p class="promo-card-eyebrow">A light, fizzy way to reset your day.</p>
-          <span class="promo-card-tag">INTRODUCTORY PRICE — &#8377;349</span>
-          <h3 class="promo-card-headline">Your Daily<br>Reset Ritual</h3>
-          <button class="promo-card-cta" onclick="openProduct(34)">Shop Apple Cider Vinegar</button>
-        </div>
-        <div class="promo-card-media"><img data-media-key="home.hero.slide5" src="https://i.ibb.co/QvDDT2yn/Chat-GPT-Image-Jul-26-2026-06-34-41-AM.png" alt="Apple Cider Vinegar Effervescent" loading="lazy" decoding="async"></div>
-      </div>
-
-    </div>
+    <!-- Cards are rendered by renderPromoCarousel() from the live product
+         list (category = effervescent), so images come from Supabase
+         Storage exactly like the shop grid. Previously these were five
+         hardcoded cards — two of them pointed at products with no image
+         uploaded, which is why blank panels appeared in the carousel. -->
+    <div class="promo-hero-track" id="promoHeroTrack"></div>
 
     <button class="promo-nav-arrow promo-nav-next" onclick="promoCarousel(1)" aria-label="Next offer">&#8250;</button>
 
-    <div class="promo-dots" id="promoDots">
-      <button class="promo-dot active" onclick="promoGoTo(0)" aria-label="Slide 1"></button>
-      <button class="promo-dot" onclick="promoGoTo(1)" aria-label="Slide 2"></button>
-      <button class="promo-dot" onclick="promoGoTo(2)" aria-label="Slide 3"></button>
-      <button class="promo-dot" onclick="promoGoTo(3)" aria-label="Slide 4"></button>
-      <button class="promo-dot" onclick="promoGoTo(4)" aria-label="Slide 5"></button>
-    </div>
+    <div class="promo-dots" id="promoDots"></div>
   </div>
 
   <!-- FIZZ COUNTERS — animated on first scroll into view -->
@@ -9064,6 +9023,9 @@ async function syncProductsFromBackend() {
         // Re-render all grids with updated data (including new backend products)
         try { renderFeatured(); } catch(e){}
         try { renderNewArrivals(); } catch(e){}
+        // The promo carousel is built from PRODUCTS, so it must pick up
+        // freshly synced Supabase images and prices too.
+        try { renderPromoCarousel(); } catch(e){}
         try {
           const sg = document.getElementById('shopGrid');
           if(sg) renderShopGrid();
@@ -15128,6 +15090,97 @@ document.addEventListener('DOMContentLoaded', function() {
 
 
 
+// ═══════════════════════════════════════════════════════════════
+// HOME PROMO CAROUSEL — rendered from live product data
+//
+// The cards used to be hardcoded, which caused three problems: two of
+// them pointed at products with no image uploaded (the blank panels in
+// the carousel), the copy promoted non-effervescent lines, and the
+// prices drifted from the real catalogue. They now render straight from
+// PRODUCTS filtered to effervescent tablets, so images come from
+// Supabase Storage exactly like the shop grid and the price can never
+// disagree with the product page.
+// ═══════════════════════════════════════════════════════════════
+const PROMO_BENEFIT = {
+  38: 'Dull skin you can\u2019t fix with creams alone?',
+  31: 'A daily adaptogen for stress resilience.',
+  34: 'A light, fizzy way to reset your day.',
+  33: 'Daily essentials, made for women.',
+  32: 'Daily essentials, made for men.',
+  37: 'Natural vitamin C with amla, the Ayurvedic way.',
+  35: 'Everyday strength for bones and joints.',
+  36: 'Replace what you sweat out \u2014 fast.',
+  30: 'Green tea antioxidants, no brewing needed.',
+  39: 'Fuel your workout, recover faster.',
+};
+
+// Honest offer line. `offer` is a placeholder on most products right now
+// ("Price to be updated"), so it is NOT shown as though it were a real
+// promotion — we fall back to the actual price rather than inventing a
+// discount that does not exist.
+function promoOfferLine(p) {
+  const off = String(p.offer || '').trim();
+  const placeholder = !off || /price to be updated|to be updated|tbd|coming soon/i.test(off);
+  if (!placeholder) return 'CURRENT OFFER \u2014 ' + off;
+  const sale = Number(p.salePrice) || 0;
+  const mrp  = Number(p.price) || 0;
+  if (sale > 0 && mrp > sale) {
+    const pct = Math.round((1 - sale / mrp) * 100);
+    return 'CURRENT OFFER \u2014 ' + pct + '% OFF \u00b7 \u20b9' + sale.toLocaleString('en-IN');
+  }
+  const shown = sale > 0 ? sale : mrp;
+  return shown > 0 ? 'NOW \u20b9' + shown.toLocaleString('en-IN') : 'NEW ARRIVAL';
+}
+
+function promoShortName(name) {
+  return String(name || '')
+    .replace(/\s*Effervescent Tablets?\s*/i, ' ')
+    .replace(/\s*\(.*?\)\s*/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+
+function renderPromoCarousel() {
+  const track = document.getElementById('promoHeroTrack');
+  const dots  = document.getElementById('promoDots');
+  if (!track || typeof PRODUCTS === 'undefined') return;
+
+  const list = PRODUCTS.filter(function(p){
+    return p && String(p.category || '').toLowerCase() === 'effervescent'
+           && p.active !== false && !p.deleted_at;
+  }).slice(0, 10);
+
+  if (!list.length) return; // leave what is on screen rather than blanking it
+
+  track.innerHTML = list.map(function(p, i){
+    const short = promoShortName(p.name);
+    const img   = p.image || p.image2 || '';
+    const alt   = 'Ascofizz ' + short + ' effervescent tablet';
+    return '<div class="promo-card">' +
+      '<div class="promo-card-text">' +
+        '<p class="promo-card-eyebrow">' + (PROMO_BENEFIT[p.id] || 'One tablet. Drop, fizz, done.') + '</p>' +
+        '<span class="promo-card-tag">' + promoOfferLine(p) + '</span>' +
+        '<h3 class="promo-card-headline">' + short + '</h3>' +
+        '<button class="promo-card-cta" onclick="openProduct(' + p.id + ')">Shop now</button>' +
+      '</div>' +
+      '<div class="promo-card-media">' +
+        (img
+          ? '<img src="' + img + '" alt="' + alt + '" ' +
+            (i === 0 ? 'fetchpriority="high"' : 'loading="lazy"') +
+            ' decoding="async" width="800" height="800">'
+          : '<img src="" data-awaiting-upload="true" alt="' + alt + '">') +
+      '</div>' +
+    '</div>';
+  }).join('');
+
+  if (dots) {
+    dots.innerHTML = list.map(function(_, i){
+      return '<button class="promo-dot' + (i === 0 ? ' active' : '') +
+             '" onclick="promoGoTo(' + i + ')" aria-label="Slide ' + (i + 1) + '"></button>';
+    }).join('');
+  }
+}
+
 // ═══════════════════════════════════════════════════════
 // HOME PROMO CAROUSEL — peek-style (PharmEasy-inspired): a horizontally
 // scrollable row of cards with native scroll-snap, driven by arrow buttons
@@ -15135,6 +15188,7 @@ document.addEventListener('DOMContentLoaded', function() {
 (function(){
   const track = document.getElementById('promoHeroTrack');
   if (!track) return;
+  try { renderPromoCarousel(); } catch(e) { console.warn('[promo] render failed:', e.message); }
 
   function cardStep() {
     const card = track.querySelector('.promo-card');
@@ -15144,8 +15198,29 @@ document.addEventListener('DOMContentLoaded', function() {
     return card.getBoundingClientRect().width + gap;
   }
 
+  // Scroll maths measured from the DOM rather than assumed from card width.
+  // The old version did `scrollLeft / cardStep()`, which silently assumed
+  // zero side padding and left-aligned snapping — neither was true, so on
+  // some viewport widths the arrows/dots landed a fraction of a card off
+  // and the browser then re-snapped, producing the "half card" look.
+  function padLeft() {
+    return parseFloat(getComputedStyle(track).paddingLeft || '0') || 0;
+  }
+  function contentStart() {
+    return track.getBoundingClientRect().left + padLeft();
+  }
+  function cards() {
+    return Array.prototype.slice.call(track.querySelectorAll('.promo-card'));
+  }
+
   function activeIndex() {
-    return Math.round(track.scrollLeft / cardStep());
+    const ref = contentStart();
+    let best = 0, bestDist = Infinity;
+    cards().forEach(function(c, i) {
+      const d = Math.abs(c.getBoundingClientRect().left - ref);
+      if (d < bestDist) { bestDist = d; best = i; }
+    });
+    return best;
   }
 
   function setDots(i) {
@@ -15153,12 +15228,20 @@ document.addEventListener('DOMContentLoaded', function() {
   }
 
   window.promoGoTo = function(i) {
-    track.scrollTo({ left: i * cardStep(), behavior: 'smooth' });
+    const list = cards();
+    const card = list[i];
+    if (!card) return;
+    const delta = card.getBoundingClientRect().left - contentStart();
+    track.scrollTo({ left: track.scrollLeft + delta, behavior: 'smooth' });
+    setDots(i);
   };
 
   window.promoCarousel = function(dir) {
-    const count = track.querySelectorAll('.promo-card').length;
-    const next = Math.max(0, Math.min(count - 1, activeIndex() + dir));
+    const count = cards().length;
+    if (!count) return;
+    // Wrap around — with 10 cards, dead-ending at the last one makes the
+    // arrow look broken.
+    const next = (activeIndex() + dir + count) % count;
     window.promoGoTo(next);
     resetPromoAuto();
   };
@@ -15180,6 +15263,14 @@ document.addEventListener('DOMContentLoaded', function() {
     }, 5000);
   }
   function resetPromoAuto() { startPromoAuto(); }
+  var promoResizeT;
+  window.addEventListener('resize', function(){
+    clearTimeout(promoResizeT);
+    // Re-snap to the current card after a resize so a rotation or a
+    // desktop window drag doesn't leave the track mid-card.
+    promoResizeT = setTimeout(function(){ window.promoGoTo(activeIndex()); }, 150);
+  }, { passive: true });
+
   track.addEventListener('mouseenter', function(){ clearInterval(promoAutoTimer); });
   track.addEventListener('mouseleave', startPromoAuto);
   startPromoAuto();
