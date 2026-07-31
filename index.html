@@ -2324,6 +2324,7 @@ best supplement brand 2024 2025, Ascofizz review, Ascofizz vs competitors India,
 ═══════════════════════════════════════ -->
 <!-- Supabase client — used for direct-from-browser review reads/writes (no Render backend involved) -->
 <script defer src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script defer src="https://sdk.cashfree.com/js/v3/cashfree.js"></script>
 <script>
   const SUPABASE_URL = 'https://frwsjgrrtzhjfflcdjjs.supabase.co';
   const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZyd3NqZ3JydHpoamZmbGNkampzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI3MDUzMTgsImV4cCI6MjA4ODI4MTMxOH0.iIjlG1A0BoMAmROwovyLasRZU7bVRJC5q7vhmWiMeOs';
@@ -11541,6 +11542,15 @@ function bootApp() {
     setTimeout(function() { handleGoKwikReturn(gkoid); }, 800);
   }
 
+  // ── Handle Cashfree payment return ──
+  // Cashfree's order_meta.return_url is set to /?cf_order_id={order_id},
+  // with {order_id} substituted by Cashfree itself before redirecting back.
+  var cfoid = sp.get('cf_order_id');
+  if (cfoid) {
+    try { history.replaceState({}, '', window.location.pathname); } catch(e) {}
+    setTimeout(function() { handleCashfreeReturn(cfoid); }, 800);
+  }
+
 
 
   try { initHome(); } catch(e) { console.error('initHome:', e); }
@@ -11696,7 +11706,7 @@ function openPaymentGateway(orderId, total, sub, disc, ship, formData, btn, orig
       <div style="background:linear-gradient(135deg,var(--f-mineral-d),var(--f-mineral));padding:20px 24px;border-radius:20px 20px 0 0;color:var(--t-hi);display:flex;align-items:center;justify-content:space-between">
         <div>
           <div style="font-size:1.05rem;font-weight:800">🔒 Secure Checkout</div>
-          <div style="font-size:.68rem;opacity:.8;margin-top:2px">Powered by GoKwik · PCI DSS Secured</div>
+          <div style="font-size:.68rem;opacity:.8;margin-top:2px">PCI DSS Secured · 256-bit SSL</div>
         </div>
         <div style="text-align:right">
           <div style="font-size:1.8rem;font-weight:900">₹${total.toLocaleString('en-IN')}</div>
@@ -11734,6 +11744,18 @@ function openPaymentGateway(orderId, total, sub, disc, ship, formData, btn, orig
           </div>
           <span style="background:rgba(255,255,255,.22);padding:4px 10px;border-radius:100px;font-size:.6rem;font-weight:800;letter-spacing:.5px">SECURE →</span>
         </button>
+        <!-- Cashfree Pay Button -->
+        <button class="cfPayBtn cashfree-pay-btn" onclick="startPayment('cashfree')"
+          style="width:100%;background:#0B3558;color:#fff;border:none;border-radius:14px;padding:18px 20px;font-size:.95rem;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:14px;margin-bottom:14px;transition:opacity .15s">
+          <span style="display:inline-flex;align-items:center;justify-content:center;width:42px;height:42px;background:rgba(255,255,255,0.14);border-radius:10px;flex-shrink:0">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20"/></svg>
+          </span>
+          <div style="flex:1;text-align:left">
+            <div style="font-size:1rem;font-weight:800">Pay ₹${total.toLocaleString('en-IN')} via Cashfree</div>
+            <div style="font-size:.7rem;opacity:.85;margin-top:2px">UPI · Cards · Net Banking · Wallets</div>
+          </div>
+          <span style="background:rgba(255,255,255,.18);padding:4px 10px;border-radius:100px;font-size:.6rem;font-weight:800;letter-spacing:.5px">SECURE →</span>
+        </button>
         <!-- Trust Badges -->
         <div style="display:flex;align-items:center;justify-content:center;gap:14px;margin-bottom:14px;flex-wrap:wrap">
           <span style="font-size:.67rem;color:var(--t-low)">🔒 256-bit SSL</span>
@@ -11761,14 +11783,19 @@ async function startPayment(method) {
   if (!pd) { showToast('Payment session expired. Please try again.', 'error'); closePaymentModal(); return; }
   const { orderId, total, formData } = pd;
   const btn = document.getElementById('onlinePayBtn') || document.querySelector('#page-checkout .checkout-btn');
-  const origText = btn ? btn.textContent : '💳 Pay via GoKwik';
+  const origText = btn ? btn.textContent : '💳 Pay Online';
   document.querySelectorAll('.cfPayBtn').forEach(b => { b.disabled = true; b.style.opacity = '0.5'; });
-  const activeBtn = document.querySelector('.gk-pay-btn');
-  if (activeBtn) { activeBtn.style.opacity = '1'; activeBtn.innerHTML = `<span style="font-size:1.4rem">⏳</span> <span>Connecting to GoKwik...</span>`; }
+  const activeBtn = method === 'cashfree'
+    ? document.querySelector('.cashfree-pay-btn')
+    : document.querySelector('.gk-pay-btn');
+  const gatewayLabel = method === 'cashfree' ? 'Cashfree' : 'GoKwik';
+  if (activeBtn) { activeBtn.style.opacity = '1'; activeBtn.innerHTML = `<span style="font-size:1.4rem">⏳</span> <span>Connecting to ${gatewayLabel}...</span>`; }
   await new Promise(r => setTimeout(r, 500));
   closePaymentModal();
   showProcessingScreen(orderId, total, method);
-  return startGoKwikPayment(orderId, total, formData, btn, origText);
+  return method === 'cashfree'
+    ? startCashfreePayment(orderId, total, formData, btn, origText)
+    : startGoKwikPayment(orderId, total, formData, btn, origText);
 }
 
 // ══════════════════════════════════════════════
@@ -11811,7 +11838,11 @@ async function startGoKwikPayment(orderId, total, formData, btn, origText) {
       throw new Error(data.error || 'Could not start payment');
     }
     try {
-      sessionStorage.setItem('asc_pending_gk', JSON.stringify({ orderId: orderId, formData: formData, t: Date.now() }));
+      sessionStorage.setItem('asc_pending_gk', JSON.stringify({
+        orderId: orderId, formData: formData, t: Date.now(),
+        vitaApplied: (typeof VITA_APPLIED !== 'undefined' ? VITA_APPLIED : 0),
+        promoCode: (typeof activePromoCode !== 'undefined' && activePromoCode) ? activePromoCode : null,
+      }));
     } catch (e) {}
     window.location.href = data.short_url;
   } catch (err) {
@@ -11828,8 +11859,148 @@ async function startGoKwikPayment(orderId, total, formData, btn, origText) {
 }
 
 // ══════════════════════════════════════════════
-// COD — called directly from checkout page (no modal)
+// startCashfreePayment
+//
+// Same trust model as startGoKwikPayment: the amount passed here is
+// display-only. /api/create-cashfree-order recomputes it from real
+// product prices server-side, so a tampered request can't open a
+// session for less than the cart is actually worth.
+//
+// Cashfree's JS SDK opens its hosted checkout with redirectTarget:"_self"
+// — a full-page redirect, same shape as GoKwik's short_url flow, so the
+// customer is returned to this site via order_meta.return_url and the
+// same "resume on return" pattern (handleCashfreeReturn) picks it up.
 // ══════════════════════════════════════════════
+async function startCashfreePayment(orderId, total, formData, btn, origText) {
+  try {
+    if (typeof Cashfree === 'undefined') {
+      throw new Error('Payment SDK failed to load — please check your connection and try again.');
+    }
+    const resp = await fetch(API_BASE + '/api/create-cashfree-order', {
+      method: 'POST',
+      headers: Object.assign({ 'Content-Type': 'application/json' },
+        localStorage.getItem('asc_jwt') ? { 'Authorization': 'Bearer ' + localStorage.getItem('asc_jwt') } : {}),
+      body: JSON.stringify({
+        merchant_reference_id: orderId,
+        items: STORE.cart.map(function(i){
+          var o = { id: i.id, qty: i.qty };
+          if (i.tierTabs) { o.tierTabs = i.tierTabs; o.tierIdx = i.tierIdx; }
+          return o;
+        }),
+        coupon_code: (typeof activePromoCode !== 'undefined' && activePromoCode) ? activePromoCode.code : null,
+        vita_points: (typeof VITA_APPLIED !== 'undefined' && VITA_APPLIED > 0) ? VITA_APPLIED : 0,
+        customer_name:  [formData.firstName, formData.lastName].filter(Boolean).join(' ') || formData.name || '',
+        customer_email: formData.email,
+        customer_phone: formData.phone,
+        description: 'Ascofizz order ' + orderId,
+      }),
+    });
+    const data = await resp.json();
+    if (!resp.ok || !data.success || !data.payment_session_id) {
+      throw new Error(data.error || 'Could not start payment');
+    }
+    try {
+      sessionStorage.setItem('asc_pending_cf', JSON.stringify({
+        orderId: orderId, formData: formData, t: Date.now(),
+        vitaApplied: (typeof VITA_APPLIED !== 'undefined' ? VITA_APPLIED : 0),
+        promoCode: (typeof activePromoCode !== 'undefined' && activePromoCode) ? activePromoCode : null,
+      }));
+    } catch (e) {}
+
+    const cashfree = Cashfree({ mode: (window.CASHFREE_MODE || 'production') });
+    cashfree.checkout({ paymentSessionId: data.payment_session_id, redirectTarget: '_self' });
+  } catch (err) {
+    console.error('[startCashfreePayment]', err);
+    if (typeof hideProcessingScreen === 'function') hideProcessingScreen();
+    if (btn) { btn.disabled = false; btn.textContent = origText || '💳 Pay Online'; }
+    document.querySelectorAll('.cfPayBtn').forEach(function(b){ b.disabled = false; b.style.opacity = '1'; });
+    if (typeof showPaymentError === 'function') {
+      showPaymentError('Payment could not be started: ' + err.message, orderId, formData, total, 'cashfree');
+    } else if (typeof showToast === 'function') {
+      showToast('❌ ' + err.message, 'error');
+    }
+  }
+}
+
+// ══════════════════════════════════════════════
+// PAYMENT RETURN HANDLERS
+//
+// handleGoKwikReturn was called from the boot sequence's "Handle GoKwik
+// payment return" block but was never defined anywhere in this file — so
+// every customer who completed an online GoKwik payment and was
+// redirected back threw a ReferenceError right there, and the order was
+// never confirmed: no thank-you page, no VitaPoints, nothing saved. COD
+// was the only online-payment-adjacent path that actually worked.
+//
+// Both handlers here follow the same shape: restore the checkout state
+// that was stashed in sessionStorage before the redirect away (cart
+// itself survives via STORE's own localStorage persistence), verify
+// payment directly with the gateway (never trust the return URL alone —
+// it's just a hint to check, exactly like the GoKwik/Cashfree webhooks
+// do), then run the SAME finalizeOrder() used by every other payment
+// path so there is only one order-saving code path to trust.
+// ══════════════════════════════════════════════
+async function handleGoKwikReturn(merchantRefId) {
+  let pending = null;
+  try { pending = JSON.parse(sessionStorage.getItem('asc_pending_gk') || 'null'); } catch (e) {}
+  if (!pending || pending.orderId !== merchantRefId) {
+    console.warn('[handleGoKwikReturn] No matching pending session for', merchantRefId);
+    return;
+  }
+  sessionStorage.removeItem('asc_pending_gk');
+  if (typeof VITA_APPLIED !== 'undefined') VITA_APPLIED = pending.vitaApplied || 0;
+  if (typeof activePromoCode !== 'undefined') activePromoCode = pending.promoCode || null;
+
+  showProcessingScreen(merchantRefId, 0, 'gokwik');
+  try {
+    const resp = await fetch(API_BASE + '/api/verify-gokwik-order/' + encodeURIComponent(merchantRefId));
+    const data = await resp.json();
+    if (!resp.ok || !data.success) throw new Error(data.error || 'Could not verify payment');
+    if (!data.paid) {
+      if (typeof hideProcessingScreen === 'function') hideProcessingScreen();
+      showPaymentError('Payment was not completed. If money was deducted, it will be auto-refunded by GoKwik within 5-7 days.',
+        merchantRefId, pending.formData, data.amount || 0, 'gokwik');
+      return;
+    }
+    await finalizeOrder(merchantRefId, pending.formData, data.amount || 0, 'gokwik', 0);
+  } catch (err) {
+    console.error('[handleGoKwikReturn]', err);
+    if (typeof hideProcessingScreen === 'function') hideProcessingScreen();
+    showPaymentError('We could not confirm your payment automatically. If money was deducted, contact +91 98985 82650 with Order ID: ' + merchantRefId + '. (' + err.message + ')',
+      merchantRefId, pending.formData, 0, 'gokwik');
+  }
+}
+
+async function handleCashfreeReturn(orderId) {
+  let pending = null;
+  try { pending = JSON.parse(sessionStorage.getItem('asc_pending_cf') || 'null'); } catch (e) {}
+  if (!pending || pending.orderId !== orderId) {
+    console.warn('[handleCashfreeReturn] No matching pending session for', orderId);
+    return;
+  }
+  sessionStorage.removeItem('asc_pending_cf');
+  if (typeof VITA_APPLIED !== 'undefined') VITA_APPLIED = pending.vitaApplied || 0;
+  if (typeof activePromoCode !== 'undefined') activePromoCode = pending.promoCode || null;
+
+  showProcessingScreen(orderId, 0, 'cashfree');
+  try {
+    const resp = await fetch(API_BASE + '/api/verify-cashfree-order/' + encodeURIComponent(orderId));
+    const data = await resp.json();
+    if (!resp.ok || !data.success) throw new Error(data.error || 'Could not verify payment');
+    if (!data.paid) {
+      if (typeof hideProcessingScreen === 'function') hideProcessingScreen();
+      showPaymentError('Payment was not completed. If money was deducted, it will be auto-refunded by Cashfree within 5-7 days.',
+        orderId, pending.formData, data.order_amount || 0, 'cashfree');
+      return;
+    }
+    await finalizeOrder(orderId, pending.formData, data.order_amount || 0, 'cashfree', 0);
+  } catch (err) {
+    console.error('[handleCashfreeReturn]', err);
+    if (typeof hideProcessingScreen === 'function') hideProcessingScreen();
+    showPaymentError('We could not confirm your payment automatically. If money was deducted, contact +91 98985 82650 with Order ID: ' + orderId + '. (' + err.message + ')',
+      orderId, pending.formData, 0, 'cashfree');
+  }
+}
 async function initiateCOD() {
   if (STORE.cart.length === 0) { showToast('🛒 Your cart is empty!', 'error'); return; }
   const formData = validateCheckoutForm();
@@ -11944,8 +12115,8 @@ function updateProcessingStatus(pct, msg) {
 // ── PROCESSING OVERLAY ──
 function showProcessingScreen(orderId, total, method) {
   document.getElementById('cfProcessing')?.remove();
-  const methodIcons = { upi:'📱', card:'💳', netbanking:'🏦', emi:'📊', gokwik:'🔴' };
-  const methodNames = { upi:'UPI', card:'Card', netbanking:'Net Banking', emi:'EMI', gokwik:'GoKwik' };
+  const methodIcons = { upi:'📱', card:'💳', netbanking:'🏦', emi:'📊', gokwik:'🔴', cashfree:'🔵' };
+  const methodNames = { upi:'UPI', card:'Card', netbanking:'Net Banking', emi:'EMI', gokwik:'GoKwik', cashfree:'Cashfree' };
 
   const el = document.createElement('div');
   el.id = 'cfProcessing';
@@ -12158,6 +12329,7 @@ async function finalizeOrder(orderId, formData, total, method, codCharge) {
       state: formData.state,
       pincode: formData.pin,
       total: total,
+      coupon_code: (typeof activePromoCode !== 'undefined' && activePromoCode) ? activePromoCode.code : null,
       vita_points: _vitaPointsForOrder,
       payment_status: method === 'cod' ? 'COD - Pending' : 'Paid',
       fulfillment: 'Pending',
@@ -12188,7 +12360,8 @@ async function finalizeOrder(orderId, formData, total, method, codCharge) {
       }).filter(Boolean)),
     };
 
-    const url  = API_BASE + (isOnlinePayment ? '/api/confirm-gokwik-order' : '/api/orders');
+    const gatewayEndpoint = method === 'cashfree' ? '/api/confirm-cashfree-order' : '/api/confirm-gokwik-order';
+    const url  = API_BASE + (isOnlinePayment ? gatewayEndpoint : '/api/orders');
     const body = isOnlinePayment
       ? JSON.stringify({ order_id: orderId, order_data: orderPayload })
       : JSON.stringify(orderPayload);
