@@ -11907,7 +11907,12 @@ async function startCashfreePayment(orderId, total, formData, btn, origText) {
       }));
     } catch (e) {}
 
-    const cashfree = Cashfree({ mode: (window.CASHFREE_MODE || 'production') });
+    // Use whichever mode the backend actually created this order under
+    // (data.cf_env), so a sandbox session always opens in sandbox mode
+    // and a production session always opens in production mode — this
+    // can never drift out of sync with CASHFREE_ENV on Render, unlike a
+    // hardcoded/manual frontend flag.
+    const cashfree = Cashfree({ mode: (data.cf_env || window.CASHFREE_MODE || 'production') });
     cashfree.checkout({ paymentSessionId: data.payment_session_id, redirectTarget: '_self' });
   } catch (err) {
     console.error('[startCashfreePayment]', err);
