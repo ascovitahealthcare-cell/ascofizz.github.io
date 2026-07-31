@@ -3542,10 +3542,15 @@ img[src=""], img[data-awaiting-upload] { visibility: hidden; width: 100%; }
 /* ══ HERO — white space, one line of type, three bubbles ══════════ */
 .shader-hero {
   position: relative;
-  min-height: min(88dvh, 820px);
+  /* Was min(88dvh, 820px) with up to 150px of top padding, which meant the
+     hero alone filled the first screen and nothing below it was visible on
+     load. Sized so the offer carousel underneath always peeks into view —
+     that peek is what tells a first-time visitor there is more to scroll.
+     dvh (not vh) so mobile browser chrome collapsing doesn't jump it. */
+  min-height: min(58dvh, 560px);
   display: flex; align-items: center;
   overflow: hidden;
-  padding: clamp(92px, 13vh, 150px) 0 clamp(64px, 9vh, 110px);
+  padding: clamp(56px, 7.5vh, 92px) 0 clamp(36px, 5vh, 58px);
   background: var(--paper);
 }
 .shader-hero-veil { display: none; }
@@ -3554,7 +3559,7 @@ img[src=""], img[data-awaiting-upload] { visibility: hidden; width: 100%; }
 /* Ascovita signs the page, in its own green */
 .shader-badge {
   display: inline-flex; align-items: center; gap: 12px;
-  padding: 0; margin-bottom: clamp(24px, 3.6vh, 38px);
+  padding: 0; margin-bottom: clamp(14px, 2.2vh, 22px);
   font-size: .68rem; font-weight: 600; letter-spacing: .22em; text-transform: uppercase;
   color: var(--green); background: none; border: none; box-shadow: none;
 }
@@ -3562,27 +3567,27 @@ img[src=""], img[data-awaiting-upload] { visibility: hidden; width: 100%; }
 
 .shader-headline {
   font-family: var(--font-display);
-  margin: 0 auto clamp(22px, 3vh, 34px);
-  line-height: 1.02; letter-spacing: -.03em;
+  margin: 0 auto clamp(14px, 2vh, 22px);
+  line-height: 1.04; letter-spacing: -.03em;
   color: var(--ink);
 }
 .sh-line { display: block; }
 .sh-line-1 {
-  font-size: clamp(1.05rem, 1.9vw, 1.45rem);
+  font-size: clamp(.88rem, 1.45vw, 1.12rem);
   font-weight: 400; letter-spacing: .18em; text-transform: uppercase; line-height: 1.4;
   color: var(--indigo);
-  margin-bottom: clamp(12px, 1.8vh, 20px);
+  margin-bottom: clamp(8px, 1.2vh, 13px);
 }
-.sh-line-2 { font-size: clamp(3rem, 8.4vw, 6.6rem); font-weight: 200; letter-spacing: -.035em; }
-.sh-line-3 { font-size: clamp(3rem, 8.4vw, 6.6rem); font-weight: 500; letter-spacing: -.035em; color: var(--ink); }
+.sh-line-2 { font-size: clamp(2.1rem, 5.6vw, 4.2rem); font-weight: 200; letter-spacing: -.035em; }
+.sh-line-3 { font-size: clamp(2.1rem, 5.6vw, 4.2rem); font-weight: 500; letter-spacing: -.035em; color: var(--ink); }
 .shader-sub {
-  font-size: clamp(.98rem, 1.3vw, 1.1rem);
-  line-height: 1.7; color: var(--t-low);
-  max-width: 56ch; margin: 0 auto clamp(30px, 4vh, 44px);
+  font-size: clamp(.9rem, 1.1vw, 1rem);
+  line-height: 1.62; color: var(--t-low);
+  max-width: 52ch; margin: 0 auto clamp(18px, 2.6vh, 28px);
 }
 .shader-cta-row { display: flex; flex-wrap: wrap; gap: 14px; justify-content: center; }
-.shader-btn-primary { padding: 17px 34px; font-size: .93rem; }
-.shader-btn-ghost   { padding: 17px 34px; font-size: .93rem; }
+.shader-btn-primary { padding: 13px 28px; font-size: .87rem; }
+.shader-btn-ghost   { padding: 13px 28px; font-size: .87rem; }
 
 /* The mark's three bubbles, drifting behind the type */
 .shader-ring-wrap { position: absolute; inset: 0; z-index: 0; pointer-events: none; display: block; }
@@ -5320,13 +5325,18 @@ textarea.b2b-form-input { min-height: 110px; resize: vertical; font-family: inhe
 
   .shader-hero {
     min-height: auto;
-    padding: calc(env(safe-area-inset-top, 0px) + 128px) 0 34px;
+    /* 128px of top padding pushed everything below the fold on a phone. */
+    padding: calc(env(safe-area-inset-top, 0px) + 88px) 0 24px;
   }
-  .sh-line-2 { font-size: clamp(3rem, 15vw, 4.6rem); }
-  .sh-line-3 { font-size: clamp(2rem, 10vw, 3rem); }
-  .shader-sub { font-size: .95rem; }
-  .shader-cta-row { flex-direction: column; align-items: stretch; }
-  .shader-cta-row > * { width: 100%; }
+  .sh-line-2 { font-size: clamp(2.1rem, 10.5vw, 3.1rem); }
+  .sh-line-3 { font-size: clamp(1.65rem, 8vw, 2.4rem); }
+  .shader-sub { font-size: .88rem; line-height: 1.55; margin-bottom: 18px; }
+  .shader-btn-primary, .shader-btn-ghost { padding: 10px 22px; font-size: .8rem; }
+  /* Stacking full-width made sense when there were two buttons. With a
+     single CTA, width:100% turns it into a full-bleed slab — so it now
+     sizes to its own text and centres instead. */
+  .shader-cta-row { flex-direction: row; align-items: center; justify-content: center; }
+  .shader-cta-row > * { width: auto; }
   .shader-ring-wrap { display: none; }
   .shader-badge { font-size: .625rem; letter-spacing: .09em; padding: 7px 14px 7px 11px; }
   .section-label, .sec-overline, .cf-section-label { font-size: .64rem; letter-spacing: .12em; }
@@ -5410,7 +5420,11 @@ textarea.b2b-form-input { min-height: 110px; resize: vertical; font-family: inhe
 
 /* ── Very short viewports (landscape phones) ───────────────────── */
 @media (max-height: 560px) and (orientation: landscape) {
-  .shader-hero { min-height: auto; padding: 110px 0 50px; }
+  /* Landscape phones have very little vertical room — the hero must not
+     eat all of it, or the page looks like a dead end. */
+  .shader-hero { min-height: auto; padding: 74px 0 28px; }
+  .sh-line-2, .sh-line-3 { font-size: clamp(1.6rem, 6.5vw, 2.3rem); }
+  .shader-sub { margin-bottom: 14px; }
   .vita-chat-wrap { height: 78vh; }
 }
 
@@ -6896,7 +6910,6 @@ setInterval(function() { syncAppCartBadge(); syncAppWishBadge(); }, 2000);
 
       <div class="shader-cta-row">
         <button class="shader-btn-primary" onclick="showPage('shop')">Shop All Products</button>
-        <button class="shader-btn-ghost" onclick="window.open('https://www.ascovita.com/#/capabilities','_blank')">B2B &amp; Private Label</button>
       </div>
     </div>
 
