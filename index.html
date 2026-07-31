@@ -7919,7 +7919,7 @@ setInterval(function() { syncAppCartBadge(); syncAppWishBadge(); }, 2000);
             <span style="font-size:1.2rem">💵</span>
             <div style="text-align:left">
               <div>Cash on Delivery (COD)</div>
-              <div id="codBtnNote" style="font-size:.68rem;opacity:.85;font-weight:400;margin-top:1px">+₹60 COD charge · Free if order ≥ ₹599</div>
+              <div id="codBtnNote" style="font-size:.68rem;opacity:.85;font-weight:400;margin-top:1px">Free COD on your order</div>
             </div>
           </button>
           <div style="text-align:center;font-size:.72rem;color:var(--gray);margin-top:10px">
@@ -8013,6 +8013,25 @@ function renderCkRecommendations() {
 
 // Patch renderCheckoutSummary to include qty controls
 const _origRenderCkSummary = renderCheckoutSummary;
+// ══════════════════════════════════════════════════════════════
+// SHIPPING / COD CHARGE — SINGLE SOURCE OF TRUTH
+// Every checkout display AND every charge path must use calcShipping().
+// They used to each hardcode `net >= 599 ? 0 : 60`, so changing the
+// policy in the summary alone left the payment gateway and the COD
+// confirm still adding 60 — the customer saw FREE and was charged 60.
+// The server (computeServerSideTotal in server.js) must match these
+// two values exactly or the same mismatch reappears.
+//   SHIP_FEE = 0  -> shipping always free (current policy)
+//   SHIP_FEE = 60 -> 60 charged below SHIP_THRESHOLD
+// ══════════════════════════════════════════════════════════════
+var SHIP_THRESHOLD = 599;
+var SHIP_FEE = 0;
+function calcShipping(netSubtotal) {
+  if (!SHIP_FEE) return 0;
+  return (Number(netSubtotal) || 0) >= SHIP_THRESHOLD ? 0 : SHIP_FEE;
+}
+function shippingIsAlwaysFree() { return !SHIP_FEE; }
+
 function renderCheckoutSummary() {
   const el = document.getElementById('ckSummary');
   if (!el) return;
@@ -8032,7 +8051,7 @@ function renderCheckoutSummary() {
     disc = appliedDiscount.type==='percent' ? Math.round(sub*appliedDiscount.value/100) : appliedDiscount.value;
   }
 
-  const ship  = 0;
+  const ship  = calcShipping(sub - disc);
   const _vita = vitaCheckoutInfo(sub - disc);
   const vitaOff = _vita.rupees;
   const total = Math.max(0, sub - disc + ship - vitaOff);
@@ -10862,7 +10881,7 @@ function renderCart() {
     discLabel = appliedDiscount.label || '';
   }
 
-  const ship = 0; // Free shipping online
+  const ship = calcShipping(sub - disc);
   const _vita = vitaCheckoutInfo(sub - disc);
   const vitaOff = _vita.rupees;
   const total = Math.max(0, sub - disc + ship - vitaOff);
@@ -10912,7 +10931,7 @@ function renderCart() {
           }).join('')}
           <div style="padding:18px 20px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;">
             <button class="btn-outline" onclick="showPage('shop')">← Continue Shopping</button>
-            <span style="font-size:.82rem;color:var(--gray)">${(sub-disc) >= 599 ? '🎉 You qualify for free shipping!' : 'Add ₹' + (599 - (sub-disc)) + ' more for free shipping'}</span>
+            <span style="font-size:.82rem;color:var(--gray)">${shippingIsAlwaysFree() ? '🎉 Free shipping on every order!' : ((sub-disc) >= SHIP_THRESHOLD ? '🎉 You qualify for free shipping!' : 'Add ₹' + (SHIP_THRESHOLD - (sub-disc)) + ' more for free shipping')}</span>
           </div>
         </div>
       </div>
@@ -10928,8 +10947,8 @@ function renderCart() {
             🎉 Total savings on this order: <strong>₹${disc.toLocaleString('en-IN')}</strong>
           </div>` : ''}
         <div class="sum-row"><span>Shipping</span><span>${ship === 0 ? '<span style="color:var(--success);font-weight:700">FREE 🎉</span>' : '₹' + ship}</span></div>
-        ${sub < 599 ? `<div style="font-size:.72rem;color:var(--gray);margin-bottom:4px;padding:6px 10px;background:#FFF8E1;border-radius:6px;border-left:1px solid var(--seal)">💡 Add ₹${(599 - sub).toLocaleString('en-IN')} more for FREE shipping + free COD</div>` : ''}
-        <div class="sum-row" style="font-size:.78rem;color:var(--gray)"><span>COD charge (if applicable)</span><span>${sub >= 599 ? '<span style="color:var(--success)">FREE</span>' : '₹60'}</span></div>
+        ${(!shippingIsAlwaysFree() && sub < SHIP_THRESHOLD) ? `<div style="font-size:.72rem;color:var(--gray);margin-bottom:4px;padding:6px 10px;background:#FFF8E1;border-radius:6px;border-left:1px solid var(--seal)">💡 Add ₹${(SHIP_THRESHOLD - sub).toLocaleString('en-IN')} more for FREE shipping + free COD</div>` : ''}
+        <div class="sum-row" style="font-size:.78rem;color:var(--gray)"><span>COD charge</span><span>${calcShipping(sub) === 0 ? '<span style="color:var(--success)">FREE</span>' : '₹' + calcShipping(sub)}</span></div>
         <hr style="border:none;border-top:1px solid var(--light-gray);margin:8px 0">
         ${vitaOff > 0 ? `<div class="sum-row" style="color:var(--fern-lo)"><span>💎 VitaPoints (${_vita.applied.toLocaleString('en-IN')})</span><span>-₹${vitaOff.toFixed(2)}</span></div>` : ''}
         <div class="sum-row total"><span>Total</span><span style="color:var(--green)">₹${total.toLocaleString('en-IN',{maximumFractionDigits:2})}</span></div>
@@ -11052,8 +11071,8 @@ function updateCodBtnNote() {
   if (!note) return;
   const { sub, disc } = getOrderTotal();
   const net = sub - disc;
-  note.textContent = net >= 599 ? '✅ Free COD on your order!' : '+₹60 COD charge · Free if order ≥ ₹599';
-  note.style.color = net >= 599 ? '#d4edda' : 'rgba(255,255,255,0.85)';
+  note.textContent = calcShipping(net) === 0 ? '✅ Free COD on your order!' : '+₹' + calcShipping(net) + ' COD charge · Free if order ≥ ₹' + SHIP_THRESHOLD;
+  note.style.color = calcShipping(net) === 0 ? '#d4edda' : 'rgba(255,255,255,0.85)';
 }
 
 // ══════════════════════════════════════════════
@@ -11108,7 +11127,7 @@ function renderCheckoutSummary() {
     disc = appliedDiscount.type==='percent' ? Math.round(sub*appliedDiscount.value/100) : appliedDiscount.value;
   }
 
-  const ship = 0; // Free shipping online
+  const ship = calcShipping(sub - disc);
   const _vita = vitaCheckoutInfo(sub - disc);
   const vitaOff = _vita.rupees;
   const total = Math.max(0, sub - disc + ship - vitaOff);
@@ -11599,7 +11618,7 @@ function initiatePayment() {
     ? (activePromoCode.type === 'pct' ? Math.round(netSub * activePromoCode.value / 100) : Math.min(activePromoCode.value, netSub))
     : (appliedDiscount ? (appliedDiscount.type === 'percent' ? Math.round(netSub * appliedDiscount.value / 100) : appliedDiscount.value) : 0);
   const afterDisc = netSub - promoD;
-  const ship  = afterDisc >= 599 ? 0 : 60;
+  const ship  = calcShipping(afterDisc);
   const total = afterDisc + ship;
 
   const orderId = generateOrderId();
@@ -11785,7 +11804,7 @@ async function initiateCOD() {
   const { sub, disc } = getOrderTotal();
   const orderId = generateOrderId();
   const netSub = sub - disc;
-  const codCharge = netSub >= 599 ? 0 : 60;
+  const codCharge = calcShipping(netSub);
   const codTotal = netSub + codCharge;
 
   // Disable button immediately to prevent double-tap
@@ -11796,7 +11815,7 @@ async function initiateCOD() {
     await finalizeOrder(orderId, formData, codTotal, 'cod', codCharge);
     // finalizeOrder navigates to thank-you page — done!
   } catch(err) {
-    if (btn) { btn.disabled = false; btn.style.opacity = '1'; btn.innerHTML = '<span style="font-size:1.2rem">💵</span><div style="text-align:left"><div>Confirm COD Order</div><div id="codBtnNote" style="font-size:.65rem;opacity:.8;font-weight:500;margin-top:1px">+₹60 charge · Free if order ≥ ₹599</div></div>'; updateCodBtnNote(); }
+    if (btn) { btn.disabled = false; btn.style.opacity = '1'; btn.innerHTML = '<span style="font-size:1.2rem">💵</span><div style="text-align:left"><div>Confirm COD Order</div><div id="codBtnNote" style="font-size:.65rem;opacity:.8;font-weight:500;margin-top:1px">Free COD on your order</div></div>'; updateCodBtnNote(); }
     showToast('❌ Order failed: ' + err.message, 'error');
   }
 }
@@ -11830,9 +11849,9 @@ async function startCOD() {
 
   const { orderId, sub, disc, formData } = pd;
 
-  // COD charge: free if order >= 599, else ₹60
+  // COD charge — always via calcShipping() so display and charge agree
   const netSub = sub - disc;
-  const codCharge = netSub >= 599 ? 0 : 60;
+  const codCharge = calcShipping(netSub);
   const codTotal = netSub + codCharge;
 
   closePaymentModal();
@@ -14861,7 +14880,7 @@ function renderSideCart() {
     const price = item.tierRate !== undefined ? item.tierRate : (p ? (p.salePrice || p.price) : 0);
     return s + price * item.qty;
   }, 0);
-  const ship = 0; // Free shipping online
+  const ship = calcShipping(sub);
   const promoDisc = getPromoDiscount ? getPromoDiscount(sub) : 0;
   const total = Math.max(0, sub - promoDisc + ship);
 
