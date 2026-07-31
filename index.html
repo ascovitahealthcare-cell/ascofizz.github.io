@@ -8032,13 +8032,7 @@ function renderCheckoutSummary() {
     disc = appliedDiscount.type==='percent' ? Math.round(sub*appliedDiscount.value/100) : appliedDiscount.value;
   }
 
-  // Must match the ₹599 free-shipping/COD threshold used at actual order
-  // placement (initiatePayment/initiateCOD/startCOD) and server-side
-  // (computeServerSideTotal in server.js). This was previously hardcoded
-  // to 0, so the checkout page always showed "FREE" shipping and a lower
-  // Total than what was actually charged once the order was placed —
-  // the "amount before order vs after order confirmation" mismatch.
-  const ship  = (sub - disc) >= 599 ? 0 : 60;
+  const ship  = 0;
   const _vita = vitaCheckoutInfo(sub - disc);
   const vitaOff = _vita.rupees;
   const total = Math.max(0, sub - disc + ship - vitaOff);
@@ -8073,8 +8067,7 @@ function renderCheckoutSummary() {
     <hr style="border:none;border-top:1.5px solid var(--light-gray);margin:14px 0 10px">
     <div class="sum-row"><span>Subtotal</span><span>₹${sub.toLocaleString('en-IN')}</span></div>
     ${disc > 0 ? `<div class="sum-row" style="color:var(--success)"><span>🏷️ Discount</span><span>-₹${disc.toLocaleString('en-IN')}</span></div>` : ''}
-    <div class="sum-row"><span>Shipping${total_cod_note(ship)}</span><span>${ship === 0 ? '<span style="color:var(--success);font-weight:700">FREE</span>' : '₹' + ship}</span></div>
-    ${(sub - disc) < 599 ? `<div style="font-size:.72rem;color:var(--gray);margin:2px 0 4px;padding:6px 10px;background:#FFF8E1;border-radius:6px;border-left:1px solid var(--seal)">💡 Add ₹${(599 - (sub - disc)).toLocaleString('en-IN')} more for FREE shipping</div>` : ''}
+    <div class="sum-row"><span>Shipping</span><span>${ship === 0 ? '<span style="color:var(--success);font-weight:700">FREE</span>' : '₹' + ship}</span></div>
     ${vitaOff > 0 ? `<div class="sum-row" style="color:var(--fern-lo)"><span>💎 VitaPoints (${_vita.applied.toLocaleString('en-IN')})</span><span>-₹${vitaOff.toFixed(2)}</span></div>` : ''}
     <hr style="border:none;border-top:1px solid var(--light-gray);margin:8px 0">
     <div class="sum-row total"><span>Total</span><span style="color:var(--green);font-size:1.1rem">₹${total.toLocaleString('en-IN',{maximumFractionDigits:2})}</span></div>
@@ -8083,7 +8076,6 @@ function renderCheckoutSummary() {
   // Also re-render recommendations whenever summary updates
   renderCkRecommendations();
 }
-function total_cod_note(ship){ return ship > 0 ? ' <span style="font-size:.68rem;color:var(--gray)">(incl. ₹60 charge)</span>' : ''; }
 </script>
 
 
@@ -11116,12 +11108,7 @@ function renderCheckoutSummary() {
     disc = appliedDiscount.type==='percent' ? Math.round(sub*appliedDiscount.value/100) : appliedDiscount.value;
   }
 
-  // Must match the ₹599 free-shipping/COD threshold applied at actual
-  // order placement (initiatePayment/initiateCOD/startCOD) and
-  // server-side (computeServerSideTotal). Previously hardcoded to 0, so
-  // this on-page summary always showed FREE shipping and a lower Total
-  // than what got charged once the order was actually placed.
-  const ship = (sub - disc) >= 599 ? 0 : 60;
+  const ship = 0; // Free shipping online
   const _vita = vitaCheckoutInfo(sub - disc);
   const vitaOff = _vita.rupees;
   const total = Math.max(0, sub - disc + ship - vitaOff);
@@ -11146,8 +11133,7 @@ function renderCheckoutSummary() {
     <hr style="border:none;border-top:1px solid var(--light-gray);margin:12px 0">
     <div class="sum-row"><span>Subtotal</span><span>₹${sub.toLocaleString('en-IN')}</span></div>
     ${disc > 0 ? `<div class="sum-row" style="color:var(--success)"><span>🏷️ Discount</span><span>-₹${disc.toLocaleString('en-IN')}</span></div>` : ''}
-    <div class="sum-row"><span>Shipping${ship > 0 ? ' <span style="font-size:.68rem;color:var(--gray)">(incl. ₹60 charge)</span>' : ''}</span><span>${ship === 0 ? '<span style="color:var(--success);font-weight:700">FREE</span>' : '₹' + ship}</span></div>
-    ${(sub - disc) < 599 ? `<div style="font-size:.72rem;color:var(--gray);margin:2px 0 4px;padding:6px 10px;background:#FFF8E1;border-radius:6px;border-left:1px solid var(--seal)">💡 Add ₹${(599 - (sub - disc)).toLocaleString('en-IN')} more for FREE shipping</div>` : ''}
+    <div class="sum-row"><span>Shipping</span><span>${ship === 0 ? '<span style="color:var(--success);font-weight:700">FREE</span>' : '₹' + ship}</span></div>
     <hr style="border:none;border-top:1px solid var(--light-gray);margin:8px 0">
     ${vitaOff > 0 ? `<div class="sum-row" style="color:var(--fern-lo)"><span>💎 VitaPoints (${_vita.applied.toLocaleString('en-IN')})</span><span>-₹${vitaOff.toFixed(2)}</span></div>` : ''}
     <div class="sum-row total"><span>Total</span><span style="color:var(--green);font-size:1.1rem">₹${total.toLocaleString('en-IN',{maximumFractionDigits:2})}</span></div>
@@ -12117,13 +12103,23 @@ async function finalizeOrder(orderId, formData, total, method, codCharge) {
         const p = PRODUCTS.find(p => p.id === item.id);
         if (!p) return null;
         const price = item.tierRate !== undefined ? item.tierRate : (p.salePrice || p.price);
-        return {
+        const line = {
           id: p.id,
           name: p.name + (item.tierTabs ? ` (${item.tierTabs} tabs)` : ''),
           qty: item.qty,
           price: price,
           category: p.category || 'Other',
         };
+        // CRITICAL: the pack identity must travel with the line.
+        // The server re-prices every order from the products table and
+        // deliberately ignores the `price` above (a client could forge it).
+        // Without tierTabs/tierIdx it cannot tell WHICH pack was bought, so
+        // it fell back to the single-unit price — a 45-tab pack sold at
+        // ₹1,158 was recorded as ₹399, and the customer's order history
+        // and VitaPoints were both wrong as a result.
+        if (item.tierTabs != null) line.tierTabs = item.tierTabs;
+        if (item.tierIdx  != null) line.tierIdx  = item.tierIdx;
+        return line;
       }).filter(Boolean)),
     };
 
@@ -12701,13 +12697,14 @@ const VITA = {
   MAX_EARN_PER_ORDER:   5000,  // ceiling on points COLLECTED from one order
   MAX_REDEEM_PER_ORDER: 5000,  // ceiling on points SPENT on one order
   TIER_50_THRESHOLD: 15000,
-  TIER_50_CONSUMES: true,      // reaching the tier spends the 15,000 points
-  // Points are spendable immediately after order confirmation — no hold.
-  // The buy -> earn -> return -> keep-points fraud case this used to guard
-  // against is now handled by actually clawing points back when a return
-  // is approved / marked refunded (server-side vita_reverse), not by
-  // delaying every legitimate customer's balance for over a week.
-  HOLD_DAYS: 0
+  TIER_50_CONSUMES: true,      // claiming the reward spends the 15,000 points
+  MILESTONE_MAX_DISCOUNT: 100, // 50% of the LOWEST-priced item, capped at Rs100
+  MILESTONE_MIN_ORDER: 299,
+  // DECIDED: points are held until delivery + a 7-day return window.
+  // This value is display-only — the SERVER owns the hold entirely
+  // (vita_config.release_hold_days, applied by vita_mark_delivered ->
+  // vita_release_due). Nothing on the client can shorten or skip it.
+  HOLD_DAYS: 7
 };
 
 // Per-user namespacing. Two customers on one device must never see
@@ -12777,29 +12774,27 @@ async function vitaRefreshFromServer() {
   const jwt = localStorage.getItem('asc_jwt') || '';
   if (!jwt || typeof API_BASE === 'undefined') return false;
   try {
-    const [balRes, histRes] = await Promise.all([
-      fetchWithTimeout(API_BASE + '/api/vitapoints/balance', { headers: { 'Authorization': 'Bearer ' + jwt } }, 8000),
+    const [sumRes, histRes] = await Promise.all([
+      fetchWithTimeout(API_BASE + '/api/vitapoints/summary', { headers: { 'Authorization': 'Bearer ' + jwt } }, 8000),
       fetchWithTimeout(API_BASE + '/api/vitapoints/history', { headers: { 'Authorization': 'Bearer ' + jwt } }, 8000),
     ]);
-    if (!balRes.ok || !histRes.ok) return false;
-    const bal  = await balRes.json();
-    const hist = await histRes.json();
+    if (!sumRes.ok) return false;
+    const sum  = await sumRes.json();
+    const hist = histRes.ok ? await histRes.json() : { history: [] };
 
-    const st = getVitaState(); // keep the coupons count — that tier feature has no server side yet
-    st.balance = Number(bal.balance) || 0;
-    st.lifetime = Number(bal.lifetime) || 0;
-    // No more client-side hold — the server no longer puts anything on a
-    // pending timer either (see the hold removal), so there's nothing left
-    // to age into balance locally.
-    st.pending = [];
-    st.history = (hist.history || []).map(function(h) {
-      const typeMap = { earn_pending: 'earn', reverse: 'return', redeem: 'redeem', admin_adjust: 'adjust', tier_coupon: 'coupon' };
-      return {
-        t: h.created_at ? new Date(h.created_at).getTime() : Date.now(),
-        type: typeMap[h.type] || h.type,
-        pts: Number(h.points) || 0,
-        ref: h.order_id || h.reason || '',
-      };
+    const st = getVitaState();
+    // `balance` is AVAILABLE only — points still pending delivery are
+    // deliberately NOT spendable and are surfaced separately.
+    st.balance   = Number(sum.available) || 0;
+    st.pendingPts = Number(sum.pending) || 0;
+    st.locked    = Number(sum.locked) || 0;
+    st.debt      = Number(sum.debt) || 0;
+    st.lifetime  = Number(sum.lifetimeEarned) || 0;
+    st.milestoneReady = !!sum.milestoneReady;
+    st.pending   = []; // legacy client-side maturation is gone; server owns it
+    st.history   = (hist.history || []).map(function(h) {
+      return { t: h.at ? new Date(h.at).getTime() : Date.now(),
+               type: h.type, label: h.label, pts: Number(h.points) || 0, ref: h.orderId || '' };
     });
     const k = _vitaKey(u.email);
     if (k) {
@@ -13078,52 +13073,78 @@ async function renderVitaPanel() {
 
 function _renderVitaPanelBody(el) {
   const st = getVitaState();
-  const pct = Math.min(100, (st.balance / VITA.TIER_50_THRESHOLD) * 100);
-  const toGo = Math.max(0, VITA.TIER_50_THRESHOLD - st.balance);
+  const avail   = Number(st.balance) || 0;
+  const pendPts = Number(st.pendingPts) || 0;
+  const debt    = Number(st.debt) || 0;
+  const pct  = Math.min(100, (avail / VITA.TIER_50_THRESHOLD) * 100);
+  const toGo = Math.max(0, VITA.TIER_50_THRESHOLD - avail);
 
-  const rows = (st.history || []).slice(0, 12).map(function(h){
+  const rows = (st.history || []).slice(0, 15).map(function(h){
     const sign = h.pts > 0 ? '+' : '';
     const col  = h.pts > 0 ? 'var(--fern-lo)' : (h.pts < 0 ? 'var(--clay-lo)' : 'var(--t-mid)');
-    const lbl  = h.type === 'earn' ? 'Earned on order' :
-                 h.type === 'redeem' ? 'Redeemed on order' :
-                 h.type === 'tier' ? 'Converted to coupon' : 'Coupon used';
+    const lbl  = h.label || h.type || 'Activity';
     const d = new Date(h.t).toLocaleDateString('en-IN',{day:'2-digit',month:'short',year:'numeric'});
     return '<tr><td style="padding:9px 12px;font-size:.8rem">' + d + '</td>' +
            '<td style="padding:9px 12px;font-size:.8rem">' + lbl + '</td>' +
-           '<td style="padding:9px 12px;font-size:.75rem;color:var(--t-low)">' + (h.ref||'—') + '</td>' +
+           '<td style="padding:9px 12px;font-size:.75rem;color:var(--t-low)">' + (h.ref||'\u2014') + '</td>' +
            '<td style="padding:9px 12px;text-align:right;font-weight:800;color:' + col + '">' +
-             (h.pts ? sign + h.pts.toLocaleString('en-IN') : '—') + '</td></tr>';
-  }).join('') || '<tr><td colspan="4" style="padding:22px;text-align:center;color:var(--gray);font-size:.85rem">No VitaPoints activity yet — your first order starts the collection.</td></tr>';
+             (h.pts ? sign + h.pts.toLocaleString('en-IN') : '\u2014') + '</td></tr>';
+  }).join('') || '<tr><td colspan="4" style="padding:22px;text-align:center;color:var(--gray);font-size:.85rem">No VitaPoints activity yet \u2014 your first order starts the collection.</td></tr>';
+
+  // Pending points are the single most likely support question now that
+  // the hold is live, so explain them inline rather than hiding them.
+  const pendingBlock = pendPts > 0
+    ? '<div style="margin:14px 0;padding:13px 16px;background:var(--face-warm);border:1px solid var(--line);border-radius:12px">' +
+        '<div style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap">' +
+          '<div><b style="font-size:1.05rem">' + pendPts.toLocaleString('en-IN') + ' VitaPoints on the way</b>' +
+          '<div style="font-size:.8rem;color:var(--t-mid);margin-top:2px">These unlock once your order is delivered and the 7-day return window closes.</div></div>' +
+          '<button class="btn-ghost" style="font-size:.78rem" onclick="vitaShowPending()">See details</button>' +
+        '</div><div id="vitaPendingList"></div>' +
+      '</div>'
+    : '';
+
+  const debtBlock = debt > 0
+    ? '<div style="margin:14px 0;padding:13px 16px;background:#fff6f4;border:1px solid #f0cfc6;border-radius:12px">' +
+        '<b style="font-size:.92rem">' + debt.toLocaleString('en-IN') + ' points to settle</b>' +
+        '<div style="font-size:.8rem;color:var(--t-mid);margin-top:3px">A returned order had already earned points you\u2019d spent. ' +
+        'This is settled automatically from points on your next orders \u2014 nothing to pay.</div>' +
+      '</div>'
+    : '';
+
+  const milestoneNote = toGo === 0
+    ? '\ud83c\udf89 Reward ready \u2014 50% off your lowest-priced item, up to \u20b9100.'
+    : 'Collect ' + toGo.toLocaleString('en-IN') + ' more VitaPoints to unlock 50% off your lowest-priced item (up to \u20b9100).';
 
   el.innerHTML =
     '<div class="vita-hero">' +
       '<div class="vita-bal">' +
-        '<div class="vita-bal-num" id="vitaBalNum">' + st.balance.toLocaleString('en-IN') + '</div>' +
+        '<div class="vita-bal-num" id="vitaBalNum">' + avail.toLocaleString('en-IN') + '</div>' +
         '<div class="vita-bal-lbl">VitaPoints available</div>' +
-        '<div class="vita-bal-val">= ₹' + vitaToRupees(st.balance).toFixed(2) + ' off your next order</div>' +
+        '<div class="vita-bal-val">= \u20b9' + vitaToRupees(avail).toFixed(2) + ' off your next order</div>' +
       '</div>' +
       '<div class="vita-stats">' +
-        '<div><b>' + st.lifetime.toLocaleString('en-IN') + '</b><span>Lifetime collected</span></div>' +
-        '<div><b>' + st.coupons + '</b><span>50% coupons</span></div>' +
+        '<div><b>' + pendPts.toLocaleString('en-IN') + '</b><span>Pending</span></div>' +
+        '<div><b>' + (Number(st.lifetime)||0).toLocaleString('en-IN') + '</b><span>Lifetime collected</span></div>' +
         '<div><b>' + VITA.MAX_REDEEM_PER_ORDER.toLocaleString('en-IN') + '</b><span>Max per order</span></div>' +
       '</div>' +
     '</div>' +
+    pendingBlock + debtBlock +
     '<div class="vita-prog-wrap">' +
-      '<div class="vita-prog-top"><span>Progress to your 50% OFF coupon</span>' +
-        '<span>' + st.balance.toLocaleString('en-IN') + ' / ' + VITA.TIER_50_THRESHOLD.toLocaleString('en-IN') + '</span></div>' +
+      '<div class="vita-prog-top"><span>Progress to your 50% OFF reward</span>' +
+        '<span>' + avail.toLocaleString('en-IN') + ' / ' + VITA.TIER_50_THRESHOLD.toLocaleString('en-IN') + '</span></div>' +
       '<div class="vita-prog"><i style="width:' + pct.toFixed(1) + '%"></i></div>' +
-      '<div class="vita-prog-note">' + (toGo === 0
-        ? '🎉 Coupon ready — 50% off any product, calculated on MRP.'
-        : 'Collect ' + toGo.toLocaleString('en-IN') + ' more VitaPoints to unlock 50% off any product (on MRP).') + '</div>' +
+      '<div class="vita-prog-note">' + milestoneNote + '</div>' +
+      (st.milestoneReady ? '<button class="btn" style="margin-top:10px" onclick="vitaClaimMilestone(this)">Claim my 50% OFF reward</button>' : '') +
     '</div>' +
     '<div class="vita-rules">' +
       '<h4>How VitaPoints work</h4>' +
       '<ul>' +
-        '<li>Earn <b>1 VitaPoint for every ₹1</b> you spend — a ₹1,500 order gives you 1,500 points.</li>' +
-        '<li><b>150 VitaPoints = ₹1.</b> So 1,500 points are worth ₹10 off your next order.</li>' +
-        '<li>You can use up to <b>' + VITA.MAX_REDEEM_PER_ORDER.toLocaleString('en-IN') + ' VitaPoints on one order</b> (₹' + vitaToRupees(VITA.MAX_REDEEM_PER_ORDER).toFixed(2) + ').</li>' +
-        '<li>Points you redeem are deducted from your balance straight away.</li>' +
-        '<li>Reach <b>' + VITA.TIER_50_THRESHOLD.toLocaleString('en-IN') + ' points</b> and they convert into a <b>50% OFF coupon</b>, calculated on the product MRP — not the discounted price.</li>' +
+        '<li>Earn <b>1 VitaPoint for every \u20b91</b> you spend \u2014 a \u20b91,500 order gives you 1,500 points.</li>' +
+        '<li>Points are held while your order is on its way. They become spendable <b>7 days after delivery</b>, once the return window closes.</li>' +
+        '<li><b>150 VitaPoints = \u20b91.</b> So 1,500 points are worth \u20b910 off a future order.</li>' +
+        '<li>You can use up to <b>' + VITA.MAX_REDEEM_PER_ORDER.toLocaleString('en-IN') + ' VitaPoints on one order</b> (\u20b9' + vitaToRupees(VITA.MAX_REDEEM_PER_ORDER).toFixed(2) + ').</li>' +
+        '<li>If you return an order, the points it earned are reversed.</li>' +
+        '<li>Reach <b>' + VITA.TIER_50_THRESHOLD.toLocaleString('en-IN') + ' available points</b> to unlock <b>50% off your lowest-priced item, up to \u20b9100</b> (minimum cart \u20b9299).</li>' +
       '</ul>' +
     '</div>' +
     '<div class="vita-hist"><h4>Activity</h4>' +
@@ -13134,6 +13155,49 @@ function _renderVitaPanelBody(el) {
         '<th style="padding:9px 12px;text-align:left;font-size:.68rem;letter-spacing:.1em;text-transform:uppercase;color:var(--t-low)">Reference</th>' +
         '<th style="padding:9px 12px;text-align:right;font-size:.68rem;letter-spacing:.1em;text-transform:uppercase;color:var(--t-low)">Points</th>' +
         '</tr></thead><tbody>' + rows + '</tbody></table></div>';
+}
+
+// Expands the per-order breakdown of pending points.
+async function vitaShowPending() {
+  const host = document.getElementById('vitaPendingList');
+  if (!host) return;
+  if (host.dataset.open === '1') { host.innerHTML = ''; host.dataset.open = '0'; return; }
+  host.dataset.open = '1';
+  host.innerHTML = '<div style="font-size:.8rem;color:var(--t-mid);padding:8px 0">Loading\u2026</div>';
+  try {
+    const jwt = localStorage.getItem('asc_jwt') || '';
+    const r = await fetchWithTimeout(API_BASE + '/api/vitapoints/pending',
+      { headers: { 'Authorization': 'Bearer ' + jwt } }, 8000);
+    const d = await r.json();
+    host.innerHTML = (d.pending || []).map(function(p){
+      const when = p.availableOn
+        ? new Date(p.availableOn).toLocaleDateString('en-IN',{day:'2-digit',month:'short',year:'numeric'})
+        : null;
+      return '<div style="display:flex;justify-content:space-between;gap:10px;padding:8px 0;border-top:1px solid var(--line);font-size:.82rem">' +
+             '<div><b>' + (p.orderId||'') + '</b><div style="color:var(--t-mid);font-size:.76rem">' +
+             p.status + (when ? ' \u2014 available ' + when : '') + '</div></div>' +
+             '<div style="font-weight:800;white-space:nowrap">+' + (p.points||0).toLocaleString('en-IN') + '</div></div>';
+    }).join('') || '<div style="font-size:.8rem;color:var(--t-mid);padding:8px 0">Nothing pending.</div>';
+  } catch (e) {
+    host.innerHTML = '<div style="font-size:.8rem;color:var(--t-mid);padding:8px 0">Could not load right now.</div>';
+  }
+}
+
+async function vitaClaimMilestone(btn) {
+  if (btn) { btn.disabled = true; btn.textContent = 'Claiming\u2026'; }
+  try {
+    const jwt = localStorage.getItem('asc_jwt') || '';
+    const r = await fetchWithTimeout(API_BASE + '/api/vitapoints/milestone/claim',
+      { method: 'POST', headers: { 'Authorization': 'Bearer ' + jwt } }, 12000);
+    const d = await r.json();
+    if (!r.ok) throw new Error(d.error || 'Could not claim');
+    showToast('\ud83c\udf89 Reward unlocked \u2014 code ' + d.code);
+    await vitaRefreshFromServer();
+    renderVitaPanel();
+  } catch (e) {
+    showToast('\u26a0\ufe0f ' + e.message);
+    if (btn) { btn.disabled = false; btn.textContent = 'Claim my 50% OFF reward'; }
+  }
 }
 
 function getCurrentUser() {
@@ -14339,32 +14403,14 @@ function buildInvoiceHTML(order) {
   const intra      = buyerState ? (buyerCode === L.stateCode) : true;
 
   if (!o.items.length) o.items = [{ name:'Order '+o.orderId, hsn:ASCOFIZZ_LEGAL.hsnDefault, qty:1, rate:o.total, gross:o.total }];
+  const gross    = o.items.reduce(function(t,i){ return t + i.gross; }, 0) || o.total;
   const rate     = L.gstRate;
-  const mrpGross = o.items.reduce(function(t,i){ return t + i.gross; }, 0) || o.total;
-  const grand    = o.total || (mrpGross + o.ship - o.discount);
-
-  // RECONCILE LINE ITEMS WITH THE ACTUAL AMOUNT CHARGED.
-  // `mrpGross` is qty × the item's listed sale price — it knows nothing
-  // about coupon or VitaPoints discounts applied at checkout. `grand`
-  // (o.total) IS the real, post-discount amount the customer paid. These
-  // two used to be computed completely independently, so a ₹2,077 cart
-  // that was actually paid for at ₹650 after a discount printed line
-  // Amount/Taxable/Tax figures based on ₹2,077 while Grand Total below
-  // correctly showed ₹650 — the invoice didn't add up ("before order"
-  // vs "after order" totals mismatch). Scale every line proportionally
-  // to the real amount charged for goods (grand minus shipping) so
-  // Taxable + Tax + Shipping always equals Grand Total.
-  const netGoods = Math.max(0, grand - (o.ship || 0));
-  const scale    = mrpGross > 0 ? netGoods / mrpGross : 1;
-  o.items = o.items.map(function(i){
-    return { name:i.name, hsn:i.hsn, qty:i.qty, rate:i.rate, gross:i.gross*scale, estimated:i.estimated };
-  });
-  const gross    = netGoods;
   const taxable  = gross / (1 + rate/100);
   const taxTotal = gross - taxable;
   const cgst = intra ? taxTotal/2 : 0;
   const sgst = intra ? taxTotal/2 : 0;
   const igst = intra ? 0 : taxTotal;
+  const grand = o.total || (gross + o.ship - o.discount);
   const money = function(n){ return '₹' + Number(n||0).toLocaleString('en-IN',{minimumFractionDigits:2,maximumFractionDigits:2}); };
 
   const rows = o.items.map(function(i, n){
