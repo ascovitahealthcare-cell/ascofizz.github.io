@@ -3744,11 +3744,11 @@ img[src=""], img[data-awaiting-upload] { visibility: hidden; width: 100%; }
 .trust-item-dot { width: 5px; height: 5px; border-radius: 50%; background: var(--indigo); flex: none; }
 
 /* ══ CATEGORY TILES ══════════════════════════════════════════════ */
-.cat-grid-new, .cat-grid-marketing { display: grid; gap: 12px; grid-template-columns: repeat(auto-fill, minmax(124px, 1fr)); }
+.cat-grid-new, .cat-grid-marketing { display: grid; gap: 11px; grid-template-columns: repeat(auto-fill, minmax(112px, 1fr)); }
 .cat-card-sm, .cat-card {
   position: relative; overflow: hidden;
-  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px;
-  padding: 17px 10px; border-radius: var(--r-lg); text-align: center; cursor: pointer;
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 7px;
+  padding: 15px 9px; border-radius: var(--r-lg); text-align: center; cursor: pointer;
   background: var(--paper); box-shadow: var(--neo-1); border: none;
   transform-style: preserve-3d;
   transition: transform var(--dur-3) var(--rise), box-shadow var(--dur-3) var(--rise);
@@ -3761,8 +3761,8 @@ img[src=""], img[data-awaiting-upload] { visibility: hidden; width: 100%; }
 .cat-card-sm:active, .cat-card:active { transform: none; box-shadow: var(--neo-in); }
 .ci, .cat-icon {
   position: relative; z-index: 1;
-  display: grid; place-items: center; width: 42px; height: 42px;
-  border-radius: 50%; font-size: 1.15rem;
+  display: grid; place-items: center; width: 38px; height: 38px;
+  border-radius: 50%; font-size: 1.04rem;
   background: var(--paper); box-shadow: var(--neo-in);
   transition: transform var(--dur-3) var(--fizz), box-shadow var(--dur-3) var(--fizz);
 }
@@ -3770,13 +3770,13 @@ img[src=""], img[data-awaiting-upload] { visibility: hidden; width: 100%; }
   transform: translateZ(20px) scale(1.06);
   box-shadow: var(--neo-in), 0 0 0 3px color-mix(in srgb, var(--card-flavour, var(--indigo)) 30%, transparent);
 }
-.ci svg, .cat-icon svg { width: 21px; height: 21px; color: var(--indigo); }
+.ci svg, .cat-icon svg { width: 19px; height: 19px; color: var(--indigo); }
 .cn, .cat-name {
   position: relative; z-index: 1;
-  font-family: var(--font-display); font-size: .82rem; font-weight: 500;
+  font-family: var(--font-display); font-size: .74rem; font-weight: 500;
   letter-spacing: -.01em; color: var(--ink); line-height: 1.3;
 }
-.cat-count { font-size: .66rem; color: var(--t-dim); }
+.cat-count { font-size: .6rem; color: var(--t-dim); }
 
 /* ══ MIX & MATCH ═════════════════════════════════════════════════ */
 .mix-match-banner {
@@ -5361,10 +5361,17 @@ textarea.b2b-form-input { min-height: 110px; resize: vertical; font-family: inhe
   .btn-wishlist { width: 34px; height: 34px; }
   .btn-qadd { padding: 9px; font-size: .74rem; }
 
-  .cat-grid-new, .cat-grid-marketing { grid-template-columns: repeat(3, 1fr); gap: 9px; }
-  .cat-card-sm, .cat-card { padding: 14px 8px; }
-  .ci, .cat-icon { width: 38px; height: 38px; font-size: 1.05rem; }
-  .ci svg, .cat-icon svg { width: 19px; height: 19px; }
+  /* ~50% smaller cards on phones. Height is driven by padding + icon +
+     label, so all three shrink together; the 3-column layout is kept
+     because 4 columns makes labels like "Ayurvedic Wellness" wrap badly.
+     Type shrinks less than the box on purpose — halving .74rem would land
+     near 6px and be unreadable. */
+  .cat-grid-new, .cat-grid-marketing { grid-template-columns: repeat(3, 1fr); gap: 7px; }
+  .cat-card-sm, .cat-card { padding: 5px 4px; gap: 3px; border-radius: var(--r-md); }
+  .ci, .cat-icon { width: 18px; height: 18px; font-size: .65rem; }
+  .ci svg, .cat-icon svg { width: 10px; height: 10px; }
+  .cn, .cat-name { font-size: .6rem; line-height: 1.2; }
+  .cat-count { font-size: .5rem; }
 
   .testi-grid, .influencer-grid { columns: 1; }
   .ig-card, .ig-skeleton { flex: 0 0 calc((100% - 14px) / 2); min-height: 148px; }
