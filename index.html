@@ -9038,10 +9038,11 @@ function updateSaleUIVisibility() {
 // Live coupon validation against backend (used in applyPromoCode below)
 async function validateCouponWithBackend(code, subtotal) {
   try {
+    const u = (typeof getCurrentUser === 'function') ? getCurrentUser() : null;
     const r = await fetchWithTimeout(`${API_BASE}/api/coupons/validate`, {
       method: 'POST',
       headers: {'Content-Type':'application/json'},
-      body: JSON.stringify({code, subtotal})
+      body: JSON.stringify({code, subtotal, email: u?.email || null})
     }, 5000);
     if (!r.ok) return null;
     const d = await r.json();
@@ -10837,17 +10838,29 @@ async function submitReview() {
   if (btn) { btn.disabled = true; btn.textContent = 'Submitting…'; }
 
   try {
-    // Persist straight to Supabase (SQL) — no Render backend in the
-    // loop, so no cold-start timeout to worry about.
-    const sb = sbClient(); if (!sb) throw new Error('Reviews are offline right now. Please try again in a moment.');
-    const { error } = await sb.from('reviews').insert({
-      product_id: currentProduct.id,
-      product_name: currentProduct.name || '',
-      user_name: name,
-      rating: selectedRating,
-      review_text: text
+    // Submits through the backend now, not a direct Supabase insert.
+    // The RLS policy that used to allow anonymous inserts (no purchase
+    // check, and it didn't even restrict the verified/status columns —
+    // anyone could mark their own review "verified") has been removed.
+    // The backend checks this customer actually has an order containing
+    // the product before the review is created at all.
+    const jwt = localStorage.getItem('asc_jwt') || '';
+    if (!jwt) { openAuth('login'); if (btn) { btn.disabled = false; btn.textContent = 'Submit Review 🌱'; } return; }
+
+    const resp = await fetch(API_BASE + '/api/reviews', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + jwt },
+      body: JSON.stringify({
+        product_id: currentProduct.id,
+        product_name: currentProduct.name || '',
+        user_name: name,
+        rating: selectedRating,
+        review_text: text,
+      }),
+      signal: AbortSignal.timeout(20000),
     });
-    if (error) throw error;
+    const result = await resp.json();
+    if (!resp.ok) throw new Error(result.error || 'Could not submit review');
 
     // Re-fetch the authoritative list from Supabase rather than
     // trusting our own optimistic copy — guarantees what's shown
@@ -10859,9 +10872,8 @@ async function submitReview() {
     selectedRating = 0;
     switchTab(document.querySelectorAll('.tab')[2], 'rvs');
   } catch (e) {
-    console.error('[submitReview] Supabase error:', JSON.stringify(e, Object.getOwnPropertyNames(e||{})), e);
-    const detail = e?.message || e?.error_description || e?.details || '';
-    showToast(detail ? `Couldn't submit review: ${detail}` : "Couldn't submit your review — please try again in a moment.", 'error');
+    console.error('[submitReview] error:', e);
+    showToast(e.message || "Couldn't submit your review — please try again in a moment.", 'error');
   } finally {
     if (btn) { btn.disabled = false; btn.textContent = 'Submit Review 🌱'; }
   }
