@@ -8446,17 +8446,22 @@ const INTEGRATIONS = [
     ]
   },
   {
-    id: 'razorpay', name: 'Razorpay (Backup PG)', icon: '💰', category: 'Payments',
-    desc: 'Alternative payment gateway — fallback for Cashfree',
-    docsUrl: 'https://razorpay.com/docs',
-    envVars: ['RAZORPAY_KEY_ID', 'RAZORPAY_KEY_SECRET'],
-    checkUrl: null,
+    // Replaced a stale Razorpay entry that described an integration which
+    // never existed in the backend — it listed RAZORPAY_* env vars and a
+    // PAYMENT_GATEWAY switch that no code reads. Cashfree is the real
+    // second gateway.
+    id: 'cashfree', name: 'Cashfree Payments', icon: '💰', category: 'Payments',
+    desc: 'Second payment gateway alongside GoKwik — UPI, cards, net banking, wallets',
+    docsUrl: 'https://docs.cashfree.com/reference/pg-new-apis-endpoint',
+    envVars: ['CASHFREE_APP_ID', 'CASHFREE_SECRET_KEY', 'CASHFREE_ENV'],
+    checkUrl: '/api/health/cashfree-env',
     checkAuth: false,
     setupSteps: [
-      'Sign up at razorpay.com',
-      'Complete KYC for live payments',
-      'Copy Key ID and Secret from Dashboard → API Keys',
-      'Set PAYMENT_GATEWAY=razorpay in env to switch from Cashfree'
+      'Sign up at cashfree.com and complete KYC',
+      'Dashboard → Developers → API Keys, copy App ID and Secret Key',
+      'Set CASHFREE_APP_ID, CASHFREE_SECRET_KEY, CASHFREE_ENV=PRODUCTION in Render',
+      'Add the webhook URL: <backend>/api/cashfree-webhook (Dashboard → Webhooks)',
+      'Run one sandbox transaction end-to-end before going live'
     ]
   },
   {
