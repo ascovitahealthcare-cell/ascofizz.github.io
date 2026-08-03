@@ -980,6 +980,79 @@ body.theme-glass .card:hover{box-shadow:0 10px 28px rgba(0,0,0,0.3), inset 0 1px
   border-color:var(--green);box-shadow:0 0 0 3px var(--green-glow,rgba(82,183,136,0.25));outline:none;
 }
 </style>
+
+<!-- ══════════════════════════════════════
+     AUDIT / DEBUGGER — scoped styles
+     Everything lives under .audit-console so it can never collide with
+     the Deluxe/Neomorphism/Liquid Glass theme rules above, regardless
+     of which theme is active (body.theme-*).
+     ══════════════════════════════════════ -->
+<style>
+.audit-console {
+  --ac-ink: #0A0C10; --ac-surface: #12151B; --ac-raised: #171B23; --ac-border: #232830;
+  --ac-text: #E4E7ED; --ac-dim: #838B99;
+  --ac-critical: #FF3B5C; --ac-high: #FF8C42; --ac-medium: #F5C518; --ac-low: #3E9CFF; --ac-info: #5B6472;
+  --ac-good: #2FD98B;
+  background: var(--ac-ink); color: var(--ac-text); border-radius: 14px; padding: 24px;
+  font-family: 'Inter', -apple-system, sans-serif;
+}
+.audit-console h3 { font-family: 'Space Grotesk', 'Inter', sans-serif; font-size: 15px; font-weight: 600; margin: 0; color: var(--ac-text); }
+.audit-console .ac-mono { font-family: 'IBM Plex Mono', ui-monospace, monospace; }
+.ac-pipeline { background: var(--ac-surface); border: 1px solid var(--ac-border); border-radius: 12px; padding: 16px 20px; margin-bottom: 18px; }
+.ac-pipeline-label { display: flex; align-items: center; gap: 8px; font-size: 12px; color: var(--ac-dim); margin-bottom: 12px; font-family: 'IBM Plex Mono', monospace; }
+.ac-dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; box-shadow: 0 0 8px currentColor; }
+.ac-dot-monitor { background: var(--ac-good); color: var(--ac-good); }
+.ac-dot-detect, .ac-dot-recommend { background: var(--ac-high); color: var(--ac-high); }
+.ac-dot-approve { background: var(--ac-medium); color: var(--ac-medium); }
+.ac-steps { display: flex; align-items: center; flex-wrap: wrap; gap: 0; font-family: 'Space Grotesk', sans-serif; }
+.ac-step { font-size: 11px; letter-spacing: .04em; padding: 6px 10px; border-radius: 6px; color: var(--ac-dim); background: transparent; border: 1px solid transparent; white-space: nowrap; }
+.ac-step.active { color: var(--ac-ink); background: var(--ac-good); font-weight: 700; }
+.ac-arrow { color: var(--ac-border); font-size: 12px; padding: 0 2px; }
+.ac-actions { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin-bottom: 20px; }
+.ac-btn { background: var(--ac-raised); border: 1px solid var(--ac-border); color: var(--ac-text); padding: 8px 14px; border-radius: 8px; font-size: 13px; cursor: pointer; font-family: inherit; }
+.ac-btn:hover { border-color: #37404f; }
+.ac-btn-primary { background: #3054e0; border-color: #3054e0; font-weight: 600; }
+.ac-btn-ghost { background: transparent; }
+.ac-conn { margin-left: auto; font-size: 11px; color: var(--ac-dim); font-family: 'IBM Plex Mono', monospace; }
+.ac-severity-row { display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px; margin-bottom: 20px; }
+.ac-sev-tile { background: var(--ac-surface); border: 1px solid var(--ac-border); border-radius: 10px; padding: 14px; border-left: 3px solid var(--sev-color); }
+.ac-sev-tile .ac-sev-label { font-size: 11px; text-transform: uppercase; letter-spacing: .05em; color: var(--ac-dim); }
+.ac-sev-tile .ac-sev-value { font-family: 'IBM Plex Mono', monospace; font-size: 30px; font-weight: 700; margin-top: 4px; color: var(--sev-color); }
+.ac-sev-tile .ac-sev-check { font-size: 11px; color: var(--ac-good); margin-top: 4px; }
+.ac-panel { background: var(--ac-surface); border: 1px solid var(--ac-border); border-radius: 12px; padding: 18px 20px; margin-bottom: 18px; }
+.ac-panel-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; flex-wrap: wrap; gap: 8px; }
+.ac-subhead { font-size: 12px; color: var(--ac-dim); }
+.ac-filter-group { display: flex; gap: 4px; background: var(--ac-ink); border: 1px solid var(--ac-border); border-radius: 8px; padding: 3px; }
+.ac-filter-btn { background: transparent; border: none; color: var(--ac-dim); padding: 5px 12px; border-radius: 6px; font-size: 12px; cursor: pointer; font-family: inherit; }
+.ac-filter-btn.active { background: var(--ac-raised); color: var(--ac-text); }
+.ac-categories { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 12px; }
+.ac-cat { background: var(--ac-raised); border-radius: 8px; padding: 12px 14px; }
+.ac-cat-head { display: flex; justify-content: space-between; font-size: 12px; margin-bottom: 8px; }
+.ac-cat-name { color: var(--ac-dim); text-transform: uppercase; letter-spacing: .03em; }
+.ac-cat-score { font-family: 'IBM Plex Mono', monospace; font-weight: 700; }
+.ac-cat-bar-track { height: 6px; background: var(--ac-ink); border-radius: 3px; overflow: hidden; }
+.ac-cat-bar-fill { height: 100%; border-radius: 3px; }
+.ac-repo-block { margin-bottom: 16px; }
+.ac-repo-title { font-family: 'IBM Plex Mono', monospace; font-size: 13px; color: var(--ac-text); font-weight: 600; margin-bottom: 8px; display: flex; align-items: center; gap: 8px; }
+.ac-repo-count { font-size: 11px; color: var(--ac-dim); font-weight: 400; }
+.ac-file-block { border-left: 2px solid var(--ac-border); margin-left: 6px; padding-left: 14px; margin-bottom: 10px; }
+.ac-file-name { font-family: 'IBM Plex Mono', monospace; font-size: 12px; color: var(--ac-dim); margin-bottom: 6px; }
+.ac-finding-row { display: flex; gap: 8px; align-items: flex-start; padding: 6px 0; border-top: 1px solid rgba(255,255,255,0.04); font-size: 13px; }
+.ac-finding-row:first-child { border-top: none; }
+.ac-finding-title { color: var(--ac-text); }
+.ac-finding-fix { color: var(--ac-dim); font-size: 12px; margin-top: 2px; }
+.ac-chip { display: inline-block; padding: 2px 8px; border-radius: 5px; font-size: 10px; font-weight: 700; letter-spacing: .03em; flex-shrink: 0; margin-top: 2px; }
+.ac-chip-CRITICAL { background: var(--ac-critical); color: #fff; }
+.ac-chip-HIGH { background: var(--ac-high); color: #1a1000; }
+.ac-chip-MEDIUM { background: var(--ac-medium); color: #1a1000; }
+.ac-chip-LOW { background: var(--ac-low); color: #fff; }
+.ac-chip-INFO { background: var(--ac-info); color: #fff; }
+.ac-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+.ac-table th { text-align: left; color: var(--ac-dim); font-size: 11px; text-transform: uppercase; letter-spacing: .03em; padding: 6px 8px; border-bottom: 1px solid var(--ac-border); }
+.ac-table td { padding: 8px; border-bottom: 1px solid rgba(255,255,255,0.04); font-family: 'IBM Plex Mono', monospace; }
+.ac-empty { color: var(--ac-dim); font-size: 13px; padding: 16px 0; text-align: center; }
+@media (max-width: 700px) { .ac-severity-row { grid-template-columns: repeat(2, 1fr); } }
+</style>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
 </head>
 <body>
@@ -1141,6 +1214,7 @@ body.theme-glass .card:hover{box-shadow:0 10px 28px rgba(0,0,0,0.3), inset 0 1px
     <div class="nav-item" onclick="showPage('integrations')"><span class="nav-ico">🔗</span> Integrations</div>
     <div class="nav-item" onclick="showPage('geoanalytics')"><span class="nav-ico">🌏</span> Geo Analytics <span class="nav-new"></span></div>
     <div class="nav-item" onclick="showPage('performance')"><span class="nav-ico">⚡</span> Performance <span class="nav-new"></span></div>
+    <div class="nav-item" onclick="showPage('auditdebugger')"><span class="nav-ico">🛡️</span> Audit / Debugger</div>
     <div class="nav-item" onclick="showPage('settings')"><span class="nav-ico">⚙️</span> Settings</div>
   </div>
 </nav>
@@ -2838,6 +2912,74 @@ body.theme-glass .card:hover{box-shadow:0 10px 28px rgba(0,0,0,0.3), inset 0 1px
     <div class="card" style="text-align:center;padding:20px 12px;">
       <canvas id="perfRing3" style="width:90px;height:90px;display:inline-block;"></canvas>
       <div style="font-size:0.72rem;color:var(--text3);margin-top:6px;">Stock Health</div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════
+     AUDIT / DEBUGGER
+     Calls the standalone audit-system service (its own repo/Supabase/
+     Render — see /areas/ascovita-backend.md) at auditdebuging.onrender.com,
+     authenticated with this panel's own admin/owner JWT (the `authToken`
+     variable declared earlier in this file) — no second login.
+     ══════════════════════════════════════ -->
+<div class="page" id="page-auditdebugger">
+  <div class="page-hdr">
+    <div><div class="page-title">Audit / Debugger</div><div class="page-sub">Automated security, code, database and payment audit system</div></div>
+  </div>
+
+  <div class="audit-console">
+    <div class="ac-pipeline" id="acPipeline">
+      <div class="ac-pipeline-label">
+        <span id="acPipelineDot" class="ac-dot ac-dot-monitor"></span>
+        <span id="acPipelineDetail">Loading pipeline status…</span>
+      </div>
+      <div class="ac-steps" id="acSteps"></div>
+    </div>
+
+    <div class="ac-actions">
+      <button class="ac-btn ac-btn-primary" onclick="auditRun('full')">Run Full Audit Now</button>
+      <button class="ac-btn" onclick="auditRun('security')">Security</button>
+      <button class="ac-btn" onclick="auditRun('repository')">Repository / Code</button>
+      <button class="ac-btn" onclick="auditRun('database')">Database / RLS</button>
+      <button class="ac-btn" onclick="auditRun('payment')">Payment (staging)</button>
+      <button class="ac-btn ac-btn-ghost" onclick="auditRefresh()">↻ Refresh</button>
+      <span class="ac-conn" id="acConnStatus">connecting…</span>
+    </div>
+
+    <div class="ac-severity-row" id="acSeverityRow"></div>
+
+    <div class="ac-panel">
+      <div class="ac-panel-head">
+        <h3>Trend</h3>
+        <div class="ac-filter-group" id="acFilterGroup">
+          <button class="ac-filter-btn" data-days="1" onclick="auditSetRange(1)">Today</button>
+          <button class="ac-filter-btn active" data-days="7" onclick="auditSetRange(7)">7 Days</button>
+          <button class="ac-filter-btn" data-days="30" onclick="auditSetRange(30)">30 Days</button>
+        </div>
+      </div>
+      <div id="acTrendChart"></div>
+    </div>
+
+    <div class="ac-panel">
+      <div class="ac-panel-head"><h3>System Health by Category</h3></div>
+      <div class="ac-categories" id="acCategories"></div>
+    </div>
+
+    <div class="ac-panel">
+      <div class="ac-panel-head">
+        <h3>What Needs Improvement</h3>
+        <span class="ac-subhead">Grouped by repository, then by file</span>
+      </div>
+      <div id="acRepoSummary"><div class="ac-empty">Loading…</div></div>
+    </div>
+
+    <div class="ac-panel">
+      <div class="ac-panel-head"><h3>Recent Runs</h3></div>
+      <table class="ac-table">
+        <thead><tr><th>Started</th><th>Type</th><th>Trigger</th><th>Status</th><th>Score</th></tr></thead>
+        <tbody id="acRunsBody"><tr><td colspan="5" class="ac-empty">No runs yet.</td></tr></tbody>
+      </table>
     </div>
   </div>
 </div>
@@ -9200,6 +9342,7 @@ showPage = function(name){
   <button class="admin-more-btn" onclick="showPage('integrations');syncAbn('integrations');closeAdminMoreMenu()"><span>🔗</span><span>Integrations</span></button>
   <button class="admin-more-btn" onclick="showPage('aiassistant');syncAbn('aiassistant');closeAdminMoreMenu()"><span>🤖</span><span>AI Assistant</span></button>
   <button class="admin-more-btn" id="moreAiTeam" onclick="showPage('aiteam');syncAbn('aiteam');closeAdminMoreMenu()" style="display:none"><span>🧠</span><span>AI Team</span></button>
+  <button class="admin-more-btn" onclick="showPage('auditdebugger');syncAbn('auditdebugger');closeAdminMoreMenu()"><span>🛡️</span><span>Audit / Debugger</span></button>
   <button class="admin-more-btn" onclick="showPage('settings');syncAbn('settings');closeAdminMoreMenu()"><span>⚙️</span><span>Settings</span></button>
 </div>
 
@@ -10110,6 +10253,215 @@ if (typeof _mktOrigShowPage === 'function') {
   window.showPage = function (name) {
     _mktOrigShowPage(name);
     if (name === 'marketing') mktShowTab('overview');
+  };
+}
+</script>
+
+<!-- ══════════════════════════════════════
+     AUDIT / DEBUGGER — logic
+     Calls the standalone audit-system service on Render. Uses this panel's
+     own `authToken` (declared earlier in this file, same admin/owner login
+     you already use for every other tab) — no second sign-in, no separate
+     dashboard key.
+     ══════════════════════════════════════ -->
+<script>
+const AUDIT_API_BASE = 'https://auditdebuging.onrender.com/api/audit';
+let acCurrentRange = 7;
+
+async function auditApi(path, options = {}) {
+  // Reuses this file's own `authToken` variable (set on login, same as
+  // every other admin API call in this panel).
+  const res = await fetch(`${AUDIT_API_BASE}${path}`, {
+    ...options,
+    headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${authToken}`, ...(options.headers || {}) },
+  });
+  if (!res.ok) {
+    const body = await res.json().catch(() => ({}));
+    throw new Error(body.error || `${res.status} ${res.statusText}`);
+  }
+  return res.json();
+}
+
+const AC_PIPELINE_STAGES = ['DETECT', 'PROVE', 'PRIORITIZE', 'RECOMMEND', 'TEST', 'APPROVE', 'FIX', 'VERIFY', 'MONITOR'];
+const AC_CATEGORY_LABELS = { security: 'Security', fraud: 'Fraud', code: 'Code', checkout: 'Checkout', database: 'Database', performance: 'Performance', ux: 'UX', seo: 'SEO' };
+const AC_SEVERITIES = ['CRITICAL', 'HIGH', 'MEDIUM', 'LOW', 'INFO'];
+const AC_SEV_COLOR = { CRITICAL: 'var(--ac-critical)', HIGH: 'var(--ac-high)', MEDIUM: 'var(--ac-medium)', LOW: 'var(--ac-low)', INFO: 'var(--ac-info)' };
+
+function acScoreColor(score) {
+  if (score >= 90) return 'var(--ac-good)';
+  if (score >= 70) return 'var(--ac-medium)';
+  return 'var(--ac-critical)';
+}
+function acScoreIcon(score) {
+  if (score >= 90) return '✓';
+  if (score >= 70) return '⚠';
+  return '✕';
+}
+
+function renderPipeline(stageData) {
+  const stage = (stageData && stageData.stage) || 'MONITOR';
+  const dotClass = stage === 'MONITOR' ? 'ac-dot-monitor' : (stage === 'APPROVE' ? 'ac-dot-approve' : 'ac-dot-detect');
+  document.getElementById('acPipelineDot').className = `ac-dot ${dotClass}`;
+  document.getElementById('acPipelineDetail').textContent = (stageData && stageData.detail) || 'Status unavailable';
+  document.getElementById('acSteps').innerHTML = AC_PIPELINE_STAGES.map((s, i) => `
+    <span class="ac-step ${s === stage ? 'active' : ''}">${s}</span>${i < AC_PIPELINE_STAGES.length - 1 ? '<span class="ac-arrow">→</span>' : ''}
+  `).join('');
+}
+
+function renderSeverityRow(findings) {
+  const counts = { CRITICAL: 0, HIGH: 0, MEDIUM: 0, LOW: 0, INFO: 0 };
+  findings.forEach(f => { counts[f.severity] = (counts[f.severity] || 0) + 1; });
+  document.getElementById('acSeverityRow').innerHTML = AC_SEVERITIES.map(sev => `
+    <div class="ac-sev-tile" style="--sev-color:${AC_SEV_COLOR[sev]}">
+      <div class="ac-sev-label">${sev}</div>
+      <div class="ac-sev-value">${counts[sev]}</div>
+      ${counts[sev] === 0 ? '<div class="ac-sev-check">✓ clear</div>' : ''}
+    </div>
+  `).join('');
+}
+
+function renderCategories(scores) {
+  const el = document.getElementById('acCategories');
+  if (!scores) { el.innerHTML = '<div class="ac-empty">No completed run yet.</div>'; return; }
+  el.innerHTML = Object.entries(AC_CATEGORY_LABELS).map(([key, label]) => {
+    const score = scores[key] ?? 100;
+    const color = acScoreColor(score);
+    return `
+      <div class="ac-cat">
+        <div class="ac-cat-head">
+          <span class="ac-cat-name">${label}</span>
+          <span class="ac-cat-score" style="color:${color}">${acScoreIcon(score)} ${score}</span>
+        </div>
+        <div class="ac-cat-bar-track"><div class="ac-cat-bar-fill" style="width:${score}%;background:${color}"></div></div>
+      </div>`;
+  }).join('');
+}
+
+/** Minimal inline SVG line chart — no external chart library needed. */
+function renderTrendChart(series) {
+  const el = document.getElementById('acTrendChart');
+  const points = series.filter(d => d.overall_health_score !== null);
+  if (points.length < 2) {
+    el.innerHTML = '<div class="ac-empty">Not enough completed runs yet in this range to draw a trend.</div>';
+    return;
+  }
+  const W = 640, H = 140, PAD = 20;
+  const xStep = (W - PAD * 2) / (points.length - 1);
+  const yFor = (v) => H - PAD - (v / 100) * (H - PAD * 2);
+  const path = points.map((p, i) => `${i === 0 ? 'M' : 'L'} ${PAD + i * xStep} ${yFor(p.overall_health_score)}`).join(' ');
+  const lastColor = acScoreColor(points[points.length - 1].overall_health_score);
+
+  const bars = series.map((d, i) => {
+    const total = AC_SEVERITIES.reduce((s, sev) => s + (d.new_findings[sev] || 0), 0);
+    const h = Math.min(total * 4, 24);
+    const x = PAD + i * ((W - PAD * 2) / (series.length - 1 || 1));
+    return total > 0 ? `<rect x="${x - 2}" y="${H - h}" width="4" height="${h}" fill="var(--ac-high)" opacity="0.5"><title>${d.date}: ${total} new finding(s)</title></rect>` : '';
+  }).join('');
+
+  el.innerHTML = `
+    <svg viewBox="0 0 ${W} ${H}" style="width:100%;height:150px;">
+      <line x1="${PAD}" y1="${yFor(90)}" x2="${W-PAD}" y2="${yFor(90)}" stroke="#232830" stroke-dasharray="3,3"/>
+      <line x1="${PAD}" y1="${yFor(70)}" x2="${W-PAD}" y2="${yFor(70)}" stroke="#232830" stroke-dasharray="3,3"/>
+      ${bars}
+      <path d="${path}" fill="none" stroke="${lastColor}" stroke-width="2"/>
+      ${points.map((p,i) => `<circle cx="${PAD + i*xStep}" cy="${yFor(p.overall_health_score)}" r="2.5" fill="${lastColor}"><title>${p.date}: ${p.overall_health_score}</title></circle>`).join('')}
+    </svg>
+    <div style="display:flex;justify-content:space-between;font-size:11px;color:var(--ac-dim);font-family:'IBM Plex Mono',monospace;margin-top:4px;">
+      <span>${series[0].date}</span><span>${series[series.length-1].date}</span>
+    </div>`;
+}
+
+function renderRepoSummary(repoGroups) {
+  const el = document.getElementById('acRepoSummary');
+  if (!repoGroups.length) { el.innerHTML = '<div class="ac-empty">No open findings 🎉 — nothing needs improvement right now.</div>'; return; }
+  el.innerHTML = repoGroups.map(r => `
+    <div class="ac-repo-block">
+      <div class="ac-repo-title">📦 ${r.repo} <span class="ac-repo-count">${r.findingCount} finding(s) across ${r.fileCount} file(s)</span></div>
+      ${r.files.map(f => `
+        <div class="ac-file-block">
+          <div class="ac-file-name">${f.file}</div>
+          ${f.findings.map(finding => `
+            <div class="ac-finding-row">
+              <span class="ac-chip ac-chip-${finding.severity}">${finding.severity}</span>
+              <div>
+                <div class="ac-finding-title">${finding.title}</div>
+                ${finding.recommended_fix ? `<div class="ac-finding-fix">Fix: ${finding.recommended_fix}</div>` : ''}
+              </div>
+            </div>
+          `).join('')}
+        </div>
+      `).join('')}
+    </div>
+  `).join('');
+}
+
+function renderRuns(runs) {
+  const body = document.getElementById('acRunsBody');
+  if (!runs.length) { body.innerHTML = '<tr><td colspan="5" class="ac-empty">No runs yet.</td></tr>'; return; }
+  body.innerHTML = runs.map(r => `
+    <tr>
+      <td>${new Date(r.started_at).toLocaleString()}</td>
+      <td>${r.run_type}</td>
+      <td>${r.trigger_source}</td>
+      <td>${r.status}</td>
+      <td style="color:${r.overall_health_score != null ? acScoreColor(r.overall_health_score) : 'inherit'}">${r.overall_health_score ?? '—'}</td>
+    </tr>`).join('');
+}
+
+async function auditSetRange(days) {
+  acCurrentRange = days;
+  document.querySelectorAll('#acFilterGroup .ac-filter-btn').forEach(b => b.classList.toggle('active', Number(b.dataset.days) === days));
+  try {
+    const trend = await auditApi(`/trends?days=${days}`);
+    renderTrendChart(trend.series);
+  } catch (err) {
+    document.getElementById('acTrendChart').innerHTML = `<div class="ac-empty">Could not load trend: ${err.message}</div>`;
+  }
+}
+
+async function auditRefresh() {
+  const statusEl = document.getElementById('acConnStatus');
+  if (!statusEl) return; // page not in DOM yet
+  statusEl.textContent = 'loading…';
+  try {
+    const [latest, findings, repoSummary, runs, pipeline] = await Promise.all([
+      auditApi('/health-scores/latest'),
+      auditApi('/findings?status=open'),
+      auditApi('/repo-summary'),
+      auditApi('/runs?limit=10'),
+      auditApi('/pipeline-status'),
+    ]);
+    renderPipeline(pipeline);
+    renderSeverityRow(findings);
+    renderCategories(latest.scores);
+    renderRepoSummary(repoSummary);
+    renderRuns(runs);
+    await auditSetRange(acCurrentRange);
+    statusEl.textContent = 'connected';
+  } catch (err) {
+    statusEl.textContent = `disconnected — ${err.message}`;
+    console.error(err);
+  }
+}
+
+async function auditRun(action) {
+  try {
+    const result = await auditApi(`/run/${action}`, { method: 'POST' });
+    await auditRefresh();
+    alert(`Audit complete — overall health ${result.overall}, ${result.newFindingCount} new finding(s).`);
+  } catch (err) {
+    alert(`Audit failed: ${err.message}`);
+  }
+}
+
+// Patch showPage (again — chains onto every previous patch above, same
+// pattern the marketing and bottom-nav features already use in this file)
+// so opening the Audit / Debugger tab loads live data automatically.
+const _auditOrigShowPage = window.showPage;
+if (typeof _auditOrigShowPage === 'function') {
+  window.showPage = function (name) {
+    _auditOrigShowPage(name);
+    if (name === 'auditdebugger') auditRefresh();
   };
 }
 </script>
