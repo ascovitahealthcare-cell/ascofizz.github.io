@@ -1,61 +1,145 @@
-# Site Images system — what this adds
+# Deploy + Re-Audit Results (2026-08-01)
 
-A new **"Site Images"** tab in admin, showing every fixed image on ascovita.com
-grouped by where it lives, with upload/replace/reset per image — plus a
-**Promo Carousel** manager so those 19 cards no longer require editing
-PROMO_MEDIA.js and pushing to GitHub.
+## ⚠️ Two manual steps — do these or things break
 
-## What's catalogued right now
+### 1. Add this Render environment variable
 
-| Group | Image | Where it shows |
+```
+DELHIVERY_WEBHOOK_SECRET = 9033086b8cc97f170f76c5b999ed3994fcf2209e94346d0c
+```
+
+### 2. Update the Delhivery dashboard webhook URL
+
+From `https://<your-render-url>/api/delhivery/webhook`
+to `https://<your-render-url>/api/delhivery/webhook/9033086b8cc97f170f76c5b999ed3994fcf2209e94346d0c`
+
+Until you do this, delivery statuses stop updating (fails closed, not open).
+
+### 3. Delete `email.js` from the backend repo
+
+It's dead code (renamed an env var nothing reads). Deleting it isn't
+optional cleanup — leaving it invites someone to "fix" the wrong file later.
+
+---
+
+## Files to deploy
+
+**Backend repo** (root level) — 7 files:
+`server.js` · `package.json` · `reviews-routes.js` · `returns-routes.js` ·
+`cashfree-routes.js` · `vitapoints-routes.js` · `site-media-routes.js`
+
+⚠️ **`package.json` matters this time** — it bumps `bcrypt` 5.1.1 → 6.0.0,
+which is what clears the critical dependency advisory. Render rebuilds
+native modules automatically on deploy.
+
+**Frontend repo** (root level) — 2 files: `index.html` · `admin.html`
+
+All SQL is already applied to Supabase. Nothing to run there.
+
+---
+
+## Re-audit results (run after every fix)
+
+| Check | Before | After |
 |---|---|---|
-| Global | Site Logo | Header + mobile menu drawer |
-| Home Page | Hero Slide 1 | Glutathione hero slide (desktop + mobile) |
-| Home Page | Hero Slide 2 | Spirulina Combo hero slide |
-| Home Page | Hero Slide 3 | Multidiata hero slide |
-| About Page | Hero Background | Faint texture behind About header |
-| About Page | Manufacturing Photo | Big photo in the About story section |
-| B2B Page | Hero Background | Faint texture behind B2B header |
-| Home Page | Promo Carousel (19 cards) | Scrolling promo strip |
+| npm vulnerabilities | 3 (1 critical, 2 high) | **0** ✅ |
+| Tables the public can write to | 3 | **0** ✅ |
+| Tables without RLS | 0 | **0** ✅ |
+| Backend files passing syntax check | 7/7 | **7/7** ✅ |
+| Frontend JS blocks passing | 32/32 | **32/32** ✅ |
 
-Product photos (Shop page, product cards, cart, checkout) already come from
-your Products table and are already editable via the existing Photo Library
-→ "Add to product" flow, so I left those alone. The logo inside the printable
-invoice template is still hard-coded — say the word if you want that wired
-up too.
+### 🔴 New critical issue found during the re-audit
 
-## Files
+`blog_posts` had a policy named **"Service can manage blog"** granted to
+**public** with `USING (true)` and command `ALL`. The name implied it was
+scoped to the service role — it was not. Anyone with the public anon key
+(which is necessarily in your frontend source) could insert, edit or
+delete any blog post: defacement, SEO spam injection, or wiping the blog.
 
-- **index.html** — every image above now has `data-media-key="..."` (or a
-  CSS variable for the two background textures). The current live image
-  stays hard-coded as the fallback, so if the backend is ever down the site
-  looks exactly like it does today — a script just asks the backend for
-  overrides on page load and swaps them in if present.
-- **admin.html** — new "Site Images" tab: a card per image with a live
-  preview and a text field to paste an **imgbb direct image link** (upload
-  the file to https://ascovita.imgbb.com/ yourself, same as PROMO_MEDIA.js
-  today, then paste the "Direct link" here), plus Reset-to-default. Below
-  it, a Promo Carousel grid — paste a link to add a card, and edit link /
-  reorder / activate / delete per card. Nothing is uploaded to your own
-  server or Supabase Storage for these two features — only the URL is
-  stored, exactly like your current PROMO_MEDIA.js workflow.
-- **backend/site-media-routes.js** — Express routes for both features,
-  written to match your existing patterns (Bearer auth, `apiFetch`, your
-  `/api/upload/image` endpoint for the actual file bytes).
-- **backend/supabase-site-media.sql** — the two new tables (`site_media`,
-  `promo_media`) with RLS: public read, writes only through your backend.
-- **PROMO_MEDIA.js** — unchanged, kept in the repo as an offline fallback.
-  The homepage now prefers whatever's in the `promo_media` table; if that
-  fetch fails it falls back to this file exactly like before.
+The first audit missed this because I checked `reviews` specifically and
+read the policy *names* elsewhere rather than their actual clauses. Fixed
+— policy dropped. The backend uses the service-role key, which bypasses
+RLS by design, so nothing legitimate needed it.
 
-## To go live
+This is exactly why the re-audit was worth doing.
 
-1. Run `backend/supabase-site-media.sql` once in the Supabase SQL editor.
-2. Add `backend/site-media-routes.js` to your Render backend repo and mount
-   it: `app.use('/api', require('./site-media-routes')(supabase, requireAdmin));`
-   — swap in your actual Supabase client and admin-auth middleware names.
-3. Deploy the backend, then push the updated `index.html` and `admin.html`.
+---
 
-Everything degrades gracefully — until step 2 is deployed, the site just
-keeps showing today's images and the new admin tab will show "using site
-default" for everything.
+## All 18 findings — final status
+
+| # | Finding | Status |
+|---|---|---|
+| 1 | Fake reviews via public RLS insert | ✅ Fixed |
+| 2 | No backend reviews route | ✅ Fixed |
+| 3 | Delhivery webhook unauthenticated | ✅ Fixed *(needs step 1+2)* |
+| 4 | No coupon max-discount cap | ✅ Fixed |
+| 5 | No per-customer coupon limit | ✅ Fixed |
+| 6 | No rate limiting on money routes | ✅ Fixed |
+| 7 | Cashfree untested live | ⚠️ **Still open — needs you** |
+| 8 | Shared admin creds, no token revocation | ✅ Fixed |
+| 9 | bcrypt critical advisory | ✅ Fixed |
+| 10 | No automated tests | ⚠️ **Still open** |
+| 11 | site-media-routes never mounted | ✅ Fixed |
+| 12 | No GoKwik/manual refund audit trail | ✅ Fixed |
+| 13 | No fraud velocity/IP tracking | ✅ Fixed |
+| 14 | No monitoring/alerting | ✅ Fixed |
+| 15 | email.js dead file | ✅ Fixed *(needs step 3)* |
+| 16 | Dead Razorpay reference | ✅ Fixed |
+| 17 | Coupon TOCTOU race | ✅ Fixed |
+| 18 | VitaPoints expiry unenforced | ✅ Fixed |
+| — | **blog_posts public write** *(new)* | ✅ Fixed |
+
+**16 of 18 closed. Two remain, and neither can be closed by writing code:**
+
+- **#7 Cashfree** — I have no network path to `api.cashfree.com` and no
+  sandbox credentials. Run one real sandbox transaction end-to-end.
+  Everything else in the payment chain is verified; this specific
+  integration is not.
+- **#10 Tests** — a real test suite is its own project. Every fix in this
+  batch was verified manually (syntax gates, live DB queries, live
+  VitaPoints transactions), but there's no regression suite to catch
+  future breakage.
+
+---
+
+## What's new that you should actually use
+
+**Revoke a leaked admin token instantly:**
+```
+POST /api/owner/revoke-tokens   { "identity": "admin" }
+```
+Owner-only. Every outstanding admin token stops working immediately.
+Previously a leaked token stayed valid for 30 days and rotating
+`ADMIN_PASSWORD` did nothing to it.
+
+**See fraud + payment alerts:**
+```
+GET  /api/admin/alerts?open=true
+PUT  /api/admin/alerts/:id/resolve
+GET  /api/admin/fraud/customer/:email
+```
+Velocity checks flag unusual patterns (many orders from one IP, several
+accounts sharing an IP, repeat COD refusals) — they **record and alert,
+never auto-block**. A false positive silently refusing a real customer is
+worse than one a human glances at.
+
+**Set coupon limits** (both default to unlimited, so nothing changed for
+existing coupons until you set them):
+- `coupons.max_discount` — rupee ceiling on percent coupons
+- `coupons.max_uses_per_customer` — real per-customer limit
+
+**Enable VitaPoints expiry** if you ever want it — it's now a config
+change, not a code change:
+```sql
+update vita_config set value = '12' where key = 'points_expiry_months';
+```
+
+---
+
+## After deploying — 4 quick checks
+
+1. Render logs show all mounts ✅, including `[mount] site-media-routes ✅`
+2. Old Delhivery URL returns **410**, not 200
+3. Admin login still works (token now carries a version claim)
+4. `GET /api/site-media` returns data instead of 404 — that endpoint has
+   been broken this whole time
