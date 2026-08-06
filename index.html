@@ -11465,33 +11465,140 @@ function bootApp() {
     } catch (e) { return null; }
   };
 
-  // 📡 Ping backend to register this visitor session (for Live Visitors in admin)
-  (function pingVisitor() {
-    try {
-      const page = document.title || window.location.pathname;
-      const device = /Mobi|Android/i.test(navigator.userAgent) ? '📱 Mobile' : '💻 Desktop';
-      const sessionId = sessionStorage.getItem('asc_sid') || (() => {
-        const id = Math.random().toString(36).slice(2, 10);
-        sessionStorage.setItem('asc_sid', id);
-        return id;
-      })();
-      const payload = { session_id: sessionId, page, device, ts: Date.now(), attribution: window._getAttribution() };
-      fetch(`${API_BASE}/api/visitors/ping`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload),
-        keepalive: true
-      }).catch(() => {}); // silently ignore if backend offline
-      // Re-ping every 4 minutes to keep session alive
-      setInterval(() => {
-        payload.ts = Date.now();
-        payload.page = document.title || window.location.pathname;
-        fetch(`${API_BASE}/api/visitors/ping`, {
-          method: 'POST', headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(payload), keepalive: true
-        }).catch(() => {});
-      }, 4 * 60 * 1000);
-    } catch(e) {}
+  // ═══════════════════════════════════════════════════════════════════
+  // 📡 VISITOR ANALYTICS CLIENT  (v2 — persistent)
+  // ═══════════════════════════════════════════════════════════════════
+  // What changed and why:
+  //  • The old ping sent {device, ts, attribution}. The server destructured
+  //    only {session_id, page, referrer, city} — so device and attribution
+  //    were thrown away, and because referrer was NEVER sent, every single
+  //    visitor was filed as "Direct" in the admin panel.
+  //  • It re-pinged every 4 minutes but the server dropped a session after
+  //    2 minutes, so visitors vanished for half of every visit and the
+  //    "Active Now" number was roughly half the real figure.
+  //  • Single-page navigation was invisible: the ping fired once on load,
+  //    so a shopper who browsed 8 pages counted as 1 pageview.
+  // This sends the full picture and re-pings inside the server's window.
+  window.AZAnalytics = (function () {
+    var API = (typeof API_BASE !== 'undefined') ? API_BASE : '';
+    var sid = (function () {
+      try {
+        var v = sessionStorage.getItem('asc_sid');
+        if (!v) { v = Date.now().toString(36) + Math.random().toString(36).slice(2, 10); sessionStorage.setItem('asc_sid', v); }
+        return v;
+      } catch (e) { return 'anon-' + Math.random().toString(36).slice(2, 10); }
+    })();
+
+    /* iPadOS 13+ reports itself as a Mac in the user-agent string. The
+       browser is the only place that can tell the difference (a Mac has no
+       touch points), so we send a hint the server trusts for that one case. */
+    function deviceHint() {
+      var ua = navigator.userAgent, touch = (navigator.maxTouchPoints || 0) > 1;
+      if (/iPad/.test(ua) || (/Macintosh/.test(ua) && touch)) return 'tablet';
+      if (/Android/.test(ua) && !/Mobile/.test(ua)) return 'tablet';
+      if (/Mobi|iPhone|iPod|Android|Windows Phone/i.test(ua)) return 'mobile';
+      return 'desktop';
+    }
+
+    function utm() {
+      try {
+        var q = new URLSearchParams(location.search), o = {};
+        ['source', 'medium', 'campaign'].forEach(function (k) {
+          var v = q.get('utm_' + k); if (v) o[k] = v.slice(0, 120);
+        });
+        if (!o.source) {
+          var a = (typeof window._getAttribution === 'function') ? window._getAttribution() : null;
+          if (a) { o.source = a.utm_source || a.source; o.medium = a.utm_medium || a.medium; o.campaign = a.utm_campaign || a.campaign; }
+        }
+        return o;
+      } catch (e) { return {}; }
+    }
+
+    /* Captured once: after the first SPA navigation document.referrer still
+       shows the original external referrer, but we want the value as it was
+       on arrival, before any of our own redirects rewrote it. */
+    var firstReferrer = (function () {
+      try {
+        var k = 'asc_first_ref', v = sessionStorage.getItem(k);
+        if (v === null) { v = document.referrer || ''; sessionStorage.setItem(k, v); }
+        return v;
+      } catch (e) { return document.referrer || ''; }
+    })();
+
+    function currentPage() {
+      var p = location.pathname.replace(/\/+$/, '') || '/';
+      var h = (location.hash || '').replace('#', '');
+      if (h && p === '/') p = '/' + h;
+      return p.slice(0, 200);
+    }
+
+    function email() {
+      try {
+        var u = (typeof getCurrentUser === 'function') ? getCurrentUser() : null;
+        return (u && u.email) ? u.email : null;
+      } catch (e) { return null; }
+    }
+
+    function send(path, body) {
+      try {
+        if (!API) return;
+        fetch(API + path, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(body),
+          keepalive: true
+        }).catch(function () {});   // analytics must never break the store
+      } catch (e) {}
+    }
+
+    var lastPage = null;
+    function ping(force) {
+      var page = currentPage();
+      if (!force && page === lastPage) { /* heartbeat only — still send */ }
+      lastPage = page;
+      send('/api/visitors/ping', {
+        session_id:  sid,
+        page:        page,
+        referrer:    firstReferrer,
+        device_hint: deviceHint(),
+        screen_w:    screen.width,
+        screen_h:    screen.height,
+        is_pwa:      !!(window.matchMedia && matchMedia('(display-mode: standalone)').matches) || !!navigator.standalone,
+        utm:         utm(),
+        email:       email()
+      });
+    }
+
+    /* Marks the session as converted so the admin panel's conversion rate is
+       a real number. The old panel counted `sessions.filter(s => s.status ===
+       'checkout')` against an API that never returned a `status` field, so
+       "Converting" sat at 0 forever. */
+    function convert(orderId, value) {
+      send('/api/visitors/convert', {
+        session_id: sid, order_id: String(orderId || '').slice(0, 64),
+        order_value: Number(value) || null, email: email()
+      });
+    }
+
+    ping(true);
+
+    /* Heartbeat well inside the server's 5-minute live window (was 4 min
+       against a 2-minute window, which is what caused the undercount). */
+    setInterval(function () { if (!document.hidden) ping(false); }, 45 * 1000);
+
+    /* Single-page navigation — count each screen the shopper actually opens. */
+    if (typeof window.showPage === 'function') {
+      var _origShowPage = window.showPage;
+      window.showPage = function (pg) {
+        var r = _origShowPage.apply(this, arguments);
+        setTimeout(function () { ping(true); }, 40);
+        return r;
+      };
+    }
+    window.addEventListener('popstate', function () { setTimeout(function () { ping(true); }, 40); });
+    document.addEventListener('visibilitychange', function () { if (!document.hidden) ping(true); });
+
+    return { ping: ping, convert: convert, sessionId: sid };
   })();
 
   // ── GitHub Pages SPA routing fix ──
@@ -12503,6 +12610,15 @@ async function finalizeOrder(orderId, formData, total, method, codCharge) {
     );
   } catch(e) {}
   showPage('thankyou');
+  /* Record the conversion against this visitor session so the admin
+     dashboard's conversion rate and revenue-by-source are real. */
+  try {
+    if (window.AZAnalytics) {
+      var _o = (typeof order !== 'undefined' && order) ? order
+             : (typeof orderData !== 'undefined' ? orderData : null);
+      window.AZAnalytics.convert(_o && (_o.id || _o.order_id), _o && (_o.total || _o.amount));
+    }
+  } catch (e) {}
   showToast(`✅ Order confirmed! Invoice opened & email sent 🧾`);
 }
 
@@ -13006,11 +13122,12 @@ function vitaSyncToServer(st) {
   try {
     const jwt = localStorage.getItem('asc_jwt') || '';
     if (!jwt || typeof API_BASE === 'undefined') return;
-    fetch(API_BASE + '/api/vitapoints/sync', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + jwt },
-      body: JSON.stringify({ balance: st.balance, lifetime: st.lifetime, coupons: st.coupons })
-    }).catch(function(){});
+    /* /api/vitapoints/sync does not exist on the backend — this POST 404'd
+       on every save. Removed rather than implemented on purpose: the server
+       ledger is the source of truth for points (vitaRefreshFromServer pulls
+       from /api/vitapoints/summary + /history), so letting the browser push
+       a balance up would be exactly the client-trusting path we removed. */
+    void jwt;
   } catch(e) {}
 }
 
@@ -16970,6 +17087,201 @@ button:active, .btn-primary:active, .btn-outline:active,
   obs.observe(document.body, { childList: true, subtree: true });
 })();
 
+</script>
+
+
+<!-- ══════════════════════════════════════════════════════════════════════
+     ASCOFIZZ APP LAYER v2
+     Appended after all existing markup and scripts. Adds nothing to the
+     commerce path — cart, checkout, pricing and payment code is untouched.
+     Everything here is progressive: if a selector below stops matching, the
+     store still works exactly as it does now.
+     ══════════════════════════════════════════════════════════════════════ -->
+<style id="az-layer2-css">
+/* ---------- App chrome ---------- */
+.az-net{position:fixed;left:50%;transform:translateX(-50%) translateY(-140%);top:calc(env(safe-area-inset-top,0px) + 10px);
+  z-index:99999;background:#2b2b2b;color:#fff;font:600 .82rem/1 system-ui,-apple-system,sans-serif;
+  padding:11px 18px;border-radius:999px;box-shadow:0 8px 30px rgba(0,0,0,.28);transition:transform .32s cubic-bezier(.22,1,.36,1)}
+.az-net.show{transform:translateX(-50%) translateY(0)}
+.az-net.ok{background:#2E7D32}
+
+/* ---------- Image stability: no jumping as photos load ---------- */
+img.az-fade{opacity:0;transition:opacity .38s ease}
+img.az-fade.az-in{opacity:1}
+
+/* ---------- Horizontal rails behave like native scrollers ---------- */
+.az-rail{scroll-snap-type:x mandatory;-webkit-overflow-scrolling:touch;scrollbar-width:none}
+.az-rail::-webkit-scrollbar{display:none}
+.az-rail>*{scroll-snap-align:start}
+
+/* ---------- Focus that's visible for keyboard users only ---------- */
+:where(a,button,input,select,textarea,[tabindex]):focus-visible{
+  outline:2px solid #2E7D32;outline-offset:2px;border-radius:6px}
+
+@media (prefers-reduced-motion:reduce){
+  .az-net,img.az-fade{transition:none!important}
+}
+
+/* ---------- Mobile: make the page read like an installed app ---------- */
+@media (max-width:820px){
+  /* Anything pinned to the bottom must clear the iPhone home indicator. */
+  .az-safe-bottom{padding-bottom:calc(env(safe-area-inset-bottom,0px) + 8px)!important}
+  /* Long product/blog text at a comfortable phone reading measure. */
+  #page-blog p, #page-about p, #page-product .p-desc{font-size:1rem;line-height:1.75}
+  /* Stop long unbroken words (SKUs, URLs) from forcing a sideways scroll. */
+  body{overflow-x:hidden}
+  p,li,h1,h2,h3,td{overflow-wrap:anywhere}
+}
+</style>
+
+<script>
+/* ══════════════════════════════════════════════════════════════════════
+   APP LAYER v2 — behaviour
+   Idempotent: safe to run twice, safe to re-run after the store re-renders.
+   ══════════════════════════════════════════════════════════════════════ */
+(function () {
+  if (window.__azLayer2) return;
+  window.__azLayer2 = true;
+  var reduce = window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  /* ---------------------------------------------------------------
+     1. Connection status
+     A shopper on Indian mobile data who loses signal mid-checkout
+     currently sees a silent failure. Tell them what happened.
+     --------------------------------------------------------------- */
+  var net = document.createElement('div');
+  net.className = 'az-net';
+  net.setAttribute('role', 'status');
+  net.setAttribute('aria-live', 'polite');
+  document.body.appendChild(net);
+  var netTimer;
+  function netMsg(text, ok) {
+    net.textContent = text;
+    net.classList.toggle('ok', !!ok);
+    net.classList.add('show');
+    clearTimeout(netTimer);
+    if (ok) netTimer = setTimeout(function () { net.classList.remove('show'); }, 2600);
+  }
+  window.addEventListener('offline', function () { netMsg('No internet connection', false); });
+  window.addEventListener('online',  function () { netMsg('Back online', true); });
+
+  /* ---------------------------------------------------------------
+     2. Haptics + press feedback on the actions that matter
+     A short tap vibration on add-to-cart is the single cheapest thing
+     that makes a web store feel like an app on Android.
+     --------------------------------------------------------------- */
+  function buzz(ms) { try { if (navigator.vibrate && !reduce) navigator.vibrate(ms); } catch (e) {} }
+  document.addEventListener('click', function (e) {
+    var t = e.target.closest('button, .btn, .btn-primary, [onclick]');
+    if (!t) return;
+    var label = (t.textContent || '') + ' ' + (t.getAttribute('onclick') || '');
+    if (/addToCart|add to cart|buy now|checkout|place order/i.test(label)) buzz(12);
+  }, true);
+
+  /* ---------------------------------------------------------------
+     3. Image loading discipline
+     Most product images are injected by JS template literals, so they
+     miss the loading/decoding attributes and cause layout shift as
+     each one lands. Apply them as the DOM changes.
+     --------------------------------------------------------------- */
+  function tidyImages(root) {
+    var imgs = (root || document).querySelectorAll('img:not([data-az-img])');
+    for (var n = 0; n < imgs.length; n++) {
+      var im = imgs[n];
+      im.setAttribute('data-az-img', '1');
+      if (!im.hasAttribute('loading'))  im.setAttribute('loading', 'lazy');
+      if (!im.hasAttribute('decoding')) im.setAttribute('decoding', 'async');
+      if (!im.getAttribute('alt'))      im.setAttribute('alt', '');
+      if (!im.complete) {
+        im.classList.add('az-fade');
+        im.addEventListener('load',  function () { this.classList.add('az-in'); }, { once: true });
+        im.addEventListener('error', function () { this.classList.add('az-in'); }, { once: true });
+      }
+    }
+  }
+
+  /* ---------------------------------------------------------------
+     4. Horizontal rails get snap + momentum
+     --------------------------------------------------------------- */
+  function tidyRails() {
+    var els = document.querySelectorAll('[class*="chips"],[class*="rail"],[class*="carousel"],[class*="scroller"]');
+    for (var n = 0; n < els.length; n++) {
+      var el = els[n];
+      if (el.hasAttribute('data-az-rail')) continue;
+      var cs = getComputedStyle(el);
+      if (cs.overflowX === 'auto' || cs.overflowX === 'scroll') {
+        el.setAttribute('data-az-rail', '1');
+        el.classList.add('az-rail');
+      }
+    }
+  }
+
+  /* ---------------------------------------------------------------
+     5. Bottom-pinned bars clear the home indicator on iPhone
+     --------------------------------------------------------------- */
+  function tidyFixed() {
+    var els = document.querySelectorAll('#stickyCart, .app-bottom-nav, [class*="bottom-nav"], [class*="sticky-bar"]');
+    for (var n = 0; n < els.length; n++) els[n].classList.add('az-safe-bottom');
+  }
+
+  function tidy() { tidyImages(); tidyRails(); tidyFixed(); }
+  tidy();
+
+  /* The store re-renders its grids after every fetch, so re-apply on change
+     rather than only once at boot. Throttled to one pass per frame. */
+  var queued = false;
+  new MutationObserver(function () {
+    if (queued) return;
+    queued = true;
+    requestAnimationFrame(function () { queued = false; tidy(); });
+  }).observe(document.body, { childList: true, subtree: true });
+
+  /* ---------------------------------------------------------------
+     6. Forms: right keyboard, right autofill
+     On a phone, a numeric pincode field that opens the alphabet
+     keyboard is the most common reason a checkout gets abandoned.
+     --------------------------------------------------------------- */
+  function tidyInputs() {
+    var f = document.querySelectorAll('input:not([data-az-inp])');
+    for (var n = 0; n < f.length; n++) {
+      var el = f[n], id = ((el.id || '') + ' ' + (el.name || '') + ' ' + (el.placeholder || '')).toLowerCase();
+      el.setAttribute('data-az-inp', '1');
+      if (el.type === 'text' || el.type === '') {
+        if (/pin ?code|zip|postal/.test(id)) { el.setAttribute('inputmode', 'numeric'); el.setAttribute('autocomplete', 'postal-code'); el.setAttribute('maxlength', '6'); }
+        else if (/phone|mobile|contact/.test(id)) { el.setAttribute('inputmode', 'tel'); el.setAttribute('autocomplete', 'tel'); }
+        else if (/name/.test(id) && !/user ?name/.test(id)) { el.setAttribute('autocomplete', 'name'); el.setAttribute('autocapitalize', 'words'); }
+        else if (/address|street|city|state/.test(id)) { el.setAttribute('autocomplete', 'street-address'); el.setAttribute('autocapitalize', 'words'); }
+      }
+      if (el.type === 'email') { el.setAttribute('autocomplete', 'email'); el.setAttribute('autocapitalize', 'none'); el.setAttribute('spellcheck', 'false'); }
+      if (el.type === 'tel')   { el.setAttribute('inputmode', 'tel'); el.setAttribute('autocomplete', 'tel'); }
+    }
+  }
+  tidyInputs();
+  setInterval(tidyInputs, 2500);
+
+  /* ---------------------------------------------------------------
+     7. Tell the shopper when a slow backend is the reason nothing moved
+     Render's free tier cold-starts for ~30s. Silence reads as "broken".
+     --------------------------------------------------------------- */
+  if (typeof window.fetch === 'function' && typeof API_BASE !== 'undefined') {
+    var _f = window.fetch;
+    window.fetch = function (input, init) {
+      var url = (typeof input === 'string') ? input : (input && input.url) || '';
+      var isOurs = url.indexOf(API_BASE) === 0;
+      var slow;
+      if (isOurs && !/visitors\//.test(url)) {
+        slow = setTimeout(function () { netMsg('Waking the server — one moment', false); }, 4000);
+      }
+      return _f.apply(this, arguments).then(function (r) {
+        if (slow) { clearTimeout(slow); net.classList.remove('show'); }
+        return r;
+      }, function (e) {
+        if (slow) { clearTimeout(slow); net.classList.remove('show'); }
+        throw e;
+      });
+    };
+  }
+})();
 </script>
 
 </body>
