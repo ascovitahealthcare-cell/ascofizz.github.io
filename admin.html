@@ -1478,6 +1478,86 @@ body.theme-glass .card:hover{box-shadow:0 10px 28px rgba(0,0,0,0.3), inset 0 1px
     <div class="card-hdr"><span class="card-title">📄 Page Breakdown</span></div>
     <div id="lvPageDist" style="display:flex;gap:8px;flex-wrap:wrap;padding:8px 0;min-height:40px;"><span style="color:var(--text3);font-size:0.8rem;">Loading…</span></div>
   </div>
+
+  <!-- ═══════════ VISITOR ANALYTICS — real history from Postgres ═══════════ -->
+  <div class="card" style="margin-top:18px;">
+    <div class="card-hdr" style="flex-wrap:wrap;gap:10px;">
+      <span class="card-title">📊 Visitor Analytics</span>
+      <div id="vaRangeTabs" style="display:flex;gap:6px;flex-wrap:wrap;">
+        <button class="btn btn-secondary btn-sm va-range" data-range="today">Today</button>
+        <button class="btn btn-secondary btn-sm va-range" data-range="7d">7 days</button>
+        <button class="btn btn-secondary btn-sm va-range" data-range="30d">30 days</button>
+        <button class="btn btn-secondary btn-sm va-range" data-range="90d">90 days</button>
+        <button class="btn btn-secondary btn-sm va-range" data-range="12m">12 months</button>
+      </div>
+    </div>
+
+    <div id="vaState" style="padding:10px 0;font-size:0.8rem;color:var(--text3);">Loading…</div>
+
+    <!-- Headline numbers, each with its change vs the previous period -->
+    <div class="grid-4" style="margin-bottom:16px;">
+      <div class="kpi"><div class="kpi-label">Visitors</div><div class="kpi-val" id="vaSessions">–</div><div class="kpi-sub" id="vaSessionsD"></div><span class="kpi-ico">👥</span></div>
+      <div class="kpi"><div class="kpi-label">Page Views</div><div class="kpi-val" id="vaPageviews">–</div><div class="kpi-sub" id="vaPageviewsD"></div><span class="kpi-ico">👁️</span></div>
+      <div class="kpi"><div class="kpi-label">Avg Time on Site</div><div class="kpi-val" id="vaDuration">–</div><div class="kpi-sub">per visitor</div><span class="kpi-ico">⏱️</span></div>
+      <div class="kpi"><div class="kpi-label">Bounce Rate</div><div class="kpi-val" id="vaBounce">–</div><div class="kpi-sub">left after one page</div><span class="kpi-ico">↩️</span></div>
+    </div>
+    <div class="grid-4" style="margin-bottom:18px;">
+      <div class="kpi"><div class="kpi-label">Orders from Traffic</div><div class="kpi-val" id="vaConversions">–</div><div class="kpi-sub" id="vaConversionsD"></div><span class="kpi-ico">🛒</span></div>
+      <div class="kpi"><div class="kpi-label">Conversion Rate</div><div class="kpi-val" id="vaConvRate">–</div><div class="kpi-sub">visitors who ordered</div><span class="kpi-ico">🎯</span></div>
+      <div class="kpi"><div class="kpi-label">Revenue Tracked</div><div class="kpi-val" id="vaRevenue">–</div><div class="kpi-sub" id="vaRevenueD"></div><span class="kpi-ico">₹</span></div>
+      <div class="kpi"><div class="kpi-label">Signed In</div><div class="kpi-val" id="vaSignedIn">–</div><div class="kpi-sub" id="vaBots">bots filtered out</div><span class="kpi-ico">🔐</span></div>
+    </div>
+
+    <!-- History chart -->
+    <div style="margin-bottom:18px;">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+        <span style="font-size:0.78rem;font-weight:700;color:var(--text2);">Traffic over time</span>
+        <span style="font-size:0.7rem;color:var(--text3);" id="vaBucketLabel"></span>
+      </div>
+      <div style="height:250px;"><canvas id="vaTrendChart"></canvas></div>
+    </div>
+  </div>
+
+  <!-- Device / OS / Browser -->
+  <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:16px;margin-top:16px;">
+    <div class="card">
+      <div class="card-hdr"><span class="card-title">📱 Device Type</span><span class="badge badge-blue" id="vaDeviceTop">–</span></div>
+      <div style="height:200px;"><canvas id="vaDeviceChart"></canvas></div>
+      <div id="vaDeviceLegend" style="margin-top:10px;"></div>
+    </div>
+    <div class="card">
+      <div class="card-hdr"><span class="card-title">⚙️ Operating System</span><span class="badge badge-green" id="vaOsTop">–</span></div>
+      <div style="height:200px;"><canvas id="vaOsChart"></canvas></div>
+      <div id="vaOsLegend" style="margin-top:10px;"></div>
+    </div>
+    <div class="card">
+      <div class="card-hdr"><span class="card-title">🌐 Browser</span></div>
+      <div id="vaBrowserBars" style="padding:6px 0;"></div>
+    </div>
+  </div>
+
+  <!-- Where they came from / what they looked at -->
+  <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:16px;margin-top:16px;">
+    <div class="card">
+      <div class="card-hdr"><span class="card-title">🔗 Traffic Source</span></div>
+      <div id="vaSourceBars" style="padding:6px 0;"></div>
+    </div>
+    <div class="card">
+      <div class="card-hdr"><span class="card-title">📄 Most Viewed Pages</span></div>
+      <div class="table-wrap" style="max-height:280px;overflow-y:auto;">
+        <table><thead><tr><th>Page</th><th style="text-align:right;">Views</th><th style="text-align:right;">Share</th></tr></thead>
+        <tbody id="vaPagesTbody"><tr><td colspan="3" style="text-align:center;padding:18px;color:var(--text3);">Loading…</td></tr></tbody></table>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-hdr"><span class="card-title">📍 Cities</span></div>
+      <div class="table-wrap" style="max-height:280px;overflow-y:auto;">
+        <table><thead><tr><th>City</th><th style="text-align:right;">Visitors</th><th style="text-align:right;">Share</th></tr></thead>
+        <tbody id="vaCitiesTbody"><tr><td colspan="3" style="text-align:center;padding:18px;color:var(--text3);">Loading…</td></tr></tbody></table>
+      </div>
+    </div>
+  </div>
+
   <div id="lvNotice" style="display:none;margin-top:14px;border-left:3px solid var(--gold);" class="card">
     <div style="padding:14px;font-size:0.82rem;color:var(--text2);line-height:1.9;">
       <strong style="color:var(--gold-text);">⚙️ Using simulated data</strong> — backend /api/visitors/active not responding.<br>
@@ -8415,7 +8495,7 @@ const INTEGRATIONS = [
     desc: 'Payment gateway — UPI, cards, net banking, EMI',
     docsUrl: 'https://docs.cashfree.com',
     envVars: ['CASHFREE_APP_ID', 'CASHFREE_SECRET_KEY'],
-    checkUrl: () => `${API}/api/health/cashfree`,
+    checkUrl: () => `${API}/api/health/cashfree-env`,
     checkAuth: true,
     setupSteps: [
       'Sign up at cashfree.com/pg',
@@ -8952,66 +9032,332 @@ renderDiscounts = function() {
 
 // ── Live Visitors enhanced ─────────────────────────────
 let _lvTraff=[], _lvStream=[], _lvGlobAng=0, _lvGlobRAF=null;
-const _DPG=['/home','/products','/cart','/checkout','/product/glutathione','/product/spirulina'];
-const _DPC=['Mumbai','Delhi','Bangalore','Chennai','Hyderabad','Pune','Kolkata','Jaipur','Surat'];
-const _DPD=['Mobile','Desktop','Tablet'];
-const _DPS=['Google','Direct','Instagram','Facebook','WhatsApp'];
+/* _genSim() and its _DPG/_DPC/_DPD/_DPS sample arrays were deleted here.
+   They existed to fabricate visitor sessions when the backend was down —
+   invented cities, devices and pages, shown as if they were customers.
+   Real analytics replaced them; the panel now reports an outage instead. */
 
-function _genSim(n) {
-  return Array.from({length:n},()=>({
-    page:_DPG[0|Math.random()*_DPG.length],
-    city:_DPC[0|Math.random()*_DPC.length],
-    device:_DPD[0|Math.random()*_DPD.length],
-    duration:0|Math.random()*480,
-    source:_DPS[0|Math.random()*_DPS.length],
-    status:Math.random()>0.25?'browsing':'checkout'
-  }));
+/* ═══════════════════════════════════════════════════════════════════
+   LIVE VISITORS — real data only
+   ───────────────────────────────────────────────────────────────────
+   The version that used to sit here had three problems worth naming, so
+   they don't get reintroduced:
+     1. When the backend call failed it generated fake sessions with
+        _genSim() — invented cities, devices and pages — and showed them as
+        if they were real customers. A business decision made on invented
+        traffic is worse than one made on no traffic.
+     2. Bounce Rate was `(38+0|Math.random()*18)+'%'` — a random number.
+        (It also had an operator-precedence bug: + binds tighter than |,
+        so it was `38 | random`, which can only ever produce 38,39,46,47,
+        54,55,62,63 — never a plausible spread anyway.)
+     3. "Converting" counted sessions where `s.status === 'checkout'`, but
+        /api/visitors/active never returned a `status` field, so it was
+        permanently 0.
+   All three numbers now come from the server, measured. When the backend
+   is unreachable the panel says so instead of inventing traffic.
+   ═══════════════════════════════════════════════════════════════════ */
+updateLiveVisitors = async function () {
+  const se = (id, v) => { const e = document.getElementById(id); if (e) e.textContent = v; };
+  let sessions = [], cnt = 0, views = 0, converting = 0, live = false;
+
+  try {
+    const r = await fetch(API + '/api/visitors/active', {
+      headers: { 'Authorization': `Bearer ${authToken}` },
+      signal: AbortSignal.timeout(8000)
+    });
+    if (!r.ok) throw new Error('HTTP ' + r.status);
+    const d = await r.json();
+    sessions   = Array.isArray(d.sessions) ? d.sessions : [];
+    cnt        = d.active_count || sessions.length || 0;
+    views      = d.page_views_today || 0;
+    converting = d.converting || 0;
+    live = true;
+    const n = document.getElementById('lvNotice'); if (n) n.style.display = 'none';
+  } catch (e) {
+    const n = document.getElementById('lvNotice');
+    if (n) {
+      n.style.display = 'block';
+      n.innerHTML = `<div style="padding:16px;font-size:0.82rem;color:var(--text2);line-height:1.9;">
+        <strong style="color:var(--red);">Live visitor feed unavailable</strong> — ${e.message}<br>
+        <span style="font-size:0.75rem;color:var(--text3);">
+          Check that the backend is awake and that <code>analytics-routes.js</code> is deployed
+          and <code>analytics-schema.sql</code> has been run in Supabase.
+          No sample data is shown here on purpose.
+        </span></div>`;
+    }
+  }
+
+  se('liveCount', live ? cnt : '–');
+  se('lvActive',  live ? cnt : '–');
+  se('lvViews',   live ? views.toLocaleString('en-IN') : '–');
+  se('lvSessionCount', sessions.length);
+  se('lvConv',    live ? converting : '–');
+
+  const avg = sessions.length ? Math.round(sessions.reduce((a, v) => a + (v.duration || 0), 0) / sessions.length) : 0;
+  se('lvSession', avg ? `${Math.floor(avg / 60)}m ${String(avg % 60).padStart(2, '0')}s` : (live ? '0m 00s' : '–'));
+
+  /* Bounce rate is a property of a date range, not of who happens to be
+     online this second — it comes from the analytics summary instead. */
+  se('lvRefreshTime', (live ? 'Live · ' : 'Offline · ') +
+    new Date().toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit', second: '2-digit' }));
+
+  _lvTraff.push(cnt); if (_lvTraff.length > 60) _lvTraff.shift();
+  _drawLvTraffic();
+
+  const tb = document.getElementById('liveSessionsTbody');
+  if (tb) {
+    tb.innerHTML = sessions.length ? sessions.map(v => {
+      const badge = v.status === 'converted' ? 'badge-green'
+                  : v.status === 'checkout'  ? 'badge-gold' : 'badge-gray';
+      const dev = [v.device, v.os].filter(Boolean).join(' · ') + (v.is_pwa ? ' · App' : '');
+      return `<tr>
+        <td style="font-family:var(--mono);font-size:0.75rem;color:var(--green-text);">${_vaEsc(v.page || '/')}</td>
+        <td style="font-size:0.78rem;">${_vaEsc(v.city || 'India')}</td>
+        <td style="font-size:0.78rem;">${_vaEsc(dev)}</td>
+        <td style="font-family:var(--mono);font-size:0.75rem;">${Math.floor((v.duration || 0) / 60)}:${String((v.duration || 0) % 60).padStart(2, '0')}</td>
+        <td><span class="badge badge-gray">${_vaEsc(v.source || 'Direct')}</span></td>
+        <td><span class="badge ${badge}">${_vaEsc(v.status || 'browsing')}</span></td>
+      </tr>`;
+    }).join('')
+    : `<tr><td colspan="6" style="text-align:center;padding:20px;color:var(--text3);font-size:0.82rem;">${live ? 'Nobody on the site right now' : 'Not connected'}</td></tr>`;
+  }
+
+  if (sessions.length) {
+    const s0 = sessions[0];
+    _lvAddStream(`${s0.city || 'India'} · ${s0.device || ''} · ${s0.page || '/'} · via ${s0.source || 'Direct'}`);
+  }
+  _lvPageDist(sessions);
+
+  const counts = {};
+  sessions.forEach(v => { counts[v.page || '/'] = (counts[v.page || '/'] || 0) + 1; });
+  const top = Object.entries(counts).sort((a, b) => b[1] - a[1])[0];
+  se('lvTopPage', top ? top[0] : '–');
+};
+
+/* ═══════════════════════════════════════════════════════════════════
+   VISITOR ANALYTICS — day / week / month history
+   One call to /api/analytics/dashboard fills the whole section.
+   Uses the Chart.js instance already loaded on this page and this file's
+   own colour tokens — no new library, no new palette.
+   ═══════════════════════════════════════════════════════════════════ */
+let _vaRange = 'today';
+let _vaTrendChart = null, _vaDeviceChart = null, _vaOsChart = null;
+let _vaLoading = false;
+
+const _VA_COLORS = ['#547177', '#A97A1E', '#3B7EA6', '#B65B1E', '#C2434F', '#7C8B62', '#8B6BA8', '#4F7A6A'];
+
+function _vaEsc(v) {
+  return String(v == null ? '' : v).replace(/[&<>"']/g, c =>
+    ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+}
+function _vaNum(n) { return (Number(n) || 0).toLocaleString('en-IN'); }
+function _vaDur(sec) {
+  sec = Math.max(0, Math.round(Number(sec) || 0));
+  if (sec < 60) return sec + 's';
+  const m = Math.floor(sec / 60);
+  return m < 60 ? `${m}m ${String(sec % 60).padStart(2, '0')}s` : `${Math.floor(m / 60)}h ${m % 60}m`;
+}
+function _vaDelta(el, pct) {
+  const e = document.getElementById(el); if (!e) return;
+  const n = Number(pct);
+  if (!isFinite(n) || n === 0) { e.textContent = 'no change'; e.style.color = 'var(--text3)'; return; }
+  e.textContent = (n > 0 ? '▲ ' : '▼ ') + Math.abs(n) + '% vs previous';
+  e.style.color = n > 0 ? 'var(--green-text)' : 'var(--red)';
 }
 
-const _v26_lvOrig = updateLiveVisitors;
-updateLiveVisitors = async function() {
-  let sessions=[], cnt=0, views=0, sim=false;
-  try {
-    // Same missing Authorization header as the other poller.
-    const r = await fetch(API+'/api/visitors/active', {headers:{'Authorization':`Bearer ${authToken}`}, signal:AbortSignal.timeout(6000)});
-    if (!r.ok) throw new Error('not ok');
-    const d = await r.json();
-    sessions = Array.isArray(d.sessions)?d.sessions:[];
-    cnt = d.active_count||sessions.length||0;
-    views = d.page_views_today||0;
-    const n=document.getElementById('lvNotice'); if(n) n.style.display='none';
-  } catch {
-    sim=true; cnt=(0|Math.random()*7)+1; views=(0|Math.random()*180)+40;
-    sessions=_genSim(cnt);
-    const n=document.getElementById('lvNotice'); if(n) n.style.display='block';
+/* Horizontal bar list — used for Browser and Traffic Source. Reads better
+   than a third pie chart and stays legible with 8+ rows. */
+function _vaBars(elId, rows, unit) {
+  const el = document.getElementById(elId); if (!el) return;
+  if (!rows || !rows.length) {
+    el.innerHTML = '<div style="color:var(--text3);font-size:0.8rem;padding:12px 0;">No data for this period</div>';
+    return;
   }
-  const se=(id,v)=>{const e=document.getElementById(id);if(e)e.textContent=v;};
-  se('liveCount',cnt); se('lvActive',cnt); se('lvViews',views.toLocaleString('en-IN'));
-  se('lvSessionCount',sessions.length);
-  const avg=sessions.length?Math.round(sessions.reduce((s,v)=>s+(v.duration||0),0)/sessions.length):0;
-  se('lvSession', avg?`${Math.floor(avg/60)}m ${String(avg%60).padStart(2,'0')}s`:'--');
-  se('lvBounce',(38+0|Math.random()*18)+'%');
-  se('lvConv',sessions.filter(s=>s.status==='checkout').length);
-  se('lvRefreshTime',(sim?'Demo · ':'Live · ')+new Date().toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit',second:'2-digit'}));
-  _lvTraff.push(cnt); if(_lvTraff.length>60) _lvTraff.shift();
-  _drawLvTraffic();
-  const tb=document.getElementById('liveSessionsTbody');
-  if(tb) tb.innerHTML = sessions.length ? sessions.map(s=>`<tr>
-    <td style="font-family:var(--mono);font-size:0.75rem;color:var(--green-text);">${s.page||'/'}</td>
-    <td style="font-size:0.78rem;">🇮🇳 ${s.city||'India'}</td>
-    <td style="font-size:0.78rem;">${s.device||'Mobile'}</td>
-    <td style="font-family:var(--mono);font-size:0.75rem;">${Math.floor((s.duration||0)/60)}:${String((s.duration||0)%60).padStart(2,'0')}</td>
-    <td><span class="badge badge-gray">${s.source||'Direct'}</span></td>
-    <td><span class="badge ${s.status==='checkout'?'badge-gold':'badge-green'}">${s.status||'browsing'}</span></td>
-  </tr>`).join('') : '<tr><td colspan="6" style="text-align:center;padding:20px;color:var(--text3);">No active visitors right now</td></tr>';
-  if(sessions.length>0) _lvAddStream(`${sessions[0].city} viewing ${sessions[0].page} via ${sessions[0].source}`);
-  _lvPageDist(sessions);
-  const pageCts={};
-  sessions.forEach(s=>{pageCts[s.page||'/']=(pageCts[s.page||'/']||0)+1;});
-  const topPg=Object.entries(pageCts).sort((a,b)=>b[1]-a[1])[0];
-  se('lvTopPage', topPg?topPg[0]:'/home');
-  se('lvPeakHour', new Date().getHours()+':00');
-};
+  const max = Math.max(...rows.map(r => r.count), 1);
+  el.innerHTML = rows.map((r, i) => `
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:9px;">
+      <div style="width:110px;flex-shrink:0;font-size:0.76rem;color:var(--text2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${_vaEsc(r.label)}</div>
+      <div style="flex:1;background:var(--surface2);border-radius:4px;height:10px;overflow:hidden;">
+        <div style="width:${(r.count / max * 100).toFixed(1)}%;height:100%;background:${_VA_COLORS[i % _VA_COLORS.length]};border-radius:4px;"></div>
+      </div>
+      <div style="width:88px;text-align:right;font-family:var(--mono);font-size:0.72rem;color:var(--text2);flex-shrink:0;">
+        ${_vaNum(r.count)}${unit ? '' : ''} <span style="color:var(--text3);">${r.pct}%</span>
+      </div>
+    </div>`).join('');
+}
+
+function _vaLegend(elId, rows) {
+  const el = document.getElementById(elId); if (!el) return;
+  el.innerHTML = (rows || []).map((r, i) => `
+    <div style="display:flex;align-items:center;gap:8px;margin-bottom:5px;font-size:0.76rem;">
+      <span style="width:9px;height:9px;border-radius:2px;background:${_VA_COLORS[i % _VA_COLORS.length]};flex-shrink:0;"></span>
+      <span style="flex:1;color:var(--text2);">${_vaEsc(r.label)}</span>
+      <span style="font-family:var(--mono);color:var(--text3);">${_vaNum(r.count)} · ${r.pct}%</span>
+    </div>`).join('') || '<div style="color:var(--text3);font-size:0.78rem;">No data</div>';
+}
+
+function _vaDoughnut(existing, canvasId, rows) {
+  const c = document.getElementById(canvasId);
+  if (!c || typeof Chart === 'undefined') return existing;
+  if (existing) existing.destroy();
+  const r = rows && rows.length ? rows : [{ label: 'No data', count: 1 }];
+  return new Chart(c.getContext('2d'), {
+    type: 'doughnut',
+    data: {
+      labels: r.map(x => x.label),
+      datasets: [{
+        data: r.map(x => x.count),
+        backgroundColor: r.map((_, i) => rows && rows.length ? _VA_COLORS[i % _VA_COLORS.length] : '#DDD6C9'),
+        borderWidth: 0
+      }]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false, cutout: '62%',
+      plugins: { legend: { display: false } }
+    }
+  });
+}
+
+function _vaTable(tbodyId, rows, emptyText) {
+  const tb = document.getElementById(tbodyId); if (!tb) return;
+  tb.innerHTML = (rows && rows.length)
+    ? rows.map(r => `<tr>
+        <td style="font-size:0.78rem;font-family:var(--mono);">${_vaEsc(r.label)}</td>
+        <td style="text-align:right;font-family:var(--mono);font-size:0.78rem;">${_vaNum(r.count)}</td>
+        <td style="text-align:right;font-size:0.75rem;color:var(--text3);">${r.pct}%</td>
+      </tr>`).join('')
+    : `<tr><td colspan="3" style="text-align:center;padding:18px;color:var(--text3);font-size:0.8rem;">${emptyText || 'No data'}</td></tr>`;
+}
+
+function _vaBucketFmt(iso, bucket) {
+  const d = new Date(iso);
+  if (bucket === 'hour')  return d.toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' });
+  if (bucket === 'month') return d.toLocaleDateString('en-IN', { month: 'short', year: '2-digit' });
+  return d.toLocaleDateString('en-IN', { day: '2-digit', month: 'short' });
+}
+
+async function loadVisitorAnalytics(range) {
+  if (range) _vaRange = range;
+  if (_vaLoading) return;
+  _vaLoading = true;
+
+  document.querySelectorAll('.va-range').forEach(b => {
+    const on = b.dataset.range === _vaRange;
+    b.style.background   = on ? 'var(--green)' : '';
+    b.style.color        = on ? '#fff' : '';
+    b.style.borderColor  = on ? 'var(--green)' : '';
+  });
+
+  const state = document.getElementById('vaState');
+  if (state) { state.textContent = 'Loading…'; state.style.color = 'var(--text3)'; }
+
+  try {
+    const r = await fetch(`${API}/api/analytics/dashboard?range=${encodeURIComponent(_vaRange)}`, {
+      headers: { 'Authorization': `Bearer ${authToken}` },
+      signal: AbortSignal.timeout(20000)
+    });
+    if (!r.ok) throw new Error('HTTP ' + r.status + (r.status === 404 ? ' — analytics-routes.js not deployed yet' : ''));
+    const d = await r.json();
+    const o = d.overview || {};
+
+    document.getElementById('vaSessions').textContent    = _vaNum(o.sessions);
+    document.getElementById('vaPageviews').textContent   = _vaNum(o.pageviews);
+    document.getElementById('vaDuration').textContent    = _vaDur(o.avg_duration);
+    document.getElementById('vaBounce').textContent      = (Number(o.bounce_rate) || 0) + '%';
+    document.getElementById('vaConversions').textContent = _vaNum(o.conversions);
+    document.getElementById('vaConvRate').textContent    = (Number(o.conversion_rate) || 0) + '%';
+    document.getElementById('vaRevenue').textContent     = '₹' + _vaNum(Math.round(Number(o.revenue) || 0));
+    document.getElementById('vaSignedIn').textContent    = _vaNum(o.signed_in);
+    document.getElementById('vaBots').textContent        = _vaNum(o.bots_filtered) + ' bots filtered out';
+
+    const ch = d.change || {};
+    _vaDelta('vaSessionsD',    ch.sessions);
+    _vaDelta('vaPageviewsD',   ch.pageviews);
+    _vaDelta('vaConversionsD', ch.conversions);
+    _vaDelta('vaRevenueD',     ch.revenue);
+
+    // ── history chart ──
+    const pts = d.series || [];
+    const bl = document.getElementById('vaBucketLabel');
+    if (bl) bl.textContent = pts.length ? `${pts.length} ${d.bucket === 'hour' ? 'hours' : d.bucket === 'month' ? 'months' : 'days'}` : '';
+    const cv = document.getElementById('vaTrendChart');
+    if (cv && typeof Chart !== 'undefined') {
+      if (_vaTrendChart) _vaTrendChart.destroy();
+      _vaTrendChart = new Chart(cv.getContext('2d'), {
+        type: 'line',
+        data: {
+          labels: pts.map(p => _vaBucketFmt(p.bucket, d.bucket)),
+          datasets: [
+            { label: 'Visitors',  data: pts.map(p => p.visitors),  borderColor: '#547177', backgroundColor: 'rgba(84,113,119,0.14)', fill: true, tension: 0.35, borderWidth: 2, pointRadius: 0, pointHoverRadius: 4 },
+            { label: 'Page views', data: pts.map(p => p.pageviews), borderColor: '#A97A1E', backgroundColor: 'transparent', fill: false, tension: 0.35, borderWidth: 2, borderDash: [5, 4], pointRadius: 0, pointHoverRadius: 4 },
+            { label: 'Orders',    data: pts.map(p => p.conversions), borderColor: '#C2434F', backgroundColor: 'transparent', fill: false, tension: 0.35, borderWidth: 2, pointRadius: 0, pointHoverRadius: 4, yAxisID: 'y1' }
+          ]
+        },
+        options: {
+          responsive: true, maintainAspectRatio: false,
+          interaction: { mode: 'index', intersect: false },
+          plugins: { legend: { position: 'bottom', labels: { boxWidth: 12, font: { size: 11 } } } },
+          scales: {
+            y:  { beginAtZero: true, ticks: { precision: 0 }, grid: { color: 'rgba(84,113,119,0.10)' } },
+            y1: { beginAtZero: true, position: 'right', ticks: { precision: 0 }, grid: { display: false }, title: { display: true, text: 'Orders', font: { size: 10 } } },
+            x:  { grid: { display: false }, ticks: { maxTicksLimit: 12, font: { size: 10 } } }
+          }
+        }
+      });
+    }
+
+    // ── breakdowns ──
+    _vaDeviceChart = _vaDoughnut(_vaDeviceChart, 'vaDeviceChart', d.devices);
+    _vaOsChart     = _vaDoughnut(_vaOsChart,     'vaOsChart',     d.os);
+    _vaLegend('vaDeviceLegend', d.devices);
+    _vaLegend('vaOsLegend',     d.os);
+    _vaBars('vaBrowserBars', d.browsers);
+    _vaBars('vaSourceBars',  d.sources);
+    _vaTable('vaPagesTbody',  d.pages,  'No page views in this period');
+    _vaTable('vaCitiesTbody', d.cities, 'No location data yet');
+
+    const dTop = (d.devices || [])[0], oTop = (d.os || [])[0];
+    const dt = document.getElementById('vaDeviceTop');
+    const ot = document.getElementById('vaOsTop');
+    if (dt) dt.textContent = dTop ? `${dTop.label} ${dTop.pct}%` : '–';
+    if (ot) ot.textContent = oTop ? `${oTop.label} ${oTop.pct}%` : '–';
+
+    if (state) {
+      state.innerHTML = `<span style="color:var(--green-text);font-weight:700;">${_vaEsc(d.label || '')}</span>
+        · ${_vaNum(o.sessions)} visitors · ${_vaNum(o.pageviews)} page views
+        · updated ${new Date().toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' })}`;
+    }
+  } catch (e) {
+    if (state) {
+      state.style.color = 'var(--red)';
+      state.innerHTML = `Could not load analytics — ${_vaEsc(e.message)}.
+        <span style="color:var(--text3);">Deploy <code>analytics-routes.js</code> and run
+        <code>analytics-schema.sql</code>, then refresh. No sample data is shown.</span>`;
+    }
+  } finally {
+    _vaLoading = false;
+  }
+}
+
+document.addEventListener('click', function (e) {
+  const b = e.target.closest('.va-range');
+  if (b) loadVisitorAnalytics(b.dataset.range);
+});
+
+/* Load the analytics section the first time the Live Visitors page is
+   opened, following this file's existing convention of wrapping showPage
+   rather than editing it. */
+(function () {
+  const _origSP = window.showPage;
+  let loadedOnce = false;
+  window.showPage = function (name) {
+    const r = _origSP ? _origSP.apply(this, arguments) : undefined;
+    if (name === 'livevisitors') {
+      if (!loadedOnce) { loadedOnce = true; setTimeout(() => loadVisitorAnalytics(_vaRange), 120); }
+    }
+    return r;
+  };
+})();
 
 function _lvAddStream(msg) {
   _lvStream.unshift(msg);
