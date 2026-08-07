@@ -9037,6 +9037,16 @@ function mergeBackendProducts(backendProducts) {
 // JS before indexing, so an updated block is what gets read.
 // ═══════════════════════════════════════════════════════════════════
 
+// slugify() lives in a later <script> block, and function declarations only
+// become globals once their own block has been parsed. The load-time call
+// below runs before that, so the schema code carries its own copy rather
+// than throwing "slugify is not defined" and silently doing nothing — which
+// is exactly the case this is meant to cover, when the backend is asleep and
+// Googlebot snapshots the page anyway. Must stay identical to slugify().
+function schemaSlug(str) {
+  return String(str || '').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+}
+
 // The price a shopper actually pays: bulk tier first, then sale, then list.
 function schemaPriceOf(p) {
   const tiers = p._backendTiers || (typeof QTY_TIERS !== 'undefined' ? QTY_TIERS[p.id] : null);
@@ -9044,6 +9054,52 @@ function schemaPriceOf(p) {
   if (valid.length) return Number(valid[0].rate);
   return Number(p.salePrice || p.price || 0);
 }
+
+// Every product image we can find, best first. The static catalogue ships
+// with these blank on purpose — real URLs arrive from the backend — which is
+// why Search Console reported "Missing field image" on all 16 products and
+// failed every Merchant listing. Product snippets do not require an image;
+// Merchant listings do.
+function schemaImagesFor(p) {
+  const urls = [];
+  const push = u => {
+    const v = typeof u === 'string' ? u : (u && u.url);
+    if (v && /^https?:\/\//.test(v) && !urls.includes(v)) urls.push(v);
+  };
+  push(p.image);
+  (p.allImages || []).forEach(push);
+  (p.media || []).forEach(m => push(m && m.type !== 'video' ? m : null));
+  push(p.image2);
+  return urls.slice(0, 6);
+}
+
+// Shipping and returns, stated once and shared by the catalogue and the
+// per-product block. These are the two fields behind the "2 non-critical
+// issues" on every product. Values are the real policy, taken from the code
+// that enforces it: computeServerSideTotal() charges shippingFee 0 on every
+// order, and RETURN_WINDOW_DAYS in returns-routes.js is 7.
+const SCHEMA_SHIPPING = {
+  '@type': 'OfferShippingDetails',
+  shippingRate: { '@type': 'MonetaryAmount', value: '0', currency: 'INR' },
+  shippingDestination: { '@type': 'DefinedRegion', addressCountry: 'IN' },
+  deliveryTime: {
+    '@type': 'ShippingDeliveryTime',
+    handlingTime: { '@type': 'QuantitativeValue', minValue: 0, maxValue: 1, unitCode: 'DAY' },
+    transitTime:  { '@type': 'QuantitativeValue', minValue: 2, maxValue: 7, unitCode: 'DAY' },
+  },
+};
+
+// returnFees is deliberately absent: nothing in the codebase or the site copy
+// states who pays return postage, and guessing it here would publish a policy
+// the business has not agreed to. Add it once that is decided —
+// https://schema.org/FreeReturn or https://schema.org/ReturnShippingFees.
+const SCHEMA_RETURNS = {
+  '@type': 'MerchantReturnPolicy',
+  applicableCountry: 'IN',
+  returnPolicyCategory: 'https://schema.org/MerchantReturnFiniteReturnWindow',
+  merchantReturnDays: 7,
+  returnMethod: 'https://schema.org/ReturnByMail',
+};
 
 function schemaOfferFor(p, url) {
   const price = schemaPriceOf(p);
@@ -9058,6 +9114,8 @@ function schemaOfferFor(p, url) {
       : 'https://schema.org/OutOfStock',
     itemCondition: 'https://schema.org/NewCondition',
     seller: { '@id': 'https://www.ozylix.com/#organization' },
+    shippingDetails: SCHEMA_SHIPPING,
+    hasMerchantReturnPolicy: SCHEMA_RETURNS,
   };
   // Google drops an offer with a priceValidUntil in the past. A year out is
   // the conventional rolling window for a catalogue with no fixed end date.
@@ -9094,17 +9152,27 @@ function syncProductStructuredData() {
     if (!list) return;
 
     let changed = false;
+    const noImage = [];
     for (const entry of list.itemListElement) {
       const item = entry.item || entry;
       if (!String(item['@type']).includes('Product')) continue;
-      const live = PRODUCTS.find(p => slugify(p.name) === String(item.url || '').split('/').pop());
+      const live = PRODUCTS.find(p => schemaSlug(p.name) === String(item.url || '').split('/').pop());
       if (!live) continue;
       item.offers = schemaOfferFor(live, item.url);
       const rating = schemaRatingFor(live);
       if (rating) item.aggregateRating = rating; else delete item.aggregateRating;
+      const images = schemaImagesFor(live);
+      if (images.length) item.image = images;
+      else { delete item.image; noImage.push(live.name); }
       changed = true;
     }
     if (changed) tag.textContent = JSON.stringify(graph, null, 2);
+    // An image is required for a Merchant listing and cannot be invented, so
+    // name the products that still need one rather than failing silently.
+    if (noImage.length) {
+      console.warn('[schema] ' + noImage.length + ' product(s) have no image and cannot qualify for '
+        + 'Google Merchant listings. Upload one per product in Admin → Products: ' + noImage.join(', '));
+    }
   } catch (e) {
     console.warn('[schema] catalogue sync skipped:', e.message);
   }
@@ -9120,7 +9188,7 @@ function setProductPageSchema(p) {
   document.getElementById(ID)?.remove();
   if (!p) return;
   try {
-    const url = 'https://www.ozylix.com/product/' + slugify(p.name);
+    const url = 'https://www.ozylix.com/product/' + schemaSlug(p.name);
     const node = {
       '@context': 'https://schema.org',
       '@type': 'Product',
@@ -9134,8 +9202,8 @@ function setProductPageSchema(p) {
       manufacturer: { '@type': 'Organization', name: 'Ascovita Healthcare', url: 'https://www.ascovita.com' },
       offers: schemaOfferFor(p, url),
     };
-    const img = p.image || (p.allImages && p.allImages[0]);
-    if (img) node.image = [img];
+    const images = schemaImagesFor(p);
+    if (images.length) node.image = images;
     const rating = schemaRatingFor(p);
     if (rating) node.aggregateRating = rating;
 
@@ -9777,6 +9845,16 @@ function wixResize(url, size) {
   });
 
   console.log('[Ozylix] ✅ Product images applied from PRODUCT_IMAGES map');
+
+  // Write the structured data from whatever we know locally, without waiting
+  // for the backend. syncProductStructuredData() was only called at the end
+  // of the backend merge, so a slow or sleeping API — the Render free tier
+  // cold-starts in about a minute — meant Googlebot snapshotted the page
+  // before any of it ran, and read the hand-written static block instead.
+  // The backend merge calls it again afterwards with live stock and prices.
+  if (typeof syncProductStructuredData === 'function') {
+    try { syncProductStructuredData(); } catch (e) { /* never block render */ }
+  }
 })();
 
 // Export for Node.js / bundlers
