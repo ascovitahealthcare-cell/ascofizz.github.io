@@ -7850,22 +7850,22 @@ setInterval(function() { syncAppCartBadge(); syncAppWishBadge(); }, 2000);
             <span id="ckSignInLink" style="font-size:.74rem;font-weight:600;color:var(--green);cursor:pointer;text-decoration:underline" onclick="openAuth('login')">Sign in</span>
           </div>
           <div class="form-row">
-            <div class="form-group"><label class="form-label">First Name</label><input class="form-input" type="text" placeholder="Enter first name" oninput="this.classList.remove('field-error')"></div>
-            <div class="form-group"><label class="form-label">Last Name</label><input class="form-input" type="text" placeholder="Enter last name"></div>
+            <div class="form-group"><label class="form-label">First Name</label><input class="form-input" type="text" placeholder="Enter first name" autocomplete="given-name" autocapitalize="words" enterkeyhint="next" oninput="this.classList.remove('field-error')"></div>
+            <div class="form-group"><label class="form-label">Last Name</label><input class="form-input" type="text" placeholder="Enter last name" autocomplete="family-name" autocapitalize="words" enterkeyhint="next"></div>
           </div>
-          <div class="form-group"><label class="form-label">Email Address</label><input class="form-input" type="email" placeholder="email@example.com" oninput="this.classList.remove('field-error')"></div>
-          <div class="form-group"><label class="form-label">Mobile Number</label><input class="form-input" type="tel" placeholder="+91 98765 43210" oninput="this.classList.remove('field-error')"></div>
+          <div class="form-group"><label class="form-label">Email Address</label><input class="form-input" type="email" placeholder="email@example.com" autocomplete="email" inputmode="email" autocapitalize="off" autocorrect="off" spellcheck="false" enterkeyhint="next" oninput="this.classList.remove('field-error')"></div>
+          <div class="form-group"><label class="form-label">Mobile Number</label><input class="form-input" type="tel" placeholder="+91 98765 43210" autocomplete="tel" inputmode="tel" enterkeyhint="next" oninput="this.classList.remove('field-error')"></div>
 
           <div class="ck-section-title" style="margin-top:24px">📍 Delivery Address</div>
-          <div class="form-group"><label class="form-label">Address Line 1</label><input class="form-input" type="text" placeholder="House / Flat No., Street" oninput="this.classList.remove('field-error')"></div>
-          <div class="form-group"><label class="form-label">Address Line 2</label><input class="form-input" type="text" placeholder="Area / Locality (optional)"></div>
+          <div class="form-group"><label class="form-label">Address Line 1</label><input class="form-input" type="text" placeholder="House / Flat No., Street" autocomplete="address-line1" autocapitalize="words" enterkeyhint="next" oninput="this.classList.remove('field-error')"></div>
+          <div class="form-group"><label class="form-label">Address Line 2</label><input class="form-input" type="text" placeholder="Area / Locality (optional)" autocomplete="address-line2" autocapitalize="words" enterkeyhint="next"></div>
           <div class="form-row">
-            <div class="form-group"><label class="form-label">City</label><input class="form-input" type="text" placeholder="City" oninput="this.classList.remove('field-error')"></div>
-            <div class="form-group"><label class="form-label">State</label><input class="form-input" type="text" placeholder="State"></div>
+            <div class="form-group"><label class="form-label">City</label><input class="form-input" type="text" placeholder="City" autocomplete="address-level2" autocapitalize="words" enterkeyhint="next" oninput="this.classList.remove('field-error')"></div>
+            <div class="form-group"><label class="form-label">State</label><input class="form-input" type="text" placeholder="State" autocomplete="address-level1" autocapitalize="words" enterkeyhint="next"></div>
           </div>
           <div class="form-row">
-            <div class="form-group"><label class="form-label">PIN Code</label><input class="form-input" type="text" placeholder="6-digit PIN" oninput="this.classList.remove('field-error')"></div>
-            <div class="form-group"><label class="form-label">Country</label><input class="form-input" type="text" value="India" readonly></div>
+            <div class="form-group"><label class="form-label">PIN Code</label><input class="form-input" type="text" placeholder="6-digit PIN" autocomplete="postal-code" inputmode="numeric" pattern="[0-9]*" maxlength="6" enterkeyhint="done" oninput="this.classList.remove('field-error')"></div>
+            <div class="form-group"><label class="form-label">Country</label><input class="form-input" type="text" value="India" readonly tabindex="-1" autocomplete="country-name" aria-label="Country"></div>
           </div>
 
           <div class="ck-section-title" style="margin-top:24px">💳 Payment Method</div>
@@ -14654,19 +14654,30 @@ function _renderOrderCards(orders, container) {
     // when it awards/redeems against the ledger. Nothing is recomputed here —
     // if the order was returned, the points were reversed server-side, so the
     // card says so rather than still claiming they were earned.
-    const isReturned = /return/i.test(status);
+    const isReturned  = /return/i.test(status);
+    const isCancelled = /cancel/i.test(status);
     const earned   = Number(o.vita_points_earned || 0);
     const redeemed = Number(o.vita_points_redeemed || 0);
     let vitaLine = '';
-    if (earned > 0 || redeemed > 0) {
+    {
       const bits = [];
       if (earned > 0) {
         bits.push(isReturned
           ? `<span style="color:var(--clay-lo,#b4553f)">−${earned.toLocaleString('en-IN')} VitaPoints reversed</span>`
           : `<span style="color:var(--fern-lo,#2E7D32)">+${earned.toLocaleString('en-IN')} VitaPoints</span>`);
+      } else if (!isCancelled && !isReturned) {
+        // A cash-on-delivery order earns nothing until the courier hands it
+        // over and the cash is collected — a refused parcel was never a sale.
+        // With no line at all, an order that SPENT points looked like it gave
+        // nothing back, which is what this reads as on the account page.
+        // No number is shown: the rate is tier-based and decided server-side
+        // by vita_earn_on_order, so quoting one here would be a guess.
+        bits.push('<span style="color:var(--gray,#777)">Earns VitaPoints once delivered</span>');
       }
       if (redeemed > 0) bits.push(`<span style="color:var(--gray,#777)">${redeemed.toLocaleString('en-IN')} used</span>`);
-      vitaLine = `<div style="font-size:.76rem;margin-top:6px;display:flex;gap:10px;flex-wrap:wrap">🌿 ${bits.join(' · ')}</div>`;
+      if (bits.length) {
+        vitaLine = `<div style="font-size:.76rem;margin-top:6px;display:flex;gap:10px;flex-wrap:wrap">🌿 ${bits.join(' · ')}</div>`;
+      }
     }
     const payStatus = o.payment_status ? `<div style="font-size:.72rem;color:var(--gray,#888);margin-top:4px">${o.payment_status}</div>` : '';
 
@@ -17392,9 +17403,262 @@ img.az-fade.az-in{opacity:1}
   #page-blog p, #page-about p, #page-product .p-desc{font-size:1rem;line-height:1.75}
   /* Stop long unbroken words (SKUs, URLs) from forcing a sideways scroll. */
   body{overflow-x:hidden}
-  p,li,h1,h2,h3,td{overflow-wrap:anywhere}
+  /* `td` was in this list. overflow-wrap:anywhere breaks INSIDE a word at
+     any character, which is why the account tables render "AVC-02605 641",
+     "COD - Pendin g" and "-1,59 7". Prose still needs it; table cells get
+     a horizontal scroll instead, below. */
+  p,li,h1,h2,h3{overflow-wrap:anywhere}
 }
 </style>
+
+<div id="ozPayBar" role="region" aria-label="Order total and payment">
+  <div class="opb-total">
+    <div class="opb-label">Total</div>
+    <div class="opb-amt" id="ozPayBarAmt">—</div>
+  </div>
+  <div class="opb-actions">
+    <button class="opb-pay" type="button" onclick="initiatePayment()">🔒 Pay Securely</button>
+    <button class="opb-cod" type="button" onclick="initiateCOD()">or pay cash on delivery</button>
+  </div>
+</div>
+
+<style id="oz-account-mobile">
+/* ═══════════════════════════════════════════════════════════════════
+   ACCOUNT AREA — mobile
+   Last stylesheet in the document, so it settles the ties.
+
+   Three separate faults showed up on a real iPhone:
+     · The invoices and VitaPoints tables are 5-column <table>s inside a
+       container with overflow:hidden. With `td{overflow-wrap:anywhere}`
+       set globally they did not overflow — they shredded, breaking order
+       ids and rupee amounts mid-character.
+     · .account-nav is flex-wrap with centred justification, so six items
+       of unequal width wrapped into a ragged 2-1-2 arrangement with
+       orphans floating mid-row.
+     · The ambient .particle bubbles sit at z-index 0 with the account
+       card painting no background of its own, so they drifted over the
+       menu instead of behind it.
+   ═══════════════════════════════════════════════════════════════════ */
+
+/* ── Tables scroll; they never break a word ───────────────────────── */
+.account-panel table,
+.vita-hist table {
+  min-width: max-content;
+}
+.account-panel table td, .account-panel table th,
+.vita-hist table td,     .vita-hist table th {
+  white-space: nowrap;
+  overflow-wrap: normal;
+  word-break: normal;
+}
+
+@media (max-width: 900px) {
+  /* The wrapper each table already sits in becomes the scroll container.
+     :has() lets this attach to the existing markup without touching the
+     render functions; the fallback below covers browsers without it. */
+  .account-panel div:has(> table),
+  .vita-hist {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior-x: contain;
+  }
+  .account-panel, .vita-hist { max-width: 100%; }
+  .account-panel table, .vita-hist table { display: block; overflow-x: auto; }
+  .account-panel table > thead, .account-panel table > tbody,
+  .vita-hist table > thead,     .vita-hist table > tbody {
+    display: table;
+    width: max-content;
+    min-width: 100%;
+  }
+  /* Tighter cells so more of each row is visible before scrolling. */
+  .account-panel table td, .account-panel table th,
+  .vita-hist table td,     .vita-hist table th {
+    padding: 11px 13px !important;
+    font-size: .8rem !important;
+  }
+
+  /* ── Account menu: an even grid instead of ragged wrapping ──────── */
+  .account-nav {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+    justify-content: stretch;
+  }
+  .account-nav-item {
+    width: 100%;
+    min-height: 52px;
+    justify-content: flex-start;
+    padding: 12px 13px;
+    border-radius: 14px;
+    background: var(--paper-hi, #fff);
+    box-shadow: var(--neo-1, 0 1px 3px rgba(0,0,0,.06));
+    font-size: .82rem;
+    line-height: 1.25;
+    touch-action: manipulation;
+  }
+  /* Sign Out reads as an action, not another destination. */
+  .account-nav-item[onclick*="logout"], .account-nav-item.danger {
+    grid-column: 1 / -1;
+    justify-content: center;
+  }
+
+  /* ── The card owns its own background, so nothing drifts across it ─ */
+  .account-sidebar, .account-panel, .account-card {
+    position: relative;
+    z-index: 1;
+  }
+}
+
+/* Very narrow phones: one column reads better than two cramped ones. */
+@media (max-width: 360px) {
+  .account-nav { grid-template-columns: 1fr; }
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   CHECKOUT — shorter on a phone
+   The form is ten fields. At ≤600px `.form-row` collapsed every pair to
+   one column, so name, city/state and pin/country each took two full
+   rows instead of one — roughly 300px of extra scrolling between the
+   cart and the pay button, on the one screen where scrolling costs
+   money. These pairs are short enough to sit side by side at 320px.
+   ═══════════════════════════════════════════════════════════════════ */
+@media (max-width: 600px) {
+  #page-checkout .form-row { grid-template-columns: 1fr 1fr; gap: 10px; }
+  /* Address line 1 is the one field that genuinely needs the full width. */
+  #page-checkout .form-row.single { grid-template-columns: 1fr; }
+
+  /* Tighter vertical rhythm — same fields, less travel. */
+  #page-checkout .form-group { margin-bottom: 12px; }
+  #page-checkout .form-label {
+    font-size: .68rem;
+    margin-bottom: 4px;
+    letter-spacing: .04em;
+    text-transform: uppercase;
+  }
+  /* 16px is the floor: below it iOS zooms the page on focus and never
+     zooms back, which is the fastest way to lose a checkout. */
+  #page-checkout .form-input { font-size: 16px; padding: 11px 13px; }
+
+  #page-checkout .ck-section-title { margin-top: 16px !important; font-size: .95rem; }
+  /* The page sets padding-top:90px inline for the fixed header; a phone
+     header is far shorter than that. */
+  #page-checkout { padding-top: 66px !important; }
+  #page-checkout h1 { font-size: 1.4rem; margin-bottom: 14px; }
+  #page-checkout .breadcrumb { margin-bottom: 10px; font-size: .74rem; }
+
+  /* The country field is fixed at India and not editable. It keeps its
+     place in the DOM — validateCheckoutForm() finds fields by
+     placeholder and fillSavedAddress() by index — but it does not need
+     to look like something awaiting input. */
+  #page-checkout input[readonly] { opacity: .62; }
+
+  /* Payment methods were 474px of the form — four cards, each with a
+     subtitle repeating what the title already says. The icon and the name
+     identify the method; "Visa, Mastercard, RuPay accepted" does not
+     change anyone's choice on a phone. */
+  #page-checkout .pay-method { padding: 11px 13px; gap: 11px; }
+  #page-checkout .pm-info > *:last-child { display: none; }
+  #page-checkout .pm-info > *:first-child { font-size: .86rem; line-height: 1.3; }
+  #page-checkout .pm-icon { font-size: 1.15rem; }
+  #page-checkout .pm-badge { font-size: .62rem; padding: 2px 7px; }
+
+  /* Room for the sticky pay bar. */
+  #page-checkout .checkout-layout { padding-bottom: 96px; }
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   STICKY PAY BAR — mobile
+   Both pay buttons live at the bottom of .cart-summary-box, which on a
+   phone stacks under the form: about 2,400px of scrolling between
+   arriving at checkout and being able to pay. This puts the total and
+   the primary action permanently in reach, the way every native
+   checkout does. It calls the same initiatePayment()/initiateCOD()
+   handlers and mirrors the total straight out of the rendered summary,
+   so there is no second copy of the pricing maths to drift.
+   ═══════════════════════════════════════════════════════════════════ */
+#ozPayBar {
+  display: none;
+  position: fixed; left: 0; right: 0; bottom: 0; z-index: 900;
+  padding: 10px 14px calc(10px + env(safe-area-inset-bottom, 0px));
+  background: var(--paper-hi, #fff);
+  box-shadow: 0 -6px 26px rgba(101,113,102,.16);
+  align-items: center; gap: 12px;
+}
+#ozPayBar .opb-total { flex: 0 0 auto; line-height: 1.15; }
+#ozPayBar .opb-label { font-size: .62rem; letter-spacing: .07em; text-transform: uppercase; color: var(--t-low, #7a857b); }
+#ozPayBar .opb-amt   { font-size: 1.06rem; font-weight: 800; color: var(--t-hi, #1D2320); font-variant-numeric: tabular-nums; }
+#ozPayBar .opb-actions { margin-left: auto; display: flex; flex-direction: column; align-items: stretch; gap: 3px; }
+#ozPayBar .opb-pay {
+  border: none; border-radius: 13px; padding: 12px 20px; min-height: 46px;
+  font-size: .9rem; font-weight: 800; cursor: pointer;
+  background: var(--indigo, #547177); color: #fff; touch-action: manipulation;
+}
+#ozPayBar .opb-cod {
+  background: none; border: none; padding: 2px; cursor: pointer;
+  font-size: .7rem; font-weight: 700; color: var(--t-mid, #5B665C);
+  text-decoration: underline; touch-action: manipulation;
+}
+@media (max-width: 900px) {
+  body.oz-checkout #ozPayBar { display: flex; }
+  /* The WhatsApp button sits bottom-right and would cover the COD link. */
+  body.oz-checkout .wa-bubble,
+  body.oz-checkout .wa-float,
+  body.oz-checkout #waFloat {
+    bottom: calc(96px + env(safe-area-inset-bottom, 0px)) !important;
+  }
+}
+
+/* The ambient bubbles are decoration. They belong behind everything and
+   must never intercept a tap. */
+.particle { z-index: -1 !important; pointer-events: none !important; }
+</style>
+
+<script>
+/* Sticky pay bar wiring.
+   The amount is read out of the rendered summary rather than recomputed,
+   so it can never disagree with the figure the customer is looking at —
+   promo codes, VitaPoints, shipping and tier pricing all already land
+   there. A MutationObserver keeps it current as the summary re-renders. */
+(function () {
+  var bar = document.getElementById('ozPayBar');
+  if (!bar) return;
+  var amtEl = document.getElementById('ozPayBarAmt');
+
+  function readTotal() {
+    var row = document.querySelector('#ckSummary .sum-row.total span:last-child');
+    return row ? row.textContent.trim() : '';
+  }
+  function sync() {
+    var t = readTotal();
+    if (t) amtEl.textContent = t;
+    // COD is not offered on every cart; mirror the real button's state.
+    var cod = document.getElementById('codBtn');
+    var codLink = bar.querySelector('.opb-cod');
+    if (codLink) {
+      var hidden = !cod || cod.offsetParent === null || cod.disabled;
+      codLink.style.display = hidden ? 'none' : '';
+    }
+  }
+  function setActive() {
+    var pg = document.getElementById('page-checkout');
+    var on = !!pg && pg.classList.contains('active');
+    document.body.classList.toggle('oz-checkout', on);
+    if (on) sync();
+  }
+
+  var sum = document.getElementById('ckSummary');
+  if (sum && window.MutationObserver) {
+    new MutationObserver(sync).observe(sum, { childList: true, subtree: true, characterData: true });
+  }
+  // showPage() toggles .active on the page containers.
+  var pages = document.querySelector('.page') && document.querySelector('.page').parentNode;
+  if (pages && window.MutationObserver) {
+    new MutationObserver(setActive).observe(pages, { attributes: true, attributeFilter: ['class'], subtree: true });
+  }
+  document.addEventListener('DOMContentLoaded', setActive);
+  setActive();
+})();
+</script>
 
 <script>
 /* ══════════════════════════════════════════════════════════════════════
