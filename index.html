@@ -239,7 +239,7 @@ best supplement brand 2024 2025, Ozylix review, Ozylix vs competitors India, Mad
   <meta name="revisit-after" content="3 days">
   <meta name="rating" content="safe for all">
   <meta name="application-name" content="Ozylix">
-  <meta name="theme-color" content="#FBF3E8">
+  <meta name="theme-color" content="#F5F3F4">
 
   <!-- GEO — Local SEO signals -->
   <meta name="geo.region" content="IN-GJ">
@@ -2401,33 +2401,45 @@ best supplement brand 2024 2025, Ozylix review, Ozylix vs competitors India, Mad
    ════════════════════════════════════════════════════════════════════ */
 
 :root {
-  /* ── The surface. One tone; light and shadow do all the work. ── */
-  --paper:    #FBF3E8;   /* the page — warm parchment, from the cream swatch */
-  --paper-hi: #FFFFFF;   /* raised faces catch this */
-  --paper-lo: #EDE3D2;   /* sunk faces fall to this — deeper sand */
+  /* ── The surface ───────────────────────────────────────────────────
+     A premium white ground rather than the old parchment. Pure #FFFFFF
+     cannot carry neumorphism — the raised highlight is the same colour
+     as the page, so nothing reads — so the ground is a hair off white
+     and cards sit on true white above it. That 1.09:1 step is what
+     makes a card look lifted instead of drawn.
+     Faintly warm, not a cold grey, so the brand crimson sits on it
+     without clashing. ── */
+  --paper:    #F5F3F4;   /* the page — warm near-white */
+  --paper-hi: #FFFFFF;   /* raised faces: cards, sheets, inputs */
+  --paper-lo: #E9E5E7;   /* sunk faces */
   --white:    #FFFFFF;
 
-  /* ── Ink, sampled from the palette ── */
-  --ink:      #1D2320;   /* near-black — deep olive, not navy      */
-  --navy:     #454E46;   /* mid ink, same olive family             */
-  --indigo:   #547177;   /* primary accent — dusty sky-blue, deepened */
-  --indigo-lo:#3F565B;
-  --indigo-hi:#99CDD8;   /* the sky-blue swatch itself, for highlights */
-  --green:    #7D6259;   /* "powered by Ascovita" — clay, 5.0:1 on --paper */
-  --green-hi: #F3C3B2;   /* the peach swatch itself, for light accents */
+  /* ── Ink and accent, taken from the Ozylix logo itself ──────────────
+     The accent used to be #547177, a dusty sage-blue with no
+     relationship to the mark. The logo is crimson dots over a
+     maroon-to-crimson wordmark; those are the brand's actual colours and
+     they are what the site now uses. Contrast measured on the ground:
+     brand 4.9:1, brand-lo 7.9:1, ink 17.0:1. --indigo-hi is the logo's
+     own dot colour at 3.6:1 — fills and large type only, never body
+     text. The token NAMES are unchanged on purpose: ~1,100 inline styles
+     and the legacy bridge below call them. ── */
+  --ink:      #16121A;   /* near-black, faint plum cast */
+  --navy:     #46404A;   /* mid ink, same family */
+  --indigo:   #C0394A;   /* primary accent — Ozylix crimson */
+  --indigo-lo:#8E2333;   /* deeper crimson for text on light */
+  --indigo-hi:#D7535D;   /* the logo's dot colour, for fills and highlights */
+  --green:    #6B5560;   /* secondary — muted plum-grey */
+  --green-hi: #EBD9DC;   /* soft crimson wash */
 
-  /* ── Text — every tone drawn from the palette's own dark olive ── */
-  --t-hi:  #1D2320;
-  --t-mid: #5B665C;
-  /* Both steps were set by eye and fell under 4.5:1 on the parchment
-     (#657166 measured 4.66, #778278 only 3.66). Darkened along the same
-     olive so the hue is unchanged and every tone clears the threshold. */
-  --t-low: #5C6A5D;   /* 5.2:1 on --paper */
-  --t-dim: #5C6A59;   /* 5.0:1 on --paper, 4.8:1 on a raised card */
+  /* ── Text ── */
+  --t-hi:  #16121A;   /* 17.0:1 on --paper */
+  --t-mid: #5A5560;   /* 6.6:1  */
+  --t-low: #6B6570;   /* 5.2:1  */
+  --t-dim: #6B6570;   /* 5.2:1  */
 
-  /* ── Soft shadow, tinted with the olive rather than navy ── */
-  --sh-d: rgba(101,113,102,.14);
-  --sh-d2:rgba(101,113,102,.09);
+  /* ── Shadow, warmed to match the ground rather than tinted olive ── */
+  --sh-d: rgba(72,62,70,.13);
+  --sh-d2:rgba(72,62,70,.08);
   --sh-l: #FFFFFF;
 
   /* Neumorphic elevation. Raised = light top-left, shadow bottom-right. */
@@ -2437,12 +2449,12 @@ best supplement brand 2024 2025, Ozylix review, Ozylix vs competitors India, Mad
   --neo-4: 16px 16px 38px var(--sh-d), -12px -12px 30px var(--sh-l);
   --neo-in:    inset 3px 3px 7px var(--sh-d), inset -3px -3px 7px var(--sh-l);
   --neo-in-lg: inset 6px 6px 13px var(--sh-d), inset -5px -5px 11px var(--sh-l);
-  --lit-indigo: 0 6px 18px rgba(84,113,119,.28);
-  --lit-green:  0 6px 18px rgba(134,107,98,.22);
+  --lit-indigo: 0 6px 18px rgba(192,57,74,.26);
+  --lit-green:  0 6px 18px rgba(107,85,96,.20);
 
   /* Hairlines, used sparingly — the shadow is the edge */
-  --edge:    rgba(101,113,102,.08);
-  --edge-hi: rgba(101,113,102,.14);
+  --edge:    rgba(72,62,70,.09);
+  --edge-hi: rgba(72,62,70,.15);
 
   /* ── Status tints ──────────────────────────────────────────────────
      Badges and callouts were written with stock Tailwind-ish colours
@@ -2455,11 +2467,11 @@ best supplement brand 2024 2025, Ozylix review, Ozylix vs competitors India, Mad
      kept — green reads done, amber reads waiting — but each one is
      desaturated and warmed until it belongs on parchment. Every pair
      below clears WCAG AA on its own background (4.8:1 to 6.5:1). */
-  --st-ok-bg:     #E7F0E3;  --st-ok-fg:     #3D6642;   /* 5.7:1 */
-  --st-warn-bg:   #F7ECD8;  --st-warn-fg:   #845E15;   /* 5.0:1 */
-  --st-info-bg:   #E3EDEF;  --st-info-fg:   #3F565B;   /* 6.5:1 */
-  --st-danger-bg: #F8E5E6;  --st-danger-fg: #9E2F3F;   /* 5.9:1 */
-  --st-muted-bg:  #F1EADF;  --st-muted-fg:  #5C6A5D;   /* 4.8:1 */
+  --st-ok-bg:     #E6F1E8;  --st-ok-fg:     #2F6B41;   /* 5.9:1 */
+  --st-warn-bg:   #FBEEDA;  --st-warn-fg:   #8A5E12;   /* 5.3:1 */
+  --st-info-bg:   #E7EDF4;  --st-info-fg:   #3D566E;   /* 6.5:1 */
+  --st-danger-bg: #FBE7E9;  --st-danger-fg: #A32B3C;   /* 6.0:1 */
+  --st-muted-bg:  #EFEDEF;  --st-muted-fg:  #635D68;   /* 5.7:1 */
 
   /* ── Motion — soft, no bounce ── */
   --rise:   cubic-bezier(.16,1,.3,1);
@@ -2489,7 +2501,7 @@ best supplement brand 2024 2025, Ozylix review, Ozylix vs competitors India, Mad
   --gold: var(--indigo);
   --green-mid: var(--green);    --green-light: var(--green-hi);
   --green-pale: var(--paper);   --green-wash: var(--paper);
-  --gold-light: var(--indigo-hi); --gold-pale: rgba(84,113,119,.10);
+  --gold-light: var(--indigo-hi); --gold-pale: rgba(192,57,74,.10);
   --amber: var(--indigo);
   --cream: var(--paper);        --off-white: var(--paper);
   --dark: var(--t-hi);          --text: var(--t-hi);
@@ -2600,7 +2612,7 @@ a, button, [role="button"], input, select, textarea, label, summary,
 ul, ol { list-style: none; }
 table { border-collapse: collapse; width: 100%; }
 hr { border: none; height: 1px; background: var(--edge); }
-::selection { background: rgba(84,113,119,.16); color: var(--ink); }
+::selection { background: rgba(192,57,74,.16); color: var(--ink); }
 :focus-visible { outline: 2px solid var(--indigo); outline-offset: 3px; border-radius: 4px; }
 
 ::-webkit-scrollbar { width: 11px; height: 11px; }
@@ -2784,7 +2796,7 @@ body::before, body::after { content: none; }
 .btn-primary:hover, .shader-btn-primary:hover, .btn-gold:hover {
   background: var(--indigo-lo);
   transform: translateY(-2px);
-  box-shadow: 0 10px 26px rgba(84,113,119,.30);
+  box-shadow: 0 10px 26px rgba(192,57,74,.30);
 }
 .btn-primary:active, .shader-btn-primary:active, .btn-gold:active {
   transform: translateY(0); box-shadow: var(--neo-in);
@@ -2849,7 +2861,7 @@ button:disabled, .btn-primary:disabled, .btn-gold:disabled {
 .particle {
   position: fixed; bottom: -20px; z-index: 0; border-radius: 50%;
   pointer-events: none;
-  background: rgba(84,113,119,.09) !important;
+  background: rgba(192,57,74,.09) !important;
   box-shadow: none;
   animation: fz-rise linear infinite;
 }
@@ -3265,7 +3277,7 @@ img[src=""], img[data-awaiting-upload] { visibility: hidden; width: 100%; }
 .app-menu-item-badge {
   padding: 3px 9px; border-radius: 99px; font-size: .6rem; font-weight: 600;
   letter-spacing: .06em; text-transform: uppercase;
-  background: rgba(84,113,119,.10); color: var(--indigo);
+  background: rgba(192,57,74,.10); color: var(--indigo);
 }
 .app-menu-item-arrow, .app-more-arrow { color: var(--t-dim); font-size: 1.05rem; }
 .app-menu-footer { margin-top: 26px; padding-top: 20px; box-shadow: inset 0 1px 0 var(--edge); }
@@ -3345,7 +3357,7 @@ img[src=""], img[data-awaiting-upload] { visibility: hidden; width: 100%; }
 .sc-tier-info {
   padding: 12px 14px; margin-bottom: 14px; border-radius: var(--r-sm);
   font-size: .78rem; font-weight: 500; color: var(--green);
-  background: rgba(134,107,98,.07);
+  background: rgba(107,85,96,.07);
 }
 .sc-foot {
   padding: 18px 22px calc(env(safe-area-inset-bottom, 0px) + 20px);
@@ -3429,7 +3441,7 @@ img[src=""], img[data-awaiting-upload] { visibility: hidden; width: 100%; }
 }
 .auth-input:focus, .form-input:focus, .b2b-form-input:focus, .promo-input:focus,
 .refer-input:focus, .vita-lead-input:focus, .sort-sel:focus, textarea:focus, .footer-nl input:focus {
-  box-shadow: var(--neo-in), 0 0 0 2px rgba(84,113,119,.30);
+  box-shadow: var(--neo-in), 0 0 0 2px rgba(192,57,74,.30);
 }
 .auth-pw-wrap { position: relative; }
 .auth-pw-toggle { position: absolute; right: 14px; top: 50%; transform: translateY(-50%); font-size: .74rem; font-weight: 600; color: var(--t-dim); }
@@ -3453,7 +3465,7 @@ img[src=""], img[data-awaiting-upload] { visibility: hidden; width: 100%; }
   font-size: .82rem; font-weight: 500;
 }
 .auth-error   { background: rgba(192,48,74,.08); color: #A62740; }
-.auth-success { background: rgba(134,107,98,.09); color: var(--green); }
+.auth-success { background: rgba(107,85,96,.09); color: var(--green); }
 .auth-link { color: var(--t-mid); font-size: .85rem; font-weight: 400; text-align: center; }
 .auth-link a { color: var(--indigo-lo); font-weight: 700; cursor: pointer; }
 .auth-link:hover { text-decoration: underline; }
@@ -3470,7 +3482,7 @@ img[src=""], img[data-awaiting-upload] { visibility: hidden; width: 100%; }
 }
 .wa-btn:hover { transform: translateY(-3px) scale(1.04); }
 .wa-btn svg { width: 28px; height: 28px; }
-.wa-pulse { position: absolute; inset: 0; border-radius: 50%; box-shadow: 0 0 0 2px rgba(134,107,98,.28); animation: fz-pulse 2.6s var(--settle) infinite; }
+.wa-pulse { position: absolute; inset: 0; border-radius: 50%; box-shadow: 0 0 0 2px rgba(107,85,96,.28); animation: fz-pulse 2.6s var(--settle) infinite; }
 .wa-tooltip {
   position: absolute; right: 68px; top: 50%; transform: translateY(-50%);
   padding: 9px 14px; border-radius: var(--r-pill); white-space: nowrap;
@@ -3932,7 +3944,7 @@ img[src=""], img[data-awaiting-upload] { visibility: hidden; width: 100%; }
 }
 .rt-card:hover { transform: translateY(-5px); box-shadow: var(--neo-3); }
 .rt-card::before { content: none; }
-.rt-card.gold { box-shadow: var(--neo-2), 0 0 0 2px rgba(84,113,119,.18); }
+.rt-card.gold { box-shadow: var(--neo-2), 0 0 0 2px rgba(192,57,74,.18); }
 .rt-badge { font-size: 1.8rem; margin-bottom: 14px; }
 .rt-name { font-family: var(--font-display); font-size: 1.2rem; font-weight: 500; color: var(--ink); }
 .rt-pts { font-family: var(--font-display); font-size: 2rem; font-weight: 300; color: var(--indigo); margin: 10px 0 2px; }
@@ -3962,14 +3974,14 @@ img[src=""], img[data-awaiting-upload] { visibility: hidden; width: 100%; }
   transition: box-shadow var(--dur-2) var(--rise), transform var(--dur-2) var(--rise);
 }
 .b-prod-row:hover { transform: translateX(3px); box-shadow: var(--neo-2); }
-.b-prod-row.selected { box-shadow: var(--neo-in), 0 0 0 2px rgba(84,113,119,.25); }
+.b-prod-row.selected { box-shadow: var(--neo-in), 0 0 0 2px rgba(192,57,74,.25); }
 .b-prod-cb { width: 19px; height: 19px; flex: none; }
 .b-prod-img { width: 54px; height: 54px; flex: none; border-radius: 12px; object-fit: contain; padding: 5px; background: var(--paper); box-shadow: var(--neo-in); }
 .b-prod-info { flex: 1; min-width: 0; }
 .b-prod-name { font-size: .87rem; font-weight: 600; color: var(--ink); line-height: 1.3; }
 .b-prod-cat { font-size: .66rem; font-weight: 600; letter-spacing: .14em; text-transform: uppercase; color: var(--t-dim); margin-top: 3px; }
 .b-prod-price { font-size: .95rem; font-weight: 600; color: var(--indigo); white-space: nowrap; }
-.b-prod-badge { padding: 3px 9px; border-radius: 99px; font-size: .6rem; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; background: rgba(84,113,119,.10); color: var(--indigo-lo); }
+.b-prod-badge { padding: 3px 9px; border-radius: 99px; font-size: .6rem; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; background: rgba(192,57,74,.10); color: var(--indigo-lo); }
 .bundle-summary {
   position: sticky; top: 100px;
   padding: 28px; border-radius: var(--r-lg);
@@ -3985,7 +3997,7 @@ img[src=""], img[data-awaiting-upload] { visibility: hidden; width: 100%; }
 .bundle-row { display: flex; justify-content: space-between; align-items: baseline; padding: 9px 0; font-size: .87rem; color: var(--t-mid); }
 .bundle-row.total { font-family: var(--font-display); font-size: 1.3rem; font-weight: 500; color: var(--ink); padding-top: 14px; margin-top: 6px; box-shadow: inset 0 1px 0 var(--edge); }
 .bundle-divider { height: 1px; background: var(--edge); margin: 10px 0; }
-.bundle-savings-banner { display: none; padding: 13px 16px; margin-top: 16px; border-radius: var(--r-sm); font-size: .82rem; font-weight: 600; text-align: center; background: rgba(134,107,98,.08); color: var(--green); border: none; }
+.bundle-savings-banner { display: none; padding: 13px 16px; margin-top: 16px; border-radius: var(--r-sm); font-size: .82rem; font-weight: 600; text-align: center; background: rgba(107,85,96,.08); color: var(--green); border: none; }
 
 /* ══ REFERRAL ════════════════════════════════════════════════════ */
 .refer-section { position: relative; padding: clamp(48px, 6vw, 92px) 0; }
@@ -4131,7 +4143,7 @@ img[src=""], img[data-awaiting-upload] { visibility: hidden; width: 100%; }
   font-size: .625rem; font-weight: 800; letter-spacing: .07em; text-transform: uppercase;
   color: #fff;
   background: var(--indigo);
-  box-shadow: 0 3px 12px rgba(84,113,119,.36);
+  box-shadow: 0 3px 12px rgba(192,57,74,.36);
 }
 .p-disc-badge {
   position: absolute; top: 11px; right: 11px; z-index: 2;
@@ -4139,7 +4151,7 @@ img[src=""], img[data-awaiting-upload] { visibility: hidden; width: 100%; }
   font-size: .655rem; font-weight: 800;
   color: #fff;
   background: var(--indigo);
-  box-shadow: 0 3px 12px rgba(84,113,119,.4);
+  box-shadow: 0 3px 12px rgba(192,57,74,.4);
   font-variant-numeric: tabular-nums;
 }
 /* Actions surface out of the well on hover */
@@ -4163,7 +4175,7 @@ img[src=""], img[data-awaiting-upload] { visibility: hidden; width: 100%; }
   flex: 1; padding: 11px; border-radius: 12px;
   font-size: .8rem; font-weight: 800; color: #fff;
   background: var(--indigo);
-  box-shadow: 0 4px 14px rgba(84,113,119,.34);
+  box-shadow: 0 4px 14px rgba(192,57,74,.34);
   transition: transform var(--dur-2) var(--fizz), filter var(--dur-2) var(--rise);
 }
 .btn-qadd:hover {
@@ -4202,7 +4214,7 @@ img[src=""], img[data-awaiting-upload] { visibility: hidden; width: 100%; }
 .savings-pill {
   display: inline-block; padding: 4px 10px; border-radius: 99px;
   font-size: .68rem; font-weight: 800;
-  background: rgba(84,113,119,.14); color: var(--indigo); border: none;
+  background: rgba(192,57,74,.14); color: var(--indigo); border: none;
 }
 .live-viewers, .stock-urgency {
   display: inline-flex; align-items: center; gap: 7px;
@@ -4377,7 +4389,7 @@ img[src=""], img[data-awaiting-upload] { visibility: hidden; width: 100%; }
   box-shadow: var(--neo-1);
   transition: background var(--dur-1) var(--settle), transform var(--dur-2) var(--fizz);
 }
-.qty-btn:hover, .ck-qty-btn:hover { background: rgba(84,113,119,.24); transform: scale(1.06); }
+.qty-btn:hover, .ck-qty-btn:hover { background: rgba(192,57,74,.24); transform: scale(1.06); }
 .qty-num, .ck-qty-num { min-width: 42px; text-align: center; font-weight: 800; color: var(--t-hi); font-variant-numeric: tabular-nums; }
 
 .add-cart-btn, .buy-now-btn, .checkout-btn, .cfPayBtn, .gk-pay-btn, .sc-checkout-btn {
@@ -4416,8 +4428,8 @@ img[src=""], img[data-awaiting-upload] { visibility: hidden; width: 100%; }
 }
 .tier-tabs > button:hover, .qty-tiers-grid > *:hover { transform: translateY(-3px); background: var(--paper); }
 .tier-tabs > button.active, .tier-tabs > button.selected, .qty-tiers-grid > .selected {
-  border-color: transparent; background: rgba(84,113,119,.12);
-  box-shadow: 0 0 26px rgba(84,113,119,.16);
+  border-color: transparent; background: rgba(192,57,74,.12);
+  box-shadow: 0 0 26px rgba(192,57,74,.16);
 }
 .tier-rate { font-family: var(--font-display); font-size: 1.15rem; font-weight: 800; color: var(--t-hi); font-variant-numeric: tabular-nums; }
 .tier-disc { font-size: .72rem; font-weight: 800; color: var(--f-citrus); }
@@ -4447,7 +4459,7 @@ img[src=""], img[data-awaiting-upload] { visibility: hidden; width: 100%; }
 .tab.active { color: var(--t-hi); }
 .tab.active::after {
   content: ''; position: absolute; left: 14px; right: 14px; bottom: -1px; height: 2px;
-  background: var(--f-mineral); box-shadow: 0 0 10px rgba(84,113,119,.7);
+  background: var(--f-mineral); box-shadow: 0 0 10px rgba(192,57,74,.7);
 }
 .tab-content { display: none; }
 .tab-content.active { display: block; animation: fz-in .4s var(--rise) both; }
@@ -4468,7 +4480,7 @@ img[src=""], img[data-awaiting-upload] { visibility: hidden; width: 100%; }
 .rv-name { font-weight: 700; color: var(--t-hi); font-size: .88rem; }
 .rv-verified {
   padding: 3px 9px; border-radius: 99px; font-size: .62rem; font-weight: 800;
-  background: rgba(84,113,119,.14); color: var(--indigo); border: none;
+  background: rgba(192,57,74,.14); color: var(--indigo); border: none;
 }
 .rv-date { margin-left: auto; font-size: .72rem; color: var(--t-dim); }
 .rv-stars { color: var(--seal); letter-spacing: .1em; }
@@ -4552,14 +4564,14 @@ img[src=""], img[data-awaiting-upload] { visibility: hidden; width: 100%; }
   box-shadow: var(--neo-1);
   transition: background var(--dur-1) var(--settle);
 }
-.promo-apply-btn:hover { background: rgba(84,113,119,.2); }
+.promo-apply-btn:hover { background: rgba(192,57,74,.2); }
 .promo-remove { font-size: .74rem; color: var(--t-dim); }
 .promo-remove:hover { color: var(--f-guava); }
 .disc-applied {
   display: flex; align-items: center; justify-content: space-between; gap: 10px;
   padding: 11px 14px; border-radius: var(--r-sm); margin: 12px 0;
   font-size: .82rem; font-weight: 700;
-  background: rgba(84,113,119,.12); color: var(--indigo); border: none;
+  background: rgba(192,57,74,.12); color: var(--indigo); border: none;
 }
 .empty-cart, .wishlist-empty, .no-orders {
   text-align: center; padding: clamp(50px, 8vw, 92px) 20px;
@@ -4571,7 +4583,7 @@ img[src=""], img[data-awaiting-upload] { visibility: hidden; width: 100%; }
 /* Upsell rail */
 .upsell-bar {
   padding: 18px; border-radius: var(--r-lg); margin: 20px 0;
-  background: rgba(134,107,98,.08);
+  background: rgba(107,85,96,.08);
   border: none;
   box-shadow: var(--neo-1);
 }
@@ -4611,7 +4623,7 @@ textarea.form-input { min-height: 96px; resize: vertical; font-family: inherit; 
 .saved-address-bar {
   display: flex; align-items: center; gap: 14px; flex-wrap: wrap;
   padding: 15px 18px; margin-bottom: 20px; border-radius: var(--r-md);
-  background: rgba(84,113,119,.09);
+  background: rgba(192,57,74,.09);
   border: none;
   box-shadow: var(--neo-1);
 }
@@ -4636,8 +4648,8 @@ textarea.form-input { min-height: 96px; resize: vertical; font-family: inherit; 
 }
 .pay-method:hover { background: var(--paper); transform: translateX(3px); }
 .pay-method.selected {
-  border-color: transparent; background: rgba(84,113,119,.10);
-  box-shadow: 0 0 26px rgba(84,113,119,.14);
+  border-color: transparent; background: rgba(192,57,74,.10);
+  box-shadow: 0 0 26px rgba(192,57,74,.14);
 }
 .pm-info { flex: 1; min-width: 0; }
 .pm-info > *:first-child { font-size: .92rem; font-weight: 700; color: var(--t-hi); }
@@ -4657,7 +4669,7 @@ textarea.form-input { min-height: 96px; resize: vertical; font-family: inherit; 
 .ck-reco-price { font-size: .88rem; font-weight: 800; color: var(--f-mineral); font-variant-numeric: tabular-nums; }
 .ck-reco-badge {
   padding: 3px 8px; border-radius: 99px; font-size: .6rem; font-weight: 800; text-transform: uppercase;
-  background: rgba(84,113,119,.16); color: var(--indigo); border: 1px solid rgba(84,113,119,.3);
+  background: rgba(192,57,74,.16); color: var(--indigo); border: 1px solid rgba(192,57,74,.3);
 }
 .ck-reco-add-btn {
   padding: 9px 15px; border-radius: var(--r-pill);
@@ -4671,9 +4683,9 @@ textarea.form-input { min-height: 96px; resize: vertical; font-family: inherit; 
 .ty-ring {
   display: grid; place-items: center; width: 108px; height: 108px; margin: 0 auto 26px;
   border-radius: 50%; font-size: 3rem;
-  background: radial-gradient(circle at 38% 32%, rgba(107,240,218,.30), rgba(84,113,119,.08) 58%, transparent);
-  border: 2px solid rgba(84,113,119,.44);
-  box-shadow: 0 0 54px rgba(84,113,119,.26), inset 0 1px 0 rgba(255,255,255,.3);
+  background: radial-gradient(circle at 38% 32%, rgba(107,240,218,.30), rgba(192,57,74,.08) 58%, transparent);
+  border: 2px solid rgba(192,57,74,.44);
+  box-shadow: 0 0 54px rgba(192,57,74,.26), inset 0 1px 0 rgba(255,255,255,.3);
   animation: fz-pulse 3s var(--settle) infinite;
 }
 .ty-steps, .pf-steps { display: flex; justify-content: center; gap: clamp(18px, 4vw, 46px); flex-wrap: wrap; margin: 38px 0; }
@@ -4718,7 +4730,7 @@ textarea.form-input { min-height: 96px; resize: vertical; font-family: inherit; 
   box-shadow: var(--neo-1);
   transition: background var(--dur-1) var(--settle), transform var(--dur-2) var(--rise);
 }
-.order-track-btn:hover, .invoice-btn:hover { background: rgba(84,113,119,.2); transform: translateY(-2px); }
+.order-track-btn:hover, .invoice-btn:hover { background: rgba(192,57,74,.2); transform: translateY(-2px); }
 
 /* ══ SUBSCRIPTIONS ════════════════════════════════════════════════ */
 .sub-grid { display: grid; gap: 18px; grid-template-columns: repeat(auto-fit, minmax(252px, 1fr)); align-items: stretch; }
@@ -4733,7 +4745,7 @@ textarea.form-input { min-height: 96px; resize: vertical; font-family: inherit; 
 .sub-card:hover { transform: translateY(-6px); box-shadow: var(--sink-3); }
 .sub-card.sub-popular, .sub-popular {
   border-color: transparent;
-  box-shadow: var(--sink-2), 0 0 44px rgba(84,113,119,.14);
+  box-shadow: var(--sink-2), 0 0 44px rgba(192,57,74,.14);
 }
 .sub-name { font-family: var(--font-display); font-size: 1.2rem; font-weight: 800; letter-spacing: -.03em; color: var(--t-hi); }
 .sub-price { font-family: var(--font-display); font-size: 2.2rem; font-weight: 800; color: var(--t-hi); margin: 12px 0 4px; font-variant-numeric: tabular-nums; }
@@ -4769,7 +4781,7 @@ textarea.form-input { min-height: 96px; resize: vertical; font-family: inherit; 
 }
 .pkg-banner {
   padding: 20px 24px; border-radius: var(--r-lg); margin-bottom: 24px;
-  background: rgba(134,107,98,.09); border: none; box-shadow: var(--neo-1);
+  background: rgba(107,85,96,.09); border: none; box-shadow: var(--neo-1);
 }
 .pkg-banner-list { display: grid; gap: 9px; margin-top: 12px; }
 .pkg-banner-item { position: relative; padding-left: 22px; font-size: .84rem; color: var(--t-mid); }
@@ -4809,8 +4821,8 @@ textarea.form-input { min-height: 96px; resize: vertical; font-family: inherit; 
   background: var(--paper); border: none; box-shadow: var(--neo-1);
   transition: transform var(--dur-2) var(--rise), border-color var(--dur-1) var(--settle), background var(--dur-1) var(--settle);
 }
-.qm-opt:hover { transform: translateX(4px); background: rgba(84,113,119,.10); border-color: transparent; color: var(--t-hi); }
-.qm-opt.selected, .qm-opt.sel { border-color: transparent; background: rgba(84,113,119,.14); color: var(--t-hi); }
+.qm-opt:hover { transform: translateX(4px); background: rgba(192,57,74,.10); border-color: transparent; color: var(--t-hi); }
+.qm-opt.selected, .qm-opt.sel { border-color: transparent; background: rgba(192,57,74,.14); color: var(--t-hi); }
 .qm-opt-ico { font-size: 1.3rem; flex: none; }
 .qm-nav { display: flex; justify-content: space-between; gap: 12px; margin-top: 24px; }
 .qm-back { padding: 12px 22px; border-radius: var(--r-pill); font-weight: 700; color: var(--t-mid); background: var(--paper); border: none; }
@@ -4854,7 +4866,7 @@ textarea.form-input { min-height: 96px; resize: vertical; font-family: inherit; 
 .about-stats-grid > * { position: relative; padding: 20px 18px; text-align: center; }
 .about-stats-grid > * + *::before {
   content: ''; position: absolute; left: 0; top: 20%; bottom: 20%; width: 1px;
-  background: linear-gradient(180deg, transparent, rgba(84,113,119,.26), transparent);
+  background: linear-gradient(180deg, transparent, rgba(192,57,74,.26), transparent);
 }
 .about-team-grid { display: grid; gap: 18px; grid-template-columns: repeat(auto-fit, minmax(212px, 1fr)); }
 .about-contact-grid { display: grid; gap: 18px; grid-template-columns: repeat(auto-fit, minmax(232px, 1fr)); }
@@ -4863,7 +4875,7 @@ textarea.form-input { min-height: 96px; resize: vertical; font-family: inherit; 
 .about-timeline { position: relative; padding-left: 34px; }
 .about-timeline::before {
   content: ''; position: absolute; left: 10px; top: 8px; bottom: 8px; width: 2px;
-  background: linear-gradient(180deg, transparent, rgba(84,113,119,.4) 12%, rgba(84,113,119,.4) 88%, transparent);
+  background: linear-gradient(180deg, transparent, rgba(192,57,74,.4) 12%, rgba(192,57,74,.4) 88%, transparent);
 }
 .at-item { position: relative; padding-bottom: 34px; }
 .at-dot {
@@ -4871,7 +4883,7 @@ textarea.form-input { min-height: 96px; resize: vertical; font-family: inherit; 
   width: 14px; height: 14px; border-radius: 50%;
   background: var(--f-mineral);
   border: 3px solid var(--w-deep);
-  box-shadow: 0 0 14px rgba(84,113,119,.7);
+  box-shadow: 0 0 14px rgba(192,57,74,.7);
 }
 .at-year, .at-yr-n {
   font-family: var(--font-display); font-size: .82rem; font-weight: 800;
@@ -4898,7 +4910,7 @@ textarea.form-input { min-height: 96px; resize: vertical; font-family: inherit; 
 .value-ico {
   display: grid; place-items: center; width: 54px; height: 54px; margin-bottom: 16px;
   border-radius: 17px; font-size: 1.5rem;
-  background: rgba(84,113,119,.12);
+  background: rgba(192,57,74,.12);
   box-shadow: var(--neo-1);
 }
 .value-ico svg { width: 30px; height: 30px; }
@@ -4918,7 +4930,7 @@ textarea.form-input { min-height: 96px; resize: vertical; font-family: inherit; 
 .b2b-eyebrow {
   display: inline-block; margin-bottom: 15px; padding-bottom: 7px;
   font-size: .68rem; font-weight: 800; letter-spacing: .18em; text-transform: uppercase;
-  color: var(--seal); border-bottom: 1px solid rgba(134,107,98,.32);
+  color: var(--seal); border-bottom: 1px solid rgba(107,85,96,.32);
 }
 .b2b-title {
   font-family: var(--font-display); font-size: clamp(2.3rem, 5.4vw, 4.2rem);
@@ -4990,7 +5002,7 @@ textarea.b2b-form-input { min-height: 110px; resize: vertical; font-family: inhe
   padding: 15px 28px; border-radius: var(--r-pill);
   font-size: .9rem; font-weight: 800; color: #fff;
   background: var(--green);
-  box-shadow: 0 8px 24px rgba(134,107,98,.34);
+  box-shadow: 0 8px 24px rgba(107,85,96,.34);
   transition: transform var(--dur-2) var(--fizz), filter var(--dur-2) var(--rise);
 }
 .b2b-wa-btn:hover { transform: translateY(-3px); filter: brightness(1.06); }
@@ -5032,7 +5044,7 @@ textarea.b2b-form-input { min-height: 110px; resize: vertical; font-family: inhe
 .c-ico {
   display: grid; place-items: center; width: 46px; height: 46px; flex: none;
   border-radius: 14px; font-size: 1.2rem;
-  background: rgba(84,113,119,.12); box-shadow: var(--neo-1);
+  background: rgba(192,57,74,.12); box-shadow: var(--neo-1);
 }
 .c-info-title { font-size: .68rem; font-weight: 800; letter-spacing: .14em; text-transform: uppercase; color: var(--t-dim); margin-bottom: 5px; }
 .c-info-val { font-size: .93rem; font-weight: 600; color: var(--t-hi); line-height: 1.5; }
@@ -5054,10 +5066,10 @@ textarea.b2b-form-input { min-height: 110px; resize: vertical; font-family: inhe
 .faq-icon {
   display: grid; place-items: center; width: 30px; height: 30px; flex: none;
   border-radius: 50%; font-size: 1rem; color: var(--f-mineral);
-  background: rgba(84,113,119,.10); border: none;
+  background: rgba(192,57,74,.10); border: none;
   transition: transform var(--dur-3) var(--fizz), background var(--dur-2) var(--rise);
 }
-.faq-item.open .faq-icon { transform: rotate(135deg); background: rgba(84,113,119,.24); }
+.faq-item.open .faq-icon { transform: rotate(135deg); background: rgba(192,57,74,.24); }
 .faq-a { display: grid; grid-template-rows: 0fr; transition: grid-template-rows var(--dur-3) var(--rise); }
 .faq-a > * { overflow: hidden; }
 .faq-item.open .faq-a, .faq-a.open { grid-template-rows: 1fr; }
@@ -5081,7 +5093,7 @@ textarea.b2b-form-input { min-height: 110px; resize: vertical; font-family: inhe
 .blog-tag {
   align-self: flex-start; padding: 4px 11px; border-radius: 99px;
   font-size: .625rem; font-weight: 800; letter-spacing: .1em; text-transform: uppercase;
-  background: rgba(84,113,119,.12); color: var(--indigo-lo); border: none;
+  background: rgba(192,57,74,.12); color: var(--indigo-lo); border: none;
 }
 .blog-title { font-family: var(--font-display); font-size: 1.12rem; font-weight: 700; letter-spacing: -.032em; line-height: 1.24; color: var(--t-hi); }
 .blog-exc { font-size: .855rem; color: var(--t-low); line-height: 1.62; }
@@ -5152,7 +5164,7 @@ textarea.b2b-form-input { min-height: 110px; resize: vertical; font-family: inhe
 }
 .vita-chat-hdr {
   display: flex; align-items: center; gap: 13px; padding: 16px 20px; flex: none;
-  background: rgba(84,113,119,.06);
+  background: rgba(192,57,74,.06);
   border-bottom: 1px solid var(--edge);
 }
 .vita-chat-avatar {
@@ -5184,10 +5196,10 @@ textarea.b2b-form-input { min-height: 110px; resize: vertical; font-family: inhe
 .vita-chip-btn {
   padding: 9px 16px; border-radius: var(--r-pill);
   font-size: .8rem; font-weight: 600; color: var(--f-mineral);
-  background: rgba(84,113,119,.10); border: none;
+  background: rgba(192,57,74,.10); border: none;
   transition: background var(--dur-1) var(--settle), transform var(--dur-2) var(--fizz);
 }
-.vita-chip-btn:hover { background: rgba(84,113,119,.22); transform: translateY(-2px); }
+.vita-chip-btn:hover { background: rgba(192,57,74,.22); transform: translateY(-2px); }
 .vita-rec-card {
   display: flex; align-items: center; gap: 13px;
   padding: 13px; border-radius: var(--r-md);
@@ -5243,7 +5255,7 @@ textarea.b2b-form-input { min-height: 110px; resize: vertical; font-family: inhe
 .brochure-label {
   display: inline-block; padding: 4px 10px; border-radius: 99px; margin-bottom: 9px;
   font-size: .62rem; font-weight: 800; letter-spacing: .1em; text-transform: uppercase;
-  background: rgba(134,107,98,.14); color: var(--seal); border: none;
+  background: rgba(107,85,96,.14); color: var(--seal); border: none;
 }
 .brochure-title { font-family: var(--font-display); font-size: 1.05rem; font-weight: 700; letter-spacing: -.028em; color: var(--t-hi); margin-bottom: 7px; }
 .brochure-desc { font-size: .82rem; color: var(--t-low); line-height: 1.58; }
@@ -5255,7 +5267,7 @@ textarea.b2b-form-input { min-height: 110px; resize: vertical; font-family: inhe
   z-index: 990; padding: 14px 24px; border-radius: var(--r-pill);
   font-size: .875rem; font-weight: 700; color: var(--t-hi);
   background: var(--paper); border: none;
-  box-shadow: var(--sink-3), 0 0 32px rgba(84,113,119,.16);
+  box-shadow: var(--sink-3), 0 0 32px rgba(192,57,74,.16);
   backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px);
   opacity: 0; pointer-events: none;
   transition: opacity var(--dur-2) var(--rise), transform var(--dur-3) var(--fizz);
@@ -5505,7 +5517,7 @@ textarea.b2b-form-input { min-height: 110px; resize: vertical; font-family: inhe
 .ck-reco-add-btn, .pay-error-try, .qm-next, .sa-use-btn, .upsell-add,
 .btn-export-solid, .vita-rec-add, .vita-send-btn, .btn-qadd,
 .wa-btn, .wa-open-btn, .app-menu-wa-btn, .b2b-wa-btn {
-  --accent-gl: 84,113,119;
+  --accent-gl: 192,57,74;
   --accent-lo: var(--indigo-lo);
   color: var(--accent-lo);
   background: var(--face-warm);
@@ -5633,7 +5645,7 @@ textarea.b2b-form-input { min-height: 110px; resize: vertical; font-family: inhe
 /* Selected states are tinted, not inverted. */
 .cpill.active, .auth-tab.active, .account-nav-item.active {
   color: var(--indigo-lo); background: var(--sky-bg);
-  box-shadow: inset 0 0 0 1.4px rgba(84,113,119,.32);
+  box-shadow: inset 0 0 0 1.4px rgba(192,57,74,.32);
 }
 .tier-tabs > button.active, .tier-tabs > button.selected, .qty-tiers-grid > .selected {
   color: var(--fern-lo); background: var(--fern-bg);
@@ -5732,7 +5744,7 @@ button, [role="button"] {
   width: 108px; height: 108px; margin: 0 auto 14px; border-radius: 50%;
   display: grid; place-items: center;
   background: conic-gradient(var(--harbour), var(--fern), var(--harbour));
-  box-shadow: 0 0 0 6px var(--white), 0 10px 30px rgba(84,113,119,.32);
+  box-shadow: 0 0 0 6px var(--white), 0 10px 30px rgba(192,57,74,.32);
   animation: vb-spin 2.4s linear infinite;
 }
 @keyframes vb-spin { to { transform: rotate(360deg) } }
@@ -6021,24 +6033,24 @@ var PROMO_MEDIA = [
 <!-- ═══ APP BOTTOM NAVIGATION (mobile only) ═══ -->
 <nav class="app-bottom-nav" id="appBottomNav">
   <button class="app-nav-item active" id="appNav-home" onclick="showPage('home');setAppNav('home')">
-    <span class="app-nav-icon">🏠</span>
+    <span class="app-nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 10.4 12 3.5l9 6.9"/><path d="M5.4 9.2V19a1.4 1.4 0 0 0 1.4 1.4h3.1v-4.7h4.2v4.7h3.1A1.4 1.4 0 0 0 18.6 19V9.2"/></svg></span>
     <span class="app-nav-label">Home</span>
   </button>
   <button class="app-nav-item" id="appNav-shop" onclick="showPage('shop');setAppNav('shop')">
-    <span class="app-nav-icon">🛍️</span>
+    <span class="app-nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5.2 7.6h13.6l-1 12a1.4 1.4 0 0 1-1.4 1.3H7.6a1.4 1.4 0 0 1-1.4-1.3z"/><path d="M8.8 7.6V6.2a3.2 3.2 0 0 1 6.4 0v1.4"/></svg></span>
     <span class="app-nav-label">Shop</span>
   </button>
   <button class="app-nav-item" id="appNav-advisor" onclick="showPage('advisor');setAppNav('advisor')">
-    <span class="app-nav-icon">🌿</span>
+    <span class="app-nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 20.5c0-5.6 3-9.6 8-10.6-.4 5.8-3.4 9.4-8 10.6z"/><path d="M12 20.5C12 15.4 9.3 11.7 4.8 10.8c.4 5.3 3.1 8.6 7.2 9.7z"/><path d="M12 20.5v-6.2"/></svg></span>
     <span class="app-nav-label">Advisor</span>
   </button>
   <button class="app-nav-item" id="appNav-cart" onclick="openSideCart();setAppNav('cart')" style="position:relative;">
-    <span class="app-nav-icon">🛒</span>
+    <span class="app-nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 4.5h2.1l2.2 10.2a1.4 1.4 0 0 0 1.4 1.1h7.9a1.4 1.4 0 0 0 1.4-1.1L20 8.1H6.2"/><circle cx="9.4" cy="19.4" r="1.4"/><circle cx="16.6" cy="19.4" r="1.4"/></svg></span>
     <span class="app-nav-label">Cart</span>
     <span class="app-nav-dot" id="appNavCartDot" style="display:none">0</span>
   </button>
   <button class="app-nav-item" id="appNav-account" onclick="handleAccountNavClick();setAppNav('account')">
-    <span class="app-nav-icon">👤</span>
+    <span class="app-nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="8.4" r="3.6"/><path d="M4.9 20.2a7.4 7.4 0 0 1 14.2 0"/></svg></span>
     <span class="app-nav-label">Account</span>
   </button>
 
@@ -8273,7 +8285,7 @@ function renderCheckoutSummary() {
             </div>
           </div>
           <div style="display:flex;gap:12px;flex-wrap:wrap">
-            <button onclick="showPage('shop')" style="display:inline-flex;align-items:center;gap:8px;background:var(--face-warm);color:var(--indigo-lo);box-shadow:inset 0 0 0 1.5px rgba(84,113,119,.32);border:none;border-radius:100px;padding:14px 26px;font-weight:800;font-size:.88rem;cursor:pointer;font-family:var(--font-body)">&#127807; Shop Our Products</button>
+            <button onclick="showPage('shop')" style="display:inline-flex;align-items:center;gap:8px;background:var(--face-warm);color:var(--indigo-lo);box-shadow:inset 0 0 0 1.5px rgba(192,57,74,.32);border:none;border-radius:100px;padding:14px 26px;font-weight:800;font-size:.88rem;cursor:pointer;font-family:var(--font-body)">&#127807; Shop Our Products</button>
             <button onclick="openWhatsApp('Hello Ozylix! I want to learn more about your products.')" style="display:inline-flex;align-items:center;gap:8px;background:rgba(255,255,255,.12);color:var(--t-hi);border:2px solid rgba(255,255,255,.3);border-radius:100px;padding:13px 22px;font-weight:600;font-size:.86rem;cursor:pointer;font-family:var(--font-body)">&#128172; WhatsApp Us</button>
           </div>
         </div>
@@ -16061,7 +16073,12 @@ function addBundleToCart(){const sel=[...selectedBundleIds].map(id=>PRODUCTS.fin
 let stickyQty=1,stickyProdId=null;
 function initStickyCart(prod){if(!prod)return;stickyProdId=prod.id;stickyQty=1;const ne=document.getElementById('scProdName'),pe=document.getElementById('scProdPrice'),qe=document.getElementById('scQtyVal');if(ne)ne.textContent=prod.name;if(pe)pe.textContent='₹'+(prod.salePrice||prod.price);if(qe)qe.textContent=1;const sc=document.getElementById('stickyCart'),ab=document.getElementById('addCartBtn');if(!sc||!ab)return;const obs=new IntersectionObserver(en=>{if(!en[0].isIntersecting){sc.style.display='flex';requestAnimationFrame(()=>{sc.style.transform='translateY(0)';});}else{sc.style.transform='translateY(100%)';setTimeout(()=>{if(sc.style.transform==='translateY(100%)')sc.style.display='none';},300);}},{threshold:0.1});obs.observe(ab);}
 function scQtyChange(d){stickyQty=Math.max(1,stickyQty+d);const e=document.getElementById('scQtyVal');if(e)e.textContent=stickyQty;}
-function scAddToCart(){if(!stickyProdId)return;STORE.addToCart(stickyProdId,stickyQty);openSideCart();showPtsToast('+5 VitaPoints earned!');}
+// Nothing is earned by adding to a cart. Points are created when the order
+// is placed (prepaid) or when the courier delivers it and collects the cash
+// (COD), and the rate is 5 per ₹100 at the base tier — so a flat "+5
+// earned" on add-to-cart was wrong about the trigger AND the amount. The
+// nudge is worth keeping; the false claim is not.
+function scAddToCart(){if(!stickyProdId)return;STORE.addToCart(stickyProdId,stickyQty);openSideCart();showPtsToast('Earns VitaPoints when delivered');}
 
 function renderStockUrgency(prod){const el=document.getElementById('stockUrgency');if(!el||!prod)return;const stock=prod.stock||prod.inventory||0;if(stock<=0||stock>50){el.innerHTML='';return;}const pct=Math.min(100,Math.round((stock/50)*100)),cls=stock<=10?'danger':stock<=25?'warning':'ok',msg=stock<=10?'Only '+stock+' left — selling fast!':'Low stock — only '+stock+' remaining';el.innerHTML='<div class="su-low"'+(stock>10?' style="background:var(--st-warn-bg);border-color:var(--st-warn-fg);color:var(--f-citrus)"':'')+'><span class="su-dot"'+(stock>10?' style="background:var(--f-citrus)"':'')+'><\/span>'+msg+'<\/div><div class="su-bar"><div class="su-bar-fill '+cls+'" style="width:'+pct+'%"><\/div><\/div>';}
 function startLiveViewers(){const el=document.getElementById('liveViewerCount');if(!el)return;let n=8+Math.floor(Math.random()*16);el.textContent=n;setInterval(()=>{n=Math.max(5,Math.min(30,n+(Math.random()>.5?1:-1)*Math.floor(Math.random()*3+1)));el.textContent=n;},6500);}
@@ -16070,7 +16087,7 @@ function copyReferLink(){const inp=document.getElementById('referLink');if(!inp)
 
 document.addEventListener('DOMContentLoaded',function(){
   if(document.getElementById('bundleProdList')&&typeof PRODUCTS!=='undefined')renderBundleBuilder();
-  if(typeof addToCartWithTier==='function'){const _o=addToCartWithTier;window.addToCartWithTier=function(id){_o(id);showPtsToast('+5 VitaPoints earned!');};}
+  if(typeof addToCartWithTier==='function'){const _o=addToCartWithTier;window.addToCartWithTier=function(id){_o(id);showPtsToast('Earns VitaPoints when delivered');};}
 });
 document.addEventListener('productPageShown',function(e){const prod=e.detail;if(!prod)return;initStickyCart(prod);renderStockUrgency(prod);startLiveViewers();});
 
@@ -16352,7 +16369,7 @@ function vitaSubmitLead() {
 
 </script>
 
-<div id="stickyCart" style="position:fixed;bottom:0;left:0;right:0;z-index:800;display:none;align-items:center;gap:12px;padding:10px 14px;transform:translateY(100%);background:var(--paper);box-shadow:0 -1px 0 var(--edge),0 -10px 30px rgba(101,113,102,.10)">
+<div id="stickyCart" style="position:fixed;bottom:0;left:0;right:0;z-index:800;display:none;align-items:center;gap:12px;padding:10px 14px;transform:translateY(100%);background:var(--paper);box-shadow:0 -1px 0 var(--edge),0 -10px 30px rgba(72,62,70,.10)">
   <div style="flex:1;min-width:0">
     <div id="scProdName" style="font-size:.78rem;font-weight:700;color:var(--t-hi);white-space:nowrap;overflow:hidden;text-overflow:ellipsis"></div>
     <div id="scProdPrice" style="font-size:.92rem;font-weight:800;color:var(--f-mineral);font-variant-numeric:tabular-nums"></div>
@@ -17090,7 +17107,7 @@ button:active, .btn-primary:active, .btn-outline:active,
   gap: 1px; margin: 22px 0;
   border-radius: var(--r-md);
   background: var(--paper);
-  box-shadow: var(--neo-in, inset 0 1px 3px rgba(101,113,102,.10));
+  box-shadow: var(--neo-in, inset 0 1px 3px rgba(72,62,70,.10));
   overflow: hidden;
 }
 .az-trust-item {
@@ -17101,7 +17118,7 @@ button:active, .btn-primary:active, .btn-outline:active,
 }
 .az-trust-item + .az-trust-item::before {
   content: ''; position: absolute; left: 0; top: 22%; bottom: 22%; width: 1px;
-  background: var(--edge-hi, rgba(101,113,102,.14));
+  background: var(--edge-hi, rgba(72,62,70,.14));
 }
 .az-trust-ico { width: 20px; height: 20px; color: var(--green); flex: none; }
 .az-trust-t {
@@ -17113,7 +17130,7 @@ button:active, .btn-primary:active, .btn-outline:active,
   .az-trust { grid-template-columns: repeat(2, 1fr); }
   .az-trust-item:nth-child(3)::before, .az-trust-item:nth-child(1)::before { display: none; }
   .az-trust-item:nth-child(3), .az-trust-item:nth-child(4) {
-    box-shadow: 0 -1px 0 var(--edge-hi, rgba(101,113,102,.14));
+    box-shadow: 0 -1px 0 var(--edge-hi, rgba(72,62,70,.14));
   }
 }
 /* Compact form for the pay step — one line, no icons competing with the button */
@@ -17124,10 +17141,39 @@ button:active, .btn-primary:active, .btn-outline:active,
 /* ── 4 · BOTTOM NAV ───────────────────────────────────────────────────
    Adds the moving indicator and home-bar clearance that make a tab bar
    read as native rather than as five links pinned to the bottom. */
+/* ── Bottom nav ────────────────────────────────────────────────────────
+   Was five emoji on a cold rgba(241,243,248,.96) strip — a blue-grey that
+   belonged to neither the old parchment nor the new near-white ground, and
+   emoji that render in each platform's own house style rather than the
+   brand's. Now stroke icons that take currentColor, on the page's own tone,
+   with the active item pressed INTO the surface rather than merely
+   recoloured. That inset is what makes a neumorphic bar read as a physical
+   control instead of a flat row. ── */
 .app-bottom-nav {
-  padding-bottom: calc(6px + env(safe-area-inset-bottom, 0px)) !important;
-  box-shadow: 0 -1px 0 var(--edge), 0 -12px 28px rgba(101,113,102,.07);
+  padding: 7px 6px calc(7px + env(safe-area-inset-bottom, 0px)) !important;
+  background: var(--paper) !important;
+  box-shadow: 0 -1px 0 var(--edge), 0 -12px 30px rgba(72,62,70,.08);
 }
+.app-nav-item {
+  min-height: 50px;
+  border-radius: 15px;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+  transition: color var(--dur-1) var(--settle), box-shadow var(--dur-2) var(--settle);
+}
+.app-nav-item.active {
+  color: var(--indigo);
+  box-shadow: var(--neo-in);
+}
+.app-nav-icon {
+  display: grid; place-items: center;
+  width: 24px; height: 24px;
+  transition: transform var(--dur-2) var(--rise);
+}
+.app-nav-icon svg { width: 22px; height: 22px; display: block; }
+.app-nav-label { letter-spacing: .01em; }
+/* The underline and the inset together were too much; the press carries it. */
+.app-nav-item::after { display: none; }
 .app-nav-item {
   position: relative;
   transition: color .18s var(--settle, ease);
@@ -17189,7 +17235,7 @@ button:active, .btn-primary:active, .btn-outline:active,
   width: 42px; height: 42px; border-radius: 50%;
   display: grid; place-items: center;
   background: var(--paper); color: var(--t-hi);
-  box-shadow: var(--neo-2, 0 6px 18px rgba(101,113,102,.18));
+  box-shadow: var(--neo-2, 0 6px 18px rgba(72,62,70,.18));
   border: none; cursor: pointer;
   opacity: 0; pointer-events: none; transform: translateY(10px);
   transition: opacity .22s ease, transform .22s var(--rise, ease);
@@ -17571,6 +17617,28 @@ img.az-fade.az-in{opacity:1}
 }
 
 /* ═══════════════════════════════════════════════════════════════════
+   PROMO CARDS — the text column was being crushed to nothing
+   .promo-card is flex:0 0 min(78vw,430px) with align-items:stretch, and
+   .promo-card-media is aspect-ratio:1/1. On a 360px screen that card is
+   281px wide and 268px tall, so the square image claimed 268px of it and
+   left 13px for the text. Measured: .promo-perk needed 154px and got 29.
+   Everything in that column was ellipsised down to a character or two.
+   Capping the image share gives the text roughly two thirds back.
+   ═══════════════════════════════════════════════════════════════════ */
+@media (max-width: 700px) {
+  .promo-card { flex: 0 0 min(86vw, 400px); min-height: 232px; }
+  .promo-card-media {
+    flex: 0 0 38%;
+    max-width: 38%;
+    aspect-ratio: auto;      /* height comes from the card, not the width */
+    align-self: stretch;
+  }
+  .promo-card-text { padding: 20px 16px 20px 18px; }
+  .promo-perk { font-size: .56rem; padding: 4px 9px; }
+  .promo-card-cta { width: 100%; justify-content: center; }
+}
+
+/* ═══════════════════════════════════════════════════════════════════
    CHECKOUT — shorter on a phone
    The form is ten fields. At ≤600px `.form-row` collapsed every pair to
    one column, so name, city/state and pin/country each took two full
@@ -17655,8 +17723,8 @@ img.az-fade.az-in{opacity:1}
   /* Page tone, not white: this is an extruded surface in the same
      neumorphic system as everything else, and a white slab on parchment
      reads as a different material. */
-  background: var(--paper, #FBF3E8);
-  box-shadow: 0 -1px 0 var(--edge), 0 -8px 28px rgba(101,113,102,.14);
+  background: var(--paper, #F5F3F4);
+  box-shadow: 0 -1px 0 var(--edge), 0 -8px 28px rgba(72,62,70,.14);
   align-items: center; gap: 12px;
 }
 #ozPayBar .opb-total { flex: 0 0 auto; line-height: 1.15; }
