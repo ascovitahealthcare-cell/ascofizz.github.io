@@ -2444,6 +2444,23 @@ best supplement brand 2024 2025, Ozylix review, Ozylix vs competitors India, Mad
   --edge:    rgba(101,113,102,.08);
   --edge-hi: rgba(101,113,102,.14);
 
+  /* ── Status tints ──────────────────────────────────────────────────
+     Badges and callouts were written with stock Tailwind-ish colours
+     straight in style attributes — var(--st-info-bg)/var(--st-info-fg) blue chips,
+     var(--st-warn-bg)/var(--st-warn-fg) orange, var(--st-ok-bg)/var(--st-ok-fg) mint, var(--st-warn-bg) yellow, #eee
+     rules. 45 different hardcoded colours across 73 inline styles, none
+     of them from this palette, which is why the page reads as mixed.
+
+     A status still has to be legible AS a status, so the hue meaning is
+     kept — green reads done, amber reads waiting — but each one is
+     desaturated and warmed until it belongs on parchment. Every pair
+     below clears WCAG AA on its own background (4.8:1 to 6.5:1). */
+  --st-ok-bg:     #E7F0E3;  --st-ok-fg:     #3D6642;   /* 5.7:1 */
+  --st-warn-bg:   #F7ECD8;  --st-warn-fg:   #845E15;   /* 5.0:1 */
+  --st-info-bg:   #E3EDEF;  --st-info-fg:   #3F565B;   /* 6.5:1 */
+  --st-danger-bg: #F8E5E6;  --st-danger-fg: #9E2F3F;   /* 5.9:1 */
+  --st-muted-bg:  #F1EADF;  --st-muted-fg:  #5C6A5D;   /* 4.8:1 */
+
   /* ── Motion — soft, no bounce ── */
   --rise:   cubic-bezier(.16,1,.3,1);
   --fizz:   cubic-bezier(.2,1.02,.3,1);
@@ -5452,10 +5469,21 @@ textarea.b2b-form-input { min-height: 110px; resize: vertical; font-family: inhe
    each one carries a meaning rather than a decoration.
    ═══════════════════════════════════════════════════════════════════ */
 :root {
-  /* The three faces a card or button is ever allowed to be. */
-  --face:      #FFFFFF;   /* white     — cards, panels        */
-  --face-soft: #FCF7EF;   /* off-white — secondary controls   */
-  --face-warm: #FFFBF3;   /* cream     — primary actions      */
+  /* The three faces a card or button is ever allowed to be.
+     These were literal hex values, which made this a SECOND surface
+     system running alongside --paper / --paper-hi / --paper-lo from the
+     first :root. Measured on the live page, four different tones were
+     carrying the same neumorphic shadow — 108 elements on #FBF3E8, 39 on
+     #FFFFFF, 33 on #FFFBF3 and 3 on #FCF7EF.
+     Neumorphism is an extrusion illusion: it only reads when the raised
+     face is the SAME tone as the surface behind it. Four tones 4-8 RGB
+     apart do not look like four deliberate levels — they look like
+     patches, which is what "the colours are mixed" is describing.
+     Repointed at the paper ramp so both systems resolve to one set of
+     surfaces. Every existing --face* call site keeps working. */
+  --face:      var(--paper-hi);  /* white     — elevated cards, panels */
+  --face-soft: var(--paper);     /* page tone — secondary controls     */
+  --face-warm: var(--paper);     /* page tone — primary actions        */
 
   /* Sky — trust, immunity, logistics.  #99CDD8 / #DAEBE9 */
   --sky:    #7FB3C4;  --sky-lo: #35555C;  --sky-bg: #DAEBE9;
@@ -6598,7 +6626,7 @@ setInterval(function() { syncAppCartBadge(); syncAppWishBadge(); }, 2000);
           <stop offset="0%" stop-color="#BF360C"/>
           <stop offset="35%" stop-color="#FF6D00"/>
           <stop offset="70%" stop-color="#FFD600"/>
-          <stop offset="100%" stop-color="#FFF8E1"/>
+          <stop offset="100%" stop-color="var(--st-warn-bg)"/>
         </linearGradient>
       </defs>
       <path d="M24 42 C14 42 8 34 10 26 C11 20 16 16 18 10 C20 16 18 20 22 22 C22 18 24 12 28 8 C28 16 32 18 34 24 C36 18 34 14 32 10 C38 16 40 22 40 28 C40 36 33 42 24 42Z" fill="url(#lg-fire)"/>
@@ -7326,7 +7354,7 @@ setInterval(function() { syncAppCartBadge(); syncAppWishBadge(); }, 2000);
         {emoji:'✨', label:'Skin & Glow', bg:'#E8EDE6'},
         {emoji:'🌿', label:'Spirulina', bg:'#E8EDE6'},
         {emoji:'💪', label:'Immunity', bg:'#E8F5E9'},
-        {emoji:'⚡', label:'Energy', bg:'#FFF8E1'},
+        {emoji:'⚡', label:'Energy', bg:'var(--st-warn-bg)'},
         {emoji:'🏆', label:'Multidiata', bg:'#F3E5F5'},
         {emoji:'🫧', label:'Effervescent', bg:'#E3F2FD'},
       ];
@@ -8399,12 +8427,12 @@ function renderCheckoutSummary() {
           <div style="padding:22px">
             <p style="font-size:.82rem;color:var(--gray);line-height:1.75;margin-bottom:16px">Creative marketing strategist behind Ozylix's brand identity, digital presence, and the nationwide awareness campaigns driving our rapid growth.</p>
             <div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:16px">
-              <span style="background:#e8f0ff;color:#2451a0;font-size:.7rem;font-weight:600;padding:3px 10px;border-radius:100px">Marketing</span>
-              <span style="background:#e8f0ff;color:#2451a0;font-size:.7rem;font-weight:600;padding:3px 10px;border-radius:100px">Brand Strategy</span>
-              <span style="background:#e8f0ff;color:#2451a0;font-size:.7rem;font-weight:600;padding:3px 10px;border-radius:100px">Growth</span>
+              <span style="background:var(--st-info-bg);color:var(--st-info-fg);font-size:.7rem;font-weight:600;padding:3px 10px;border-radius:100px">Marketing</span>
+              <span style="background:var(--st-info-bg);color:var(--st-info-fg);font-size:.7rem;font-weight:600;padding:3px 10px;border-radius:100px">Brand Strategy</span>
+              <span style="background:var(--st-info-bg);color:var(--st-info-fg);font-size:.7rem;font-weight:600;padding:3px 10px;border-radius:100px">Growth</span>
             </div>
-            <a href="mailto:ascovitahealthcare@gmail.com" style="display:flex;align-items:center;gap:6px;font-size:.78rem;color:#2451a0;font-weight:600;text-decoration:none;margin-bottom:8px">&#128231; ascovitahealthcare@gmail.com</a>
-            <a href="https://www.linkedin.com/in/aamin-ghachivahora-416985332" target="_blank" rel="noopener" style="display:flex;align-items:center;gap:6px;font-size:.78rem;color:#2451a0;font-weight:600;text-decoration:none">&#128279; LinkedIn</a>
+            <a href="mailto:ascovitahealthcare@gmail.com" style="display:flex;align-items:center;gap:6px;font-size:.78rem;color:var(--st-info-fg);font-weight:600;text-decoration:none;margin-bottom:8px">&#128231; ascovitahealthcare@gmail.com</a>
+            <a href="https://www.linkedin.com/in/aamin-ghachivahora-416985332" target="_blank" rel="noopener" style="display:flex;align-items:center;gap:6px;font-size:.78rem;color:var(--st-info-fg);font-weight:600;text-decoration:none">&#128279; LinkedIn</a>
           </div>
         </div>
         <div style="background:var(--sub-1);border-radius:20px;overflow:hidden;border:1px solid rgba(0,0,0,.06);box-shadow:0 8px 30px rgba(123,45,0,.1);transition:transform .25s,box-shadow .25s" onmouseover="this.style.transform='translateY(-6px)';this.style.boxShadow='0 16px 40px rgba(123,45,0,.18)'" onmouseout="this.style.transform='';this.style.boxShadow='0 8px 30px rgba(123,45,0,.1)'">
@@ -8416,11 +8444,11 @@ function renderCheckoutSummary() {
           <div style="padding:22px">
             <p style="font-size:.82rem;color:var(--gray);line-height:1.75;margin-bottom:16px">Financial architect managing Ozylix's fiscal strategy, investor relations, and the sustainable growth model that keeps us profitable while keeping prices fair.</p>
             <div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:16px">
-              <span style="background:#fff3e0;color:#b34700;font-size:.7rem;font-weight:600;padding:3px 10px;border-radius:100px">Finance</span>
-              <span style="background:#fff3e0;color:#b34700;font-size:.7rem;font-weight:600;padding:3px 10px;border-radius:100px">Compliance</span>
-              <span style="background:#fff3e0;color:#b34700;font-size:.7rem;font-weight:600;padding:3px 10px;border-radius:100px">Investor Relations</span>
+              <span style="background:var(--st-warn-bg);color:var(--st-warn-fg);font-size:.7rem;font-weight:600;padding:3px 10px;border-radius:100px">Finance</span>
+              <span style="background:var(--st-warn-bg);color:var(--st-warn-fg);font-size:.7rem;font-weight:600;padding:3px 10px;border-radius:100px">Compliance</span>
+              <span style="background:var(--st-warn-bg);color:var(--st-warn-fg);font-size:.7rem;font-weight:600;padding:3px 10px;border-radius:100px">Investor Relations</span>
             </div>
-            <a href="mailto:ascovitahealthcare@gmail.com" style="display:flex;align-items:center;gap:6px;font-size:.78rem;color:#b34700;font-weight:600;text-decoration:none">&#128231; ascovitahealthcare@gmail.com</a>
+            <a href="mailto:ascovitahealthcare@gmail.com" style="display:flex;align-items:center;gap:6px;font-size:.78rem;color:var(--st-warn-fg);font-weight:600;text-decoration:none">&#128231; ascovitahealthcare@gmail.com</a>
           </div>
         </div>
       </div>
@@ -8708,7 +8736,7 @@ function renderCheckoutSummary() {
   </div>
   <section class="section"><div class="container">
 
-    <div style="background:linear-gradient(135deg,var(--green-wash),#e0f0cc);border-radius:var(--radius);padding:24px 28px;margin-bottom:36px;display:flex;align-items:center;gap:20px;flex-wrap:wrap">
+    <div style="background:linear-gradient(135deg,var(--green-wash),var(--st-ok-bg));border-radius:var(--radius);padding:24px 28px;margin-bottom:36px;display:flex;align-items:center;gap:20px;flex-wrap:wrap">
       <div style="font-size:2.5rem">🔔</div>
       <div>
         <div style="font-weight:700;font-size:0.95rem;margin-bottom:4px">Subscription Benefits</div>
@@ -11202,11 +11230,11 @@ function renderCart() {
             <span>🏷️ ${discLabel ? discLabel : 'Discount'}</span>
             <span>-₹${disc.toLocaleString('en-IN')}</span>
           </div>
-          <div style="background:#f0fdf4;border:1px solid #bbf7d0;border-radius:8px;padding:8px 12px;font-size:.75rem;color:#166534;font-weight:600;margin-bottom:6px;display:flex;align-items:center;gap:6px">
+          <div style="background:var(--st-ok-bg);border:1px solid var(--st-ok-bg);border-radius:8px;padding:8px 12px;font-size:.75rem;color:var(--st-ok-fg);font-weight:600;margin-bottom:6px;display:flex;align-items:center;gap:6px">
             🎉 Total savings on this order: <strong>₹${disc.toLocaleString('en-IN')}</strong>
           </div>` : ''}
         <div class="sum-row"><span>Shipping</span><span>${ship === 0 ? '<span style="color:var(--success);font-weight:700">FREE 🎉</span>' : '₹' + ship}</span></div>
-        ${(!shippingIsAlwaysFree() && sub < SHIP_THRESHOLD) ? `<div style="font-size:.72rem;color:var(--gray);margin-bottom:4px;padding:6px 10px;background:#FFF8E1;border-radius:6px;border-left:1px solid var(--seal)">💡 Add ₹${(SHIP_THRESHOLD - sub).toLocaleString('en-IN')} more for FREE shipping + free COD</div>` : ''}
+        ${(!shippingIsAlwaysFree() && sub < SHIP_THRESHOLD) ? `<div style="font-size:.72rem;color:var(--gray);margin-bottom:4px;padding:6px 10px;background:var(--st-warn-bg);border-radius:6px;border-left:1px solid var(--seal)">💡 Add ₹${(SHIP_THRESHOLD - sub).toLocaleString('en-IN')} more for FREE shipping + free COD</div>` : ''}
         <div class="sum-row" style="font-size:.78rem;color:var(--gray)"><span>COD charge</span><span>${calcShipping(sub) === 0 ? '<span style="color:var(--success)">FREE</span>' : '₹' + calcShipping(sub)}</span></div>
         <hr style="border:none;border-top:1px solid var(--light-gray);margin:8px 0">
         ${vitaOff > 0 ? `<div class="sum-row" style="color:var(--fern-lo)"><span>💎 VitaPoints (${_vita.applied.toLocaleString('en-IN')})</span><span>-₹${vitaOff.toFixed(2)}</span></div>` : ''}
@@ -11246,8 +11274,8 @@ function renderCartUpsell() {
   if (!ups.length) return '';
   var sub = STORE.cart.reduce(function(s,item){ var p=PRODUCTS.find(function(x){return x.id===item.id;}); if(!p)return s; var up=item.tierRate!==undefined?item.tierRate:(p.salePrice||p.price); return s+up*item.qty; }, 0);
   var shipMsg = sub < 599
-    ? '<div style="background:linear-gradient(135deg,#fff3cd,#ffe8a3);border:1px solid var(--f-mineral);border-radius:12px;padding:14px 18px;margin-bottom:20px;display:flex;align-items:center;gap:12px"><span style="font-size:1.4rem">&#x1F69A;</span><div><div style="font-size:.84rem;font-weight:700;color:#7a5800">Add just <strong>&#8377;' + (599-sub) + '</strong> more to unlock FREE shipping!</div><div style="font-size:.74rem;color:#9a7010;margin-top:2px">You\'re so close &#x1F382;</div></div></div>'
-    : '<div style="background:linear-gradient(135deg,#d4edda,#b8dfc5);border:1px solid #28a745;border-radius:12px;padding:14px 18px;margin-bottom:20px;display:flex;align-items:center;gap:12px"><span style="font-size:1.4rem">&#x1F381;</span><div><div style="font-size:.84rem;font-weight:700;color:#155724">&#x1F389; FREE shipping unlocked!</div><div style="font-size:.74rem;color:#1e7e34;margin-top:2px">Your order qualifies for free delivery</div></div></div>';
+    ? '<div style="background:linear-gradient(135deg,var(--st-warn-bg),var(--st-warn-bg));border:1px solid var(--f-mineral);border-radius:12px;padding:14px 18px;margin-bottom:20px;display:flex;align-items:center;gap:12px"><span style="font-size:1.4rem">&#x1F69A;</span><div><div style="font-size:.84rem;font-weight:700;color:var(--st-warn-fg)">Add just <strong>&#8377;' + (599-sub) + '</strong> more to unlock FREE shipping!</div><div style="font-size:.74rem;color:var(--st-warn-fg);margin-top:2px">You\'re so close &#x1F382;</div></div></div>'
+    : '<div style="background:linear-gradient(135deg,var(--st-ok-bg),var(--st-ok-bg));border:1px solid var(--st-ok-fg);border-radius:12px;padding:14px 18px;margin-bottom:20px;display:flex;align-items:center;gap:12px"><span style="font-size:1.4rem">&#x1F381;</span><div><div style="font-size:.84rem;font-weight:700;color:var(--st-ok-fg)">&#x1F389; FREE shipping unlocked!</div><div style="font-size:.74rem;color:var(--st-ok-fg);margin-top:2px">Your order qualifies for free delivery</div></div></div>';
   var cards = ups.map(function(p){
     var price = p.salePrice||p.price;
     var disc = p.salePrice ? Math.round((1-p.salePrice/p.price)*100) : 0;
@@ -11258,7 +11286,7 @@ function renderCartUpsell() {
       + '<div style="display:flex;align-items:center;gap:5px;flex-wrap:wrap"><span style="font-size:.88rem;font-weight:800;color:var(--green)">&#x20B9;' + price.toLocaleString('en-IN') + '</span>' + discBadge + '</div>'
       + '<button style="margin-top:8px;background:var(--face-warm);color:var(--clay-lo);box-shadow:inset 0 0 0 1.5px rgba(138,74,51,.32);border:none;border-radius:100px;padding:5px 14px;font-size:.72rem;font-weight:700;cursor:pointer;font-family:var(--font-body)" onclick="event.stopPropagation();addUpsellToCart(' + p.id + ')">+ Add</button></div></div>';
   }).join('');
-  return '<div style="margin-top:32px"><div style="background:linear-gradient(135deg,#fffdf0,#fff8e0);border:2px solid var(--seal);border-radius:20px;padding:26px">'
+  return '<div style="margin-top:32px"><div style="background:linear-gradient(135deg,var(--st-warn-bg),var(--st-warn-bg));border:2px solid var(--seal);border-radius:20px;padding:26px">'
     + shipMsg
     + '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px"><div><div style="font-size:.7rem;color:var(--f-mineral-d);font-weight:700;text-transform:uppercase;letter-spacing:1.5px">&#x1F4A1; Complete Your Wellness Stack</div><div style="font-size:1rem;font-weight:800;color:var(--t-mid);margin-top:3px">Customers Also Bought</div></div><span style="background:var(--seal);color:var(--t-hi);font-size:.69rem;font-weight:700;padding:3px 10px;border-radius:100px">SAVE MORE</span></div>'
     + '<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:12px">' + cards + '</div>'
@@ -11331,7 +11359,7 @@ function updateCodBtnNote() {
   const { sub, disc } = getOrderTotal();
   const net = sub - disc;
   note.textContent = calcShipping(net) === 0 ? '✅ Free COD on your order!' : '+₹' + calcShipping(net) + ' COD charge · Free if order ≥ ₹' + SHIP_THRESHOLD;
-  note.style.color = calcShipping(net) === 0 ? '#d4edda' : 'rgba(255,255,255,0.85)';
+  note.style.color = calcShipping(net) === 0 ? 'var(--st-ok-bg)' : 'rgba(255,255,255,0.85)';
 }
 
 // ══════════════════════════════════════════════
@@ -12038,7 +12066,7 @@ function openPaymentGateway(orderId, total, sub, disc, ship, formData, btn, orig
     if (!p) return '';
     const price = item.tierRate !== undefined ? item.tierRate : (p.salePrice || p.price);
     const pack = item.tierTabs ? ` (${item.tierTabs} tabs)` : '';
-    return `<div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid #f0f0f0;font-size:.82rem">
+    return `<div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--st-muted-bg);font-size:.82rem">
       <span style="color:var(--t-mid)">${p.name}${pack} × ${item.qty}</span>
       <span style="font-weight:700;color:var(--f-mineral-d)">₹${(price * item.qty).toLocaleString('en-IN')}</span>
     </div>`;
@@ -12074,12 +12102,12 @@ function openPaymentGateway(orderId, total, sub, disc, ship, formData, btn, orig
           <div style="margin-top:10px;padding-top:8px;border-top:1.5px solid var(--t-low)">
             <div style="display:flex;justify-content:space-between;font-size:.78rem;color:var(--t-low);margin-bottom:3px"><span>Subtotal</span><span>₹${sub.toLocaleString('en-IN')}</span></div>
             ${discHtml}
-            <div style="display:flex;justify-content:space-between;font-size:.78rem;color:var(--t-low);margin-bottom:6px"><span>Shipping</span><span style="color:${ship===0?'var(--f-mineral-d)':'#333'}">${ship===0?'FREE':'₹'+ship}</span></div>
+            <div style="display:flex;justify-content:space-between;font-size:.78rem;color:var(--t-low);margin-bottom:6px"><span>Shipping</span><span style="color:${ship===0?'var(--f-mineral-d)':'var(--t-hi)'}">${ship===0?'FREE':'₹'+ship}</span></div>
             <div style="display:flex;justify-content:space-between;font-weight:800;font-size:.95rem;color:var(--f-mineral-d)"><span>Total</span><span>₹${total.toLocaleString('en-IN')}</span></div>
           </div>
         </div>
         <!-- Delivery Info -->
-        <div style="background:#fafafa;border-radius:10px;padding:11px 14px;margin-bottom:16px;font-size:.78rem;color:#555;line-height:1.6">
+        <div style="background:var(--st-muted-bg);border-radius:10px;padding:11px 14px;margin-bottom:16px;font-size:.78rem;color:var(--t-mid);line-height:1.6">
           <span style="font-weight:700;color:var(--t-mid)">👤 Ship to: </span>
           ${formData.firstName} ${formData.lastName} · ${formData.phone}<br>
           ${formData.addr1}, ${formData.city}, ${formData.state} – ${formData.pin}<br>
@@ -12087,7 +12115,7 @@ function openPaymentGateway(orderId, total, sub, disc, ship, formData, btn, orig
         </div>
         <!-- GoKwik Pay Button -->
         <button class="cfPayBtn gk-pay-btn" onclick="startPayment('gokwik')"
-          style="width:100%;background:var(--face-warm);color:#A81F2B;box-shadow:inset 0 0 0 1.5px rgba(192,48,74,.34);border:none;border-radius:14px;padding:18px 20px;font-size:.95rem;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:14px;margin-bottom:14px;transition:opacity .15s">
+          style="width:100%;background:var(--face-warm);color:var(--st-danger-fg);box-shadow:inset 0 0 0 1.5px rgba(192,48,74,.34);border:none;border-radius:14px;padding:18px 20px;font-size:.95rem;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:14px;margin-bottom:14px;transition:opacity .15s">
           <span style="display:inline-flex;align-items:center;justify-content:center;width:42px;height:42px;background:rgba(255,255,255,0.18);border-radius:10px;flex-shrink:0">
             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
           </span>
@@ -12116,7 +12144,7 @@ function openPaymentGateway(orderId, total, sub, disc, ship, formData, btn, orig
           <span style="font-size:.67rem;color:var(--t-low)">🛡️ GoKwik Secured</span>
         </div>
         <!-- Cancel -->
-        <button onclick="closePaymentModal()" style="width:100%;background:#f2f2f2;color:#777;border:none;border-radius:10px;padding:11px;font-size:.82rem;cursor:pointer">
+        <button onclick="closePaymentModal()" style="width:100%;background:var(--st-muted-bg);color:var(--t-low);border:none;border-radius:10px;padding:11px;font-size:.82rem;cursor:pointer">
           ✕ Cancel &amp; Go Back
         </button>
       </div>
@@ -12485,7 +12513,7 @@ function showProcessingScreen(orderId, total, method) {
     <div style="font-size:.85rem;opacity:.7;margin-bottom:4px">₹${total.toLocaleString('en-IN')} via ${methodNames[method] || method}</div>
     <div style="font-size:.72rem;opacity:.5;margin-bottom:28px">Order: ${orderId}</div>
     <div style="width:240px;height:5px;background:rgba(255,255,255,.15);border-radius:100px;overflow:hidden">
-      <div id="cfPBar" style="height:100%;width:0%;background:linear-gradient(90deg,#4ade80,#22c55e);border-radius:100px;transition:width .4s ease"></div>
+      <div id="cfPBar" style="height:100%;width:0%;background:linear-gradient(90deg,var(--st-ok-fg),var(--indigo));border-radius:100px;transition:width .4s ease"></div>
     </div>
     <div id="cfPStatus" style="font-size:.72rem;opacity:.5;margin-top:12px">Connecting to payment gateway...</div>
     <div style="font-size:.65rem;opacity:.35;margin-top:24px">🔒 256-bit SSL · GoKwik Secured · PCI DSS</div>
@@ -12526,7 +12554,7 @@ function showPaymentError(msg, orderId, formData, total, method) {
   const el = document.createElement('div');
   el.className = 'pay-error-overlay';
   el.id = 'payErrorOverlay';
-  const orderRef = orderId ? `<div style="font-size:.72rem;color:#999;margin-bottom:16px;background:#f5f5f5;padding:8px 14px;border-radius:8px">Order Ref: <strong>${orderId}</strong></div>` : '';
+  const orderRef = orderId ? `<div style="font-size:.72rem;color:var(--t-low);margin-bottom:16px;background:var(--st-muted-bg);padding:8px 14px;border-radius:8px">Order Ref: <strong>${orderId}</strong></div>` : '';
   el.innerHTML = `
     <div class="pay-error-box">
       <div class="pay-error-icon">❌</div>
@@ -12540,7 +12568,7 @@ function showPaymentError(msg, orderId, formData, total, method) {
         <button class="pay-error-back" onclick="document.getElementById('payErrorOverlay')?.remove(); showPage('cart');">
           ← Back to Cart
         </button>
-        <button class="pay-error-back" style="background:#fff3cd;border-color:#ffc107;color:#856404" onclick="document.getElementById('payErrorOverlay')?.remove(); window.open('https://wa.me/919898582650?text=Payment+failed+for+order+${orderId || ''}+amount+₹${total || ''}+please+help','_blank')">
+        <button class="pay-error-back" style="background:var(--st-warn-bg);border-color:var(--st-warn-fg);color:var(--st-warn-fg)" onclick="document.getElementById('payErrorOverlay')?.remove(); window.open('https://wa.me/919898582650?text=Payment+failed+for+order+${orderId || ''}+amount+₹${total || ''}+please+help','_blank')">
            WhatsApp Support
         </button>
         <button class="pay-error-cancel" onclick="document.getElementById('payErrorOverlay')?.remove(); showPage('home');">
@@ -12872,7 +12900,7 @@ async function sendOrderEmail({ orderId, formData, srItems, sub, totalDisc, prom
   // Build items table for email
   const itemsText = srItems.map(i => `${i.name} × ${i.units} = ₹${(i.selling_price * i.units).toLocaleString('en-IN')}`).join('\n');
   const itemsHtml = srItems.map(i =>
-    `<tr style="border-bottom:1px solid #eee">
+    `<tr style="border-bottom:1px solid var(--edge-hi)">
        <td style="padding:8px 12px">${i.name}</td>
        <td style="padding:8px 12px;text-align:center">${i.units}</td>
        <td style="padding:8px 12px;text-align:right">₹${i.selling_price.toLocaleString('en-IN')}</td>
@@ -12885,7 +12913,7 @@ async function sendOrderEmail({ orderId, formData, srItems, sub, totalDisc, prom
 
   // Full HTML email body
   const emailHtml = `
-  <div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto;background:var(--sub-1);border:1px solid #e5e7eb;border-radius:12px;overflow:hidden">
+  <div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto;background:var(--sub-1);border:1px solid var(--edge-hi);border-radius:12px;overflow:hidden">
     <div style="background:linear-gradient(135deg,var(--f-mineral-d),var(--f-mineral));padding:28px 32px;color:var(--t-hi);text-align:center">
       <div style="font-size:24px;font-weight:900;margin-bottom:4px">🌿 Ozylix</div>
       <div style="font-size:13px;opacity:.8">Order Confirmation</div>
@@ -12915,10 +12943,10 @@ async function sendOrderEmail({ orderId, formData, srItems, sub, totalDisc, prom
         <div style="display:flex;justify-content:space-between;padding:4px 0;color:var(--t-mid)"><span>Subtotal</span><span>₹${sub.toLocaleString('en-IN')}</span></div>
         ${totalDisc > 0 ? `<div style="display:flex;justify-content:space-between;padding:4px 0;color:var(--f-mineral-d);font-weight:700"><span>🏷️ Discount Saved</span><span>-₹${totalDisc.toLocaleString('en-IN')}</span></div>` : ''}
         <div style="display:flex;justify-content:space-between;padding:4px 0;color:var(--t-mid)"><span>Shipping</span><span>${ship === 0 ? '<span style="color:var(--f-mineral-d)">FREE</span>' : '₹' + ship}</span></div>
-        <div style="display:flex;justify-content:space-between;padding:10px 0 4px;font-size:16px;font-weight:900;color:var(--f-mineral-d);border-top:1px solid #e5e7eb;margin-top:6px"><span>Grand Total</span><span>₹${total.toLocaleString('en-IN')}</span></div>
+        <div style="display:flex;justify-content:space-between;padding:10px 0 4px;font-size:16px;font-weight:900;color:var(--f-mineral-d);border-top:1px solid var(--edge-hi);margin-top:6px"><span>Grand Total</span><span>₹${total.toLocaleString('en-IN')}</span></div>
       </div>
 
-      <div style="margin:20px 0;background:#f9f9f9;border-radius:8px;padding:14px 18px;font-size:13px;line-height:1.8">
+      <div style="margin:20px 0;background:var(--st-muted-bg);border-radius:8px;padding:14px 18px;font-size:13px;line-height:1.8">
         <strong style="display:block;margin-bottom:6px">📍 Delivery Address</strong>
         ${formData.firstName} ${formData.lastName}<br>
         ${formData.addr1}${formData.addr2 ? ', ' + formData.addr2 : ''}<br>
@@ -12982,15 +13010,15 @@ function generateInvoice({ orderId, formData, srItems, sub, disc, promoDisc, shi
     const gst  = (item.selling_price * item.units) - base;
     return `
       <tr>
-        <td style="padding:10px 12px;border-bottom:1px solid #eee">${item.name}</td>
-        <td style="padding:10px 12px;border-bottom:1px solid #eee;text-align:center">${item.sku}</td>
-        <td style="padding:10px 12px;border-bottom:1px solid #eee;text-align:center">${item.units}</td>
-        <td style="padding:10px 12px;border-bottom:1px solid #eee;text-align:right">₹${item.mrp}</td>
-        <td style="padding:10px 12px;border-bottom:1px solid #eee;text-align:right">₹${item.selling_price}</td>
-        <td style="padding:10px 12px;border-bottom:1px solid #eee;text-align:right">₹${item.discount > 0 ? item.discount * item.units : '-'}</td>
-        <td style="padding:10px 12px;border-bottom:1px solid #eee;text-align:right">5%</td>
-        <td style="padding:10px 12px;border-bottom:1px solid #eee;text-align:right">₹${gst.toLocaleString('en-IN')}</td>
-        <td style="padding:10px 12px;border-bottom:1px solid #eee;text-align:right;font-weight:700">₹${(item.selling_price * item.units).toLocaleString('en-IN')}</td>
+        <td style="padding:10px 12px;border-bottom:1px solid var(--edge-hi)">${item.name}</td>
+        <td style="padding:10px 12px;border-bottom:1px solid var(--edge-hi);text-align:center">${item.sku}</td>
+        <td style="padding:10px 12px;border-bottom:1px solid var(--edge-hi);text-align:center">${item.units}</td>
+        <td style="padding:10px 12px;border-bottom:1px solid var(--edge-hi);text-align:right">₹${item.mrp}</td>
+        <td style="padding:10px 12px;border-bottom:1px solid var(--edge-hi);text-align:right">₹${item.selling_price}</td>
+        <td style="padding:10px 12px;border-bottom:1px solid var(--edge-hi);text-align:right">₹${item.discount > 0 ? item.discount * item.units : '-'}</td>
+        <td style="padding:10px 12px;border-bottom:1px solid var(--edge-hi);text-align:right">5%</td>
+        <td style="padding:10px 12px;border-bottom:1px solid var(--edge-hi);text-align:right">₹${gst.toLocaleString('en-IN')}</td>
+        <td style="padding:10px 12px;border-bottom:1px solid var(--edge-hi);text-align:right;font-weight:700">₹${(item.selling_price * item.units).toLocaleString('en-IN')}</td>
       </tr>`;
   }).join('');
 
@@ -13014,22 +13042,22 @@ function generateInvoice({ orderId, formData, srItems, sub, disc, promoDisc, shi
   .inv-logo-name { font-size:22px; font-weight:900; letter-spacing:.5px; }
   .inv-logo-sub { font-size:11px; opacity:.8; margin-top:3px; }
   .inv-company-addr { font-size:11px; opacity:.85; line-height:1.7; text-align:right; }
-  .inv-meta { background:#f8fdf4; padding:20px 32px; display:flex; justify-content:space-between; border-bottom:2px solid #2E7D32; }
+  .inv-meta { background:var(--st-ok-bg); padding:20px 32px; display:flex; justify-content:space-between; border-bottom:2px solid #2E7D32; }
   .inv-meta-block { line-height:1.8; }
   .inv-meta-block strong { font-size:11px; text-transform:uppercase; color:#666; letter-spacing:.5px; display:block; }
   .inv-meta-block span { font-size:14px; font-weight:700; color:#2E7D32; }
   .inv-section { padding:20px 32px; }
   .inv-section h3 { font-size:11px; text-transform:uppercase; letter-spacing:1px; color:#666; margin-bottom:12px; }
   .inv-cust-grid { display:grid; grid-template-columns:1fr 1fr; gap:16px; }
-  .inv-cust-box { background:#f9f9f9; border:1px solid #eee; border-radius:6px; padding:14px; line-height:1.8; }
-  .inv-cust-box strong { font-size:11px; text-transform:uppercase; color:#999; display:block; margin-bottom:4px; }
+  .inv-cust-box { background:var(--st-muted-bg); border:1px solid var(--edge-hi); border-radius:6px; padding:14px; line-height:1.8; }
+  .inv-cust-box strong { font-size:11px; text-transform:uppercase; color:var(--t-low); display:block; margin-bottom:4px; }
   table { width:100%; border-collapse:collapse; }
   thead tr { background:#2E7D32; color:#fff; }
   thead th { padding:10px 12px; text-align:left; font-size:11px; text-transform:uppercase; letter-spacing:.3px; }
   thead th:not(:first-child) { text-align:right; }
   thead th:nth-child(3),thead th:nth-child(7) { text-align:center; }
-  tbody tr:hover { background:#f8fdf4; }
-  .inv-totals { background:#f8fdf4; border-top:2px solid #2E7D32; }
+  tbody tr:hover { background:var(--st-ok-bg); }
+  .inv-totals { background:var(--st-ok-bg); border-top:2px solid #2E7D32; }
   .inv-totals td { padding:7px 12px; }
   .inv-grand { background:#2E7D32 !important; color:#fff; }
   .inv-grand td { padding:12px; font-size:15px; font-weight:900; }
@@ -13130,7 +13158,7 @@ function generateInvoice({ orderId, formData, srItems, sub, disc, promoDisc, shi
   </div>
 
   <!-- NOTES -->
-  <div class="inv-section" style="border-top:1px solid #eee;font-size:11px;color:var(--t-low);line-height:1.9">
+  <div class="inv-section" style="border-top:1px solid var(--edge-hi);font-size:11px;color:var(--t-low);line-height:1.9">
     <strong style="font-size:11px;text-transform:uppercase;letter-spacing:.5px">Terms & Notes</strong><br>
     • All prices are inclusive of 5% GST &nbsp;|&nbsp; HSN Code: 30049099 (Nutraceuticals)<br>
     • Returns accepted within 7 days for sealed/unused products<br>
@@ -13146,7 +13174,7 @@ function generateInvoice({ orderId, formData, srItems, sub, disc, promoDisc, shi
 
 <div class="no-print" style="text-align:center;margin-top:24px;padding-bottom:30px">
   <button onclick="window.print()" style="background:var(--f-mineral-d);color:var(--t-hi);border:none;padding:13px 32px;border-radius:100px;font-size:15px;font-weight:700;cursor:pointer;margin-right:12px">🖨️ Print Invoice</button>
-  <button onclick="window.close()" style="background:#eee;color:#333;border:none;padding:13px 32px;border-radius:100px;font-size:15px;font-weight:700;cursor:pointer">✕ Close</button>
+  <button onclick="window.close()" style="background:var(--st-muted-bg);color:var(--t-hi);border:none;padding:13px 32px;border-radius:100px;font-size:15px;font-weight:700;cursor:pointer">✕ Close</button>
 </div>
 
 <!-- ── Media Lightbox ── -->
@@ -13710,7 +13738,7 @@ function _renderVitaPanelBody(el) {
     : '';
 
   const debtBlock = debt > 0
-    ? '<div style="margin:14px 0;padding:13px 16px;background:#fff6f4;border:1px solid #f0cfc6;border-radius:12px">' +
+    ? '<div style="margin:14px 0;padding:13px 16px;background:var(--st-danger-bg);border:1px solid var(--st-danger-bg);border-radius:12px">' +
         '<b style="font-size:.92rem">' + debt.toLocaleString('en-IN') + ' points to settle</b>' +
         '<div style="font-size:.8rem;color:var(--t-mid);margin-top:3px">A returned order had already earned points you\u2019d spent. ' +
         'This is settled automatically from points on your next orders \u2014 nothing to pay.</div>' +
@@ -13988,7 +14016,7 @@ const _GOOGLE_MAX_RETRIES = 8;
   spinner.id  = 'g-spinner';
   spinner.style.cssText = 'position:fixed;inset:0;z-index:99999;background:#FAFAF7;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:12px;font-family:sans-serif';
   spinner.innerHTML = '<style>@keyframes gs{to{transform:rotate(360deg)}}</style>'
-    + '<div style="width:40px;height:40px;border:3px solid #ddd;border-top-color:var(--f-mineral);border-radius:50%;animation:gs .8s linear infinite"></div>'
+    + '<div style="width:40px;height:40px;border:3px solid var(--edge-hi);border-top-color:var(--f-mineral);border-radius:50%;animation:gs .8s linear infinite"></div>'
     + '<p style="color:var(--f-mineral);margin:0;font-size:14px">Signing you in…</p>';
   document.addEventListener('DOMContentLoaded', function() { document.body.appendChild(spinner); });
 
@@ -14808,8 +14836,8 @@ async function loadInvoicesList() {
           const oid  = o.id || o.orderId || '';
           const date = o.date || (o.created_at ? new Date(o.created_at).toLocaleDateString('en-IN',{day:'2-digit',month:'short',year:'numeric'}) : '');
           const paid = (o.payment_status||'').toLowerCase().includes('paid') || (o.payment_status||'').toLowerCase().includes('cod') ? o.payment_status : 'Paid';
-          const paidColor = paid.toLowerCase().includes('cod') ? '#ca8a04' : '#16a34a';
-          const paidBg    = paid.toLowerCase().includes('cod') ? '#fefce8' : '#f0fdf4';
+          const paidColor = paid.toLowerCase().includes('cod') ? 'var(--st-warn-fg)' : 'var(--st-ok-fg)';
+          const paidBg    = paid.toLowerCase().includes('cod') ? 'var(--st-warn-bg)' : 'var(--st-ok-bg)';
           return `<tr style="border-top:1px solid var(--light-gray);font-size:0.84rem">
             <td style="padding:14px 18px;font-weight:700;color:var(--green)">${oid}</td>
             <td style="padding:14px 18px;color:var(--gray)">${date}</td>
@@ -14854,7 +14882,7 @@ function doTrackOrder() {
       `;
     } else {
       res.style.display = 'block';
-      res.innerHTML = `<div style="background:#fef2f2;border:1px solid #fecaca;border-radius:var(--radius);padding:14px;font-size:0.84rem;color:var(--red)">Order not found locally. <a href="https://www.shiprocket.in/shipment-tracking/" target="_blank" style="color:var(--green);font-weight:700">Try Shiprocket directly ↗</a></div>`;
+      res.innerHTML = `<div style="background:var(--st-danger-bg);border:1px solid var(--st-danger-bg);border-radius:var(--radius);padding:14px;font-size:0.84rem;color:var(--red)">Order not found locally. <a href="https://www.shiprocket.in/shipment-tracking/" target="_blank" style="color:var(--green);font-weight:700">Try Shiprocket directly ↗</a></div>`;
     }
   } catch(e) {}
 }
@@ -16019,7 +16047,7 @@ function initStickyCart(prod){if(!prod)return;stickyProdId=prod.id;stickyQty=1;c
 function scQtyChange(d){stickyQty=Math.max(1,stickyQty+d);const e=document.getElementById('scQtyVal');if(e)e.textContent=stickyQty;}
 function scAddToCart(){if(!stickyProdId)return;STORE.addToCart(stickyProdId,stickyQty);openSideCart();showPtsToast('+5 VitaPoints earned!');}
 
-function renderStockUrgency(prod){const el=document.getElementById('stockUrgency');if(!el||!prod)return;const stock=prod.stock||prod.inventory||0;if(stock<=0||stock>50){el.innerHTML='';return;}const pct=Math.min(100,Math.round((stock/50)*100)),cls=stock<=10?'danger':stock<=25?'warning':'ok',msg=stock<=10?'Only '+stock+' left — selling fast!':'Low stock — only '+stock+' remaining';el.innerHTML='<div class="su-low"'+(stock>10?' style="background:#FFF8E1;border-color:#FFD54F;color:var(--f-citrus)"':'')+'><span class="su-dot"'+(stock>10?' style="background:var(--f-citrus)"':'')+'><\/span>'+msg+'<\/div><div class="su-bar"><div class="su-bar-fill '+cls+'" style="width:'+pct+'%"><\/div><\/div>';}
+function renderStockUrgency(prod){const el=document.getElementById('stockUrgency');if(!el||!prod)return;const stock=prod.stock||prod.inventory||0;if(stock<=0||stock>50){el.innerHTML='';return;}const pct=Math.min(100,Math.round((stock/50)*100)),cls=stock<=10?'danger':stock<=25?'warning':'ok',msg=stock<=10?'Only '+stock+' left — selling fast!':'Low stock — only '+stock+' remaining';el.innerHTML='<div class="su-low"'+(stock>10?' style="background:var(--st-warn-bg);border-color:var(--st-warn-fg);color:var(--f-citrus)"':'')+'><span class="su-dot"'+(stock>10?' style="background:var(--f-citrus)"':'')+'><\/span>'+msg+'<\/div><div class="su-bar"><div class="su-bar-fill '+cls+'" style="width:'+pct+'%"><\/div><\/div>';}
 function startLiveViewers(){const el=document.getElementById('liveViewerCount');if(!el)return;let n=8+Math.floor(Math.random()*16);el.textContent=n;setInterval(()=>{n=Math.max(5,Math.min(30,n+(Math.random()>.5?1:-1)*Math.floor(Math.random()*3+1)));el.textContent=n;},6500);}
 function showPtsToast(msg){const t=document.getElementById('ptsToast');if(!t)return;t.textContent='🪙 '+msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),3500);}
 function copyReferLink(){const inp=document.getElementById('referLink');if(!inp)return;inp.select();try{document.execCommand('copy');showToast('Referral link copied! Share on WhatsApp 🤝','success');showPtsToast('Share to earn ₹100!');}catch(e){showToast('Link: '+inp.value,'info');}}
