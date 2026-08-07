@@ -1,57 +1,58 @@
 {
-  "name": "Ascovita Healthcare",
-  "short_name": "Ascovita",
-  "description": "Organic Vitamins & Supplements – Effervescent, Spirulina, Multivitamins. FSSAI Approved. Made in India.",
+  "id": "/",
+  "name": "Ozylix — Effervescent Vitamins & Supplements",
+  "short_name": "Ozylix",
+  "description": "Effervescent vitamins and supplements from Ozylix — glutathione, vitamin C with amla, ACV, ashwagandha, spirulina and daily multivitamins. FSSAI approved, made in India, free delivery.",
   "start_url": "/",
   "scope": "/",
   "display": "standalone",
   "orientation": "portrait",
-  "background_color": "#ffffff",
-  "theme_color": "#2E7D32",
+  "background_color": "#FBF3E8",
+  "theme_color": "#FBF3E8",
   "lang": "en-IN",
+  "dir": "ltr",
   "categories": ["health", "shopping", "lifestyle"],
   "icons": [
     {
-      "src": "https://static.wixstatic.com/media/f0adaf_05a2b4385ab84453aa9c2e9a1cec4b97~mv2.png/v1/fill/w_192,h_192,al_c,q_85,enc_avif,quality_auto/f0adaf_05a2b4385ab84453aa9c2e9a1cec4b97~mv2.png",
+      "src": "/assets/ozylix-icon-192.png",
       "sizes": "192x192",
       "type": "image/png",
-      "purpose": "any maskable"
+      "purpose": "any"
     },
     {
-      "src": "https://static.wixstatic.com/media/f0adaf_05a2b4385ab84453aa9c2e9a1cec4b97~mv2.png/v1/fill/w_512,h_512,al_c,q_85,enc_avif,quality_auto/f0adaf_05a2b4385ab84453aa9c2e9a1cec4b97~mv2.png",
+      "src": "/assets/ozylix-icon-512.png",
       "sizes": "512x512",
       "type": "image/png",
-      "purpose": "any maskable"
-    }
-  ],
-  "screenshots": [
+      "purpose": "any"
+    },
     {
-      "src": "https://static.wixstatic.com/media/f0adaf_059d2c1e15c0421da19fa9495e205e37~mv2.jpg",
-      "sizes": "980x980",
-      "type": "image/jpeg"
+      "src": "/assets/ozylix-icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
     }
   ],
   "shortcuts": [
     {
       "name": "Shop Now",
       "short_name": "Shop",
-      "description": "Browse all Ascovita products",
+      "description": "Browse all Ozylix products",
       "url": "/shop",
-      "icons": [{ "src": "https://static.wixstatic.com/media/f0adaf_05a2b4385ab84453aa9c2e9a1cec4b97~mv2.png", "sizes": "192x192" }]
+      "icons": [{ "src": "/assets/ozylix-icon-192.png", "sizes": "192x192", "type": "image/png" }]
     },
     {
       "name": "AI Advisor",
       "short_name": "Vita AI",
-      "description": "Chat with Vita health advisor",
+      "description": "Chat with the Vita health advisor",
       "url": "/advisor",
-      "icons": [{ "src": "https://static.wixstatic.com/media/f0adaf_05a2b4385ab84453aa9c2e9a1cec4b97~mv2.png", "sizes": "192x192" }]
+      "icons": [{ "src": "/assets/ozylix-icon-192.png", "sizes": "192x192", "type": "image/png" }]
     },
     {
       "name": "My Cart",
       "short_name": "Cart",
       "description": "View your shopping cart",
       "url": "/#cart",
-      "icons": [{ "src": "https://static.wixstatic.com/media/f0adaf_05a2b4385ab84453aa9c2e9a1cec4b97~mv2.png", "sizes": "192x192" }]
+      "icons": [{ "src": "/assets/ozylix-icon-192.png", "sizes": "192x192", "type": "image/png" }]
     }
   ],
   "related_applications": [],

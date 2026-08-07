@@ -6,155 +6,187 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
         xmlns:xhtml="http://www.w3.org/1999/xhtml">
   <url>
-    <loc>https://www.ascofizz.com/</loc>
-    <lastmod>2026-07-28</lastmod>
+    <loc>https://www.ozylix.com/</loc>
+    <lastmod>2026-08-07</lastmod>
     <changefreq>daily</changefreq>
     <priority>1.0</priority>
-    <xhtml:link rel="alternate" hreflang="en-IN" href="https://www.ascofizz.com/"/>
-    <xhtml:link rel="alternate" hreflang="x-default" href="https://www.ascofizz.com/"/>
+    <xhtml:link rel="alternate" hreflang="en-IN" href="https://www.ozylix.com/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://www.ozylix.com/"/>
   </url>
   <url>
-    <loc>https://www.ascofizz.com/shop</loc>
-    <lastmod>2026-07-28</lastmod>
+    <loc>https://www.ozylix.com/shop</loc>
+    <lastmod>2026-08-07</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.9</priority>
-    <xhtml:link rel="alternate" hreflang="en-IN" href="https://www.ascofizz.com/shop"/>
-    <xhtml:link rel="alternate" hreflang="x-default" href="https://www.ascofizz.com/shop"/>
+    <xhtml:link rel="alternate" hreflang="en-IN" href="https://www.ozylix.com/shop"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://www.ozylix.com/shop"/>
   </url>
   <url>
-    <loc>https://www.ascofizz.com/about</loc>
-    <lastmod>2026-07-28</lastmod>
+    <loc>https://www.ozylix.com/about</loc>
+    <lastmod>2026-08-07</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
-    <xhtml:link rel="alternate" hreflang="en-IN" href="https://www.ascofizz.com/about"/>
-    <xhtml:link rel="alternate" hreflang="x-default" href="https://www.ascofizz.com/about"/>
+    <xhtml:link rel="alternate" hreflang="en-IN" href="https://www.ozylix.com/about"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://www.ozylix.com/about"/>
   </url>
   <url>
-    <loc>https://www.ascofizz.com/blog</loc>
-    <lastmod>2026-07-28</lastmod>
+    <loc>https://www.ozylix.com/blog</loc>
+    <lastmod>2026-08-07</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
-    <xhtml:link rel="alternate" hreflang="en-IN" href="https://www.ascofizz.com/blog"/>
-    <xhtml:link rel="alternate" hreflang="x-default" href="https://www.ascofizz.com/blog"/>
+    <xhtml:link rel="alternate" hreflang="en-IN" href="https://www.ozylix.com/blog"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://www.ozylix.com/blog"/>
   </url>
   <url>
-    <loc>https://www.ascofizz.com/contact</loc>
-    <lastmod>2026-07-28</lastmod>
+    <loc>https://www.ozylix.com/contact</loc>
+    <lastmod>2026-08-07</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
-    <xhtml:link rel="alternate" hreflang="en-IN" href="https://www.ascofizz.com/contact"/>
-    <xhtml:link rel="alternate" hreflang="x-default" href="https://www.ascofizz.com/contact"/>
+    <xhtml:link rel="alternate" hreflang="en-IN" href="https://www.ozylix.com/contact"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://www.ozylix.com/contact"/>
   </url>
   <url>
-    <loc>https://www.ascofizz.com/faq</loc>
-    <lastmod>2026-07-28</lastmod>
+    <loc>https://www.ozylix.com/faq</loc>
+    <lastmod>2026-08-07</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
-    <xhtml:link rel="alternate" hreflang="en-IN" href="https://www.ascofizz.com/faq"/>
-    <xhtml:link rel="alternate" hreflang="x-default" href="https://www.ascofizz.com/faq"/>
+    <xhtml:link rel="alternate" hreflang="en-IN" href="https://www.ozylix.com/faq"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://www.ozylix.com/faq"/>
   </url>
   <url>
-    <loc>https://www.ascofizz.com/advisor</loc>
-    <lastmod>2026-07-28</lastmod>
+    <loc>https://www.ozylix.com/advisor</loc>
+    <lastmod>2026-08-07</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
-    <xhtml:link rel="alternate" hreflang="en-IN" href="https://www.ascofizz.com/advisor"/>
-    <xhtml:link rel="alternate" hreflang="x-default" href="https://www.ascofizz.com/advisor"/>
+    <xhtml:link rel="alternate" hreflang="en-IN" href="https://www.ozylix.com/advisor"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://www.ozylix.com/advisor"/>
   </url>
   <url>
-    <loc>https://www.ascofizz.com/product/multidiata-ascofizz-premium-multivitamin</loc>
-    <lastmod>2026-07-28</lastmod>
+    <loc>https://www.ozylix.com/product/multidiata-ozylix-premium-multivitamin</loc>
+    <lastmod>2026-08-07</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
+    <xhtml:link rel="alternate" hreflang="en-IN" href="https://www.ozylix.com/product/multidiata-ozylix-premium-multivitamin"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://www.ozylix.com/product/multidiata-ozylix-premium-multivitamin"/>
   </url>
   <url>
-    <loc>https://www.ascofizz.com/product/green-tea-effervescent-tablet</loc>
-    <lastmod>2026-07-28</lastmod>
+    <loc>https://www.ozylix.com/product/green-tea-effervescent-tablet</loc>
+    <lastmod>2026-08-07</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
+    <xhtml:link rel="alternate" hreflang="en-IN" href="https://www.ozylix.com/product/green-tea-effervescent-tablet"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://www.ozylix.com/product/green-tea-effervescent-tablet"/>
   </url>
   <url>
-    <loc>https://www.ascofizz.com/product/ashwagandha-effervescent-tablet</loc>
-    <lastmod>2026-07-28</lastmod>
+    <loc>https://www.ozylix.com/product/ashwagandha-effervescent-tablet</loc>
+    <lastmod>2026-08-07</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
+    <xhtml:link rel="alternate" hreflang="en-IN" href="https://www.ozylix.com/product/ashwagandha-effervescent-tablet"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://www.ozylix.com/product/ashwagandha-effervescent-tablet"/>
   </url>
   <url>
-    <loc>https://www.ascofizz.com/product/men-s-multivitamin-effervescent-tablet</loc>
-    <lastmod>2026-07-28</lastmod>
+    <loc>https://www.ozylix.com/product/men-s-multivitamin-effervescent-tablet</loc>
+    <lastmod>2026-08-07</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
+    <xhtml:link rel="alternate" hreflang="en-IN" href="https://www.ozylix.com/product/men-s-multivitamin-effervescent-tablet"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://www.ozylix.com/product/men-s-multivitamin-effervescent-tablet"/>
   </url>
   <url>
-    <loc>https://www.ascofizz.com/product/women-s-multivitamin-effervescent-tablet</loc>
-    <lastmod>2026-07-28</lastmod>
+    <loc>https://www.ozylix.com/product/women-s-multivitamin-effervescent-tablet</loc>
+    <lastmod>2026-08-07</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
+    <xhtml:link rel="alternate" hreflang="en-IN" href="https://www.ozylix.com/product/women-s-multivitamin-effervescent-tablet"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://www.ozylix.com/product/women-s-multivitamin-effervescent-tablet"/>
   </url>
   <url>
-    <loc>https://www.ascofizz.com/product/apple-cider-vinegar-effervescent-tablet</loc>
-    <lastmod>2026-07-28</lastmod>
+    <loc>https://www.ozylix.com/product/apple-cider-vinegar-effervescent-tablet</loc>
+    <lastmod>2026-08-07</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
+    <xhtml:link rel="alternate" hreflang="en-IN" href="https://www.ozylix.com/product/apple-cider-vinegar-effervescent-tablet"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://www.ozylix.com/product/apple-cider-vinegar-effervescent-tablet"/>
   </url>
   <url>
-    <loc>https://www.ascofizz.com/product/complete-bone-health-effervescent-tablet</loc>
-    <lastmod>2026-07-28</lastmod>
+    <loc>https://www.ozylix.com/product/complete-bone-health-effervescent-tablet</loc>
+    <lastmod>2026-08-07</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
+    <xhtml:link rel="alternate" hreflang="en-IN" href="https://www.ozylix.com/product/complete-bone-health-effervescent-tablet"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://www.ozylix.com/product/complete-bone-health-effervescent-tablet"/>
   </url>
   <url>
-    <loc>https://www.ascofizz.com/product/rehydration-effervescent-tablet</loc>
-    <lastmod>2026-07-28</lastmod>
+    <loc>https://www.ozylix.com/product/rehydration-effervescent-tablet</loc>
+    <lastmod>2026-08-07</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
+    <xhtml:link rel="alternate" hreflang="en-IN" href="https://www.ozylix.com/product/rehydration-effervescent-tablet"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://www.ozylix.com/product/rehydration-effervescent-tablet"/>
   </url>
   <url>
-    <loc>https://www.ascofizz.com/product/natural-vitamin-c-amla-effervescent-tablet</loc>
-    <lastmod>2026-07-28</lastmod>
+    <loc>https://www.ozylix.com/product/natural-vitamin-c-amla-effervescent-tablet</loc>
+    <lastmod>2026-08-07</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
+    <xhtml:link rel="alternate" hreflang="en-IN" href="https://www.ozylix.com/product/natural-vitamin-c-amla-effervescent-tablet"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://www.ozylix.com/product/natural-vitamin-c-amla-effervescent-tablet"/>
   </url>
   <url>
-    <loc>https://www.ascofizz.com/product/glutathione-effervescent-tablet</loc>
-    <lastmod>2026-07-28</lastmod>
+    <loc>https://www.ozylix.com/product/glutathione-effervescent-tablet</loc>
+    <lastmod>2026-08-07</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
+    <xhtml:link rel="alternate" hreflang="en-IN" href="https://www.ozylix.com/product/glutathione-effervescent-tablet"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://www.ozylix.com/product/glutathione-effervescent-tablet"/>
   </url>
   <url>
-    <loc>https://www.ascofizz.com/product/l-carnitine-l-tartrate-effervescent-tablet</loc>
-    <lastmod>2026-07-28</lastmod>
+    <loc>https://www.ozylix.com/product/l-carnitine-l-tartrate-effervescent-tablet</loc>
+    <lastmod>2026-08-07</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
+    <xhtml:link rel="alternate" hreflang="en-IN" href="https://www.ozylix.com/product/l-carnitine-l-tartrate-effervescent-tablet"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://www.ozylix.com/product/l-carnitine-l-tartrate-effervescent-tablet"/>
   </url>
   <url>
-    <loc>https://www.ascofizz.com/product/vitaplus-b12-d3-vegan-with-certified-organic-spirulina</loc>
-    <lastmod>2026-07-28</lastmod>
+    <loc>https://www.ozylix.com/product/vitaplus-b12-d3-vegan-with-certified-organic-spirulina</loc>
+    <lastmod>2026-08-07</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
+    <xhtml:link rel="alternate" hreflang="en-IN" href="https://www.ozylix.com/product/vitaplus-b12-d3-vegan-with-certified-organic-spirulina"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://www.ozylix.com/product/vitaplus-b12-d3-vegan-with-certified-organic-spirulina"/>
   </url>
   <url>
-    <loc>https://www.ascofizz.com/product/mg-magnesium-b12-d3-with-magnesium</loc>
-    <lastmod>2026-07-28</lastmod>
+    <loc>https://www.ozylix.com/product/mg-magnesium-b12-d3-with-magnesium</loc>
+    <lastmod>2026-08-07</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
+    <xhtml:link rel="alternate" hreflang="en-IN" href="https://www.ozylix.com/product/mg-magnesium-b12-d3-with-magnesium"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://www.ozylix.com/product/mg-magnesium-b12-d3-with-magnesium"/>
   </url>
   <url>
-    <loc>https://www.ascofizz.com/product/cs-iron-calcium-iron-with-b12-d3</loc>
-    <lastmod>2026-07-28</lastmod>
+    <loc>https://www.ozylix.com/product/cs-iron-calcium-iron-with-b12-d3</loc>
+    <lastmod>2026-08-07</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
+    <xhtml:link rel="alternate" hreflang="en-IN" href="https://www.ozylix.com/product/cs-iron-calcium-iron-with-b12-d3"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://www.ozylix.com/product/cs-iron-calcium-iron-with-b12-d3"/>
   </url>
   <url>
-    <loc>https://www.ascofizz.com/product/moringa-tablets</loc>
-    <lastmod>2026-07-28</lastmod>
+    <loc>https://www.ozylix.com/product/moringa-tablets</loc>
+    <lastmod>2026-08-07</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
+    <xhtml:link rel="alternate" hreflang="en-IN" href="https://www.ozylix.com/product/moringa-tablets"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://www.ozylix.com/product/moringa-tablets"/>
   </url>
   <url>
-    <loc>https://www.ascofizz.com/product/power-pro-tablets</loc>
-    <lastmod>2026-07-28</lastmod>
+    <loc>https://www.ozylix.com/product/power-pro-tablets</loc>
+    <lastmod>2026-08-07</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
+    <xhtml:link rel="alternate" hreflang="en-IN" href="https://www.ozylix.com/product/power-pro-tablets"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://www.ozylix.com/product/power-pro-tablets"/>
   </url>
 </urlset>

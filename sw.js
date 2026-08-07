@@ -1,9 +1,9 @@
 // ============================================================
-// Ascovita Healthcare — Service Worker (sw.js)
+// Ozylix — Service Worker (sw.js)
 // Place this file in ROOT of your GitHub Pages repo
 // ============================================================
 
-const CACHE_NAME = 'ascovita-pwa-v5-fetchfix';
+const CACHE_NAME = 'ozylix-pwa-v6';
 const OFFLINE_URL = '/offline.html';
 
 // Files to cache on install (your core pages)
@@ -19,23 +19,22 @@ const CORE_FILES = [
   '/faq',
   '/offline.html',
   // cache.addAll rejects the whole batch if a single entry 404s, so every
-  // path below must exist. ascofizz-logo.svg used to be listed here and
-  // does not — the logo is a PNG now — which silently voided the precache.
-  '/assets/ascofizz-logo.png',
-  '/assets/ascofizz-mark.svg',
+  // path below must exist.
+  '/assets/ozylix-logo.png',
+  '/assets/ozylix-mark.svg',
   '/assets/favicon.svg',
-  '/assets/ascofizz-icon-192.png',
-  '/assets/ascofizz-icon-512.png'
+  '/assets/ozylix-icon-192.png',
+  '/assets/ozylix-icon-512.png'
 ];
 
 // ── INSTALL: cache core files ──
 self.addEventListener('install', event => {
-  console.log('[Ascovita SW] Installing...');
+  console.log('[Ozylix SW] Installing...');
   event.waitUntil(
     caches.open(CACHE_NAME).then(cache => {
       return cache.addAll(CORE_FILES).catch(err => {
         // If some files fail (e.g. /shop not a static file), continue anyway
-        console.warn('[Ascovita SW] Some files not cached:', err);
+        console.warn('[Ozylix SW] Some files not cached:', err);
       });
     })
   );
@@ -44,14 +43,14 @@ self.addEventListener('install', event => {
 
 // ── ACTIVATE: clean old caches ──
 self.addEventListener('activate', event => {
-  console.log('[Ascovita SW] Activated');
+  console.log('[Ozylix SW] Activated');
   event.waitUntil(
     caches.keys().then(keys =>
       Promise.all(
         keys
           .filter(key => key !== CACHE_NAME)
           .map(key => {
-            console.log('[Ascovita SW] Deleting old cache:', key);
+            console.log('[Ozylix SW] Deleting old cache:', key);
             return caches.delete(key);
           })
       )
@@ -131,11 +130,11 @@ self.addEventListener('fetch', event => {
 // ── PUSH NOTIFICATIONS (optional future use) ──
 self.addEventListener('push', event => {
   const data = event.data ? event.data.json() : {};
-  const title = data.title || 'Ascovita Healthcare';
+  const title = data.title || 'Ozylix';
   const options = {
     body: data.body || 'Check out our latest offers!',
-    icon: '/assets/ascofizz-icon-192.png',
-    badge: '/assets/ascofizz-icon-192.png',
+    icon: '/assets/ozylix-icon-192.png',
+    badge: '/assets/ozylix-icon-192.png',
     data: { url: data.url || '/' }
   };
   event.waitUntil(self.registration.showNotification(title, options));

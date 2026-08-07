@@ -1,5 +1,5 @@
 // ============================================================
-// ASCOVITA — PRODUCT IMAGES
+// OZYLIX — PRODUCT IMAGES
 // ============================================================
 
 const PRODUCT_IMAGES = {
@@ -11,7 +11,7 @@ const PRODUCT_IMAGES = {
     "",
   ]},
 
-  // —— id: 8 — Multidiata – Ascovita Premium Multivitamin ——
+  // —— id: 8 — Multidiata – Ozylix Premium Multivitamin ——
   // (general/unisex flagship — men's & women's versions are separate ids 32/33)
   8: { images: [
     "",
@@ -149,7 +149,7 @@ function wixResize(url, size) {
     p.thumb400 = wixResize(imgs[0] || p.image || '', 400);
   });
 
-  console.log('[Ascovita] ✅ Product images applied from PRODUCT_IMAGES map');
+  console.log('[Ozylix] ✅ Product images applied from PRODUCT_IMAGES map');
 })();
 
 // Export for Node.js / bundlers

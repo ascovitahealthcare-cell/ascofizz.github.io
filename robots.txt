@@ -1,5 +1,5 @@
 # ═══════════════════════════════════════════════════════════════════
-# Ascofizz — robots.txt
+# Ozylix — robots.txt
 # Search crawlers, and the answer engines that increasingly sit in
 # front of them, are both welcome on everything except admin and
 # utility pages.
@@ -68,4 +68,4 @@ Disallow: /
 User-agent: DotBot
 Disallow: /
 
-Sitemap: https://www.ascofizz.com/sitemap.xml
+Sitemap: https://www.ozylix.com/sitemap.xml
