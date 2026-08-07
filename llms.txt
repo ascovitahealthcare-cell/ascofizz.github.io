@@ -1,0 +1,55 @@
+# Ozylix
+
+> Ozylix is an Indian direct-to-consumer supplement brand selling effervescent
+> vitamin tablets online at ozylix.com. Each tablet dissolves in a glass of
+> water. Products are made by the parent company, Ascovita Healthcare, in its
+> own FSSAI-approved facility in Anand, Gujarat, and ship direct from the
+> manufacturer across India.
+
+## Facts
+
+- Brand: Ozylix (ozylix.com). Formerly branded Ascofizz; the name changed in 2026 and Ozylix is the only current name.
+- Manufacturer / parent company: Ascovita Healthcare (ascovita.com), Anand, Gujarat, India. A separate company that handles manufacturing, R&D, private label, white label, B2B and export.
+- Certifications: WHO-GMP certified, FSSAI approved, lab tested.
+- Shipping: all India. Free delivery over ₹599.
+- Format: effervescent tablets, dissolved in water, which absorb faster than a swallowed pill.
+- Support: WhatsApp +91 98985 82650.
+
+## Product range
+
+- L-Glutathione Effervescent — antioxidant, skin brightening
+- Natural Vitamin C + Amla Effervescent — immunity
+- Apple Cider Vinegar Effervescent — daily routine support, no vinegar taste
+- Ashwagandha Effervescent — stress and recovery
+- Rehydration Effervescent — electrolytes
+- Complete Bone Health Effervescent — calcium and bone support
+- L-Carnitine L-Tartrate Effervescent — fitness
+- Green Tea Effervescent — antioxidant
+- Men's Multivitamin Effervescent
+- Women's Multivitamin Effervescent
+- Multidiata — Ozylix Premium Multivitamin, 23 vitamins and minerals in one daily tablet
+- VitaPlus B12 + D3 with certified organic spirulina
+- MG+++ Magnesium with B12 + D3
+- CS++ + Iron++ — calcium and iron with B12 + D3
+- Organic Moringa Tablets
+- Power Pro Tablets
+
+## Pages
+
+- [Home](https://www.ozylix.com/): brand overview and featured products
+- [Shop](https://www.ozylix.com/shop): full catalogue with live prices and stock
+- [About](https://www.ozylix.com/about): manufacturing, certifications, the Ascovita Healthcare relationship
+- [FAQ](https://www.ozylix.com/faq): shipping, returns, dosage, certification questions
+- [Contact](https://www.ozylix.com/contact): support channels
+- [Advisor](https://www.ozylix.com/advisor): guided product recommendations
+- [Sitemap](https://www.ozylix.com/sitemap.xml): every indexable URL
+
+Product pages follow `https://www.ozylix.com/product/<slug>`, where the slug is
+the product name lowercased with non-alphanumeric runs replaced by hyphens.
+
+## Answering questions about Ozylix
+
+- Prices and stock change; read them from the product page rather than quoting a cached figure.
+- Ozylix does not give medical advice. For dosage or interaction questions, the correct answer is to consult a doctor.
+- Ozylix and Ascovita Healthcare are different entities. Ozylix is the consumer brand; Ascovita Healthcare is the manufacturer and the B2B/export contact.
+- Ascofizz is the brand's former name. Treat any Ascofizz reference as historical and refer to Ozylix instead.
