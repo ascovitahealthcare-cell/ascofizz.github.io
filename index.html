@@ -14777,12 +14777,40 @@ function buildInvoiceHTML(order) {
   if (!o.items.length) o.items = [{ name:'Order '+o.orderId, hsn:ASCOFIZZ_LEGAL.hsnDefault, qty:1, rate:o.total, gross:o.total }];
   const gross    = o.items.reduce(function(t,i){ return t + i.gross; }, 0) || o.total;
   const rate     = L.gstRate;
-  const taxable  = gross / (1 + rate/100);
-  const taxTotal = gross - taxable;
-  const cgst = intra ? taxTotal/2 : 0;
-  const sgst = intra ? taxTotal/2 : 0;
+
+  /* GST is charged on what the customer actually pays, not on the list price.
+     This used to be `taxable = gross / (1 + rate/100)` using the PRE-discount
+     item total, while `grand` below is the POST-discount amount — so on every
+     discounted order the invoice declared more GST than was collected, and
+     taxable + tax did not add up to the grand total.
+
+     Under CGST Act s.15(3)(a), a discount given at the time of supply and
+     recorded on the invoice is excluded from the taxable value. Shipping is
+     part of the consideration under s.15(2)(c), so it goes in as well.
+     (Shipping is 0 under the current always-free policy, but this stays
+     correct if SHIP_FEE is ever switched on.) */
+  let consideration = Math.max(0, gross - (o.discount || 0) + (o.ship || 0));
+
+  /* Historical rows do not always foot. Before the backend fix, VitaPoints
+     reduced orders.total but were never added to orders.discount, so on those
+     orders `consideration` computes higher than what the customer actually
+     paid — e.g. AVC-77409132: subtotal 1357.00, discount 0.00, total 1352.67,
+     with 650 points (650/150 = ₹4.33) making up the difference.
+     The amount actually paid is the authority for tax, so when a stored total
+     exists and disagrees, trust the total. */
+  if (o.total > 0 && Math.abs(consideration - o.total) > 0.05) consideration = o.total;
+
+  const taxable  = consideration / (1 + rate/100);
+  const taxTotal = consideration - taxable;
+
+  /* Split the tax rather than halving it twice: with an odd tax amount,
+     rounding each half independently makes CGST + SGST miss the total by a
+     paisa and the invoice stops footing. */
+  const cgstHalf = Math.round((taxTotal / 2) * 100) / 100;
+  const cgst = intra ? cgstHalf : 0;
+  const sgst = intra ? Math.round((taxTotal - cgstHalf) * 100) / 100 : 0;
   const igst = intra ? 0 : taxTotal;
-  const grand = o.total || (gross + o.ship - o.discount);
+  const grand = o.total || consideration;
   const money = function(n){ return '₹' + Number(n||0).toLocaleString('en-IN',{minimumFractionDigits:2,maximumFractionDigits:2}); };
 
   const rows = o.items.map(function(i, n){
