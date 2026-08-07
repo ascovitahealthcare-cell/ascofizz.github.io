@@ -8027,9 +8027,25 @@ function renderCkRecommendations() {
     .map(x => x.p);
 
   if (scored.length === 0) { sec.style.display = 'none'; return; }
-  sec.style.display = '';
 
-  el.innerHTML = scored.map(p => {
+  // Build the markup BEFORE revealing the section, and only reveal it if
+  // something was actually produced. Previously display was cleared first,
+  // so any throw inside the map below left the heading sitting over an
+  // empty card with no way to recover.
+  let html = '';
+  try {
+    html = renderCkRecoCards(scored);
+  } catch (e) {
+    console.warn('[checkout] recommendations skipped:', e && e.message);
+    html = '';
+  }
+  if (!html) { sec.style.display = 'none'; el.innerHTML = ''; return; }
+  el.innerHTML = html;
+  sec.style.display = '';
+}
+
+function renderCkRecoCards(scored) {
+  return scored.map(p => {
     const price    = p.salePrice || p.price;
     const inCart   = STORE.cart.some(i => i.id === p.id);
     const imgSrc   = getProductImg(p);
@@ -17508,24 +17524,36 @@ img.az-fade.az-in{opacity:1}
   /* ── Account menu: an even grid instead of ragged wrapping ──────── */
   .account-nav {
     display: grid;
-    grid-template-columns: 1fr 1fr;
+    /* `1fr 1fr` resolves to minmax(auto, 1fr), and a grid item defaults to
+       min-width:auto — so the track can never shrink below the widest
+       label. "Track Shipment" and "Profile & Address" pushed the columns
+       to 215px + 191px inside a 306px card and hung off the right edge.
+       minmax(0, 1fr) lets the tracks actually be half each. */
+    grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 8px;
-    justify-content: stretch;
   }
   .account-nav-item {
     width: 100%;
+    min-width: 0;          /* same reason — the item must be allowed to shrink */
     min-height: 52px;
     justify-content: flex-start;
-    padding: 12px 13px;
+    padding: 12px 11px;
     border-radius: 14px;
     background: var(--paper-hi, #fff);
     box-shadow: var(--neo-1, 0 1px 3px rgba(0,0,0,.06));
-    font-size: .82rem;
-    line-height: 1.25;
+    font-size: .78rem;
+    line-height: 1.22;
+    text-align: left;
     touch-action: manipulation;
   }
-  /* Sign Out reads as an action, not another destination. */
-  .account-nav-item[onclick*="logout"], .account-nav-item.danger {
+  /* Let a long label use two lines rather than force the column wider. */
+  .account-nav-item > span:not(.nav-ico) { min-width: 0; overflow-wrap: anywhere; }
+  .account-nav-item .nav-ico { flex: none; }
+  /* Sign Out is an action, not another destination. Matched on the real
+     handler — doLogout() — not a guessed one. */
+  .account-nav-item[onclick*="doLogout"],
+  .account-nav-item[onclick*="logout"],
+  .account-nav-item.danger {
     grid-column: 1 / -1;
     justify-content: center;
   }
@@ -17592,6 +17620,22 @@ img.az-fade.az-in{opacity:1}
 
   /* Room for the sticky pay bar. */
   #page-checkout .checkout-layout { padding-bottom: 96px; }
+
+  /* Emphasis was inverted. "Pay Securely via GoKwik" rendered at page tone
+     — a quiet neumorphic extrusion — while the COD button underneath it
+     carries an inline linear-gradient built from --seal/--f-citrus, both
+     of which resolve to --indigo. The secondary action was the loud one.
+     The primary gets the fill; COD becomes the quiet extrusion. */
+  #page-checkout #onlinePayBtn {
+    background: var(--indigo) !important;
+    color: #fff !important;
+    box-shadow: var(--lit-indigo) !important;
+  }
+  #page-checkout #codBtn {
+    background: var(--paper) !important;
+    color: var(--t-hi) !important;
+    box-shadow: var(--neo-1) !important;
+  }
 }
 
 /* ═══════════════════════════════════════════════════════════════════
@@ -17608,8 +17652,11 @@ img.az-fade.az-in{opacity:1}
   display: none;
   position: fixed; left: 0; right: 0; bottom: 0; z-index: 900;
   padding: 10px 14px calc(10px + env(safe-area-inset-bottom, 0px));
-  background: var(--paper-hi, #fff);
-  box-shadow: 0 -6px 26px rgba(101,113,102,.16);
+  /* Page tone, not white: this is an extruded surface in the same
+     neumorphic system as everything else, and a white slab on parchment
+     reads as a different material. */
+  background: var(--paper, #FBF3E8);
+  box-shadow: 0 -1px 0 var(--edge), 0 -8px 28px rgba(101,113,102,.14);
   align-items: center; gap: 12px;
 }
 #ozPayBar .opb-total { flex: 0 0 auto; line-height: 1.15; }
@@ -17628,13 +17675,19 @@ img.az-fade.az-in{opacity:1}
 }
 @media (max-width: 900px) {
   body.oz-checkout #ozPayBar { display: flex; }
-  /* The WhatsApp button sits bottom-right and would cover the COD link. */
-  body.oz-checkout .wa-bubble,
-  body.oz-checkout .wa-float,
-  body.oz-checkout #waFloat {
-    bottom: calc(96px + env(safe-area-inset-bottom, 0px)) !important;
+  /* The class is .wa-fab — the earlier rule guessed at .wa-bubble and never
+     matched, so the button still sat on top of the COD link. */
+  body.oz-checkout .wa-fab {
+    bottom: calc(env(safe-area-inset-bottom, 0px) + 108px) !important;
   }
 }
+
+/* #stickyCart is the product page's add-to-cart bar. An IntersectionObserver
+   shows it when the real Add button scrolls away, but nothing ever hides it
+   again on navigation — so it followed the customer to checkout and sat
+   underneath the pay bar, two fixed bars stacked on top of each other. It
+   belongs to the product page and nowhere else. */
+body:not(.oz-product) #stickyCart { display: none !important; }
 
 /* The ambient bubbles are decoration. They belong behind everything and
    must never intercept a tap. */
@@ -17671,6 +17724,11 @@ img.az-fade.az-in{opacity:1}
     var pg = document.getElementById('page-checkout');
     var on = !!pg && pg.classList.contains('active');
     document.body.classList.toggle('oz-checkout', on);
+    // #stickyCart is the product page's add-to-cart bar and is only ever
+    // shown, never hidden again, so it used to follow the customer to
+    // checkout and stack under the pay bar. This scopes it to its own page.
+    var prod = document.getElementById('page-product');
+    document.body.classList.toggle('oz-product', !!prod && prod.classList.contains('active'));
     if (on) sync();
   }
 
