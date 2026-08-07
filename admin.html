@@ -10038,7 +10038,19 @@ document.addEventListener('DOMContentLoaded', function() {
 <script>
   window.MARKETING_SUPABASE_URL = "https://wyvpuafzirwlwweifzao.supabase.co";
   window.MARKETING_SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Ind5dnB1YWZ6aXJ3bHd3ZWlmemFvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODQyODU0NTUsImV4cCI6MjA5OTg2MTQ1NX0.JG_DIQJef2rshO7TYwrk1p0DqTLR3JUQeJbQHO8K8rg";
-  window.MARKETING_BACKEND_URL = "https://marketing-automation-rmcb.onrender.com";
+  /* Marketing calls now go through the main backend's /api/marketing/* proxy
+     instead of straight to the marketing service.
+
+     Why: every route on that service (including POST /api/adsets/:id/budget,
+     which sets your Meta daily ad budget) was reachable by anyone who knew
+     its URL, and this panel called it with no credentials at all. The service
+     is now key-gated — but this file is static on GitHub Pages, so it cannot
+     hold that key. The backend holds it, checks your admin JWT first, and
+     attaches the key server-side.
+
+     The direct URL is kept below only for reference. */
+  window.MARKETING_DIRECT_URL  = "https://marketing-automation-rmcb.onrender.com";
+  window.MARKETING_BACKEND_URL = API + "/api/marketing";
 </script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 <script>
@@ -10774,6 +10786,357 @@ if (typeof _auditOrigShowPage === 'function') {
     if (name === 'auditdebugger') auditRefresh();
   };
 }
+</script>
+
+
+<script>
+/* ═══════════════════════════════════════════════════════════════════
+   Marketing proxy auth shim
+   The Live Ads and Strategy tabs call fetch(MARKETING_BACKEND_URL + ...)
+   with no headers. Those calls now land on the backend's admin-gated
+   /api/marketing/* proxy, so they need the same bearer token every other
+   admin call already sends. Wrapping fetch keeps all five call sites
+   untouched and picks up any added later.
+   ═══════════════════════════════════════════════════════════════════ */
+(function () {
+  if (window.__mktAuthShim) return;
+  window.__mktAuthShim = true;
+  var _fetch = window.fetch;
+  window.fetch = function (input, init) {
+    try {
+      var url = (typeof input === 'string') ? input : (input && input.url) || '';
+      if (url.indexOf('/api/marketing') !== -1 && typeof authToken !== 'undefined' && authToken) {
+        init = init || {};
+        var h = new Headers(init.headers || {});
+        if (!h.has('Authorization')) h.set('Authorization', 'Bearer ' + authToken);
+        if (!h.has('Content-Type') && init.body) h.set('Content-Type', 'application/json');
+        init.headers = h;
+      }
+    } catch (e) { /* never let the shim break a request */ }
+    return _fetch.call(this, input, init);
+  };
+})();
+</script>
+
+
+<!-- ══════════════════════════════════════════════════════════════════════
+     ADMIN SESSION + ROLE LAYER  (v9.3)
+     Appended after all existing markup and scripts. Nothing above is edited.
+     ══════════════════════════════════════════════════════════════════════ -->
+<style id="az-role-css">
+/* Idle warning */
+#azIdleModal{position:fixed;inset:0;z-index:100000;display:none;align-items:center;justify-content:center;
+  background:rgba(20,30,36,.62);backdrop-filter:blur(6px)}
+#azIdleModal.show{display:flex}
+#azIdleCard{background:var(--surface,#fff);border-radius:16px;padding:30px 32px;max-width:400px;width:calc(100% - 40px);
+  box-shadow:0 24px 70px rgba(0,0,0,.32);text-align:center;font-family:var(--font-body,system-ui)}
+#azIdleCount{font-family:var(--mono,monospace);font-size:2.6rem;font-weight:800;color:var(--red,#C2434F);margin:10px 0 4px}
+/* Session pill in the topbar */
+#azSessionPill{display:inline-flex;align-items:center;gap:6px;font-family:var(--mono,monospace);font-size:.7rem;
+  padding:4px 9px;border-radius:999px;background:var(--surface2,#EFE7DA);color:var(--text3,#7A8B92);margin-left:8px}
+#azSessionPill.warn{background:rgba(194,67,79,.14);color:var(--red,#C2434F);font-weight:700}
+/* Actions this role cannot perform */
+.az-noperm{opacity:.42;cursor:not-allowed!important;position:relative;filter:grayscale(.6)}
+.az-noperm::after{content:"👑";position:absolute;top:-5px;right:-5px;font-size:.66rem;filter:none}
+#azRoleBanner{display:none;margin:0 0 14px;padding:11px 15px;border-radius:10px;font-size:.79rem;line-height:1.6;
+  background:rgba(59,126,166,.1);border-left:3px solid var(--blue,#3B7EA6);color:var(--text2,#40535C)}
+body.role-admin #azRoleBanner{display:block}
+</style>
+
+<div id="azIdleModal" role="alertdialog" aria-live="assertive">
+  <div id="azIdleCard">
+    <div style="font-size:2rem">⏳</div>
+    <div style="font-weight:800;font-size:1.05rem;margin-top:6px">Still there?</div>
+    <div id="azIdleCount">2:00</div>
+    <div id="azIdleWhy" style="font-size:.82rem;color:var(--text3,#7A8B92);line-height:1.6">
+      You'll be signed out automatically for security.
+    </div>
+    <button id="azIdleKeep" class="btn btn-primary" style="margin-top:16px;width:100%" onclick="azStaySignedIn()">Keep me signed in</button>
+    <button class="btn btn-secondary btn-sm" style="margin-top:8px;width:100%" onclick="doLogout()">Sign out now</button>
+  </div>
+</div>
+
+<script>
+/* ══════════════════════════════════════════════════════════════════════
+   1. IDLE + ABSOLUTE SESSION TIMEOUT
+   Staff tokens now expire server-side after 1 hour. The UI has to agree,
+   or the panel sits there looking signed in while every call 401s.
+   Two independent clocks:
+     • idle   — 60 min with no interaction, 2-minute warning first
+     • absolute — the token's own exp, which cannot be extended by activity
+   ══════════════════════════════════════════════════════════════════════ */
+(function () {
+  if (window.__azSession) return;
+  window.__azSession = true;
+
+  var IDLE_MS  = 60 * 60 * 1000;   // 60 minutes of inactivity
+  var WARN_MS  = 2 * 60 * 1000;    // warn for the last 2 minutes
+  var lastAct  = Date.now();
+  var warning  = false;
+  /* Which clock raised the warning. Activity can dismiss an IDLE warning —
+     that's the whole point of it. It must NOT dismiss an ABSOLUTE-expiry
+     warning: the token is running out regardless of how much you move the
+     mouse, so hiding it would drop the person out with no notice at all. */
+  var warnKind = null;
+  var tickRef  = null;
+
+  function tokenExp() {
+    try {
+      var t = localStorage.getItem('ascovita_token');
+      if (!t) return 0;
+      return (JSON.parse(atob(t.split('.')[1])).exp || 0) * 1000;
+    } catch (e) { return 0; }
+  }
+
+  function fmt(ms) {
+    var s = Math.max(0, Math.ceil(ms / 1000));
+    return Math.floor(s / 60) + ':' + String(s % 60).padStart(2, '0');
+  }
+
+  window.azStaySignedIn = function () {
+    lastAct = Date.now();
+    hideWarn();
+    /* Activity resets the idle clock but cannot extend the token. If the
+       server-side hour is nearly up, refresh it by re-authenticating rather
+       than leaving the user on a token that is about to start 401ing. */
+    var left = tokenExp() - Date.now();
+    if (left > 0 && left < 5 * 60 * 1000) {
+      alert('Your 1-hour session is almost over. Please sign in again to continue.');
+      doLogout();
+    }
+  };
+
+  function showWarn(kind) {
+    warning = true;
+    warnKind = kind;
+    var m = document.getElementById('azIdleModal');
+    if (m) m.classList.add('show');
+    var why = document.getElementById('azIdleWhy');
+    if (why) {
+      why.textContent = kind === 'expiry'
+        ? 'Your 1-hour session is ending. Sign in again to continue — staying active will not extend it.'
+        : "You'll be signed out automatically after 60 minutes of inactivity.";
+    }
+    var keep = document.getElementById('azIdleKeep');
+    if (keep) keep.style.display = (kind === 'expiry') ? 'none' : 'block';
+  }
+  function hideWarn() {
+    warning = false;
+    warnKind = null;
+    var m = document.getElementById('azIdleModal');
+    if (m) m.classList.remove('show');
+  }
+
+  function tick() {
+    if (!localStorage.getItem('ascovita_token')) return;
+
+    var idleLeft = IDLE_MS - (Date.now() - lastAct);
+    var exp      = tokenExp();
+    var absLeft  = exp ? exp - Date.now() : Infinity;
+
+    // Whichever runs out first wins.
+    var left = Math.min(idleLeft, absLeft);
+
+    if (left <= 0) {
+      hideWarn();
+      try { localStorage.setItem('ascovita_logout_reason', absLeft <= 0 ? 'expired' : 'idle'); } catch (e) {}
+      doLogout();
+      /* doLogout() swaps the panel for the login screen in place — it does
+         not reload — so the DOMContentLoaded handler below has long since
+         run. Show the reason now, or the person is dropped back to a blank
+         login form with no idea why. */
+      showLogoutReason();
+      return;
+    }
+
+    if (left <= WARN_MS) {
+      if (!warning) showWarn(absLeft <= idleLeft ? 'expiry' : 'idle');
+      var c = document.getElementById('azIdleCount');
+      if (c) c.textContent = fmt(left);
+    } else if (warning) {
+      hideWarn();
+    }
+
+    var pill = document.getElementById('azSessionPill');
+    if (pill && exp) {
+      pill.textContent = '⏱ ' + fmt(absLeft);
+      pill.classList.toggle('warn', absLeft < 5 * 60 * 1000);
+    }
+  }
+
+  ['mousedown', 'keydown', 'touchstart', 'scroll', 'click'].forEach(function (ev) {
+    document.addEventListener(ev, function () {
+      lastAct = Date.now();
+      if (warning && warnKind === 'idle') hideWarn();
+    }, { passive: true, capture: true });
+  });
+
+  /* setInterval alone is unreliable — a backgrounded tab throttles it, and a
+     laptop that sleeps for two hours would wake up still "signed in". The
+     visibility check re-evaluates the moment the tab comes back. */
+  window.__azTick = tick;   // so applyRole can refresh the pill immediately
+  tickRef = setInterval(tick, 1000);
+  document.addEventListener('visibilitychange', function () { if (!document.hidden) tick(); });
+  tick();
+
+  /* Signing out in one tab should sign out every tab. */
+  window.addEventListener('storage', function (e) {
+    if (e.key === 'ascovita_token' && !e.newValue) location.reload();
+  });
+
+  /* Explain why they were kicked out — both on a fresh page load and
+     immediately after an in-place logout. */
+  function showLogoutReason() {
+    var why = localStorage.getItem('ascovita_logout_reason');
+    if (!why) return;
+    localStorage.removeItem('ascovita_logout_reason');
+    var err = document.getElementById('loginError');
+    if (err) {
+      err.style.display = 'block';
+      err.textContent = why === 'idle'
+        ? 'Signed out after 60 minutes of inactivity. Please sign in again.'
+        : 'Your 1-hour session expired. Please sign in again.';
+    }
+  }
+  window.showLogoutReason = showLogoutReason;
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', showLogoutReason);
+  } else {
+    showLogoutReason();
+  }
+})();
+
+/* ══════════════════════════════════════════════════════════════════════
+   2. ROLE-AWARE UI
+   Reads /api/admin/me, which returns the SAME permission list the API
+   guards use. So a button is only ever hidden when the server would
+   genuinely refuse the action — the UI can't drift from the rules.
+
+   This is presentation only. The real boundary is server-side: every
+   owner-only route 403s for an admin token no matter what this file does.
+   ══════════════════════════════════════════════════════════════════════ */
+window.AZPerms = { role: null, list: [], loaded: false };
+
+window.azCan = function (perm) {
+  if (!window.AZPerms.loaded) return true;   // don't grey things out before we know
+  return window.AZPerms.list.indexOf(perm) !== -1;
+};
+
+/* Which permission each part of the panel needs. Selector -> permission. */
+var AZ_UI_PERMS = [
+  ['[onclick*="deleteProduct"]',      'products.delete'],
+  ['[onclick*="deleteOrder"]',        'orders.delete'],
+  ['[onclick*="deleteCustomer"]',     'customers.delete'],
+  ['[onclick*="manualRefund"]',       'orders.refund'],
+  ['[onclick*="refundOrder"]',        'orders.refund'],
+  ['[onclick*="saveCoupon"]',         'coupons.manage'],
+  ['[onclick*="deleteCoupon"]',       'coupons.manage'],
+  ['[onclick*="addCoupon"]',          'coupons.manage'],
+  ['[onclick*="saveSettings"]',       'settings.manage'],
+  ['[onclick*="syncProducts"]',       'system.maintenance'],
+  ['[onclick*="sendWhatsapp"]',       'whatsapp.send'],
+  ['[onclick*="sendReport"]',         'whatsapp.send'],
+  ['[onclick*="testEmail"]',          'system.maintenance'],
+  ['[onclick*="revokeTokens"]',       'tokens.revoke'],
+  ['#navCoupons',                     'coupons.manage'],
+  ['#navSettings',                    'settings.manage'],
+  ['#navAuditLog',                    'audit.view'],
+  ['#navMarketing',                   'marketing.manage'],
+  ['#moreCoupons',                    'coupons.manage'],
+  ['#moreSettings',                   'settings.manage'],
+];
+
+function azApplyPermsToDOM() {
+  if (!window.AZPerms.loaded || window.AZPerms.role === 'owner') return;
+  AZ_UI_PERMS.forEach(function (pair) {
+    if (window.azCan(pair[1])) return;
+    document.querySelectorAll(pair[0]).forEach(function (el) {
+      if (el.dataset.azPerm) return;
+      el.dataset.azPerm = pair[1];
+      if (pair[0].charAt(0) === '#') { el.style.display = 'none'; return; }
+      el.classList.add('az-noperm');
+      el.title = 'Owner only — ask the owner to do this';
+      el.setAttribute('aria-disabled', 'true');
+      el.addEventListener('click', function (e) {
+        e.preventDefault(); e.stopImmediatePropagation();
+        if (typeof showToast === 'function') showToast('Owner only — you do not have permission for this', 'error');
+        else alert('Owner only — you do not have permission for this action.');
+      }, true);
+    });
+  });
+
+  /* Price fields are read-only for staff; stock stays editable. */
+  document.querySelectorAll('#prodPrice,#prodSalePrice,#prodMrp,[id*="Price"],[name*="price"]').forEach(function (el) {
+    if (el.tagName !== 'INPUT' || el.dataset.azPriceLocked) return;
+    if (window.azCan('products.pricing')) return;
+    el.dataset.azPriceLocked = '1';
+    el.readOnly = true;
+    el.title = 'Only the owner can change pricing';
+    el.style.background = 'var(--surface2, #EFE7DA)';
+  });
+}
+
+async function azLoadPerms() {
+  try {
+    const r = await fetch(API + '/api/admin/me', {
+      headers: { 'Authorization': 'Bearer ' + authToken },
+      signal: AbortSignal.timeout(12000)
+    });
+    if (!r.ok) return;
+    const d = await r.json();
+    window.AZPerms = { role: d.role, list: d.permissions || [], loaded: true };
+
+    const banner = document.getElementById('azRoleBanner');
+    if (banner && d.role === 'admin') {
+      banner.innerHTML = '<strong>Staff account.</strong> You can manage orders, stock, customers and returns. '
+        + 'Pricing, refunds, coupons, deletions, settings, revenue reports and ad spend are owner-only. '
+        + 'Actions marked 👑 need the owner.';
+    }
+    azApplyPermsToDOM();
+  } catch (e) { /* leave the UI fully enabled; the server still enforces */ }
+}
+
+/* The panel re-renders its tables constantly, so re-apply as the DOM changes
+   rather than only once after login. Throttled to one pass per frame. */
+(function () {
+  var queued = false;
+  new MutationObserver(function () {
+    if (queued || !window.AZPerms.loaded) return;
+    queued = true;
+    requestAnimationFrame(function () { queued = false; azApplyPermsToDOM(); });
+  }).observe(document.body, { childList: true, subtree: true });
+})();
+
+/* Hook into the existing applyRole() rather than editing it — the same
+   convention the other patches in this file use. */
+(function () {
+  var _orig = window.applyRole;
+  window.applyRole = function (role) {
+    var r = _orig ? _orig.apply(this, arguments) : undefined;
+    azLoadPerms();
+
+    /* Session countdown pill next to the role badge. */
+    var tickNow = function () { try { if (window.__azTick) window.__azTick(); } catch (e) {} };
+    var badge = document.getElementById('roleBadge');
+    if (badge && !document.getElementById('azSessionPill')) {
+      var pill = document.createElement('span');
+      pill.id = 'azSessionPill';
+      pill.title = 'Time left in this session';
+      badge.parentNode.insertBefore(pill, badge.nextSibling);
+      tickNow();   // otherwise the pill sits empty until the next 1s tick
+    }
+
+    /* Explain the limits once, at the top of the page area. */
+    if (!document.getElementById('azRoleBanner')) {
+      var main = document.querySelector('main') || document.body;
+      var b = document.createElement('div');
+      b.id = 'azRoleBanner';
+      main.insertBefore(b, main.firstChild);
+    }
+    return r;
+  };
+  if (localStorage.getItem('ascovita_token')) azLoadPerms();
+})();
 </script>
 
 </body>
