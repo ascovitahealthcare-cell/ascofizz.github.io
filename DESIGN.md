@@ -1,4 +1,4 @@
-# DESIGN.md — Ascofizz · "Coastal Sage"
+# DESIGN.md — Ozylix · "Coastal Sage"
 
 > **Current system.** One file: `index.html` holds the markup, the whole
 > stylesheet (`<style>`, sections banner-marked `01-core` … `07-accents` in
@@ -28,7 +28,8 @@
 > - **B2B** is not a page here. Every B2B affordance is an external link to
 >   `https://www.ascovita.com/#/capabilities`, and a deep link to `/b2b`
 >   redirects there. Those URLs are deliberate — do not rewrite them to the
->   ascofizz domain.
+>   ozylix domain. Ascovita Healthcare is the separate parent manufacturer,
+>   not an old name for this brand.
 > - **Imagery** every marketing and product image link is cleared for
 >   re-upload; `data-media-key` attributes are intact, so Admin → Site Images
 >   still drives them.
@@ -44,7 +45,7 @@
 > - **Ground** `--paper #F1F3F8`. One tone. Every surface is that same paper
 >   raised out of the page (`--neo-1..4`) or pressed into it (`--neo-in`).
 >   There are almost no borders — the shadow is the edge.
-> - **Colour**, sampled from `assets/ascofizz-logo.png`: `--indigo #3432C8`
+> - **Colour**, sampled from `assets/ozylix-logo.png`: `--indigo #3432C8`
 >   (the three bubbles and the ZZ) is the single accent; `--green #2A6614`
 >   ("powered by Ascovita") appears only on kickers and confirmations;
 >   `--ink #070B23` for headings.
@@ -212,14 +213,15 @@ tokens directly.
 
 ## 9 · Known gaps
 
-- `assets/ascofizz-icon-{16,32,180,192,512}.png` and `assets/favicon.ico`
-  are still referenced and still missing. `assets/favicon.svg` and
-  `assets/ascofizz-mark.svg` now cover modern browsers and the app chrome;
-  raster icons remain for the owner to supply.
+- `assets/ozylix-icon-{16,32,180,192,512}.png` now exist, generated from the
+  Ozylix logo package: 16 and 32 carry the three-dot mark alone so they stay
+  legible at favicon size, 180/192/512 carry the full wordmark on parchment.
+  `assets/favicon.svg` and `assets/ozylix-mark.svg` cover modern browsers and
+  the app chrome. `assets/favicon.ico` is no longer referenced.
 - `assets/plant-placeholder.svg` is a **labelled synthetic placeholder** on
   the About page. Replace it with the real manufacturing photograph via
   Admin → Site Images.
-- The wordmark inside `assets/ascofizz-logo.svg` renders in a fallback face,
+- The wordmark inside `assets/ozylix-logo.svg` renders in a fallback face,
   because an SVG loaded through `<img>` cannot use webfonts. Supplying a
   real logo file through Admin → Site Images replaces it.
 - `admin.html` was deliberately left on the old styling; it is an internal

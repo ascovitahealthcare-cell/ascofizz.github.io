@@ -1,5 +1,5 @@
 /**
- * PROMO_MEDIA.js — Ascovita Healthcare
+ * PROMO_MEDIA.js — Ozylix
  * ─────────────────────────────────────────────────────────────────
  * Upload your promo images to https://ascovita.imgbb.com/
  * Then paste the direct image links into the `src` fields below.
