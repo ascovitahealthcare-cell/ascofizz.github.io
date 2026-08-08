@@ -6,20 +6,56 @@
   <meta name="robots" content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1">
   <meta name="googlebot" content="index, follow, max-image-preview:large">
   <meta name="bingbot" content="index, follow">
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://www.googletagmanager.com https://accounts.google.com https://cdn.jsdelivr.net https://cdnjs.cloudflare.com https://connect.facebook.net https://sdk.cashfree.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://accounts.google.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: blob: https:; connect-src 'self' https://www.facebook.com https://connect.facebook.net https://frwsjgrrtzhjfflcdjjs.supabase.co https://ascovitahealthcare-cell-github-io.onrender.com https://*.gokwik.co https://gkx.gokwik.co https://www.google-analytics.com https://region1.google-analytics.com https://www.googleapis.com https://oauth2.googleapis.com https://openidconnect.googleapis.com https://accounts.google.com https://api.cashfree.com https://sandbox.cashfree.com; frame-src https://accounts.google.com https://content.googleapis.com https://oauth2.googleapis.com https://*.gokwik.co https://sdk.cashfree.com https://api.cashfree.com https://sandbox.cashfree.com https://payments.cashfree.com https://payments-test.cashfree.com; object-src 'none'; base-uri 'self';">
-  <!-- Google Analytics 4 — G-PSRK3R6L0Z -->
-<script async src="https://www.googletagmanager.com/gtag/js?id=G-PSRK3R6L0Z"></script>
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://www.googletagmanager.com https://accounts.google.com https://cdn.jsdelivr.net https://cdnjs.cloudflare.com https://connect.facebook.net https://sdk.cashfree.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://accounts.google.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: blob: https:; connect-src 'self' https://www.googletagmanager.com https://www.facebook.com https://connect.facebook.net https://frwsjgrrtzhjfflcdjjs.supabase.co https://ascovitahealthcare-cell-github-io.onrender.com https://*.gokwik.co https://gkx.gokwik.co https://www.google-analytics.com https://region1.google-analytics.com https://www.googleapis.com https://oauth2.googleapis.com https://openidconnect.googleapis.com https://accounts.google.com https://api.cashfree.com https://sandbox.cashfree.com; frame-src https://www.googletagmanager.com https://accounts.google.com https://content.googleapis.com https://oauth2.googleapis.com https://*.gokwik.co https://sdk.cashfree.com https://api.cashfree.com https://sandbox.cashfree.com https://payments.cashfree.com https://payments-test.cashfree.com; object-src 'none'; base-uri 'self';">
+  <!-- ── Clickjacking guard ──────────────────────────────────────────
+       X-Frame-Options is a response header, and CSP's frame-ancestors is
+       explicitly ignored when the policy arrives in a <meta> tag — so on
+       GitHub Pages, which serves this file and cannot add headers, neither
+       of the two proper defences is available. This is the fallback: if the
+       storefront is ever framed by another origin, take the top window
+       back. Only same-origin framing is allowed through, which keeps the
+       payment and Tag Manager iframes this page itself embeds working,
+       because those are frames we contain, not frames containing us.
+
+       Replace this with a real `X-Frame-Options: DENY` /
+       `Content-Security-Policy: frame-ancestors 'none'` header the moment
+       the site sits behind a proxy that can set one (Cloudflare, Netlify).
+       A script guard is defeatable by a sandboxed iframe; a header is not. -->
+  <script>
+  (function () {
+    if (window.top === window.self) return;
+    try {
+      // Reading the parent's origin throws when it is cross-origin, which
+      // is itself the signal we are looking for.
+      if (window.top.location.origin === window.self.location.origin) return;
+    } catch (e) { /* cross-origin — fall through and break out */ }
+    try { window.top.location = window.self.location.href; }
+    catch (e) { document.documentElement.style.display = 'none'; }
+  })();
+  </script>
+
+  <!-- Google Tag Manager — GTM-MQPL5QGP -->
+  <!-- Replaces the hardcoded GA4 loader (gtag/js?id=G-PSRK3R6L0Z) and its
+       gtag('config') call. Measurement IDs, consent and any future pixel now
+       live in the GTM container instead of being edited into this file, which
+       is the whole point of putting a tag manager in front of them: the GA4
+       property is configured once inside GTM and this page stops naming it.
+
+       The dataLayer and the gtag() shim below are deliberately kept. Every
+       _trackPage / _trackAddToCart / purchase call further down pushes
+       through gtag(), which is just dataLayer.push(arguments) — GTM reads
+       those, so the whole e-commerce event layer keeps working unchanged once
+       a GA4 tag is configured in the container. -->
+<script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+})(window,document,'script','dataLayer','GTM-MQPL5QGP');</script>
+<!-- End Google Tag Manager -->
 <script>
   window.dataLayer = window.dataLayer || [];
   function gtag(){dataLayer.push(arguments);}
   gtag('js', new Date());
-  gtag('config', 'G-PSRK3R6L0Z', {
-    send_page_view: true,
-    page_title: 'Ozylix',
-    page_location: window.location.href,
-  });
-
-  const _GA = 'G-PSRK3R6L0Z';
   const _gtag = (...args) => { if(typeof gtag === 'function') gtag(...args); };
 
   // ── PAGE VIEW (called from showPage) ──
@@ -930,7 +966,7 @@ best supplement brand 2024 2025, Ozylix review, Ozylix vs competitors India, Mad
               "name": "Ozylix"
             },
             "manufacturer": {
-              "@id": "https://www.ozylix.com/#organization"
+              "@id": "https://www.ascovita.com/#organization"
             },
             "sku": "ASC-008",
             "url": "https://www.ozylix.com/product/multidiata-ozylix-premium-multivitamin",
@@ -1003,7 +1039,7 @@ best supplement brand 2024 2025, Ozylix review, Ozylix vs competitors India, Mad
               "name": "Ozylix"
             },
             "manufacturer": {
-              "@id": "https://www.ozylix.com/#organization"
+              "@id": "https://www.ascovita.com/#organization"
             },
             "sku": "ASC-030",
             "url": "https://www.ozylix.com/product/green-tea-effervescent-tablet",
@@ -1064,7 +1100,7 @@ best supplement brand 2024 2025, Ozylix review, Ozylix vs competitors India, Mad
               "name": "Ozylix"
             },
             "manufacturer": {
-              "@id": "https://www.ozylix.com/#organization"
+              "@id": "https://www.ascovita.com/#organization"
             },
             "sku": "ASC-031",
             "url": "https://www.ozylix.com/product/ashwagandha-effervescent-tablet",
@@ -1130,7 +1166,7 @@ best supplement brand 2024 2025, Ozylix review, Ozylix vs competitors India, Mad
               "name": "Ozylix"
             },
             "manufacturer": {
-              "@id": "https://www.ozylix.com/#organization"
+              "@id": "https://www.ascovita.com/#organization"
             },
             "sku": "ASC-032",
             "url": "https://www.ozylix.com/product/men-s-multivitamin-effervescent-tablet",
@@ -1205,7 +1241,7 @@ best supplement brand 2024 2025, Ozylix review, Ozylix vs competitors India, Mad
               "name": "Ozylix"
             },
             "manufacturer": {
-              "@id": "https://www.ozylix.com/#organization"
+              "@id": "https://www.ascovita.com/#organization"
             },
             "sku": "ASC-033",
             "url": "https://www.ozylix.com/product/women-s-multivitamin-effervescent-tablet",
@@ -1280,7 +1316,7 @@ best supplement brand 2024 2025, Ozylix review, Ozylix vs competitors India, Mad
               "name": "Ozylix"
             },
             "manufacturer": {
-              "@id": "https://www.ozylix.com/#organization"
+              "@id": "https://www.ascovita.com/#organization"
             },
             "sku": "ASC-034",
             "url": "https://www.ozylix.com/product/apple-cider-vinegar-effervescent-tablet",
@@ -1355,7 +1391,7 @@ best supplement brand 2024 2025, Ozylix review, Ozylix vs competitors India, Mad
               "name": "Ozylix"
             },
             "manufacturer": {
-              "@id": "https://www.ozylix.com/#organization"
+              "@id": "https://www.ascovita.com/#organization"
             },
             "sku": "ASC-035",
             "url": "https://www.ozylix.com/product/complete-bone-health-effervescent-tablet",
@@ -1430,7 +1466,7 @@ best supplement brand 2024 2025, Ozylix review, Ozylix vs competitors India, Mad
               "name": "Ozylix"
             },
             "manufacturer": {
-              "@id": "https://www.ozylix.com/#organization"
+              "@id": "https://www.ascovita.com/#organization"
             },
             "sku": "ASC-036",
             "url": "https://www.ozylix.com/product/rehydration-effervescent-tablet",
@@ -1500,7 +1536,7 @@ best supplement brand 2024 2025, Ozylix review, Ozylix vs competitors India, Mad
               "name": "Ozylix"
             },
             "manufacturer": {
-              "@id": "https://www.ozylix.com/#organization"
+              "@id": "https://www.ascovita.com/#organization"
             },
             "sku": "ASC-037",
             "url": "https://www.ozylix.com/product/natural-vitamin-c-amla-effervescent-tablet",
@@ -1570,7 +1606,7 @@ best supplement brand 2024 2025, Ozylix review, Ozylix vs competitors India, Mad
               "name": "Ozylix"
             },
             "manufacturer": {
-              "@id": "https://www.ozylix.com/#organization"
+              "@id": "https://www.ascovita.com/#organization"
             },
             "sku": "ASC-038",
             "url": "https://www.ozylix.com/product/glutathione-effervescent-tablet",
@@ -1635,7 +1671,7 @@ best supplement brand 2024 2025, Ozylix review, Ozylix vs competitors India, Mad
               "name": "Ozylix"
             },
             "manufacturer": {
-              "@id": "https://www.ozylix.com/#organization"
+              "@id": "https://www.ascovita.com/#organization"
             },
             "sku": "ASC-039",
             "url": "https://www.ozylix.com/product/l-carnitine-l-tartrate-effervescent-tablet",
@@ -1685,7 +1721,7 @@ best supplement brand 2024 2025, Ozylix review, Ozylix vs competitors India, Mad
               "name": "Ozylix"
             },
             "manufacturer": {
-              "@id": "https://www.ozylix.com/#organization"
+              "@id": "https://www.ascovita.com/#organization"
             },
             "sku": "ASC-010",
             "url": "https://www.ozylix.com/product/vitaplus-b12-d3-vegan-with-certified-organic-spirulina",
@@ -1753,7 +1789,7 @@ best supplement brand 2024 2025, Ozylix review, Ozylix vs competitors India, Mad
               "name": "Ozylix"
             },
             "manufacturer": {
-              "@id": "https://www.ozylix.com/#organization"
+              "@id": "https://www.ascovita.com/#organization"
             },
             "sku": "ASC-011",
             "url": "https://www.ozylix.com/product/mg-magnesium-b12-d3-with-magnesium",
@@ -1826,7 +1862,7 @@ best supplement brand 2024 2025, Ozylix review, Ozylix vs competitors India, Mad
               "name": "Ozylix"
             },
             "manufacturer": {
-              "@id": "https://www.ozylix.com/#organization"
+              "@id": "https://www.ascovita.com/#organization"
             },
             "sku": "ASC-012",
             "url": "https://www.ozylix.com/product/cs-iron-calcium-iron-with-b12-d3",
@@ -1899,7 +1935,7 @@ best supplement brand 2024 2025, Ozylix review, Ozylix vs competitors India, Mad
               "name": "Ozylix"
             },
             "manufacturer": {
-              "@id": "https://www.ozylix.com/#organization"
+              "@id": "https://www.ascovita.com/#organization"
             },
             "sku": "ASC-020",
             "url": "https://www.ozylix.com/product/moringa-tablets",
@@ -1952,7 +1988,7 @@ best supplement brand 2024 2025, Ozylix review, Ozylix vs competitors India, Mad
               "name": "Ozylix"
             },
             "manufacturer": {
-              "@id": "https://www.ozylix.com/#organization"
+              "@id": "https://www.ascovita.com/#organization"
             },
             "sku": "ASC-022",
             "url": "https://www.ozylix.com/product/power-pro-tablets",
@@ -6497,6 +6533,10 @@ var PROMO_MEDIA = [
 
 </script>
 <body>
+<!-- Google Tag Manager (noscript) — GTM-MQPL5QGP -->
+<noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-MQPL5QGP"
+height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+<!-- End Google Tag Manager (noscript) -->
 <a class="skip-link" href="#page-home">Skip to content</a>
 
 
@@ -9701,23 +9741,75 @@ function schemaRatingFor(p) {
   // Only ever emit a rating backed by real reviews. Inventing one is a
   // structured-data violation and a manual-action risk, and the site
   // already refuses to display a fabricated star count.
-  const count = Number(p.reviews) || 0;
-  const value = Number(p.rating) || 0;
+  //
+  // Sourced from productRating(), the same live reviews-table aggregate
+  // the cards and the product page read. It used to read p.reviews /
+  // p.rating off the static catalogue, where both are 0 on every
+  // product — which is why Search Console reported "Missing field
+  // aggregateRating" on all sixteen even for products that do have
+  // reviews.
+  const r = (typeof productRating === 'function')
+    ? productRating(p)
+    : { avg: Number(p.rating) || 0, count: Number(p.reviews) || 0 };
+  const count = Number(r && r.count) || 0;
+  const value = Number(r && r.avg) || 0;
   if (!(count > 0 && value > 0)) return null;
   return {
     '@type': 'AggregateRating',
-    ratingValue: value.toFixed(1),
+    ratingValue: (Math.round(value * 10) / 10).toFixed(1),
     reviewCount: count,
     bestRating: '5',
     worstRating: '1',
   };
 }
 
+// Up to three real reviews, for the other half of the "2 non-critical
+// issues" Search Console reports. Only ever from REVIEWS[] — rows that
+// came out of the reviews table — never from anything typed in here.
+function schemaReviewsFor(p) {
+  let rows = (typeof REVIEWS !== 'undefined' && Array.isArray(REVIEWS[p.id])) ? REVIEWS[p.id] : [];
+  if (!rows.length && typeof PRODUCT_REVIEWS !== 'undefined' && Array.isArray(PRODUCT_REVIEWS[p.id])) {
+    rows = PRODUCT_REVIEWS[p.id];
+  }
+  const usable = rows.filter(r => r && Number(r.rating) > 0 && r.user);
+  if (!usable.length) return null;
+  return usable.slice(0, 3).map(r => {
+    const node = {
+      '@type': 'Review',
+      reviewRating: {
+        '@type': 'Rating',
+        ratingValue: String(Number(r.rating)),
+        bestRating: '5',
+        worstRating: '1',
+      },
+      author: { '@type': 'Person', name: String(r.user) },
+    };
+    if (r.text) node.reviewBody = String(r.text);
+    if (r.date) {
+      const d = new Date(r.date);
+      if (!isNaN(d)) node.datePublished = d.toISOString().slice(0, 10);
+    }
+    return node;
+  });
+}
+
 function syncProductStructuredData() {
   try {
     const tag = document.querySelector('script[type="application/ld+json"]');
     if (!tag || typeof PRODUCTS === 'undefined' || !PRODUCTS.length) return;
-    const graph = JSON.parse(tag.textContent);
+
+    // Rebuild from a pristine snapshot, never from the last render. This
+    // function runs again after every backend sync, and it now removes
+    // products that have no image — so reading the previous output would
+    // make removal permanent: the first pass would drop a product, the
+    // next pass would have nothing to put back when its photo finally
+    // arrived, and the ItemList would only ever shrink. The snapshot is
+    // also how the list is located, since "the node containing Products"
+    // stops matching once every Product has been filtered out of it.
+    if (!syncProductStructuredData._pristine) {
+      syncProductStructuredData._pristine = tag.textContent;
+    }
+    const graph = JSON.parse(syncProductStructuredData._pristine);
     const nodes = graph['@graph'] || [];
     const list = nodes.find(n =>
       String(n['@type']).includes('ItemList') && Array.isArray(n.itemListElement) &&
@@ -9726,25 +9818,49 @@ function syncProductStructuredData() {
 
     let changed = false;
     const noImage = [];
+    const kept = [];
     for (const entry of list.itemListElement) {
       const item = entry.item || entry;
-      if (!String(item['@type']).includes('Product')) continue;
+      if (!String(item['@type']).includes('Product')) { kept.push(entry); continue; }
       const live = PRODUCTS.find(p => schemaSlug(p.name) === String(item.url || '').split('/').pop());
-      if (!live) continue;
+      if (!live) { kept.push(entry); continue; }
+
+      const images = schemaImagesFor(live);
+      if (!images.length) {
+        // `image` is REQUIRED on Product. This used to delete the field and
+        // leave the item in the list, which is what Search Console was
+        // reporting as "1 critical issue" on the six products that have no
+        // photo yet — an invalid item, not an item with a gap. A product we
+        // cannot describe validly is left out of the feed until it has a
+        // picture, and walks back in by itself the moment one is uploaded.
+        noImage.push(live.name);
+        changed = true;
+        continue;
+      }
+      item.image = images;
       item.offers = schemaOfferFor(live, item.url);
+
       const rating = schemaRatingFor(live);
       if (rating) item.aggregateRating = rating; else delete item.aggregateRating;
-      const images = schemaImagesFor(live);
-      if (images.length) item.image = images;
-      else { delete item.image; noImage.push(live.name); }
+      const reviews = schemaReviewsFor(live);
+      if (reviews) item.review = reviews; else delete item.review;
+
+      kept.push(entry);
       changed = true;
     }
-    if (changed) tag.textContent = JSON.stringify(graph, null, 2);
-    // An image is required for a Merchant listing and cannot be invented, so
-    // name the products that still need one rather than failing silently.
+    if (changed) {
+      list.itemListElement = kept.map((e, i) => {
+        if (e && typeof e === 'object' && 'position' in e) e.position = i + 1;
+        return e;
+      });
+      if ('numberOfItems' in list) list.numberOfItems = kept.length;
+      tag.textContent = JSON.stringify(graph, null, 2);
+    }
+    // An image cannot be invented, so name the products that still need one
+    // rather than failing silently.
     if (noImage.length) {
-      console.warn('[schema] ' + noImage.length + ' product(s) have no image and cannot qualify for '
-        + 'Google Merchant listings. Upload one per product in Admin → Products: ' + noImage.join(', '));
+      console.warn('[schema] ' + noImage.length + ' product(s) have no image, so they are held out of '
+        + 'the Product feed until one is uploaded (Admin → Products): ' + noImage.join(', '));
     }
   } catch (e) {
     console.warn('[schema] catalogue sync skipped:', e.message);
@@ -9772,13 +9888,20 @@ function setProductPageSchema(p) {
       url,
       category: p.category || '',
       brand: { '@type': 'Brand', name: p.brand || 'Ozylix' },
-      manufacturer: { '@type': 'Organization', name: 'Ascovita Healthcare', url: 'https://www.ascovita.com' },
+      manufacturer: { '@type': 'Organization', '@id': 'https://www.ascovita.com/#organization', name: 'Ascovita Healthcare', url: 'https://www.ascovita.com' },
       offers: schemaOfferFor(p, url),
     };
+    // Same rule as the catalogue: no image, no Product node. Publishing one
+    // without the required field is what produces a critical issue in Search
+    // Console; publishing nothing simply leaves the product out until it has
+    // a photo.
     const images = schemaImagesFor(p);
-    if (images.length) node.image = images;
+    if (!images.length) return;
+    node.image = images;
     const rating = schemaRatingFor(p);
     if (rating) node.aggregateRating = rating;
+    const reviews = schemaReviewsFor(p);
+    if (reviews) node.review = reviews;
 
     const el = document.createElement('script');
     el.type = 'application/ld+json';
@@ -10209,6 +10332,7 @@ const REVIEWS_LOADED = {};   // productId -> true once a fetch has completed (su
 // already on screen. Cheap enough to be worth doing eagerly, and it is
 // the same table getLiveRating() already reads for the homepage stat.
 const PRODUCT_RATINGS = {};      // productId -> { avg, count }
+const PRODUCT_REVIEWS = {};      // productId -> up to 3 real review rows
 let PRODUCT_RATINGS_LOADED = false;
 
 // sbClient() returns null until the deferred Supabase bundle has run.
@@ -10231,7 +10355,15 @@ async function loadProductRatings() {
   try {
     const sb = await sbClientWhenReady(8000);
     if (!sb) throw new Error('Supabase client not loaded yet');
-    const { data, error } = await sb.from('reviews').select('product_id, rating');
+    // The extra columns cost nothing on top of a query that was already
+    // reading every row, and they let the Product structured data carry
+    // real `review` nodes on the catalogue page — the second of the two
+    // non-critical issues Search Console reports. Googlebot renders the
+    // catalogue, not each product page, so REVIEWS[] (filled only when a
+    // product page is opened) is never populated by the time the markup
+    // is read.
+    const { data, error } = await sb.from('reviews')
+      .select('product_id, rating, user_name, review_text, created_at');
     if (error) throw error;
 
     const totals = {};
@@ -10242,6 +10374,12 @@ async function loadProductRatings() {
       if (!totals[id]) totals[id] = { sum: 0, count: 0 };
       totals[id].sum += n;
       totals[id].count += 1;
+      if (!PRODUCT_REVIEWS[id]) PRODUCT_REVIEWS[id] = [];
+      if (PRODUCT_REVIEWS[id].length < 3 && r.user_name) {
+        PRODUCT_REVIEWS[id].push({
+          user: r.user_name, rating: n, text: r.review_text, date: r.created_at,
+        });
+      }
     });
     Object.keys(totals).forEach((id) => {
       PRODUCT_RATINGS[id] = { avg: totals[id].sum / totals[id].count, count: totals[id].count };
@@ -10255,6 +10393,8 @@ async function loadProductRatings() {
     PRODUCT_RATINGS_LOADED = true;
   }
   try { updateAllProductCards(); } catch (e) {}
+  // The structured data is built from these figures too.
+  try { if (typeof syncProductStructuredData === 'function') syncProductStructuredData(); } catch (e) {}
 }
 
 // What a card should show. Live aggregate first, then the full review
