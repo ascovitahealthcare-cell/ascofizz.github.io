@@ -2984,6 +2984,58 @@ button:disabled, .btn-primary:disabled, .btn-gold:disabled {
   .foil-blob { filter: blur(46px) saturate(1.4); opacity: .4; }
 }
 
+/* ══ FLOATING CURSOR ══════════════════════════════════════════════
+   A soft halo that trails the pointer, plus a small ring that tracks it
+   exactly. The native cursor is deliberately left visible — hiding the
+   system pointer for a decorative one is the fastest way to make a page
+   feel broken on a slow frame, and it takes the OS's own accessibility
+   cursor settings with it.
+
+   Both layers are position:fixed with pointer-events:none, so they can
+   never intercept a click, and the whole thing is torn out entirely on
+   touch devices and under prefers-reduced-motion (see fzCursor()).
+
+   Scroll feeds the halo: it swells and warms as the page moves, using
+   the --scrollv channel channels() already publishes plus a velocity
+   value the module sets on itself. */
+.fz-cursor {
+  position: fixed; top: 0; left: 0; z-index: 9998;
+  pointer-events: none; will-change: transform;
+  border-radius: 50%;
+  opacity: 0; transition: opacity .35s var(--settle);
+}
+.fz-cursor.is-live { opacity: 1; }
+
+.fz-cursor-halo {
+  width: 320px; height: 320px; margin: -160px 0 0 -160px;
+  background: radial-gradient(circle at 50% 50%,
+    color-mix(in srgb, var(--indigo) 20%, transparent) 0%,
+    color-mix(in srgb, var(--indigo) 9%, transparent) 38%,
+    transparent 68%);
+  filter: blur(14px);
+}
+.fz-cursor-ring {
+  width: 26px; height: 26px; margin: -13px 0 0 -13px;
+  box-shadow: inset 0 0 0 1.4px color-mix(in srgb, var(--indigo) 42%, transparent);
+  transition: opacity .35s var(--settle), width .22s var(--rise),
+              height .22s var(--rise), margin .22s var(--rise),
+              box-shadow .22s var(--rise);
+}
+/* Over anything clickable the ring opens up and fills faintly, so the
+   cursor answers the question the pointer is already asking. */
+.fz-cursor-ring.is-hot {
+  width: 46px; height: 46px; margin: -23px 0 0 -23px;
+  box-shadow: inset 0 0 0 1.4px color-mix(in srgb, var(--indigo) 62%, transparent),
+              0 0 0 6px color-mix(in srgb, var(--indigo) 7%, transparent);
+}
+.fz-cursor-ring.is-down { width: 20px; height: 20px; margin: -10px 0 0 -10px; }
+
+/* Pointer devices only. A phone has no pointer to trail and the halo
+   would sit frozen wherever the last tap landed. */
+@media (hover: none), (pointer: coarse), (prefers-reduced-motion: reduce) {
+  .fz-cursor { display: none !important; }
+}
+
 /* A light sheen crosses tiltable cards as the pointer passes */
 [data-tilt]::after {
   content: ""; position: absolute; inset: 0; z-index: 2; border-radius: inherit;
@@ -5076,16 +5128,160 @@ textarea.form-input { min-height: 96px; resize: vertical; font-family: inherit; 
   box-shadow: var(--sink-3);
   animation: fz-bob 7s var(--settle) infinite;
 }
+/* Two by two, not auto-fit. In a half-width hero column, minmax(150px)
+   fits three tracks and drops the fourth stat onto its own row with a
+   divider hanging off the side of it. */
 .about-stats-grid {
-  display: grid; gap: 1px; margin: 40px 0;
-  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  display: grid; gap: 1px 0; margin: 34px 0;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
 }
+.about-stats-grid > *:nth-child(odd)::before { display: none; }
+
+.ab-hero-media { position: relative; }
+.ab-hero-well {
+  display: grid; place-content: center; justify-items: center; gap: 10px;
+  aspect-ratio: 4/5; width: 100%; padding: 24px; text-align: center;
+  border-radius: var(--r-xl); background: var(--paper); box-shadow: var(--neo-in);
+  color: var(--t-dim);
+}
+.ab-hero-well span { font-size: 2.4rem; opacity: .5; }
+.ab-hero-well small { font-size: .74rem; font-weight: 600; letter-spacing: .04em; max-width: 22ch; line-height: 1.5; }
+/* Once a real photo arrives the img is no longer hidden, so the well
+   steps out of the way and the image takes the flow. */
+.ab-hero-media:has(img:not([data-awaiting-upload]):not([src=""])) .ab-hero-well { display: none; }
+.ab-hero-media:has(.ab-hero-well) > img { position: absolute; inset: 0; }
 .about-stats-grid > * { position: relative; padding: 20px 18px; text-align: center; }
+.ab-stat-n {
+  font-family: var(--font-display); font-size: 1.85rem; font-weight: 800;
+  line-height: 1.05; color: var(--f-mineral); font-variant-numeric: tabular-nums;
+}
+.ab-stat-l { font-size: .7rem; color: var(--t-low); margin-top: 4px; line-height: 1.35; }
+@media (max-width: 480px) { .ab-stat-n { font-size: 1.5rem; } .ab-stat-l { font-size: .66rem; } }
+
 .about-stats-grid > * + *::before {
   content: ''; position: absolute; left: 0; top: 20%; bottom: 20%; width: 1px;
   background: linear-gradient(180deg, transparent, rgba(192,57,74,.26), transparent);
 }
 .about-team-grid { display: grid; gap: 18px; grid-template-columns: repeat(auto-fit, minmax(212px, 1fr)); }
+
+/* ══ ABOUT PAGE CARDS ═════════════════════════════════════════════
+   The About page was built against a dark hero — every card in it was
+   painted with rgba(255,255,255,.08….18) fills and rgba(255,255,255,.2)
+   borders. The hero is var(--face-warm) now, so all of that is white on
+   white: the four hero stat cards, the two decorative rings and the
+   founder avatars were invisible, and the founder row mixed one
+   dark-crimson header against two pastel ones. These classes replace the
+   inline styles with the surfaces the rest of the site uses. */
+.ab-grid {
+  display: grid; gap: 14px;
+  grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+}
+.ab-card {
+  display: flex; flex-direction: column; align-items: center; gap: 8px;
+  padding: 24px 20px; border-radius: var(--r-lg); text-align: center;
+  background: var(--paper-hi); box-shadow: var(--neo-1); border: none;
+  transition: transform var(--dur-3) var(--rise), box-shadow var(--dur-3) var(--rise);
+}
+.ab-card:hover { transform: translateY(-4px); box-shadow: var(--neo-2); }
+.ab-card-ico {
+  display: grid; place-items: center; width: 44px; height: 44px;
+  border-radius: 50%; font-size: 1.25rem;
+  background: var(--paper); box-shadow: var(--neo-in);
+}
+.ab-card-t { font-family: var(--font-display); font-size: .95rem; font-weight: 600; color: var(--t-hi); line-height: 1.3; }
+.ab-card-d { font-size: .79rem; color: var(--t-low); line-height: 1.6; }
+
+/* Certification list — one row per credential, same list on the About
+   page and in the contact panel. */
+.ab-certs { display: grid; gap: 9px; }
+.ab-cert {
+  display: flex; align-items: flex-start; gap: 11px;
+  padding: 12px 14px; border-radius: var(--r-md);
+  background: var(--paper); box-shadow: var(--neo-in);
+}
+.ab-cert-tick { color: var(--fern-lo); font-size: 1rem; line-height: 1.3; flex: none; }
+.ab-cert-t { font-size: .85rem; font-weight: 700; color: var(--t-hi); }
+.ab-cert-d { font-size: .75rem; color: var(--t-low); line-height: 1.5; margin-top: 2px; }
+
+/* Founder cards. One card had a dark crimson gradient header carrying
+   near-black text; the other two had pale washes. Same shape for all
+   three, accent supplied per card. */
+.team-card {
+  display: flex; flex-direction: column; overflow: hidden;
+  border-radius: var(--r-lg); background: var(--paper-hi);
+  box-shadow: var(--neo-1); border: none;
+  transition: transform var(--dur-3) var(--rise), box-shadow var(--dur-3) var(--rise);
+}
+.team-card:hover { transform: translateY(-5px); box-shadow: var(--neo-3); }
+.team-head {
+  padding: 26px 18px 20px; text-align: center;
+  background: linear-gradient(160deg,
+    color-mix(in srgb, var(--card-accent, var(--indigo)) 22%, var(--white)),
+    color-mix(in srgb, var(--card-accent, var(--indigo)) 7%, var(--white)));
+}
+.team-avatar {
+  display: grid; place-items: center; width: 68px; height: 68px; margin: 0 auto 12px;
+  border-radius: 50%; font-size: 1.7rem;
+  background: var(--white); box-shadow: var(--neo-1);
+}
+.team-name { font-family: var(--font-display); font-size: 1.02rem; font-weight: 700; color: var(--t-hi); }
+.team-role {
+  display: inline-block; margin-top: 7px; padding: 3px 12px; border-radius: var(--r-pill);
+  font-size: .68rem; font-weight: 800; letter-spacing: .06em; text-transform: uppercase;
+  color: color-mix(in srgb, var(--card-accent, var(--indigo)) 74%, var(--ink));
+  background: var(--white); box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--card-accent, var(--indigo)) 28%, transparent);
+}
+.team-body { padding: 20px 18px; display: flex; flex-direction: column; gap: 13px; }
+.team-bio { font-size: .81rem; color: var(--t-low); line-height: 1.72; }
+.team-tags { display: flex; flex-wrap: wrap; gap: 6px; }
+.team-tags span {
+  padding: 3px 10px; border-radius: var(--r-pill);
+  font-size: .69rem; font-weight: 700;
+  color: color-mix(in srgb, var(--card-accent, var(--indigo)) 74%, var(--ink));
+  background: color-mix(in srgb, var(--card-accent, var(--indigo)) 12%, var(--white));
+}
+.team-links { display: grid; gap: 7px; margin-top: auto; }
+.team-links a {
+  display: flex; align-items: center; gap: 7px; word-break: break-word;
+  font-size: .77rem; font-weight: 600; text-decoration: none;
+  color: color-mix(in srgb, var(--card-accent, var(--indigo)) 74%, var(--ink));
+}
+.team-links a:hover { text-decoration: underline; text-underline-offset: 3px; }
+.team-card:nth-child(3n+1) { --card-accent: var(--fern); }
+.team-card:nth-child(3n+2) { --card-accent: var(--harbour); }
+.team-card:nth-child(3n+3) { --card-accent: var(--clay); }
+
+/* Trust ribbon under the hero */
+.ab-ribbon {
+  display: grid; gap: 0;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  max-width: 900px; margin: 0 auto;
+}
+.ab-ribbon > div {
+  position: relative; display: flex; align-items: center; justify-content: center;
+  gap: 10px; padding: 6px 14px; text-align: left;
+}
+.ab-ribbon > div + div::before {
+  content: ''; position: absolute; left: 0; top: 15%; bottom: 15%; width: 1px;
+  background: var(--edge-hi);
+}
+.ab-ribbon-t { font-size: .76rem; font-weight: 700; color: var(--t-hi); line-height: 1.25; }
+.ab-ribbon-d { font-size: .68rem; color: var(--t-low); line-height: 1.35; }
+
+@media (max-width: 780px) {
+  .ab-ribbon { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px 0; }
+  .ab-ribbon > div:nth-child(odd)::before { display: none; }
+}
+@media (max-width: 560px) {
+  .ab-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+  .ab-card { padding: 16px 12px; gap: 6px; }
+  .ab-card-ico { width: 36px; height: 36px; font-size: 1.05rem; }
+  .ab-card-t { font-size: .84rem; }
+  .ab-card-d { font-size: .72rem; }
+  .about-team-grid { grid-template-columns: 1fr; }
+  .team-head { padding: 20px 16px 16px; }
+  .team-avatar { width: 56px; height: 56px; font-size: 1.4rem; }
+}
 .about-contact-grid { display: grid; gap: 18px; grid-template-columns: repeat(auto-fit, minmax(232px, 1fr)); }
 
 /* Timeline — depth markings down the side of the vessel */
@@ -8582,9 +8778,11 @@ function renderCheckoutSummary() {
   <!-- ABOUT HERO - Premium redesign -->
   <div style="background:var(--face-warm);color:var(--t-hi);padding:100px 0 80px;position:relative;overflow:hidden;--about-hero-bg:none">
     <div id="aboutHeroBgLayer" style="position:absolute;inset:0;opacity:.06;background:var(--about-hero-bg) center/cover"></div>
-    <!-- Animated dots decoration -->
-    <div style="position:absolute;top:20%;right:5%;width:300px;height:300px;border-radius:50%;border:1px solid rgba(255,255,255,.06)"></div>
-    <div style="position:absolute;top:15%;right:8%;width:200px;height:200px;border-radius:50%;border:1px solid rgba(255,255,255,.1)"></div>
+    <!-- Decorative rings. They were 1px of rgba(255,255,255,.06) on a
+         near-white hero — nothing was ever on screen. Drawn in the ink
+         tint instead, at an opacity that reads as texture. -->
+    <div aria-hidden="true" style="position:absolute;top:20%;right:5%;width:300px;height:300px;border-radius:50%;border:1px solid rgba(72,62,70,.07)"></div>
+    <div aria-hidden="true" style="position:absolute;top:15%;right:8%;width:200px;height:200px;border-radius:50%;border:1px solid rgba(192,57,74,.10)"></div>
     <div class="container" style="position:relative">
       <div class="about-hero-grid" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:60px;align-items:center">
         <div>
@@ -8592,22 +8790,30 @@ function renderCheckoutSummary() {
           <h1 style="font-size:clamp(2.2rem,4.5vw,3.5rem);font-family:var(--font-display);line-height:1.1;margin-bottom:20px;font-weight:800">Rooted in Nature,<br><em style="color:var(--f-mineral);font-style:italic">Powered by Science</em></h1>
           <p style="font-size:.95rem;opacity:.85;line-height:1.85;margin-bottom:28px">Founded in Anand, Gujarat — India's nutraceutical capital — Ozylix began with a single mission: make premium-grade nutrition accessible to every Indian family, without compromise on quality or affordability.</p>
           <!-- Hero Stats Row -->
-          <div class="about-stats-grid" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:16px;margin-bottom:32px">
-            <div data-reveal="up" data-delay="1" style="text-align:center;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.15);border-radius:14px;padding:16px 8px">
-              <div data-count="10000" data-suffix="+" style="font-size:1.9rem;font-weight:800;color:var(--f-mineral);font-family:var(--font-display)">10K+</div>
-              <div style="font-size:.7rem;opacity:.75;margin-top:3px">Happy Customers</div>
+          <!-- The inline rgba(255,255,255,.08) fills and .15 borders here
+               were drawn for a dark hero and are invisible on this one;
+               removing them lets .about-stats-grid's own divided-row
+               styling show. The product count and the rating are read
+               from the catalogue and the reviews table rather than
+               typed: the count said 12 when 16 are live, and 4.8★ was a
+               fixed number sitting on a site that shows "New · Awaiting
+               Reviews" everywhere else until real reviews arrive. -->
+          <div class="about-stats-grid">
+            <div data-reveal="up" data-delay="1">
+              <div class="ab-stat-n" data-count="10000" data-suffix="+">10K+</div>
+              <div class="ab-stat-l">Customers served</div>
             </div>
-            <div data-reveal="up" data-delay="2" style="text-align:center;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.15);border-radius:14px;padding:16px 8px">
-              <div data-count="12" data-suffix="+" style="font-size:1.9rem;font-weight:800;color:var(--f-mineral);font-family:var(--font-display)">12+</div>
-              <div style="font-size:.7rem;opacity:.75;margin-top:3px">Products</div>
+            <div data-reveal="up" data-delay="2">
+              <div class="ab-stat-n" id="aboutProductCount">—</div>
+              <div class="ab-stat-l">Products</div>
             </div>
-            <div data-reveal="up" data-delay="3" style="text-align:center;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.15);border-radius:14px;padding:16px 8px">
-              <div style="font-size:1.9rem;font-weight:800;color:var(--f-mineral);font-family:var(--font-display)">4.8⭐</div>
-              <div style="font-size:.7rem;opacity:.75;margin-top:3px">Avg Rating</div>
+            <div data-reveal="up" data-delay="3">
+              <div class="ab-stat-n" id="aboutAvgRating" data-live-rating="1" data-rating-label="aboutAvgRatingLabel" data-suffix="★">—</div>
+              <div class="ab-stat-l" id="aboutAvgRatingLabel">Average rating</div>
             </div>
-            <div data-reveal="up" data-delay="4" style="text-align:center;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.15);border-radius:14px;padding:16px 8px">
-              <div data-count="50" data-suffix="+" style="font-size:1.9rem;font-weight:800;color:var(--f-mineral);font-family:var(--font-display)">50+</div>
-              <div style="font-size:.7rem;opacity:.75;margin-top:3px">B2B Partners</div>
+            <div data-reveal="up" data-delay="4">
+              <div class="ab-stat-n" data-count="50" data-suffix="+">50+</div>
+              <div class="ab-stat-l">B2B partners</div>
             </div>
           </div>
           <div style="display:flex;gap:12px;flex-wrap:wrap">
@@ -8615,16 +8821,26 @@ function renderCheckoutSummary() {
             <button onclick="openWhatsApp('Hello Ozylix! I want to learn more about your products.')" style="display:inline-flex;align-items:center;gap:8px;background:rgba(255,255,255,.12);color:var(--t-hi);border:2px solid rgba(255,255,255,.3);border-radius:100px;padding:13px 22px;font-weight:600;font-size:.86rem;cursor:pointer;font-family:var(--font-body)">&#128172; WhatsApp Us</button>
           </div>
         </div>
-        <div style="position:relative">
-          <img data-media-key="about.manufacturing_photo" loading="lazy" decoding="async" src="" data-awaiting-upload="true" alt="Ozylix's FSSAI approved manufacturing floor in Anand, Gujarat" data-needs-upload="true" style="width:100%;aspect-ratio:4/5;object-fit:cover;border-radius:24px;box-shadow:0 30px 60px rgba(0,0,0,.4)">
+        <div class="ab-hero-media">
+          <!-- The photo is still awaiting upload, and img[data-awaiting-upload]
+               is visibility:hidden — which left this column as blank page
+               with two badges floating over nothing. The well holds the
+               4:5 shape and says what belongs here, and disappears the
+               moment a real src lands. -->
+          <div class="ab-hero-well" aria-hidden="true"><span>&#127981;</span><small>Our plant in Anand &mdash; photo coming soon</small></div>
+          <img data-media-key="about.manufacturing_photo" loading="lazy" decoding="async" src="" data-awaiting-upload="true" alt="Ozylix's FSSAI approved manufacturing floor in Anand, Gujarat" data-needs-upload="true" style="width:100%;aspect-ratio:4/5;object-fit:cover;border-radius:var(--r-xl);box-shadow:var(--neo-3)">
           <!-- Floating cert badges -->
-          <div class="about-hero-float-badge" style="position:absolute;bottom:-20px;left:-20px;background:var(--sub-1);border-radius:16px;padding:14px 18px;box-shadow:0 10px 30px rgba(0,0,0,.2);display:flex;align-items:center;gap:10px">
-            <span style="font-size:1.6rem">&#127981;</span>
-            <div><div style="font-size:.72rem;color:var(--t-low);font-weight:700;text-transform:uppercase;letter-spacing:1px">Certified</div><div style="font-size:.9rem;font-weight:800;color:var(--f-mineral-d)">FSSAI Licensed</div></div>
+          <!-- These were two badges saying the same thing: "Certified /
+               FSSAI Licensed" and "Licensed / FSSAI", same factory icon
+               on both. One states the licence, the other states where
+               the plant is. -->
+          <div class="about-hero-float-badge" style="bottom:-20px;left:-20px;display:flex;align-items:center;gap:10px">
+            <span style="font-size:1.6rem">&#9989;</span>
+            <div><div style="font-size:.7rem;color:var(--t-low);font-weight:800;text-transform:uppercase;letter-spacing:.1em">Certified</div><div style="font-size:.9rem;font-weight:800;color:var(--f-mineral-d)">FSSAI licensed</div></div>
           </div>
-          <div class="about-hero-float-badge" style="position:absolute;top:20px;right:-15px;background:var(--sub-1);border-radius:16px;padding:14px 18px;box-shadow:0 10px 30px rgba(0,0,0,.2);display:flex;align-items:center;gap:10px">
+          <div class="about-hero-float-badge" style="top:20px;right:-15px;display:flex;align-items:center;gap:10px">
             <span style="font-size:1.6rem">&#127981;</span>
-            <div><div style="font-size:.72rem;color:var(--t-low);font-weight:700;text-transform:uppercase;letter-spacing:1px">Licensed</div><div style="font-size:.9rem;font-weight:800;color:var(--f-mineral-d)">FSSAI</div></div>
+            <div><div style="font-size:.7rem;color:var(--t-low);font-weight:800;text-transform:uppercase;letter-spacing:.1em">Our own plant</div><div style="font-size:.9rem;font-weight:800;color:var(--f-mineral-d)">Anand, Gujarat</div></div>
           </div>
         </div>
       </div>
@@ -8634,16 +8850,14 @@ function renderCheckoutSummary() {
   <!-- TRUST RIBBON -->
   <div style="background:var(--sub-1);border-bottom:1px solid var(--light-gray);padding:20px 0">
     <div class="container">
-      <div style="display:flex;align-items:center;justify-content:center;gap:40px;flex-wrap:wrap">
-        <div style="display:flex;align-items:center;gap:10px"><span style="font-size:1.3rem">&#127981;</span><div><div style="font-size:.76rem;font-weight:700;color:var(--dark)">FSSAI Certified</div><div style="font-size:.68rem;color:var(--gray)">Food Safety Authority</div></div></div>
-        <div style="width:1px;height:36px;background:var(--light-gray)"></div>
-        <div style="display:flex;align-items:center;gap:10px"><span style="font-size:1.3rem">&#128300;</span><div><div style="font-size:.76rem;font-weight:700;color:var(--dark)">FSSAI Approved</div><div style="font-size:.68rem;color:var(--gray)">Indian Food Safety Standard</div></div></div>
-        <div style="width:1px;height:36px;background:var(--light-gray)"></div>
-        <div style="display:flex;align-items:center;gap:10px"><span style="font-size:1.3rem">&#127470;&#127475;</span><div><div style="font-size:.76rem;font-weight:700;color:var(--dark)">Made in India</div><div style="font-size:.68rem;color:var(--gray)">Anand, Gujarat</div></div></div>
-        <div style="width:1px;height:36px;background:var(--light-gray)"></div>
-        <div style="display:flex;align-items:center;gap:10px"><span style="font-size:1.3rem">&#129514;</span><div><div style="font-size:.76rem;font-weight:700;color:var(--dark)">3rd Party Tested</div><div style="font-size:.68rem;color:var(--gray)">Independent QC</div></div></div>
-        <div style="width:1px;height:36px;background:var(--light-gray)"></div>
-        <div style="display:flex;align-items:center;gap:10px"><span style="font-size:1.3rem">&#128204;</span><div><div style="font-size:.76rem;font-weight:700;color:var(--dark)">10,000+ Customers</div><div style="font-size:.68rem;color:var(--gray)">Trusted India-Wide</div></div></div>
+      <!-- Was five items, two of which were the same credential twice:
+           "FSSAI Certified / Food Safety Authority" and "FSSAI Approved
+           / Indian Food Safety Standard". One licence, stated once. -->
+      <div class="ab-ribbon">
+        <div><span style="font-size:1.3rem">&#9989;</span><div><div class="ab-ribbon-t">FSSAI licensed</div><div class="ab-ribbon-d">Food Safety and Standards Authority of India</div></div></div>
+        <div><span style="font-size:1.3rem">&#127981;</span><div><div class="ab-ribbon-t">Our own plant</div><div class="ab-ribbon-d">Anand, Gujarat &mdash; nothing outsourced</div></div></div>
+        <div><span style="font-size:1.3rem">&#129514;</span><div><div class="ab-ribbon-t">Third-party lab tested</div><div class="ab-ribbon-d">Independent QC on every batch</div></div></div>
+        <div><span style="font-size:1.3rem">&#128204;</span><div><div class="ab-ribbon-t">10,000+ customers</div><div class="ab-ribbon-d">Delivered across India</div></div></div>
       </div>
     </div>
   </div>
@@ -8693,37 +8907,17 @@ function renderCheckoutSummary() {
         <h2 class="section-title">State-of-the-Art Manufacturing</h2>
         <p class="section-sub">Every Ozylix product is made in our own FSSAI-licensed facility — giving us total control over quality from raw material to finished product.</p>
       </div>
-      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:24px;margin-bottom:40px">
-        <div style="background:linear-gradient(135deg,var(--green-wash),white);border-radius:20px;padding:32px 24px;border:1px solid rgba(23,224,192,.1);text-align:center">
-          <div style="font-size:2.5rem;margin-bottom:12px">&#127981;</div>
-          <div style="font-size:1rem;font-weight:700;color:var(--dark);margin-bottom:8px">FSSAI-Licensed Plant</div>
-          <div style="font-size:.82rem;color:var(--gray);line-height:1.7">Fully licensed food-grade manufacturing with regular government audits and full regulatory compliance.</div>
-        </div>
-        <div style="background:linear-gradient(135deg,var(--green-wash),white);border-radius:20px;padding:32px 24px;border:1px solid rgba(23,224,192,.1);text-align:center">
-          <div style="font-size:2.5rem;margin-bottom:12px">&#128300;</div>
-          <div style="font-size:1rem;font-weight:700;color:var(--dark);margin-bottom:8px">All Formats In-House</div>
-          <div style="font-size:.82rem;color:var(--gray);line-height:1.7">Effervescent tablets, capsules, softgels, strips, and powder — all manufactured under one roof.</div>
-        </div>
-        <div style="background:linear-gradient(135deg,var(--green-wash),white);border-radius:20px;padding:32px 24px;border:1px solid rgba(23,224,192,.1);text-align:center">
-          <div style="font-size:2.5rem;margin-bottom:12px">&#129516;</div>
-          <div style="font-size:1rem;font-weight:700;color:var(--dark);margin-bottom:8px">3rd Party Lab Tested</div>
-          <div style="font-size:.82rem;color:var(--gray);line-height:1.7">Every batch independently tested for purity, potency, and safety — results on file for every SKU.</div>
-        </div>
-        <div style="background:linear-gradient(135deg,var(--green-wash),white);border-radius:20px;padding:32px 24px;border:1px solid rgba(23,224,192,.1);text-align:center">
-          <div style="font-size:2.5rem;margin-bottom:12px">&#127807;</div>
-          <div style="font-size:1rem;font-weight:700;color:var(--dark);margin-bottom:8px">Certified Nutritionists</div>
-          <div style="font-size:.82rem;color:var(--gray);line-height:1.7">Every formulation developed and validated by qualified nutritionists and food scientists.</div>
-        </div>
-        <div style="background:linear-gradient(135deg,var(--green-wash),white);border-radius:20px;padding:32px 24px;border:1px solid rgba(23,224,192,.1);text-align:center">
-          <div style="font-size:2.5rem;margin-bottom:12px">&#128204;</div>
-          <div style="font-size:1rem;font-weight:700;color:var(--dark);margin-bottom:8px">Traceable Ingredients</div>
-          <div style="font-size:.82rem;color:var(--gray);line-height:1.7">Full farm-to-capsule traceability — we know the source of every ingredient in every product.</div>
-        </div>
-        <div style="background:linear-gradient(135deg,var(--green-wash),white);border-radius:20px;padding:32px 24px;border:1px solid rgba(23,224,192,.1);text-align:center">
-          <div style="font-size:2.5rem;margin-bottom:12px">&#128666;</div>
-          <div style="font-size:1rem;font-weight:700;color:var(--dark);margin-bottom:8px">ISO Packaging</div>
-          <div style="font-size:.82rem;color:var(--gray);line-height:1.7">Alu-Alu, blister, strip, and effervescent tube formats — premium packaging that protects and preserves.</div>
-        </div>
+      <!-- Was a six-card grid of inline gradients with a stale teal
+           border colour from an older palette, and one card headed
+           "ISO Packaging" whose own description never mentioned ISO
+           — it lists pack formats, which is what it is called now. -->
+      <div class="ab-grid" style="margin-bottom:40px">
+        <div class="ab-card"><div class="ab-card-ico">&#127981;</div><div class="ab-card-t">FSSAI-licensed plant</div><div class="ab-card-d">Fully licensed food-grade manufacturing with regular government audits and full regulatory compliance.</div></div>
+        <div class="ab-card"><div class="ab-card-ico">&#128300;</div><div class="ab-card-t">All formats in-house</div><div class="ab-card-d">Effervescent tablets, capsules, softgels, strips and powder — all manufactured under one roof.</div></div>
+        <div class="ab-card"><div class="ab-card-ico">&#129516;</div><div class="ab-card-t">Third-party lab tested</div><div class="ab-card-d">Every batch independently tested for purity, potency and safety — results on file for every SKU.</div></div>
+        <div class="ab-card"><div class="ab-card-ico">&#127807;</div><div class="ab-card-t">Certified nutritionists</div><div class="ab-card-d">Every formulation developed and validated by qualified nutritionists and food scientists.</div></div>
+        <div class="ab-card"><div class="ab-card-ico">&#128204;</div><div class="ab-card-t">Traceable ingredients</div><div class="ab-card-d">Full farm-to-capsule traceability — we know the source of every ingredient in every product.</div></div>
+        <div class="ab-card"><div class="ab-card-ico">&#128666;</div><div class="ab-card-t">Protective pack formats</div><div class="ab-card-d">Alu-Alu, blister, strip and effervescent tube — packaging chosen to keep each format stable.</div></div>
       </div>
     </div>
   </section>
@@ -8752,58 +8946,27 @@ function renderCheckoutSummary() {
       <div style="text-align:center;margin-bottom:44px">
         <div class="section-label">The People Behind Ozylix</div>
         <h2 class="section-title">Meet Our Founders</h2>
-        <p class="section-sub">Four entrepreneurs united by a single vision — making premium health accessible to every Indian.</p>
+        <p class="section-sub">Three entrepreneurs united by a single vision — making premium health accessible to every Indian.</p>
       </div>
-      <div class="about-team-grid" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(215px,1fr));gap:28px">
-        <div style="background:var(--sub-1);border-radius:20px;overflow:hidden;border:1px solid rgba(0,0,0,.06);box-shadow:0 8px 30px rgba(23,224,192,.1);transition:transform .25s,box-shadow .25s" onmouseover="this.style.transform='translateY(-6px)';this.style.boxShadow='0 16px 40px rgba(46,125,50,.18)'" onmouseout="this.style.transform='';this.style.boxShadow='0 8px 30px rgba(46,125,50,.1)'">
-          <div style="background:linear-gradient(135deg,var(--f-mineral-d),var(--f-mineral));padding:36px 20px 24px;text-align:center">
-            <div style="width:80px;height:80px;background:rgba(255,255,255,.18);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:2rem;margin:0 auto 14px;border:3px solid rgba(255,255,255,.4)">&#128084;</div>
-            <div style="color:var(--t-hi);font-weight:800;font-size:1.05rem">Amit Dantani</div>
-            <div style="display:inline-block;background:rgba(87,80,77,.9);color:white;font-size:.7rem;font-weight:700;padding:3px 12px;border-radius:100px;margin-top:6px">Founder &amp; CEO</div>
-          </div>
-          <div style="padding:22px">
-            <p style="font-size:.82rem;color:var(--gray);line-height:1.75;margin-bottom:16px">Visionary leader driving Ozylix's strategic direction, supply chain excellence, and long-term vision of making India the nutraceutical capital of Asia.</p>
-            <div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:16px">
-              <span style="background:var(--green-wash);color:var(--green);font-size:.7rem;font-weight:600;padding:3px 10px;border-radius:100px">Strategy</span>
-              <span style="background:var(--green-wash);color:var(--green);font-size:.7rem;font-weight:600;padding:3px 10px;border-radius:100px">Operations</span>
-              <span style="background:var(--green-wash);color:var(--green);font-size:.7rem;font-weight:600;padding:3px 10px;border-radius:100px">Leadership</span>
-            </div>
-            <a href="mailto:ascovitahealthcare@gmail.com" style="display:flex;align-items:center;gap:6px;font-size:.78rem;color:var(--green);font-weight:600;text-decoration:none;margin-bottom:8px">&#128231; ascovitahealthcare@gmail.com</a>
-            <a href="https://www.linkedin.com/in/amit-dantani-b724a3345/" target="_blank" rel="noopener" style="display:flex;align-items:center;gap:6px;font-size:.78rem;color:var(--green);font-weight:600;text-decoration:none">&#128279; LinkedIn</a>
-          </div>
+      <!-- One of these three cards had a dark crimson gradient header
+           carrying near-black text while the other two had pale
+           washes, and every avatar was a white-on-white disc left
+           over from the dark-hero design. One shape, accent per
+           card, and the hover state is CSS rather than two inline
+           event handlers that reset to a shadow colour the card
+           never had. -->
+      <div class="about-team-grid">
+        <div class="team-card">
+          <div class="team-head"><div class="team-avatar">&#128084;</div><div class="team-name">Amit Dantani</div><div class="team-role">Founder &amp; CEO</div></div>
+          <div class="team-body"><p class="team-bio">Visionary leader driving Ozylix's strategic direction, supply chain excellence, and long-term vision of making India the nutraceutical capital of Asia.</p><div class="team-tags"><span>Strategy</span><span>Operations</span><span>Leadership</span></div><div class="team-links"><a href="mailto:ascovitahealthcare@gmail.com">&#128231; ascovitahealthcare@gmail.com</a><a href="https://www.linkedin.com/in/amit-dantani-b724a3345/" target="_blank" rel="noopener">&#128279; LinkedIn</a></div></div>
         </div>
-        <div style="background:var(--sub-1);border-radius:20px;overflow:hidden;border:1px solid rgba(0,0,0,.06);box-shadow:0 8px 30px rgba(26,58,107,.1);transition:transform .25s,box-shadow .25s" onmouseover="this.style.transform='translateY(-6px)';this.style.boxShadow='0 16px 40px rgba(26,58,107,.18)'" onmouseout="this.style.transform='';this.style.boxShadow='0 8px 30px rgba(26,58,107,.1)'">
-          <div style="background:var(--harbour-bg);padding:36px 20px 24px;text-align:center">
-            <div style="width:80px;height:80px;background:rgba(255,255,255,.18);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:2rem;margin:0 auto 14px;border:3px solid rgba(255,255,255,.4)">&#128226;</div>
-            <div style="color:var(--t-hi);font-weight:800;font-size:1.05rem">Aamin Ghachivahora</div>
-            <div style="display:inline-block;background:rgba(87,80,77,.9);color:white;font-size:.7rem;font-weight:700;padding:3px 12px;border-radius:100px;margin-top:6px">Co-Founder &amp; CMO</div>
-          </div>
-          <div style="padding:22px">
-            <p style="font-size:.82rem;color:var(--gray);line-height:1.75;margin-bottom:16px">Creative marketing strategist behind Ozylix's brand identity, digital presence, and the nationwide awareness campaigns driving our rapid growth.</p>
-            <div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:16px">
-              <span style="background:var(--st-info-bg);color:var(--st-info-fg);font-size:.7rem;font-weight:600;padding:3px 10px;border-radius:100px">Marketing</span>
-              <span style="background:var(--st-info-bg);color:var(--st-info-fg);font-size:.7rem;font-weight:600;padding:3px 10px;border-radius:100px">Brand Strategy</span>
-              <span style="background:var(--st-info-bg);color:var(--st-info-fg);font-size:.7rem;font-weight:600;padding:3px 10px;border-radius:100px">Growth</span>
-            </div>
-            <a href="mailto:ascovitahealthcare@gmail.com" style="display:flex;align-items:center;gap:6px;font-size:.78rem;color:var(--st-info-fg);font-weight:600;text-decoration:none;margin-bottom:8px">&#128231; ascovitahealthcare@gmail.com</a>
-            <a href="https://www.linkedin.com/in/aamin-ghachivahora-416985332" target="_blank" rel="noopener" style="display:flex;align-items:center;gap:6px;font-size:.78rem;color:var(--st-info-fg);font-weight:600;text-decoration:none">&#128279; LinkedIn</a>
-          </div>
+        <div class="team-card">
+          <div class="team-head"><div class="team-avatar">&#128226;</div><div class="team-name">Aamin Ghachivahora</div><div class="team-role">Co-Founder &amp; CMO</div></div>
+          <div class="team-body"><p class="team-bio">Creative marketing strategist behind Ozylix's brand identity, digital presence, and the nationwide awareness campaigns driving our rapid growth.</p><div class="team-tags"><span>Marketing</span><span>Brand strategy</span><span>Growth</span></div><div class="team-links"><a href="mailto:ascovitahealthcare@gmail.com">&#128231; ascovitahealthcare@gmail.com</a><a href="https://www.linkedin.com/in/aamin-ghachivahora-416985332" target="_blank" rel="noopener">&#128279; LinkedIn</a></div></div>
         </div>
-        <div style="background:var(--sub-1);border-radius:20px;overflow:hidden;border:1px solid rgba(0,0,0,.06);box-shadow:0 8px 30px rgba(123,45,0,.1);transition:transform .25s,box-shadow .25s" onmouseover="this.style.transform='translateY(-6px)';this.style.boxShadow='0 16px 40px rgba(123,45,0,.18)'" onmouseout="this.style.transform='';this.style.boxShadow='0 8px 30px rgba(123,45,0,.1)'">
-          <div style="background:var(--clay-bg);padding:36px 20px 24px;text-align:center">
-            <div style="width:80px;height:80px;background:rgba(255,255,255,.18);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:2rem;margin:0 auto 14px;border:3px solid rgba(255,255,255,.4)">&#128202;</div>
-            <div style="color:var(--t-hi);font-weight:800;font-size:1.05rem">Jaydeep Prajapati</div>
-            <div style="display:inline-block;background:rgba(87,80,77,.9);color:white;font-size:.7rem;font-weight:700;padding:3px 12px;border-radius:100px;margin-top:6px">Co-Founder &amp; CFO</div>
-          </div>
-          <div style="padding:22px">
-            <p style="font-size:.82rem;color:var(--gray);line-height:1.75;margin-bottom:16px">Financial architect managing Ozylix's fiscal strategy, investor relations, and the sustainable growth model that keeps us profitable while keeping prices fair.</p>
-            <div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:16px">
-              <span style="background:var(--st-warn-bg);color:var(--st-warn-fg);font-size:.7rem;font-weight:600;padding:3px 10px;border-radius:100px">Finance</span>
-              <span style="background:var(--st-warn-bg);color:var(--st-warn-fg);font-size:.7rem;font-weight:600;padding:3px 10px;border-radius:100px">Compliance</span>
-              <span style="background:var(--st-warn-bg);color:var(--st-warn-fg);font-size:.7rem;font-weight:600;padding:3px 10px;border-radius:100px">Investor Relations</span>
-            </div>
-            <a href="mailto:ascovitahealthcare@gmail.com" style="display:flex;align-items:center;gap:6px;font-size:.78rem;color:var(--st-warn-fg);font-weight:600;text-decoration:none">&#128231; ascovitahealthcare@gmail.com</a>
-          </div>
+        <div class="team-card">
+          <div class="team-head"><div class="team-avatar">&#128202;</div><div class="team-name">Jaydeep Prajapati</div><div class="team-role">Co-Founder &amp; CFO</div></div>
+          <div class="team-body"><p class="team-bio">Financial architect managing Ozylix's fiscal strategy, investor relations, and the sustainable growth model that keeps us profitable while keeping prices fair.</p><div class="team-tags"><span>Finance</span><span>Compliance</span><span>Investor relations</span></div><div class="team-links"><a href="mailto:ascovitahealthcare@gmail.com">&#128231; ascovitahealthcare@gmail.com</a></div></div>
         </div>
       </div>
     </div>
@@ -8829,11 +8992,15 @@ function renderCheckoutSummary() {
         </div>
         <div style="background:var(--sub-1);border-radius:20px;padding:32px;border:1px solid var(--light-gray);box-shadow:0 8px 30px rgba(23,224,192,.08)">
           <div style="font-family:var(--font-display);font-size:1.15rem;font-weight:700;margin-bottom:20px;color:var(--dark)">Our Certifications &amp; Compliance</div>
-          <div style="display:flex;flex-direction:column;gap:12px">
-            <div style="display:flex;align-items:center;gap:10px;padding:12px;background:var(--green-wash);border-radius:10px"><span style="color:var(--green);font-size:1.2rem">&#9989;</span><div><div style="font-size:.86rem;font-weight:600">FSSAI License</div><div style="font-size:.76rem;color:var(--gray)">Food Safety and Standards Authority of India</div></div></div>
-            <div style="display:flex;align-items:center;gap:10px;padding:12px;background:var(--green-wash);border-radius:10px"><span style="color:var(--green);font-size:1.2rem">&#9989;</span><div><div style="font-size:.86rem;font-weight:600">FSSAI Licensed</div><div style="font-size:.76rem;color:var(--gray)">Licensed under FSSAI, India's food safety regulator</div></div></div>
-            <div style="display:flex;align-items:center;gap:10px;padding:12px;background:var(--green-wash);border-radius:10px"><span style="color:var(--green);font-size:1.2rem">&#9989;</span><div><div style="font-size:.86rem;font-weight:600">3rd Party Lab Testing</div><div style="font-size:.76rem;color:var(--gray)">Independent QC for purity, potency, and safety on every batch</div></div></div>
-            <div style="display:flex;align-items:center;gap:10px;padding:12px;background:var(--green-wash);border-radius:10px"><span style="color:var(--green);font-size:1.2rem">&#9989;</span><div><div style="font-size:.86rem;font-weight:600">ISO-Standard Packaging</div><div style="font-size:.76rem;color:var(--gray)">Alu-Alu, blister, strip &amp; effervescent tube formats available</div></div></div>
+          <!-- "FSSAI License" and "FSSAI Licensed" were two rows for one
+               licence, and "ISO-Standard Packaging" described pack
+               formats rather than any ISO standard. Four rows, four
+               different things, each one the site can stand behind. -->
+          <div class="ab-certs">
+            <div class="ab-cert"><span class="ab-cert-tick">&#9989;</span><div><div class="ab-cert-t">FSSAI licence</div><div class="ab-cert-d">Licensed by the Food Safety and Standards Authority of India</div></div></div>
+            <div class="ab-cert"><span class="ab-cert-tick">&#9989;</span><div><div class="ab-cert-t">Own manufacturing unit</div><div class="ab-cert-d">Near Rajshivalay Cinema, Anand &mdash; 388001, Gujarat</div></div></div>
+            <div class="ab-cert"><span class="ab-cert-tick">&#9989;</span><div><div class="ab-cert-t">Third-party lab testing</div><div class="ab-cert-d">Independent QC for purity, potency and safety on every batch</div></div></div>
+            <div class="ab-cert"><span class="ab-cert-tick">&#9989;</span><div><div class="ab-cert-t">Protective pack formats</div><div class="ab-cert-d">Alu-Alu, blister, strip and effervescent tube formats available</div></div></div>
           </div>
         </div>
       </div>
@@ -9662,6 +9829,7 @@ async function syncProductsFromBackend() {
         try { renderFeatured(); } catch(e){}
         try { renderNewArrivals(); } catch(e){}
         try { hydrateCategoryCounts(); } catch(e){}
+        try { hydrateAboutStats(); } catch(e){}
         // The promo carousel is built from PRODUCTS, so it must pick up
         // freshly synced Supabase images and prices too.
         try { renderPromoCarousel(); } catch(e){}
@@ -11077,8 +11245,9 @@ function initHome() {
   const hbg=document.getElementById('homeBlogGrid'); if(hbg) hbg.innerHTML = BLOGS.slice(0,4).map(renderBlogCard).join('');
   // FAQ
   const hfw=document.getElementById('homeFaqWrap'); if(hfw) hfw.innerHTML = FAQS.slice(0,5).map(renderFaqItem).join('');
-  // Category tile counts
+  // Category tile counts + About page figures
   try { hydrateCategoryCounts(); } catch(e) {}
+  try { hydrateAboutStats(); } catch(e) {}
   // Testimonials + Customer Reviews Wall — both pull the same real, live data
   renderTestimonials();
   renderReviewsWall();
@@ -12110,34 +12279,47 @@ async function getLiveRating() {
   return LIVE_RATING_CACHE;
 }
 
+// Every element carrying data-live-rating, not just the home counter.
+// The About page had 4.8★ typed into the markup — a fixed score on a site
+// that says "New · Awaiting Reviews" everywhere else until real reviews
+// exist. One fetch feeds them all.
 async function renderLiveRatingStat() {
-  const el = document.getElementById('statAvgRating');
-  const label = document.getElementById('statAvgRatingLabel');
-  if (!el) return;
+  const els = document.querySelectorAll('[data-live-rating]');
+  if (!els.length) return;
   const { avg, count } = await getLiveRating();
 
-  if (avg === null) {
-    // No reviews yet — say so rather than showing a fabricated score.
-    el.dataset.ready = '1';
-    el.textContent = 'New';
+  els.forEach((el) => {
+    const label = el.dataset.ratingLabel
+      ? document.getElementById(el.dataset.ratingLabel)
+      : document.getElementById('statAvgRatingLabel');
+
+    if (avg === null) {
+      // No reviews yet — say so rather than showing a fabricated score.
+      el.dataset.ready = '1';
+      el.textContent = 'New';
+      if (label) label.textContent = 'Awaiting reviews';
+    } else {
+      el.dataset.count = avg.toFixed(1);
+      el.dataset.ready = '1';
+      el.textContent = avg.toFixed(1) + (el.dataset.suffix || '★');
+      if (label) {
+        label.textContent = count === 1
+          ? 'Average rating · 1 review'
+          : 'Average rating · ' + count.toLocaleString('en-IN') + ' reviews';
+      }
+    }
     el.style.transition = 'opacity .5s ease';
     el.style.opacity = '0';
     requestAnimationFrame(() => { el.style.opacity = '1'; });
-    if (label) label.textContent = 'Awaiting Reviews';
-    return;
-  }
+  });
+}
 
-  el.dataset.count = avg.toFixed(1);
-  el.dataset.ready = '1';
-  el.textContent = avg.toFixed(1) + (el.dataset.suffix || '★');
-  el.style.transition = 'opacity .5s ease';
-  el.style.opacity = '0';
-  requestAnimationFrame(() => { el.style.opacity = '1'; });
-  if (label) {
-    label.textContent = count === 1
-      ? 'Average Rating · 1 Review'
-      : 'Average Rating · ' + count.toLocaleString('en-IN') + ' Reviews';
-  }
+// The About hero claimed "12+ Products" against a catalogue of 16.
+function hydrateAboutStats() {
+  const el = document.getElementById('aboutProductCount');
+  if (!el || typeof PRODUCTS === 'undefined') return;
+  const n = PRODUCTS.filter(p => !p._hidden && p.active !== false).length;
+  el.textContent = n ? String(n) : '—';
 }
 
 function testiCardHtml(t) {
@@ -12222,6 +12404,7 @@ function bootApp() {
   try { renderFeatured(); } catch(e) {}
   try { renderNewArrivals(); } catch(e) {}
   try { hydrateCategoryCounts(); } catch(e) {}
+  try { hydrateAboutStats(); } catch(e) {}
   try { if(document.getElementById('bundleProdList')) renderBundleBuilder(); } catch(e) {}
   try { updateSaleUIVisibility(); } catch(e) {}
   // 🔗 Sync live product data from Supabase backend (non-blocking)
@@ -17608,12 +17791,101 @@ document.addEventListener('DOMContentLoaded', function() {
     document.body.insertBefore(field, document.body.firstChild);
   }
 
+  /* ══ 3c · FLOATING CURSOR ════════════════════════════════════════
+     A halo that lags behind the pointer and a ring that sits on it.
+     One rAF loop moves both with transform only — no layout is read
+     inside it; the scroll listener writes a velocity the loop reads.
+
+     Guards, in order: reduced motion off, coarse pointer off, and
+     nothing is created at all in either case rather than created and
+     hidden, so a phone never carries the listeners. */
+  function fzCursor() {
+    if (reduce || coarse) return;
+    if (!window.matchMedia || !window.matchMedia('(pointer: fine)').matches) return;
+    if (document.querySelector('.fz-cursor')) return;
+
+    var halo = document.createElement('div');
+    halo.className = 'fz-cursor fz-cursor-halo';
+    var ring = document.createElement('div');
+    ring.className = 'fz-cursor fz-cursor-ring';
+    halo.setAttribute('aria-hidden', 'true');
+    ring.setAttribute('aria-hidden', 'true');
+    document.body.appendChild(halo);
+    document.body.appendChild(ring);
+
+    var tx = window.innerWidth / 2, ty = window.innerHeight / 2;   // target
+    var hx = tx, hy = ty;      // halo, heavily eased
+    var rx = tx, ry = ty;      // ring, barely eased
+    var live = false, raf = null;
+
+    // Scroll velocity, normalised and decayed, so the halo swells while
+    // the page is moving and settles when it stops.
+    var lastY = window.scrollY, vel = 0;
+
+    var HOT = 'a,button,[role="button"],input,select,textarea,label,summary,' +
+              '.product-card,.cat-card,.cat-card-sm,.qty-tier,.ab-card,.team-card,' +
+              '.cert-card,.value-card,.blog-card,.sec-head-link,.at-item';
+
+    function loop() {
+      raf = null;
+      hx += (tx - hx) * 0.085;
+      hy += (ty - hy) * 0.085;
+      rx += (tx - rx) * 0.34;
+      ry += (ty - ry) * 0.34;
+      vel *= 0.9;
+      var swell = 1 + Math.min(vel, 1) * 0.42;
+      halo.style.transform = 'translate3d(' + hx.toFixed(1) + 'px,' + hy.toFixed(1) + 'px,0) scale(' + swell.toFixed(3) + ')';
+      ring.style.transform = 'translate3d(' + rx.toFixed(1) + 'px,' + ry.toFixed(1) + 'px,0)';
+      // Keep going while anything is still catching up.
+      if (Math.abs(tx - hx) > 0.4 || Math.abs(ty - hy) > 0.4 || vel > 0.01) tick();
+    }
+    function tick() { if (raf === null) raf = requestAnimationFrame(loop); }
+
+    document.addEventListener('pointermove', function (e) {
+      if (e.pointerType && e.pointerType !== 'mouse') return;
+      tx = e.clientX; ty = e.clientY;
+      if (!live) {
+        live = true;
+        // Jump both layers to the pointer on first sight, so they do not
+        // fly in from the middle of the screen.
+        hx = rx = tx; hy = ry = ty;
+        halo.classList.add('is-live');
+        ring.classList.add('is-live');
+      }
+      ring.classList.toggle('is-hot', !!(e.target && e.target.closest && e.target.closest(HOT)));
+      tick();
+    }, { passive: true });
+
+    document.addEventListener('pointerdown', function () { ring.classList.add('is-down'); tick(); }, { passive: true });
+    document.addEventListener('pointerup',   function () { ring.classList.remove('is-down'); tick(); }, { passive: true });
+
+    // Leaving the window: fade out rather than freeze mid-page.
+    document.addEventListener('mouseleave', function () {
+      live = false;
+      halo.classList.remove('is-live');
+      ring.classList.remove('is-live');
+    });
+    document.addEventListener('mouseenter', function () {
+      if (!live) { live = true; halo.classList.add('is-live'); ring.classList.add('is-live'); }
+    });
+
+    window.addEventListener('scroll', function () {
+      var y = window.scrollY;
+      vel = Math.min(1.6, vel + Math.abs(y - lastY) / 120);
+      lastY = y;
+      tick();
+    }, { passive: true });
+
+    tick();
+  }
+
   /* ══ 4 · WIRING ══════════════════════════════════════════════════ */
   function boot() {
     startWater();
     channels();
     bubbles();
     liquidFoil();
+    fzCursor();
     scanTilt();
     magnetise();
 
