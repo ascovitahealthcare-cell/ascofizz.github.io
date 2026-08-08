@@ -1,10 +1,16 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- Generated from the live PRODUCTS catalogue in index.html.
-     Product paths must equal slugify(product.name); the router in
-     index.html resolves /product/<slug> by matching exactly that.
-     /b2b is deliberately absent: it is an off-site redirect now. -->
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
         xmlns:xhtml="http://www.w3.org/1999/xhtml">
+  <!-- Generated from the live PRODUCTS catalogue in index.html.
+       Product paths must equal slugify(product.name); the router in
+       index.html resolves /product/<slug> by matching exactly that.
+       /b2b is deliberately absent: it is an off-site redirect now.
+
+       This note used to sit between the XML declaration and <urlset>.
+       Legal XML, but Search Console reported "Sitemap is HTML — Line 2,
+       Tag: html" against this file, and line 2 was this comment with the
+       string "index.html" in it. Keeping everything inside the root
+       element removes the question entirely. -->
   <url>
     <loc>https://www.ozylix.com/</loc>
     <lastmod>2026-08-07</lastmod>
