@@ -10019,9 +10019,10 @@ async function syncProductsFromBackend() {
           }
         } catch(e) {}
 
-        // Push local QTY_TIERS to backend for any product missing tiers in DB
-        // This ensures admin sees tier data even before it's been set manually
-        try { pushLocalTiersToBackend(products); } catch(e) {}
+        // (pushLocalTiersToBackend removed — see the note where it was
+        // defined. It fired one PUT per product from every visitor's
+        // browser, on every page load, at an endpoint that does not
+        // exist.)
 
         return; // success — stop retrying
       }
@@ -10043,25 +10044,31 @@ async function syncProductsFromBackend() {
 
 // Push local QTY_TIERS to backend for products that have no tiers set in DB
 // Runs once after first successful sync — skips products that already have tiers
-async function pushLocalTiersToBackend(backendProducts) {
-  const productsWithoutTiers = backendProducts.filter(bp => {
-    if (!bp.has_tiers && !bp.tiers) {
-      const lt = QTY_TIERS[parseInt(bp.id)];
-      return lt && lt.length > 0 && lt[0].rate != null;
-    }
-    return false;
-  });
-  if (!productsWithoutTiers.length) return;
-  for (const bp of productsWithoutTiers) {
-    try {
-      const lt = QTY_TIERS[parseInt(bp.id)];
-      await fetch(`${API_BASE}/api/products/${bp.id}`, {
-        method: 'PUT', headers: {'Content-Type':'application/json'},
-        body: JSON.stringify({has_tiers:true, tiers:JSON.stringify(lt)})
-      });
-    } catch(e) {}
-  }
-}
+// REMOVED: pushLocalTiersToBackend.
+//
+// It looped over every product missing tier data and sent one
+// `PUT /api/products/<id>` each, awaited in sequence — from the browser,
+// on every page load, for every visitor. Ten such products meant ten
+// sequential writes queued behind the page the customer was waiting for.
+//
+// None of them ever did anything. There is no `PUT /api/products/:id`
+// route on the server; the only PUT under that path is
+// `/api/products/:id/restore`. Every request 404'd, and `catch(e){}`
+// meant nobody ever saw it. Years of write traffic accomplishing
+// precisely nothing.
+//
+// Deliberately not "fixed" by adding the endpoint and batching the
+// writes into one call. The 404 is the only reason this was harmless:
+// the requests carried no credentials, so a working version would let
+// any visitor rewrite prices and pack options in the product catalogue.
+// Writing to the catalogue is an admin operation and belongs behind
+// authMiddleware + adminOnly, which the admin panel already uses.
+//
+// The legitimate need — getting tier data from this file into the
+// database — is the server's job, not the shopper's browser.
+// syncProductsFromFrontend() in server.js already reads this file and
+// syncs the frontend-owned product fields on a schedule, and the admin
+// Products screen edits tiers directly.
 
 // ✅ FIX 2 & 5: Standalone render functions used after backend sync
 function renderFeatured() {
