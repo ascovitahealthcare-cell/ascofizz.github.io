@@ -5941,20 +5941,51 @@ function clearBulkSelection() {
   const all = document.getElementById('selectAllProds'); if(all) all.checked=false;
   updateBulkBar();
 }
+// Both of these used to fire ONE REQUEST PER PRODUCT —
+//   Promise.all(ids.map(id => apiFetch(`/api/admin/products/${id}`, ...)))
+// — so selecting fifty products meant fifty HTTP requests, each landing
+// on the single-row handler that does its own SELECT, UPDATE and audit
+// INSERT: roughly a hundred and fifty database round trips to set one
+// boolean on fifty rows.
+//
+// Worse than slow, it was not atomic. A failure at request thirty left
+// twenty-nine products changed and twenty-one not, and the toast still
+// said "50 products deactivated". One request, one statement, one
+// transaction — it applies to all of them or to none.
+// apiFetch resolves with the Response, and only throws for a non-JSON
+// error page — a JSON 400 or 500 comes back as a normal resolved
+// response with r.ok false. So both of these check r.ok themselves; a
+// bare try/catch would report success for a write the server refused.
 async function bulkActivate(active) {
   if(!selectedProductIds.size) return;
   const ids = [...selectedProductIds];
-  await Promise.all(ids.map(id => apiFetch(`/api/admin/products/${id}`,{method:'PUT',body:JSON.stringify({active})})));
-  ids.forEach(id => { const p = allProducts.find(x=>x.id===id); if(p) p.active=active; });
-  clearBulkSelection(); filterProducts();
-  toast(`${ids.length} products ${active?'activated':'deactivated'} ✅`);
+  try {
+    const r = await apiFetch('/api/admin/products/bulk-update',
+      {method:'POST', body:JSON.stringify({ids, patch:{active}})});
+    const d = await r.json().catch(() => ({}));
+    if(!r.ok) throw new Error(d.error || `Server returned ${r.status}`);
+    ids.forEach(id => { const p = allProducts.find(x=>x.id===id); if(p) p.active=active; });
+    clearBulkSelection(); filterProducts();
+    toast(`${d.updated ?? ids.length} products ${active?'activated':'deactivated'} ✅`);
+  } catch(e) {
+    toast(e.message || 'Bulk update failed', 'error');
+    loadProducts();   // re-read the truth rather than trusting local state
+  }
 }
 async function bulkDelete() {
   if(!selectedProductIds.size || !confirm(`Delete ${selectedProductIds.size} products?`)) return;
   const ids = [...selectedProductIds];
-  await Promise.all(ids.map(id => apiFetch(`/api/admin/products/${id}`,{method:'DELETE'})));
-  clearBulkSelection(); loadProducts();
-  toast(`${ids.length} products deleted ✅`);
+  try {
+    const r = await apiFetch('/api/admin/products/bulk-delete',
+      {method:'POST', body:JSON.stringify({ids})});
+    const d = await r.json().catch(() => ({}));
+    if(!r.ok) throw new Error(d.error || `Server returned ${r.status}`);
+    clearBulkSelection(); loadProducts();
+    toast(`${d.deleted ?? ids.length} products deleted ✅`);
+  } catch(e) {
+    toast(e.message || 'Bulk delete failed', 'error');
+    loadProducts();
+  }
 }
 
 // ── Product Drawer ─────────────────────────────
