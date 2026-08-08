@@ -17696,12 +17696,29 @@ button:active, .btn-primary:active, .btn-outline:active,
   }
 
   function placeTrust() {
-    // Product page — directly under the buy button, where the doubt is.
+    // Product page — directly under the buy buttons, where the doubt is.
+    //
+    // WHERE THIS WAS GOING WRONG: the anchor used to be
+    // btn.closest('div'), which is not the button's little wrapper — the
+    // buy column has no wrapper, so closest('div') walked all the way up
+    // to the column ITSELF. Inserting after that made the rail a third
+    // child of #productDetail, and #productDetail is .product-page:
+    // `display:grid; grid-template-columns: 1fr 1fr`. A third child in a
+    // two-column grid drops into row 2, column 1 — so the rail rendered
+    // underneath the sticky image gallery, 600px below and a full column
+    // across from the button it exists to reassure, tangled up with
+    // whatever else was down there. On a phone the same bug parked it at
+    // the very bottom of the page, past the reviews.
+    //
+    // Anchoring to the last call to action inside the column keeps the
+    // rail in normal flow next to the buttons and leaves the grid with
+    // the two children it is drawn for.
     var btn = document.getElementById('addCartBtn');
     if (btn && !document.getElementById('azTrustPdp')) {
-      var host = btn.closest('div') || btn.parentNode;
+      var col = btn.parentNode;
+      var anchor = (col && col.querySelector('.buy-now-btn')) || btn;
       var r = trustRail(false); r.id = 'azTrustPdp';
-      if (host && host.parentNode) host.parentNode.insertBefore(r, host.nextSibling);
+      if (anchor && anchor.parentNode) anchor.parentNode.insertBefore(r, anchor.nextSibling);
     }
     // Checkout — one slim line above the pay controls.
     var ck = document.getElementById('ckSummary');
