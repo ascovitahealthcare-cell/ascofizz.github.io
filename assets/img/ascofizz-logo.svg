@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 220 56" width="220" height="56" role="img" aria-label="Ascofizz">
+  <defs>
+    <linearGradient id="af-moss" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#3F6B57"/>
+      <stop offset="1" stop-color="#2F5545"/>
+    </linearGradient>
+    <linearGradient id="af-fizz" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#8FE0CA"/>
+      <stop offset="1" stop-color="#6FD2B8"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Mark: a dissolving tablet, three bubbles rising off it -->
+  <rect x="2" y="8" width="40" height="40" rx="13" fill="url(#af-moss)"/>
+  <circle cx="22" cy="34" r="10.5" fill="none" stroke="#fff" stroke-width="2.6" opacity=".95"/>
+  <path d="M14.5 34a7.5 7.5 0 0 1 15 0" fill="none" stroke="url(#af-fizz)" stroke-width="2.6" stroke-linecap="round"/>
+  <circle cx="16.5" cy="19" r="3.1" fill="url(#af-fizz)"/>
+  <circle cx="25.5" cy="15.5" r="2.2" fill="url(#af-fizz)" opacity=".8"/>
+  <circle cx="31.5" cy="20.5" r="1.5" fill="url(#af-fizz)" opacity=".62"/>
+
+  <!-- Wordmark -->
+  <text x="54" y="38"
+        font-family="Fraunces, 'Iowan Old Style', Georgia, serif"
+        font-size="27" font-weight="600" letter-spacing="-0.8" fill="#14201B">Asco<tspan fill="#12806A">fizz</tspan></text>
+</svg>
