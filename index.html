@@ -52,10 +52,18 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
 })(window,document,'script','dataLayer','GTM-MQPL5QGP');</script>
 <!-- End Google Tag Manager -->
+
+<!-- Google tag (gtag.js) — GA4 property G-1SPY139WS1 -->
+<!-- Loaded directly as well as through the container. If you later add a
+     GA4 configuration tag for this same measurement ID inside GTM, delete
+     one of the two — otherwise every pageview and every purchase is
+     counted twice. -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-1SPY139WS1"></script>
 <script>
   window.dataLayer = window.dataLayer || [];
   function gtag(){dataLayer.push(arguments);}
   gtag('js', new Date());
+  gtag('config', 'G-1SPY139WS1');
   const _gtag = (...args) => { if(typeof gtag === 'function') gtag(...args); };
 
   // ── PAGE VIEW (called from showPage) ──
@@ -11727,10 +11735,18 @@ function buildProductPage(p) {
           ${getCurrentUser() ? `
           <div class="star-picker" id="starPicker">${[1,2,3,4,5].map(s=>`<span onclick="setRating(${s})" onmouseenter="previewRating(${s})" onmouseleave="clearRatingPreview()" data-s="${s}">&#x2605;</span>`).join('')}</div>
           <div style="font-size:.8rem;color:var(--gray);margin:6px 0 10px">Posting as <strong>${esc(getCurrentUser().name || 'You')}</strong></div>
+          <!-- The server only accepts a review from someone who has bought
+               this product (reviews-routes.js checks the order history), and
+               it keeps one review per person per product. Both rules used to
+               be invisible until the POST came back 403, which is why people
+               filled the form in and were told "no" afterwards. -->
+          <div style="font-size:.78rem;color:var(--t-low);margin:0 0 12px;padding:9px 12px;border-radius:var(--r-sm);background:var(--paper);box-shadow:var(--neo-in)">
+            Reviews are open to customers who have ordered this product, one per person &mdash; posting again updates your existing review.
+          </div>
           <textarea class="form-input" placeholder="Share your experience with this product..." id="rvText" oninput="this.classList.remove('field-error')"></textarea>
           <button class="btn-primary" style="width:100%;justify-content:center" onclick="submitReview()">Submit Review &#x1F331;</button>
           ` : `
-          <p style="font-size:.85rem;color:var(--gray);margin-bottom:14px">Sign in with your account to write a review — this keeps reviews tied to real customers.</p>
+          <p style="font-size:.85rem;color:var(--gray);margin-bottom:14px">Sign in with the account you ordered on to write a review — reviews are open to customers who have bought this product.</p>
           <button class="btn-primary" style="width:100%;justify-content:center" onclick="openAuth('login')">Sign In to Write a Review</button>
           `}
         </div>
@@ -18993,7 +19009,14 @@ body:not(.oz-product) #stickyCart { display: none !important; }
 
   /* ---------------------------------------------------------------
      7. Tell the shopper when a slow backend is the reason nothing moved
-     Render's free tier cold-starts for ~30s. Silence reads as "broken".
+
+     This used to say "Waking the server — one moment" after 4 seconds,
+     which was true on Render's free tier: it sleeps after 15 minutes and
+     cold-starts for about 30 seconds. The service is on Starter now and
+     never sleeps, so nothing is ever waking up — a request past 4s is
+     just a slow request, and telling the customer the server was asleep
+     was both wrong and alarming. Honest wording, and a longer threshold
+     so an ordinary request on a mobile connection does not trip it.
      --------------------------------------------------------------- */
   if (typeof window.fetch === 'function' && typeof API_BASE !== 'undefined') {
     var _f = window.fetch;
@@ -19002,7 +19025,7 @@ body:not(.oz-product) #stickyCart { display: none !important; }
       var isOurs = url.indexOf(API_BASE) === 0;
       var slow;
       if (isOurs && !/visitors\//.test(url)) {
-        slow = setTimeout(function () { netMsg('Waking the server — one moment', false); }, 4000);
+        slow = setTimeout(function () { netMsg('Still loading — hang on', false); }, 7000);
       }
       return _f.apply(this, arguments).then(function (r) {
         if (slow) { clearTimeout(slow); net.classList.remove('show'); }
