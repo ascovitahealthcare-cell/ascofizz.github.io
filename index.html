@@ -2678,6 +2678,32 @@ strong, b { color: var(--ink); font-weight: 600; }
   margin-bottom: 18px;
   text-wrap: balance;
 }
+/* Section header for the shopping rows — category tiles, featured,
+   new arrivals. Title on the left, the way out of the row on the
+   right, one line. The centred label/title/subtitle stack the rest of
+   the page uses is right for an editorial statement and wrong for a
+   product row: it costs three stacked lines of vertical space above
+   every grid, and it leaves the "see everything" action stranded in a
+   button below the fold. Editorial sections keep the centred stack. */
+.sec-head {
+  display: flex; align-items: flex-end; justify-content: space-between;
+  gap: 14px 24px; flex-wrap: wrap; margin-bottom: 24px;
+}
+.sec-head-main { min-width: 0; }
+.sec-head .section-title { font-size: clamp(1.45rem, 2.9vw, 2.05rem); margin: 2px 0 0; }
+.sec-head .section-sub { margin-top: 6px; max-width: 56ch; }
+.sec-head-link {
+  flex: none; cursor: pointer;
+  font-size: .82rem; font-weight: 700; color: var(--indigo-lo);
+  background: none; border: none; padding: 0 0 4px;
+  white-space: nowrap;
+}
+.sec-head-link:hover { text-decoration: underline; text-underline-offset: 3px; }
+@media (max-width: 560px) {
+  .sec-head { align-items: flex-start; margin-bottom: 18px; }
+  .sec-head .section-sub { display: none; }
+}
+
 .section-sub, .cf-section-sub {
   font-size: clamp(.95rem, 1.25vw, 1.06rem);
   color: var(--t-low); max-width: 64ch; line-height: 1.7;
@@ -3775,8 +3801,17 @@ img[src=""], img[data-awaiting-upload] { visibility: hidden; width: 100%; }
 .trust-item-dot { width: 5px; height: 5px; border-radius: 50%; background: var(--indigo); flex: none; }
 
 /* ══ CATEGORY TILES ══════════════════════════════════════════════ */
-.cat-grid-new, .cat-grid-marketing { display: grid; gap: 11px; grid-template-columns: repeat(auto-fill, minmax(112px, 1fr)); }
-.cat-card-sm, .cat-card {
+/* Two grids, two jobs. "Shop by Goal" stays a dense tray of small
+   targets — nine of them, and auto-fill at 112px packs them correctly.
+   "Shop by Category" is five entries, and at the same 112px minimum
+   five cards filled about half a 1280px row and left the rest blank,
+   with the names wrapping to different line counts so no two cards
+   were the same height. Five equal tracks, wide enough to carry a line
+   of copy, is what that row actually wants. */
+.cat-grid-marketing { display: grid; gap: 11px; grid-template-columns: repeat(auto-fill, minmax(112px, 1fr)); }
+.cat-grid-new { display: grid; gap: 14px; grid-template-columns: repeat(5, minmax(0, 1fr)); }
+
+.cat-card-sm {
   position: relative; overflow: hidden;
   display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 7px;
   padding: 15px 9px; border-radius: var(--r-lg); text-align: center; cursor: pointer;
@@ -3784,12 +3819,35 @@ img[src=""], img[data-awaiting-upload] { visibility: hidden; width: 100%; }
   transform-style: preserve-3d;
   transition: transform var(--dur-3) var(--rise), box-shadow var(--dur-3) var(--rise);
 }
-.cat-card-sm::after, .cat-card::after { content: none; }
-.cat-card-sm:hover, .cat-card:hover {
+
+/* The category tile. Left-aligned and tall enough to say what is inside
+   the category rather than only naming it — the accent each card
+   already carries (sage, sky, fern, harbour, clay, assigned by
+   nth-child further down) becomes a wash across the whole face, so the
+   row reads as five different places to go instead of five identical
+   chips. */
+.cat-card {
+  position: relative; overflow: hidden;
+  display: flex; flex-direction: column; align-items: flex-start; gap: 8px;
+  padding: 22px 20px 18px; border-radius: var(--r-lg); text-align: left; cursor: pointer;
+  min-height: 196px;
+  background:
+    linear-gradient(160deg,
+      color-mix(in srgb, var(--card-accent, var(--indigo)) 15%, var(--white)) 0%,
+      var(--white) 62%);
+  box-shadow: var(--neo-1); border: none;
+  transition: transform var(--dur-3) var(--rise), box-shadow var(--dur-3) var(--rise);
+}
+.cat-card:hover {
+  transform: translateY(-6px);
+  box-shadow: var(--neo-3), 0 14px 34px -16px var(--card-accent, var(--indigo));
+}
+.cat-card-sm:hover {
   transform: translateY(-6px);
   box-shadow: var(--neo-3), 0 14px 34px -16px var(--card-flavour, var(--indigo));
 }
-.cat-card-sm:active, .cat-card:active { transform: none; box-shadow: var(--neo-in); }
+.cat-card:active, .cat-card-sm:active { transform: none; box-shadow: var(--neo-in); }
+
 .ci, .cat-icon {
   position: relative; z-index: 1;
   display: grid; place-items: center; width: 38px; height: 38px;
@@ -3797,40 +3855,94 @@ img[src=""], img[data-awaiting-upload] { visibility: hidden; width: 100%; }
   background: var(--paper); box-shadow: var(--neo-in);
   transition: transform var(--dur-3) var(--fizz), box-shadow var(--dur-3) var(--fizz);
 }
+.cat-card .cat-icon { width: 46px; height: 46px; margin-bottom: 2px; }
 .cat-card-sm:hover .ci, .cat-card:hover .cat-icon {
   transform: translateZ(20px) scale(1.06);
-  box-shadow: var(--neo-in), 0 0 0 3px color-mix(in srgb, var(--card-flavour, var(--indigo)) 30%, transparent);
+  box-shadow: var(--neo-in), 0 0 0 3px color-mix(in srgb, var(--card-accent, var(--indigo)) 30%, transparent);
 }
 .ci svg, .cat-icon svg { width: 19px; height: 19px; color: var(--indigo); }
+.cat-card .cat-icon svg { width: 23px; height: 23px; }
+
 .cn, .cat-name {
   position: relative; z-index: 1;
   font-family: var(--font-display); font-size: .74rem; font-weight: 500;
   letter-spacing: -.01em; color: var(--ink); line-height: 1.3;
 }
-.cat-count { font-size: .6rem; color: var(--t-dim); }
+.cat-card .cat-name { font-size: 1rem; font-weight: 600; }
+.cat-desc {
+  position: relative; z-index: 1;
+  font-size: .765rem; line-height: 1.5; color: var(--t-low);
+}
+.cat-count {
+  font-size: .64rem; font-weight: 800; letter-spacing: .12em; text-transform: uppercase;
+  color: var(--t-dim);
+}
+.cat-card .cat-count { margin-top: auto; }
+.cat-go {
+  font-size: .76rem; font-weight: 700;
+  color: color-mix(in srgb, var(--card-accent, var(--indigo)) 72%, var(--ink));
+}
+.cat-card:hover .cat-go { text-decoration: underline; text-underline-offset: 3px; }
+
+@media (max-width: 1080px) {
+  .cat-grid-new { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+}
+@media (max-width: 700px) {
+  .cat-grid-new { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+  .cat-card { min-height: 0; padding: 14px 13px 13px; gap: 5px; }
+  .cat-card .cat-icon { width: 34px; height: 34px; }
+  .cat-card .cat-icon svg { width: 17px; height: 17px; }
+  .cat-card .cat-name { font-size: .86rem; }
+  /* The description is the first thing to go on a phone, and with it
+     goes the reason to push the count to the bottom — margin-top:auto
+     would just open a hole in the middle of a four-line card. */
+  .cat-desc { display: none; }
+  .cat-card .cat-count { margin-top: 2px; font-size: .6rem; }
+  .cat-go { font-size: .72rem; }
+}
 
 /* ══ MIX & MATCH ═════════════════════════════════════════════════
    Retired with the banner it styled. .mm-badge is still named in one
    grouped badge selector below, where it now matches nothing. */
 
 /* ══ CERTIFICATION ═══════════════════════════════════════════════ */
-.cert-grid { display: grid; gap: 18px; grid-template-columns: repeat(auto-fit, minmax(212px, 1fr)); }
+/* Four claims, stated once. This block used to run a full screen tall:
+   a 3rem headline, a subtitle, then four cards at 32px padding with a
+   64px icon medallion and a three-line paragraph each. Four short
+   claims do not need a screen — the whole point of a trust row is that
+   it is read in a glance on the way past, and a row you have to scroll
+   through is not a glance. Same four claims, a third of the height. */
+.cert-grid { display: grid; gap: 12px; grid-template-columns: repeat(4, minmax(0, 1fr)); }
 .cert-card {
   position: relative; overflow: hidden;
-  padding: 32px 26px; border-radius: var(--r-lg); text-align: center;
+  display: flex; flex-direction: column; align-items: center; gap: 7px;
+  padding: 20px 16px 18px; border-radius: var(--r-lg); text-align: center;
   background: var(--paper); box-shadow: var(--neo-1); border: none;
-  transform-style: preserve-3d;
   transition: transform var(--dur-3) var(--rise), box-shadow var(--dur-3) var(--rise);
 }
-.cert-card:hover { transform: translateY(-5px); box-shadow: var(--neo-3); }
+.cert-card:hover { transform: translateY(-4px); box-shadow: var(--neo-2); }
 .cert-ico {
-  display: grid; place-items: center; width: 64px; height: 64px; margin: 0 auto 18px;
-  border-radius: 50%; font-size: 1.6rem; color: var(--green);
+  display: grid; place-items: center; width: 40px; height: 40px;
+  border-radius: 50%; font-size: 1.1rem; color: var(--green);
   background: var(--paper); box-shadow: var(--neo-in); border: none;
 }
-.cert-ico svg { width: 32px; height: 32px; }
-.cert-t { font-family: var(--font-display); font-size: 1.02rem; font-weight: 500; color: var(--ink); margin-bottom: 8px; }
-.cert-d { font-size: .81rem; color: var(--t-low); line-height: 1.6; }
+.cert-ico svg { width: 21px; height: 21px; }
+.cert-t { font-family: var(--font-display); font-size: .88rem; font-weight: 600; color: var(--ink); line-height: 1.25; }
+.cert-d { font-size: .735rem; color: var(--t-low); line-height: 1.5; }
+
+/* A claims strip is not a full section and should not carry a full
+   section's rhythm — 140px of air above four one-line cards read as a
+   mistake once the cards stopped being a screen tall themselves. */
+.section.certs { padding: clamp(44px, 5.5vw, 78px) 0 clamp(40px, 5vw, 70px); }
+
+@media (max-width: 860px) { .cert-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 420px) {
+  .cert-card { padding: 15px 10px 14px; gap: 5px; }
+  .cert-ico { width: 34px; height: 34px; }
+  .cert-ico svg { width: 18px; height: 18px; }
+  .cert-t { font-size: .8rem; }
+  .cert-d { font-size: .68rem; }
+}
 
 /* ══ TESTIMONIALS ════════════════════════════════════════════════ */
 .testi-grid { columns: 3 280px; column-gap: 18px; }
@@ -4728,7 +4840,16 @@ textarea.form-input { min-height: 96px; resize: vertical; font-family: inherit; 
 }
 
 /* ══ ORDER OUTCOMES ═══════════════════════════════════════════════ */
-.ty-page, .pf-page { text-align: center; padding: clamp(60px, 9vw, 118px) 0; }
+/* text-align:center centres the TEXT, not the boxes. Every block child
+   with a max-width and no auto margin — the facts list, the notes, the
+   Instagram card that was already here — sat hard against the left edge
+   of a centred page. Making the page a centred column fixes all of them
+   at once, including the ones that were wrong before. */
+.ty-page, .pf-page {
+  display: flex; flex-direction: column; align-items: center;
+  text-align: center; padding: clamp(52px, 8vw, 104px) 0;
+}
+.ty-page > *, .pf-page > * { max-width: 100%; }
 .ty-ring {
   display: grid; place-items: center; width: 108px; height: 108px; margin: 0 auto 26px;
   border-radius: 50%; font-size: 3rem;
@@ -4737,8 +4858,55 @@ textarea.form-input { min-height: 96px; resize: vertical; font-family: inherit; 
   box-shadow: 0 0 54px rgba(192,57,74,.26), inset 0 1px 0 rgba(255,255,255,.3);
   animation: fz-pulse 3s var(--settle) infinite;
 }
-.ty-steps, .pf-steps { display: flex; justify-content: center; gap: clamp(18px, 4vw, 46px); flex-wrap: wrap; margin: 38px 0; }
-.ty-step, .pf-step { display: flex; flex-direction: column; align-items: center; gap: 9px; max-width: 168px; font-size: .82rem; color: var(--t-mid); }
+/* Order facts, as a definition list rather than a chip and a
+   scattering of sentences: the three things a customer checks on this
+   page are the reference, how they paid, and when it lands. */
+.ty-facts {
+  display: grid; gap: 0; width: 100%; max-width: 460px; margin: 20px auto 6px;
+  border-radius: var(--r-md); background: var(--paper-hi); box-shadow: var(--neo-1);
+  overflow: hidden; text-align: left;
+}
+.ty-facts > div {
+  display: flex; align-items: baseline; justify-content: space-between; gap: 14px;
+  padding: 12px 18px;
+}
+.ty-facts > div + div { box-shadow: inset 0 1px 0 var(--edge); }
+.ty-facts dt { font-size: .8rem; color: var(--t-low); }
+.ty-facts dd { font-size: .86rem; font-weight: 700; color: var(--t-hi); text-align: right; }
+.ty-facts dd#orderNum { color: var(--indigo-lo); font-variant-numeric: tabular-nums; }
+.ty-notes {
+  display: grid; gap: 8px; width: 100%; max-width: 460px; margin: 14px auto 2px;
+  padding: 14px 18px; border-radius: var(--r-md);
+  background: var(--fern-bg); text-align: left;
+  font-size: .81rem; font-weight: 600; color: var(--fern-lo);
+}
+.ty-notes div { display: flex; align-items: flex-start; gap: 9px; }
+.ty-step.ty-next, .ty-step.ty-todo { opacity: .45; }
+
+/* Four steps, four tracks — the flex row was wrapping one step per line
+   on a phone and turning a progress bar into a 700px column. Two-by-two
+   is the phone shape.
+
+   The disc under each icon is the brand crimson for the step that has
+   happened and a soft neutral for the ones that have not, so the row
+   reads as progress rather than as four identical badges. Without this
+   every emoji sat on a filled crimson disc, which is where the "green
+   tick on a red sticker" look came from. */
+.ty-step.ty-next > *:first-child, .ty-step.ty-todo > *:first-child {
+  background: var(--paper); box-shadow: var(--neo-in); color: var(--t-mid);
+}
+
+/* Four steps, four tracks. As a wrapping flex row with a 168px cap per
+   step, a phone put one step per line and turned a progress bar into a
+   700px column; two-by-two is the phone shape. */
+.ty-steps, .pf-steps {
+  display: grid; grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 16px 12px; margin: 32px auto; width: 100%; max-width: 720px;
+}
+.ty-step, .pf-step { display: flex; flex-direction: column; align-items: center; gap: 9px; font-size: .82rem; color: var(--t-mid); }
+@media (max-width: 560px) {
+  .ty-steps, .pf-steps { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 20px 10px; margin: 26px 0; }
+}
 .pf-step-num, .ty-step > *:first-child {
   display: grid; place-items: center; width: 42px; height: 42px;
   border-radius: 50%; font-weight: 800; color: #fff;
@@ -5441,15 +5609,21 @@ textarea.b2b-form-input { min-height: 110px; resize: vertical; font-family: inhe
 
   /* ~50% smaller cards on phones. Height is driven by padding + icon +
      label, so all three shrink together; the 3-column layout is kept
-     because 4 columns makes labels like "Ayurvedic Wellness" wrap badly.
-     Type shrinks less than the box on purpose — halving .74rem would land
-     near 6px and be unreadable. */
-  .cat-grid-new, .cat-grid-marketing { grid-template-columns: repeat(3, 1fr); gap: 7px; }
-  .cat-card-sm, .cat-card { padding: 5px 4px; gap: 3px; border-radius: var(--r-md); }
-  .ci, .cat-icon { width: 18px; height: 18px; font-size: .65rem; }
-  .ci svg, .cat-icon svg { width: 10px; height: 10px; }
-  .cn, .cat-name { font-size: .6rem; line-height: 1.2; }
-  .cat-count { font-size: .5rem; }
+     because 4 columns makes labels wrap badly. Type shrinks less than the
+     box on purpose — halving .74rem would land near 6px and be
+     unreadable.
+
+     This block is for the "Shop by Goal" tray (.cat-card-sm) only. It
+     used to name .cat-card / .cat-grid-new as well, from when both grids
+     were the same little icon chip. .cat-card is a category tile now,
+     with a description and a link in it, and 5px of padding at .6rem
+     type is not a smaller version of that — it is a broken one. Its own
+     phone layout lives with the rest of its rules, above. */
+  .cat-grid-marketing { grid-template-columns: repeat(3, 1fr); gap: 7px; }
+  .cat-card-sm { padding: 5px 4px; gap: 3px; border-radius: var(--r-md); }
+  .cat-card-sm .ci { width: 18px; height: 18px; font-size: .65rem; }
+  .cat-card-sm .ci svg { width: 10px; height: 10px; }
+  .cat-card-sm .cn { font-size: .6rem; line-height: 1.2; }
 
   .testi-grid, .influencer-grid { columns: 1; }
   .ig-card, .ig-skeleton { flex: 0 0 calc((100% - 14px) / 2); min-height: 148px; }
@@ -7172,15 +7346,15 @@ setInterval(function() { syncAppCartBadge(); syncAppWishBadge(); }, 2000);
   <!-- FEATURED -->
   <section class="section" style="background:var(--off-white)">
     <div class="container">
-      <div class="text-center" style="margin-bottom:36px">
-        <div class="section-label">Top Picks</div>
-        <h2 class="section-title">Featured &amp; Bestsellers</h2>
-        <p class="section-sub">Products our customers love and reorder every month.</p>
+      <div class="sec-head">
+        <div class="sec-head-main">
+          <div class="section-label">Top Picks</div>
+          <h2 class="section-title">Featured &amp; Bestsellers</h2>
+          <p class="section-sub">Products our customers love and reorder every month.</p>
+        </div>
+        <button class="sec-head-link" onclick="showPage('shop')">View all products &rarr;</button>
       </div>
       <div class="products-grid" id="featuredGrid"></div>
-      <div class="text-center" style="margin-top:36px">
-        <button class="btn-primary" onclick="showPage('shop')">View All Products →</button>
-      </div>
     </div>
   </section>
 
@@ -7310,17 +7484,24 @@ setInterval(function() { syncAppCartBadge(); syncAppWishBadge(); }, 2000);
   <!-- CATEGORIES -->
   <section class="section" style="padding-bottom:32px">
     <div class="container">
-      <div class="text-center" style="margin-bottom:28px">
-        <div class="section-label">Our Range</div>
-        <h2 class="section-title">Shop by Category</h2>
-        <p class="section-sub">From spirulina superfoods to effervescent wellness — find exactly what your body needs.</p>
+      <div class="sec-head">
+        <div class="sec-head-main">
+          <div class="section-label">Our Range</div>
+          <h2 class="section-title">Shop by Category</h2>
+          <p class="section-sub">From spirulina superfoods to effervescent wellness — find exactly what your body needs.</p>
+        </div>
+        <button class="sec-head-link" onclick="showPage('shop')">Browse everything &rarr;</button>
       </div>
+      <!-- Counts carry data-cat-count and are filled by
+           hydrateCategoryCounts() from the live catalogue. They used to
+           be typed in, and had drifted: this row claimed the
+           effervescent range held 5 products when it holds 10. -->
       <div class="cat-grid-new" style="margin-bottom:20px">
-        <a class="cat-card" onclick="showShop('premium')"><span class="cat-icon"><svg width="44" height="44"><use href="#ico-trophy"/></svg></span><span class="cat-name">Ozylix Premium</span><span class="cat-count">Multidiata</span></a>
-        <a class="cat-card" onclick="showShop('spirulina')"><span class="cat-icon"><svg width="44" height="44"><use href="#ico-wave"/></svg></span><span class="cat-name">Spirulina Range</span><span class="cat-count">3 products</span></a>
-        <a class="cat-card" onclick="showShop('effervescent')"><span class="cat-icon"><svg width="44" height="44"><use href="#ico-bubble"/></svg></span><span class="cat-name">Effervescent Range</span><span class="cat-count">5 products</span></a>
-        <a class="cat-card" onclick="showShop('ayurvedic')"><span class="cat-icon"><svg width="44" height="44"><use href="#ico-leaf"/></svg></span><span class="cat-name">Ayurvedic Wellness</span><span class="cat-count">Moringa Tablets</span></a>
-        <a class="cat-card" onclick="showShop('immunity')"><span class="cat-icon"><svg width="44" height="44"><use href="#ico-energy"/></svg></span><span class="cat-name">Immunity</span><span class="cat-count">Power Pro</span></a>
+        <a class="cat-card" onclick="showShop('premium')"><span class="cat-icon"><svg width="44" height="44"><use href="#ico-trophy"/></svg></span><span class="cat-name">Ozylix Premium</span><span class="cat-desc">Multidiata — 23 vitamins and minerals in one daily tablet.</span><span class="cat-count" data-cat-count="premium"></span><span class="cat-go">Shop &rarr;</span></a>
+        <a class="cat-card" onclick="showShop('effervescent')"><span class="cat-icon"><svg width="44" height="44"><use href="#ico-bubble"/></svg></span><span class="cat-name">Effervescent Range</span><span class="cat-desc">Drop, fizz, drink. Absorbs faster than a swallowed pill.</span><span class="cat-count" data-cat-count="effervescent"></span><span class="cat-go">Shop &rarr;</span></a>
+        <a class="cat-card" onclick="showShop('spirulina')"><span class="cat-icon"><svg width="44" height="44"><use href="#ico-wave"/></svg></span><span class="cat-name">Spirulina Range</span><span class="cat-desc">B12, magnesium and iron built on organic spirulina.</span><span class="cat-count" data-cat-count="spirulina"></span><span class="cat-go">Shop &rarr;</span></a>
+        <a class="cat-card" onclick="showShop('ayurvedic')"><span class="cat-icon"><svg width="44" height="44"><use href="#ico-leaf"/></svg></span><span class="cat-name">Ayurvedic Wellness</span><span class="cat-desc">Moringa, in a clean everyday tablet.</span><span class="cat-count" data-cat-count="ayurvedic"></span><span class="cat-go">Shop &rarr;</span></a>
+        <a class="cat-card" onclick="showShop('immunity')"><span class="cat-icon"><svg width="44" height="44"><use href="#ico-energy"/></svg></span><span class="cat-name">Immunity</span><span class="cat-desc">Ashwagandha, shilajit and astaxanthin for stamina.</span><span class="cat-count" data-cat-count="immunity"></span><span class="cat-go">Shop &rarr;</span></a>
       </div>
       <div style="font-size:0.72rem;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--gray);margin-bottom:12px">Shop by Goal</div>
       <div class="cat-grid-marketing">
@@ -7340,9 +7521,12 @@ setInterval(function() { syncAppCartBadge(); syncAppWishBadge(); }, 2000);
   <!-- NEW ARRIVALS -->
   <section class="section">
     <div class="container">
-      <div class="text-center" style="margin-bottom:36px">
-        <div class="section-label">Just Launched</div>
-        <h2 class="section-title">New Arrivals</h2>
+      <div class="sec-head">
+        <div class="sec-head-main">
+          <div class="section-label">Just Launched</div>
+          <h2 class="section-title">New Arrivals</h2>
+        </div>
+        <button class="sec-head-link" onclick="showShop('new')">See what's new &rarr;</button>
       </div>
       <div class="products-grid" id="newArrivalsGrid"></div>
     </div>
@@ -7385,16 +7569,15 @@ setInterval(function() { syncAppCartBadge(); syncAppWishBadge(); }, 2000);
   <!-- CERTIFICATIONS -->
   <section class="section certs">
     <div class="container">
-      <div class="text-center" style="margin-bottom:36px">
+      <div class="text-center" style="margin-bottom:22px">
         <div class="section-label" style="color:var(--harbour-lo)">Trust &amp; Quality</div>
-        <h2 class="section-title">Certified. Tested. Trusted.</h2>
-        <p class="section-sub">Every Ozylix product meets the highest standards of purity, safety and efficacy.</p>
+        <h2 class="section-title" style="font-size:clamp(1.5rem,3vw,2.1rem)">Certified. Tested. Trusted.</h2>
       </div>
       <div class="cert-grid">
-        <div class="cert-card"><div class="cert-ico"><svg width="52" height="52"><use href="#ico-check"/></svg></div><div class="cert-t">FSSAI Approved</div><div class="cert-d">All products carry valid FSSAI licence under Indian food safety regulations</div></div>
-        <div class="cert-card"><div class="cert-ico"><svg width="52" height="52"><use href="#ico-lab"/></svg></div><div class="cert-t">3rd Party Lab Tested</div><div class="cert-d">Independent laboratory testing for purity, potency, and absence of contaminants</div></div>
-        <div class="cert-card"><div class="cert-ico"><svg width="52" height="52"><use href="#ico-organic"/></svg></div><div class="cert-t">Organic Certified</div><div class="cert-d">Key ingredients sourced from certified organic farms with full traceability</div></div>
-        <div class="cert-card"><div class="cert-ico"><svg width="52" height="52"><use href="#ico-factory"/></svg></div><div class="cert-t">Licensed Manufacturing</div><div class="cert-d">Produced in FSSAI approved facility in Anand, Gujarat, India</div></div>
+        <div class="cert-card"><div class="cert-ico"><svg width="52" height="52"><use href="#ico-check"/></svg></div><div class="cert-t">FSSAI approved</div><div class="cert-d">Valid licence on every product</div></div>
+        <div class="cert-card"><div class="cert-ico"><svg width="52" height="52"><use href="#ico-lab"/></svg></div><div class="cert-t">Lab tested</div><div class="cert-d">Purity and potency, batch by batch</div></div>
+        <div class="cert-card"><div class="cert-ico"><svg width="52" height="52"><use href="#ico-organic"/></svg></div><div class="cert-t">Organic certified</div><div class="cert-d">Traceable back to the farm</div></div>
+        <div class="cert-card"><div class="cert-ico"><svg width="52" height="52"><use href="#ico-factory"/></svg></div><div class="cert-t">Our own plant</div><div class="cert-d">Made in Anand, Gujarat</div></div>
       </div>
     </div>
   </section>
@@ -8301,18 +8484,32 @@ function renderCheckoutSummary() {
       <div class="ty-ring">🌿</div>
       <h1 style="font-size:2.4rem;margin-bottom:12px">Order Confirmed!</h1>
       <p style="color:var(--gray);max-width:420px">Your order has been received and is being processed. Thank you for choosing Ozylix!</p>
-      <div style="background:var(--light-gray);padding:8px 20px;border-radius:8px;font-size:.86rem;font-weight:600;margin:16px 0;display:inline-block">Order #<span id="orderNum">AVC-00000000</span></div>
+      <!-- The three facts a customer looks for on this page, in one
+           block rather than scattered down it. Filled by finalizeOrder(). -->
+      <dl class="ty-facts">
+        <div><dt>Order reference</dt><dd id="orderNum">AVC-00000000</dd></div>
+        <div><dt>Payment method</dt><dd id="tyPayMethod">—</dd></div>
+        <div><dt>Estimated delivery</dt><dd>3–5 business days</dd></div>
+      </dl>
       <!-- Shiprocket order ID row (shown after SR push) -->
       <div id="srOrderRow" style="display:none;align-items:center;gap:8px;background:var(--sub-1);border:1px solid var(--t-low);border-radius:8px;padding:8px 16px;font-size:.82rem;font-weight:600;margin-bottom:4px">
         <span>🚚 Shiprocket ID:</span><span id="srOrderId" style="color:var(--green)">—</span>
       </div>
       <a id="trackOrderBtn" href="https://shiprocket.in/shipment-tracking/" target="_blank" rel="noopener" style="display:none;align-items:center;gap:6px;background:var(--face-warm);color:var(--clay-lo);box-shadow:inset 0 0 0 1.5px rgba(138,74,51,.32);border-radius:100px;padding:10px 22px;font-weight:600;font-size:.82rem;text-decoration:none;margin:8px 0">📦 Track on Shiprocket →</a>
-      <p style="font-size:.83rem;color:var(--gray)">Confirmation &amp; tracking details will be sent to your email and SMS.</p>
+      <div class="ty-notes">
+        <div><span aria-hidden="true">📦</span> Dispatched from our own facility in Anand, Gujarat</div>
+        <div><span aria-hidden="true">🚚</span> Tracking link follows by email and SMS</div>
+      </div>
+      <!-- Step 1 shipped with an empty icon div, which .ty-step > *:first-child
+           painted as a blank crimson disc, and the dimming ran 1 / .4 / .8 / .4
+           — so "Shipped" looked further along than "Processing", which comes
+           before it. Done steps are lit, everything ahead is dimmed the same
+           amount, in order. -->
       <div class="ty-steps">
-        <div class="ty-step"><div style="font-size:1.8rem"></div><div style="font-size:.8rem;font-weight:700;margin:6px 0">Order Placed</div><div style="font-size:.72rem;color:var(--gray)">Just now</div></div>
-        <div class="ty-step" style="opacity:.4"><div style="font-size:1.8rem">📦</div><div style="font-size:.8rem;font-weight:700;margin:6px 0">Processing</div><div style="font-size:.72rem;color:var(--gray)">1–2 hours</div></div>
-        <div class="ty-step" style="opacity:.8"><div style="font-size:1.8rem">🚚</div><div style="font-size:.8rem;font-weight:700;margin:6px 0">Shipped</div><div style="font-size:.72rem;color:var(--gray)">Via Shiprocket</div></div>
-        <div class="ty-step" style="opacity:.4"><div style="font-size:1.8rem">🏠</div><div style="font-size:.8rem;font-weight:700;margin:6px 0">Delivered</div><div style="font-size:.72rem;color:var(--gray)">3–5 days</div></div>
+        <div class="ty-step ty-done"><div style="font-size:1.35rem">&#x2713;</div><div style="font-size:.8rem;font-weight:700;margin:6px 0">Order placed</div><div style="font-size:.72rem;color:var(--gray)">Just now</div></div>
+        <div class="ty-step ty-next"><div style="font-size:1.8rem">📦</div><div style="font-size:.8rem;font-weight:700;margin:6px 0">Processing</div><div style="font-size:.72rem;color:var(--gray)">Within 24 hours</div></div>
+        <div class="ty-step ty-todo"><div style="font-size:1.8rem">🚚</div><div style="font-size:.8rem;font-weight:700;margin:6px 0">Shipped</div><div style="font-size:.72rem;color:var(--gray)">Tracking sent to you</div></div>
+        <div class="ty-step ty-todo"><div style="font-size:1.8rem">🏠</div><div style="font-size:.8rem;font-weight:700;margin:6px 0">Delivered</div><div style="font-size:.72rem;color:var(--gray)">3–5 business days</div></div>
       </div>
       <div style="display:flex;gap:14px;flex-wrap:wrap;justify-content:center">
         <button class="btn-primary" onclick="showPage('shop')">Continue Shopping</button>
@@ -9464,6 +9661,7 @@ async function syncProductsFromBackend() {
         // Re-render all grids with updated data (including new backend products)
         try { renderFeatured(); } catch(e){}
         try { renderNewArrivals(); } catch(e){}
+        try { hydrateCategoryCounts(); } catch(e){}
         // The promo carousel is built from PRODUCTS, so it must pick up
         // freshly synced Supabase images and prices too.
         try { renderPromoCarousel(); } catch(e){}
@@ -9538,6 +9736,22 @@ function renderNewArrivals() {
   if (nag) nag.innerHTML = newP.map(p => renderProductCard(p)).join('');
 }
 function renderShopGrid() { applyFilters(); }
+
+// The "Shop by Category" tiles quote how many products each category
+// holds. Those numbers were typed into the markup and had gone stale —
+// the effervescent tile claimed 5 when the catalogue holds 10 — so they
+// are counted from PRODUCTS instead, after the backend sync has had its
+// say about which products are live.
+function hydrateCategoryCounts() {
+  const nodes = document.querySelectorAll('[data-cat-count]');
+  if (!nodes.length || typeof PRODUCTS === 'undefined') return;
+  const visible = PRODUCTS.filter(p => !p._hidden && p.active !== false);
+  nodes.forEach((el) => {
+    const cat = el.getAttribute('data-cat-count');
+    const n = visible.filter(p => p.category === cat).length;
+    el.textContent = n === 1 ? '1 product' : n + ' products';
+  });
+}
 
 // Re-render all visible product cards after backend sync — full replacement
 function updateAllProductCards() {
@@ -10863,6 +11077,8 @@ function initHome() {
   const hbg=document.getElementById('homeBlogGrid'); if(hbg) hbg.innerHTML = BLOGS.slice(0,4).map(renderBlogCard).join('');
   // FAQ
   const hfw=document.getElementById('homeFaqWrap'); if(hfw) hfw.innerHTML = FAQS.slice(0,5).map(renderFaqItem).join('');
+  // Category tile counts
+  try { hydrateCategoryCounts(); } catch(e) {}
   // Testimonials + Customer Reviews Wall — both pull the same real, live data
   renderTestimonials();
   renderReviewsWall();
@@ -12005,6 +12221,7 @@ function bootApp() {
   // ✅ FIX: Render immediately from static data so shop never shows empty
   try { renderFeatured(); } catch(e) {}
   try { renderNewArrivals(); } catch(e) {}
+  try { hydrateCategoryCounts(); } catch(e) {}
   try { if(document.getElementById('bundleProdList')) renderBundleBuilder(); } catch(e) {}
   try { updateSaleUIVisibility(); } catch(e) {}
   // 🔗 Sync live product data from Supabase backend (non-blocking)
@@ -12900,9 +13117,17 @@ function showPaymentError(msg, orderId, formData, total, method) {
 }
 
 // ── FINALIZE ORDER AFTER SUCCESSFUL PAYMENT ──
+const PAY_METHOD_LABEL = {
+  cod: 'Cash on delivery',
+  gokwik: 'Paid online (GoKwik)',
+  cashfree: 'Paid online (Cashfree)',
+};
+
 async function finalizeOrder(orderId, formData, total, method, codCharge) {
   const orderNumEl = document.getElementById('orderNum');
   if (orderNumEl) orderNumEl.textContent = orderId;
+  const payEl = document.getElementById('tyPayMethod');
+  if (payEl) payEl.textContent = PAY_METHOD_LABEL[method] || 'Paid online';
 
   // Build order items
   const cartSnapshot = [...STORE.cart];
@@ -13170,8 +13395,11 @@ async function finalizeOrder(orderId, formData, total, method, codCharge) {
         const w = window.open(u, '_blank', 'width=960,height=800,scrollbars=yes');
         if (w) setTimeout(() => URL.revokeObjectURL(u), 30000); else URL.revokeObjectURL(u);
       };
-      const orderNumEl = document.getElementById('orderNum');
-      if (orderNumEl && orderNumEl.parentNode) orderNumEl.parentNode.appendChild(invBtn);
+      // Anchor to the facts block, not to #orderNum's own parent — that
+      // is now a row inside a bordered definition list, and appending a
+      // pill button into it drops the invoice button inside the table.
+      const facts = document.querySelector('#page-thankyou .ty-facts');
+      if (facts) facts.insertAdjacentElement('afterend', invBtn);
       else tyPage.appendChild(invBtn);
     }, 0);
   } catch(e) { console.warn('Invoice:', e); }
@@ -13544,10 +13772,8 @@ function generateInvoice({ orderId, formData, srItems, sub, disc, promoDisc, shi
     invBtn.onclick = function() {
       openInvoiceWindow(html);
     };
-    const orderNumEl = document.getElementById('orderNum');
-    if (orderNumEl && orderNumEl.parentNode) {
-      orderNumEl.parentNode.insertAdjacentElement('afterend', invBtn);
-    }
+    const facts = document.querySelector('#page-thankyou .ty-facts');
+    if (facts) facts.insertAdjacentElement('afterend', invBtn);
   }
 }
 
