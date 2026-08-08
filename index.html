@@ -5137,6 +5137,23 @@ textarea.form-input { min-height: 96px; resize: vertical; font-family: inherit; 
 }
 .about-stats-grid > *:nth-child(odd)::before { display: none; }
 
+/* Who actually makes this. Ozylix is the storefront; Ascovita Healthcare
+   is the parent company and the plant. That was in the schema and the
+   meta description and nowhere a reader could see it. */
+.ab-parent {
+  display: flex; align-items: baseline; flex-wrap: wrap; gap: 4px 10px;
+  margin-bottom: 26px; padding: 12px 16px;
+  border-radius: var(--r-md); background: var(--paper); box-shadow: var(--neo-in);
+}
+.ab-parent-k { font-size: .66rem; font-weight: 800; letter-spacing: .16em; text-transform: uppercase; color: var(--t-dim); }
+.ab-parent-v { font-size: .95rem; font-weight: 700; color: var(--indigo-lo); text-decoration: none; }
+.ab-parent-v:hover { text-decoration: underline; text-underline-offset: 3px; }
+.ab-parent-d { flex-basis: 100%; font-size: .74rem; color: var(--t-low); }
+
+.footer-parent { margin-top: 12px; font-size: .78rem; line-height: 1.65; color: var(--t-low); }
+.footer-parent a { color: var(--indigo-lo); font-weight: 700; text-decoration: none; }
+.footer-parent a:hover { text-decoration: underline; text-underline-offset: 3px; }
+
 .ab-hero-media { position: relative; }
 .ab-hero-well {
   display: grid; place-content: center; justify-items: center; gap: 10px;
@@ -7519,14 +7536,14 @@ setInterval(function() { syncAppCartBadge(); syncAppWishBadge(); }, 2000);
     <div style="overflow:hidden">
       <div style="display:flex">
         <div class="trust-bar-track">
-          <div class="trust-item"><div class="trust-item-dot"></div><svg width="18" height="18" style="vertical-align:middle;margin-right:6px"><use href="#ico-check"/></svg> 10,000+ Happy Customers</div>
+          <div class="trust-item"><div class="trust-item-dot"></div><svg width="18" height="18" style="vertical-align:middle;margin-right:6px"><use href="#ico-check"/></svg> Factory Direct — No Middlemen</div>
           <div class="trust-item"><div class="trust-item-dot"></div>🚚 Free Delivery Every Order</div>
           <div class="trust-item"><div class="trust-item-dot"></div>🇮🇳 Made in India — Anand, Gujarat</div>
           <div class="trust-item"><div class="trust-item-dot"></div>🔒 100% Secure Payment via GoKwik</div>
           <div class="trust-item"><div class="trust-item-dot"></div><svg width="18" height="18" style="vertical-align:middle;margin-right:6px"><use href="#ico-check"/></svg> FSSAI Approved &amp; Lab Certified</div>
           <div class="trust-item"><div class="trust-item-dot"></div>🌿 100% Organic Ingredients</div>
           <div class="trust-item"><div class="trust-item-dot"></div>📦 Ships within 24 Hours</div>
-          <div class="trust-item"><div class="trust-item-dot"></div><svg width="18" height="18" style="vertical-align:middle;margin-right:6px"><use href="#ico-check"/></svg> 10,000+ Happy Customers</div>
+          <div class="trust-item"><div class="trust-item-dot"></div><svg width="18" height="18" style="vertical-align:middle;margin-right:6px"><use href="#ico-check"/></svg> Factory Direct — No Middlemen</div>
           <div class="trust-item"><div class="trust-item-dot"></div>🚚 Free Delivery Every Order</div>
           <div class="trust-item"><div class="trust-item-dot"></div>🇮🇳 Made in India — Anand, Gujarat</div>
           <div class="trust-item"><div class="trust-item-dot"></div>🔒 100% Secure Payment via GoKwik</div>
@@ -8788,7 +8805,15 @@ function renderCheckoutSummary() {
         <div>
           <div style="display:inline-flex;align-items:center;gap:8px;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2);border-radius:100px;padding:6px 16px;font-size:.75rem;font-weight:700;letter-spacing:2px;text-transform:uppercase;margin-bottom:24px;color:var(--f-mineral)">&#127807; Our Story</div>
           <h1 style="font-size:clamp(2.2rem,4.5vw,3.5rem);font-family:var(--font-display);line-height:1.1;margin-bottom:20px;font-weight:800">Rooted in Nature,<br><em style="color:var(--f-mineral);font-style:italic">Powered by Science</em></h1>
-          <p style="font-size:.95rem;opacity:.85;line-height:1.85;margin-bottom:28px">Founded in Anand, Gujarat — India's nutraceutical capital — Ozylix began with a single mission: make premium-grade nutrition accessible to every Indian family, without compromise on quality or affordability.</p>
+          <p style="font-size:.95rem;color:var(--t-mid);line-height:1.85;margin-bottom:22px">Ozylix is the direct-to-consumer brand of <strong>Ascovita Healthcare</strong>, and every tablet is made in Ascovita's own FSSAI-licensed plant in Anand, Gujarat — India's nutraceutical capital. Nothing is outsourced and nobody stands between the factory and your door.</p>
+          <!-- The relationship was stated in the page's schema and meta tags
+               but never on the page itself, so a reader had no way to know
+               who actually makes the product. -->
+          <div class="ab-parent">
+            <span class="ab-parent-k">Powered by</span>
+            <a class="ab-parent-v" href="https://www.ascovita.com/" target="_blank" rel="noopener">Ascovita Healthcare &nearr;</a>
+            <span class="ab-parent-d">Manufacturing, formulation, R&amp;D &amp; export</span>
+          </div>
           <!-- Hero Stats Row -->
           <!-- The inline rgba(255,255,255,.08) fills and .15 borders here
                were drawn for a dark hero and are invisible on this one;
@@ -8800,8 +8825,8 @@ function renderCheckoutSummary() {
                Reviews" everywhere else until real reviews arrive. -->
           <div class="about-stats-grid">
             <div data-reveal="up" data-delay="1">
-              <div class="ab-stat-n" data-count="10000" data-suffix="+">10K+</div>
-              <div class="ab-stat-l">Customers served</div>
+              <div class="ab-stat-n">0</div>
+              <div class="ab-stat-l">Middlemen &mdash; factory straight to your door</div>
             </div>
             <div data-reveal="up" data-delay="2">
               <div class="ab-stat-n" id="aboutProductCount">—</div>
@@ -8855,9 +8880,9 @@ function renderCheckoutSummary() {
            / Indian Food Safety Standard". One licence, stated once. -->
       <div class="ab-ribbon">
         <div><span style="font-size:1.3rem">&#9989;</span><div><div class="ab-ribbon-t">FSSAI licensed</div><div class="ab-ribbon-d">Food Safety and Standards Authority of India</div></div></div>
-        <div><span style="font-size:1.3rem">&#127981;</span><div><div class="ab-ribbon-t">Our own plant</div><div class="ab-ribbon-d">Anand, Gujarat &mdash; nothing outsourced</div></div></div>
+        <div><span style="font-size:1.3rem">&#127981;</span><div><div class="ab-ribbon-t">Made in our own plant</div><div class="ab-ribbon-d">Ascovita's facility in Anand, Gujarat</div></div></div>
         <div><span style="font-size:1.3rem">&#129514;</span><div><div class="ab-ribbon-t">Third-party lab tested</div><div class="ab-ribbon-d">Independent QC on every batch</div></div></div>
-        <div><span style="font-size:1.3rem">&#128204;</span><div><div class="ab-ribbon-t">10,000+ customers</div><div class="ab-ribbon-d">Delivered across India</div></div></div>
+        <div><span style="font-size:1.3rem">&#128736;&#65039;</span><div><div class="ab-ribbon-t">Backed by Ascovita</div><div class="ab-ribbon-d">Our parent company and manufacturer</div></div></div>
       </div>
     </div>
   </div>
@@ -8870,7 +8895,7 @@ function renderCheckoutSummary() {
           <div class="section-label">Mission & Vision</div>
           <h2 class="section-title">Why Ozylix Exists</h2>
           <p style="font-size:.9rem;color:var(--gray);line-height:1.85;margin-bottom:20px">India has the world's highest rate of micronutrient deficiency — yet most supplement brands charge a premium that keeps quality nutrition out of reach for millions. We founded Ozylix to break that cycle.</p>
-          <p style="font-size:.9rem;color:var(--gray);line-height:1.85;margin-bottom:28px">From our FSSAI-licensed facility in Anand, Gujarat, we formulate, manufacture, and deliver premium nutraceuticals — effervescent tablets, spirulina, glutathione, biotin and more — at prices that make good health truly accessible.</p>
+          <p style="font-size:.9rem;color:var(--gray);line-height:1.85;margin-bottom:28px">Ascovita Healthcare formulates and manufactures every Ozylix product in its own FSSAI-licensed facility in Anand, Gujarat — effervescent tablets, spirulina, glutathione, biotin and more. Ozylix takes them straight to the customer. One company owns the whole chain, which is why there is no distributor margin in the price.</p>
           <!-- Quote highlight -->
           <div style="border-left:1px solid var(--green);padding:16px 20px;background:var(--sub-1);border-radius:0 12px 12px 0;margin-bottom:28px">
             <p style="font-size:.95rem;font-weight:600;color:var(--dark);line-height:1.6;font-style:italic;margin:0">"From formulation to manufacturing of nutraceutical products — one standard, no shortcuts."</p>
@@ -8884,7 +8909,7 @@ function renderCheckoutSummary() {
           </div>
           <div class="at-item">
             <div class="at-year"><div class="at-dot">&#127981;</div><div class="at-yr-n">Plant</div></div>
-            <div class="at-content"><div class="at-t">Own FSSAI-Licensed Manufacturing Unit</div><div class="at-d">Near Rajshivalay Cinema, Anand — our FSSAI-licensed plant produces effervescent, capsule, tablet and strip formats in-house.</div></div>
+            <div class="at-content"><div class="at-t">Ascovita's Own FSSAI-Licensed Plant</div><div class="at-d">Near Rajshivalay Cinema, Anand — Ascovita Healthcare's licensed plant produces effervescent, capsule, tablet and strip formats in-house.</div></div>
           </div>
           <div class="at-item">
             <div class="at-year"><div class="at-dot">&#128640;</div><div class="at-yr-n">Growth</div></div>
@@ -8892,7 +8917,7 @@ function renderCheckoutSummary() {
           </div>
           <div class="at-item">
             <div class="at-year"><div class="at-dot">&#127758;</div><div class="at-yr-n">Today</div></div>
-            <div class="at-content"><div class="at-t">10,000+ Customers & Growing</div><div class="at-d">Serving retail customers across India and B2B partners globally — with franchise and export opportunities now open.</div></div>
+            <div class="at-content"><div class="at-t">Factory to Doorstep, All India</div><div class="at-d">Ozylix ships from the plant to the customer with no distributor in between, alongside 50+ B2B partners — franchise and export opportunities now open.</div></div>
           </div>
         </div>
       </div>
@@ -8998,7 +9023,7 @@ function renderCheckoutSummary() {
                different things, each one the site can stand behind. -->
           <div class="ab-certs">
             <div class="ab-cert"><span class="ab-cert-tick">&#9989;</span><div><div class="ab-cert-t">FSSAI licence</div><div class="ab-cert-d">Licensed by the Food Safety and Standards Authority of India</div></div></div>
-            <div class="ab-cert"><span class="ab-cert-tick">&#9989;</span><div><div class="ab-cert-t">Own manufacturing unit</div><div class="ab-cert-d">Near Rajshivalay Cinema, Anand &mdash; 388001, Gujarat</div></div></div>
+            <div class="ab-cert"><span class="ab-cert-tick">&#9989;</span><div><div class="ab-cert-t">Ascovita's own manufacturing unit</div><div class="ab-cert-d">Near Rajshivalay Cinema, Anand &mdash; 388001, Gujarat</div></div></div>
             <div class="ab-cert"><span class="ab-cert-tick">&#9989;</span><div><div class="ab-cert-t">Third-party lab testing</div><div class="ab-cert-d">Independent QC for purity, potency and safety on every batch</div></div></div>
             <div class="ab-cert"><span class="ab-cert-tick">&#9989;</span><div><div class="ab-cert-t">Protective pack formats</div><div class="ab-cert-d">Alu-Alu, blister, strip and effervescent tube formats available</div></div></div>
           </div>
@@ -10763,6 +10788,7 @@ function _updateStrength(val) {
         <div>
           <div class="footer-logo-t">🌿 Ozylix</div>
           <p class="footer-tag">Organic vitamins &amp; supplements made with nature's finest ingredients. FSSAI approved. Lab certified. Made in India.</p>
+          <p class="footer-parent">Powered by <a href="https://www.ascovita.com/" target="_blank" rel="noopener">Ascovita Healthcare</a> &mdash; our parent company and the manufacturer of every Ozylix product.</p>
           <div class="footer-nl">
             <input type="email" id="nlEmail" placeholder="Your email address">
             <button onclick="subscribeNL()">Subscribe</button>
