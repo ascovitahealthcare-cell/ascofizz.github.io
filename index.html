@@ -3809,32 +3809,9 @@ img[src=""], img[data-awaiting-upload] { visibility: hidden; width: 100%; }
 }
 .cat-count { font-size: .6rem; color: var(--t-dim); }
 
-/* ══ MIX & MATCH ═════════════════════════════════════════════════ */
-.mix-match-banner {
-  position: relative; overflow: hidden;
-  display: grid; gap: 36px; align-items: center; grid-template-columns: 1.15fr .85fr;
-  padding: clamp(32px, 4.5vw, 58px);
-  border-radius: var(--r-xl);
-  background: var(--paper); box-shadow: var(--neo-2); border: none;
-}
-.mix-match-text h2 { margin-bottom: 14px; }
-.mix-match-text p { color: var(--t-low); margin-bottom: 24px; }
-.mix-match-visual { position: relative; display: grid; place-items: center; min-height: 190px; perspective: 900px; }
-.mm-chip {
-  position: absolute; display: grid; place-items: center;
-  width: 92px; height: 92px; border-radius: 50%; font-size: 2rem;
-  background: var(--paper); box-shadow: var(--neo-2); border: none;
-  animation: fz-bob-z 7s var(--settle) infinite;
-}
-.mm-chip-1 { transform: translate3d(-86px, 14px, 0); animation-delay: 0s; }
-.mm-chip-2 { transform: translate3d(0, -22px, 30px); animation-delay: .9s; z-index: 2; }
-.mm-chip-3 { transform: translate3d(86px, 18px, 0); animation-delay: 1.7s; }
-.mm-badge {
-  position: absolute; bottom: -6px; right: 4px; z-index: 3;
-  padding: 10px 20px; border-radius: var(--r-pill);
-  font-size: .8rem; font-weight: 600; color: #fff;
-  background: var(--indigo); box-shadow: var(--lit-indigo);
-}
+/* ══ MIX & MATCH ═════════════════════════════════════════════════
+   Retired with the banner it styled. .mm-badge is still named in one
+   grouped badge selector below, where it now matches nothing. */
 
 /* ══ CERTIFICATION ═══════════════════════════════════════════════ */
 .cert-grid { display: grid; gap: 18px; grid-template-columns: repeat(auto-fit, minmax(212px, 1fr)); }
@@ -4340,17 +4317,29 @@ img[src=""], img[data-awaiting-upload] { visibility: hidden; width: 100%; }
   background: var(--indigo);
 }
 .prod-stock { display: inline-flex; align-items: center; gap: 8px; font-size: .84rem; font-weight: 700; color: var(--f-mineral); margin-bottom: 18px; }
-.prod-features { display: grid; gap: 10px; margin: 22px 0; }
+/* Product qualities, as chips. This was a one-column grid — no
+   grid-template-columns, so one full-width shadowed row per claim — and
+   six claims stacked that way took about 330px of the buy column,
+   pushing the tabs and the description below the fold on a phone for
+   content that is read in half a second. A wrapped chip row says the
+   same thing in two lines. The service claims that used to be in here
+   (returns, shipping) now live only in the .az-trust rail under the buy
+   button, which derives its shipping line from SHIP_FEE — this list had
+   them hardcoded as "Free Ship ₹599+" while the rail, the announcement
+   bar and the FAQ all say delivery is free on every order. */
+.prod-features {
+  display: flex; flex-wrap: wrap; gap: 7px; margin: 16px 0;
+}
 .feat-item {
-  display: flex; align-items: center; gap: 12px;
-  padding: 13px 15px; border-radius: var(--r-md);
-  font-size: .855rem; color: var(--t-mid);
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 6px 12px; border-radius: var(--r-pill);
+  font-size: .74rem; font-weight: 600; color: var(--t-mid);
   background: var(--paper);
   border: none;
   box-shadow: var(--neo-1);
 }
-.feat-ico { font-size: 1.2rem; flex: none; }
-.feat-ico svg { width: 24px; height: 24px; }
+.feat-ico { font-size: .9rem; line-height: 1; flex: none; }
+.feat-ico svg { width: 15px; height: 15px; }
 
 .qty-wrap, .ck-qty-wrap {
   display: inline-flex; align-items: center; gap: 4px; padding: 4px;
@@ -5393,9 +5382,8 @@ textarea.b2b-form-input { min-height: 110px; resize: vertical; font-family: inhe
 @media (max-width: 900px) {
   .product-page { grid-template-columns: 1fr; }
   .prod-images, .media-gallery { position: static; }
-  .about-hero-grid, .vita-home-inner, .bundle-layout, .mix-match-banner { grid-template-columns: 1fr; }
+  .about-hero-grid, .vita-home-inner, .bundle-layout { grid-template-columns: 1fr; }
   .vita-home-right { order: -1; }
-  .mix-match-visual { min-height: 210px; }
   .ig-card, .ig-skeleton { flex: 0 0 calc((100% - 28px) / 3); }
   .shader-ring-wrap { width: 118px; right: 20px; bottom: 30px; }
   .promo-card { flex-basis: min(86vw, 400px); }
@@ -7389,25 +7377,10 @@ setInterval(function() { syncAppCartBadge(); syncAppWishBadge(); }, 2000);
   </div>
 </section>
 
-  <!-- MIX & MATCH BUNDLE PROMO -->
-  <section class="section" style="padding:48px 0">
-    <div class="container">
-      <div class="mix-match-banner">
-        <div class="mix-match-text">
-          <div class="section-label" style="color:var(--gold)">Build Your Own Bundle</div>
-          <h2 class="section-title" style="margin-bottom:14px">Mix. Match.<br>Save Up to <em style="color:var(--clay-lo);font-style:italic">20%</em>.</h2>
-          <p class="section-sub" style="margin-bottom:26px">Pick any 3 or more Ozylix effervescent tablets and the discount applies automatically at checkout — no code needed.</p>
-          <button class="btn-primary" onclick="showShop('combos')">Build Your Bundle →</button>
-        </div>
-        <div class="mix-match-visual" aria-hidden="true">
-          <div class="mm-chip mm-chip-1"><svg width="26" height="26"><use href="#ico-bubble"/></svg><span>Effervescent</span></div>
-          <div class="mm-chip mm-chip-2"><svg width="26" height="26"><use href="#ico-leaf"/></svg><span>Ayurvedic</span></div>
-          <div class="mm-chip mm-chip-3"><svg width="26" height="26"><use href="#ico-wave"/></svg><span>Spirulina</span></div>
-          <div class="mm-badge">Save<br><b>20%</b></div>
-        </div>
-      </div>
-    </div>
-  </section>
+  <!-- The "Mix. Match. Save Up to 20%" banner stood here. Removed on
+       request. The Bundle Builder section directly above it makes the
+       same offer with the actual product picker attached, so this was a
+       second ask for one action, one scroll after the first. -->
 
   <!-- CERTIFICATIONS -->
   <section class="section certs">
@@ -9816,6 +9789,94 @@ function byPosition(a, b) {
 const REVIEWS = {};          // productId -> array of real reviews fetched from SQL
 const REVIEWS_LOADED = {};   // productId -> true once a fetch has completed (success or fail)
 
+// ── PER-PRODUCT RATING AGGREGATES ─────────────────────────────
+// The grid cards and the product page were reading two different
+// sources. The product page reads the live `reviews` table, so it shows
+// the real stars and review count. The cards read p.reviews — a number
+// typed into the static catalogue above, still 0 on products that have
+// since collected real reviews — so the same product read "No ratings
+// yet" in the grid and "4.5 (6 reviews)" one click later.
+//
+// One query covers every card on the site: pull product_id + rating for
+// the whole table once, fold it here, and re-render the cards that are
+// already on screen. Cheap enough to be worth doing eagerly, and it is
+// the same table getLiveRating() already reads for the homepage stat.
+const PRODUCT_RATINGS = {};      // productId -> { avg, count }
+let PRODUCT_RATINGS_LOADED = false;
+
+// sbClient() returns null until the deferred Supabase bundle has run.
+// Every existing caller is an async function reached long after load, so
+// that has been fine — but this one fires during start-up, and on a slow
+// CDN it would miss by a few hundred milliseconds and leave every card
+// permanently ratingless. Wait, briefly, rather than give up on the
+// first try.
+async function sbClientWhenReady(waitMs) {
+  const deadline = Date.now() + (waitMs || 8000);
+  for (;;) {
+    const sb = sbClient();
+    if (sb) return sb;
+    if (Date.now() >= deadline) return null;
+    await new Promise((r) => setTimeout(r, 250));
+  }
+}
+
+async function loadProductRatings() {
+  try {
+    const sb = await sbClientWhenReady(8000);
+    if (!sb) throw new Error('Supabase client not loaded yet');
+    const { data, error } = await sb.from('reviews').select('product_id, rating');
+    if (error) throw error;
+
+    const totals = {};
+    (data || []).forEach((r) => {
+      const id = r.product_id;
+      const n = Number(r.rating);
+      if (id == null || !Number.isFinite(n) || n <= 0) return;
+      if (!totals[id]) totals[id] = { sum: 0, count: 0 };
+      totals[id].sum += n;
+      totals[id].count += 1;
+    });
+    Object.keys(totals).forEach((id) => {
+      PRODUCT_RATINGS[id] = { avg: totals[id].sum / totals[id].count, count: totals[id].count };
+    });
+  } catch (e) {
+    // Honest empty state, same as everywhere else that reads reviews: the
+    // cards keep whatever the catalogue claims rather than showing zero.
+    console.warn('[loadProductRatings]', e.message);
+    return;
+  } finally {
+    PRODUCT_RATINGS_LOADED = true;
+  }
+  try { updateAllProductCards(); } catch (e) {}
+}
+
+// What a card should show. Live aggregate first, then the full review
+// list for a product whose page has already been opened, then the
+// catalogue's own figure — and once we know the live answer, the
+// catalogue never wins, because a stale "4.5 (12)" on a product with no
+// reviews is the exact fabrication the empty state exists to prevent.
+function productRating(p) {
+  const live = PRODUCT_RATINGS[p.id];
+  if (live && live.count > 0) return live;
+
+  const cached = REVIEWS[p.id];
+  if (Array.isArray(cached) && cached.length) {
+    const sum = cached.reduce((s, r) => s + (Number(r.rating) || 0), 0);
+    return { avg: sum / cached.length, count: cached.length };
+  }
+
+  if (PRODUCT_RATINGS_LOADED || REVIEWS_LOADED[p.id]) return { avg: null, count: 0 };
+
+  const n = Number(p.reviews) || 0;
+  return n > 0 ? { avg: Number(p.rating) || 0, count: n } : { avg: null, count: 0 };
+}
+
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', loadProductRatings);
+} else {
+  loadProductRatings();
+}
+
 async function loadProductReviews(productId) {
   try {
     // Throw rather than return: the catch below already sets the honest
@@ -9859,7 +9920,10 @@ const STORE = {
 };
 
 function fmt(p){return '₹'+p.toLocaleString('en-IN',{minimumFractionDigits:0,maximumFractionDigits:2});}
-function stars(r){const f=Math.floor(r),h=r%1>=0.5;return '<span class="stars">'+'★'.repeat(f)+(h?'☆':'')+'</span><span class="rating-n">'+r+'</span>';}
+// `r` is often a computed mean now (cards and the product page both
+// average the live review rows), so round for display — printing it raw
+// put "4.333333333333333" next to the stars.
+function stars(r){const v=Math.round((Number(r)||0)*10)/10,f=Math.floor(v),h=v%1>=0.5;return '<span class="stars">'+'★'.repeat(f)+(h?'☆':'')+'</span><span class="rating-n">'+v+'</span>';}
 function showToast(msg,type=''){const t=document.createElement('div');t.className='toast '+type;t.textContent=msg;document.body.appendChild(t);requestAnimationFrame(()=>t.classList.add('show'));setTimeout(()=>{t.classList.remove('show');setTimeout(()=>t.remove(),350);},3200);}
 // Category-based fallback images using Wix product images already in the page
 // A neutral "no image available" placeholder — used ONLY when a product
@@ -9923,9 +9987,13 @@ function renderProductCard(p){
   // FIX (audit item P1-15): was always rendering stars(p.rating) even when
   // p.reviews is 0 — e.g. "4.5 ★ (0)". Fabricated/empty ratings are an ASCI
   // trust issue, so show "No ratings yet" instead whenever there's no real
-  // review count.
-  const ratingDisplay = (p.reviews && p.reviews > 0)
-    ? `${stars(p.rating)} <span class="review-ct">(${p.reviews})</span>`
+  // review count. productRating() sources that count from the live
+  // reviews table rather than the static catalogue, so a card and the
+  // product page behind it can no longer disagree about whether a product
+  // has been reviewed.
+  const rating = productRating(p);
+  const ratingDisplay = rating.count > 0
+    ? `${stars(rating.avg)} <span class="review-ct">(${rating.count})</span>`
     : `<span class="review-ct" style="color:var(--gray)">No ratings yet</span>`;
   return `<div class="product-card" data-product-id="${p.id}" onclick="openProduct(${p.id})"><div class="p-img-wrap"><img src="${imgSrc}" alt="${safeName}" loading="lazy" onerror="this.src='${PRODUCT_FALLBACKS.default}'" decoding="async">${safeBadge} ${maxDisc>0?`<span class="p-disc-badge">${tiers?'Up to ':'-'}${maxDisc}%</span>`:''}<div class="p-actions"><button class="btn-wishlist" onclick="event.stopPropagation();STORE.toggleWishlist(${p.id})" title="Wishlist">♡</button><button class="btn-qadd" onclick="event.stopPropagation();${tiers?`openProduct(${p.id})`:`STORE.addToCart(${p.id})`}">${tiers?'Choose Pack':'Add to Cart'}</button></div></div><div class="p-info"><div class="p-brand">${safeBrand}</div><div class="p-name">${safeName}</div><div class="p-rating">${ratingDisplay}</div><div class="p-price"><span class="sale-price">${priceDisplay}</span>${(baseMRP&&baseMRP!==baseRate)?`<span class="orig-price">₹${baseMRP.toLocaleString('en-IN')}</span>`:''}</div>${tiers?`<div class="tier-offer-tag">⚡ Up to ${maxDisc}% OFF on larger packs</div>`:safeOffer}</div></div>`;
 }
@@ -11074,8 +11142,6 @@ function buildProductPage(p) {
         <div class="feat-item"><span class="feat-ico">&#x1F52C;</span>Lab Tested</div>
         <div class="feat-item"><span class="feat-ico">&#x2705;</span>FSSAI Approved</div>
         <div class="feat-item"><span class="feat-ico">&#x1F1EE;&#x1F1F3;</span>Made in India</div>
-        <div class="feat-item"><span class="feat-ico">&#x21A9;&#xFE0F;</span>7-Day Returns</div>
-        <div class="feat-item"><span class="feat-ico">&#x1F69A;</span>Free Ship &#x20B9;599+</div>
       </div>
       <div class="tabs">
         <button class="tab active" onclick="switchTab(this,'desc')">Description</button>
