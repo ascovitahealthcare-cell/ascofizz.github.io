@@ -3930,39 +3930,16 @@ img[src=""], img[data-awaiting-upload] { visibility: hidden; width: 100%; }
 }
 .ig-follow-btn:hover { transform: translateY(-2px); background: var(--indigo-lo); }
 
-/* ══ REWARDS ═════════════════════════════════════════════════════ */
-.rewards-bar { overflow: hidden; padding: 14px 0; background: var(--paper); box-shadow: inset 0 -1px 0 var(--edge), inset 0 1px 0 var(--edge); }
-.rewards-ticker { display: flex; gap: 44px; width: max-content; animation: fz-marquee 40s linear infinite; font-size: .78rem; font-weight: 500; color: var(--green); white-space: nowrap; }
-.rewards-section { position: relative; padding: clamp(56px, 7vw, 104px) 0; }
-.rewards-tiers { display: grid; gap: 20px; margin-bottom: 44px; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); align-items: stretch; }
-.rt-card {
-  position: relative; overflow: hidden;
-  display: flex; flex-direction: column;
-  padding: 30px 26px; border-radius: var(--r-lg);
-  background: var(--paper); box-shadow: var(--neo-1); border: none;
-  transition: transform var(--dur-3) var(--rise), box-shadow var(--dur-3) var(--rise);
-}
-.rt-card:hover { transform: translateY(-5px); box-shadow: var(--neo-3); }
-.rt-card::before { content: none; }
-.rt-card.gold { box-shadow: var(--neo-2), 0 0 0 2px rgba(192,57,74,.18); }
-.rt-badge { font-size: 1.8rem; margin-bottom: 14px; }
-.rt-name { font-family: var(--font-display); font-size: 1.2rem; font-weight: 500; color: var(--ink); }
-.rt-pts { font-family: var(--font-display); font-size: 2rem; font-weight: 300; color: var(--indigo); margin: 10px 0 2px; }
-.rt-pts-sub { font-size: .72rem; color: var(--t-dim); margin-bottom: 20px; }
-.rt-benefits { display: flex; flex-direction: column; gap: 10px; margin-top: auto; }
-.rt-benefits li, .rt-item { position: relative; padding-left: 22px; font-size: .83rem; color: var(--t-mid); line-height: 1.5; }
-.rt-benefits li::before, .rt-item::before { content: '✓'; position: absolute; left: 0; color: var(--green); font-weight: 600; font-size: .8rem; }
-.earn-grid { display: grid; gap: 14px; grid-template-columns: repeat(auto-fit, minmax(178px, 1fr)); }
-.earn-card {
-  display: flex; align-items: center; gap: 14px;
-  padding: 18px; border-radius: var(--r-md);
-  background: var(--paper); box-shadow: var(--neo-1); border: none;
-  transition: transform var(--dur-2) var(--rise), box-shadow var(--dur-2) var(--rise);
-}
-.earn-card:hover { transform: translateY(-3px); box-shadow: var(--neo-2); }
-.earn-ico { display: grid; place-items: center; width: 44px; height: 44px; flex: none; border-radius: 50%; font-size: 1.15rem; background: var(--paper); box-shadow: var(--neo-in); }
-.earn-action { font-size: .83rem; font-weight: 500; color: var(--t-mid); line-height: 1.35; }
-.earn-pts { margin-left: auto; font-size: .88rem; font-weight: 600; color: var(--indigo); white-space: nowrap; }
+/* ══ REWARDS ═════════════════════════════════════════════════════
+   Retired. These styled the VitaRewards marquee (.rewards-bar /
+   .rewards-ticker / .rt-item) and the Green–Bloom–Gold tier grid
+   (.rewards-section / .rewards-tiers / .rt-* / .earn-*) that used to sit
+   on the home page describing a programme the store does not run. Both
+   are gone; the live scheme is #vitapoints-home, styled under
+   "VITAPOINTS — HOME BLOCK" further down. The class names survive only
+   inside a few grouped selectors (card-accent, reveal-on-scroll) where
+   they match nothing and cost nothing. Do not resurrect these to add a
+   second rewards story to the page. */
 
 /* ══ BUNDLE BUILDER ══════════════════════════════════════════════ */
 .bundle-section { position: relative; padding: clamp(56px, 7vw, 104px) 0; }
@@ -4413,32 +4390,115 @@ img[src=""], img[data-awaiting-upload] { visibility: hidden; width: 100%; }
 }
 .add-cart-btn:active, .buy-now-btn:active, .checkout-btn:active { transform: translateY(0) scale(.985); }
 
-/* ── Pack tiers — the strip of dosages on the carton ── */
-.tier-tabs, .tier-tabs-label, .qty-discount-wrap { margin: 20px 0; }
-.tier-tabs { display: grid; gap: 10px; grid-template-columns: repeat(auto-fit, minmax(128px, 1fr)); }
-.tier-tabs-label, .tier-units-label, .tier-save-label {
-  font-size: .66rem; font-weight: 800; letter-spacing: .15em; text-transform: uppercase; color: var(--t-dim);
-}
-.tier-tabs > button, .qty-tiers-grid > * {
-  position: relative; padding: 15px 13px; border-radius: var(--r-md); text-align: center;
-  background: var(--paper);
-  border: none;
-  box-shadow: var(--neo-1);
-  transition: transform var(--dur-2) var(--rise), border-color var(--dur-1) var(--settle), background var(--dur-1) var(--settle);
-}
-.tier-tabs > button:hover, .qty-tiers-grid > *:hover { transform: translateY(-3px); background: var(--paper); }
-.tier-tabs > button.active, .tier-tabs > button.selected, .qty-tiers-grid > .selected {
-  border-color: transparent; background: rgba(192,57,74,.12);
-  box-shadow: 0 0 26px rgba(192,57,74,.16);
-}
-.tier-rate { font-family: var(--font-display); font-size: 1.15rem; font-weight: 800; color: var(--t-hi); font-variant-numeric: tabular-nums; }
-.tier-disc { font-size: .72rem; font-weight: 800; color: var(--f-citrus); }
-.qty-tiers-grid { display: grid; gap: 10px; grid-template-columns: repeat(auto-fit, minmax(118px, 1fr)); }
+/* ── Pack tiers — "buy more, save more" on the product page ────────
+   Rewritten. The old rules had `.tier-tabs` doing two contradictory
+   jobs: a grid CONTAINER (`display:grid` + auto-fit columns + 20px
+   block margins) and, in buildTierWidget, the pack-size NUMBER inside
+   each card. The number won the markup and lost the styling, so every
+   card opened with a 20px-margined grid box wrapped around "60", the
+   labels below it inherited the same 20px margins, and the price, the
+   MRP and the saving all ran together as inline text with no size
+   difference between them. Nothing in the card said which figure was
+   the one you pay.
+
+   The rebuild gives each card one reading order — pack size, price you
+   pay, price per tablet, what you save — and sizes the type so that
+   order is visible at a glance. Price per tablet is the new line and
+   the reason the grid is comprehensible at all: it is the only figure
+   that makes "60 tablets for ₹3,093" and "15 for ₹827" directly
+   comparable, which is the entire claim the widget is making.
+   `.tier-tabs > button` is gone with them; no markup ever produced it. */
+.qty-discount-wrap { margin: 20px 0; }
 .qty-discount-header {
-  display: flex; align-items: center; justify-content: space-between; gap: 12px;
-  font-size: .78rem; font-weight: 700; color: var(--seal); margin-bottom: 12px;
+  display: flex; align-items: baseline; justify-content: space-between;
+  gap: 10px; flex-wrap: wrap; margin-bottom: 11px;
+  font-size: .8rem; font-weight: 700; color: var(--seal);
 }
-.qty-discount-footer { font-size: .74rem; color: var(--t-dim); margin-top: 11px; }
+.qd-hint { font-size: .72rem; font-weight: 500; color: var(--t-low); }
+
+.qty-tiers-grid {
+  display: grid;
+  /* Row gap is the larger one: the "best value" ribbon hangs above its
+     card, and on a wrapped grid it would otherwise sit on the bottom edge
+     of the card in the row above. */
+  gap: 16px 10px;
+  grid-template-columns: repeat(auto-fit, minmax(136px, 1fr));
+}
+.qty-tier {
+  position: relative; display: flex; flex-direction: column; gap: 2px;
+  padding: 21px 12px 13px; border-radius: var(--r-md);
+  text-align: center; font: inherit; color: inherit;
+  background: var(--paper); border: none; box-shadow: var(--neo-1);
+  cursor: pointer;
+  transition: transform var(--dur-2) var(--rise), box-shadow var(--dur-2) var(--rise),
+              background var(--dur-1) var(--settle);
+}
+.qty-tier:hover { transform: translateY(-3px); box-shadow: var(--neo-2); }
+.qty-tier.selected {
+  background: var(--fern-bg);
+  box-shadow: inset 0 0 0 1.6px rgba(94,145,121,.5), var(--neo-1);
+}
+/* The ribbon overlaps the card's top edge, so the cards need headroom for
+   it. Every card carries that headroom, not just the flagged one: this is
+   a comparison grid, and one card indented 9px further than its
+   neighbours puts its price on a different line from theirs, which is
+   exactly the reading the grid exists to support. */
+.qt-flag {
+  position: absolute; top: 0; left: 50%; transform: translate(-50%, -45%);
+  padding: 3px 10px; border-radius: var(--r-pill); white-space: nowrap;
+  font-size: .58rem; font-weight: 800; letter-spacing: .1em; text-transform: uppercase;
+  color: #fff; background: var(--indigo); box-shadow: var(--lit-indigo);
+}
+.qt-size { font-size: .78rem; font-weight: 600; color: var(--t-mid); line-height: 1.2; }
+.qt-size b {
+  display: block; font-family: var(--font-display);
+  font-size: 1.45rem; font-weight: 700; line-height: 1.05; color: var(--t-hi);
+  font-variant-numeric: tabular-nums;
+}
+.qt-packs { font-size: .66rem; color: var(--t-low); }
+.qt-rate {
+  margin-top: 7px; font-family: var(--font-display);
+  font-size: 1.18rem; font-weight: 800; line-height: 1.15; color: var(--t-hi);
+  font-variant-numeric: tabular-nums;
+}
+.qt-unit { font-size: .68rem; font-weight: 600; color: var(--fern-lo); font-variant-numeric: tabular-nums; }
+.qt-compare {
+  display: flex; align-items: center; justify-content: center; gap: 6px;
+  flex-wrap: wrap; margin-top: 6px; font-size: .68rem;
+}
+.qt-compare s { color: var(--t-dim); font-variant-numeric: tabular-nums; }
+.qt-compare i {
+  font-style: normal; font-weight: 800; color: var(--indigo);
+  padding: 2px 7px; border-radius: var(--r-pill); background: rgba(192,57,74,.12);
+}
+.qt-save { margin-top: 3px; font-size: .68rem; font-weight: 700; color: var(--t-mid); }
+
+.qty-discount-footer {
+  display: flex; align-items: center; justify-content: space-between;
+  gap: 10px; flex-wrap: wrap; margin-top: 12px;
+  font-size: .78rem; color: var(--t-mid);
+}
+.qty-discount-footer b { color: var(--t-hi); }
+
+/* Phone: two columns rather than one, because the whole point of the
+   widget is comparing packs and a single column puts them off-screen
+   from each other. Everything shrinks a step to pay for it, and the
+   secondary lines — pack count, struck MRP — drop out entirely; the
+   pricing tab below still carries the full table for anyone who wants
+   every figure. */
+@media (max-width: 560px) {
+  .qty-tiers-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px 8px; }
+  .qty-tier { padding: 17px 8px 10px; gap: 1px; }
+  .qt-size { font-size: .7rem; }
+  .qt-size b { font-size: 1.2rem; }
+  .qt-packs { display: none; }
+  .qt-rate { margin-top: 5px; font-size: 1rem; }
+  .qt-unit { font-size: .63rem; }
+  .qt-compare { margin-top: 4px; gap: 5px; font-size: .62rem; }
+  .qt-compare s { display: none; }
+  .qt-save { font-size: .63rem; }
+  .qd-hint { display: none; }
+}
 
 /* ── Tabs & reviews ── */
 /* A wrapping tab row reflows the page when a label changes length; one
@@ -5336,7 +5396,6 @@ textarea.b2b-form-input { min-height: 110px; resize: vertical; font-family: inhe
   .about-hero-grid, .vita-home-inner, .bundle-layout, .mix-match-banner { grid-template-columns: 1fr; }
   .vita-home-right { order: -1; }
   .mix-match-visual { min-height: 210px; }
-  .rewards-tiers { grid-template-columns: 1fr; }
   .ig-card, .ig-skeleton { flex: 0 0 calc((100% - 28px) / 3); }
   .shader-ring-wrap { width: 118px; right: 20px; bottom: 30px; }
   .promo-card { flex-basis: min(86vw, 400px); }
@@ -5647,10 +5706,10 @@ textarea.b2b-form-input { min-height: 110px; resize: vertical; font-family: inhe
   color: var(--indigo-lo); background: var(--sky-bg);
   box-shadow: inset 0 0 0 1.4px rgba(192,57,74,.32);
 }
-.tier-tabs > button.active, .tier-tabs > button.selected, .qty-tiers-grid > .selected {
-  color: var(--fern-lo); background: var(--fern-bg);
-  box-shadow: inset 0 0 0 1.5px rgba(94,145,121,.36);
-}
+/* The pack-tier selected state used to be re-declared here, one
+   screenful after its base rule and at the same specificity, so
+   whichever came last silently won. It now lives once, with the rest
+   of the tier card, under "Pack tiers" above. */
 .section-label { color: var(--sage-lo); }
 
 /* ══ LAYOUT SAFETY ════════════════════════════════════════════════
@@ -5686,6 +5745,96 @@ button, [role="button"] {
   overflow: visible;
 }
 
+
+/* ══ VITAPOINTS — HOME BLOCK ══════════════════════════════════════
+   The single loyalty block on the home page (see the markup comment at
+   #vitapoints-home). Three tracks on desktop — the card visual, the
+   copy, the call to action — collapsing to one on a phone with the
+   visual dropped, because a decorative mock membership card is the
+   first thing worth losing when vertical space is the scarce resource. */
+.vph-section { padding: clamp(46px, 6vw, 84px) 0; }
+.vph-card {
+  display: grid; align-items: center;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  gap: clamp(22px, 3.4vw, 44px);
+  padding: clamp(24px, 3.2vw, 40px);
+  border-radius: var(--r-lg);
+  background: var(--paper-hi);
+  box-shadow: var(--neo-2);
+}
+
+/* The mock card. Not a real balance — the number is decorative, and the
+   label says so by being masked. */
+.vph-chip {
+  width: 178px; padding: 20px 18px 18px;
+  border-radius: var(--r-md);
+  background: linear-gradient(150deg, var(--indigo-lo), var(--indigo) 62%, var(--indigo-hi));
+  box-shadow: var(--lit-indigo);
+  color: #fff;
+}
+.vph-chip-brand {
+  font-family: var(--font-display); font-size: 1.05rem; font-weight: 600;
+  letter-spacing: .06em;
+}
+.vph-chip-name {
+  margin-top: 26px;
+  font-size: .64rem; font-weight: 800; letter-spacing: .2em; text-transform: uppercase;
+  opacity: .82;
+}
+.vph-chip-num {
+  margin-top: 4px;
+  font-size: .82rem; font-weight: 600; letter-spacing: .12em;
+  font-variant-numeric: tabular-nums; opacity: .9;
+}
+
+.vph-label {
+  display: inline-block; margin-bottom: 10px;
+  font-size: .68rem; font-weight: 800; letter-spacing: .16em; text-transform: uppercase;
+  color: var(--indigo-lo);
+}
+.vph-title {
+  font-family: var(--font-display); font-weight: 600; line-height: 1.12;
+  font-size: clamp(1.55rem, 3.2vw, 2.35rem); color: var(--t-hi);
+}
+.vph-lede {
+  margin-top: 12px; max-width: 54ch;
+  font-size: .92rem; line-height: 1.72; color: var(--t-mid);
+}
+.vph-lede b { color: var(--t-hi); font-weight: 700; }
+
+.vph-perks {
+  list-style: none; margin-top: 22px;
+  display: grid; gap: 14px 26px;
+  grid-template-columns: repeat(auto-fit, minmax(228px, 1fr));
+}
+.vph-perks li { display: flex; align-items: flex-start; gap: 11px; }
+.vph-perk-ico {
+  display: grid; place-items: center; flex: none;
+  width: 34px; height: 34px; border-radius: 50%; font-size: .95rem;
+  background: var(--paper); box-shadow: var(--neo-in);
+}
+.vph-perks b {
+  display: block; font-size: .88rem; font-weight: 700; color: var(--t-hi); line-height: 1.35;
+}
+.vph-perks span { display: block; font-size: .78rem; color: var(--t-low); line-height: 1.45; }
+
+.vph-cta { display: flex; flex-direction: column; align-items: center; gap: 10px; text-align: center; }
+.vph-join { white-space: nowrap; padding: 15px 34px; font-size: .95rem; }
+.vph-cta-note { font-size: .72rem; color: var(--t-low); max-width: 17ch; line-height: 1.45; }
+
+/* Tablet: the CTA drops under the copy and spans it, so the button keeps
+   its own row instead of squeezing the lede into a two-word column. */
+@media (max-width: 1080px) {
+  .vph-card { grid-template-columns: auto minmax(0, 1fr); }
+  .vph-cta { grid-column: 1 / -1; flex-direction: row; justify-content: center; flex-wrap: wrap; }
+  .vph-cta-note { max-width: none; }
+}
+@media (max-width: 620px) {
+  .vph-card { grid-template-columns: 1fr; text-align: left; padding: 22px 20px; }
+  .vph-visual { display: none; }
+  .vph-perks { grid-template-columns: 1fr; gap: 12px; }
+  .vph-join { width: 100%; justify-content: center; }
+}
 
 /* ══ VITAPOINTS ═══════════════════════════════════════════════════ */
 .vita-hero {
@@ -5807,6 +5956,10 @@ button, [role="button"] {
 
 /* Returns / refunds */
 .ret-card { background: var(--paper); border-radius: var(--r-lg); padding: 16px 18px; box-shadow: var(--neo-1); margin-bottom: 12px; }
+/* Orders shown for information only — the window has closed, or a
+   request is already open. Sunk rather than raised so the eye skips
+   past them to the cards that still have a button on them. */
+.ret-card-muted { box-shadow: var(--neo-in); opacity: .82; }
 .ret-head { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; flex-wrap: wrap; }
 .ret-oid { font-weight: 800; font-size: .9rem; color: var(--t-hi); }
 .ret-meta { font-size: .74rem; color: var(--t-low); margin-top: 3px; }
@@ -7507,65 +7660,68 @@ setInterval(function() { syncAppCartBadge(); syncAppWishBadge(); }, 2000);
 
 
 
-<!-- ═══════════ VITAREWARDS TICKER ═══════════ -->
-<div class="rewards-bar">
-  <div style="overflow:hidden">
-    <div class="rewards-ticker">
-      <span class="rt-item">🪙 Earn 5 VitaPoints per ₹100 spent</span>
-      <span class="rt-item" style="color:var(--f-mineral-d);opacity:.5">·</span>
-      <span class="rt-item">🎁 Birthday double points bonus</span>
-      <span class="rt-item" style="color:var(--f-mineral-d);opacity:.5">·</span>
-      <span class="rt-item">🌟 Gold tier unlocks 10% extra cashback</span>
-      <span class="rt-item" style="color:var(--f-mineral-d);opacity:.5">·</span>
-      <span class="rt-item">🤝 Refer &amp; earn ₹100 per friend</span>
-      <span class="rt-item" style="color:var(--f-mineral-d);opacity:.5">·</span>
-      <span class="rt-item">✍️ Write a review, earn 50 VitaPoints</span>
-      <span class="rt-item" style="color:var(--f-mineral-d);opacity:.5">·</span>
-      <span class="rt-item">🪙 Earn 5 VitaPoints per ₹100 spent</span>
-      <span class="rt-item" style="color:var(--f-mineral-d);opacity:.5">·</span>
-      <span class="rt-item">🎁 Birthday double points bonus</span>
-      <span class="rt-item" style="color:var(--f-mineral-d);opacity:.5">·</span>
-      <span class="rt-item">🌟 Gold tier unlocks 10% extra cashback</span>
-      <span class="rt-item" style="color:var(--f-mineral-d);opacity:.5">·</span>
-      <span class="rt-item">🤝 Refer &amp; earn ₹100 per friend</span>
-      <span class="rt-item" style="color:var(--f-mineral-d);opacity:.5">·</span>
-      <span class="rt-item">✍️ Write a review, earn 50 VitaPoints</span>
-    </div>
-  </div>
-</div>
-
-<!-- ═══════════ VITAREWARDS TIERS ═══════════ -->
-<section class="rewards-section">
+<!-- ═══════════ VITAPOINTS ═══════════
+     ONE block, where there used to be two. This page carried a marquee
+     ticker *and* a Green / Bloom / Gold tier grid, and both described a
+     programme that does not exist: "5 VitaPoints per ₹100", three
+     membership tiers, 10% cashback, 25 points for an Instagram follow.
+     The scheme the customer actually has is `const VITA` further down
+     this file — 1 point per ₹1 spent, 150 points to the rupee — and that
+     is what My Account has been showing them all along. Two contradictory
+     stories about the same currency on one page is worse than telling it
+     once, so the ticker and the tier grid are gone and this is the single
+     source. Every figure below carries a data-vita key and is rewritten
+     from VITA by hydrateVitaHome() on load, so the marketing copy cannot
+     drift away from the engine a second time. -->
+<section class="section vph-section" id="vitapoints-home">
   <div class="container">
-    <div style="text-align:center;margin-bottom:44px">
-      <span class="cf-section-label">VitaRewards Program</span>
-      <span style="display:inline-block;margin-left:10px;background:var(--harbour-bg);color:var(--harbour-lo);box-shadow:inset 0 0 0 1px rgba(39,74,115,.28);font-size:0.68rem;font-weight:800;letter-spacing:0.6px;text-transform:uppercase;padding:4px 12px;border-radius:20px;vertical-align:middle">🚧 Coming Soon</span>
-      <h2 class="cf-section-title">Shop. Earn. Save. Repeat.</h2>
-      <p class="cf-section-sub" style="margin:0 auto">Every rupee you spend earns VitaPoints. Redeem for free products, discounts &amp; early access.</p>
-    </div>
-    <div class="rewards-tiers">
-      <div class="rt-card bronze"><div class="rt-badge">🌿</div><div class="rt-name">Green Tier</div><div class="rt-pts">0–499</div><div class="rt-pts-sub">VitaPoints</div><ul class="rt-benefits"><li>5 points per ₹100 spent</li><li>Birthday 2× bonus</li><li>50 pts for every review</li><li>Early sale access</li></ul></div>
-      <div class="rt-card silver"><div class="rt-badge">🌱</div><div class="rt-name">Bloom Tier</div><div class="rt-pts">500–1,999</div><div class="rt-pts-sub">VitaPoints</div><ul class="rt-benefits"><li>7 points per ₹100 spent</li><li>Free shipping every order</li><li>100 pts for referrals</li><li>Exclusive Bloom offers</li></ul></div>
-      <div class="rt-card gold"><div class="rt-badge">✨</div><div class="rt-name">Gold Tier</div><div class="rt-pts">2,000+</div><div class="rt-pts-sub">VitaPoints</div><ul class="rt-benefits"><li>10 points per ₹100 spent</li><li>10% cashback every order</li><li>Priority WhatsApp support</li><li>Free product on birthday</li></ul></div>
-    </div>
-    <h3 style="font-family:'Cormorant Garamond',serif;font-size:1.3rem;color:var(--t-hi);margin-bottom:16px;font-weight:700">Ways to Earn Points</h3>
-    <div class="earn-grid">
-      <div class="earn-card"><div class="earn-ico">🛒</div><div><div class="earn-action">Every Purchase</div><div class="earn-pts">5 pts per ₹100</div></div></div>
-      <div class="earn-card"><div class="earn-ico">✍️</div><div><div class="earn-action">Write a Review</div><div class="earn-pts">50 pts</div></div></div>
-      <div class="earn-card"><div class="earn-ico">🤝</div><div><div class="earn-action">Refer a Friend</div><div class="earn-pts">100 pts per referral</div></div></div>
-      <div class="earn-card"><div class="earn-ico">🎂</div><div><div class="earn-action">Birthday Bonus</div><div class="earn-pts">2× points that week</div></div></div>
-      <div class="earn-card"><div class="earn-ico">📱</div><div><div class="earn-action">Follow on Instagram</div><div class="earn-pts">25 pts (one-time)</div></div></div>
-      <div class="earn-card"><div class="earn-ico">🔔</div><div><div class="earn-action">Subscribe to Newsletter</div><div class="earn-pts">30 pts (one-time)</div></div></div>
-    </div>
-    <div style="text-align:center;margin-top:32px">
-      <button class="btn-primary" style="opacity:0.55;cursor:not-allowed" onclick="showToast('VitaRewards is launching soon! 🌟 We\'ll notify you the moment it\'s live.','success')">🚧 Coming Soon — Join Waitlist</button>
+    <div class="vph-card">
+
+      <div class="vph-visual" aria-hidden="true">
+        <div class="vph-chip">
+          <div class="vph-chip-brand">Ozylix</div>
+          <div class="vph-chip-name">VitaPoints</div>
+          <div class="vph-chip-num">•••• 4823</div>
+        </div>
+      </div>
+
+      <div class="vph-body">
+        <span class="vph-label">Loyalty, without the games</span>
+        <h2 class="vph-title">Join Ozylix VitaPoints</h2>
+        <p class="vph-lede">
+          Every delivered order earns points on its own — <b data-vita="earn">1 point for every ₹1</b>
+          you spend, and <b data-vita="value">150 points is ₹1 off</b> a future order.
+          No expiry dates, no minimum spend, nothing to activate.
+        </p>
+
+        <ul class="vph-perks">
+          <li>
+            <span class="vph-perk-ico" aria-hidden="true">💎</span>
+            <div><b data-vita="earn-short">1 point per ₹1</b><span>on every delivered order</span></div>
+          </li>
+          <li>
+            <span class="vph-perk-ico" aria-hidden="true">🧾</span>
+            <div><b data-vita="value-short">150 points = ₹1</b><span>off any future order</span></div>
+          </li>
+          <li>
+            <span class="vph-perk-ico" aria-hidden="true">🗓️</span>
+            <div><b data-vita="hold">Spendable in 7 days</b><span>once the return window closes</span></div>
+          </li>
+          <li>
+            <span class="vph-perk-ico" aria-hidden="true">🎁</span>
+            <div><b data-vita="milestone">15,000 points</b><span>unlocks 50% off an item</span></div>
+          </li>
+        </ul>
+      </div>
+
+      <div class="vph-cta">
+        <button class="btn-primary vph-join" onclick="vitaHomeCta()">Join free</button>
+        <span class="vph-cta-note">Free to join · points never expire</span>
+      </div>
+
     </div>
   </div>
 </section>
-
-
-
-</script>
 
 <!-- ═══════════ REFER A FRIEND ═══════════ -->
 <section class="refer-section">
@@ -8864,7 +9020,6 @@ function renderCheckoutSummary() {
 <!-- ══════════ END SUBSCRIPTIONS ══════════ -->
 
 
-</script>
 
 <script>
 // ═══════════════════════════════════════════════════════
@@ -10721,52 +10876,111 @@ function clearFilters() {
 // Tracks which tier is selected per product (productId → tierIndex)
 const selectedTiers = {};
 
+// The one place the product page is allowed to read a tier table.
+//
+// QTY_TIERS carries rows with `mrp: null, rate: null` for products whose
+// price isn't set yet (Power Pro, id 22, ships that way), and the admin
+// panel can push the same shape from the backend. renderProductCard and
+// schemaPriceOf each grew their own filter for it; the product page never
+// did, so opening one of those products ran `null.toLocaleString()` inside
+// the template literal that builds the whole detail pane — one TypeError,
+// and the pane stayed blank with no clue why. Returning null here means a
+// priced-later product simply renders as an untiered product, which is
+// what it is.
+function getProductTiers(p) {
+  const raw = p && (p._backendTiers || (typeof QTY_TIERS !== 'undefined' ? QTY_TIERS[p.id] : null));
+  if (!Array.isArray(raw)) return null;
+  const usable = raw.filter((t) =>
+    t && Number.isFinite(Number(t.rate)) && Number(t.rate) > 0 &&
+         Number.isFinite(Number(t.mrp))  && Number(t.mrp)  > 0);
+  return usable.length ? usable : null;
+}
+
+// Index into the tier list, clamped. selectedTiers survives a backend
+// refresh that can shorten the list, so the stored index is a hint.
+function currentTierIdx(p, tiers) {
+  const list = tiers || getProductTiers(p);
+  if (!list) return 0;
+  const want = selectedTiers[p.id];
+  return (Number.isInteger(want) && want >= 0 && want < list.length) ? want : 0;
+}
+
+// "₹51.55" — per-tablet price, to two decimals only when it needs them.
+function tierUnitPrice(tier) {
+  const tabs = Number(tier.tabs) || 0;
+  if (!tabs) return null;
+  const per = Number(tier.rate) / tabs;
+  return per >= 100 ? Math.round(per).toLocaleString('en-IN')
+                    : per.toFixed(per < 10 ? 2 : 1);
+}
+
 function buildTierWidget(p) {
-  const tiers = p._backendTiers || QTY_TIERS[p.id];
-  if (!tiers) return '';            // no tiers for this product
-  const sel = selectedTiers[p.id] !== undefined ? selectedTiers[p.id] : 0;
+  const tiers = getProductTiers(p);
+  if (!tiers) return '';            // no tiers, or none priced yet
+  const sel = currentTierIdx(p, tiers);
   const t = tiers[sel];
   const saving = t.mrp - t.rate;
+  const rupee = (n) => '₹' + Number(n).toLocaleString('en-IN');
+
+  // Best value is the deepest discount, resolved once rather than inside
+  // the map — with `Math.max` recomputed per card it was O(n²) and, more
+  // to the point, it could flag two cards when two tiers tie on percent.
+  const bestPct = Math.max(...tiers.map((x) => Number(x.discountPct) || 0));
+  const bestIdx = bestPct > 0 ? tiers.findIndex((x) => (Number(x.discountPct) || 0) === bestPct) : -1;
+
+  // "3 packs of 15" only when the pack sizes really are multiples of the
+  // smallest one. The old code hardcoded 15/30/45 and fell through to
+  // "4 Packs" for everything else, which labelled the 60-tablet Multidiata
+  // box — a single carton — as four packs.
+  const unit = Number(tiers[0].tabs) || 0;
+  const packLabel = (tier) => {
+    const n = unit ? Number(tier.tabs) / unit : 0;
+    if (!Number.isInteger(n) || n < 2) return '';
+    return n + ' packs of ' + unit;
+  };
 
   return `
     <div class="qty-discount-wrap" id="tierWidget_${p.id}">
       <div class="qty-discount-header">
-        <span class="spark">⚡</span>
-        Buy More, Save More — Choose Your Pack Size
+        <span><span class="spark">⚡</span> Buy more, save more</span>
+        <span class="qd-hint">Price per tablet drops with every pack size</span>
       </div>
-      <div class="qty-tiers-grid">
+      <div class="qty-tiers-grid" role="radiogroup" aria-label="Choose a pack size">
         ${tiers.map((tier, i) => {
-          const isSel = i === sel;
-          const isBest = tier.discountPct === Math.max(...tiers.map(t=>t.discountPct));
+          const isSel  = i === sel;
+          const isBest = i === bestIdx;
+          const per    = tierUnitPrice(tier);
+          const packs  = packLabel(tier);
+          const off    = Number(tier.discountPct) || 0;
+          const save   = tier.mrp - tier.rate;
           return `
-          <div class="qty-tier${isSel ? ' selected' : ''}${isBest ? ' best-value' : ''}"
-               onclick="selectTier(${p.id}, ${i})">
-            <div class="tier-tabs">${tier.tabs}</div>
-            <span class="tier-tabs-label">Tablets</span>
-            <span class="tier-units-label" style="font-size:.62rem;color:var(--t-low);font-weight:500;margin-top:1px">${tier.tabs===15?'1 Pack':tier.tabs===30?'2 Packs':tier.tabs===45?'3 Packs':'4 Packs'}</span>
-            <span class="tier-disc">${tier.discountPct}% OFF</span>
-            <span class="tier-rate">₹${tier.rate.toLocaleString('en-IN')}</span>
-            <span class="tier-mrp">₹${tier.mrp.toLocaleString('en-IN')}</span>
-            <span class="tier-save-label">Save ₹${(tier.mrp-tier.rate).toLocaleString('en-IN')}</span>
-          </div>`;
+          <button type="button" role="radio" aria-checked="${isSel}"
+                  class="qty-tier${isSel ? ' selected' : ''}${isBest ? ' best-value' : ''}"
+                  onclick="selectTier(${p.id}, ${i})">
+            ${isBest ? '<span class="qt-flag">Best value</span>' : ''}
+            <span class="qt-size"><b>${tier.tabs}</b> tablets</span>
+            <span class="qt-packs">${packs || '&nbsp;'}</span>
+            <span class="qt-rate">${rupee(tier.rate)}</span>
+            ${per ? `<span class="qt-unit">${'₹' + per} per tablet</span>` : ''}
+            <span class="qt-compare">
+              <s>${rupee(tier.mrp)}</s>${off > 0 ? `<i>${off}% off</i>` : ''}
+            </span>
+            ${save > 0 ? `<span class="qt-save">You save ${rupee(save)}</span>` : ''}
+          </button>`;
         }).join('')}
       </div>
       <div class="qty-discount-footer">
-        <span class="selected-summary">
-          <strong>${t.tabs} Tablets</strong> for <strong>₹${t.rate.toLocaleString('en-IN')}</strong>
-          (MRP ₹${t.mrp.toLocaleString('en-IN')})
-        </span>
-        <span class="savings-pill">You Save ₹${saving.toLocaleString('en-IN')}!</span>
+        <span>Selected: <b>${t.tabs} tablets</b> for <b>${rupee(t.rate)}</b> · MRP ${rupee(t.mrp)}</span>
+        ${saving > 0 ? `<span class="savings-pill">You save ${rupee(saving)}</span>` : ''}
       </div>
     </div>`;
 }
 
 function selectTier(productId, tierIdx) {
-  selectedTiers[productId] = tierIdx;
   const p2 = PRODUCTS.find(p => p.id === productId);
-  const tiers = (p2 && p2._backendTiers) || QTY_TIERS[productId];
-  if (!tiers) return;
-  const t = tiers[tierIdx];
+  const tiers = getProductTiers(p2);
+  if (!tiers || !tiers[tierIdx]) return;
+  selectedTiers[productId] = tierIdx;
 
   // Rebuild widget in place
   const widget = document.getElementById(`tierWidget_${productId}`);
@@ -10781,9 +10995,9 @@ function selectTier(productId, tierIdx) {
 
 function updatePriceDisplay(productId, tierIdx) {
   const p3 = PRODUCTS.find(p => p.id === productId);
-  const tiers = (p3 && p3._backendTiers) || QTY_TIERS[productId];
-  if (!tiers) return;
-  const t = tiers[tierIdx];
+  const tiers = getProductTiers(p3);
+  const t = tiers && tiers[tierIdx];
+  if (!t) return;
   const disc = Math.round((1 - t.rate / t.mrp) * 100);
 
   const salePriceEl = document.getElementById('dynSalePrice');
@@ -10820,13 +11034,18 @@ function buildProductPage(p) {
   const rg=document.getElementById('relatedGrid'); if(rg) rg.innerHTML = related.map(r=>renderProductCard(r)).join('');
 
   // Determine tier for display
-  const tiers = p._backendTiers || QTY_TIERS[p.id];
-  const tierIdx = selectedTiers[p.id] !== undefined ? selectedTiers[p.id] : 0;
+  const tiers = getProductTiers(p);
+  const tierIdx = currentTierIdx(p, tiers);
   const activeTier = tiers ? tiers[tierIdx] : null;
-  const displayRate = activeTier ? activeTier.rate : (p.salePrice || p.price);
-  const displayMRP  = activeTier ? activeTier.mrp  : p.price;
-  const displayDisc = Math.round((1 - displayRate / displayMRP) * 100);
-  const displaySaving = displayMRP - displayRate;
+  // A product with no price yet (rate and MRP both null in the catalogue)
+  // has no tiers as far as getProductTiers is concerned, and p.price can
+  // still be null on top of that — so the price block has to survive
+  // having nothing to show rather than dividing by it.
+  const displayRate = Number(activeTier ? activeTier.rate : (p.salePrice || p.price)) || 0;
+  const displayMRP  = Number(activeTier ? activeTier.mrp  : p.price) || 0;
+  const displayDisc = displayMRP > 0 && displayRate > 0
+    ? Math.round((1 - displayRate / displayMRP) * 100) : 0;
+  const displaySaving = displayMRP > displayRate ? displayMRP - displayRate : 0;
 
   const pdEl=document.getElementById('productDetail'); if(pdEl) pdEl.innerHTML = `
     ${buildMediaGallery(p)}
@@ -10924,18 +11143,22 @@ function buildProductPage(p) {
 // Adds a tiered product to cart, recording which tier (pack size) was chosen
 function addToCartWithTier(productId) {
   const p0 = PRODUCTS.find(p => p.id === productId);
-  const tiers = (p0 && p0._backendTiers) || QTY_TIERS[productId];
+  const tiers = getProductTiers(p0);
   if (!tiers) {
     // No tier system — standard add to cart
     STORE.addToCart(productId, pQty);
     return;
   }
-  const tierIdx = selectedTiers[productId] !== undefined ? selectedTiers[productId] : 0;
+  const tierIdx = currentTierIdx(p0, tiers);
   const tier = tiers[tierIdx];
-  const p = PRODUCTS.find(p => p.id === productId);
+  const p = p0;
 
-  // Physical packs: 15 tabs = 1 pack, 30 = 2, 45 = 3, 60 = 4
-  const physicalPacks = tier.tabs / 15;
+  // How many physical cartons this bundle is. The smallest tier IS one
+  // carton, whatever that happens to hold — hardcoding 15 made the
+  // 30-tablet Multidiata box count as two packs and the 60 as four.
+  const unitTabs = Number(tiers[0].tabs) || Number(tier.tabs) || 1;
+  const rawPacks = Number(tier.tabs) / unitTabs;
+  const physicalPacks = Number.isInteger(rawPacks) && rawPacks >= 1 ? rawPacks : 1;
   // qty = number of BUNDLES (1 bundle = physicalPacks physical packs)
   const ex = STORE.cart.find(i => i.id === productId && i.tierIdx === tierIdx);
   if (ex) {
@@ -10953,7 +11176,9 @@ function addToCartWithTier(productId) {
     });
   }
   STORE.save();
-  const packLabel = physicalPacks === 1 ? '1 Pack (15 tabs)' : `${physicalPacks} Packs (${tier.tabs} tabs)`;
+  const packLabel = physicalPacks === 1
+    ? `1 pack (${tier.tabs} tabs)`
+    : `${physicalPacks} packs (${tier.tabs} tabs)`;
   showToast(`${p.name} — ${packLabel} added to cart!`);
 
 }
@@ -13368,6 +13593,59 @@ const VITA = {
   HOLD_DAYS: 7
 };
 
+// ── HOME BLOCK ────────────────────────────────────────────────
+// #vitapoints-home states the scheme in marketing words. The words are
+// in the markup (so the section still reads correctly with JS off and to
+// search engines), but the NUMBERS in them are rewritten from VITA here.
+// That is the whole point of this function: the home page used to quote
+// "5 VitaPoints per ₹100" and three membership tiers while the engine
+// paid 1 point per ₹1 with no tiers at all, and nothing in the code
+// connected the two. Now a rate change in VITA moves the home page with
+// it, and a stale figure is a bug you can see rather than one nobody
+// notices for a year.
+function hydrateVitaHome() {
+  const host = document.getElementById('vitapoints-home');
+  if (!host) return;
+
+  const rupee = (n) => '₹' + Number(n).toLocaleString('en-IN');
+  const pts   = (n) => Number(n).toLocaleString('en-IN');
+
+  const copy = {
+    'earn':        '1 point for every ' + rupee(1 / VITA.EARN_PER_RUPEE),
+    'earn-short':  '1 point per ' + rupee(1 / VITA.EARN_PER_RUPEE),
+    'value':       pts(VITA.POINTS_PER_RUPEE) + ' points is ' + rupee(1) + ' off',
+    'value-short': pts(VITA.POINTS_PER_RUPEE) + ' points = ' + rupee(1),
+    'hold':        'Spendable in ' + VITA.HOLD_DAYS + ' days',
+    'milestone':   pts(VITA.TIER_50_THRESHOLD) + ' points',
+  };
+
+  Object.keys(copy).forEach((k) => {
+    const el = host.querySelector('[data-vita="' + k + '"]');
+    if (el) el.textContent = copy[k];
+  });
+}
+
+// "Join free" — there is nothing to join, which is the nice part: points
+// start accruing on the first delivered order of any account. So the
+// button does the only useful thing it can, which depends on whether
+// there is an account yet.
+function vitaHomeCta() {
+  if (getCurrentUser()) {
+    showPage('account');
+    if (typeof loadAccountPage === 'function') loadAccountPage();
+    switchAccountPanel('vita');
+  } else {
+    openAuth('register');
+  }
+}
+
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', hydrateVitaHome);
+} else {
+  hydrateVitaHome();
+}
+
+
 // Per-user namespacing. Two customers on one device must never see
 // each other's balance, so the key is derived from the signed-in
 // email and every read is guarded by the current session.
@@ -14593,7 +14871,9 @@ async function renderReturnsPanel() {
     html += '<h4 style="font-size:.72rem;letter-spacing:.14em;text-transform:uppercase;color:var(--t-low);margin:20px 0 11px;font-weight:800">Eligible for return</h4>';
 
     if (!eligible.length) {
-      html += '<div class="ret-empty">No orders are currently eligible.<br>'
+      html += '<div class="ret-empty">' + (orders.length
+                ? 'None of your orders are open for return right now.'
+                : 'You have no orders yet.') + '<br>'
             + '<span style="font-size:.78rem">Returns are open for <b>7 days</b> after delivery.</span></div>';
     } else {
       html += eligible.map(function(o){
@@ -14623,6 +14903,31 @@ async function renderReturnsPanel() {
           + '</div>';
       }).join('');
     }
+
+    // Everything that is NOT open for return, with the server's reason
+    // against it. This panel used to render nothing but "No orders are
+    // currently eligible", which is the same message whether the window
+    // has closed, the order was cancelled, a request is already open, or
+    // — as was happening for every customer — the window was being
+    // measured from the wrong date. A customer who cannot raise a refund
+    // request should at least be told which of those it is.
+    const blocked = orders.filter(function(o){ return !o.eligible; });
+    if (blocked.length) {
+      html += '<h4 style="font-size:.72rem;letter-spacing:.14em;text-transform:uppercase;color:var(--t-low);margin:22px 0 11px;font-weight:800">Not open for return</h4>';
+      html += blocked.map(function(o){
+        return '<div class="ret-card ret-card-muted">'
+          + '<div class="ret-head"><div><div class="ret-oid">' + _esc(o.order_id) + '</div>'
+          + '<div class="ret-meta">\u20b9' + Number(o.total||0).toLocaleString('en-IN')
+          + ' \u00b7 ' + new Date(o.created_at).toLocaleDateString('en-IN',{day:'2-digit',month:'short',year:'numeric'})
+          + (o.fulfillment ? ' \u00b7 ' + _esc(o.fulfillment) : '') + '</div></div></div>'
+          + '<div class="ret-meta" style="margin-top:8px">' + _esc(o.reason || 'Not eligible for return') + '</div>'
+          + '</div>';
+      }).join('');
+    }
+
+    html += '<p class="ret-meta" style="margin-top:18px">Something look wrong? '
+          + '<a href="mailto:ascovitahealthcare@gmail.com">Email us</a> with your order number '
+          + 'and we will raise the request for you.</p>';
 
     el.innerHTML = html;
   } catch (err) {
