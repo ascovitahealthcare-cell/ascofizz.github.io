@@ -89,6 +89,27 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);min-height:1
 .tb-stat{display:flex;align-items:center;gap:6px;background:var(--bg2);border:1px solid var(--border);border-radius:8px;padding:5px 10px;font-size:0.75rem;}
 .tb-dot{width:7px;height:7px;border-radius:50%;background:var(--green-text);animation:pulse 2s infinite;}
 @keyframes pulse{0%,100%{opacity:1}50%{opacity:0.4}}
+
+/* ── ROLLBACK ────────────────────────────────────────────────────
+   An optimistic change that the server refused has to be VISIBLY
+   undone. Two amber pulses: enough that the eye catches the row
+   returning to its old state, not so much that it reads as a crash.
+   currentColor-free so it works on any row background. */
+@keyframes rollbackFlash{
+  0%,100%{ background-color:transparent; box-shadow:none }
+  15%,60%{ background-color:rgba(245,158,11,.22); box-shadow:inset 3px 0 0 #f59e0b }
+}
+.rollback-flash{ animation:rollbackFlash 1.5s ease-in-out 1 }
+
+/* An optimistic change that has not been confirmed yet. Subtle — the
+   point is that the action already looks done, with only a hint that
+   it is still settling. */
+.pending-sync{ opacity:.62; transition:opacity .18s ease }
+
+@media (prefers-reduced-motion: reduce){
+  /* Still mark the rollback, just without the pulsing. */
+  .rollback-flash{ animation:none; background-color:rgba(245,158,11,.22); box-shadow:inset 3px 0 0 #f59e0b }
+}
 .tb-btn{background:none;border:1px solid var(--border);border-radius:8px;color:var(--text2);padding:6px 10px;cursor:pointer;font-size:0.8rem;font-family:var(--font);transition:all 0.2s;}
 .tb-btn:hover{border-color:var(--green);color:var(--green-text);}
 .hamburger-btn{display:none;background:none;border:none;color:var(--text);font-size:1.2rem;cursor:pointer;padding:4px;}
@@ -3441,6 +3462,71 @@ async function apiFetch(path, opts={}) {
 }
 
 // ═══════════════════════════════════════════════
+// OPTIMISTIC UPDATES
+//
+// Every admin action used to work the same way: send the request, wait
+// for the round trip to Render and back, and only then change what is
+// on screen. On a phone on mobile data that is half a second of a
+// button that looks broken, and the usual result is a second click.
+//
+// These apply the change immediately and reconcile afterwards. The part
+// that matters is the failure path: if the server refuses, the screen
+// must go BACK, and the user must SEE it go back. A silent revert is
+// worse than no optimism at all — they walk away believing a product is
+// deleted when it is not.
+//
+// So a rollback does three things: restores the previous state, flashes
+// the affected row so the change is visible rather than sneaked in, and
+// says plainly what failed.
+//
+// Deliberately NOT used for anything where the server is the authority
+// on whether the action is allowed at all, or where money moves.
+// Optimism is for actions that virtually always succeed — not for
+// pretending a refusal did not happen.
+// ═══════════════════════════════════════════════
+function flashRollback(selector) {
+  // Make the undo visible. Without this the row quietly returns and the
+  // admin never registers that their change did not stick.
+  try {
+    const el = typeof selector === 'string' ? document.querySelector(selector) : selector;
+    if (!el) return;
+    el.classList.remove('rollback-flash');
+    void el.offsetWidth;              // restart the animation if it is mid-flight
+    el.classList.add('rollback-flash');
+    setTimeout(() => el.classList.remove('rollback-flash'), 1600);
+  } catch (e) { /* a missing element must never break the rollback itself */ }
+}
+
+// apply()    — change the UI now
+// commit()   — send it; resolve on success, throw on failure
+// rollback() — put the UI back exactly as it was
+async function optimistic({ apply, commit, rollback, onError, flash, successMsg }) {
+  apply();
+  try {
+    const result = await commit();
+    if (successMsg) toast(successMsg);
+    return result;
+  } catch (e) {
+    rollback();
+    if (flash) flashRollback(flash);
+    const msg = e && e.message ? e.message : 'Action failed';
+    toast(`↩️ Reverted — ${msg}`, 'error');
+    if (onError) onError(e);
+    return null;
+  }
+}
+
+// apiFetch resolves with the Response and only throws for a non-JSON
+// error page, so every optimistic commit needs this: a JSON 400/500
+// arrives as a resolved response and would otherwise read as success.
+async function expectOk(promise, fallbackMsg) {
+  const r = await promise;
+  const d = await r.json().catch(() => ({}));
+  if (!r.ok) throw new Error(d.error || d.message || fallbackMsg || `Server returned ${r.status}`);
+  return d;
+}
+
+// ═══════════════════════════════════════════════
 // INIT
 // ═══════════════════════════════════════════════
 async function initApp() {
@@ -5464,8 +5550,9 @@ function renderOrders(list) {
   document.getElementById('ordersTbody').innerHTML = list.length ? list.map(o => {
     let items = [];
     try { items = typeof o.items==='string' ? JSON.parse(o.items||'[]') : (o.items||[]); } catch {}
+    // data-oid anchors the rollback flash to this order's row.
     return `
-    <tr>
+    <tr data-oid="${o.id}">
       <td class="td-id" style="cursor:pointer;color:var(--green-text);" onclick="openOrderModal('${o.id}')">${o.id}</td>
       <td>
         <div style="font-size:0.83rem;font-weight:500;">${esc(o.customer_name)||'-'}</div>
@@ -5560,31 +5647,56 @@ async function updateOrderStatus(orderId) {
   const body = {status, fulfillment:status, shiprocket_id:tracking||null};
   if (payment_status) body.payment_status = payment_status;
 
-  try {
-    const r = await apiFetch(`/api/admin/orders/${orderId}`, {
-      method:'PUT', body: JSON.stringify(body)
-    });
-    const d = await r.json();
-    if(!r.ok) throw new Error(d.error||d.message||'Update failed — check backend logs');
-    const idx = allOrders.findIndex(o=>o.id===orderId);
-    if(idx>-1) {
-      allOrders[idx].status = status; allOrders[idx].fulfillment = status; allOrders[idx].shiprocket_id = tracking;
-      if (payment_status) allOrders[idx].payment_status = payment_status;
-    }
-    toast(payment_status ? `Order ${orderId} → ${status} (COD payment collected ✅)` : `Order ${orderId} → ${status}`);
-    closeModal('orderModal');
-    filterOrders();
-  } catch(e) { toast(e.message,'error'); }
+  const idx = allOrders.findIndex(o=>o.id===orderId);
+  const before = idx > -1 ? {
+    status: allOrders[idx].status, fulfillment: allOrders[idx].fulfillment,
+    shiprocket_id: allOrders[idx].shiprocket_id, payment_status: allOrders[idx].payment_status,
+  } : null;
+
+  await optimistic({
+    // Close the modal and move the order immediately. This is the most
+    // repeated action in the panel — marking a run of orders Shipped —
+    // and waiting for a round trip on each one is most of the time it
+    // takes to work through them.
+    apply: () => {
+      if (idx > -1) {
+        allOrders[idx].status = status; allOrders[idx].fulfillment = status;
+        allOrders[idx].shiprocket_id = tracking;
+        if (payment_status) allOrders[idx].payment_status = payment_status;
+      }
+      closeModal('orderModal');
+      filterOrders();
+    },
+    commit: () => expectOk(apiFetch(`/api/admin/orders/${orderId}`, {
+      method:'PUT', body: JSON.stringify(body),
+    }), 'Update failed — check backend logs'),
+    rollback: () => {
+      if (idx > -1 && before) Object.assign(allOrders[idx], before);
+      filterOrders();
+    },
+    flash: `#ordersTbody tr[data-oid="${orderId}"]`,
+    successMsg: payment_status
+      ? `Order ${orderId} → ${status} (COD payment collected ✅)`
+      : `Order ${orderId} → ${status}`,
+  });
 }
 
 async function softDeleteOrder(id) {
   if(!confirm(`Soft-delete order ${id}? It will be hidden from the list.`)) return;
-  try {
-    await apiFetch(`/api/admin/orders/${id}`, {method:'DELETE'});
-    allOrders = allOrders.filter(o=>o.id!==id);
-    filterOrders();
-    toast('Order deleted');
-  } catch(e) { toast(e.message,'error'); }
+  const idx = allOrders.findIndex(o => o.id === id);
+  if (idx < 0) return;
+  const removed = allOrders[idx];
+
+  await optimistic({
+    // Splice rather than filter-and-reassign, so the rollback can put
+    // the order back exactly where it was instead of at the end of a
+    // list the admin is trying to work down in order.
+    apply:    () => { allOrders.splice(idx, 1); filterOrders(); },
+    commit:   () => expectOk(apiFetch(`/api/admin/orders/${id}`, {method:'DELETE'}), 'Delete failed'),
+    rollback: () => { allOrders.splice(idx, 0, removed); filterOrders(); },
+    flash:    `#ordersTbody tr[data-oid="${id}"]`,
+    successMsg: 'Order deleted',
+  });
 }
 
 // ═══════════════════════════════════════════════
@@ -5700,7 +5812,11 @@ function renderProducts(list) {
     const disc = discPct(p);
     const stockClass = p.stock===0 ? 'badge-red' : p.stock<20 ? 'badge-gold' : 'badge-green';
     const checked = selectedProductIds.has(p.id) ? 'checked' : '';
-    return `<tr style="${p.deleted_at?'opacity:0.5;':''}">
+    // data-pid is what lets a rolled-back optimistic change flash the
+    // right row. Without it flashRollback silently finds nothing and the
+    // undo happens invisibly, which is the failure mode optimistic UI
+    // has to avoid above all others.
+    return `<tr data-pid="${p.id}" style="${p.deleted_at?'opacity:0.5;':''}">
       <td><input type="checkbox" ${checked} onchange="toggleSelectProduct(${p.id},this)"></td>
       <td>
         <div style="display:flex;align-items:center;gap:4px;">
@@ -5959,33 +6075,66 @@ function clearBulkSelection() {
 async function bulkActivate(active) {
   if(!selectedProductIds.size) return;
   const ids = [...selectedProductIds];
-  try {
-    const r = await apiFetch('/api/admin/products/bulk-update',
-      {method:'POST', body:JSON.stringify({ids, patch:{active}})});
-    const d = await r.json().catch(() => ({}));
-    if(!r.ok) throw new Error(d.error || `Server returned ${r.status}`);
-    ids.forEach(id => { const p = allProducts.find(x=>x.id===id); if(p) p.active=active; });
-    clearBulkSelection(); filterProducts();
-    toast(`${d.updated ?? ids.length} products ${active?'activated':'deactivated'} ✅`);
-  } catch(e) {
-    toast(e.message || 'Bulk update failed', 'error');
-    loadProducts();   // re-read the truth rather than trusting local state
-  }
+  // Snapshot per product — they will not all have had the same value,
+  // so a rollback cannot just set them all back to !active.
+  const before = new Map(ids.map(id => {
+    const p = allProducts.find(x => x.id === id);
+    return [id, p ? p.active : undefined];
+  }));
+
+  await optimistic({
+    apply: () => {
+      ids.forEach(id => { const p = allProducts.find(x=>x.id===id); if(p) p.active = active; });
+      clearBulkSelection(); filterProducts();
+    },
+    commit: async () => {
+      const d = await expectOk(apiFetch('/api/admin/products/bulk-update',
+        {method:'POST', body:JSON.stringify({ids, patch:{active}})}), 'Bulk update failed');
+      toast(`${d.updated ?? ids.length} products ${active?'activated':'deactivated'} ✅`);
+      return d;
+    },
+    rollback: () => {
+      ids.forEach(id => {
+        const p = allProducts.find(x=>x.id===id);
+        if (p && before.get(id) !== undefined) p.active = before.get(id);
+      });
+      filterProducts();
+      // Flash the first affected row — flashing fifty would just look
+      // like the page was broken.
+      flashRollback(`#productsTbody tr[data-pid="${ids[0]}"]`);
+    },
+  });
 }
 async function bulkDelete() {
   if(!selectedProductIds.size || !confirm(`Delete ${selectedProductIds.size} products?`)) return;
   const ids = [...selectedProductIds];
-  try {
-    const r = await apiFetch('/api/admin/products/bulk-delete',
-      {method:'POST', body:JSON.stringify({ids})});
-    const d = await r.json().catch(() => ({}));
-    if(!r.ok) throw new Error(d.error || `Server returned ${r.status}`);
-    clearBulkSelection(); loadProducts();
-    toast(`${d.deleted ?? ids.length} products deleted ✅`);
-  } catch(e) {
-    toast(e.message || 'Bulk delete failed', 'error');
-    loadProducts();
-  }
+  const before = new Map(ids.map(id => {
+    const p = allProducts.find(x => x.id === id);
+    return [id, p ? p.deleted_at : undefined];
+  }));
+
+  await optimistic({
+    apply: () => {
+      const stamp = new Date().toISOString();
+      ids.forEach(id => { const p = allProducts.find(x=>x.id===id); if(p) p.deleted_at = stamp; });
+      clearBulkSelection(); filterProducts();
+    },
+    commit: async () => {
+      const d = await expectOk(apiFetch('/api/admin/products/bulk-delete',
+        {method:'POST', body:JSON.stringify({ids})}), 'Bulk delete failed');
+      toast(`${d.deleted ?? ids.length} products deleted ✅`);
+      loadProducts();   // reconcile with the server's real state
+      return d;
+    },
+    rollback: () => {
+      ids.forEach(id => {
+        const p = allProducts.find(x=>x.id===id);
+        if (p && before.get(id) !== undefined) p.deleted_at = before.get(id);
+      });
+      filterProducts();
+      flashRollback(`#productsTbody tr[data-pid="${ids[0]}"]`);
+    },
+  });
 }
 
 // ── Product Drawer ─────────────────────────────
@@ -6412,17 +6561,33 @@ async function saveProductFromDrawer() {
 
 async function deleteProduct(id) {
   if(!confirm('Soft-delete this product?')) return;
-  try {
-    await apiFetch(`/api/admin/products/${id}`,{method:'DELETE'});
-    toast('Product deleted'); loadProducts();
-  } catch(e) { toast(e.message,'error'); }
+  const p = allProducts.find(x => x.id === id);
+  if (!p) return;
+  const prev = p.deleted_at;
+
+  await optimistic({
+    // Gone from the list straight away — the row is what the admin is
+    // looking at, so that is what has to change first.
+    apply:    () => { p.deleted_at = new Date().toISOString(); filterProducts(); },
+    commit:   () => expectOk(apiFetch(`/api/admin/products/${id}`, {method:'DELETE'}), 'Delete failed'),
+    rollback: () => { p.deleted_at = prev; filterProducts(); },
+    flash:    `#productsTbody tr[data-pid="${id}"]`,
+    successMsg: 'Product deleted',
+  });
 }
 
 async function restoreProduct(id) {
-  try {
-    await apiFetch(`/api/admin/products/${id}/restore`,{method:'PUT'});
-    toast('Product restored ♻️'); loadProducts();
-  } catch(e) { toast(e.message,'error'); }
+  const p = allProducts.find(x => x.id === id);
+  if (!p) return;
+  const prev = p.deleted_at;
+
+  await optimistic({
+    apply:    () => { p.deleted_at = null; filterProducts(); },
+    commit:   () => expectOk(apiFetch(`/api/admin/products/${id}/restore`, {method:'PUT'}), 'Restore failed'),
+    rollback: () => { p.deleted_at = prev; filterProducts(); },
+    flash:    `#productsTbody tr[data-pid="${id}"]`,
+    successMsg: 'Product restored ♻️',
+  });
 }
 
 // ── Force a product sync (e.g. from an external catalog / source-of-truth) ──
