@@ -6421,8 +6421,66 @@ button, [role="button"] {
 .rb-cancelled { background: var(--face-warm); color: var(--t-low); }
 .rb-closed    { background: var(--face-warm); color: var(--t-low); }
 .ret-items { margin-top: 11px; border-top: 1px solid var(--edge); padding-top: 11px; }
-.ret-item { display: flex; align-items: center; gap: 10px; font-size: .82rem; color: var(--t-mid); padding: 5px 0; }
-.ret-item input[type=checkbox] { width: 17px; height: 17px; accent-color: var(--fern-lo); flex: none; }
+
+/* ── ITEM PICKER ──────────────────────────────────────────────────
+   This was a bare native checkbox with nothing but width/height and an
+   accent-color. accent-color only tints the CHECKED state, so an
+   unchecked box fell back to the platform default — and on iOS Safari
+   that is a hairline grey outline which, on this light neumorphic card,
+   is effectively invisible. Customers could not see there was anything
+   to select, tapped "Submit return request", and got "Select at least
+   one item to return" with no idea what it meant. The button looked
+   broken; the real problem was an invisible required control.
+
+   So the control is drawn explicitly now, the whole row is the tap
+   target (a 17px box is far below the ~44px minimum for a finger), and
+   selection is obvious without reading anything. */
+.ret-pick-hint {
+  font-size: .72rem; letter-spacing: .1em; text-transform: uppercase;
+  color: var(--t-low); font-weight: 700; margin-bottom: 7px;
+}
+.ret-item {
+  display: flex; align-items: center; gap: 12px;
+  font-size: .85rem; color: var(--t-mid);
+  padding: 11px 12px; margin-bottom: 6px;
+  min-height: 46px;                      /* a real finger target */
+  border-radius: var(--r-sm);
+  background: var(--white); box-shadow: var(--neo-in);
+  cursor: pointer; user-select: none;
+  transition: box-shadow .18s ease, background .18s ease, color .18s ease;
+}
+/* The native box is replaced, not hidden from assistive tech: it keeps
+   its size and focusability, we just paint over it. */
+.ret-item input[type=checkbox] {
+  appearance: none; -webkit-appearance: none;
+  width: 22px; height: 22px; flex: none; margin: 0;
+  border-radius: 6px;
+  background: var(--paper);
+  box-shadow: inset 0 0 0 2px var(--t-dim);
+  position: relative; cursor: pointer;
+  transition: background .16s ease, box-shadow .16s ease;
+}
+.ret-item input[type=checkbox]:checked {
+  background: var(--fern-lo, #4a7c59);
+  box-shadow: inset 0 0 0 2px var(--fern-lo, #4a7c59);
+}
+/* The tick */
+.ret-item input[type=checkbox]:checked::after {
+  content: ""; position: absolute; left: 7px; top: 3px;
+  width: 6px; height: 11px;
+  border: solid #fff; border-width: 0 2.5px 2.5px 0;
+  transform: rotate(45deg);
+}
+.ret-item input[type=checkbox]:focus-visible {
+  outline: 3px solid color-mix(in srgb, var(--indigo) 45%, transparent);
+  outline-offset: 2px;
+}
+/* Selected rows read as selected at a glance, not just by the tick. */
+.ret-item:has(input[type=checkbox]:checked) {
+  background: color-mix(in srgb, var(--fern-lo, #4a7c59) 9%, var(--white));
+  box-shadow: inset 0 0 0 1.5px color-mix(in srgb, var(--fern-lo, #4a7c59) 45%, transparent);
+  color: var(--t-hi); font-weight: 600;
+}
 .ret-item .rq { margin-left: auto; font-size: .74rem; color: var(--t-low); white-space: nowrap; }
 .ret-actions { display: flex; gap: 9px; margin-top: 13px; flex-wrap: wrap; }
 .ret-days { font-size: .72rem; font-weight: 700; color: var(--clay-lo); }
@@ -15713,12 +15771,25 @@ async function renderReturnsPanel() {
         }
         if (!Array.isArray(rawItems)) rawItems = [];
 
+        // An order with ONE item has only one possible answer, and making
+        // the customer find an invisible box to give it was the whole
+        // failure. Pre-selected — they still choose a reason and press
+        // Submit, so nothing is sent without an explicit action.
+        const single = rawItems.length === 1;
+
         const items = rawItems.map(function(i, n){
           return '<label class="ret-item">'
-            + '<input type="checkbox" data-oid="' + _esc(o.order_id) + '" data-id="' + _esc(i.id) + '" data-max="' + (i.qty||1) + '">'
+            + '<input type="checkbox"' + (single ? ' checked' : '')
+            + ' data-oid="' + _esc(o.order_id) + '" data-id="' + _esc(i.id) + '" data-max="' + (i.qty||1) + '">'
             + '<span>' + _esc(i.name || ('Item ' + i.id)) + '</span>'
             + '<span class="rq">qty ' + (i.qty || 1) + '</span></label>';
         }).join('');
+
+        // Say a choice is needed BEFORE the button is pressed, rather
+        // than only in an error afterwards.
+        const pickHint = '<div class="ret-pick-hint">'
+          + (single ? 'Item to return' : 'Select the item(s) to return')
+          + '</div>';
 
         // AN ORDER WITH NO ITEMS MUST NOT SHOW A SUBMIT BUTTON.
         // Previously the item list rendered empty while the reason box
@@ -15744,7 +15815,7 @@ async function renderReturnsPanel() {
           + '<div class="ret-meta">₹' + Number(o.total||0).toLocaleString('en-IN')
           + ' · ' + new Date(o.created_at).toLocaleDateString('en-IN',{day:'2-digit',month:'short',year:'numeric'}) + '</div></div>'
           + '<span class="ret-days">' + o.days_left + ' day' + (o.days_left === 1 ? '' : 's') + ' left</span></div>'
-          + '<div class="ret-items">' + items + '</div>'
+          + '<div class="ret-items">' + pickHint + items + '</div>'
           + '<div class="ret-form">'
           + '<label>Reason for return</label>'
           + '<select id="retreason-' + _esc(o.order_id) + '">'
@@ -15802,7 +15873,22 @@ async function submitReturn(orderId, btn) {
   const reason = (document.getElementById('retreason-' + orderId) || {}).value || '';
   const note   = (document.getElementById('retnote-' + orderId) || {}).value || '';
 
-  if (!boxes.length) { showToast('Select at least one item to return', 'error'); return; }
+  if (!boxes.length) {
+    // A toast alone told the customer a rule existed but not where to
+    // satisfy it — which, when the control was invisible, made the
+    // button look broken. Point at the actual rows and flash them.
+    showToast('Tick the item you want to return', 'error');
+    var card = document.getElementById('retcard-' + orderId);
+    var list = card && card.querySelector('.ret-items');
+    if (list) {
+      list.classList.remove('rollback-flash');
+      void list.offsetWidth;
+      list.classList.add('rollback-flash');
+      setTimeout(function(){ list.classList.remove('rollback-flash'); }, 1600);
+      list.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+    return;
+  }
   if (!reason)       { showToast('Please choose a reason for the return', 'error'); return; }
 
   const orig = btn.textContent;
