@@ -5735,8 +5735,17 @@ textarea.b2b-form-input { min-height: 110px; resize: vertical; font-family: inhe
 .brochure-desc { font-size: .82rem; color: var(--t-low); line-height: 1.58; }
 .brochure-actions { display: flex; gap: 9px; flex-wrap: wrap; padding: 0 20px 20px; }
 
-/* ══ TOASTS ═══════════════════════════════════════════════════════ */
-#ptsToast, #toast {
+/* ══ TOASTS ═══════════════════════════════════════════════════════
+   `.toast` was missing from this selector, and that broke every toast
+   on the site. showToast() builds its element with
+   className = 'toast ' + type — a CLASS — while this rule only ever
+   matched the IDs #ptsToast and #toast. A class never matches an ID
+   selector, so all 67 showToast() calls produced an unstyled block div
+   appended to <body>: plain black text dumped at the bottom of the
+   page, in the document flow, instead of a floating pill. Repeated
+   messages piled up down the page rather than replacing each other.
+   Adding the class here is what makes every one of them a real toast. */
+#ptsToast, #toast, .toast {
   position: fixed; left: 50%; bottom: 30px; transform: translateX(-50%) translateY(24px);
   z-index: 990; padding: 14px 24px; border-radius: var(--r-pill);
   font-size: .875rem; font-weight: 700; color: var(--t-hi);
@@ -5746,7 +5755,13 @@ textarea.b2b-form-input { min-height: 110px; resize: vertical; font-family: inhe
   opacity: 0; pointer-events: none;
   transition: opacity var(--dur-2) var(--rise), transform var(--dur-3) var(--fizz);
 }
-#ptsToast.show, #toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+#ptsToast.show, #toast.show, .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+/* Several toasts share one position, so without this they sit exactly on
+   top of each other and read as one smudged blob. Each additional one is
+   lifted clear of the one before it. */
+.toast ~ .toast       { bottom: 92px; }
+.toast ~ .toast ~ .toast { bottom: 154px; }
 
 /* ══ INVOICE / PRINT ══════════════════════════════════════════════
    Paper is paper. The invoice leaves the water entirely.            */
@@ -10518,7 +10533,24 @@ function fmt(p){return '₹'+p.toLocaleString('en-IN',{minimumFractionDigits:0,m
 // average the live review rows), so round for display — printing it raw
 // put "4.333333333333333" next to the stars.
 function stars(r){const v=Math.round((Number(r)||0)*10)/10,f=Math.floor(v),h=v%1>=0.5;return '<span class="stars">'+'★'.repeat(f)+(h?'☆':'')+'</span><span class="rating-n">'+v+'</span>';}
-function showToast(msg,type=''){const t=document.createElement('div');t.className='toast '+type;t.textContent=msg;document.body.appendChild(t);requestAnimationFrame(()=>t.classList.add('show'));setTimeout(()=>{t.classList.remove('show');setTimeout(()=>t.remove(),350);},3200);}
+function showToast(msg,type=''){
+  // Tapping a button four times should not stack four identical
+  // messages down the page — re-show the existing one instead.
+  const dupe = Array.from(document.querySelectorAll('.toast'))
+    .find(el => el.textContent === msg);
+  if (dupe) {
+    clearTimeout(dupe._hideT); clearTimeout(dupe._killT);
+    dupe.classList.add('show');
+    dupe._hideT = setTimeout(()=>{ dupe.classList.remove('show');
+      dupe._killT = setTimeout(()=>dupe.remove(),350); },3200);
+    return;
+  }
+  const t=document.createElement('div');t.className='toast '+type;t.textContent=msg;
+  document.body.appendChild(t);
+  requestAnimationFrame(()=>t.classList.add('show'));
+  t._hideT = setTimeout(()=>{ t.classList.remove('show');
+    t._killT = setTimeout(()=>t.remove(),350); },3200);
+}
 // Category-based fallback images using Wix product images already in the page
 // A neutral "no image available" placeholder — used ONLY when a product
 // truly has no image. This intentionally does NOT show any other
@@ -15671,12 +15703,42 @@ async function renderReturnsPanel() {
             + '<span style="font-size:.78rem">Returns are open for <b>7 days</b> after delivery.</span></div>';
     } else {
       html += eligible.map(function(o){
-        const items = (o.items || []).map(function(i, n){
+        // items can arrive as a JSON string from an older backend build,
+        // and as null on an order whose line items were never stored.
+        // Both used to fall through as "no checkboxes", which produced a
+        // form that could not possibly be submitted (see below).
+        var rawItems = o.items;
+        if (typeof rawItems === 'string') {
+          try { rawItems = JSON.parse(rawItems); } catch (e) { rawItems = []; }
+        }
+        if (!Array.isArray(rawItems)) rawItems = [];
+
+        const items = rawItems.map(function(i, n){
           return '<label class="ret-item">'
             + '<input type="checkbox" data-oid="' + _esc(o.order_id) + '" data-id="' + _esc(i.id) + '" data-max="' + (i.qty||1) + '">'
             + '<span>' + _esc(i.name || ('Item ' + i.id)) + '</span>'
             + '<span class="rq">qty ' + (i.qty || 1) + '</span></label>';
         }).join('');
+
+        // AN ORDER WITH NO ITEMS MUST NOT SHOW A SUBMIT BUTTON.
+        // Previously the item list rendered empty while the reason box
+        // and "Submit return request" rendered anyway — so there was
+        // nothing to tick, and every submit answered "Select at least
+        // one item to return". The customer could try forever and never
+        // succeed, with no way to tell why. Say what is wrong and give
+        // them the route that does work.
+        if (!rawItems.length) {
+          return '<div class="ret-card" id="retcard-' + _esc(o.order_id) + '">'
+            + '<div class="ret-head"><div><div class="ret-oid">' + _esc(o.order_id) + '</div>'
+            + '<div class="ret-meta">₹' + Number(o.total||0).toLocaleString('en-IN')
+            + ' · ' + new Date(o.created_at).toLocaleDateString('en-IN',{day:'2-digit',month:'short',year:'numeric'}) + '</div></div>'
+            + '<span class="ret-days">' + o.days_left + ' day' + (o.days_left === 1 ? '' : 's') + ' left</span></div>'
+            + '<div class="ret-empty" style="margin:12px 0 0">'
+            + 'We could not load the items for this order, so a return cannot be started here.<br>'
+            + '<span style="font-size:.78rem">This order is still within its return window — '
+            + 'message us on WhatsApp with order <b>' + _esc(o.order_id) + '</b> and we will raise it for you.</span>'
+            + '</div></div>';
+        }
         return '<div class="ret-card" id="retcard-' + _esc(o.order_id) + '">'
           + '<div class="ret-head"><div><div class="ret-oid">' + _esc(o.order_id) + '</div>'
           + '<div class="ret-meta">₹' + Number(o.total||0).toLocaleString('en-IN')
