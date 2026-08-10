@@ -11360,15 +11360,76 @@ function unlockBodyScroll() {
 }
 window.unlockBodyScroll = unlockBodyScroll;
 
+// Every layer that can cover the page, in one list so nothing can be
+// missed again. These are the only elements in the document that take a
+// scroll lock, so "is one of these open?" is the same question as "is the
+// body legitimately locked?".
+var SCROLL_LOCK_LAYERS = [
+  'sideCart', 'sideCartOverlay',
+  'appMoreDrawer', 'appMoreOverlay',
+  'appMenuDrawer', 'appMenuOverlay', 'appHamburgerBtn',
+  'authOverlay'
+];
+
+function anyOverlayOpen() {
+  for (var i = 0; i < SCROLL_LOCK_LAYERS.length; i++) {
+    var n = document.getElementById(SCROLL_LOCK_LAYERS[i]);
+    if (n && n.classList.contains('open')) return true;
+  }
+  return false;
+}
+
+// THE BUG THIS KILLS
+//   showPage() unlocked the body but left every drawer sitting there with
+//   its .open class. The page changed underneath while the cart drawer
+//   stayed painted over the whole screen — and because the drawer's dark
+//   overlay is a full-viewport fixed element, it swallowed every tap aimed
+//   at the bottom nav behind it. Tapping "Cart" then "Account" on a phone
+//   did nothing at all: the second tap never reached the button.
+//
+//   Classes are stripped directly rather than by calling closeSideCart() /
+//   closeAuth() etc, because those carry side effects — closeAuth() writes
+//   a "login prompt dismissed" flag — that must not fire on every single
+//   navigation. This is idempotent and safe to call as often as we like.
+function closeAllOverlays() {
+  for (var i = 0; i < SCROLL_LOCK_LAYERS.length; i++) {
+    var n = document.getElementById(SCROLL_LOCK_LAYERS[i]);
+    if (n) n.classList.remove('open');
+  }
+  unlockBodyScroll();
+}
+window.closeAllOverlays = closeAllOverlays;
+
+// THE WATCHDOG — the guarantee, not just another patch
+//   Every fix above closes one known path to a stuck lock. This closes all
+//   the unknown ones. If the body is locked but nothing that locks it is
+//   actually open, the lock is orphaned by definition and the page is dead
+//   for no reason — so release it. Any future overlay that forgets to
+//   unlock, any close path nobody thought of, heals within a second
+//   instead of leaving the customer on a frozen store.
+function healStuckScrollLock() {
+  var b = document.body;
+  if (b.style.position !== 'fixed' && b.style.overflow !== 'hidden') return;
+  if (anyOverlayOpen()) return;   // locked on purpose — leave it alone
+  unlockBodyScroll();
+}
+window.healStuckScrollLock = healStuckScrollLock;
+
 // Returning from WhatsApp / a new tab / the app switcher restores the
 // page from bfcache with whatever lock was on it — always unstick it.
 window.addEventListener('pageshow', unlockBodyScroll);
+window.addEventListener('popstate', healStuckScrollLock);
+document.addEventListener('visibilitychange', function () {
+  if (!document.hidden) healStuckScrollLock();
+});
+setInterval(healStuckScrollLock, 1000);
 
 function showPage(pg) {
-  // Navigation must never begin on a locked body. Any overlay that
-  // should stay open across a navigation does not exist here, so this is
-  // always safe and is the net that makes a stuck lock impossible.
-  unlockBodyScroll();
+  // Navigation must never begin on a locked body OR under a drawer that
+  // is still open from the previous page. Nothing in this store is meant
+  // to stay open across a navigation, so closing everything is always
+  // right and is the net that makes a stuck overlay impossible.
+  closeAllOverlays();
   document.getElementById('codOverlay')?.remove();
   // Update URL to clean path (e.g. ozylix.com/about) — no hash
   try {
@@ -18710,7 +18771,25 @@ button:active, .btn-primary:active, .btn-outline:active,
      page. Without this the first Back press dumps the customer out of
      checkout with the cart drawer still open — the single most common
      way a mobile web store loses a completed basket. */
+  //
+  //   THE FREEZE THIS KILLS
+  //     This list used to cover the cart and the "more" drawer only. The
+  //     hamburger menu was missing — and the hamburger is the one drawer
+  //     that takes the HEAVY lock (body{position:fixed; top:-scrollY;
+  //     overflow:hidden}), because that is the only thing that reliably
+  //     stops touch-scroll on Android. So: open the menu, press Android's
+  //     Back button — the universal way to dismiss a drawer on a phone —
+  //     and popstate found no layer to close. The drawer stayed open, the
+  //     lock stayed on, and the whole store was pinned dead. Nothing
+  //     scrolled, no button worked, and it never recovered on any page
+  //     until a hard reload. #authOverlay had the same gap.
+  //
+  //   Ordered topmost-first by z-index (auth 960 > drawers 940) so Back
+  //   peels the layer the customer is actually looking at.
   var layers = [
+    { el: '#authOverlay',    cls: 'open', close: function () { if (window.closeAuth) closeAuth(); } },
+    { el: '#appMenuDrawer',  cls: 'open', close: function () { if (window.closeAppMenu) closeAppMenu(); } },
+    { el: '#appMenuOverlay', cls: 'open', close: function () { if (window.closeAppMenu) closeAppMenu(); } },
     { el: '#sideCart',       cls: 'open', close: function () { if (window.closeSideCart) closeSideCart(); } },
     { el: '#appMoreDrawer',  cls: 'open', close: function () { if (window.closeMoreDrawer) closeMoreDrawer(); } },
     { el: '#appMoreOverlay', cls: 'open', close: function () { if (window.closeMoreDrawer) closeMoreDrawer(); } }
@@ -18729,7 +18808,7 @@ button:active, .btn-primary:active, .btn-outline:active,
     try { history.pushState({ azLayer: true }, ''); } catch (e) {}
   }
 
-  ['openSideCart', 'openMoreDrawer'].forEach(function (fn) {
+  ['openSideCart', 'openMoreDrawer', 'openAppMenu', 'openAuth'].forEach(function (fn) {
     var orig = window[fn];
     if (typeof orig !== 'function') return;
     window[fn] = function () { var r = orig.apply(this, arguments); pushGuard(); return r; };
@@ -18737,7 +18816,13 @@ button:active, .btn-primary:active, .btn-outline:active,
 
   window.addEventListener('popstate', function () {
     var l = topOpenLayer();
-    if (l) { l.close(); pushGuard(); }
+    if (!l) return;
+    l.close();
+    // Only re-arm if something is STILL open underneath. Re-arming
+    // unconditionally pushed a fresh guard state after closing the last
+    // layer, so the next Back press was eaten too and the customer had to
+    // press it twice to actually leave the page.
+    if (topOpenLayer()) pushGuard();
   });
 
   // Escape closes the top layer on desktop, same order.

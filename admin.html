@@ -3444,11 +3444,55 @@ function doLogout() {
   document.getElementById('loginScreen').style.display = 'flex';
 }
 
+// Read the token's own expiry without trusting the server round trip.
+// JWT payloads are base64URL (- and _, unpadded), not plain base64, so
+// normalise before atob() or the decode throws on some payloads.
+function tokenExpiryMs(t) {
+  try {
+    var raw = t || localStorage.getItem('ascovita_token');
+    if (!raw) return 0;
+    var b64 = raw.split('.')[1].replace(/-/g, '+').replace(/_/g, '/');
+    while (b64.length % 4) b64 += '=';
+    return (JSON.parse(atob(b64)).exp || 0) * 1000;
+  } catch (e) { return 0; }
+}
+function tokenIsExpired(t) {
+  var exp = tokenExpiryMs(t);
+  return exp > 0 && exp <= Date.now();
+}
+
 async function apiFetch(path, opts={}) {
   const headers = {'Content-Type':'application/json', 'Authorization':`Bearer ${authToken}`, ...(opts.headers||{})};
   const signal = opts.signal || AbortSignal.timeout(30000); // 30s timeout on all API calls
   const r = await fetch(`${API}${path}`, {...opts, headers, signal});
-  if(r.status === 401) { doLogout(); throw new Error('Session expired'); }
+  // A 401 used to call doLogout() and nothing else. The login screen then
+  // appeared with whatever text happened to be sitting in #loginError —
+  // in practice "Invalid credentials. Please try again.", which sends the
+  // admin off checking a password that was never wrong. Record WHY the
+  // session ended so the screen can say something true.
+  //
+  // The two cases need different words, because they have different
+  // causes and different fixes:
+  //   expired  — the token's own exp has passed. Normal, 1-hour policy.
+  //   rejected — the token still looks valid here but the server refused
+  //              it. That means a revoked session, a server restart with a
+  //              new JWT_SECRET, or a device clock that disagrees with the
+  //              server. Saying "expired" for this would hide a real fault.
+  //
+  // initApp() fires a dozen calls at once, so one dead token produces a
+  // dozen simultaneous 401s — first reason recorded wins, the rest are
+  // no-ops rather than a dozen competing messages.
+  if(r.status === 401) {
+    try {
+      if (!localStorage.getItem('ascovita_logout_reason')) {
+        localStorage.setItem('ascovita_logout_reason',
+          tokenIsExpired(authToken) ? 'expired' : 'rejected');
+      }
+    } catch(e) {}
+    doLogout();
+    if (typeof showLogoutReason === 'function') showLogoutReason();
+    throw new Error('Session expired');
+  }
   // Detect HTML error pages (Express "Cannot POST /route" 404s)
   if(!r.ok) {
     const ct = r.headers.get('content-type') || '';
@@ -3601,7 +3645,28 @@ function applyRole(role) {
   if (typeof renderLoginAudit === 'function') renderLoginAudit();
 }
 
-// Auto-login if token exists
+// Auto-login if the stored token is still valid.
+//
+// THE BUG THIS KILLS
+//   This used to be `if (authToken)` — the mere PRESENCE of a token in
+//   localStorage was taken as proof of a session. Staff tokens are signed
+//   with a 1-hour life (ADMIN_SESSION_HOURS, server-side), so anyone
+//   coming back to the panel after lunch got booted straight into the
+//   dashboard on a token that was already dead. initApp() then fires a
+//   dozen API calls at once, the first 401 comes back within a second or
+//   two, apiFetch calls doLogout(), and the panel they were just looking
+//   at vanished back to the login screen with no explanation. It read as
+//   "the admin panel logs itself out after a few seconds" — and it
+//   happened on every single visit once the hour was up.
+//
+//   Checking the token's own exp claim first costs nothing, needs no
+//   network round trip, and turns a confusing flash-and-bounce into an
+//   honest "your session expired, please sign in again".
+if (authToken && tokenIsExpired(authToken)) {
+  try { localStorage.setItem('ascovita_logout_reason', 'expired'); } catch(e) {}
+  localStorage.removeItem('ascovita_token');
+  authToken = '';
+}
 if(authToken) {
   document.getElementById('loginScreen').style.display = 'none';
   document.getElementById('app').style.display = 'block';
@@ -11508,9 +11573,15 @@ body.role-admin #azRoleBanner{display:block}
     var err = document.getElementById('loginError');
     if (err) {
       err.style.display = 'block';
-      err.textContent = why === 'idle'
-        ? 'Signed out after 60 minutes of inactivity. Please sign in again.'
-        : 'Your 1-hour session expired. Please sign in again.';
+      /* Reset the "backend is starting up" styling wakeServer() may have
+         left on this same element, or the message renders green-on-green
+         as if it were a progress note rather than the reason you are out. */
+      err.style.background = '';
+      err.style.color = '';
+      err.textContent =
+        why === 'idle'     ? 'Signed out after 60 minutes of inactivity. Please sign in again.' :
+        why === 'rejected' ? 'The server rejected your session. Sign in again — if this keeps happening straight after signing in, check that this device’s clock is correct.'
+                           : 'Your 1-hour session expired. Please sign in again.';
     }
   }
   window.showLogoutReason = showLogoutReason;
