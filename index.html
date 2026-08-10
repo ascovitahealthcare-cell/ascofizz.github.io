@@ -12938,6 +12938,7 @@ function bootApp() {
       lastPage = page;
       send('/api/visitors/ping', {
         session_id:  sid,
+        site:        location.hostname,
         page:        page,
         referrer:    firstReferrer,
         device_hint: deviceHint(),
@@ -19332,6 +19333,48 @@ body:not(.oz-product) #stickyCart { display: none !important; }
       });
     };
   }
+})();
+</script>
+
+<!-- ══════════════════════════════════════════════════════════════════
+     SERVICE WORKER REGISTRATION
+     sw.js existed in the repo (cache name 'ozylix-pwa-v6') but was never
+     actually registered anywhere — no page called
+     navigator.serviceWorker.register(). Two visible symptoms of that:
+       • the "Add to Home Screen" PWA install prompt behaved
+         inconsistently across devices (some browsers had a service worker
+         from an OLD deploy that registered it, before that call was
+         removed/lost; fresh browsers never got one at all)
+       • whichever "version" a given device/PWA install was showing
+         depended entirely on which of those two states it happened to
+         be in, with nothing here to reconcile them.
+     This registers it going forward and prompts for a reload the moment a
+     new sw.js is deployed, so everyone converges on the same version
+     instead of some visitors being stuck on a stale cached build forever.
+     ══════════════════════════════════════════════════════════════════ -->
+<script>
+(function () {
+  if (!('serviceWorker' in navigator)) return;
+  window.addEventListener('load', function () {
+    navigator.serviceWorker.register('/sw.js').then(function (reg) {
+      // A new sw.js was deployed while this tab was open. Don't force a
+      // reload mid-session (could drop a cart/checkout in progress) — just
+      // let the person know, the same way the network-status banner does.
+      reg.addEventListener('updatefound', function () {
+        var installing = reg.installing;
+        if (!installing) return;
+        installing.addEventListener('statechange', function () {
+          if (installing.state === 'installed' && navigator.serviceWorker.controller) {
+            if (typeof showToast === 'function') {
+              showToast('A new version of the site is available — refresh to update.', '');
+            }
+          }
+        });
+      });
+    }).catch(function (err) {
+      console.warn('[Ozylix] Service worker registration failed:', err);
+    });
+  });
 })();
 </script>
 
