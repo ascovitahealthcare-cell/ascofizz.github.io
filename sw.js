@@ -3,7 +3,7 @@
 // Place this file in ROOT of your GitHub Pages repo
 // ============================================================
 
-const CACHE_NAME = 'ozylix-pwa-v6';
+const CACHE_NAME = 'ozylix-pwa-v7'; // bumped: sw.js is now actually registered (see index.html) — a fresh cache name forces every visitor onto this version instead of some being stuck on whatever v6 already had cached from before registration existed.
 const OFFLINE_URL = '/offline.html';
 
 // Files to cache on install (your core pages)
