@@ -1149,18 +1149,18 @@ body.theme-glass .card:hover{box-shadow:0 10px 28px rgba(0,0,0,0.3), inset 0 1px
     <div class="nav-sec-label">Growth</div>
     <div class="nav-item" onclick="showPage('marketing')"><span class="nav-ico">📣</span> Marketing</div>
   </div>
-  <div class="nav-section">
+  <div class="nav-section owner-only" id="navSecContent">
     <div class="nav-sec-label">Content</div>
     <div class="nav-item" onclick="showPage('banners')"><span class="nav-ico">🖼️</span> Banners</div>
     <div class="nav-item" onclick="showPage('photolibrary')"><span class="nav-ico">📸</span> Photo Library</div>
     <div class="nav-item" onclick="showPage('siteimages')"><span class="nav-ico">🖥️</span> Site Images</div>
   </div>
-  <div class="nav-section">
+  <div class="nav-section owner-only" id="navSecFinance">
     <div class="nav-sec-label">Finance</div>
     <div class="nav-item" onclick="showPage('payments')"><span class="nav-ico">💳</span> Payments</div>
     <div class="nav-item" onclick="showPage('invoices')"><span class="nav-ico">🧾</span> Invoices</div>
   </div>
-  <div class="nav-section">
+  <div class="nav-section owner-only" id="navSecSystem">
     <div class="nav-sec-label">System</div>
     <div class="nav-item" onclick="showPage('whatsapp')"><span class="nav-ico">📱</span> WhatsApp</div>
     <div class="nav-item" onclick="showPage('aiassistant')"><span class="nav-ico">🤖</span> AI Assistant</div>
@@ -1169,8 +1169,8 @@ body.theme-glass .card:hover{box-shadow:0 10px 28px rgba(0,0,0,0.3), inset 0 1px
     <div class="nav-item" onclick="showPage('integrations')"><span class="nav-ico">🔗</span> Integrations</div>
     <div class="nav-item" onclick="showPage('geoanalytics')"><span class="nav-ico">🌏</span> Geo Analytics <span class="nav-new"></span></div>
     <div class="nav-item" onclick="showPage('performance')"><span class="nav-ico">⚡</span> Performance <span class="nav-new"></span></div>
-    <div class="nav-item" onclick="showPage('auditdebugger')"><span class="nav-ico">🛡️</span> Audit / Debugger</div>
-    <div class="nav-item" onclick="showPage('settings')"><span class="nav-ico">⚙️</span> Settings</div>
+    <div class="nav-item" id="navAuditLog" onclick="showPage('auditdebugger')"><span class="nav-ico">🛡️</span> Audit / Debugger</div>
+    <div class="nav-item" id="navSettings" onclick="showPage('settings')"><span class="nav-ico">⚙️</span> Settings</div>
   </div>
 </nav>
 
@@ -1482,9 +1482,10 @@ body.theme-glass .card:hover{box-shadow:0 10px 28px rgba(0,0,0,0.3), inset 0 1px
   <div style="display:grid;grid-template-columns:1.5fr 1fr;gap:16px;margin-bottom:16px;">
     <div class="card">
       <div class="card-hdr"><span class="card-title">📍 Active Sessions</span><span class="badge badge-green" id="lvSessionCount">0</span></div>
+      <div id="lvSiteBreakdown" style="padding:0 16px 10px;font-size:0.75rem;color:var(--text3);"></div>
       <div class="table-wrap"><table>
-        <thead><tr><th>Page</th><th>City</th><th>Device</th><th>Duration</th><th>Source</th><th>Status</th></tr></thead>
-        <tbody id="liveSessionsTbody"><tr><td colspan="6" style="text-align:center;padding:20px;color:var(--text3);">Connecting…</td></tr></tbody>
+        <thead><tr><th>Site</th><th>Page</th><th>City</th><th>Device</th><th>Duration</th><th>Source</th><th>Status</th></tr></thead>
+        <tbody id="liveSessionsTbody"><tr><td colspan="7" style="text-align:center;padding:20px;color:var(--text3);">Connecting…</td></tr></tbody>
       </table></div>
     </div>
     <div class="card">
@@ -9305,6 +9306,16 @@ updateLiveVisitors = async function () {
     converting = d.converting || 0;
     live = true;
     const n = document.getElementById('lvNotice'); if (n) n.style.display = 'none';
+
+    // Answers "is this really only ozylix.com or is something else feeding
+    // in too" directly in the panel, instead of having to ask.
+    const bd = document.getElementById('lvSiteBreakdown');
+    if (bd) {
+      const entries = Object.entries(d.site_breakdown || {}).sort((a, b) => b[1] - a[1]);
+      bd.textContent = entries.length
+        ? 'Live traffic by site: ' + entries.map(([s, c]) => `${s} (${c})`).join(' · ')
+        : '';
+    }
   } catch (e) {
     const n = document.getElementById('lvNotice');
     if (n) {
@@ -9343,6 +9354,7 @@ updateLiveVisitors = async function () {
                   : v.status === 'checkout'  ? 'badge-gold' : 'badge-gray';
       const dev = [v.device, v.os].filter(Boolean).join(' · ') + (v.is_pwa ? ' · App' : '');
       return `<tr>
+        <td><span class="badge badge-blue" style="font-size:0.68rem;">${_vaEsc(v.site || 'unknown')}</span></td>
         <td style="font-family:var(--mono);font-size:0.75rem;color:var(--green-text);">${_vaEsc(v.page || '/')}</td>
         <td style="font-size:0.78rem;">${_vaEsc(v.city || 'India')}</td>
         <td style="font-size:0.78rem;">${_vaEsc(dev)}</td>
@@ -9351,7 +9363,7 @@ updateLiveVisitors = async function () {
         <td><span class="badge ${badge}">${_vaEsc(v.status || 'browsing')}</span></td>
       </tr>`;
     }).join('')
-    : `<tr><td colspan="6" style="text-align:center;padding:20px;color:var(--text3);font-size:0.82rem;">${live ? 'Nobody on the site right now' : 'Not connected'}</td></tr>`;
+    : `<tr><td colspan="7" style="text-align:center;padding:20px;color:var(--text3);font-size:0.82rem;">${live ? 'Nobody on the site right now' : 'Not connected'}</td></tr>`;
   }
 
   if (sessions.length) {
@@ -9844,22 +9856,22 @@ showPage = function(name){
   <button class="admin-more-btn" onclick="showPage('inventory');syncAbn('inventory');closeAdminMoreMenu()"><span>📋</span><span>Inventory</span></button>
   <button class="admin-more-btn" onclick="showPage('discounts');syncAbn('discounts');closeAdminMoreMenu()"><span>🏷️</span><span>Discounts</span></button>
   <button class="admin-more-btn" onclick="showPage('marketing');syncAbn('marketing');closeAdminMoreMenu()"><span>📣</span><span>Marketing</span></button>
-  <button class="admin-more-btn" onclick="showPage('banners');syncAbn('banners');closeAdminMoreMenu()"><span>🖼️</span><span>Banners</span></button>
-  <button class="admin-more-btn" onclick="showPage('photolibrary');syncAbn('photolibrary');closeAdminMoreMenu()"><span>📸</span><span>Photo Library</span></button>
-  <button class="admin-more-btn" onclick="showPage('siteimages');syncAbn('siteimages');closeAdminMoreMenu()"><span>🖥️</span><span>Site Images</span></button>
-  <button class="admin-more-btn" onclick="showPage('payments');syncAbn('payments');closeAdminMoreMenu()"><span>💳</span><span>Payments</span></button>
-  <button class="admin-more-btn" onclick="showPage('invoices');syncAbn('invoices');closeAdminMoreMenu()"><span>🧾</span><span>Invoices</span></button>
-  <button class="admin-more-btn" onclick="showPage('whatsapp');syncAbn('whatsapp');closeAdminMoreMenu()"><span>📱</span><span>WhatsApp</span></button>
+  <button class="admin-more-btn owner-only" onclick="showPage('banners');syncAbn('banners');closeAdminMoreMenu()"><span>🖼️</span><span>Banners</span></button>
+  <button class="admin-more-btn owner-only" onclick="showPage('photolibrary');syncAbn('photolibrary');closeAdminMoreMenu()"><span>📸</span><span>Photo Library</span></button>
+  <button class="admin-more-btn owner-only" onclick="showPage('siteimages');syncAbn('siteimages');closeAdminMoreMenu()"><span>🖥️</span><span>Site Images</span></button>
+  <button class="admin-more-btn owner-only" onclick="showPage('payments');syncAbn('payments');closeAdminMoreMenu()"><span>💳</span><span>Payments</span></button>
+  <button class="admin-more-btn owner-only" onclick="showPage('invoices');syncAbn('invoices');closeAdminMoreMenu()"><span>🧾</span><span>Invoices</span></button>
+  <button class="admin-more-btn owner-only" onclick="showPage('whatsapp');syncAbn('whatsapp');closeAdminMoreMenu()"><span>📱</span><span>WhatsApp</span></button>
   <button class="admin-more-btn" onclick="showPage('livevisitors');syncAbn('livevisitors');closeAdminMoreMenu()"><span>👁️</span><span>Live Visitors</span></button>
-  <button class="admin-more-btn" onclick="showPage('geoanalytics');syncAbn('geoanalytics');closeAdminMoreMenu()"><span>🌏</span><span>Geo Analytics</span></button>
-  <button class="admin-more-btn" onclick="showPage('performance');syncAbn('performance');closeAdminMoreMenu()"><span>⚡</span><span>Performance</span></button>
+  <button class="admin-more-btn owner-only" onclick="showPage('geoanalytics');syncAbn('geoanalytics');closeAdminMoreMenu()"><span>🌏</span><span>Geo Analytics</span></button>
+  <button class="admin-more-btn owner-only" onclick="showPage('performance');syncAbn('performance');closeAdminMoreMenu()"><span>⚡</span><span>Performance</span></button>
   <button class="admin-more-btn" onclick="showPage('calendar');syncAbn('calendar');closeAdminMoreMenu()"><span>🗓️</span><span>Calendar</span></button>
-  <button class="admin-more-btn" onclick="showPage('database');syncAbn('database');closeAdminMoreMenu()"><span>🗄️</span><span>Database</span></button>
-  <button class="admin-more-btn" onclick="showPage('integrations');syncAbn('integrations');closeAdminMoreMenu()"><span>🔗</span><span>Integrations</span></button>
-  <button class="admin-more-btn" onclick="showPage('aiassistant');syncAbn('aiassistant');closeAdminMoreMenu()"><span>🤖</span><span>AI Assistant</span></button>
+  <button class="admin-more-btn owner-only" onclick="showPage('database');syncAbn('database');closeAdminMoreMenu()"><span>🗄️</span><span>Database</span></button>
+  <button class="admin-more-btn owner-only" onclick="showPage('integrations');syncAbn('integrations');closeAdminMoreMenu()"><span>🔗</span><span>Integrations</span></button>
+  <button class="admin-more-btn owner-only" onclick="showPage('aiassistant');syncAbn('aiassistant');closeAdminMoreMenu()"><span>🤖</span><span>AI Assistant</span></button>
   <button class="admin-more-btn" id="moreAiTeam" onclick="showPage('aiteam');syncAbn('aiteam');closeAdminMoreMenu()" style="display:none"><span>🧠</span><span>AI Team</span></button>
-  <button class="admin-more-btn" onclick="showPage('auditdebugger');syncAbn('auditdebugger');closeAdminMoreMenu()"><span>🛡️</span><span>Audit / Debugger</span></button>
-  <button class="admin-more-btn" onclick="showPage('settings');syncAbn('settings');closeAdminMoreMenu()"><span>⚙️</span><span>Settings</span></button>
+  <button class="admin-more-btn owner-only" id="moreAuditLog" onclick="showPage('auditdebugger');syncAbn('auditdebugger');closeAdminMoreMenu()"><span>🛡️</span><span>Audit / Debugger</span></button>
+  <button class="admin-more-btn owner-only" id="moreSettings" onclick="showPage('settings');syncAbn('settings');closeAdminMoreMenu()"><span>⚙️</span><span>Settings</span></button>
 </div>
 
 <script>
@@ -11378,7 +11390,16 @@ body.role-admin #azRoleBanner{display:block}
     try {
       var t = localStorage.getItem('ascovita_token');
       if (!t) return 0;
-      return (JSON.parse(atob(t.split('.')[1])).exp || 0) * 1000;
+      // JWT payloads are base64URL (- and _, no padding), not plain base64
+      // (+ and /, padded). atob() on a raw JWT segment can throw — or on
+      // some inputs silently decode the wrong bytes — whenever the payload
+      // happens to contain a run that differs between the two alphabets.
+      // That corrupted/zero exp was read as "already expired", which is
+      // indistinguishable from a real 2-minute session to whoever is
+      // looking at the clock. Normalise to standard base64 first.
+      var b64 = t.split('.')[1].replace(/-/g, '+').replace(/_/g, '/');
+      while (b64.length % 4) b64 += '=';
+      return (JSON.parse(atob(b64)).exp || 0) * 1000;
     } catch (e) { return 0; }
   }
 
