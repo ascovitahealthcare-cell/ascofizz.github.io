@@ -2,6 +2,33 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
+<!-- ── FORCE HTTPS — must stay the first script in the document ────────
+     The admin panel matters more here than the storefront: it posts a
+     password and holds a staff JWT in localStorage, and over plain http
+     both cross the network in clear text. The API refuses http origins
+     (adminOriginOnly allows https://ozylix.com and https://www.ozylix.com
+     only), so an http admin page cannot even sign in — it just reports
+     "Cannot reach server" while the real reason, a CORS refusal, is
+     visible only in the Render log. Get onto https before anything runs.
+
+     See the matching note in index.html. The authoritative fix is
+     Settings → Pages → Enforce HTTPS; this is the backstop. -->
+<script>
+  (function () {
+    try {
+      if (location.protocol === 'http:' &&
+          !/^(localhost|127\.0\.0\.1|\[::1\])$/.test(location.hostname)) {
+        location.replace('https://' + location.host + location.pathname +
+                         location.search + location.hash);
+      }
+    } catch (e) { /* never block the page on this */ }
+  })();
+</script>
+<!-- The same A4 GST tax invoice the storefront uses. The admin panel used to
+     carry its own hand-written invoice — different layout, fonts, GST split
+     and header — so the document a customer received and the one staff
+     printed for the same order did not match. One template now. -->
+<script src="invoice-template.js"></script>
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, minimum-scale=1.0">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -3210,7 +3237,7 @@ body.theme-glass .card:hover{box-shadow:0 10px 28px rgba(0,0,0,0.3), inset 0 1px
     <div class="modal-body" id="invoicePrintArea"></div>
     <div class="modal-ftr">
       <button class="btn btn-secondary" onclick="closeModal('invoiceModal')">Close</button>
-      <button class="btn btn-primary" onclick="window.print()">🖨️ Print Invoice</button>
+      <button class="btn btn-primary" onclick="azPrintInvoice()">🖨️ Print Invoice</button>
     </div>
   </div>
 </div>
@@ -7395,128 +7422,51 @@ function renderInvoicesTable(list) {
   }).join('') : '<tr><td colspan="8" class="empty-state">No invoices match these filters</td></tr>';
 }
 
+/* Renders the SHARED A4 tax invoice (invoice-template.js) into the modal.
+
+   The admin panel used to build its own invoice here — a different layout,
+   different fonts, its own GST arithmetic and its own header — so the
+   document a customer downloaded and the one staff printed for the same
+   order did not match. Both now come from buildInvoiceHTML().
+
+   It goes in an iframe because buildInvoiceHTML() returns a complete HTML
+   document with its own @page A4 rules; dropping that into a <div> would
+   throw the page setup away and leave the invoice at whatever size the
+   admin stylesheet imposed. Printing the frame prints the real document. */
+function showSharedInvoice(order) {
+  if (typeof buildInvoiceHTML !== "function") {
+    toast("Invoice template failed to load — check invoice-template.js", "error");
+    return;
+  }
+  const area = document.getElementById("invoicePrintArea");
+  if (!area) return;
+  let html;
+  try { html = buildInvoiceHTML(order); }
+  catch (e) { toast("Could not build invoice: " + e.message, "error"); return; }
+  area.innerHTML = '<iframe id="invoiceFrame" title="Tax invoice" ' +
+    'style="width:100%;height:70vh;border:0;background:#fff;border-radius:8px;display:block"></iframe>';
+  const f = document.getElementById("invoiceFrame");
+  const d = f.contentDocument || f.contentWindow.document;
+  d.open(); d.write(html); d.close();
+  openModal("invoiceModal");
+}
+
+/* Print the frame, not the page. window.print() would print the admin
+   dashboard and rely on a visibility hack to hide it; the frame prints the
+   invoice document itself, at A4, exactly as the customer receives it. */
+function azPrintInvoice() {
+  const f = document.getElementById("invoiceFrame");
+  if (f && f.contentWindow) { f.contentWindow.focus(); f.contentWindow.print(); }
+  else window.print();
+}
+
 function printInvoice(orderId) {
-  const o = allOrders.find(x=>x.id===orderId); if(!o) return;
-  let items = []; try { items = typeof o.items==='string'?JSON.parse(o.items||'[]'):(o.items||[]); } catch {}
-  const t = parseFloat(o.total||0);
-  const ship = parseFloat(o.shipping||o.shipping_cost||0);
-  const sub = t - ship;
-  const taxable = Math.round(sub / 1.05);
-  const gstTotal = sub - taxable;
-  const isGuj = (o.state||o.customer_state||'').toLowerCase().includes('gujarat');
-  const cgst = isGuj ? gstTotal/2 : 0;
-  const sgst = isGuj ? gstTotal/2 : 0;
-  const igst = isGuj ? 0 : gstTotal;
-  const now = new Date(o.created_at||Date.now());
-  const dateStr = now.toLocaleDateString('en-IN',{day:'2-digit',month:'long',year:'numeric'});
-  const invoiceNum = 'INV-' + orderId.replace('AVC-','').replace('DEMO-','D');
-
-  const itemRows = items.length ? items.map((it,i)=>{
-    const qty = it.qty||it.units||1;
-    const price = parseFloat(it.price||it.selling_price||0);
-    const lineTotal = price * qty;
-    const lineBase = Math.round(lineTotal/1.05);
-    const lineGst = lineTotal - lineBase;
-    return `<tr style="border-bottom:1px solid #eee;">
-      <td style="padding:9px 12px;font-size:12px;color:#666;">${i+1}</td>
-      <td style="padding:9px 12px;font-size:12px;font-weight:600;">${esc(it.name||'Product')}</td>
-      <td style="padding:9px 12px;font-size:11px;color:#888;text-align:center;">30049099</td>
-      <td style="padding:9px 12px;font-size:12px;text-align:center;">${qty}</td>
-      <td style="padding:9px 12px;font-size:12px;text-align:right;">₹${fmtNum(price)}</td>
-      <td style="padding:9px 12px;font-size:11px;text-align:center;color:#2D7D0A;">5%</td>
-      <td style="padding:9px 12px;font-size:11px;text-align:right;color:#2D7D0A;">₹${lineGst.toFixed(2)}</td>
-      <td style="padding:9px 12px;font-size:12px;text-align:right;font-weight:700;">₹${fmtNum(lineTotal)}</td>
-    </tr>`;
-  }).join('') : `<tr><td colspan="8" style="padding:20px;text-align:center;color:#999;font-size:12px;">No line items</td></tr>`;
-
-  const taxRows = isGuj ? `
-    <tr><td colspan="5"></td><td style="padding:5px 12px;font-size:12px;color:#555;text-align:right;">CGST (2.5%)</td><td colspan="2" style="padding:5px 12px;font-size:12px;text-align:right;">₹${cgst.toFixed(2)}</td></tr>
-    <tr><td colspan="5"></td><td style="padding:5px 12px;font-size:12px;color:#555;text-align:right;">SGST (2.5%)</td><td colspan="2" style="padding:5px 12px;font-size:12px;text-align:right;">₹${sgst.toFixed(2)}</td></tr>` : `
-    <tr><td colspan="5"></td><td style="padding:5px 12px;font-size:12px;color:#555;text-align:right;">IGST (5%)</td><td colspan="2" style="padding:5px 12px;font-size:12px;text-align:right;">₹${igst.toFixed(2)}</td></tr>`;
-
-  document.getElementById('invoicePrintArea').innerHTML = `
-  <div style="font-family:'Segoe UI',Arial,sans-serif;max-width:780px;margin:0 auto;background:#fff;border:1px solid #ddd;border-radius:10px;overflow:hidden;color:#1a1a1a;">
-    <!-- HEADER -->
-    <div style="background:linear-gradient(135deg,#C2434F 0%,#D8676E 100%);color:#fff;padding:28px 32px;display:flex;justify-content:space-between;align-items:flex-start;">
-      <div style="display:flex;align-items:center;gap:14px;">
-        <img src="assets/ozylix-icon-192.png" alt="Ozylix" style="height:54px;width:auto;background:#fff;border-radius:8px;padding:6px 10px;flex-shrink:0;" onerror="this.style.display='none'">
-        <div>
-          <div style="font-size:22px;font-weight:900;letter-spacing:.5px;">Ozylix</div>
-          <div style="font-size:11px;opacity:.8;margin-top:3px;">Organic Vitamins & Nutraceuticals · Made in India</div>
-          <div style="font-size:10px;opacity:.65;margin-top:5px;">FSSAI Lic: 10024022001967 &nbsp;|&nbsp; GSTIN: 24XXXXXXX &nbsp;|&nbsp; HSN: 30049099</div>
-          <div style="font-size:10px;opacity:.65;">Amin Auto Road, Near Rajshivalay Cinema, Anand – 388001, Gujarat</div>
-        </div>
-      </div>
-      <div style="text-align:right;">
-        <div style="background:rgba(255,255,255,0.15);border-radius:6px;padding:10px 16px;display:inline-block;">
-          <div style="font-size:11px;opacity:.75;text-transform:uppercase;letter-spacing:1px;">Tax Invoice</div>
-          <div style="font-size:20px;font-weight:800;margin-top:2px;">${invoiceNum}</div>
-        </div>
-        <div style="font-size:11px;opacity:.7;margin-top:8px;">${dateStr}</div>
-      </div>
-    </div>
-    <!-- INFO ROW -->
-    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;background:#f8fdf4;border-bottom:2px solid #C2434F;padding:16px 32px;gap:20px;">
-      <div>
-        <div style="font-size:10px;text-transform:uppercase;letter-spacing:.8px;color:#888;margin-bottom:4px;font-weight:700;">Bill To</div>
-        <div style="font-weight:700;font-size:14px;">${esc(o.customer_name||'Customer')}</div>
-        <div style="font-size:11px;color:#555;line-height:1.8;margin-top:2px;">
-          ${esc(o.address||o.address_line1||'')} ${esc(o.address_line2||'')}<br>
-          ${esc(o.city||'')}, ${esc(o.state||'')} – ${esc(o.pincode||'')}<br>
-          📞 ${esc(o.customer_phone||'')}<br>✉️ ${esc(o.customer_email||'')}
-        </div>
-      </div>
-      <div>
-        <div style="font-size:10px;text-transform:uppercase;letter-spacing:.8px;color:#888;margin-bottom:4px;font-weight:700;">Order Details</div>
-        <div style="font-size:11px;line-height:2;color:#444;">
-          <b>Order ID:</b> ${o.id}<br>
-          <b>Date:</b> ${dateStr}<br>
-          <b>Items:</b> ${items.length||'—'}
-        </div>
-      </div>
-      <div>
-        <div style="font-size:10px;text-transform:uppercase;letter-spacing:.8px;color:#888;margin-bottom:4px;font-weight:700;">Payment</div>
-        <div style="font-size:11px;line-height:2;color:#444;">
-          <b>Mode:</b> ${o.payment_mode||o.payment_method||'Online'}<br>
-          <b>Status:</b> <span style="color:#22c55e;font-weight:700;">${o.payment_status||'Paid'}</span><br>
-          ${o.cf_payment_id?`<b>Ref:</b> ${o.cf_payment_id}`:''}
-        </div>
-      </div>
-    </div>
-    <!-- ITEMS TABLE -->
-    <div style="padding:20px 32px 0;">
-      <table style="width:100%;border-collapse:collapse;">
-        <thead>
-          <tr style="background:#C2434F;color:#fff;">
-            ${['#','Product','HSN','Qty','Unit Price','GST%','Tax Amt','Total'].map(h=>`<th style="padding:10px 12px;text-align:${['Qty','GST%'].includes(h)?'center':h==='#'?'left':'right'};font-size:11px;font-weight:600;letter-spacing:.3px;">${h}</th>`).join('')}
-          </tr>
-        </thead>
-        <tbody>${itemRows}</tbody>
-        <tbody style="background:#f8fdf4;border-top:2px solid #C2434F;">
-          <tr><td colspan="5"></td><td style="padding:6px 12px;font-size:12px;color:#666;text-align:right;">Taxable Amount</td><td colspan="2" style="padding:6px 12px;font-size:12px;text-align:right;">₹${fmtNum(taxable)}</td></tr>
-          ${taxRows}
-          <tr><td colspan="5"></td><td style="padding:6px 12px;font-size:12px;color:#666;text-align:right;">Shipping</td><td colspan="2" style="padding:6px 12px;font-size:12px;text-align:right;">${ship<=0?'<span style="color:#22c55e;font-weight:700;">FREE</span>':'₹'+fmtNum(ship)}</td></tr>
-          <tr style="background:#C2434F;color:#fff;">
-            <td colspan="5"></td>
-            <td style="padding:12px;font-size:14px;font-weight:800;text-align:right;">GRAND TOTAL</td>
-            <td colspan="2" style="padding:12px;font-size:15px;font-weight:900;text-align:right;">₹${fmtNum(t)}</td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
-    <!-- NOTES -->
-    <div style="padding:16px 32px;border-top:1px solid #eee;font-size:10px;color:#888;line-height:1.9;">
-      • All prices inclusive of 5% GST &nbsp;|&nbsp; HSN Code: 30049099 (Nutraceuticals) &nbsp;|&nbsp; ${isGuj?'CGST 2.5% + SGST 2.5% (Gujarat)':'IGST 5%'}<br>
-      • Returns accepted within 7 days for sealed/unused products<br>
-      • Computer-generated invoice — no physical signature required<br>
-      • Queries: ascovitahealthcare@gmail.com &nbsp;|&nbsp; +91 98985 82650
-    </div>
-    <!-- FOOTER -->
-    <div style="background:#C2434F;color:rgba(255,255,255,0.9);padding:12px 32px;text-align:center;font-size:10px;line-height:1.8;">
-      Thank you for shopping with Ozylix 🌿 &nbsp;|&nbsp; Made in India, Anand Gujarat &nbsp;|&nbsp; FSSAI Approved · Lab Tested &nbsp;|&nbsp; ascovita.in
-    </div>
-  </div>`;
-  openModal('invoiceModal');
+  const o = allOrders.find(x => x.id === orderId);
+  if (!o) { toast("Order not found: " + orderId, "error"); return; }
+  // normaliseOrderForInvoice() already understands the backend column
+  // names this row carries (customer_name, created_at, payment_method,
+  // shipping, customer_state, items-as-JSON-string), so it goes straight in.
+  showSharedInvoice(o);
 }
 
 // ═══════════════════════════════════════════════
@@ -7660,132 +7610,48 @@ function miCalcTotals() {
   return { sub, promo, taxable, gstTotal, cgst, sgst, igst, ship, grandTotal, isGuj };
 }
 
+/* Manual (owner-created) invoice. Same shared template as a real order —
+   it previously built a third invoice layout by hand, so a customer given
+   a manual invoice received a document that matched neither the storefront
+   copy nor the one printed from an order. */
 function miGenerate() {
-  const name = document.getElementById('mi_name').value.trim();
-  const state = document.getElementById('mi_state').value;
-  if (!name) { toast('⚠️ Customer name is required','error'); return; }
-  if (!state) { toast('⚠️ Select a state','error'); return; }
-  if (!miItems.length || miItems.every(it => !it.name.trim())) { toast('⚠️ Add at least one product','error'); return; }
+  const v = id => (document.getElementById(id)?.value || "").trim();
+  const name = v("mi_name"), state = v("mi_state");
+  if (!name)  { toast("⚠️ Customer name is required","error"); return; }
+  if (!state) { toast("⚠️ Select a state","error"); return; }
+  const rows = miItems.filter(it => it.name.trim());
+  if (!rows.length) { toast("⚠️ Add at least one product","error"); return; }
 
   const t = miCalcTotals();
-  const phone = document.getElementById('mi_phone').value.trim();
-  const email = document.getElementById('mi_email').value.trim();
-  const address = document.getElementById('mi_address').value.trim();
-  const city = document.getElementById('mi_city').value.trim();
-  const pin = document.getElementById('mi_pin').value.trim();
-  const paymode = document.getElementById('mi_paymode').value;
-  const paystatus = document.getElementById('mi_paystatus').value;
-  const notes = document.getElementById('mi_notes').value.trim();
-  const invNo = document.getElementById('mi_invno').value.trim() || ('INV-M' + Date.now().toString().slice(-6));
-  const dateVal = document.getElementById('mi_date').value;
-  const dateStr = dateVal
-    ? new Date(dateVal+'T00:00:00').toLocaleDateString('en-IN',{day:'2-digit',month:'long',year:'numeric'})
-    : new Date().toLocaleDateString('en-IN',{day:'2-digit',month:'long',year:'numeric'});
+  const dateVal = v("mi_date");
+  // buildInvoiceHTML() prefixes INV- itself, so hand it the bare reference
+  // or the invoice prints as INV-INV-M123456.
+  const invNo = v("mi_invno") || ("M" + Date.now().toString().slice(-6));
 
-  const itemRows = miItems.filter(it=>it.name.trim()).map((it,i) => {
-    const lineTotal = Math.max(0, (it.price*it.qty) - it.discount);
-    const lineGst = lineTotal - Math.round(lineTotal/1.05);
-    return `<tr style="border-bottom:1px solid #eee;">
-      <td style="padding:9px 12px;font-size:12px;color:#666;">${i+1}</td>
-      <td style="padding:9px 12px;font-size:12px;font-weight:600;">${esc(it.name)}</td>
-      <td style="padding:9px 12px;font-size:11px;color:#888;text-align:center;">30049099</td>
-      <td style="padding:9px 12px;font-size:12px;text-align:center;">${it.qty}</td>
-      <td style="padding:9px 12px;font-size:12px;text-align:right;">₹${fmtNum(it.mrp||it.price)}</td>
-      <td style="padding:9px 12px;font-size:12px;text-align:right;">₹${fmtNum(it.price)}</td>
-      <td style="padding:9px 12px;font-size:12px;text-align:right;">${it.discount>0?'₹'+fmtNum(it.discount):'-'}</td>
-      <td style="padding:9px 12px;font-size:11px;text-align:center;color:#2D7D0A;">5%</td>
-      <td style="padding:9px 12px;font-size:11px;text-align:right;color:#2D7D0A;">₹${lineGst.toFixed(2)}</td>
-      <td style="padding:9px 12px;font-size:12px;text-align:right;font-weight:700;">₹${fmtNum(lineTotal)}</td>
-    </tr>`;
-  }).join('');
-
-  const taxRows = t.isGuj ? `
-    <tr><td colspan="7"></td><td style="padding:5px 12px;font-size:12px;color:#555;text-align:right;">CGST (2.5%)</td><td colspan="2" style="padding:5px 12px;font-size:12px;text-align:right;">₹${t.cgst.toFixed(2)}</td></tr>
-    <tr><td colspan="7"></td><td style="padding:5px 12px;font-size:12px;color:#555;text-align:right;">SGST (2.5%)</td><td colspan="2" style="padding:5px 12px;font-size:12px;text-align:right;">₹${t.sgst.toFixed(2)}</td></tr>` : `
-    <tr><td colspan="7"></td><td style="padding:5px 12px;font-size:12px;color:#555;text-align:right;">IGST (5%)</td><td colspan="2" style="padding:5px 12px;font-size:12px;text-align:right;">₹${t.igst.toFixed(2)}</td></tr>`;
-
-  document.getElementById('invoicePrintArea').innerHTML = `
-  <div style="font-family:'Segoe UI',Arial,sans-serif;max-width:820px;margin:0 auto;background:#fff;border:1px solid #ddd;border-radius:10px;overflow:hidden;color:#1a1a1a;">
-    <div style="background:linear-gradient(135deg,#C2434F 0%,#D8676E 100%);color:#fff;padding:28px 32px;display:flex;justify-content:space-between;align-items:flex-start;">
-      <div style="display:flex;align-items:center;gap:14px;">
-        <img src="assets/ozylix-icon-192.png" alt="Ozylix" style="height:54px;width:auto;background:#fff;border-radius:8px;padding:6px 10px;flex-shrink:0;" onerror="this.style.display='none'">
-        <div>
-          <div style="font-size:22px;font-weight:900;letter-spacing:.5px;">Ozylix</div>
-          <div style="font-size:11px;opacity:.8;margin-top:3px;">Organic Vitamins & Nutraceuticals · Made in India</div>
-          <div style="font-size:10px;opacity:.65;margin-top:5px;">FSSAI Lic: 10024022001967 &nbsp;|&nbsp; GSTIN: 24XXXXXXX &nbsp;|&nbsp; HSN: 30049099</div>
-          <div style="font-size:10px;opacity:.65;">Amin Auto Road, Near Rajshivalay Cinema, Anand – 388001, Gujarat</div>
-        </div>
-      </div>
-      <div style="text-align:right;">
-        <div style="background:rgba(255,255,255,0.15);border-radius:6px;padding:10px 16px;display:inline-block;">
-          <div style="font-size:11px;opacity:.75;text-transform:uppercase;letter-spacing:1px;">Tax Invoice</div>
-          <div style="font-size:20px;font-weight:800;margin-top:2px;">${esc(invNo)}</div>
-        </div>
-        <div style="font-size:11px;opacity:.7;margin-top:8px;">${dateStr}</div>
-      </div>
-    </div>
-    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;background:#f8fdf4;border-bottom:2px solid #C2434F;padding:16px 32px;gap:20px;">
-      <div>
-        <div style="font-size:10px;text-transform:uppercase;letter-spacing:.8px;color:#888;margin-bottom:4px;font-weight:700;">Bill To</div>
-        <div style="font-weight:700;font-size:14px;">${esc(name)}</div>
-        <div style="font-size:11px;color:#555;line-height:1.8;margin-top:2px;">
-          ${esc(address)}<br>
-          ${esc(city)}${city&&state?', ':''}${esc(state)}${pin?' – '+esc(pin):''}<br>
-          ${phone?'📞 '+esc(phone)+'<br>':''}${email?'✉️ '+esc(email):''}
-        </div>
-      </div>
-      <div>
-        <div style="font-size:10px;text-transform:uppercase;letter-spacing:.8px;color:#888;margin-bottom:4px;font-weight:700;">Invoice Details</div>
-        <div style="font-size:11px;line-height:2;color:#444;">
-          <b>Invoice #:</b> ${esc(invNo)}<br>
-          <b>Date:</b> ${dateStr}<br>
-          <b>Type:</b> Manual Invoice
-        </div>
-      </div>
-      <div>
-        <div style="font-size:10px;text-transform:uppercase;letter-spacing:.8px;color:#888;margin-bottom:4px;font-weight:700;">Payment</div>
-        <div style="font-size:11px;line-height:2;color:#444;">
-          <b>Mode:</b> ${esc(paymode)}<br>
-          <b>Status:</b> <span style="color:${paystatus==='PAID'?'#22c55e':'#f59e0b'};font-weight:700;">${esc(paystatus)}</span>
-        </div>
-      </div>
-    </div>
-    <div style="padding:20px 32px 0;">
-      <table style="width:100%;border-collapse:collapse;">
-        <thead>
-          <tr style="background:#C2434F;color:#fff;">
-            ${['#','Product','HSN','Qty','MRP','Unit Price','Discount','GST%','Tax Amt','Total'].map(h=>`<th style="padding:10px 12px;text-align:${['Qty','GST%'].includes(h)?'center':h==='#'?'left':'right'};font-size:11px;font-weight:600;letter-spacing:.3px;">${h}</th>`).join('')}
-          </tr>
-        </thead>
-        <tbody>${itemRows}</tbody>
-        <tbody style="background:#f8fdf4;border-top:2px solid #C2434F;">
-          <tr><td colspan="7"></td><td style="padding:6px 12px;font-size:12px;color:#666;text-align:right;">Subtotal</td><td colspan="2" style="padding:6px 12px;font-size:12px;text-align:right;">₹${fmtNum(t.sub)}</td></tr>
-          ${t.promo>0?`<tr><td colspan="7"></td><td style="padding:6px 12px;font-size:12px;color:#27ae60;text-align:right;">Promo Discount</td><td colspan="2" style="padding:6px 12px;font-size:12px;text-align:right;color:#27ae60;">-₹${fmtNum(t.promo)}</td></tr>`:''}
-          <tr><td colspan="7"></td><td style="padding:6px 12px;font-size:12px;color:#666;text-align:right;">Taxable Amount</td><td colspan="2" style="padding:6px 12px;font-size:12px;text-align:right;">₹${fmtNum(t.taxable)}</td></tr>
-          ${taxRows}
-          <tr><td colspan="7"></td><td style="padding:6px 12px;font-size:12px;color:#666;text-align:right;">Shipping</td><td colspan="2" style="padding:6px 12px;font-size:12px;text-align:right;">${t.ship<=0?'<span style="color:#22c55e;font-weight:700;">FREE</span>':'₹'+fmtNum(t.ship)}</td></tr>
-          <tr style="background:#C2434F;color:#fff;">
-            <td colspan="7"></td>
-            <td style="padding:12px;font-size:14px;font-weight:800;text-align:right;">GRAND TOTAL</td>
-            <td colspan="2" style="padding:12px;font-size:15px;font-weight:900;text-align:right;">₹${fmtNum(t.grandTotal)}</td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
-    <div style="padding:16px 32px;border-top:1px solid #eee;font-size:10px;color:#888;line-height:1.9;">
-      • All prices inclusive of 5% GST &nbsp;|&nbsp; HSN Code: 30049099 (Nutraceuticals) &nbsp;|&nbsp; ${t.isGuj?'CGST 2.5% + SGST 2.5% (Gujarat)':'IGST 5%'}<br>
-      ${notes ? esc(notes)+'<br>' : ''}
-      • Computer-generated invoice — no physical signature required<br>
-      • Queries: ascovitahealthcare@gmail.com &nbsp;|&nbsp; +91 98985 82650
-    </div>
-    <div style="background:#C2434F;color:rgba(255,255,255,0.9);padding:12px 32px;text-align:center;font-size:10px;line-height:1.8;">
-      Thank you for shopping with Ozylix 🌿 &nbsp;|&nbsp; Made in India, Anand Gujarat &nbsp;|&nbsp; FSSAI Approved · Lab Tested &nbsp;|&nbsp; ascovita.in
-    </div>
-  </div>`;
-
-  closeModal('manualInvoiceModal');
-  openModal('invoiceModal');
-  toast('✅ Manual invoice generated','success');
+  showSharedInvoice({
+    orderId:  invNo.replace(/^INV-/i, ""),
+    date:     dateVal
+                ? new Date(dateVal + "T00:00:00").toLocaleDateString("en-IN",{day:"2-digit",month:"short",year:"numeric"})
+                : new Date().toLocaleDateString("en-IN",{day:"2-digit",month:"short",year:"numeric"}),
+    customer: name,
+    email:    v("mi_email"),
+    phone:    v("mi_phone"),
+    address:  [v("mi_address"), v("mi_city"), v("mi_pin")].filter(Boolean).join(", "),
+    state:    state,
+    // Per-line discounts are already netted off in the rate here, because
+    // the shared template prices each line at rate x qty and carries a
+    // single order-level discount. Netting per line keeps every line total
+    // and the grand total identical to the preview the owner just approved.
+    items:    rows.map(it => {
+                const qty  = Number(it.qty) || 1;
+                const line = Math.max(0, (Number(it.price)||0) * qty - (Number(it.discount)||0));
+                return { name: it.name, qty: qty, price: line / qty };
+              }),
+    discount: parseFloat(document.getElementById("mi_promo")?.value || 0) || 0,
+    ship:     parseFloat(document.getElementById("mi_ship")?.value || 0) || 0,
+    total:    t.grandTotal,
+    method:   v("mi_paymode") || "UPI",
+  });
 }
 
 
