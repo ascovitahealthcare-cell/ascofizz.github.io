@@ -8789,69 +8789,12 @@ function calcShipping(netSubtotal) {
 }
 function shippingIsAlwaysFree() { return !SHIP_FEE; }
 
-function renderCheckoutSummary() {
-  const el = document.getElementById('ckSummary');
-  if (!el) return;
-
-  const sub = STORE.cart.reduce((s, item) => {
-    const p = PRODUCTS.find(p => p.id === item.id);
-    if (!p) return s;
-    const unitPrice = item.tierRate !== undefined ? item.tierRate : (p.salePrice || p.price);
-    return s + unitPrice * item.qty;
-  }, 0);
-
-  let disc = 0;
-  if (typeof activePromoCode !== 'undefined' && activePromoCode) {
-    if (activePromoCode.type === 'pct') disc = azPromoCap(Math.round(sub * activePromoCode.value / 100));
-    else if (activePromoCode.type === 'flat') disc = azPromoCap(Math.min(activePromoCode.value, sub));
-  } else if (typeof appliedDiscount !== 'undefined' && appliedDiscount) {
-    disc = appliedDiscount.type==='percent' ? Math.round(sub*appliedDiscount.value/100) : appliedDiscount.value;
-  }
-
-  const ship  = calcShipping(sub - disc);
-  const _vita = vitaCheckoutInfo(sub - disc);
-  const vitaOff = _vita.rupees;
-  const total = Math.max(0, sub - disc + ship - vitaOff);
-
-  const itemsHtml = STORE.cart.map(item => {
-    const p = PRODUCTS.find(p => p.id === item.id);
-    if (!p) return '';
-    const unitPrice  = item.tierRate !== undefined ? item.tierRate : (p.salePrice || p.price);
-    const packLabel  = item.tierTabs  ? ` (${item.tierTabs} tabs)` : '';
-    const tierLabel  = item.tierLabel ? ` — ${item.tierLabel}` : '';
-    const tierIdx    = item.tierIdx !== undefined ? item.tierIdx : -1;
-    const imgSrc     = getProductImg(p);
-    return `<div class="ck-item-row">
-      <img class="ck-item-img" src="${imgSrc}" alt="${p.name}" onerror="this.src=PRODUCT_FALLBACKS.default" loading="lazy" decoding="async">
-      <div class="ck-item-info">
-        <div class="ck-item-name">${p.name}${packLabel}${tierLabel}</div>
-        <div class="ck-item-price-line">₹${unitPrice.toLocaleString('en-IN')} each</div>
-      </div>
-      <div class="ck-item-right">
-        <div class="ck-qty-wrap">
-          <button class="ck-qty-btn" onclick="ckUpdateQty(${p.id},${item.qty-1},${tierIdx})" title="Decrease">−</button>
-          <span class="ck-qty-num">${item.qty}</span>
-          <button class="ck-qty-btn" onclick="ckUpdateQty(${p.id},${item.qty+1},${tierIdx})" title="Increase">+</button>
-        </div>
-        <div class="ck-item-total">₹${(unitPrice * item.qty).toLocaleString('en-IN')}</div>
-        <button class="ck-remove-btn" onclick="if(confirm('Remove?')){STORE.removeFromCart(${p.id});renderCheckoutSummary();renderCkRecommendations();renderSideCart();}" title="Remove">Remove ✕</button>
-      </div>
-    </div>`;
-  }).join('');
-
-  el.innerHTML = `${itemsHtml}
-    <hr style="border:none;border-top:1.5px solid var(--light-gray);margin:14px 0 10px">
-    <div class="sum-row"><span>Subtotal</span><span>₹${sub.toLocaleString('en-IN')}</span></div>
-    ${disc > 0 ? `<div class="sum-row" style="color:var(--success)"><span>🏷️ Discount</span><span>-₹${disc.toLocaleString('en-IN')}</span></div>` : ''}
-    <div class="sum-row"><span>Shipping</span><span>${ship === 0 ? '<span style="color:var(--success);font-weight:700">FREE</span>' : '₹' + ship}</span></div>
-    ${vitaOff > 0 ? `<div class="sum-row" style="color:var(--fern-lo)"><span>💎 VitaPoints (${_vita.applied.toLocaleString('en-IN')})</span><span>-₹${vitaOff.toFixed(2)}</span></div>` : ''}
-    <hr style="border:none;border-top:1px solid var(--light-gray);margin:8px 0">
-    <div class="sum-row total"><span>Total</span><span style="color:var(--green);font-size:1.1rem">₹${total.toLocaleString('en-IN',{maximumFractionDigits:2})}</span></div>
-    ${vitaRedeemWidgetHTML(sub - disc)}`;
-
-  // Also re-render recommendations whenever summary updates
-  renderCkRecommendations();
-}
+// An older renderCheckoutSummary() lived here — 63 lines, superseded by the
+// one further down whose own comment reads "fix for promo not affecting
+// price". Both were top-level declarations with the same name, so the later
+// one silently won and this copy had never run since the day it was
+// replaced. Deleting it is not a behaviour change; it is deleting the
+// version that already was not running.
 </script>
 
 
@@ -10582,7 +10525,13 @@ async function loadProductReviews(productId) {
   try {
     // Throw rather than return: the catch below already sets the honest
     // empty state and marks the fetch complete.
-    const sb = sbClient(); if (!sb) throw new Error('Supabase client not loaded yet');
+    // sbClientWhenReady(), not sbClient(). The Supabase bundle is a
+    // DEFERRED CDN script, so it has not run yet during start-up — and
+    // this fires during start-up. The bare call returned null, this threw
+    // "Supabase client not loaded yet", and nothing ever retried: the
+    // reviews stayed empty for the life of the page. Waiting a moment is
+    // the whole fix.
+    const sb = await sbClientWhenReady(8000); if (!sb) throw new Error('Supabase client not loaded yet');
     const { data, error } = await sb
       .from('reviews')
       .select('id, user_name, rating, review_text, created_at, verified')
@@ -12791,7 +12740,13 @@ let FEATURED_REVIEWS_AVG   = null;
 
 async function loadReviewStats() {
   try {
-    const sb = sbClient(); if (!sb) return;
+    // sbClientWhenReady(), not sbClient(). The Supabase bundle is a
+    // DEFERRED CDN script, so it has not run yet during start-up — and
+    // this fires during start-up. The bare call returned null, this threw
+    // "Supabase client not loaded yet", and nothing ever retried: the
+    // reviews stayed empty for the life of the page. Waiting a moment is
+    // the whole fix.
+    const sb = await sbClientWhenReady(8000); if (!sb) return;
     const { data, count, error } = await sb
       .from('reviews').select('rating', { count: 'exact' });
     if (error) throw error;
@@ -12807,7 +12762,13 @@ async function getFeaturedReviews() {
   try {
     // Throw rather than return: the catch below already sets the honest
     // empty state and marks the fetch complete.
-    const sb = sbClient(); if (!sb) throw new Error('Supabase client not loaded yet');
+    // sbClientWhenReady(), not sbClient(). The Supabase bundle is a
+    // DEFERRED CDN script, so it has not run yet during start-up — and
+    // this fires during start-up. The bare call returned null, this threw
+    // "Supabase client not loaded yet", and nothing ever retried: the
+    // reviews stayed empty for the life of the page. Waiting a moment is
+    // the whole fix.
+    const sb = await sbClientWhenReady(8000); if (!sb) throw new Error('Supabase client not loaded yet');
     const { data, error } = await sb
       .from('reviews')
       .select('id, product_id, product_name, user_name, rating, review_text, created_at')
@@ -12836,7 +12797,13 @@ let LIVE_RATING_CACHE = null;
 async function getLiveRating() {
   if (LIVE_RATING_CACHE) return LIVE_RATING_CACHE;
   try {
-    const sb = sbClient(); if (!sb) throw new Error('Supabase client not loaded yet');
+    // sbClientWhenReady(), not sbClient(). The Supabase bundle is a
+    // DEFERRED CDN script, so it has not run yet during start-up — and
+    // this fires during start-up. The bare call returned null, this threw
+    // "Supabase client not loaded yet", and nothing ever retried: the
+    // reviews stayed empty for the life of the page. Waiting a moment is
+    // the whole fix.
+    const sb = await sbClientWhenReady(8000); if (!sb) throw new Error('Supabase client not loaded yet');
     const { data, error, count } = await sb
       .from('reviews')
       .select('rating', { count: 'exact' });
@@ -16035,10 +16002,9 @@ async function renderReturnsPanel() {
   }
 }
 
-function _esc(v) {
-  return String(v == null ? '' : v)
-    .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
-}
+// _esc() is defined once, in invoice-template.js, which loads in <head>
+// before any of this runs. The byte-identical copy that used to sit here
+// shadowed it for no reason.
 
 async function submitReturn(orderId, btn) {
   const boxes = Array.from(document.querySelectorAll('input[type=checkbox][data-oid="' + orderId + '"]:checked'));
