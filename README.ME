@@ -1,24 +1,4 @@
-# Deploy + Re-Audit Results (2026-08-01)
 
-## ⚠️ Two manual steps — do these or things break
-
-### 1. Add this Render environment variable
-
-```
-DELHIVERY_WEBHOOK_SECRET = 9033086b8cc97f170f76c5b999ed3994fcf2209e94346d0c
-```
-
-### 2. Update the Delhivery dashboard webhook URL
-
-From `https://<your-render-url>/api/delhivery/webhook`
-to `https://<your-render-url>/api/delhivery/webhook/9033086b8cc97f170f76c5b999ed3994fcf2209e94346d0c`
-
-Until you do this, delivery statuses stop updating (fails closed, not open).
-
-### 3. Delete `email.js` from the backend repo
-
-It's dead code (renamed an env var nothing reads). Deleting it isn't
-optional cleanup — leaving it invites someone to "fix" the wrong file later.
 
 ---
 
