@@ -4315,12 +4315,27 @@ img[src=""], img[data-awaiting-upload] { visibility: hidden; width: 100%; }
 }
 .product-card:hover::before { transform: scaleX(1); }
 /* The lit well — product photography reads true on it */
+/* Editorial media well — a tinted ground per card, drawn from that card's
+   own --card-flavour rather than a flat grey plate.
+   Two reasons this earns the change. It is the card language the client
+   asked for, twice. And it does real work while the catalogue has no
+   photography: a product with no image on a flat grey plate reads as
+   broken, while the same product on a considered colour field reads as
+   deliberate. When the photographs land the tint sits behind them exactly
+   as it does in the reference.
+   color-mix keeps every tint derived from the committed palette, so the
+   grid can never drift into colours the brand does not own. The plain
+   background declared first is the fallback for anything that cannot
+   compute it. */
 .p-img-wrap {
   position: relative; overflow: hidden; box-sizing: border-box;
   aspect-ratio: 1; border-radius: calc(var(--r-lg) - 7px);
   background: var(--plate);
-  border: 1px solid var(--light-gray);
-  box-shadow: var(--neo-1);
+  background: linear-gradient(155deg,
+    color-mix(in srgb, var(--card-flavour, var(--indigo)) 30%, var(--face-warm, #FFFBF3)) 0%,
+    color-mix(in srgb, var(--card-flavour, var(--indigo)) 9%, var(--face-warm, #FFFBF3)) 74%);
+  border: none;
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--card-flavour, var(--indigo)) 12%, transparent);
 }
 .p-img-wrap img {
   width: 100%; height: 100%; object-fit: contain; padding: 16px;
@@ -4376,10 +4391,30 @@ img[src=""], img[data-awaiting-upload] { visibility: hidden; width: 100%; }
 .btn-qadd.in-cart { background: var(--indigo); color: #fff; }
 
 .p-info { display: flex; flex-direction: column; gap: 5px; padding: 15px 12px 13px; }
+/* Category kicker. This slot printed the brand name — "OZYLIX" repeated
+   down every card in a grid of Ozylix products, telling the customer
+   nothing they had not worked out. It now carries what the product is for,
+   in that card's flavour, which is the one line that differentiates two
+   cards at a glance. Mixed toward --ink so the tint stays legible on
+   parchment instead of relying on the raw accent. */
 .p-brand {
   font-size: .615rem; font-weight: 800; letter-spacing: .16em; text-transform: uppercase;
-  color: var(--seal);
+  color: color-mix(in srgb, var(--card-flavour, var(--indigo)) 62%, var(--ink));
 }
+/* The reference's "SHOP NOW →". Not a button: the whole card is already
+   the click target, and a button inside a clickable card is two controls
+   for one action. This is an affordance that says the card is enterable,
+   and the arrow carries the motion on hover. */
+.p-enter {
+  display: flex; align-items: center; gap: 7px; margin-top: 9px;
+  font-size: .66rem; font-weight: 800; letter-spacing: .13em; text-transform: uppercase;
+  color: var(--t-low);
+}
+.p-enter svg { width: 15px; height: 8px; overflow: visible; }
+.p-enter svg path { transition: transform var(--dur-2) var(--rise); }
+.product-card:hover .p-enter { color: color-mix(in srgb, var(--card-flavour, var(--indigo)) 70%, var(--ink)); }
+.product-card:hover .p-enter svg path { transform: translateX(4px); }
+@media (prefers-reduced-motion: reduce) { .p-enter svg path { transition: none; } }
 .p-name {
   font-family: var(--font-display); font-size: .98rem; font-weight: 700;
   letter-spacing: -.028em; line-height: 1.24; color: var(--t-hi);
@@ -10750,6 +10785,38 @@ function renderProductCard(p){
   const imgSrc = getProductImg(p);
   const safeName  = esc(p.name);
   const safeBrand = esc(p.brand);
+  // Benefit, not brand and not category. This slot first printed "OZYLIX"
+  // on every card, then "EFFERVESCENT TABLET" on every card — both useless,
+  // because a grid of Ozylix effervescent tablets is all of those things.
+  // What separates two cards at a glance is what the product is FOR.
+  //
+  // The colour comes from the same lookup, so the tint behind the product
+  // and the words under it always agree: greens read organic, sky reads
+  // hydration, clay reads warmth and energy. Colour that disagrees with its
+  // label is just decoration.
+  const BENEFIT = [
+    [/glutathione|skin|glow/i,             'Skin & Glow',          'var(--clay)'],
+    [/apple cider|acv|weight|slim/i,       'Metabolism & Weight',  'var(--harbour)'],
+    [/ashwagandha|stress|calm|sleep/i,     'Stress & Calm',        'var(--sage)'],
+    [/green tea|antioxid/i,                'Antioxidant Support',  'var(--sage)'],
+    [/spirulina|moringa|greens|algae/i,    'Plant Nutrition',      'var(--fern)'],
+    [/bone|calcium|joint/i,                'Bone & Joint',         'var(--harbour)'],
+    [/biotin|hair|nail|b1\b/i,             'Hair & Nails',         'var(--clay)'],
+    [/rehydrat|electrolyte|hydrat/i,       'Hydration',            'var(--sky)'],
+    [/carnitine|energy|burn/i,             'Energy & Burn',        'var(--clay)'],
+    [/vitamin c|amla|immun/i,              'Immunity & Defence',   'var(--fern)'],
+    // women BEFORE men, and \bmen\b on the men rule: /men/i matches inside
+    // "women", so the original order labelled Women's Multivitamin
+    // "Men's Daily". First match wins, so order is load-bearing here.
+    [/women|female/i,                      "Women's Daily",        'var(--clay)'],
+    [/\bmen\b|male/i,                     "Men's Daily",          'var(--indigo)'],
+    [/multivitamin|multidiata|daily/i,     'Daily Essentials',     'var(--indigo)'],
+    [/combo|kit|pack/i,                    'Curated Combo',        'var(--harbour)'],
+  ];
+  const _hay = ((p.name||'') + ' ' + (p.category||'')).trim();
+  const _hit = BENEFIT.find(function(r){ return r[0].test(_hay); });
+  const safeKicker  = esc(_hit ? _hit[1] : (p.category || 'Wellness'));
+  const cardFlavour = _hit ? _hit[2] : 'var(--indigo)';
   const safeBadge = p.badge ? `<span class="p-badge">${esc(p.badge)}</span>` : '';
   const safeOffer = p.offer ? `<span class="offer-tag" style="margin-top:4px;display:inline-block">${esc(p.offer)}</span>` : '';
   // FIX (audit item P1-15): was always rendering stars(p.rating) even when
@@ -10763,7 +10830,7 @@ function renderProductCard(p){
   const ratingDisplay = rating.count > 0
     ? `${stars(rating.avg)} <span class="review-ct">(${rating.count})</span>`
     : `<span class="review-ct" style="color:var(--gray)">No ratings yet</span>`;
-  return `<div class="product-card" data-product-id="${p.id}" onclick="openProduct(${p.id})"><div class="p-img-wrap"><img src="${imgSrc}" alt="${safeName}" loading="lazy" onerror="this.src='${PRODUCT_FALLBACKS.default}'" decoding="async">${safeBadge} ${maxDisc>0?`<span class="p-disc-badge">${tiers?'Up to ':'-'}${maxDisc}%</span>`:''}<div class="p-actions"><button class="btn-wishlist" onclick="event.stopPropagation();STORE.toggleWishlist(${p.id})" title="Wishlist">♡</button><button class="btn-qadd" onclick="event.stopPropagation();${tiers?`openProduct(${p.id})`:`STORE.addToCart(${p.id})`}">${tiers?'Choose Pack':'Add to Cart'}</button></div></div><div class="p-info"><div class="p-brand">${safeBrand}</div><div class="p-name">${safeName}</div><div class="p-rating">${ratingDisplay}</div><div class="p-price"><span class="sale-price">${priceDisplay}</span>${(baseMRP&&baseMRP!==baseRate)?`<span class="orig-price">₹${baseMRP.toLocaleString('en-IN')}</span>`:''}</div>${tiers?`<div class="tier-offer-tag">⚡ Up to ${maxDisc}% OFF on larger packs</div>`:safeOffer}</div></div>`;
+  return `<div class="product-card" data-product-id="${p.id}" style="--card-flavour:${cardFlavour}" onclick="openProduct(${p.id})"><div class="p-img-wrap"><img src="${imgSrc}" alt="${safeName}" loading="lazy" onerror="this.src='${PRODUCT_FALLBACKS.default}'" decoding="async">${safeBadge} ${maxDisc>0?`<span class="p-disc-badge">${tiers?'Up to ':'-'}${maxDisc}%</span>`:''}<div class="p-actions"><button class="btn-wishlist" onclick="event.stopPropagation();STORE.toggleWishlist(${p.id})" title="Wishlist">♡</button><button class="btn-qadd" onclick="event.stopPropagation();${tiers?`openProduct(${p.id})`:`STORE.addToCart(${p.id})`}">${tiers?'Choose Pack':'Add to Cart'}</button></div></div><div class="p-info"><div class="p-brand">${safeKicker}</div><div class="p-name">${safeName}</div><div class="p-rating">${ratingDisplay}</div><div class="p-price"><span class="sale-price">${priceDisplay}</span>${(baseMRP&&baseMRP!==baseRate)?`<span class="orig-price">₹${baseMRP.toLocaleString('en-IN')}</span>`:''}</div>${tiers?`<div class="tier-offer-tag">⚡ Up to ${maxDisc}% OFF on larger packs</div>`:safeOffer}<div class="p-enter" aria-hidden="true">Shop now<svg viewBox="0 0 15 8" fill="none"><path d="M0 4h13M9.5 1L13 4l-3.5 3" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></div></div></div>`;
 }
 </script>
 <script>
