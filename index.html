@@ -10086,6 +10086,11 @@ async function syncProductsFromBackend() {
           const sg = document.getElementById('shopGrid');
           if(sg) renderShopGrid();
         } catch(e){}
+        // The bundle builder is built from PRODUCTS at start-up, before this
+        // sync returns, so its thumbnails were still the category fallback
+        // while the same products showed their real photos in every grid
+        // that IS re-rendered here. It keeps any current selection.
+        try { renderBundleBuilder(); } catch(e){}
         // Update prices, images, offers on all visible product cards
         try { updateAllProductCards(); } catch(e){}
         // Re-render product detail page if currently open (so price/tiers update instantly)
@@ -17381,7 +17386,23 @@ function renderQuizResult(){
 }
 
 let selectedBundleIds=new Set();
-function renderBundleBuilder(){const list=document.getElementById('bundleProdList');if(!list||!PRODUCTS)return;list.innerHTML=PRODUCTS.filter(p=>p.price||p.salePrice).map(p=>{const img=typeof getProductImg==='function'?getProductImg(p):(p.image||PRODUCT_FALLBACKS&&PRODUCT_FALLBACKS.default||'');return'<div class="b-prod-row" id="brow-'+p.id+'" onclick="toggleBundle('+p.id+')"><div class="b-prod-cb" id="bcb-'+p.id+'">✓</div><div class="b-prod-img"><img src="'+esc(img)+'" alt="Ozylix product image" style="width:54px;height:54px;object-fit:cover;border-radius:10px" onerror="this.style.opacity=0" decoding="async"></div><div class="b-prod-info"><div class="b-prod-name">'+esc(p.name)+'</div><div class="b-prod-cat">'+esc(p.category||'supplement')+'</div>'+(p.badge?'<div class="b-prod-badge">'+esc(p.badge)+'</div>':'')+'</div><div class="b-prod-price">₹'+(p.salePrice||p.price)+'</div></div>';}).join('');}
+// The bundle rows show a real product photo only once the Supabase sync
+// has landed — before that getProductImg() has nothing but the category
+// fallback to return. This list is built at start-up, so it was ALWAYS
+// built too early, and unlike every other grid it was never rebuilt
+// afterwards: mergeBackendProducts() re-runs renderFeatured,
+// renderNewArrivals, renderPromoCarousel, renderShopGrid and
+// updateAllProductCards, but nothing re-ran this one. The bundle builder
+// therefore kept its placeholders for the life of the page while the same
+// products showed their real photos everywhere else.
+//
+// It is now called after the sync too, which means it can re-render while
+// a customer already has products ticked. Selection lives in
+// selectedBundleIds, but the TICK is the .sel class on the row — replacing
+// innerHTML drops it, so the rows would look empty while the summary below
+// still charged for them. Re-applying it here keeps the two in step no
+// matter who calls this or when.
+function renderBundleBuilder(){const list=document.getElementById('bundleProdList');if(!list||!PRODUCTS)return;list.innerHTML=PRODUCTS.filter(p=>p.price||p.salePrice).map(p=>{const img=typeof getProductImg==='function'?getProductImg(p):(p.image||PRODUCT_FALLBACKS&&PRODUCT_FALLBACKS.default||'');return'<div class="b-prod-row" id="brow-'+p.id+'" onclick="toggleBundle('+p.id+')"><div class="b-prod-cb" id="bcb-'+p.id+'">✓</div><div class="b-prod-img"><img src="'+esc(img)+'" alt="Ozylix product image" style="width:54px;height:54px;object-fit:cover;border-radius:10px" onerror="this.style.opacity=0" decoding="async"></div><div class="b-prod-info"><div class="b-prod-name">'+esc(p.name)+'</div><div class="b-prod-cat">'+esc(p.category||'supplement')+'</div>'+(p.badge?'<div class="b-prod-badge">'+esc(p.badge)+'</div>':'')+'</div><div class="b-prod-price">₹'+(p.salePrice||p.price)+'</div></div>';}).join('');try{selectedBundleIds.forEach(function(id){document.getElementById('brow-'+id)?.classList.add('sel');});}catch(e){}}
 function toggleBundle(id){if(selectedBundleIds.has(id)){selectedBundleIds.delete(id);document.getElementById('brow-'+id)?.classList.remove('sel');}else{selectedBundleIds.add(id);document.getElementById('brow-'+id)?.classList.add('sel');}updateBundleSummary();}
 function updateBundleSummary(){const sel=[...selectedBundleIds].map(id=>PRODUCTS.find(p=>p.id===id)).filter(Boolean),n=sel.length,sub=sel.reduce((s,p)=>s+(p.salePrice||p.price),0),dp=n>=4?0.20:n===3?0.15:n===2?0.10:0,sav=Math.round(sub*dp),tot=sub-sav;const box=document.getElementById('bundleItemsBox');if(box)box.innerHTML=n===0?'<div class="bundle-empty-hint">No products selected yet<\/div>':sel.map(p=>'<div class="b-item-chip"><span class="b-item-name">'+esc(p.name)+'<\/span><span class="b-item-price">₹'+(p.salePrice||p.price)+'<\/span><\/div>').join('');const s=document.getElementById('bundleSubtotal'),t=document.getElementById('bundleTotal'),dr=document.getElementById('bundleDiscountRow'),dl=document.getElementById('bundleDiscountLabel'),dv=document.getElementById('bundleDiscountVal'),sb=document.getElementById('bundleSavingsBanner');if(s)s.textContent='₹'+sub;if(t)t.textContent='₹'+tot;if(dp>0){if(dr)dr.style.display='flex';if(dl)dl.textContent='Bundle discount ('+(dp*100)+'% off)';if(dv)dv.textContent='−₹'+sav;if(sb){sb.style.display='block';sb.textContent='🎉 You\'re saving ₹'+sav+' with your '+n+'-product bundle!';}}else{if(dr)dr.style.display='none';if(sb)sb.style.display='none';}}
 function addBundleToCart(){const sel=[...selectedBundleIds].map(id=>PRODUCTS.find(p=>p.id===id)).filter(Boolean);if(!sel.length){showToast('Select at least one product 🌿','error');return;}sel.forEach(p=>STORE.addToCart(p.id,1));openSideCart();showPtsToast('+'+sel.length*10+' VitaPoints!');}
