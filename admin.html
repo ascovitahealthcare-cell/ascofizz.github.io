@@ -80,14 +80,110 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);min-height:1
 ::-webkit-scrollbar-thumb{background:var(--green);border-radius:4px;}
 
 /* ═══ LOGIN ═══ */
-#loginScreen{position:fixed;inset:0;background:var(--bg);display:flex;align-items:center;justify-content:center;z-index:9999;padding:20px;}
-.login-wrap{width:100%;max-width:400px;}
-.login-logo{text-align:center;margin-bottom:32px;}
-.logo-mark{width:64px;height:64px;background:var(--white);border:1px solid var(--border);border-radius:20px;display:inline-flex;align-items:center;justify-content:center;font-size:2rem;margin-bottom:12px;box-shadow:var(--shadow);overflow:hidden;}
-.logo-mark img{width:100%;height:100%;object-fit:contain;padding:8px;}
-.login-title{font-family:var(--display);font-size:1.6rem;font-weight:800;color:var(--text);display:block;}
-.login-sub{color:var(--text3);font-size:0.8rem;margin-top:4px;display:block;}
-.login-card{background:var(--surface);border:1px solid var(--border2);border-radius:20px;padding:32px;box-shadow:var(--shadow-lg);}
+/* ═══ LOGIN — live effervescent background ═══════════════════════════
+   The sign-in screen was a flat slab of --bg with a card on it. This gives
+   it the same identity as the product: slow drifting brand-colour fields
+   with bubbles rising through them, the way an effervescent tablet reads.
+
+   CSS only — no canvas, no rAF, no JS. It animates transform and opacity
+   exclusively, so it stays on the compositor and costs no layout, which
+   matters because this is the screen an admin lands on over mobile data.
+   Everything stops under prefers-reduced-motion. */
+/* The login screen owns its palette outright — no var(--bg), no var(--text).
+   Those follow the interface theme, and Deluxe is a LIGHT theme, so
+   inheriting them rendered this dark card and its brand-coloured fields
+   over a cream background: a washed-out mess that changed appearance
+   depending on a setting chosen by whoever last signed in. Nobody has
+   picked a theme yet at this point in the session, so the sign-in screen
+   is fixed dark and looks identical for everyone. */
+#loginScreen{
+  position:fixed;inset:0;z-index:9999;padding:20px;
+  display:flex;align-items:center;justify-content:center;
+  background:radial-gradient(120% 90% at 12% 8%, #123B22 0%, transparent 55%),
+             radial-gradient(110% 80% at 88% 92%, #12312A 0%, transparent 52%),
+             #070C08;
+  overflow:hidden;
+}
+/* Explicit, theme-independent colours for everything inside. */
+#loginScreen .login-title{color:#F2F7EE;}
+#loginScreen .login-sub{color:#8FA88C;}
+#loginScreen .field-label{color:#A9C0A4;}
+#loginScreen .field-input{
+  background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.14);color:#F2F7EE;
+}
+#loginScreen .field-input::placeholder{color:#7C8F79;}
+#loginScreen .field-input:focus{border-color:#5EAB30;box-shadow:0 0 0 3px rgba(94,171,48,.22);}
+#loginScreen .pw-toggle{color:#A9C0A4;}
+#loginScreen .btn-login{
+  background:linear-gradient(135deg,#5EAB30,#4A8A28);color:#fff;
+  box-shadow:0 8px 22px rgba(74,138,40,.38);
+}
+/* Two large blurred fields drifting on different periods, so the pattern
+   never visibly repeats. contain:strict keeps them off the layout path. */
+#loginScreen::before,#loginScreen::after{
+  content:'';position:absolute;border-radius:50%;pointer-events:none;
+  filter:blur(70px);opacity:.5;contain:strict;will-change:transform;
+}
+#loginScreen::before{
+  width:60vmax;height:60vmax;top:-22vmax;left:-18vmax;
+  background:radial-gradient(circle,rgba(94,171,48,.55),transparent 68%);
+  animation:lgDriftA 26s ease-in-out infinite;
+}
+#loginScreen::after{
+  width:52vmax;height:52vmax;bottom:-20vmax;right:-16vmax;
+  background:radial-gradient(circle,rgba(196,146,14,.42),transparent 68%);
+  animation:lgDriftB 34s ease-in-out infinite;
+}
+@keyframes lgDriftA{0%,100%{transform:translate3d(0,0,0) scale(1)}50%{transform:translate3d(6vw,4vh,0) scale(1.12)}}
+@keyframes lgDriftB{0%,100%{transform:translate3d(0,0,0) scale(1)}50%{transform:translate3d(-5vw,-5vh,0) scale(1.1)}}
+
+/* Effervescence. Nine bubbles, staggered, rising the full height. */
+.login-bubbles{position:absolute;inset:0;overflow:hidden;pointer-events:none;contain:strict;}
+.login-bubbles i{
+  position:absolute;bottom:-14vh;border-radius:50%;
+  background:radial-gradient(circle at 32% 28%,rgba(255,255,255,.5),rgba(126,200,80,.16) 60%,transparent 72%);
+  box-shadow:inset 0 0 6px rgba(255,255,255,.28);
+  animation:lgRise linear infinite;will-change:transform,opacity;
+}
+@keyframes lgRise{
+  0%{transform:translate3d(0,0,0) scale(.6);opacity:0}
+  12%{opacity:.85}
+  85%{opacity:.5}
+  100%{transform:translate3d(2vw,-118vh,0) scale(1.15);opacity:0}
+}
+.login-wrap{width:100%;max-width:400px;position:relative;z-index:1;}
+.login-logo{text-align:center;margin-bottom:28px;}
+.logo-mark{
+  width:76px;height:76px;background:var(--white);border:1px solid var(--border);
+  border-radius:22px;display:inline-flex;align-items:center;justify-content:center;
+  font-size:2rem;margin-bottom:14px;overflow:hidden;
+  box-shadow:0 10px 30px rgba(0,0,0,.42), 0 0 0 1px rgba(255,255,255,.06), 0 0 34px rgba(94,171,48,.22);
+  animation:lgBob 7s ease-in-out infinite;
+}
+@keyframes lgBob{0%,100%{transform:translateY(0)}50%{transform:translateY(-6px)}}
+.logo-mark img{width:100%;height:100%;object-fit:contain;padding:9px;}
+.login-title{font-family:var(--display);font-size:1.75rem;font-weight:800;color:var(--text);display:block;letter-spacing:.3px;}
+.login-sub{color:var(--text3);font-size:0.78rem;margin-top:5px;display:block;letter-spacing:.14em;text-transform:uppercase;}
+.login-card{
+  background:rgba(22,29,18,.82);border:1px solid var(--border2);border-radius:22px;padding:30px 28px;
+  box-shadow:0 24px 60px rgba(0,0,0,.5), inset 0 1px 0 rgba(255,255,255,.05);
+}
+/* Show / hide the password. Typing an admin password blind on a phone is
+   how people end up locked out of their own dashboard. */
+.pw-wrap{position:relative;}
+.pw-wrap .field-input{padding-right:46px;}
+.pw-toggle{
+  position:absolute;right:6px;top:50%;transform:translateY(-50%);
+  width:38px;height:38px;display:flex;align-items:center;justify-content:center;
+  background:none;border:none;cursor:pointer;font-size:1rem;opacity:.72;
+  border-radius:9px;touch-action:manipulation;
+}
+.pw-toggle:hover{opacity:1;background:rgba(255,255,255,.06);}
+
+@media (prefers-reduced-motion: reduce){
+  #loginScreen::before,#loginScreen::after,.logo-mark{animation:none;}
+  .login-bubbles{display:none;}
+}
 .field-group{margin-bottom:18px;}
 .field-label{display:block;font-size:0.75rem;font-weight:600;color:var(--text2);margin-bottom:6px;text-transform:uppercase;letter-spacing:1px;}
 .field-input{width:100%;background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius-sm);padding:11px 14px;color:var(--text);font-family:var(--font);font-size:0.9rem;outline:none;transition:border-color 0.2s,box-shadow 0.2s;}
@@ -859,15 +955,6 @@ img, canvas, svg, table { max-width:100%; }
 .theme-preview-neo .tp-bar{background:#F7EFE3;box-shadow:inset 2px 2px 4px rgba(27,67,50,0.14),inset -2px -2px 4px rgba(255,255,255,0.75);}
 .theme-preview-neo .tp-dot{background:#6C8B90;box-shadow:1px 1px 2px rgba(27,67,50,0.13);}
 
-.theme-preview-glass{
-  background:radial-gradient(circle at 20% 20%, rgba(82,183,136,0.6), transparent 45%),
-             radial-gradient(circle at 80% 15%, rgba(27,67,50,0.6), transparent 45%),
-             radial-gradient(circle at 65% 90%, rgba(116,198,157,0.5), transparent 45%),
-             #0B1A12;
-  backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);border:1px solid rgba(255,255,255,0.3);
-}
-.theme-preview-glass .tp-bar{background:rgba(255,255,255,0.35);backdrop-filter:blur(4px);}
-.theme-preview-glass .tp-dot{background:rgba(255,255,255,0.75);}
 
 /* ═══ THEME: NEOMORPHISM (classic light Soft UI) ═══
    One flat surface colour — every element is either "extruded" (raised,
@@ -885,10 +972,15 @@ body.theme-neo{
   --shadow-lg:12px 12px 24px rgba(27,67,50,0.16),-12px -12px 24px rgba(255,255,255,0.85);
   background:#F7EFE3;
 }
-body.theme-neo .main, body.theme-neo #loginScreen{background:#F7EFE3;}
+/* #loginScreen deliberately NOT themed. It used to be listed here, and
+   because `body.theme-neo #loginScreen` outranks `#loginScreen` it
+   repainted the sign-in screen cream while the card and its text stayed
+   built for dark — white title on cream, inputs invisible. The sign-in
+   screen is pre-auth and fixed dark; themes start at .main. */
+body.theme-neo .main{background:#F7EFE3;}
 body.theme-neo ::-webkit-scrollbar-thumb{background:#6C8B90;}
 body.theme-neo .card, body.theme-neo .kpi, body.theme-neo .modal, body.theme-neo .sidebar,
-body.theme-neo .topbar, body.theme-neo .login-card, body.theme-neo .stat-tick, body.theme-neo .table-wrap{
+body.theme-neo .topbar, body.theme-neo .stat-tick, body.theme-neo .table-wrap{
   background:#F7EFE3 !important;border:none !important;border-radius:20px;
   box-shadow:8px 8px 16px rgba(27,67,50,0.16),-8px -8px 16px rgba(255,255,255,0.85) !important;
 }
@@ -942,75 +1034,9 @@ body.theme-neo .kpi:nth-child(4n+4)::after{content:'';position:absolute;top:0;le
 body.theme-neo .card::before, body.theme-neo .kpi::after{border-radius:20px 20px 0 0;}
 body.theme-neo .kpi-val{color:var(--text) !important;}
 body.theme-neo .tab-btn.active{color:var(--green-text);}
-
-/* ═══ THEME: LIQUID GLASS ═══
-   Glossy, translucent panels floating over a vivid blurred colour field —
-   inspired by Apple's Liquid Glass / iOS control surfaces. Colour zones are
-   kept apart and blended with "screen" so they stay distinct and jewel-bright
-   instead of muddying into brown where they overlap. */
-body.theme-glass{
-  --border:rgba(255,255,255,0.16); --border2:rgba(255,255,255,0.28);
-  --shadow-lg:0 20px 60px rgba(0,0,0,0.35), inset 0 1px 0 rgba(255,255,255,0.35);
-  background:transparent;
-}
-html:has(body.theme-glass){background:#0B1A12;}
-body.theme-glass::before{
-  content:'';position:fixed;inset:-20%;z-index:-2;
-  background:
-    radial-gradient(circle at 6% 10%, rgba(82,183,136,0.85), transparent 26%),
-    radial-gradient(circle at 94% 6%, rgba(27,67,50,0.8), transparent 28%),
-    radial-gradient(circle at 92% 92%, rgba(45,106,79,0.75), transparent 28%),
-    radial-gradient(circle at 6% 92%, rgba(116,198,157,0.7), transparent 28%),
-    radial-gradient(circle at 50% 50%, rgba(240,248,243,0.4), transparent 30%),
-    #0B1A12;
-  background-blend-mode:screen;
-  filter:blur(55px) saturate(190%);
-  animation:glassDrift 24s ease-in-out infinite alternate;
-}
-body.theme-glass::after{
-  content:'';position:fixed;inset:0;z-index:-1;
-  background:radial-gradient(ellipse 70% 60% at 55% 45%, rgba(8,6,22,0.4), transparent 70%);
-}
-@keyframes glassDrift{0%{transform:translate(0,0) scale(1);}100%{transform:translate(-3%,3%) scale(1.08);}}
-body.theme-glass .main, body.theme-glass #loginScreen{background:transparent;}
-body.theme-glass .card, body.theme-glass .kpi, body.theme-glass .modal,
-body.theme-glass .login-card, body.theme-glass .stat-tick, body.theme-glass .table-wrap{
-  background:linear-gradient(160deg, rgba(255,255,255,0.22), rgba(255,255,255,0.05)) !important;
-  border:1px solid rgba(255,255,255,0.32) !important;border-radius:22px;
-  backdrop-filter:blur(30px) saturate(200%) !important;-webkit-backdrop-filter:blur(30px) saturate(200%) !important;
-  /* neomorphic + glass hybrid: soft dark-green ambient shadow (extrusion),
-     paired with a light inner highlight (as if lit from the glass edge) */
-  box-shadow:0 16px 48px rgba(0,0,0,0.35), 0 6px 20px rgba(27,67,50,0.25),
-    inset 0 1px 0 rgba(255,255,255,0.4) !important;
-}
-body.theme-glass .topbar, body.theme-glass .sidebar{
-  background:linear-gradient(160deg, rgba(255,255,255,0.12), rgba(255,255,255,0.02)) !important;
-  border-color:rgba(255,255,255,0.2) !important;
-  backdrop-filter:blur(28px) saturate(200%) !important;-webkit-backdrop-filter:blur(28px) saturate(200%) !important;
-}
-body.theme-glass .kpi::before{background:radial-gradient(circle,rgba(255,255,255,0.3),transparent);}
-body.theme-glass .card:nth-child(4n+1), body.theme-glass .kpi:nth-child(4n+1){border-top:2px solid rgba(20,83,45,0.75) !important;}
-body.theme-glass .card:nth-child(4n+2), body.theme-glass .kpi:nth-child(4n+2){border-top:2px solid rgba(45,106,79,0.7) !important;}
-body.theme-glass .card:nth-child(4n+3), body.theme-glass .kpi:nth-child(4n+3){border-top:2px solid rgba(82,183,136,0.75) !important;}
-body.theme-glass .card:nth-child(4n+4), body.theme-glass .kpi:nth-child(4n+4){border-top:2px solid rgba(116,198,157,0.7) !important;}
-body.theme-glass th{background:rgba(255,255,255,0.08);backdrop-filter:blur(10px);}
-body.theme-glass td{border-top:1px solid rgba(255,255,255,0.1);}
-body.theme-glass .form-control, body.theme-glass .filter-input, body.theme-glass .filter-select, body.theme-glass .drawer-input{
-  background:rgba(255,255,255,0.1) !important;border:1px solid rgba(255,255,255,0.24) !important;border-radius:12px;
-  backdrop-filter:blur(16px) !important;-webkit-backdrop-filter:blur(16px) !important;
-}
-body.theme-glass .btn{border-radius:999px;}
-body.theme-glass .btn-primary{background:linear-gradient(135deg,rgba(94,171,48,0.9),rgba(74,138,40,0.75)) !important;border:1px solid rgba(255,255,255,0.35) !important;backdrop-filter:blur(10px) !important;box-shadow:0 4px 16px rgba(74,138,40,0.4),inset 0 1px 0 rgba(255,255,255,0.4) !important;}
-body.theme-glass .btn-secondary, body.theme-glass .btn-danger, body.theme-glass .btn-export{
-  background:rgba(255,255,255,0.12) !important;border:1px solid rgba(255,255,255,0.26) !important;backdrop-filter:blur(10px) !important;
-}
-body.theme-glass .badge{background:rgba(255,255,255,0.16) !important;border:1px solid rgba(255,255,255,0.22);backdrop-filter:blur(8px);border-radius:999px;}
-body.theme-glass .filter-chip{border-radius:999px;backdrop-filter:blur(8px);}
-body.theme-glass .toggle-slider{background:rgba(255,255,255,0.14);border:1px solid rgba(255,255,255,0.26);}
-body.theme-glass .toggle-slider::before{box-shadow:0 1px 3px rgba(0,0,0,0.3);}
-body.theme-glass .nav-item{border-radius:14px;margin:0 8px;}
-body.theme-glass .nav-item.active{background:linear-gradient(135deg,rgba(255,255,255,0.2),rgba(255,255,255,0.06));backdrop-filter:blur(10px);border-left-color:transparent;box-shadow:inset 0 1px 0 rgba(255,255,255,0.35);}
-body.theme-glass .modal-overlay{backdrop-filter:blur(10px);}
+/* The Liquid Glass theme was removed at the owner's request. It was
+   the DEFAULT, so the migration in setInterfaceTheme() moves anyone
+   still carrying "glass" in localStorage onto Deluxe. */
 </style>
 
 <style>
@@ -1021,7 +1047,6 @@ body.theme-glass .modal-overlay{backdrop-filter:blur(10px);}
 .card{transition:box-shadow 0.25s cubic-bezier(.22,1,.36,1), transform 0.25s cubic-bezier(.22,1,.36,1);}
 .card:hover{box-shadow:0 10px 28px rgba(0,0,0,0.18);}
 body.theme-neo .card:hover{box-shadow:8px 8px 20px var(--neo-dark,rgba(27,67,50,0.16)), -8px -8px 20px var(--neo-light,#fff);}
-body.theme-glass .card:hover{box-shadow:0 10px 28px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.15);}
 
 /* Buttons: critically-damped press feedback — a tap should feel instant
    and settled, never bouncy (matches the storefront's button motion) */
@@ -1038,30 +1063,73 @@ body.theme-glass .card:hover{box-shadow:0 10px 28px rgba(0,0,0,0.3), inset 0 1px
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
 </head>
 <body>
-<script>(function(){try{var t=localStorage.getItem('ascovita_theme')||'glass';document.body.classList.add('theme-'+t);}catch(e){}})();</script>
+<script>(function(){try{
+  /* Glass was the default and is gone. Anyone still carrying it in
+     localStorage would otherwise boot into a theme with no CSS behind it —
+     an unstyled dashboard — so it is rewritten to deluxe here, before
+     first paint, rather than left to the settings page nobody opens. */
+  var t = localStorage.getItem('ascovita_theme') || 'deluxe';
+  if (t === 'glass') { t = 'deluxe'; localStorage.setItem('ascovita_theme', t); }
+  document.body.classList.add('theme-' + t);
+}catch(e){}})();</script>
 
 <!-- ══════════════ LOGIN ══════════════ -->
 <div id="loginScreen">
+  <!-- Rising effervescence. Inline styles because each bubble needs its own
+       size, lane and phase; nine is enough to read as continuous without
+       giving a low-end phone nine more compositor layers than it needs. -->
+  <div class="login-bubbles" aria-hidden="true">
+    <i style="left:8%;width:10px;height:10px;animation-duration:15s;animation-delay:0s"></i>
+    <i style="left:19%;width:6px;height:6px;animation-duration:19s;animation-delay:3s"></i>
+    <i style="left:31%;width:14px;height:14px;animation-duration:13s;animation-delay:6s"></i>
+    <i style="left:44%;width:8px;height:8px;animation-duration:21s;animation-delay:1.5s"></i>
+    <i style="left:57%;width:11px;height:11px;animation-duration:16s;animation-delay:8s"></i>
+    <i style="left:68%;width:5px;height:5px;animation-duration:23s;animation-delay:4s"></i>
+    <i style="left:79%;width:13px;height:13px;animation-duration:14s;animation-delay:10s"></i>
+    <i style="left:88%;width:7px;height:7px;animation-duration:18s;animation-delay:2s"></i>
+    <i style="left:96%;width:9px;height:9px;animation-duration:20s;animation-delay:7s"></i>
+  </div>
+
   <div class="login-wrap">
     <div class="login-logo">
       <div class="logo-mark"><img src="assets/ozylix-logo.png" alt="Ozylix" onerror="this.style.display='none';this.parentNode.textContent='🌿'"></div>
       <span class="login-title">Ozylix</span>
-      <span class="login-sub">Admin Backoffice v8.0</span>
+      <span class="login-sub">Admin Backoffice</span>
     </div>
-    <div class="login-card">
+    <!-- A form, not loose divs: this is what makes the phone keyboard show
+         "Go", lets Enter submit from either field, and lets a password
+         manager recognise and fill the pair. -->
+    <form class="login-card" onsubmit="event.preventDefault();doLogin();">
       <div class="form-group" style="margin-bottom:16px">
-        <label class="field-label">Username</label>
-        <input type="text" id="loginUser" class="field-input" placeholder="admin" value="admin" autocomplete="username">
+        <label class="field-label" for="loginUser">Username</label>
+        <input type="text" id="loginUser" class="field-input" placeholder="admin" value="admin"
+               autocomplete="username" autocapitalize="none" autocorrect="off" spellcheck="false">
       </div>
       <div class="form-group">
-        <label class="field-label">Password</label>
-        <input type="password" id="loginPass" class="field-input" placeholder="Enter admin password" autocomplete="current-password">
+        <label class="field-label" for="loginPass">Password</label>
+        <div class="pw-wrap">
+          <input type="password" id="loginPass" class="field-input" placeholder="Enter admin password"
+                 autocomplete="current-password" autocapitalize="none" autocorrect="off" spellcheck="false">
+          <button type="button" class="pw-toggle" id="pwToggle" aria-label="Show password"
+                  onclick="azTogglePw()">👁</button>
+        </div>
       </div>
       <div class="login-error" id="loginError">Invalid credentials. Please try again.</div>
-      <button class="btn-login" onclick="doLogin()" style="margin-top:20px">Sign In →</button>
-    </div>
+      <button class="btn-login" type="submit" style="margin-top:20px">Sign In →</button>
+    </form>
   </div>
 </div>
+<script>
+function azTogglePw() {
+  var i = document.getElementById('loginPass'), b = document.getElementById('pwToggle');
+  if (!i || !b) return;
+  var show = i.type === 'password';
+  i.type = show ? 'text' : 'password';
+  b.textContent = show ? '🙈' : '👁';
+  b.setAttribute('aria-label', show ? 'Hide password' : 'Show password');
+  i.focus();
+}
+</script>
 
 <!-- ══════════════ APP ══════════════ -->
 <div id="app">
@@ -2807,14 +2875,6 @@ body.theme-glass .card:hover{box-shadow:0 10px 28px rgba(0,0,0,0.3), inset 0 1px
         </div>
         <div class="theme-opt-label">Neomorphism</div>
       </div>
-      <div class="theme-opt" data-theme="glass" onclick="setInterfaceTheme('glass')">
-        <div class="theme-preview theme-preview-glass">
-          <div class="theme-check">✓</div>
-          <div class="tp-dots"><span class="tp-dot"></span><span class="tp-dot"></span><span class="tp-dot"></span></div>
-          <div class="tp-bars"><div class="tp-bar w80"></div><div class="tp-bar w60"></div><div class="tp-bar w40"></div></div>
-        </div>
-        <div class="theme-opt-label">Liquid Glass</div>
-      </div>
     </div>
   </div>
 
@@ -3462,7 +3522,11 @@ async function doLogin() {
     }
   }
 }
-document.getElementById('loginPass').addEventListener('keydown', e => { if(e.key==='Enter') doLogin(); });
+// The Enter-to-submit listener that used to live here is gone: the login
+// card is a real <form> now, so Enter already submits it — from either
+// field, not just the password one. Leaving both in place fired doLogin()
+// twice per keypress, which with the new per-account lockout would have
+// burned two of the five allowed attempts on every single typo.
 
 function doLogout() {
   localStorage.removeItem('ascovita_token');
@@ -8961,11 +9025,10 @@ async function checkIntegrations() {
 // and synced to the shared backend settings so the choice is visible
 // to every admin/owner who opens the backoffice, not just this device.
 const THEME_KEY = 'ascovita_theme';
-const VALID_THEMES = ['deluxe','neo','glass'];
+const VALID_THEMES = ['deluxe','neo'];   // 'glass' removed
 
 function applyThemeClass(theme) {
-  theme = VALID_THEMES.includes(theme) ? theme : 'glass';
-  document.body.classList.remove('theme-deluxe','theme-neo','theme-glass');
+  theme = VALID_THEMES.includes(theme) ? theme : 'deluxe';
   document.body.classList.add('theme-' + theme);
   document.querySelectorAll('.theme-opt').forEach(el => {
     el.classList.toggle('selected', el.dataset.theme === theme);
@@ -9018,7 +9081,7 @@ async function saveSettings() {
     whatsapp_number: document.getElementById('whatsappNumber').value,
     gst_rate: {cgst: parseFloat(document.getElementById('cgstRate').value)||2.5, sgst: parseFloat(document.getElementById('sgstRate').value)||2.5},
     razorpay_mode: document.getElementById('pgMode').value,
-    interface_theme: activeThemeOpt ? activeThemeOpt.dataset.theme : (localStorage.getItem(THEME_KEY) || 'glass'),
+    interface_theme: activeThemeOpt ? activeThemeOpt.dataset.theme : (localStorage.getItem(THEME_KEY) || 'deluxe'),
   };
   try {
     const r = await apiFetch('/api/admin/settings', {method:'PUT', body:JSON.stringify(settings)});

@@ -11581,26 +11581,11 @@ function showPage(pg) {
     } catch(e) {}
     // Render product recommendations for checkout
     setTimeout(function() { if (typeof renderCkRecommendations === 'function') renderCkRecommendations(); }, 50);
-    // ── Pre-warm backend when user opens checkout (30-50s head-start before they click Pay) ──
-    try { fetch(API_BASE + '/api/wake').catch(function(){ fetch(API_BASE + '/').catch(function(){}); }); } catch(e) {}
-    // Show warming notice on Pay button if backend likely cold
-    try {
-      var payBtn = document.getElementById('onlinePayBtn');
-      if (payBtn && !window._backendWarmed) {
-        var _origPayText = payBtn.textContent;
-        payBtn.textContent = '\u23F3 Warming up server... (first load ~30s)';
-        payBtn.style.opacity = '0.75';
-        var _warmTimer = setTimeout(function() {
-          if (payBtn) { payBtn.textContent = _origPayText || '\uD83D\uDD12 Pay Online via GoKwik'; payBtn.style.opacity = '1'; }
-          window._backendWarmed = true;
-        }, 35000);
-        fetch(API_BASE + '/').then(function() {
-          clearTimeout(_warmTimer);
-          if (payBtn) { payBtn.textContent = _origPayText || '\uD83D\uDD12 Pay Online via GoKwik'; payBtn.style.opacity = '1'; }
-          window._backendWarmed = true;
-        }).catch(function(){});
-      }
-    } catch(e) {}
+    // The Pay button used to disable itself here and read "Warming up
+    // server... (first load ~30s)" while it pinged Render awake. On a paid
+    // plan the server is never cold, so that was 35 seconds of a greyed-out
+    // Pay button and a message telling the customer to wait, at the exact
+    // moment they had decided to buy. Removed with the warm-up pings.
     try {
       const items = STORE.cart.map(i=>{const p=PRODUCTS.find(x=>x.id===i.id);return{id:i.id,name:p?.name||'',price:p?.salePrice||p?.price||0,qty:i.qty};});
       const tot = items.reduce((s,i)=>s+i.price*i.qty,0);
@@ -12987,9 +12972,6 @@ function subscribeNL() {
 function bootApp() {
   // (home promo carousel now self-initializes in its own IIFE, no boot hook needed)
   try { STORE.init(); } catch(e) { console.error('STORE init:', e); }
-  // ── PRE-WARM Render backend on page load so it's ready when user pays ──
-  // Render free tier sleeps after 15 min — this fires early to avoid "Failed to fetch"
-  try { fetch(API_BASE + '/api/wake').catch(() => fetch(API_BASE + '/').catch(() => {})); } catch(e) {}
   try { renderFullFaq(); } catch(e) {}
   try { const hfw2=document.getElementById('homeFaqWrap'); if(hfw2) hfw2.innerHTML = FAQS.slice(0,5).map(renderFaqItem).join(''); } catch(e) {}
   // ✅ FIX: Render immediately from static data so shop never shows empty
@@ -15371,15 +15353,11 @@ let _googleInitialized = false;
 let _googleInitRetries = 0;
 const _GOOGLE_MAX_RETRIES = 8;
 
-// ── Backend warm-up: ping Render on page load so it's ready when user signs in ──
-(function warmUpBackend() {
-  setTimeout(() => {
-    // /api/visitors/ping only accepts POST server-side (GET 404s here).
-    // /api/wake exists specifically for warm-up pings and returns instantly.
-    fetch(API_BASE + '/api/wake', { method: 'GET', mode: 'cors' })
-      .catch(() => {}); // Silently warm up — errors are expected and ignored
-  }, 1500);
-})();
+// Backend warm-up pings removed. They existed because Render's free tier
+// slept after 15 minutes and cold-started for ~30-60s, so the site woke it
+// early and hoped it was ready by checkout. The service is on a paid plan
+// now and never sleeps, so every one of these was a wasted round trip on
+// the critical path of a page load — three of them fired per visit.
 
 // ── Handle Google OAuth2 redirect return (mobile only) ──
 (function() {
