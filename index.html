@@ -10086,6 +10086,11 @@ async function syncProductsFromBackend() {
           const sg = document.getElementById('shopGrid');
           if(sg) renderShopGrid();
         } catch(e){}
+        // The bundle builder is built from PRODUCTS at start-up, before this
+        // sync returns, so its thumbnails were still the category fallback
+        // while the same products showed their real photos in every grid
+        // that IS re-rendered here. It keeps any current selection.
+        try { renderBundleBuilder(); } catch(e){}
         // Update prices, images, offers on all visible product cards
         try { updateAllProductCards(); } catch(e){}
         // Re-render product detail page if currently open (so price/tiers update instantly)
@@ -11606,6 +11611,11 @@ function openProduct(id) {
   if (!currentProduct) return;
   setProductPageSchema(currentProduct);
   pQty = 1;
+  // Opening a product is a fresh visit, so its review list starts collapsed
+  // at three. Only this entry point resets it — buildProductPage() must not,
+  // because it re-runs when reviews load and would then close a list the
+  // customer had just opened.
+  try { if (_rvView[id]) { _rvView[id].expanded = false; _rvView[id].page = 0; } } catch(e) {}
   buildProductPage(currentProduct);
   setTimeout(()=>document.dispatchEvent(new CustomEvent('productPageShown',{detail:currentProduct})),100);
   // Push clean URL: /product/glutathione-effervescent
@@ -11876,6 +11886,96 @@ function updatePriceDisplay(productId, tierIdx) {
   if (addBtn) addBtn.dataset.tier = tierIdx;
 }
 
+/* ── PRODUCT-PAGE REVIEW LIST: 3 shown, then paged 50 at a time ──────
+   A product with a few hundred reviews used to print every one of them
+   into the tab, pushing the "Write a Review" form and everything below it
+   miles down the page and making the tab expensive to render on a phone.
+   Three are shown up front; the rest open on request, fifty to a page.
+
+   The view state lives out here, keyed by product, NOT inside
+   buildProductPage — that function re-runs whenever reviews finish
+   loading or a backend sync lands, and state held inside it would snap a
+   list the customer had just expanded back shut underneath them.
+
+   Paging re-renders only #rvListWrap. Calling buildProductPage would
+   rebuild the gallery, tabs and tier table to change a list of reviews,
+   and would throw away the reading position while doing it. */
+const RV_TOP_N     = 3;    // before "Read all reviews"
+const RV_PAGE_SIZE = 50;   // per page once expanded
+const _rvView      = {};   // productId -> { expanded, page }
+
+function rvViewState(id) {
+  if (!_rvView[id]) _rvView[id] = { expanded: false, page: 0 };
+  return _rvView[id];
+}
+
+function rvCardHTML(r) {
+  return `<div class="rv-card"><div class="rv-hdr"><div><span class="rv-name">${esc(r.user)}</span>${r.verified?'<span class="rv-verified">&#x2713; Verified</span>':''}</div><span class="rv-date">${esc(r.date)}</span></div><div class="rv-stars">${'&#x2605;'.repeat(starCount(r.rating))}${'&#x2606;'.repeat(5-starCount(r.rating))}</div><p class="rv-text">${esc(r.text)}</p></div>`;
+}
+
+/* Paging from the bottom of a fifty-card list leaves the reader looking at
+   the end of the NEXT page. Put the top of the list back under them. */
+function rvScrollToList() {
+  const w = document.getElementById('rvListWrap');
+  if (w && w.scrollIntoView) { try { w.scrollIntoView({ block: 'start' }); } catch (e) { w.scrollIntoView(); } }
+}
+
+function rvExpand(pid)   { const v = rvViewState(pid); v.expanded = true;  v.page = 0; renderProductReviewList(pid); }
+function rvCollapse(pid) { const v = rvViewState(pid); v.expanded = false; v.page = 0; renderProductReviewList(pid); rvScrollToList(); }
+function rvGoPage(pid, delta) {
+  const v = rvViewState(pid);
+  const total = (REVIEWS[pid] || []).length;
+  const last  = Math.max(0, Math.ceil(total / RV_PAGE_SIZE) - 1);
+  v.page = Math.min(last, Math.max(0, v.page + delta));
+  renderProductReviewList(pid);
+  rvScrollToList();
+}
+
+function renderProductReviewList(pid) {
+  const wrap = document.getElementById('rvListWrap');
+  if (!wrap) return;
+  const pad = 'text-align:center;padding:24px;color:var(--gray);font-size:.85rem';
+
+  if (!REVIEWS_LOADED[pid]) { wrap.innerHTML = `<div style="${pad}">Loading reviews…</div>`; return; }
+  const rvs = REVIEWS[pid] || [];
+  if (!rvs.length) {
+    wrap.innerHTML = `<div style="${pad}">No reviews yet — be the first to share your experience with this product! 🌿</div>`;
+    return;
+  }
+
+  const v = rvViewState(pid), total = rvs.length;
+  const btn = 'display:inline-flex;align-items:center;justify-content:center;gap:6px;padding:11px 20px;' +
+              'border-radius:var(--r-pill);font-weight:700;font-size:.82rem;background:var(--paper);' +
+              'box-shadow:var(--neo-1);color:var(--indigo);touch-action:manipulation;min-height:44px';
+
+  if (!v.expanded) {
+    let html = rvs.slice(0, RV_TOP_N).map(rvCardHTML).join('');
+    if (total > RV_TOP_N) {
+      html += `<div style="text-align:center;margin-top:14px">
+        <button type="button" style="${btn}" onclick="rvExpand(${pid})">Read all ${total} reviews &#x2193;</button></div>`;
+    }
+    wrap.innerHTML = html;
+    return;
+  }
+
+  const pages = Math.max(1, Math.ceil(total / RV_PAGE_SIZE));
+  const page  = Math.min(v.page, pages - 1);
+  const start = page * RV_PAGE_SIZE;
+  const end   = Math.min(start + RV_PAGE_SIZE, total);
+  const dim   = 'opacity:.4;pointer-events:none';
+
+  let html = rvs.slice(start, end).map(rvCardHTML).join('');
+  html += `<div style="display:flex;flex-wrap:wrap;gap:10px;align-items:center;justify-content:center;margin-top:16px">
+      <div style="width:100%;text-align:center;font-size:.78rem;color:var(--t-low);margin-bottom:2px">
+        Showing ${start + 1}–${end} of ${total} reviews${pages > 1 ? ` &middot; page ${page + 1} of ${pages}` : ''}
+      </div>
+      ${pages > 1 ? `<button type="button" style="${btn}${page === 0 ? ';' + dim : ''}" ${page === 0 ? 'disabled' : ''} onclick="rvGoPage(${pid},-1)">&#x2190; Previous</button>` : ''}
+      ${pages > 1 ? `<button type="button" style="${btn}${page >= pages - 1 ? ';' + dim : ''}" ${page >= pages - 1 ? 'disabled' : ''} onclick="rvGoPage(${pid},1)">Next 50 &#x2192;</button>` : ''}
+      <button type="button" style="${btn}" onclick="rvCollapse(${pid})">Show less</button>
+    </div>`;
+  wrap.innerHTML = html;
+}
+
 // ── PRODUCT PAGE ──
 function buildProductPage(p) {
   const rvs = REVIEWS[p.id] || [];
@@ -11953,12 +12053,11 @@ function buildProductPage(p) {
           <div class="rating-big"><div class="rv-big-num">${avg !== null ? avg.toFixed(1) : '—'}</div><div class="rv-big-stars">&#x2605;&#x2605;&#x2605;&#x2605;&#x2605;</div><div style="font-size:.72rem;color:var(--gray)">${rvs.length} reviews</div></div>
           <div style="flex:1">${[5,4,3,2,1].map(s=>{const c=rvs.filter(r=>Math.round(r.rating)===s).length;const pct=rvs.length?(c/rvs.length)*100:0;return`<div class="rv-bar-row"><span style="width:14px">${s}&#x2605;</span><div class="rv-bar-track"><div class="rv-bar-fill" style="width:${pct}%"></div></div><span>${Math.round(pct)}%</span></div>`;}).join('')}</div>
         </div>
-        ${!REVIEWS_LOADED[p.id]
-            ? `<div style="text-align:center;padding:24px;color:var(--gray);font-size:.85rem">Loading reviews…</div>`
-            : rvs.length
-              ? rvs.map(r=>`<div class="rv-card"><div class="rv-hdr"><div><span class="rv-name">${esc(r.user)}</span>${r.verified?'<span class="rv-verified">&#x2713; Verified</span>':''}</div><span class="rv-date">${esc(r.date)}</span></div><div class="rv-stars">${'&#x2605;'.repeat(starCount(r.rating))}${'&#x2606;'.repeat(5-starCount(r.rating))}</div><p class="rv-text">${esc(r.text)}</p></div>`).join('')
-              : `<div style="text-align:center;padding:24px;color:var(--gray);font-size:.85rem">No reviews yet — be the first to share your experience with this product! 🌿</div>`
-          }
+        <!-- Filled by renderProductReviewList() once this HTML is in the
+             DOM: three reviews, then fifty a page on request. Loading and
+             empty states live in there too, so there is one place that
+             decides what this list shows. -->
+        <div id="rvListWrap"></div>
         <div class="rv-form" id="rvFormWrap">
           <h3>Write a Review</h3>
           ${getCurrentUser() ? `
@@ -12000,6 +12099,10 @@ function buildProductPage(p) {
       </div>` : ''}
     </div>
   `;
+  // The reviews tab ships as an empty #rvListWrap above; fill it now that
+  // the markup exists. Any expanded/paged state the customer had is kept —
+  // this function re-runs on every review load and backend sync.
+  try { renderProductReviewList(p.id); } catch(e) {}
 }
 
 // Adds a tiered product to cart, recording which tier (pack size) was chosen
@@ -17381,7 +17484,23 @@ function renderQuizResult(){
 }
 
 let selectedBundleIds=new Set();
-function renderBundleBuilder(){const list=document.getElementById('bundleProdList');if(!list||!PRODUCTS)return;list.innerHTML=PRODUCTS.filter(p=>p.price||p.salePrice).map(p=>{const img=typeof getProductImg==='function'?getProductImg(p):(p.image||PRODUCT_FALLBACKS&&PRODUCT_FALLBACKS.default||'');return'<div class="b-prod-row" id="brow-'+p.id+'" onclick="toggleBundle('+p.id+')"><div class="b-prod-cb" id="bcb-'+p.id+'">✓</div><div class="b-prod-img"><img src="'+esc(img)+'" alt="Ozylix product image" style="width:54px;height:54px;object-fit:cover;border-radius:10px" onerror="this.style.opacity=0" decoding="async"></div><div class="b-prod-info"><div class="b-prod-name">'+esc(p.name)+'</div><div class="b-prod-cat">'+esc(p.category||'supplement')+'</div>'+(p.badge?'<div class="b-prod-badge">'+esc(p.badge)+'</div>':'')+'</div><div class="b-prod-price">₹'+(p.salePrice||p.price)+'</div></div>';}).join('');}
+// The bundle rows show a real product photo only once the Supabase sync
+// has landed — before that getProductImg() has nothing but the category
+// fallback to return. This list is built at start-up, so it was ALWAYS
+// built too early, and unlike every other grid it was never rebuilt
+// afterwards: mergeBackendProducts() re-runs renderFeatured,
+// renderNewArrivals, renderPromoCarousel, renderShopGrid and
+// updateAllProductCards, but nothing re-ran this one. The bundle builder
+// therefore kept its placeholders for the life of the page while the same
+// products showed their real photos everywhere else.
+//
+// It is now called after the sync too, which means it can re-render while
+// a customer already has products ticked. Selection lives in
+// selectedBundleIds, but the TICK is the .sel class on the row — replacing
+// innerHTML drops it, so the rows would look empty while the summary below
+// still charged for them. Re-applying it here keeps the two in step no
+// matter who calls this or when.
+function renderBundleBuilder(){const list=document.getElementById('bundleProdList');if(!list||!PRODUCTS)return;list.innerHTML=PRODUCTS.filter(p=>p.price||p.salePrice).map(p=>{const img=typeof getProductImg==='function'?getProductImg(p):(p.image||PRODUCT_FALLBACKS&&PRODUCT_FALLBACKS.default||'');return'<div class="b-prod-row" id="brow-'+p.id+'" onclick="toggleBundle('+p.id+')"><div class="b-prod-cb" id="bcb-'+p.id+'">✓</div><div class="b-prod-img"><img src="'+esc(img)+'" alt="Ozylix product image" style="width:54px;height:54px;object-fit:cover;border-radius:10px" onerror="this.style.opacity=0" decoding="async"></div><div class="b-prod-info"><div class="b-prod-name">'+esc(p.name)+'</div><div class="b-prod-cat">'+esc(p.category||'supplement')+'</div>'+(p.badge?'<div class="b-prod-badge">'+esc(p.badge)+'</div>':'')+'</div><div class="b-prod-price">₹'+(p.salePrice||p.price)+'</div></div>';}).join('');try{selectedBundleIds.forEach(function(id){document.getElementById('brow-'+id)?.classList.add('sel');});}catch(e){}}
 function toggleBundle(id){if(selectedBundleIds.has(id)){selectedBundleIds.delete(id);document.getElementById('brow-'+id)?.classList.remove('sel');}else{selectedBundleIds.add(id);document.getElementById('brow-'+id)?.classList.add('sel');}updateBundleSummary();}
 function updateBundleSummary(){const sel=[...selectedBundleIds].map(id=>PRODUCTS.find(p=>p.id===id)).filter(Boolean),n=sel.length,sub=sel.reduce((s,p)=>s+(p.salePrice||p.price),0),dp=n>=4?0.20:n===3?0.15:n===2?0.10:0,sav=Math.round(sub*dp),tot=sub-sav;const box=document.getElementById('bundleItemsBox');if(box)box.innerHTML=n===0?'<div class="bundle-empty-hint">No products selected yet<\/div>':sel.map(p=>'<div class="b-item-chip"><span class="b-item-name">'+esc(p.name)+'<\/span><span class="b-item-price">₹'+(p.salePrice||p.price)+'<\/span><\/div>').join('');const s=document.getElementById('bundleSubtotal'),t=document.getElementById('bundleTotal'),dr=document.getElementById('bundleDiscountRow'),dl=document.getElementById('bundleDiscountLabel'),dv=document.getElementById('bundleDiscountVal'),sb=document.getElementById('bundleSavingsBanner');if(s)s.textContent='₹'+sub;if(t)t.textContent='₹'+tot;if(dp>0){if(dr)dr.style.display='flex';if(dl)dl.textContent='Bundle discount ('+(dp*100)+'% off)';if(dv)dv.textContent='−₹'+sav;if(sb){sb.style.display='block';sb.textContent='🎉 You\'re saving ₹'+sav+' with your '+n+'-product bundle!';}}else{if(dr)dr.style.display='none';if(sb)sb.style.display='none';}}
 function addBundleToCart(){const sel=[...selectedBundleIds].map(id=>PRODUCTS.find(p=>p.id===id)).filter(Boolean);if(!sel.length){showToast('Select at least one product 🌿','error');return;}sel.forEach(p=>STORE.addToCart(p.id,1));openSideCart();showPtsToast('+'+sel.length*10+' VitaPoints!');}
