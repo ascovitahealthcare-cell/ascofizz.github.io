@@ -4423,7 +4423,34 @@ img[src=""], img[data-awaiting-upload] { visibility: hidden; width: 100%; }
 
 /* ══ SHOP ═════════════════════════════════════════════════════════ */
 .shop-layout { display: grid; gap: 26px; grid-template-columns: 258px 1fr; align-items: start; }
-.cat-pills { display: flex; flex-wrap: wrap; gap: 9px; margin-bottom: 30px; }
+/* Category rail — one scrolling line, not a wrapping block.
+   Thirteen pills wrapping across seven rows took 309px of a 727px phone
+   and pushed the first product to 1456px: two full screens of filter
+   before a customer saw a single thing to buy. A shop page whose first
+   screen contains no product is not a shop page.
+   The rail bleeds to both edges so the row visibly continues past the
+   screen, which is what tells a thumb it can be swiped. */
+.cat-pills {
+  display: flex; flex-wrap: nowrap; gap: 8px;
+  margin: 0 calc(var(--gutter) * -1) 22px;
+  padding: 5px var(--gutter) 12px;
+  overflow-x: auto; overflow-y: hidden;
+  scroll-snap-type: x proximity;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior-x: contain;
+  scrollbar-width: none;
+  /* Fade the trailing edge so the cut-off pill reads as "more this way"
+     rather than as a layout mistake. */
+  -webkit-mask-image: linear-gradient(90deg, #000 0, #000 calc(100% - 34px), transparent 100%);
+          mask-image: linear-gradient(90deg, #000 0, #000 calc(100% - 34px), transparent 100%);
+}
+.cat-pills::-webkit-scrollbar { display: none; }
+.cat-pills > .cpill { flex: 0 0 auto; scroll-snap-align: start; }
+/* Everything fits on a wide screen, so drop the rail affordances there. */
+@media (min-width: 861px) {
+  .cat-pills { flex-wrap: wrap; overflow: visible; margin-inline: 0; padding-inline: 0;
+               -webkit-mask-image: none; mask-image: none; }
+}
 .cpill {
   padding: 9px 18px; border-radius: var(--r-pill);
   font-size: .82rem; font-weight: 700; color: var(--t-mid);
@@ -5833,8 +5860,16 @@ textarea.b2b-form-input { min-height: 110px; resize: vertical; font-family: inhe
 
 /* ── ≤1024px ───────────────────────────────────────────────────── */
 @media (max-width: 1024px) {
+  /* Products first, filters after. The single-column stack put the whole
+     filter panel — price range, sort, stock toggles — above the grid, so
+     the first product sat at 1200px on a 727px screen. Nobody arrives at a
+     shop wanting to narrow a list they have not seen yet; they want to see
+     the goods, and reach for filters only once there are too many.
+     Reordering costs nothing: every filter is still one short scroll away,
+     and the category rail above still does the coarse cut. */
   .shop-layout { grid-template-columns: 1fr; }
-  .filter-sidebar { position: static; }
+  .filter-sidebar { position: static; order: 2; }
+  .shop-layout > :not(.filter-sidebar) { order: 1; }
   .filter-box { display: grid; gap: 0 24px; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); }
   .filter-hdr { grid-column: 1 / -1; }
   .cart-layout, .checkout-layout { grid-template-columns: 1fr; }
@@ -8323,7 +8358,7 @@ setInterval(function() { syncAppCartBadge(); syncAppWishBadge(); }, 2000);
         <div style="display:flex;flex-wrap:wrap;gap:10px;margin-bottom:28px">
           <span style="background:rgba(255,255,255,0.12);color:var(--t-hi);padding:7px 15px;border-radius:100px;font-size:0.8rem;font-weight:500">✅ Skin & Glow</span>
           <span style="background:rgba(255,255,255,0.12);color:var(--t-hi);padding:7px 15px;border-radius:100px;font-size:0.8rem;font-weight:500">⚡ Energy & Focus</span>
-          <span style="background:rgba(255,255,255,0.12);color:var(--t-hi);padding:7px 15px;border-radius:100px;font-size:0.8rem;font-weight:500">💪 Immunity</span>
+          <span style="background:rgba(255,255,255,0.12);color:var(--t-hi);padding:7px 15px;border-radius:100px;font-size:0.8rem;font-weight:500">Immunity</span>
           <span style="background:rgba(255,255,255,0.12);color:var(--t-hi);padding:7px 15px;border-radius:100px;font-size:0.8rem;font-weight:500">⚖️ Weight Loss</span>
           <span style="background:rgba(255,255,255,0.12);color:var(--t-hi);padding:7px 15px;border-radius:100px;font-size:0.8rem;font-weight:500">💇 Hair & Nails</span>
         </div>
@@ -8449,18 +8484,18 @@ setInterval(function() { syncAppCartBadge(); syncAppWishBadge(); }, 2000);
     </div>
     <div class="cat-pills" id="shopPills">
       <button class="cpill active" data-cat="all" onclick="filterCat('all',this)">All</button>
-      <button class="cpill" data-cat="bestsellers" onclick="filterCat('bestsellers',this)">🔥 Best Sellers</button>
-      <button class="cpill sale-only-ui" data-cat="sale" onclick="filterCat('sale',this)">💰 On Sale</button>
-      <button class="cpill" data-cat="new" onclick="filterCat('new',this)">🆕 New</button>
-      <button class="cpill" data-cat="premium" onclick="filterCat('premium',this)">🏆 Premium</button>
-      <button class="cpill" data-cat="spirulina" onclick="filterCat('spirulina',this)">🌊 Spirulina</button>
-      <button class="cpill" data-cat="effervescent" onclick="filterCat('effervescent',this)">🫧 Effervescent</button>
-      <button class="cpill" data-cat="ayurvedic" onclick="filterCat('ayurvedic',this)">🌿 Ayurvedic</button>
-      <button class="cpill" data-cat="energy" onclick="filterCat('energy',this)">⚡ Energy</button>
-      <button class="cpill" data-cat="skin" onclick="filterCat('skin',this)">⭐ Skin &amp; Glow</button>
+      <button class="cpill" data-cat="bestsellers" onclick="filterCat('bestsellers',this)">Best Sellers</button>
+      <button class="cpill sale-only-ui" data-cat="sale" onclick="filterCat('sale',this)">On Sale</button>
+      <button class="cpill" data-cat="new" onclick="filterCat('new',this)">New</button>
+      <button class="cpill" data-cat="premium" onclick="filterCat('premium',this)">Premium</button>
+      <button class="cpill" data-cat="spirulina" onclick="filterCat('spirulina',this)">Spirulina</button>
+      <button class="cpill" data-cat="effervescent" onclick="filterCat('effervescent',this)">Effervescent</button>
+      <button class="cpill" data-cat="ayurvedic" onclick="filterCat('ayurvedic',this)">Ayurvedic</button>
+      <button class="cpill" data-cat="energy" onclick="filterCat('energy',this)">Energy</button>
+      <button class="cpill" data-cat="skin" onclick="filterCat('skin',this)">Skin &amp; Glow</button>
       <button class="cpill" data-cat="immunity" onclick="filterCat('immunity',this)">💪 Immunity</button>
-      <button class="cpill" data-cat="weight" onclick="filterCat('weight',this)">🏋 Weight</button>
-      <button class="cpill" data-cat="combos" onclick="filterCat('combos',this)">🎁 Combos</button>
+      <button class="cpill" data-cat="weight" onclick="filterCat('weight',this)">Weight</button>
+      <button class="cpill" data-cat="combos" onclick="filterCat('combos',this)">Combos</button>
     </div>
     <div class="shop-layout">
       <!-- SIDEBAR -->
@@ -8789,6 +8824,15 @@ function calcShipping(netSubtotal) {
 }
 function shippingIsAlwaysFree() { return !SHIP_FEE; }
 
+// NOTE: this function is ALSO declared further down, in a later <script>
+// block. It looks like dead duplication and I removed it on that reading —
+// which broke checkout with "renderCheckoutSummary is not defined".
+// Function hoisting is per-SCRIPT, not per-document: while this block runs,
+// the later block has not been parsed and its copy does not exist yet.
+// Callers reached during this block need this definition. The two bodies
+// have since diverged (the later one carries a promo-discount fix), so they
+// should be reconciled into one shared definition placed above both — but
+// that is a deliberate change to make and verify, not a deletion.
 function renderCheckoutSummary() {
   const el = document.getElementById('ckSummary');
   if (!el) return;
@@ -10582,7 +10626,13 @@ async function loadProductReviews(productId) {
   try {
     // Throw rather than return: the catch below already sets the honest
     // empty state and marks the fetch complete.
-    const sb = sbClient(); if (!sb) throw new Error('Supabase client not loaded yet');
+    // sbClientWhenReady(), not sbClient(). The Supabase bundle is a
+    // DEFERRED CDN script, so it has not run yet during start-up — and
+    // this fires during start-up. The bare call returned null, this threw
+    // "Supabase client not loaded yet", and nothing ever retried: the
+    // reviews stayed empty for the life of the page. Waiting a moment is
+    // the whole fix.
+    const sb = await sbClientWhenReady(8000); if (!sb) throw new Error('Supabase client not loaded yet');
     const { data, error } = await sb
       .from('reviews')
       .select('id, user_name, rating, review_text, created_at, verified')
@@ -12791,7 +12841,13 @@ let FEATURED_REVIEWS_AVG   = null;
 
 async function loadReviewStats() {
   try {
-    const sb = sbClient(); if (!sb) return;
+    // sbClientWhenReady(), not sbClient(). The Supabase bundle is a
+    // DEFERRED CDN script, so it has not run yet during start-up — and
+    // this fires during start-up. The bare call returned null, this threw
+    // "Supabase client not loaded yet", and nothing ever retried: the
+    // reviews stayed empty for the life of the page. Waiting a moment is
+    // the whole fix.
+    const sb = await sbClientWhenReady(8000); if (!sb) return;
     const { data, count, error } = await sb
       .from('reviews').select('rating', { count: 'exact' });
     if (error) throw error;
@@ -12807,7 +12863,13 @@ async function getFeaturedReviews() {
   try {
     // Throw rather than return: the catch below already sets the honest
     // empty state and marks the fetch complete.
-    const sb = sbClient(); if (!sb) throw new Error('Supabase client not loaded yet');
+    // sbClientWhenReady(), not sbClient(). The Supabase bundle is a
+    // DEFERRED CDN script, so it has not run yet during start-up — and
+    // this fires during start-up. The bare call returned null, this threw
+    // "Supabase client not loaded yet", and nothing ever retried: the
+    // reviews stayed empty for the life of the page. Waiting a moment is
+    // the whole fix.
+    const sb = await sbClientWhenReady(8000); if (!sb) throw new Error('Supabase client not loaded yet');
     const { data, error } = await sb
       .from('reviews')
       .select('id, product_id, product_name, user_name, rating, review_text, created_at')
@@ -12836,7 +12898,13 @@ let LIVE_RATING_CACHE = null;
 async function getLiveRating() {
   if (LIVE_RATING_CACHE) return LIVE_RATING_CACHE;
   try {
-    const sb = sbClient(); if (!sb) throw new Error('Supabase client not loaded yet');
+    // sbClientWhenReady(), not sbClient(). The Supabase bundle is a
+    // DEFERRED CDN script, so it has not run yet during start-up — and
+    // this fires during start-up. The bare call returned null, this threw
+    // "Supabase client not loaded yet", and nothing ever retried: the
+    // reviews stayed empty for the life of the page. Waiting a moment is
+    // the whole fix.
+    const sb = await sbClientWhenReady(8000); if (!sb) throw new Error('Supabase client not loaded yet');
     const { data, error, count } = await sb
       .from('reviews')
       .select('rating', { count: 'exact' });
@@ -16035,10 +16103,9 @@ async function renderReturnsPanel() {
   }
 }
 
-function _esc(v) {
-  return String(v == null ? '' : v)
-    .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
-}
+// _esc() is defined once, in invoice-template.js, which loads in <head>
+// before any of this runs. The byte-identical copy that used to sit here
+// shadowed it for no reason.
 
 async function submitReturn(orderId, btn) {
   const boxes = Array.from(document.querySelectorAll('input[type=checkbox][data-oid="' + orderId + '"]:checked'));
