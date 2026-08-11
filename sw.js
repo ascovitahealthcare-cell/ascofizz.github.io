@@ -3,7 +3,21 @@
 // Place this file in ROOT of your GitHub Pages repo
 // ============================================================
 
-const CACHE_NAME = 'ozylix-pwa-v7'; // bumped: sw.js is now actually registered (see index.html) — a fresh cache name forces every visitor onto this version instead of some being stuck on whatever v6 already had cached from before registration existed.
+// Bumped v7 -> v8 to force-purge every stale cache.
+//
+// Documents are network-first below, so an online visitor normally gets
+// fresh HTML. But the cache fallback fires whenever fetch() REJECTS — and
+// on patchy mobile data that happens often. A phone that cached
+// index.html back when the drawer scroll-lock bug was still in it could
+// therefore be handed that frozen copy again on any flaky load, long
+// after the fix went live. That is indistinguishable, to the person
+// holding the phone, from the fix never having shipped.
+//
+// The activate handler deletes every cache whose key !== CACHE_NAME, so
+// changing this string is what actually evicts the bad copy from devices
+// already carrying it. Bump it on any deploy that fixes a page-breaking
+// bug — a fix nobody can receive is not shipped.
+const CACHE_NAME = 'ozylix-pwa-v8';
 const OFFLINE_URL = '/offline.html';
 
 // Files to cache on install (your core pages)
