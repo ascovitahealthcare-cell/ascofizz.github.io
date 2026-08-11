@@ -11611,6 +11611,11 @@ function openProduct(id) {
   if (!currentProduct) return;
   setProductPageSchema(currentProduct);
   pQty = 1;
+  // Opening a product is a fresh visit, so its review list starts collapsed
+  // at three. Only this entry point resets it — buildProductPage() must not,
+  // because it re-runs when reviews load and would then close a list the
+  // customer had just opened.
+  try { if (_rvView[id]) { _rvView[id].expanded = false; _rvView[id].page = 0; } } catch(e) {}
   buildProductPage(currentProduct);
   setTimeout(()=>document.dispatchEvent(new CustomEvent('productPageShown',{detail:currentProduct})),100);
   // Push clean URL: /product/glutathione-effervescent
@@ -11881,6 +11886,96 @@ function updatePriceDisplay(productId, tierIdx) {
   if (addBtn) addBtn.dataset.tier = tierIdx;
 }
 
+/* ── PRODUCT-PAGE REVIEW LIST: 3 shown, then paged 50 at a time ──────
+   A product with a few hundred reviews used to print every one of them
+   into the tab, pushing the "Write a Review" form and everything below it
+   miles down the page and making the tab expensive to render on a phone.
+   Three are shown up front; the rest open on request, fifty to a page.
+
+   The view state lives out here, keyed by product, NOT inside
+   buildProductPage — that function re-runs whenever reviews finish
+   loading or a backend sync lands, and state held inside it would snap a
+   list the customer had just expanded back shut underneath them.
+
+   Paging re-renders only #rvListWrap. Calling buildProductPage would
+   rebuild the gallery, tabs and tier table to change a list of reviews,
+   and would throw away the reading position while doing it. */
+const RV_TOP_N     = 3;    // before "Read all reviews"
+const RV_PAGE_SIZE = 50;   // per page once expanded
+const _rvView      = {};   // productId -> { expanded, page }
+
+function rvViewState(id) {
+  if (!_rvView[id]) _rvView[id] = { expanded: false, page: 0 };
+  return _rvView[id];
+}
+
+function rvCardHTML(r) {
+  return `<div class="rv-card"><div class="rv-hdr"><div><span class="rv-name">${esc(r.user)}</span>${r.verified?'<span class="rv-verified">&#x2713; Verified</span>':''}</div><span class="rv-date">${esc(r.date)}</span></div><div class="rv-stars">${'&#x2605;'.repeat(starCount(r.rating))}${'&#x2606;'.repeat(5-starCount(r.rating))}</div><p class="rv-text">${esc(r.text)}</p></div>`;
+}
+
+/* Paging from the bottom of a fifty-card list leaves the reader looking at
+   the end of the NEXT page. Put the top of the list back under them. */
+function rvScrollToList() {
+  const w = document.getElementById('rvListWrap');
+  if (w && w.scrollIntoView) { try { w.scrollIntoView({ block: 'start' }); } catch (e) { w.scrollIntoView(); } }
+}
+
+function rvExpand(pid)   { const v = rvViewState(pid); v.expanded = true;  v.page = 0; renderProductReviewList(pid); }
+function rvCollapse(pid) { const v = rvViewState(pid); v.expanded = false; v.page = 0; renderProductReviewList(pid); rvScrollToList(); }
+function rvGoPage(pid, delta) {
+  const v = rvViewState(pid);
+  const total = (REVIEWS[pid] || []).length;
+  const last  = Math.max(0, Math.ceil(total / RV_PAGE_SIZE) - 1);
+  v.page = Math.min(last, Math.max(0, v.page + delta));
+  renderProductReviewList(pid);
+  rvScrollToList();
+}
+
+function renderProductReviewList(pid) {
+  const wrap = document.getElementById('rvListWrap');
+  if (!wrap) return;
+  const pad = 'text-align:center;padding:24px;color:var(--gray);font-size:.85rem';
+
+  if (!REVIEWS_LOADED[pid]) { wrap.innerHTML = `<div style="${pad}">Loading reviews…</div>`; return; }
+  const rvs = REVIEWS[pid] || [];
+  if (!rvs.length) {
+    wrap.innerHTML = `<div style="${pad}">No reviews yet — be the first to share your experience with this product! 🌿</div>`;
+    return;
+  }
+
+  const v = rvViewState(pid), total = rvs.length;
+  const btn = 'display:inline-flex;align-items:center;justify-content:center;gap:6px;padding:11px 20px;' +
+              'border-radius:var(--r-pill);font-weight:700;font-size:.82rem;background:var(--paper);' +
+              'box-shadow:var(--neo-1);color:var(--indigo);touch-action:manipulation;min-height:44px';
+
+  if (!v.expanded) {
+    let html = rvs.slice(0, RV_TOP_N).map(rvCardHTML).join('');
+    if (total > RV_TOP_N) {
+      html += `<div style="text-align:center;margin-top:14px">
+        <button type="button" style="${btn}" onclick="rvExpand(${pid})">Read all ${total} reviews &#x2193;</button></div>`;
+    }
+    wrap.innerHTML = html;
+    return;
+  }
+
+  const pages = Math.max(1, Math.ceil(total / RV_PAGE_SIZE));
+  const page  = Math.min(v.page, pages - 1);
+  const start = page * RV_PAGE_SIZE;
+  const end   = Math.min(start + RV_PAGE_SIZE, total);
+  const dim   = 'opacity:.4;pointer-events:none';
+
+  let html = rvs.slice(start, end).map(rvCardHTML).join('');
+  html += `<div style="display:flex;flex-wrap:wrap;gap:10px;align-items:center;justify-content:center;margin-top:16px">
+      <div style="width:100%;text-align:center;font-size:.78rem;color:var(--t-low);margin-bottom:2px">
+        Showing ${start + 1}–${end} of ${total} reviews${pages > 1 ? ` &middot; page ${page + 1} of ${pages}` : ''}
+      </div>
+      ${pages > 1 ? `<button type="button" style="${btn}${page === 0 ? ';' + dim : ''}" ${page === 0 ? 'disabled' : ''} onclick="rvGoPage(${pid},-1)">&#x2190; Previous</button>` : ''}
+      ${pages > 1 ? `<button type="button" style="${btn}${page >= pages - 1 ? ';' + dim : ''}" ${page >= pages - 1 ? 'disabled' : ''} onclick="rvGoPage(${pid},1)">Next 50 &#x2192;</button>` : ''}
+      <button type="button" style="${btn}" onclick="rvCollapse(${pid})">Show less</button>
+    </div>`;
+  wrap.innerHTML = html;
+}
+
 // ── PRODUCT PAGE ──
 function buildProductPage(p) {
   const rvs = REVIEWS[p.id] || [];
@@ -11958,12 +12053,11 @@ function buildProductPage(p) {
           <div class="rating-big"><div class="rv-big-num">${avg !== null ? avg.toFixed(1) : '—'}</div><div class="rv-big-stars">&#x2605;&#x2605;&#x2605;&#x2605;&#x2605;</div><div style="font-size:.72rem;color:var(--gray)">${rvs.length} reviews</div></div>
           <div style="flex:1">${[5,4,3,2,1].map(s=>{const c=rvs.filter(r=>Math.round(r.rating)===s).length;const pct=rvs.length?(c/rvs.length)*100:0;return`<div class="rv-bar-row"><span style="width:14px">${s}&#x2605;</span><div class="rv-bar-track"><div class="rv-bar-fill" style="width:${pct}%"></div></div><span>${Math.round(pct)}%</span></div>`;}).join('')}</div>
         </div>
-        ${!REVIEWS_LOADED[p.id]
-            ? `<div style="text-align:center;padding:24px;color:var(--gray);font-size:.85rem">Loading reviews…</div>`
-            : rvs.length
-              ? rvs.map(r=>`<div class="rv-card"><div class="rv-hdr"><div><span class="rv-name">${esc(r.user)}</span>${r.verified?'<span class="rv-verified">&#x2713; Verified</span>':''}</div><span class="rv-date">${esc(r.date)}</span></div><div class="rv-stars">${'&#x2605;'.repeat(starCount(r.rating))}${'&#x2606;'.repeat(5-starCount(r.rating))}</div><p class="rv-text">${esc(r.text)}</p></div>`).join('')
-              : `<div style="text-align:center;padding:24px;color:var(--gray);font-size:.85rem">No reviews yet — be the first to share your experience with this product! 🌿</div>`
-          }
+        <!-- Filled by renderProductReviewList() once this HTML is in the
+             DOM: three reviews, then fifty a page on request. Loading and
+             empty states live in there too, so there is one place that
+             decides what this list shows. -->
+        <div id="rvListWrap"></div>
         <div class="rv-form" id="rvFormWrap">
           <h3>Write a Review</h3>
           ${getCurrentUser() ? `
@@ -12005,6 +12099,10 @@ function buildProductPage(p) {
       </div>` : ''}
     </div>
   `;
+  // The reviews tab ships as an empty #rvListWrap above; fill it now that
+  // the markup exists. Any expanded/paged state the customer had is kept —
+  // this function re-runs on every review load and backend sync.
+  try { renderProductReviewList(p.id); } catch(e) {}
 }
 
 // Adds a tiered product to cart, recording which tier (pack size) was chosen
