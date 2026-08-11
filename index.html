@@ -2,6 +2,40 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
+  <!-- ── FORCE HTTPS — must stay the first script in the document ──────
+       Symptom this fixes, from the Render log:
+
+           Error: CORS: not allowed → http://www.ozylix.com
+
+       The API's allow-list is https-only, deliberately. GitHub Pages will
+       still serve this site over plain http unless "Enforce HTTPS" is
+       switched on in repository settings, so anyone arriving on an http
+       URL — a typed address, an old bookmark, a QR code, an ad — got a
+       storefront that looked fine and then failed every single API call.
+       No products, no login, no checkout, and a CORS message they could
+       not see. The page was insecure; the CORS refusal was the symptom.
+
+       Widening the allow-list to the http origins would have silenced the
+       error by blessing an unencrypted storefront that takes passwords and
+       stores a JWT. The page has to be on https instead.
+
+       replace(), not assign(), so the http URL leaves no history entry for
+       Back to bounce off. Path, query and hash are all carried over.
+       Localhost is exempt or local development breaks.
+
+       This is a client-side backstop. The real fix is Settings → Pages →
+       Enforce HTTPS, which redirects before a byte of this file is sent. -->
+  <script>
+    (function () {
+      try {
+        if (location.protocol === 'http:' &&
+            !/^(localhost|127\.0\.0\.1|\[::1\])$/.test(location.hostname)) {
+          location.replace('https://' + location.host + location.pathname +
+                           location.search + location.hash);
+        }
+      } catch (e) { /* never block the page on this */ }
+    })();
+  </script>
   <!-- ✅ Indexing directives — placed first so Googlebot reads them before any script loads -->
   <meta name="robots" content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1">
   <meta name="googlebot" content="index, follow, max-image-preview:large">

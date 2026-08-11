@@ -2,6 +2,28 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
+<!-- ── FORCE HTTPS — must stay the first script in the document ────────
+     The admin panel matters more here than the storefront: it posts a
+     password and holds a staff JWT in localStorage, and over plain http
+     both cross the network in clear text. The API refuses http origins
+     (adminOriginOnly allows https://ozylix.com and https://www.ozylix.com
+     only), so an http admin page cannot even sign in — it just reports
+     "Cannot reach server" while the real reason, a CORS refusal, is
+     visible only in the Render log. Get onto https before anything runs.
+
+     See the matching note in index.html. The authoritative fix is
+     Settings → Pages → Enforce HTTPS; this is the backstop. -->
+<script>
+  (function () {
+    try {
+      if (location.protocol === 'http:' &&
+          !/^(localhost|127\.0\.0\.1|\[::1\])$/.test(location.hostname)) {
+        location.replace('https://' + location.host + location.pathname +
+                         location.search + location.hash);
+      }
+    } catch (e) { /* never block the page on this */ }
+  })();
+</script>
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, minimum-scale=1.0">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
