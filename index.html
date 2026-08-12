@@ -106,11 +106,22 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
   const _gtag = (...args) => { if(typeof gtag === 'function') gtag(...args); };
 
   // ── PAGE VIEW (called from showPage) ──
+  // Reads the REAL URL rather than rebuilding one. These fields used to be
+  // assembled as origin + '/#' + pageName, which described a hash-routed
+  // site — and this one has not been hash-routed for a long time. showPage()
+  // pushes a clean path (/shop, /product/glutathione-effervescent) before
+  // this runs, so GA4 was being told '/#shop' while the address bar, the
+  // sitemap, Search Console and every real link said '/shop'.
+  //
+  // The cost of that is not cosmetic: GA4's Pages report listed paths that
+  // exist nowhere, could not be joined to Search Console, and collapsed
+  // every product onto a single '/#product' row instead of showing which
+  // product was viewed.
   window._trackPage = function(pageName) {
     _gtag('event', 'page_view', {
       page_title:    'Ozylix – ' + (pageName.charAt(0).toUpperCase() + pageName.slice(1)),
-      page_location: window.location.origin + (pageName !== 'home' ? '/#' + pageName : '/'),
-      page_path:     pageName !== 'home' ? '/#' + pageName : '/',
+      page_location: window.location.href,
+      page_path:     window.location.pathname + window.location.search,
     });
   };
 
@@ -11773,6 +11784,13 @@ function openProduct(id) {
     const slug = slugify(currentProduct.name);
     history.pushState({ page: 'product', id: id }, '', '/product/' + slug);
   } catch(e) {}
+  /* Product pages were absent from GA4's Pages report entirely. Opening a
+     product does not route through showPage(), so nothing ever sent a
+     page_view for it — view_item fired, which is the right ecommerce event
+     but is not a pageview, so /product/... URLs simply did not exist in the
+     reporting even though customers were on them.
+     Sent after the pushState above so the real slug is in the URL. */
+  try { window._trackPage && window._trackPage(currentProduct.name); } catch(e) {}
   // Update page title + meta for SEO
   const disc = currentProduct.salePrice ? Math.round((1 - currentProduct.salePrice/currentProduct.price)*100) : 0;
   const discText = disc > 0 ? ` – ${disc}% OFF` : '';
