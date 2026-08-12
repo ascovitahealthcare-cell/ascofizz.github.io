@@ -235,11 +235,15 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 </script>
 <!-- End Google Analytics -->
 
-<!-- Meta Pixel. Put the real ID from Events Manager in META_PIXEL_ID below;
-     until then nothing loads, because initialising on a placeholder sends
-     every pageview to a pixel that does not exist. -->
+<!-- Meta Pixel — "Ozylix Pixel", ad account 1404487341165010.
+     The guard stays: initialising on an empty ID would send every pageview
+     to a pixel that does not exist. Every event this site fires is already
+     wired further down (ViewContent, AddToCart, InitiateCheckout, Purchase,
+     Search) and starts working the moment this ID is set — there is no
+     second copy of the base code to add, and adding one would double-count
+     every PageView. -->
 <script>
-window.META_PIXEL_ID = '';
+window.META_PIXEL_ID = '1031030359902418';
 if (window.META_PIXEL_ID) {
 !function(f,b,e,v,n,t,s){if(f.fbq)return;n=f.fbq=function(){n.callMethod?
 n.callMethod.apply(n,arguments):n.queue.push(arguments)};if(!f._fbq)f._fbq=n;
@@ -248,6 +252,11 @@ t.src=v;s=b.getElementsByTagName(e)[0];s.parentNode.insertBefore(t,s)}(window,
 document,'script','https://connect.facebook.net/en_US/fbevents.js');
 fbq('init', window.META_PIXEL_ID);
 fbq('track', 'PageView');
+  // Same guard for the no-JS beacon: written from the live ID rather than
+  // hard-coded, so the two can never drift apart.
+  document.write('<noscript><img height="1" width="1" style="display:none" ' +
+    'src="https://www.facebook.com/tr?id=' + encodeURIComponent(window.META_PIXEL_ID) +
+    '&ev=PageView&noscript=1" alt=""></noscript>');
 }
 </script>
 <!-- End Meta Pixel -->
