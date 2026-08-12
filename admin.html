@@ -1210,6 +1210,181 @@ body.theme-holo .online-badge{
   body.theme-holo .cards-grid::before{animation:none !important;}
 }
 
+
+.theme-preview-elysia{background:#1a1022;border:1px solid rgba(245,166,35,0.4);box-shadow:0 0 16px rgba(245,166,35,0.18), inset 0 1px 0 rgba(255,230,180,0.06);}
+.theme-preview-elysia .tp-bar{background:linear-gradient(90deg,#f5a623,#e8677c);}
+.theme-preview-elysia .tp-dot:nth-child(1){background:#f5a623;box-shadow:0 0 6px #f5a623;}
+.theme-preview-elysia .tp-dot:nth-child(2){background:#e8677c;}
+.theme-preview-elysia .tp-dot:nth-child(3){background:#8b5cf6;}
+/* ══ ELYSIA CINEMATIC THEME (5th) ══ */
+/* ════════════════════════════════════════════════════════════════════
+   ELYSIA CINEMATIC — fifth theme.
+   Reference: warm cinematic dashboard — cream cards + dark navy panels,
+   orange/amber/pink gradients, glowing rings, streak bar charts.
+   All-new dedicated CSS: every structural class gets its own rule.
+   ════════════════════════════════════════════════════════════════════ */
+
+/* ---------- stage + sidebar ---------- */
+body.theme-elysia{
+  background:linear-gradient(160deg,#1b1120 0%,#241527 35%,#2a1728 65%,#1e1222 100%);
+  color:#f4ede2;
+}
+body.theme-elysia::before{
+  content:"";position:fixed;inset:0;pointer-events:none;z-index:0;
+  background:
+    radial-gradient(600px 420px at 12% 8%,rgba(245,166,35,0.16),transparent 60%),
+    radial-gradient(520px 380px at 88% 14%,rgba(232,103,124,0.12),transparent 60%),
+    radial-gradient(640px 460px at 50% 96%,rgba(139,92,246,0.10),transparent 62%);
+  animation:elysia-ambient 22s ease-in-out infinite alternate;
+}
+@keyframes elysia-ambient{0%{opacity:.55;transform:scale(1)}100%{opacity:.9;transform:scale(1.06)}}
+
+body.theme-elysia .sidebar{
+  background:linear-gradient(180deg,#fdf7ee 0%,#f8efdf 55%,#f3e6cf 100%);
+  border-right:1px solid rgba(214,186,140,0.55);
+  box-shadow:6px 0 26px rgba(10,6,20,0.35);
+}
+body.theme-elysia .sidebar .admin-logo-area,
+body.theme-elysia .sidebar .brand{color:#3d2b18;}
+body.theme-elysia .sidebar a,.theme-elysia .nav-item{color:#5a4526;}
+body.theme-elysia .nav-item.active{
+  background:linear-gradient(90deg,rgba(245,166,35,0.18),rgba(232,103,124,0.10));
+  color:#b45309;border-right:3px solid #f59e0b;font-weight:700;
+}
+body.theme-elysia .sidebar h4,
+body.theme-elysia .nav-section-title{color:#8a6a3c;font-weight:800;letter-spacing:.12em;}
+
+/* ---------- topbar + header ---------- */
+body.theme-elysia .topbar{background:rgba(22,14,28,0.72);backdrop-filter:blur(14px);}
+body.theme-elysia .dash-title{
+  background:linear-gradient(90deg,#ffc173,#f5a623 45%,#e8677c);
+  -webkit-background-clip:text;background-clip:text;color:transparent;
+  animation:elysia-sweep 6s linear infinite;
+}
+@keyframes elysia-sweep{0%{filter:hue-rotate(0)}100%{filter:hue-rotate(12deg)}}
+body.theme-elysia .subtitle{color:#c9b896;}
+body.theme-elysia .welcome-wrap{color:#e9dcc4;}
+
+/* ---------- cards (two-tone system) ---------- */
+body.theme-elysia .card{
+  background:linear-gradient(165deg,#faf5ec,#f6eedf);
+  border:1px solid rgba(214,186,140,0.5);
+  border-radius:22px;
+  box-shadow:0 10px 30px rgba(10,5,22,0.28),0 2px 8px rgba(10,5,22,0.22);
+}
+body.theme-elysia .card-hdr{border-bottom:1px solid rgba(214,186,140,0.45);}
+body.theme-elysia .card-title{color:#3d2b18;font-weight:800;letter-spacing:.02em;}
+body.theme-elysia .card.dark-card,
+body.theme-elysia .card--dark{
+  background:linear-gradient(165deg,#16101e 0%,#1c1224 55%,#201327 100%);
+  border:1px solid rgba(245,166,35,0.22);
+  box-shadow:0 14px 34px rgba(6,3,14,0.55),inset 0 1px 0 rgba(255,220,150,0.05);
+}
+body.theme-elysia .card--dark .card-hdr{border-bottom:1px solid rgba(245,166,35,0.18);}
+body.theme-elysia .card--dark .card-title{color:#ffe8c4;}
+
+/* KPI tiles — dark cinematic like Energy Level card */
+body.theme-elysia .kpi,.theme-elysia .kpi{
+  background:linear-gradient(150deg,#17111f,#21142a 70%);
+  border:1px solid rgba(245,166,35,0.25);
+  border-radius:22px;
+  box-shadow:0 14px 36px rgba(6,3,14,0.5),inset 0 1px 0 rgba(255,225,160,0.07);
+  overflow:hidden;position:relative;
+}
+body.theme-elysia .kpi::after{
+  content:"";position:absolute;right:-34px;top:-34px;width:130px;height:130px;border-radius:50%;
+  background:radial-gradient(circle,rgba(245,166,35,0.28),transparent 65%);
+  animation:elysia-orb 9s ease-in-out infinite alternate;
+}
+@keyframes elysia-orb{0%{transform:translate(0,0) scale(1)}100%{transform:translate(-14px,10px) scale(1.18)}}
+body.theme-elysia .kpi .kpi-label{color:#b4956a;font-weight:700;letter-spacing:.14em;font-size:.72rem;}
+body.theme-elysia .kpi .kpi-val{color:#fdf6e8;font-weight:800;font-size:1.7rem;
+  background:linear-gradient(90deg,#ffd394,#f5a623 60%,#f08060);-webkit-background-clip:text;background-clip:text;color:transparent;}
+body.theme-elysia .kpi .kpi-sub,body.theme-elysia .kpi-sub{color:#e88a5c;font-weight:600;}
+
+/* ---------- text tokens ---------- */
+body.theme-elysia .text3,body.theme-elysia .muted{color:#a89270!important;}
+body.theme-elysia .text2{color:#cbb78f;}
+body.theme-elysia body,
+body.theme-elysia .form-label,
+body.theme-elysia label{color:#eadfc9;}
+
+/* ---------- buttons ---------- */
+body.theme-elysia .btn-primary,body.theme-elysia button.primary{
+  background:linear-gradient(90deg,#f5a623,#e8677c);
+  color:#fff;border:none;border-radius:999px;
+  box-shadow:0 6px 20px rgba(245,130,80,0.42);
+}
+body.theme-elysia .btn-primary:hover,body.theme-elysia button.primary:hover{box-shadow:0 8px 28px rgba(245,130,80,0.6);transform:translateY(-1px);}
+body.theme-elysia .btn{border-radius:12px;}
+body.theme-elysia .chip,
+body.theme-elysia .badge{border-radius:999px;font-weight:700;}
+
+/* ---------- badges / status ---------- */
+body.theme-elysia .badge-green{background:rgba(74,222,128,0.16);color:#7de09e;border:1px solid rgba(74,222,128,0.35);}
+body.theme-elysia .badge-gold{background:rgba(245,166,35,0.16);color:#ffc173;border:1px solid rgba(245,166,35,0.4);}
+body.theme-elysia .badge-red{background:rgba(232,103,124,0.16);color:#f5a3b4;border:1px solid rgba(232,103,124,0.4);}
+body.theme-elysia .badge-blue{background:rgba(139,92,246,0.16);color:#c4b5fd;border:1px solid rgba(139,92,246,0.4);}
+body.theme-elysia .badge-gray{background:rgba(200,180,140,0.14);color:#cbb78f;border:1px solid rgba(200,180,140,0.3);}
+
+/* ---------- tables ---------- */
+body.theme-elysia table{border-radius:16px;overflow:hidden;}
+body.theme-elysia thead th{background:#2a1a30;color:#ffc173;font-weight:800;letter-spacing:.04em;border-bottom:2px solid #f5a623!important;}
+body.theme-elysia tbody tr{border-bottom:1px solid rgba(214,186,140,0.25);}
+body.theme-elysia tbody tr:hover{background:linear-gradient(90deg,rgba(245,166,35,0.10),rgba(232,103,124,0.06));}
+body.theme-elysia td{color:#ece1cc;}
+
+/* ---------- forms / inputs ---------- */
+body.theme-elysia input,body.theme-elysia select,body.theme-elysia textarea{
+  background:#1e1226;border:1px solid rgba(245,166,35,0.28);border-radius:12px;color:#f4ede2;
+}
+body.theme-elysia input:focus,body.theme-elysia select:focus,body.theme-elysia textarea:focus{
+  border-color:#f5a623;box-shadow:0 0 0 3px rgba(245,166,35,0.20);
+}
+body.theme-elysia .range-chips .chip.active{
+  background:linear-gradient(90deg,#f5a623,#e8677c);color:#fff;border:none;
+}
+
+/* ---------- live activity feed ---------- */
+body.theme-elysia .feed-item{
+  background:linear-gradient(90deg,rgba(245,166,35,0.08),transparent 70%);
+  border-left:3px solid #f59e0b;border-radius:12px;
+  animation:elysia-feed 8s ease-in-out infinite alternate;
+}
+@keyframes elysia-feed{0%{box-shadow:inset 0 0 0 rgba(245,166,35,0)}100%{box-shadow:inset 0 0 16px rgba(245,166,35,0.10)}}
+body.theme-elysia .feed-item strong{color:#ffd394;}
+body.theme-elysia .feed-item .feed-time{color:#b4956a;}
+body.theme-elysia .feed-title{color:#ffe8c4;font-weight:800;letter-spacing:.02em;}
+
+/* ---------- rings (Overall Progress style: conic orange glow) ---------- */
+body.theme-elysia .ring-glow{
+  filter:drop-shadow(0 0 14px rgba(245,166,35,0.55));
+  animation:elysia-ringpulse 4.6s ease-in-out infinite alternate;
+}
+@keyframes elysia-ringpulse{0%{filter:drop-shadow(0 0 12px rgba(245,166,35,0.45))}100%{filter:drop-shadow(0 0 22px rgba(232,103,124,0.55))}}
+
+/* ---------- heatmap: warm instead of green ---------- */
+body.theme-elysia .heat-cell{box-shadow:none;}
+body.theme-elysia .heat-1{background:rgba(245,166,35,0.16);}
+body.theme-elysia .heat-2{background:rgba(245,166,35,0.32);}
+body.theme-elysia .heat-3{background:rgba(240,132,96,0.50);}
+body.theme-elysia .heat-4{background:rgba(232,103,124,0.72);}
+
+/* ---------- goal bar / progress ---------- */
+body.theme-elysia .goal-bar{background:linear-gradient(90deg,#f5a623,#e8677c);border-radius:999px;box-shadow:0 0 14px rgba(245,166,35,0.45);}
+
+/* ---------- login screen (stays premium) ---------- */
+body.theme-elysia #loginScreen{background:linear-gradient(160deg,#1b1120,#2a1728 60%,#1e1222);}
+
+/* ---------- scrollbar ---------- */
+body.theme-elysia ::-webkit-scrollbar-thumb{background:linear-gradient(180deg,#f5a623,#e8677c);border-radius:8px;}
+body.theme-elysia ::-webkit-scrollbar-track{background:rgba(20,12,26,0.6);}
+
+/* ---------- reduced motion ---------- */
+@media (prefers-reduced-motion:reduce){
+  body.theme-elysia::before,body.theme-elysia .kpi::after,
+  body.theme-elysia .ring-glow,body.theme-elysia .feed-item{animation:none;}
+}
 </style>
 
 <style>
@@ -3439,6 +3614,14 @@ function azTogglePw() {
         <div class="theme-opt-label">Aurora Frost</div>
       
       </div></div>
+      <div class="theme-opt" data-theme="elysia" onclick="setInterfaceTheme('elysia')">
+        <div class="theme-preview theme-preview-elysia">
+          <div class="theme-check">&#10003;</div>
+          <div class="tp-dots"><span class="tp-dot"></span><span class="tp-dot"></span><span class="tp-dot"></span></div>
+          <div class="tp-bars"><div class="tp-bar w80"></div><div class="tp-bar w60"></div><div class="tp-bar w40"></div></div>
+        </div>
+        <div class="theme-opt-label">Elysia Cinematic</div>
+      </div></div>
       </div>
 
       </div>
@@ -4614,7 +4797,11 @@ function chartTheme(){
     return { primary:'#2563EB', secondary:'#0EA5E9', accent:'#0EA5E9', grid:'rgba(15,42,82,0.08)', legend:'#1E3A5F',
              line:'#22D3EE', fill:'rgba(14,165,233,0.16)', status:'#1D4ED8', warn:'#F59E0B', bad:'#DB2777' };
   }
-  try{
+    if((localStorage.getItem('ascovita_theme')||'deluxe')==='elysia'){
+    return { primary:'#f5a623', secondary:'#e8677c', accent:'#8b5cf6', grid:'rgba(245,166,35,0.14)', legend:'#ffe8c4',
+             line:'#f08060', fill:'rgba(245,166,35,0.14)', status:'#f5a623', warn:'#f08060', bad:'#e8677c' };
+  }
+try{
     const cs=getComputedStyle(document.documentElement);
     return {
       primary: cs.getPropertyValue('--chart-primary').trim()||'#547177',
