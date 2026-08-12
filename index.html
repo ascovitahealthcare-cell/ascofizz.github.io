@@ -6781,6 +6781,7 @@ button, [role="button"] {
 .feature-hero-arrow:hover { transform: translateY(-50%) scale(1.06); }
 .feature-hero-prev { left: 12px; } .feature-hero-next { right: 12px; }
 .feature-hero[data-live="no"] { display: none; }
+.shop-hero { margin-top: 0; }
 @media (prefers-reduced-motion: reduce) { .feature-hero-track { transition: none; } }
 @media (max-width: 820px) {
   /* Square creative on phones — no tall hero, no wasted vertical space. */
@@ -8415,6 +8416,12 @@ setInterval(function() { syncAppCartBadge(); syncAppWishBadge(); }, 2000);
           if(el){el.style.display='';el.onload=function(){var s=el.closest('[data-no-img]');if(s)s.setAttribute('data-no-img','no');};if(el.complete){var s=el.closest('[data-no-img]');if(s)s.setAttribute('data-no-img','no');}}
         }
       });
+      // Aug 2026: slider hero image slots — home feature_hero.N and
+      // shop.hero.N. These are img tags inside slider slides (or missing
+      // imgs that the slider engine substitutes from the map), so set
+      // window.__ozylixSiteMedia early: the slider engines read it in
+      // their init() and pick up the key fallback for empty src slots.
+      window.__ozylixSiteMedia = map || {};
     }
     function loadSiteMedia(){
       var base = (typeof API_BASE !== 'undefined') ? API_BASE : 'https://ascovitahealthcare-cell-github-io.onrender.com';
@@ -8826,6 +8833,120 @@ var FEATURE_HERO_SLIDES = [
       fhRestart();
     } else {
       ['fhPrev', 'fhNext'].forEach(function (id) { var el = document.getElementById(id); if (el) el.style.display = 'none'; });
+    }
+  };
+})();
+
+// ── SHOP HERO SLIDER (Aug 2026) — same engine as the home feature hero; ──
+// dedicated slide config (shop.hero.N admin keys or paste URLs below). ──
+// ▲▲▲ WHAT YOU EDIT — slide images/tags/headlines/CTAs ▲▲▲
+var SHOP_HERO_SLIDES = [
+  {
+    // Slot 1 — Mix & Match campaign creative
+    src: '', mobile: '',
+    tag: 'Mix & Match offer',
+    headline: 'Choose Any 3 Eligible Products — the 4th Is FREE',
+    body: 'The lowest-priced product in your bundle of 4 becomes completely free. Real-price calculation, validated on our server at checkout.',
+    cta: 'Shop Mix & Match',
+    product: 'shop'
+  },
+  {
+    // Slot 2 — Glutathione focus creative (upload when ready)
+    src: '', mobile: '',
+    tag: 'Daily glow ritual',
+    headline: 'Glutathione — Your Daily Glow',
+    body: 'Effervescent tablets, FSSAI approved & made in India.',
+    cta: 'Shop Glutathione',
+    product: 'glutathione-effervescent-tablet'
+  },
+  {
+    // Slot 3 — ACV focus creative (upload when ready)
+    src: '', mobile: '',
+    tag: 'Morning ritual',
+    headline: 'Apple Cider Vinegar — Morning Wake-Up',
+    body: 'A simple fizzy tablet for your morning routine.',
+    cta: 'Shop Apple Cider Vinegar',
+    product: 'apple-cider-vinegar-effervescent-tablet'
+  }
+];
+// ▲▲▲ END OF WHAT YOU EDIT ▲▲▲
+(function () {
+  var shIdx = 0, shTimer = null;
+  function shGo(i) {
+    var wrap = document.getElementById('shopHero');
+    var track = document.getElementById('shTrack');
+    var slides = track ? track.children.length : 0;
+    if (!wrap || !track || !slides) return;
+    if (i < 0) i = slides - 1;
+    if (i >= slides) i = 0;
+    shIdx = i;
+    track.style.transition = 'transform .55s cubic-bezier(.22,.61,.36,1)';
+    track.style.transform = 'translateX(-' + (i * 100) + '%)';
+    wrap.querySelectorAll('.feature-hero-dot').forEach(function (d, n) {
+      d.classList.toggle('active', n === i);
+    });
+  }
+  function shRestart() {
+    clearInterval(shTimer);
+    shTimer = setInterval(function () { shGo(shIdx + 1); }, 6500);
+  }
+  function escHtml(s) { var d = document.createElement('div'); d.textContent = s || ''; return d.innerHTML; }
+  window.initShopHero = function () {
+    var wrap = document.getElementById('shopHero');
+    var track = document.getElementById('shTrack');
+    if (!wrap || !track) return;
+    var isPhone = window.matchMedia('(max-width: 820px)').matches;
+    var slides = (window.SHOP_HERO_SLIDES || []).map(function (s, i) {
+      if (s && !String((isPhone && s.mobile) ? s.mobile : s.src).trim()) {
+        var k = 'shop.hero.' + i;
+        if (window.__ozylixSiteMedia && window.__ozylixSiteMedia[k]) {
+          s = Object.assign({}, s, { src: window.__ozylixSiteMedia[k] });
+        }
+      }
+      return s;
+    }).filter(function (s) {
+      return s && String((isPhone && s.mobile) ? s.mobile : s.src).trim();
+    });
+    if (!slides.length) return;            // stays hidden via data-live
+    track.innerHTML = slides.map(function (s, i) {
+      var img = (isPhone && s.mobile) ? s.mobile : s.src;
+      return '<div class="feature-hero-slide" style="flex:0 0 100%">' +
+        '<img src="' + escHtml(img) + '" alt="' + escHtml(s.headline || 'Ozylix') + '"' +
+        (i === 0 ? ' fetchpriority="high"' : ' loading="lazy"') + ' decoding="async">' +
+        '<div class="feature-hero-overlay"><div class="feature-hero-caption">' +
+        '<span class="fh-kicker">' + escHtml(s.tag || '') + '</span>' +
+        '<h3>' + escHtml(s.headline || '') + '</h3>' +
+        '<p>' + escHtml(s.body || '') + '</p>' +
+        '<button class="fh-cta" onclick="' +
+          (s.product === 'shop' ? "showPage('shop')" :
+           "var pr=PRODUCTS.find(function(x){return slugify(x.name)==='" + slugify(s.product || '').replace(/'/g, "\\'") + "'});if(pr){openProduct(pr.id);}else{showPage('shop');}") +
+          '">&#128722; ' + escHtml(s.cta || 'Shop now') + '</button>' +
+        '</div></div></div>';
+    }).join('');
+    document.getElementById('shDots').innerHTML = slides.map(function (_, i) {
+      return '<button class="feature-hero-dot' + (i === 0 ? ' active' : '') +
+             '" data-i="' + i + '" aria-label="Slide ' + (i + 1) + '"></button>';
+    }).join('');
+    wrap.setAttribute('data-live', 'yes');
+    shGo(0);
+    if (slides.length > 1) {
+      document.getElementById('shPrev').onclick = function () { shGo(shIdx - 1); shRestart(); };
+      document.getElementById('shNext').onclick = function () { shGo(shIdx + 1); shRestart(); };
+      document.getElementById('shDots').addEventListener('click', function (e) {
+        var d = e.target.closest('.feature-hero-dot');
+        if (d) { shGo(+d.dataset.i); shRestart(); }
+      });
+      var x0 = null, y0 = null;
+      wrap.addEventListener('touchstart', function (e) { x0 = e.touches[0].clientX; y0 = e.touches[0].clientY; }, { passive: true });
+      wrap.addEventListener('touchend', function (e) {
+        if (x0 == null) return;
+        var dx = e.changedTouches[0].clientX - x0, dy = e.changedTouches[0].clientY - y0;
+        if (Math.abs(dx) > 40 && Math.abs(dx) > Math.abs(dy)) { shGo(shIdx + (dx < 0 ? 1 : -1)); shRestart(); }
+        x0 = y0 = null;
+      }, { passive: true });
+      shRestart();
+    } else {
+      ['shPrev', 'shNext'].forEach(function (id) { var el = document.getElementById(id); if (el) el.style.display = 'none'; });
     }
   };
 })();
@@ -9381,47 +9502,18 @@ var BANNER_SLIDES = [
         <p style="color:var(--gray);font-size:.86rem">Premium organic vitamins &amp; supplements from Ozylix</p>
       </div>
     </div>
-    <!-- Aug 2026 enhancement: Mix & Match banner + campaign slots.
-         Banners 1-2 + mix_match visual: upload via admin Site Images with
-         keys "shop.banner.1" / "shop.banner.2" (3:1) and
-         "shop.banner.mix_match" (1:1). Until an image is uploaded,
-         tasteful text cards are shown (no layout shift). -->
-    <div class="mm-shop-banner" id="mmShopBanner">
-      <div class="mm-wrap">
-        <div class="mm-visual">
-          <img src="" alt="Buy Any 3, Get 1 Free — Mix &amp; Match" id="mmShopImg" data-media-key="shop.banner.mix_match" loading="lazy" style="display:none" onerror="this.style.display='none'">
-        </div>
-        <div>
-          <h3>&#127873; Buy Any 3 Eligible Products &amp; Get the Lowest-Priced One FREE</h3>
-          <p>Mix &amp; Match — build your own bundle of 4 across Apple Cider Vinegar, Glutathione, Moringa, Spirulina and more. The cheapest item in your set of 4 becomes completely free. Calculated and validated securely on our server at every cart change and at checkout. Never stacks with other promotions.</p>
-          <button class="mm-cta" onclick="document.getElementById('shopGrid')?.scrollIntoView({behavior:'smooth',block:'start'})">&#128722; Build Your Mix &amp; Match</button>
-        </div>
+    <!-- Aug 2026: SHOP LANDSCAPE HERO SLIDER — same premium slider engine
+         as the home feature hero (16:9 desktop / 1:1 mobile). Slides come
+         from SHOP_HERO_SLIDES below; upload via admin Site Images with key
+         "shop.hero.N", or paste URLs directly into SHOP_HERO_SLIDES. -->
+    <section class="shop-hero feature-hero" id="shopHero" data-live="no" aria-label="Shop offers" aria-roledescription="carousel">
+      <div class="feature-hero-inner">
+        <button class="feature-hero-arrow feature-hero-prev" id="shPrev" aria-label="Previous">&#8249;</button>
+        <div class="feature-hero-track" id="shTrack"></div>
+        <button class="feature-hero-arrow feature-hero-next" id="shNext" aria-label="Next">&#8250;</button>
+        <div class="feature-hero-dots" id="shDots"></div>
       </div>
-    </div>
-    <div class="shop-banner-slot" id="shopBannerSlot1" data-no-img="yes">
-      <img src="" alt="" id="shopBannerImg1" data-media-key="shop.banner.1" loading="lazy" style="display:none" onerror="this.style.display='none'">
-      <div class="sb-overlay"><div class="sb-copy">
-        <h3>&#10024; Wellness, made in India</h3>
-        <p>FSSAI approved, crafted at our Anand facility</p>
-      </div></div>
-    </div>
-    <div class="shop-banner-slot" id="shopBannerSlot2" data-no-img="yes">
-      <img src="" alt="" id="shopBannerImg2" data-media-key="shop.banner.2" loading="lazy" style="display:none" onerror="this.style.display='none'">
-      <div class="sb-overlay"><div class="sb-copy">
-        <h3>&#128142; Shop. Earn. Redeem.</h3>
-        <p>Vita Points on every delivered order</p>
-      </div></div>
-    </div>
-    <div class="shop-campaign" id="shopCampaign">
-      <div class="shop-campaign-card" onclick="filterCat('skin',document.querySelector('.cpill[data-cat=&quot;skin&quot;]'))">
-        <div><span class="sc-label">Focus product</span><h3>Glutathione — Daily Glow Ritual</h3></div>
-        <span class="sc-cta">Explore &#8594;</span>
-      </div>
-      <div class="shop-campaign-card" onclick="filterCat('weight',document.querySelector('.cpill[data-cat=&quot;weight&quot;]'))">
-        <div><span class="sc-label">Focus product</span><h3>Apple Cider Vinegar — Morning Ritual</h3></div>
-        <span class="sc-cta">Explore &#8594;</span>
-      </div>
-    </div>
+    </section>
     <div class="cat-pills" id="shopPills">
       <button class="cpill active" data-cat="all" onclick="filterCat('all',this)">All</button>
       <button class="cpill" data-cat="bestsellers" onclick="filterCat('bestsellers',this)">Best Sellers</button>
@@ -9490,10 +9582,54 @@ var BANNER_SLIDES = [
         </div>
         <div class="products-grid" id="shopGrid"></div>
         <div id="shopEmpty" style="display:none;text-align:center;padding:60px 20px">
-          <div style="font-size:3rem;margin-bottom:14px">🔍</div>
+          <div style="font-size:3rem;margin-bottom:14px">&#128269;</div>
           <h3>No products found</h3>
           <p style="color:var(--gray);margin:8px 0 20px">Try adjusting your filters</p>
           <button class="btn-primary" onclick="clearFilters()">Clear Filters</button>
+        </div>
+        <!-- Aug 2026: promotion blocks sit AFTER the product grid so the
+             customer browses products first, then meets the offers.
+             Mix & Match banner + campaign slots: upload via admin Site
+             Images with keys "shop.banner.1" / "shop.banner.2" (3:1) and
+             "shop.banner.mix_match" (1:1). Until an image is uploaded,
+             tasteful text cards are shown (no layout shift). -->
+        <div style="margin-top:26px">
+        <div class="mm-shop-banner" id="mmShopBanner">
+          <div class="mm-wrap">
+            <div class="mm-visual">
+              <img src="" alt="Buy Any 3, Get 1 Free — Mix &amp; Match" id="mmShopImg" data-media-key="shop.banner.mix_match" loading="lazy" style="display:none" onerror="this.style.display='none'">
+            </div>
+            <div>
+              <h3>&#127873; Buy Any 3 Eligible Products &amp; Get the Lowest-Priced One FREE</h3>
+              <p>Mix &amp; Match — choose any 3 eligible products (Apple Cider Vinegar, Glutathione, Moringa, Spirulina and more) and the 4th — the lowest-priced one — is completely FREE. The free amount is calculated from the real price of each item (MRP / your price, pack tiers included) and validated securely on our server at every cart change and at checkout. Never stacks with other promotions.</p>
+              <button class="mm-cta" onclick="document.getElementById('mmShopBanner')?.scrollIntoView({behavior:'smooth',block:'center'})">&#128722; Build Your Mix &amp; Match</button>
+            </div>
+          </div>
+        </div>
+        <div class="shop-banner-slot" id="shopBannerSlot1" data-no-img="yes">
+          <img src="" alt="" id="shopBannerImg1" data-media-key="shop.banner.1" loading="lazy" style="display:none" onerror="this.style.display='none'">
+          <div class="sb-overlay"><div class="sb-copy">
+            <h3>&#10024; Wellness, made in India</h3>
+            <p>FSSAI approved, crafted at our Anand facility</p>
+          </div></div>
+        </div>
+        <div class="shop-banner-slot" id="shopBannerSlot2" data-no-img="yes">
+          <img src="" alt="" id="shopBannerImg2" data-media-key="shop.banner.2" loading="lazy" style="display:none" onerror="this.style.display='none'">
+          <div class="sb-overlay"><div class="sb-copy">
+            <h3>&#128142; Shop. Earn. Redeem.</h3>
+            <p>Vita Points on every delivered order</p>
+          </div></div>
+        </div>
+        <div class="shop-campaign" id="shopCampaign">
+          <div class="shop-campaign-card" onclick="filterCat('skin',document.querySelector('.cpill[data-cat=&quot;skin&quot;]'))">
+            <div><span class="sc-label">Focus product</span><h3>Glutathione — Daily Glow Ritual</h3></div>
+            <span class="sc-cta">Explore &#8594;</span>
+          </div>
+          <div class="shop-campaign-card" onclick="filterCat('weight',document.querySelector('.cpill[data-cat=&quot;weight&quot;]'))">
+            <div><span class="sc-label">Focus product</span><h3>Apple Cider Vinegar — Morning Ritual</h3></div>
+            <span class="sc-cta">Explore &#8594;</span>
+          </div>
+        </div>
         </div>
       </div>
     </div>
@@ -9510,11 +9646,12 @@ var BANNER_SLIDES = [
       <a href="#" onclick="showPage('shop')">Shop</a><span class="bsep">›</span>
       <span id="prodBCName">Product</span>
     </div>
-    <!-- Aug 2026 enhancement: EDUCATIONAL GALLERY — real verified info only.
-         No fabricated experts, claims or research. Image slots: admin Site
-         Images keys `edu.{product-slug}.howto.N` etc. (1:1 square, up to 4). -->
-    <div class="edu-gallery" id="productEduGallery"></div>
     <div class="product-page" id="productDetail"></div>
+    <!-- Aug 2026: EDUCATIONAL GALLERY — real verified info only.
+         No fabricated experts, claims or research. Shown AFTER the product
+         details so the customer sees the product first. Image slots: admin
+         Site Images keys `edu.{product-slug}.howto.N` etc. (1:1 square, up to 4). -->
+    <div class="edu-gallery" id="productEduGallery" style="margin-top:56px"></div>
     <div style="margin-top:56px">
       <h2 style="font-family:var(--font-display);font-size:1.7rem;margin-bottom:22px">You May Also Like</h2>
       <div class="products-grid" id="relatedGrid"></div>
@@ -11766,7 +11903,7 @@ function getProductImg(p) {
 //                product = contextual, cart = savings/MM progress.
 // ══════════════════════════════════════════════════════════════════════
 var ozylxNotify = (function () {
-  var MAX_PER_SESSION = 2;
+  var MAX_PER_SESSION = 3;
   var MIN_GAP_MS = 20000;          // 20 s between cards — never rapid-fire
   var shownCount = 0, lastAt = 0;
   var shownIds = {}, queue = [], live = null;
@@ -12923,12 +13060,21 @@ function initHome() {
 
 // ── SHOP ──
 function initShop() { applyFilters();
-  // Aug 2026: shop strategy — MM / discovery message (not on first paint —
+  // Aug 2026: shop landscape hero slider (stays hidden until creatives are
+  // uploaded via admin Site Images key "shop.hero.N" or pasted into
+  // SHOP_HERO_SLIDES above)
+  try { if (typeof initShopHero === 'function') initShopHero(); } catch (e) {}
+
+  // Aug 2026: shop strategy — offer popups staggered (not on first paint —
   // the customer browses first; value before pressure)
   try { setTimeout(function () {
     if (typeof ozylxNotify === 'undefined') return;
-    ozylxNotify.show({ id: 'shop-discovery', msg: '🎁 Mix &amp; Match is available on eligible products — buy any 3, get the lowest-priced one FREE.', icon: '🎁', corner: 'bottom-left' });
+    ozylxNotify.show({ id: 'shop-discovery', msg: '🎁 Mix &amp; Match is available on eligible products — choose any 3 and the lowest-priced 4th is FREE.', icon: '🎁', corner: 'bottom-left' });
   }, 9000); } catch (e) {}
+  try { setTimeout(function () {
+    if (typeof ozylxNotify === 'undefined') return;
+    ozylxNotify.show({ id: 'shop-vitapoints', msg: '🪙 Every Ozylix order earns Vita Points — redeem them for real discounts on your next purchase.', icon: '🪙', corner: 'bottom-right', onCta: function () { showPage('home'); setTimeout(function () { document.getElementById('vitapoints-home')?.scrollIntoView({ behavior: 'smooth', block: 'center' }); }, 120); } });
+  }, 19000); } catch (e) {}
 }
 
 function filterCat(cat, btn) {
