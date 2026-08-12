@@ -6932,6 +6932,8 @@ button, [role="button"] {
 }
 .mm-shop-banner .mm-cta:hover { transform: translateY(-1px) scale(1.02); }
 @media (max-width: 820px) {
+  /* Square creative on phones — same rule as the home feature hero. */
+  .feature-hero-slide { aspect-ratio: 1 / 1; }
   .mm-shop-banner { transform: none; padding: 16px; }
   .mm-shop-banner .mm-visual { width: min(120px, 34vw); }
 }
