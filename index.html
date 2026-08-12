@@ -6031,10 +6031,19 @@ textarea.b2b-form-input { min-height: 110px; resize: vertical; font-family: inhe
     /* 128px of top padding pushed everything below the fold on a phone. */
     padding: calc(env(safe-area-inset-top, 0px) + 88px) 0 24px;
   }
-  /* "Wellness / Made in India" ran to 38px on a 390px screen and took most
-     of the first view on its own, now that the offer banner sits above it. */
-  .sh-line-2 { font-size: clamp(1.7rem, 7.6vw, 2.3rem); }
-  .sh-line-3 { font-size: clamp(1.35rem, 6vw, 1.8rem); }
+  /* Collapsed to a strip on phones. The offer banner above is the hero now,
+     and this section was taking a whole screen to say what the banner
+     already says — a visitor had to scroll past it to reach any product.
+     Not deleted: it carries the page <h1> and the FSSAI line, which the
+     search work depends on. The paragraph is hidden on phones only — it
+     stays on desktop, and stays in the HTML either way for crawlers. */
+  .shader-hero { min-height: auto !important; padding: 14px 0 18px !important; }
+  .sh-line-2 { font-size: clamp(1.05rem, 4.6vw, 1.4rem); line-height: 1.15; }
+  .sh-line-3 { font-size: clamp(1.05rem, 4.6vw, 1.4rem); line-height: 1.15; }
+  .shader-sub { display: none; }
+  .shader-badge { font-size: .58rem; margin-bottom: 4px; }
+  .shader-badge-line { display: none; }
+  .shader-hero-inner { gap: 4px; }
   .shader-sub { font-size: .88rem; line-height: 1.55; margin-bottom: 18px; }
   .shader-btn-primary, .shader-btn-ghost { padding: 10px 22px; font-size: .8rem; }
   /* Stacking full-width made sense when there were two buttons. With a
@@ -6140,11 +6149,8 @@ textarea.b2b-form-input { min-height: 110px; resize: vertical; font-family: inhe
 @media (max-height: 560px) and (orientation: landscape) {
   /* Landscape phones have very little vertical room — the hero must not
      eat all of it, or the page looks like a dead end. */
-  /* 74px of top padding existed to clear the fixed header. The banner now
-     sits between the two and already provides that separation, so this was
-     leaving a large empty gap under it. */
-  .shader-hero { min-height: auto; padding: 26px 0 28px; }
-  .sh-line-2, .sh-line-3 { font-size: clamp(1.35rem, 5.4vw, 1.9rem); }
+  .shader-hero { min-height: auto; padding: 14px 0 16px; }
+  .sh-line-2, .sh-line-3 { font-size: clamp(1.05rem, 4.4vw, 1.35rem); }
   .shader-sub { margin-bottom: 14px; }
   .vita-chat-wrap { height: 78vh; }
 }
