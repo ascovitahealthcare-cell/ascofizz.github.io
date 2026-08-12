@@ -46,9 +46,41 @@ function isSpaPath(pathname) {
   return SPA_ROUTES.has(path) || PRODUCT_PATH.test(path);
 }
 
+// The admin panel has its own hostname. Without this it is simply another
+// Custom Domain on the same Worker, so back.ozylix.com would serve a second
+// complete copy of the storefront — duplicate content for Google, under a name
+// that is meant to be private.
+const ADMIN_HOST = 'back.ozylix.com';
+const ADMIN_ENTRY = new Set(['/', '/admin', '/admin.html']);
+
+// Never let the admin hostname into a search index, whatever it serves.
+function noIndex(res) {
+  const headers = new Headers(res.headers);
+  headers.set('X-Robots-Tag', 'noindex, nofollow');
+  return new Response(res.body, { status: res.status, headers });
+}
+
+async function serveAdmin(request, env, url) {
+  const path = url.pathname.length > 1 ? url.pathname.replace(/\/+$/, '') : url.pathname;
+
+  if (ADMIN_ENTRY.has(path)) {
+    const page = await env.ASSETS.fetch(new URL('/admin.html', url));
+    return noIndex(new Response(page.body, { status: 200, headers: page.headers }));
+  }
+
+  // Real files still resolve, because admin.html pulls in invoice-template.js,
+  // the logo and so on. Anything else — storefront routes in particular — is
+  // left to 404 here rather than serving the shop under the admin name.
+  return noIndex(await env.ASSETS.fetch(request));
+}
+
 export default {
   async fetch(request, env) {
     const url = new URL(request.url);
+
+    if (url.hostname.toLowerCase() === ADMIN_HOST) {
+      return serveAdmin(request, env, url);
+    }
 
     if (isSpaPath(url.pathname)) {
       // Serve the app shell while keeping the visitor's URL and a 200, so the
@@ -65,4 +97,4 @@ export default {
 };
 
 // Exported for the local routing test; ignored by the Workers runtime.
-export { isSpaPath };
+export { isSpaPath, ADMIN_HOST, ADMIN_ENTRY };

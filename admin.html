@@ -5789,6 +5789,23 @@ async function openOrderModal(orderId) {
         </div>
       </div>
     </div>
+    <div class="card" style="padding:14px;margin-bottom:20px;">
+      <div style="font-size:0.72rem;color:var(--text3);margin-bottom:8px;">DELHIVERY SHIPPING</div>
+      ${o.delhivery_waybill ? `
+        <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
+          <span class="badge badge-green">🚚 AWB ${o.delhivery_waybill}</span>
+          <a href="https://www.delhivery.com/track/package/${encodeURIComponent(o.delhivery_waybill)}"
+             target="_blank" rel="noopener" style="font-size:0.82rem;">Track shipment ↗</a>
+          <button class="btn btn-sm" onclick="dlPackingSlip('${o.delhivery_waybill}')">Packing slip</button>
+        </div>
+      ` : `
+        <div style="font-size:0.82rem;color:var(--text2);margin-bottom:10px;">
+          Not shipped yet. This sends the order to Delhivery and books an AWB.
+        </div>
+        <button class="btn btn-primary btn-sm" id="dlShipBtn" onclick="dlShipOrder('${o.id}')">🚚 Ship with Delhivery</button>
+      `}
+      <div id="dlShipMsg" style="font-size:0.8rem;margin-top:10px;"></div>
+    </div>
     <div style="display:flex;gap:8px;flex-wrap:wrap;">
       ${statusBadge(o.status||o.fulfillment)}${payBadge(o.payment_status)}
       <span class="badge badge-gray">📅 ${fmtDate(o.created_at)}</span>
@@ -5796,6 +5813,89 @@ async function openOrderModal(orderId) {
     </div>
   `;
   openModal('orderModal');
+}
+
+// ── Delhivery ────────────────────────────────────────────────────────────
+// The backend has had /api/create-delhivery-order all along, but nothing ever
+// called it — no button here, no automatic push after payment — which is why
+// no order ever reached Delhivery. Deliberately a manual action rather than
+// automatic on payment: shipping costs money and books a real pickup, so it
+// stays a decision, and any rejection is shown here instead of failing quietly
+// in a webhook.
+async function dlShipOrder(orderId) {
+  const btn = document.getElementById('dlShipBtn');
+  const msg = document.getElementById('dlShipMsg');
+  const o = allOrders.find(x => String(x.id) === String(orderId));
+  if (!o) { msg.innerHTML = '<span style="color:var(--red-text)">Order not found.</span>'; return; }
+
+  // Delhivery rejects the whole shipment on a bad pincode or phone, so check
+  // the two that actually fail before spending a call.
+  const pin = String(o.pincode || '').replace(/\D/g, '');
+  const phone = String(o.customer_phone || '').replace(/\D/g, '');
+  if (pin.length !== 6)  { msg.innerHTML = '<span style="color:var(--red-text)">Pincode must be 6 digits — this order has "' + (o.pincode || '') + '".</span>'; return; }
+  if (phone.length < 10) { msg.innerHTML = '<span style="color:var(--red-text)">Phone number looks incomplete — "' + (o.customer_phone || '') + '".</span>'; return; }
+
+  if (!confirm(`Ship order ${orderId} with Delhivery?\n\nThis books a real shipment and a pickup.`)) return;
+
+  btn.disabled = true;
+  btn.textContent = 'Booking…';
+  msg.innerHTML = '';
+
+  const items = Array.isArray(o.items) ? o.items : (() => { try { return JSON.parse(o.items || '[]'); } catch { return []; } })();
+
+  try {
+    const r = await apiFetch('/api/create-delhivery-order', {
+      method: 'POST',
+      body: JSON.stringify({
+        order_id: String(o.id),
+        order_date: o.created_at,
+        billing_customer_name: o.customer_name || '',
+        billing_address: o.address || '',
+        billing_city: o.city || '',
+        billing_state: o.state || '',
+        billing_pincode: pin,
+        billing_phone: phone,
+        billing_email: o.customer_email || '',
+        payment_method: (o.payment_method || '').toUpperCase() === 'COD' ? 'COD' : 'Prepaid',
+        sub_total: Number(o.total) || 0,
+        order_items: items.map(i => ({
+          name: i.name || i.title || 'Product',
+          units: Number(i.qty || i.quantity || i.units) || 1,
+          selling_price: Number(i.price || i.selling_price) || 0,
+        })),
+      }),
+    });
+    const data = await r.json();
+
+    if (!r.ok) {
+      // 422 carries Delhivery's own rejection text, which names the real
+      // problem (unregistered warehouse, unserviceable pin, zero wallet).
+      msg.innerHTML = '<span style="color:var(--red-text)">' + esc(data.error || 'Delhivery rejected the shipment') + '</span>';
+      btn.disabled = false; btn.textContent = '🚚 Ship with Delhivery';
+      return;
+    }
+
+    o.delhivery_waybill = data.waybill;
+    o.fulfillment = 'Processing';
+    msg.innerHTML = '<span style="color:var(--green-text)">Booked. AWB ' + esc(data.waybill) + '</span>'
+      + (data.warning ? '<br><span style="color:var(--gold-text)">⚠️ ' + esc(data.warning) + '</span>' : '');
+    setTimeout(() => openOrderModal(orderId), 1200);
+  } catch (e) {
+    msg.innerHTML = '<span style="color:var(--red-text)">' + esc(e.message || 'Request failed') + '</span>';
+    btn.disabled = false; btn.textContent = '🚚 Ship with Delhivery';
+  }
+}
+
+async function dlPackingSlip(waybill) {
+  try {
+    const r = await apiFetch('/api/delhivery/packing-slip/' + encodeURIComponent(waybill));
+    const data = await r.json();
+    const url = data?.packages?.[0]?.pdf_download_link || data?.pdf_download_link;
+    if (url) window.open(url, '_blank', 'noopener');
+    else alert('Delhivery did not return a packing slip for ' + waybill);
+  } catch (e) {
+    alert('Could not fetch packing slip: ' + (e.message || 'request failed'));
+  }
 }
 
 async function updateOrderStatus(orderId) {
