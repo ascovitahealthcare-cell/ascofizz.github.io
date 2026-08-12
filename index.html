@@ -73,30 +73,24 @@
   })();
   </script>
 
-  <!-- Google Tag Manager — GTM-MQPL5QGP -->
-  <!-- Replaces the hardcoded GA4 loader (gtag/js?id=G-PSRK3R6L0Z) and its
-       gtag('config') call. Measurement IDs, consent and any future pixel now
-       live in the GTM container instead of being edited into this file, which
-       is the whole point of putting a tag manager in front of them: the GA4
-       property is configured once inside GTM and this page stops naming it.
+  <!-- Google Tag Manager (GTM-MQPL5QGP) removed at the owner's request:
+       G-1SPY139WS1 is the only property wanted, and it is loaded directly
+       below. Running both was the live double-count risk — a GA4
+       configuration tag for this same measurement ID inside the container
+       would have counted every pageview and every purchase twice, and
+       nothing in this file could have detected that.
 
-       The dataLayer and the gtag() shim below are deliberately kept. Every
-       _trackPage / _trackAddToCart / purchase call further down pushes
-       through gtag(), which is just dataLayer.push(arguments) — GTM reads
-       those, so the whole e-commerce event layer keeps working unchanged once
-       a GA4 tag is configured in the container. -->
-<script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
-new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
-j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
-'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
-})(window,document,'script','dataLayer','GTM-MQPL5QGP');</script>
-<!-- End Google Tag Manager -->
+       Nothing else depended on the container. The event layer pushes
+       through gtag(), which is dataLayer.push(arguments), and the gtag.js
+       loaded below reads that same dataLayer — so _trackPage,
+       _trackViewItem, _trackAddToCart and _trackPurchase all keep working
+       exactly as they did, now with one consumer instead of two. -->
 
 <!-- Google tag (gtag.js) — GA4 property G-1SPY139WS1 -->
-<!-- Loaded directly as well as through the container. If you later add a
-     GA4 configuration tag for this same measurement ID inside GTM, delete
-     one of the two — otherwise every pageview and every purchase is
-     counted twice. -->
+<!-- The only analytics loader on this site. If a tag manager is ever
+     reintroduced, do NOT also configure G-1SPY139WS1 inside it: two
+     consumers of the same measurement ID double every pageview and every
+     purchase, and the reports give no sign that it is happening. -->
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-1SPY139WS1"></script>
 <script>
   window.dataLayer = window.dataLayer || [];
@@ -106,11 +100,22 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
   const _gtag = (...args) => { if(typeof gtag === 'function') gtag(...args); };
 
   // ── PAGE VIEW (called from showPage) ──
+  // Reads the REAL URL rather than rebuilding one. These fields used to be
+  // assembled as origin + '/#' + pageName, which described a hash-routed
+  // site — and this one has not been hash-routed for a long time. showPage()
+  // pushes a clean path (/shop, /product/glutathione-effervescent) before
+  // this runs, so GA4 was being told '/#shop' while the address bar, the
+  // sitemap, Search Console and every real link said '/shop'.
+  //
+  // The cost of that is not cosmetic: GA4's Pages report listed paths that
+  // exist nowhere, could not be joined to Search Console, and collapsed
+  // every product onto a single '/#product' row instead of showing which
+  // product was viewed.
   window._trackPage = function(pageName) {
     _gtag('event', 'page_view', {
       page_title:    'Ozylix – ' + (pageName.charAt(0).toUpperCase() + pageName.slice(1)),
-      page_location: window.location.origin + (pageName !== 'home' ? '/#' + pageName : '/'),
-      page_path:     pageName !== 'home' ? '/#' + pageName : '/',
+      page_location: window.location.href,
+      page_path:     window.location.pathname + window.location.search,
     });
   };
 
@@ -6737,10 +6742,6 @@ var PROMO_MEDIA = [
 
 </script>
 <body>
-<!-- Google Tag Manager (noscript) — GTM-MQPL5QGP -->
-<noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-MQPL5QGP"
-height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
-<!-- End Google Tag Manager (noscript) -->
 <a class="skip-link" href="#page-home">Skip to content</a>
 
 
@@ -11773,6 +11774,13 @@ function openProduct(id) {
     const slug = slugify(currentProduct.name);
     history.pushState({ page: 'product', id: id }, '', '/product/' + slug);
   } catch(e) {}
+  /* Product pages were absent from GA4's Pages report entirely. Opening a
+     product does not route through showPage(), so nothing ever sent a
+     page_view for it — view_item fired, which is the right ecommerce event
+     but is not a pageview, so /product/... URLs simply did not exist in the
+     reporting even though customers were on them.
+     Sent after the pushState above so the real slug is in the URL. */
+  try { window._trackPage && window._trackPage(currentProduct.name); } catch(e) {}
   // Update page title + meta for SEO
   const disc = currentProduct.salePrice ? Math.round((1 - currentProduct.salePrice/currentProduct.price)*100) : 0;
   const discText = disc > 0 ? ` – ${disc}% OFF` : '';
@@ -19434,6 +19442,59 @@ body:not(.oz-product) #stickyCart { display: none !important; }
       setTimeout(build, 1200);
     }
   } catch (e) { /* a diagnostic must never break the page it inspects */ }
+})();
+</script>
+
+<script>
+/* ══ META PIXEL — PageView on SPA navigation ═══════════════════════════
+   The base pixel fires PageView once, at load, and never again. Measured:
+   three in-app navigations later the queue still read a single PageView,
+   and browser Back did not add one either. Every view after the landing
+   page was invisible to Meta, so the campaign could only ever optimise
+   against entrances.
+
+   Why the usual popstate/hashchange pair is not enough here: this router
+   navigates with history.pushState, and pushState fires NEITHER event.
+   Those listeners would have caught Back and Forward only — the minority
+   of navigations — and left taps on the nav still unreported. The router
+   itself has to be the signal, so showPage() is wrapped.
+
+   popstate is still listened for, because the app's own popstate handler
+   swaps pages directly without going through showPage.
+
+   The dedupe matters: Back can reach both this listener and showPage for
+   one navigation, and a doubled PageView is worse than a missing one —
+   it inflates reach and corrupts what the campaign learns.             */
+(function () {
+  var lastPath = null, lastAt = 0;
+
+  function firePageView() {
+    if (typeof window.fbq !== 'function') return;
+    var path = location.pathname + location.search;
+    var now  = Date.now();
+    if (path === lastPath && (now - lastAt) < 900) return;
+    lastPath = path; lastAt = now;
+    fbq('track', 'PageView');
+  }
+
+  // Seed from the load-time PageView the base snippet already sent, so the
+  // first navigation is not deduped against nothing.
+  lastPath = location.pathname + location.search;
+  lastAt   = Date.now();
+
+  var _sp = window.showPage;
+  if (typeof _sp === 'function') {
+    window.showPage = function () {
+      var out = _sp.apply(this, arguments);
+      // After, not before: showPage pushes the new URL, and PageView should
+      // carry the page being entered rather than the one being left.
+      try { firePageView(); } catch (e) {}
+      return out;
+    };
+  }
+
+  window.addEventListener('popstate', firePageView);
+  window.addEventListener('hashchange', firePageView);
 })();
 </script>
 
