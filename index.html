@@ -8322,27 +8322,10 @@ setInterval(function() { syncAppCartBadge(); syncAppWishBadge(); }, 2000);
       <div class="sm-item"><span class="sm-dot"></span>Secure Payments via GoKwik</div>
     </div>
   </div>
-  <div class="vita-micro" onclick="if(typeof showPage==='function')showPage('home');setTimeout(()=>{document.getElementById('vitapoints-home')?.scrollIntoView({behavior:'smooth',block:'center'});},60)">
-    <div class="vm-chip" aria-hidden="true">&#128142;</div>
-    <div class="vm-copy"><b>Shop. Earn. Redeem.</b> &#10024; Every Ozylix order earns Vita Points — <span id="vitaMicroEarn">1 point per &#8377;1</span>, and <span id="vitaMicroValue">150 points = &#8377;1 off</span>.</div> <script>(function(){try{var e=typeof VITA_EARN_PER_RUPEE!=='undefined'?VITA_EARN_PER_RUPEE:1,v=typeof VITA_REDEEM_PER_RUPEE!=='undefined'?VITA_REDEEM_PER_RUPEE:150;var a=document.getElementById("vitaMicroEarn"),b=document.getElementById("vitaMicroValue");if(a)a.textContent=e+' point'+(e>1?"s":"")+" per ₹1";if(b)b.textContent=v+" points = ₹1 off";}catch(x){}})()</script>
-    <div class="vm-arrow" aria-hidden="true">&#8594;</div>
   </div>
-  </div>
-  <!-- ══ HOME PROMO CAROUSEL — peek-style, multi-card ══ -->
-  <div class="promo-hero-wrap" id="promoHeroWrap">
-    <button class="promo-nav-arrow promo-nav-prev" onclick="promoCarousel(-1)" aria-label="Previous offer">&#8249;</button>
-
-    <!-- Cards are rendered by renderPromoCarousel() from the live product
-         list (category = effervescent), so images come from Supabase
-         Storage exactly like the shop grid. Previously these were five
-         hardcoded cards — two of them pointed at products with no image
-         uploaded, which is why blank panels appeared in the carousel. -->
-    <div class="promo-hero-track" id="promoHeroTrack"></div>
-
-    <button class="promo-nav-arrow promo-nav-next" onclick="promoCarousel(1)" aria-label="Next offer">&#8250;</button>
-
-    <div class="promo-dots" id="promoDots"></div>
-  </div>
+  <!-- Aug 2026: HOME PROMO CAROUSEL removed per user request — promo
+       cards now live only on the shop/product pages; the home page stays
+       product-first with hero, marquee and trust grid. -->
 
   <!-- FIZZ COUNTERS — animated on first scroll into view -->
   <div class="fizz-counters">
