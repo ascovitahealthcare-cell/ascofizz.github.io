@@ -9237,7 +9237,7 @@ function renderCheckoutSummary() {
     ${vitaOff > 0 ? `<div class="sum-row" style="color:var(--fern-lo)"><span>💎 VitaPoints (${_vita.applied.toLocaleString('en-IN')})</span><span>-₹${vitaOff.toFixed(2)}</span></div>` : ''}
     <hr style="border:none;border-top:1px solid var(--light-gray);margin:8px 0">
     <div class="sum-row total"><span>Total</span><span style="color:var(--green);font-size:1.1rem">₹${total.toLocaleString('en-IN',{maximumFractionDigits:2})}</span></div>
-    ${vitaRedeemWidgetHTML(sub - disc)}`;
+    ${vitaRedeemWidgetHTML(sub - mmOff - disc)}`;
 
   // Also re-render recommendations whenever summary updates
   renderCkRecommendations();
@@ -13019,7 +13019,7 @@ function renderCart() {
         <hr style="border:none;border-top:1px solid var(--light-gray);margin:8px 0">
         ${vitaOff > 0 ? `<div class="sum-row" style="color:var(--fern-lo)"><span>💎 VitaPoints (${_vita.applied.toLocaleString('en-IN')})</span><span>-₹${vitaOff.toFixed(2)}</span></div>` : ''}
         <div class="sum-row total"><span>Total</span><span style="color:var(--green)">₹${total.toLocaleString('en-IN',{maximumFractionDigits:2})}</span></div>
-        ${vitaRedeemWidgetHTML(sub - disc)}
+        ${vitaRedeemWidgetHTML(sub - mmOff - disc)}
         <div style="font-weight:600;font-size:.82rem;margin:16px 0 8px">Apply Coupon Code</div>
         ${(disc > 0 && discLabel) ? `<div class="disc-applied">✅ ${discLabel} applied! <span style="cursor:pointer;margin-left:auto" onclick="activePromoCode=null;appliedDiscount=null;renderCart()">✕</span></div>` : `
           <div class="coupon-row">
@@ -13194,10 +13194,28 @@ function renderCheckoutSummary() {
     disc = appliedDiscount.type==='percent' ? Math.round(sub*appliedDiscount.value/100) : appliedDiscount.value;
   }
 
-  const ship = calcShipping(sub - disc);
-  const _vita = vitaCheckoutInfo(sub - disc);
+  // ── MIX & MATCH (display only) ──────────────────────────────────────
+  // Mirrors mixAndMatchDiscount() in server.js: every 4 units, the cheapest
+  // is free. The SERVER sets the real price; this only lets the cart show
+  // the saving before checkout. Keep the two in step.
+  var mmUnits = [];
+  STORE.cart.forEach(function (it) {
+    var pr = PRODUCTS.find(function (x) { return x.id === it.id; });
+    if (!pr) return;
+    var u = it.tierRate !== undefined ? it.tierRate : (pr.salePrice || pr.price);
+    var q = Math.max(0, Math.trunc(Number(it.qty) || 0));
+    for (var n = 0; n < q; n++) mmUnits.push(u);
+  });
+  mmUnits.sort(function (a, b) { return a - b; });
+  var mmGroups = Math.floor(mmUnits.length / 4);
+  var mmDisc = 0;
+  for (var g = 0; g < mmGroups; g++) mmDisc += mmUnits[g * 4] || 0;
+  var mmOff = Math.max(0, Math.min(mmDisc, sub));
+  var mmNeed = mmGroups > 0 ? 0 : 4 - (mmUnits.length % 4);
+  const ship = calcShipping(sub - mmOff - disc);
+  const _vita = vitaCheckoutInfo(sub - mmOff - disc);
   const vitaOff = _vita.rupees;
-  const total = Math.max(0, sub - disc + ship - vitaOff);
+  const total = Math.max(0, sub - mmOff - disc + ship - vitaOff);
 
   el.innerHTML = `
     ${STORE.cart.map(item => {
@@ -13218,12 +13236,13 @@ function renderCheckoutSummary() {
     }).join('')}
     <hr style="border:none;border-top:1px solid var(--light-gray);margin:12px 0">
     <div class="sum-row"><span>Subtotal</span><span>₹${sub.toLocaleString('en-IN')}</span></div>
+    ${mmOff > 0 ? `<div class="sum-row" style="color:var(--success);font-weight:700"><span>🎁 Mix &amp; Match — lowest item free</span><span>-₹${mmOff.toLocaleString('en-IN')}</span></div>` : (mmUnits.length > 0 ? `<div style="background:var(--sub-1);border:1px solid var(--light-gray);border-radius:8px;padding:8px 10px;font-size:.72rem;margin:6px 0;line-height:1.45">🎁 Add <strong>${mmNeed}</strong> more ${mmNeed === 1 ? 'item' : 'items'} — your lowest-priced one becomes <strong>FREE</strong>.</div>` : '')}
     ${disc > 0 ? `<div class="sum-row" style="color:var(--success)"><span>🏷️ Discount</span><span>-₹${disc.toLocaleString('en-IN')}</span></div>` : ''}
     <div class="sum-row"><span>Shipping</span><span>${ship === 0 ? '<span style="color:var(--success);font-weight:700">FREE</span>' : '₹' + ship}</span></div>
     <hr style="border:none;border-top:1px solid var(--light-gray);margin:8px 0">
     ${vitaOff > 0 ? `<div class="sum-row" style="color:var(--fern-lo)"><span>💎 VitaPoints (${_vita.applied.toLocaleString('en-IN')})</span><span>-₹${vitaOff.toFixed(2)}</span></div>` : ''}
     <div class="sum-row total"><span>Total</span><span style="color:var(--green);font-size:1.1rem">₹${total.toLocaleString('en-IN',{maximumFractionDigits:2})}</span></div>
-    ${vitaRedeemWidgetHTML(sub - disc)}`;
+    ${vitaRedeemWidgetHTML(sub - mmOff - disc)}`;
 }
 
 function selPayMethod(el) { /* handled by new payment modal */ }
