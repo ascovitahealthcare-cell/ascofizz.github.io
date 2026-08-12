@@ -3899,8 +3899,13 @@ img[src=""], img[data-awaiting-upload] { visibility: hidden; width: 100%; }
   transition: transform var(--dur-2) var(--fizz), background var(--dur-2) var(--rise);
 }
 .promo-card-cta:hover { transform: translateY(-2px); background: var(--indigo-lo); }
-.promo-card-media { position: relative; z-index: 1; flex: 0 0 42%; display: grid; place-items: center; padding: 18px; min-height: 180px; }
-.promo-card-media img { width: 100%; height: 100%; object-fit: contain; transition: transform var(--dur-4) var(--rise); }
+/* The image used to sit inside 18px of padding and object-fit:contain, so a
+   square product shot rendered at roughly half the space it was given — tiny
+   next to the text. It now fills its column edge to edge and is clipped by
+   the card's own radius, so the photo reads as part of the card rather than
+   a stamp floating on it. */
+.promo-card-media { position: relative; z-index: 1; flex: 0 0 46%; display: grid; place-items: stretch; padding: 0; min-height: 180px; align-self: stretch;}
+.promo-card-media img { width: 100%; height: 100%; object-fit: cover; object-position: center; display: block; transition: transform var(--dur-4) var(--rise);}
 .promo-card:hover .promo-card-media img { transform: scale(1.04); }
 
 .promo-nav-arrow {
@@ -6056,8 +6061,11 @@ textarea.b2b-form-input { min-height: 110px; resize: vertical; font-family: inhe
   .section-label, .sec-overline, .cf-section-label { font-size: .64rem; letter-spacing: .12em; }
 
   .promo-card { flex-basis: 84vw; min-height: 244px; }
+  /* Narrower screen, so the photo takes a slightly smaller share — the text
+     column is the one that runs out of room first. */
+  .promo-card-media { flex: 0 0 40%; }
   .promo-perk { font-size: .55rem; padding: 4px 8px; }
-  .promo-card-text { padding: 18px 6px 18px 18px; }
+  .promo-card-text { padding: 18px 10px 18px 18px; }
   .promo-card-headline { font-size: 1.3rem; }
   .promo-nav-arrow { display: none; }
 
