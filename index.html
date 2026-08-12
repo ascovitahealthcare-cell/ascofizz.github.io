@@ -21028,6 +21028,8 @@ async function refreshAccountWelcome() {
   });
   if (savedEl) savedEl.textContent = '₹' + Math.round(saved).toLocaleString('en-IN');
 }
+// Expose to the earlier (gtag-style) script block that hooks showPage('account')
+window.refreshAccountWelcome = refreshAccountWelcome;
 
 })();
 </script>
