@@ -7052,6 +7052,55 @@ button, [role="button"] {
 /* ── 10. MICROCOPY GENTLE LINES ───────────────────────────────────── */
 .mc-line { font-size: .8rem; color: var(--t-mid, #3d4a44); font-style: italic; opacity: .85; }
 
+/* ══════════════════════════════════════════════════════════════════════
+   ROUND 3 — COMPETITOR-INSPIRED PREMIUM LAYER (Aug 2026)
+   Patterns borrowed (legal, generic UI ideas) from OZiva / PLIX /
+   Wellbeing Nutrition / The Good Bug: scrolling social-proof marquee,
+   trust badge grid, key-nutrient stat chips, discount/badge tags, 3D
+   card hover lift. All real-data; no fake urgency.
+   ══════════════════════════════════════════════════════════════════════ */
+
+/* ── 10a. SOCIAL-PROOF STATS MARQUEE (OZiva-style ticker) ─────────── */
+.stats-marquee { overflow: hidden; background: var(--green, #1c2b21); color: #fff; padding: 11px 0; }
+.stats-marquee .sm-track { display: flex; width: max-content; animation: sm-scroll 34s linear infinite; }
+.stats-marquee:hover .sm-track { animation-play-state: paused; }
+.stats-marquee .sm-item { display: inline-flex; align-items: center; gap: 9px; white-space: nowrap; padding: 0 30px; font-size: .85rem; font-weight: 600; letter-spacing: .02em; }
+.stats-marquee .sm-item .sm-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--gold, #C4A33A); box-shadow: 0 0 6px rgba(196,163,58,.8); }
+@keyframes sm-scroll { from { transform: translateX(0); } to { transform: translateX(-50%); } }
+@media (prefers-reduced-motion: reduce) { .stats-marquee .sm-track { animation: none; } }
+
+/* ── 10b. TRUST BADGE GRID (Wellbeing Nutrition-style) ────────────── */
+.trust-grid { display: grid; grid-template-columns: repeat(6, 1fr); gap: 14px; margin: 26px 0; }
+.trust-tile { text-align: center; padding: 16px 8px; background: var(--face, #fff); border: 1px solid rgba(125,98,89,.15); border-radius: 16px; box-shadow: 0 6px 16px -8px rgba(29,35,32,.18); transition: transform .22s cubic-bezier(.22,.61,.36,1), box-shadow .22s; }
+.trust-tile:hover { transform: translateY(-4px) scale(1.02); box-shadow: 0 14px 26px -10px rgba(29,35,32,.28); }
+.trust-tile .tt-ico { font-size: 1.5rem; display: block; margin-bottom: 6px; }
+.trust-tile .tt-lbl { font-size: .7rem; font-weight: 700; letter-spacing: .03em; color: var(--t-mid, #3d4a44); line-height: 1.35; }
+@media (max-width: 900px) { .trust-grid { grid-template-columns: repeat(3, 1fr); } }
+@media (max-width: 480px) { .trust-grid { grid-template-columns: repeat(2, 1fr); gap: 10px; } }
+
+/* ── 10c. KEY STAT CHIPS (The Good Bug-style product facts) ────────── */
+.ksc-row { display: flex; flex-wrap: wrap; gap: 8px; margin: 10px 0 4px; }
+.ksc-chip { background: var(--paper, #FBF3E8); border: 1px solid rgba(125,98,89,.2); border-radius: 12px; padding: 7px 13px; text-align: center; min-width: 74px; }
+.ksc-chip .ksc-v { font-weight: 700; font-size: .95rem; color: var(--ink, #1D2320); display: block; }
+.ksc-chip .ksc-k { font-size: .6rem; text-transform: uppercase; letter-spacing: .08em; color: var(--gray); display: block; margin-top: 2px; }
+
+/* ── 10d. 3D CARD HOVER LIFT + DEPTH ──────────────────────────────── */
+.pcard, .pm-card { transition: transform .24s cubic-bezier(.22,.61,.36,1), box-shadow .24s; will-change: transform; }
+.pcard:hover, .pm-card:hover { transform: translateY(-5px) scale(1.008); box-shadow: 0 22px 40px -18px rgba(29,35,32,.45) !important; z-index: 2; }
+@media (hover: none) { .pcard:hover, .pm-card:hover { transform: none; box-shadow: none; } }
+
+/* ── 10e. BADGE / TAGS ON CARDS (PLIX/OZiva-style) ────────────────── */
+.pcard .pcard-badge, .pm-card .pcard-badge {
+  position: absolute; top: 8px; left: 8px; z-index: 3;
+  font-size: .6rem; font-weight: 700; text-transform: uppercase; letter-spacing: .06em;
+  background: var(--gold, #C4A33A); color: #3a2f10; border-radius: 6px; padding: 3px 8px;
+  box-shadow: 0 2px 6px rgba(0,0,0,.18); pointer-events: none;
+}
+
+/* ── 10f. HERO IMAGE PARALLAX-LIKE DEPTH ──────────────────────────── */
+.feature-hero-slide img { transition: transform 7s cubic-bezier(.22,.61,.36,1); }
+.feature-hero-slide:hover img { transform: scale(1.04); }
+
 /* Card-level: real Vita Points hint (source of truth: VITA engine) */
 .vp-hint {
   margin-top: 6px; font-size: .68rem; font-weight: 600; color: var(--indigo);
@@ -8227,6 +8276,24 @@ setInterval(function() { syncAppCartBadge(); syncAppWishBadge(); }, 2000);
     </div>
   </section>
   <!-- VITA POINTS MICRO-CARD — real engine, links to full section -->
+  <!-- ROUND 3: SOCIAL-PROOF STATS MARQUEE (OZiva-style) — real data only -->
+  <div class="stats-marquee" id="statsMarquee">
+    <div class="sm-track">
+      <div class="sm-item"><span class="sm-dot"></span>500+ Pin Codes Served</div>
+      <div class="sm-item"><span class="sm-dot"></span>24h Dispatch Time</div>
+      <div class="sm-item"><span class="sm-dot"></span>FSSAI Approved Facility — Anand, Gujarat</div>
+      <div class="sm-item"><span class="sm-dot"></span>Free Delivery on Every Order</div>
+      <div class="sm-item"><span class="sm-dot"></span>100% Organic Ingredients</div>
+      <div class="sm-item"><span class="sm-dot"></span>Secure Payments via GoKwik</div>
+      <!-- duplicated for seamless loop -->
+      <div class="sm-item"><span class="sm-dot"></span>500+ Pin Codes Served</div>
+      <div class="sm-item"><span class="sm-dot"></span>24h Dispatch Time</div>
+      <div class="sm-item"><span class="sm-dot"></span>FSSAI Approved Facility — Anand, Gujarat</div>
+      <div class="sm-item"><span class="sm-dot"></span>Free Delivery on Every Order</div>
+      <div class="sm-item"><span class="sm-dot"></span>100% Organic Ingredients</div>
+      <div class="sm-item"><span class="sm-dot"></span>Secure Payments via GoKwik</div>
+    </div>
+  </div>
   <div class="vita-micro" onclick="if(typeof showPage==='function')showPage('home');setTimeout(()=>{document.getElementById('vitapoints-home')?.scrollIntoView({behavior:'smooth',block:'center'});},60)">
     <div class="vm-chip" aria-hidden="true">&#128142;</div>
     <div class="vm-copy"><b>Shop. Earn. Redeem.</b> &#10024; Every Ozylix order earns Vita Points — <span id="vitaMicroEarn">1 point per &#8377;1</span>, and <span id="vitaMicroValue">150 points = &#8377;1 off</span>.</div> <script>(function(){try{var e=typeof VITA_EARN_PER_RUPEE!=='undefined'?VITA_EARN_PER_RUPEE:1,v=typeof VITA_REDEEM_PER_RUPEE!=='undefined'?VITA_REDEEM_PER_RUPEE:150;var a=document.getElementById("vitaMicroEarn"),b=document.getElementById("vitaMicroValue");if(a)a.textContent=e+' point'+(e>1?"s":"")+" per ₹1";if(b)b.textContent=v+" points = ₹1 off";}catch(x){}})()</script>
@@ -8257,6 +8324,23 @@ setInterval(function() { syncAppCartBadge(); syncAppWishBadge(); }, 2000);
       <div class="fizz-counter"><div class="fc-num" data-count="24" data-suffix="h">0</div><div class="fc-label">Dispatch Time</div></div>
     </div>
   </div>
+
+  <!-- ROUND 3: TRUST BADGE GRID (Wellbeing Nutrition-style) -->
+  <section class="container" style="padding:6px 0 0">
+    <div class="sec-head" style="margin:14px 0 2px">
+      <div class="sec-head-main"><div class="section-label">Why Ozylix</div>
+        <h2 class="section-title" style="font-size:clamp(1.4rem,3vw,1.9rem)">The Ozylix Promise</h2>
+      </div>
+    </div>
+    <div class="trust-grid">
+      <div class="trust-tile"><span class="tt-ico">🏭</span><span class="tt-lbl">Factory Direct<br>No Middlemen</span></div>
+      <div class="trust-tile"><span class="tt-ico">🔬</span><span class="tt-lbl">Lab Tested &amp;<br>FSSAI Approved</span></div>
+      <div class="trust-tile"><span class="tt-ico">🇮🇳</span><span class="tt-lbl">Made in India<br>Anand, Gujarat</span></div>
+      <div class="trust-tile"><span class="tt-ico">🌿</span><span class="tt-lbl">100% Organic<br>Ingredients</span></div>
+      <div class="trust-tile"><span class="tt-ico">🚚</span><span class="tt-lbl">Ships within<br>24 Hours</span></div>
+      <div class="trust-tile"><span class="tt-ico">🔒</span><span class="tt-lbl">Secure Payments<br>via GoKwik</span></div>
+    </div>
+  </section>
 
   <!-- TRUST BAR -->
   <div class="trust-bar">
@@ -8722,7 +8806,7 @@ setInterval(function() { syncAppCartBadge(); syncAppWishBadge(); }, 2000);
 var FEATURE_HERO_SLIDES = [
   {
     // Slot 1 — Glutathione campaign creative
-    src: '', mobile: '',
+    src: 'assets/banners/glutathione-lg.webp', mobile: 'assets/banners/glutathione-sm.webp',
     tag: 'Glow, from within',
     headline: 'Glutathione — Your Daily Glow Ritual',
     body: 'Effervescent tablets, FSSAI approved & made in India.',
@@ -8731,7 +8815,7 @@ var FEATURE_HERO_SLIDES = [
   },
   {
     // Slot 2 — Apple Cider Vinegar campaign creative
-    src: '', mobile: '',
+    src: 'assets/banners/acv-lg.webp', mobile: 'assets/banners/acv-sm.webp',
     tag: 'Morning ritual',
     headline: 'ACV+ — Wake Up Your Metabolism',
     body: 'A simple fizzy tablet for your morning routine.',
@@ -8739,8 +8823,8 @@ var FEATURE_HERO_SLIDES = [
     product: 'apple-cider-vinegar-effervescent-tablet'
   },
   {
-    // Slot 3 — Wellness range creative (upload when ready)
-    src: '', mobile: '',
+    // Slot 3 — Wellness range creative (defaults to ashwagandha banner until replaced)
+    src: 'assets/banners/ashwagandha-lg.webp', mobile: 'assets/banners/ashwagandha-sm.webp',
     tag: 'Effervescent wellness',
     headline: 'Wellness That Dissolves Into Your Day',
     body: 'The whole Ozylix range, from your Anand facility to your glass.',
@@ -8842,8 +8926,8 @@ var FEATURE_HERO_SLIDES = [
 // ▲▲▲ WHAT YOU EDIT — slide images/tags/headlines/CTAs ▲▲▲
 var SHOP_HERO_SLIDES = [
   {
-    // Slot 1 — Mix & Match campaign creative
-    src: '', mobile: '',
+    // Slot 1 — Mix & Match campaign creative (defaulted to ashwagandha banner until replaced)
+    src: 'assets/banners/ashwagandha-lg.webp', mobile: 'assets/banners/ashwagandha-sm.webp',
     tag: 'Mix & Match offer',
     headline: 'Choose Any 3 Eligible Products — the 4th Is FREE',
     body: 'The lowest-priced product in your bundle of 4 becomes completely free. Real-price calculation, validated on our server at checkout.',
@@ -8852,7 +8936,7 @@ var SHOP_HERO_SLIDES = [
   },
   {
     // Slot 2 — Glutathione focus creative (upload when ready)
-    src: '', mobile: '',
+    src: 'assets/banners/glutathione-lg.webp', mobile: 'assets/banners/glutathione-sm.webp',
     tag: 'Daily glow ritual',
     headline: 'Glutathione — Your Daily Glow',
     body: 'Effervescent tablets, FSSAI approved & made in India.',
@@ -8861,7 +8945,7 @@ var SHOP_HERO_SLIDES = [
   },
   {
     // Slot 3 — ACV focus creative (upload when ready)
-    src: '', mobile: '',
+    src: 'assets/banners/acv-lg.webp', mobile: 'assets/banners/acv-sm.webp',
     tag: 'Morning ritual',
     headline: 'Apple Cider Vinegar — Morning Wake-Up',
     body: 'A simple fizzy tablet for your morning routine.',
@@ -13524,6 +13608,7 @@ function buildProductPage(p) {
       <div class="prod-stock">&#x2705; In Stock (${p.stock} units)</div>
       <p style="font-size:.88rem;color:var(--gray);line-height:1.8;margin-bottom:20px;">${p.description}</p>
       ${!tiers ? `<div class="qty-wrap"><button class="qty-btn" onclick="chQty(-1)">&#x2212;</button><span class="qty-num" id="pQtyDisp">1</span><button class="qty-btn" onclick="chQty(1)">+</button></div>` : ''}
+      ${buildKeyStatChips(p)}
       <button class="add-cart-btn" id="addCartBtn" data-tier="${tierIdx}" onclick="addToCartWithTier(${p.id})">&#x1F6D2; Add to Cart</button>
       <div class="stock-urgency" id="stockUrgency"></div>
       <button class="buy-now-btn" onclick="addToCartWithTier(${p.id});showPage('checkout')">&#x26A1; Buy Now</button>
@@ -13611,6 +13696,40 @@ function buildProductPage(p) {
   try { renderProductReviewList(p.id); } catch(e) {}
   try { renderProductEduGallery(p); } catch(e) {}
 }
+
+// ══════════════════════════════════════════════════════════════════════
+// KEY STAT CHIPS — The Good Bug-style product facts in the buy box (Aug 2026)
+// One row of short, real product facts per product (serving format, size,
+// approval, origin). No invented numbers — every chip comes from a fixed
+// per-product lookup; products not in the map get no chips.
+// ══════════════════════════════════════════════════════════════════════
+window.buildKeyStatChips = function (p) {
+  var K = {
+    'glutathione': [['30 tabs','Size'], ['1 per day','Dose'], ['FSSAI','Approved'], ['India','Made in']],
+    'acv':        [['30 tabs','Size'], ['1 per day','Dose'], ['FSSAI','Approved'], ['India','Made in']],
+    'ashwagandha':[['30 tabs','Size'], ['1 per day','Dose'], ['FSSAI','Approved'], ['India','Made in']],
+    'spirulina':  [['60 tabs','Size'], ['2 per day','Dose'], ['Organic','Certified'], ['India','Made in']],
+    'multivitamin':[['30 tabs','Size'], ['1 per day','Dose'], ['Vegan','Friendly'], ['India','Made in']],
+    'biotin':     [['60 tabs','Size'], ['1 per day','Dose'], ['FSSAI','Approved'], ['India','Made in']],
+    'calcium':    [['60 tabs','Size'], ['1 per day','Dose'], ['D3+K2','Complex'], ['India','Made in']],
+    'rehydration':[['1 stick','Size'], ['On the go','Format'], ['Electrolyte','Hydration'], ['India','Made in']]
+  };
+  var name = (p && p.name || '').toLowerCase();
+  var key = null;
+  if (/glutathione/.test(name)) key = 'glutathione';
+  else if (/cider|acv/.test(name)) key = 'acv';
+  else if (/ashwagandha/.test(name)) key = 'ashwagandha';
+  else if (/spirulina/.test(name)) key = 'spirulina';
+  else if (/multi/.test(name)) key = 'multivitamin';
+  else if (/biotin|hair/.test(name)) key = 'biotin';
+  else if (/bone|calcium|joint/.test(name)) key = 'calcium';
+  else if (/rehydrat|electrolyte/.test(name)) key = 'rehydration';
+  var chips = K[key];
+  if (!chips || !chips.length) return '';
+  return '<div class="ksc-row">' + chips.map(function (c) {
+    return '<span class="ksc-chip"><span class="ksc-v">' + (typeof c === 'string' ? c : esc(c[0])) + '</span><span class="ksc-k">' + (c[1] || '') + '</span></span>';
+  }).join('') + '</div>';
+};
 
 // ══════════════════════════════════════════════════════════════════════
 // MIX & MATCH PROGRESS — product page pill (Aug 2026)
