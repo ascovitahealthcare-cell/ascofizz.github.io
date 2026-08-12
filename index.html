@@ -8780,8 +8780,11 @@ setInterval(function() { syncAppCartBadge(); syncAppWishBadge(); }, 2000);
 
     // Re-trigger scroll reveal for new cards
     if (typeof tagSections === 'function') setTimeout(tagSections, 100);
-    // Aug 2026 enhancement — premium feature hero (image slots)
-    if (typeof initFeatureHero === 'function') setTimeout(initFeatureHero, 60);
+    // Aug 2026 enhancement — premium feature hero (image slots).
+    // Do NOT init here: FEATURE_HERO_SLIDES is assigned later in this same
+    // file (top-to-bottom script execution), so the call below would run
+    // before the config exists and the hero would stay data-live="no".
+    // The final DOMContentLoaded block at the end of the document runs it.
   }
 
   // ══════════════════════════════════════════════════════════════════════
@@ -21122,7 +21125,25 @@ body:not(.oz-product) #stickyCart { display: none !important; }
   window.addEventListener('hashchange', firePageView);
 })();
 </script>
-
+<script>
+// Final deterministic bootstrap for the premium hero sliders.
+// FEATURE_HERO_SLIDES and SHOP_HERO_SLIDES are assigned in-file above, and
+// script execution is strictly top-to-bottom — so this end-of-document block
+// is the earliest point both configs are guaranteed to exist.
+// The Hostinger CDN edge case (DOMContentLoaded firing before this script
+// parsed) is handled by the readyState check.
+(function () {
+  function boot() {
+    try { if (typeof initFeatureHero === 'function') initFeatureHero(); } catch (e) {}
+    try { if (typeof initShopHero === 'function') initShopHero(); } catch (e) {}
+  }
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', boot);
+  } else {
+    setTimeout(boot, 0);
+  }
+})();
+</script>
 <!-- Central contextual popup manager root (max 1 card, never covers CTAs) -->
 <div id="ozylxNotify" aria-live="polite"></div>
 </body>
