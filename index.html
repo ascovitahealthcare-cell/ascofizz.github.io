@@ -4123,6 +4123,39 @@ img[src=""], img[data-awaiting-upload] { visibility: hidden; width: 100%; }
 .ig-card img,
 .ig-card video { width: 100%; height: 100%; object-fit: cover; display: block; }
 
+/* Hides the existing WhatsApp widget on the buying pages — see waSync(). */
+.wa-hidden { display: none !important; }
+
+/* ══ THANK YOU — VitaPoints earned ═════════════════════════════════════ */
+.ty-vita {
+  margin: 28px auto 4px; max-width: 380px; width: 100%;
+  background: linear-gradient(140deg, var(--green-wash, #eef4ea), var(--sub-1, #f7f9f5));
+  border: 1px solid var(--light-gray, #e3e7de); border-radius: var(--radius, 16px);
+  padding: 18px 20px; text-align: left;
+}
+.ty-vita-top { display: flex; align-items: center; gap: 13px; }
+.ty-vita-badge {
+  flex: 0 0 auto; width: 42px; height: 42px; border-radius: 50%;
+  background: var(--green, #3f7d4e); color: #fff;
+  display: flex; align-items: center; justify-content: center; font-size: 1.25rem;
+}
+.ty-vita-amt { font-size: 1.32rem; font-weight: 800; line-height: 1.1; color: var(--green-text, #2f5d3a); }
+.ty-vita-sub { font-size: .78rem; color: var(--gray, #6b7280); margin-top: 2px; }
+.ty-vita-bar {
+  height: 6px; border-radius: 99px; background: rgba(0,0,0,.07);
+  margin: 14px 0 8px; overflow: hidden;
+}
+.ty-vita-bar-fill {
+  height: 100%; width: 0; border-radius: 99px; background: var(--green, #3f7d4e);
+  transition: width .9s cubic-bezier(.22,.61,.36,1);
+}
+.ty-vita-note { font-size: .76rem; color: var(--gray, #6b7280); line-height: 1.5; }
+.ty-vita-link {
+  margin-top: 12px; background: none; border: 0; padding: 0; cursor: pointer;
+  font-size: .8rem; font-weight: 700; color: var(--green-text, #2f5d3a);
+}
+@media (prefers-reduced-motion: reduce) { .ty-vita-bar-fill { transition: none; } }
+
 /* ══ HERO BANNER — top-of-home offer carousel ══════════════════════════
    Stays display:none until BANNER_SLIDES has at least one usable image, so
    an empty banner never ships. aspect-ratio reserves the exact height before
@@ -4131,13 +4164,13 @@ img[src=""], img[data-awaiting-upload] { visibility: hidden; width: 100%; }
 .hero-banner.is-live { display: block; }
 .hero-banner-track { display: flex; transition: transform .45s cubic-bezier(.22,.61,.36,1); will-change: transform; }
 .hero-banner-slide { flex: 0 0 100%; display: block; position: relative; }
+/* Landscape on every screen, phones included — matches the artwork's own
+   2688x1152, so nothing is ever cropped and the offer text always survives.
+   The mobile file is a smaller copy of the same shape, not a square crop. */
 .hero-banner-slide img {
   width: 100%; height: auto; display: block;
-  aspect-ratio: 1200 / 500;            /* desktop ratio, overridden below */
+  aspect-ratio: 2688 / 1152;
   object-fit: cover;
-}
-@media (max-width: 820px) {
-  .hero-banner-slide img { aspect-ratio: 800 / 800; }   /* square on phones */
 }
 .hero-banner-dots { position: absolute; left: 0; right: 0; bottom: 10px; display: flex; justify-content: center; gap: 7px; }
 .hero-banner-dot {
@@ -8261,9 +8294,15 @@ setInterval(function() { syncAppCartBadge(); syncAppWishBadge(); }, 2000);
   // `link` is optional — where the banner sends the customer.
   // `mobile` is optional — falls back to `src` if you only make one image.
   var BANNER_SLIDES = [
-    { src: '', mobile: '', alt: '', link: '' },
-    { src: '', mobile: '', alt: '', link: '' },
-    { src: '', mobile: '', alt: '', link: '' }
+    { src: 'assets/banners/glutathione-lg.webp', mobile: 'assets/banners/glutathione-sm.webp',
+      alt: 'Buy 2 Get 2 Free — Glow Like Never Before. Ozylix Glutathione Effervescent Tablets: glow, detox, defense.',
+      link: '/product/glutathione-effervescent-tablet' },
+    { src: 'assets/banners/acv-lg.webp', mobile: 'assets/banners/acv-sm.webp',
+      alt: 'Buy 2 Get 2 Free — Morning Metabolism Boost. Ozylix Apple Cider Vinegar Effervescent Tablets: burn, balance, boost.',
+      link: '/product/apple-cider-vinegar-effervescent-tablet' },
+    { src: 'assets/banners/ashwagandha-lg.webp', mobile: 'assets/banners/ashwagandha-sm.webp',
+      alt: 'Buy 4 Get 1 Free — Strength & Recovery Boost. Ozylix Ashwagandha Effervescent Tablets: strength, recovery, performance.',
+      link: '/product/ashwagandha-effervescent-tablet' }
   ];
   // ▲▲▲ END OF WHAT YOU EDIT ▲▲▲
 
@@ -9190,6 +9229,27 @@ function renderCheckoutSummary() {
         <div class="ty-step ty-todo"><div style="font-size:1.8rem">🚚</div><div style="font-size:.8rem;font-weight:700;margin:6px 0">Shipped</div><div style="font-size:.72rem;color:var(--gray)">Tracking sent to you</div></div>
         <div class="ty-step ty-todo"><div style="font-size:1.8rem">🏠</div><div style="font-size:.8rem;font-weight:700;margin:6px 0">Delivered</div><div style="font-size:.72rem;color:var(--gray)">3–5 business days</div></div>
       </div>
+      <!-- VitaPoints earned. Hidden until finalizeOrder() knows the number —
+           an empty rewards card on a confirmation page reads as a broken
+           promise. Deliberately says "pending": points only release after
+           delivery plus a 7-day return window (vita_config.release_policy),
+           and telling someone they have points they cannot spend yet is how
+           a rewards scheme loses trust on its first use. -->
+      <div class="ty-vita" id="tyVita" style="display:none">
+        <div class="ty-vita-top">
+          <span class="ty-vita-badge" aria-hidden="true">&#10022;</span>
+          <div>
+            <div class="ty-vita-amt"><span id="tyVitaPts">0</span> VitaPoints</div>
+            <div class="ty-vita-sub">earned on this order</div>
+          </div>
+        </div>
+        <div class="ty-vita-bar" id="tyVitaBarWrap">
+          <div class="ty-vita-bar-fill" id="tyVitaBar"></div>
+        </div>
+        <div class="ty-vita-note" id="tyVitaNote"></div>
+        <button class="ty-vita-link" onclick="showPage('account')">View my VitaPoints &rsaquo;</button>
+      </div>
+
       <div style="display:flex;gap:14px;flex-wrap:wrap;justify-content:center">
         <button class="btn-primary" onclick="showPage('shop')">Continue Shopping</button>
         <button class="btn-outline" onclick="showPage('home')">Back to Home</button>
@@ -9249,6 +9309,14 @@ function renderCheckoutSummary() {
     <button class="wa-open-btn" onclick="openWhatsApp('Hello! I have a question about Ozylix products.')">
       <svg style="width:18px;height:18px;fill:white" viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
       Start Chat on WhatsApp
+    </button>
+    <!-- Second line for faults. Product questions and "the site won't let me
+         pay" need different people, and mixing them into one number means a
+         technical fault waits behind order enquiries. -->
+    <button class="wa-open-btn" style="margin-top:8px;background:var(--sub-1,#f4f6f2);color:var(--t-mid,#38473c);box-shadow:inset 0 0 0 1px var(--light-gray,#e3e7de)"
+            onclick="openWhatsAppTech()">
+      <span style="font-size:1rem">&#128736;&#65039;</span>
+      Report a technical issue
     </button>
   </div>
 </div>
@@ -9855,10 +9923,45 @@ function renderCheckoutSummary() {
 // ═══════════════════════════════════════════════════════
 const WA_NUMBER = '919898582650';
 
+// Faults go to a different phone than orders — see the second button in the
+// chat popup.
+const WA_TECH_NUMBER = '917265884137';
+
 function openWhatsApp(msg) {
   const encoded = encodeURIComponent(msg || 'Hello! I have a question about Ozylix.');
   window.open('https://wa.me/' + WA_NUMBER + '?text=' + encoded, '_blank');
 }
+
+function openWhatsAppTech() {
+  // Whoever picks this up needs to know which page broke, and the customer
+  // will not think to say — so the message carries it.
+  const where = (document.querySelector('.page.active') || {}).id || '';
+  const msg = 'Hi Ozylix, I am facing a technical issue on the website.'
+            + (where ? '\n\nPage: ' + where.replace('page-', '') : '')
+            + '\nLink: ' + window.location.href;
+  window.open('https://wa.me/' + WA_TECH_NUMBER + '?text=' + encodeURIComponent(msg), '_blank');
+}
+
+// ── Keep the widget out of the buying flow ──────────────────────────────
+// A chat prompt while someone is entering card details is an invitation to
+// stop and ask instead of finishing, and an abandoned checkout costs far
+// more than the question was worth. Reads the DOM rather than tracking
+// state, so it cannot drift out of step with however the page was reached.
+const WA_BLOCKED_PAGES = ['cart', 'checkout', 'thankyou'];
+window.waSync = function () {
+  const fab = document.getElementById('waFab');
+  const pop = document.getElementById('waChatPopup');
+  if (!fab) return;
+  const active = document.querySelector('.page.active');
+  const id = active ? (active.id || '').replace('page-', '') : '';
+  const hide = WA_BLOCKED_PAGES.indexOf(id) !== -1;
+  fab.classList.toggle('wa-hidden', hide);
+  if (pop) {
+    pop.classList.toggle('wa-hidden', hide);
+    if (hide) pop.classList.remove('open');
+  }
+};
+document.addEventListener('DOMContentLoaded', function () { window.waSync(); });
 
 function toggleWAPopup() {
   const popup = document.getElementById('waChatPopup');
@@ -14248,11 +14351,57 @@ const PAY_METHOD_LABEL = {
   cashfree: 'Paid online (Cashfree)',
 };
 
+// VitaPoints card on the thank-you page.
+//   earn      1 point per Rs1 of eligible spend   (vita_config.points_per_rupee_earn)
+//   redeem    150 points = Rs1                    (points_per_rupee_redeem)
+//   milestone 15,000 points unlocks a reward      (milestone_threshold)
+// These mirror vita_config; the server remains the authority and this only
+// reports what was just earned.
+const VITA_EARN_PER_RUPEE   = 1;
+const VITA_REDEEM_PER_RUPEE = 150;
+const VITA_MILESTONE        = 15000;
+
+function showVitaEarned(total) {
+  const card = document.getElementById('tyVita');
+  if (!card) return;
+
+  // Shipping and tax do not earn (earn_on_shipping / earn_on_tax are both
+  // false), so this is an estimate off the order value — the server figure
+  // is what actually lands in the account.
+  const pts = Math.max(0, Math.floor((Number(total) || 0) * VITA_EARN_PER_RUPEE));
+  if (!pts) return;                       // no points, no card
+
+  card.style.display = 'block';
+  const amt = document.getElementById('tyVitaPts');
+  if (amt) amt.textContent = pts.toLocaleString('en-IN');
+
+  const worth = pts / VITA_REDEEM_PER_RUPEE;
+  const note = document.getElementById('tyVitaNote');
+  if (note) {
+    note.innerHTML =
+      'Worth about <strong>&#8377;' + worth.toFixed(worth < 10 ? 2 : 0) + '</strong> off a future order. ' +
+      'Points are confirmed <strong>7 days after delivery</strong>, once the return window closes.';
+  }
+
+  // Progress toward the milestone reward. Counts this order only — the
+  // running balance lives on the account page, and guessing it here would
+  // be worse than not showing it.
+  const bar = document.getElementById('tyVitaBar');
+  const wrap = document.getElementById('tyVitaBarWrap');
+  const pct = Math.min(100, (pts / VITA_MILESTONE) * 100);
+  if (pct < 1) {
+    if (wrap) wrap.style.display = 'none';   // a bar at 0.3% just looks broken
+  } else if (bar) {
+    requestAnimationFrame(function () { bar.style.width = pct.toFixed(1) + '%'; });
+  }
+}
+
 async function finalizeOrder(orderId, formData, total, method, codCharge) {
   const orderNumEl = document.getElementById('orderNum');
   if (orderNumEl) orderNumEl.textContent = orderId;
   const payEl = document.getElementById('tyPayMethod');
   if (payEl) payEl.textContent = PAY_METHOD_LABEL[method] || 'Paid online';
+  try { showVitaEarned(total); } catch (e) {}
 
   // Build order items
   const cartSnapshot = [...STORE.cart];
@@ -19704,11 +19853,17 @@ body:not(.oz-product) #stickyCart { display: none !important; }
       // After, not before: showPage pushes the new URL, and PageView should
       // carry the page being entered rather than the one being left.
       try { firePageView(); } catch (e) {}
+      // Same reason — the WhatsApp button has to read the page just entered
+      // to know whether it is a checkout step it must stay out of.
+      try { window.waSync && window.waSync(); } catch (e) {}
       return out;
     };
   }
 
-  window.addEventListener('popstate', firePageView);
+  window.addEventListener('popstate', function () {
+    firePageView();
+    try { window.waSync && window.waSync(); } catch (e) {}
+  });
   window.addEventListener('hashchange', firePageView);
 })();
 </script>
