@@ -1,0 +1,35 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+
+  // Must match the Worker that Workers Builds already created, otherwise a
+  // deploy publishes a second Worker instead of updating this one.
+  "name": "ascovitahealthcare-cell-github-io",
+  // Wrangler defaults this to "today", which the bundled workerd runtime does
+  // not yet support — `wrangler dev` refuses to start. Nothing here depends on
+  // recent runtime behaviour, so pin a date the local runtime also accepts.
+  "compatibility_date": "2026-08-11",
+
+  // Without this file checked in, `npx wrangler deploy` re-guesses these
+  // settings inside the build container on every run and answers its own
+  // prompts with fallback values. Committing it makes each build identical.
+  "main": "./worker/index.js",
+
+  "assets": {
+    // The site is served from the repository root — there is no build step.
+    "directory": ".",
+
+    // Required so worker/index.js can hand requests back to the asset server.
+    "binding": "ASSETS",
+
+    // Unmatched paths return 404.html with a real 404 status. Deliberately NOT
+    // "single-page-application": that answers 200 with index.html for every
+    // unknown URL, which turns every typo and dead link into a soft 404 and is
+    // exactly the indexing problem this migration is meant to fix. Real SPA
+    // routes are handled explicitly in worker/index.js.
+    "not_found_handling": "404-page"
+  },
+
+  "observability": {
+    "enabled": true
+  }
+}

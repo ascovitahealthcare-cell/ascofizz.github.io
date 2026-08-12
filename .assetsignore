@@ -1,0 +1,37 @@
+# Files in the repository root that must NOT be published as static assets.
+# The assets directory is the repo root ("." in wrangler.jsonc), so without this
+# list every one of these would be uploaded and served publicly.
+
+# The Worker script itself — uploading it as an asset would also serve its
+# source at /worker/index.js.
+worker
+
+# Deploy configuration.
+wrangler.jsonc
+.assetsignore
+
+# Internal tooling and design notes. .claude alone is ~3 MB of agent skills and
+# has no business being on the public site.
+.claude
+DESIGN.md
+SECURITY.md
+README.ME
+gitignore
+
+# Superseded Ascovita billing page, ~95 KB, referenced from nowhere in the site.
+# Left in the repository, just not published.
+abababababababab.html
+
+# GitHub Pages leftovers with no meaning on Cloudflare.
+CNAME
+.nojekyll
+
+# Wrangler's own local state, which it writes INTO the assets directory. Left in
+# it also makes `wrangler dev` watch a directory it is itself writing to, which
+# retriggers the file watcher and loops the local server forever.
+.wrangler
+
+# Never useful.
+.git
+node_modules
+**/.DS_Store
