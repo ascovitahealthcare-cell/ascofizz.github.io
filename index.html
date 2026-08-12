@@ -3650,7 +3650,8 @@ img[src=""], img[data-awaiting-upload] { visibility: hidden; width: 100%; }
   box-shadow: var(--lit-green);
   transition: transform var(--dur-2) var(--fizz);
 }
-.wa-btn:hover { transform: translateY(-3px) scale(1.04); }
+.wa-btn:hover { transform: translateY(-3px); }
+@media (hover: hover) and (pointer: fine) { .wa-btn:hover { transform: translateY(-3px) scale(1.04); } }
 .wa-btn svg { width: 28px; height: 28px; }
 .wa-pulse { position: absolute; inset: 0; border-radius: 50%; box-shadow: 0 0 0 2px rgba(107,85,96,.28); animation: fz-pulse 2.6s var(--settle) infinite; }
 .wa-tooltip {
@@ -5099,6 +5100,41 @@ img[src=""], img[data-awaiting-upload] { visibility: hidden; width: 100%; }
 .ck-section-title:first-child { margin-top: 0; }
 .form-row { display: grid; gap: 14px; grid-template-columns: 1fr 1fr; }
 .form-group { margin-bottom: 14px; }
+/* ── ROUND 12: compact, fast-fill checkout (designer-stack principles) ──
+   Fewer, tighter rows + 16px floor on mobile (below it iOS zooms on focus
+   and never zooms back). Everything keeps specific-property transitions. */
+.checkout-form .form-label { font-size: .68rem; margin-bottom: 4px; }
+.checkout-form .form-input { padding: 10px 13px; font-size: .86rem; }
+.checkout-form .form-group { margin-bottom: 10px; }
+.checkout-form .form-row { gap: 12px; }
+.checkout-form .ck-section-title { margin-top: 16px !important; font-size: 1.02rem; }
+/* City / State / PIN in one row — one less row to tab through */
+.checkout-form .ck-loc-row { display: grid; grid-template-columns: 1.15fr 1fr 1fr; gap: 12px; }
+.checkout-form .ck-loc-row > .form-group { margin-bottom: 0; }
+/* Tighter premium checkout header */
+.ck-header-card { padding: 16px 22px; margin-bottom: 18px; }
+.ck-hstep { padding: 7px 14px; font-size: .72rem; }
+.ck-header-steps { gap: 8px; }
+/* Payment rows: one-click radio rows with instant press feedback */
+.pay-method { padding: 12px 14px; gap: 12px; transition: transform 120ms cubic-bezier(.23,1,.32,1), background-color 120ms cubic-bezier(.23,1,.32,1), box-shadow 120ms cubic-bezier(.23,1,.32,1); }
+.pm-icon { font-size: 1.35rem; margin-bottom: 0; }
+.pm-info { padding: 0; }
+.pm-info > *:first-child { font-size: .86rem; }
+.pm-info > *:last-child { font-size: .72rem; }
+.pay-methods { gap: 9px; }
+@media (hover: hover) and (pointer: fine) { .pay-method:hover { transform: translateX(2px); } }
+.pay-method:active { transform: scale(.985); }
+.pay-method:focus-visible { outline: 2px solid rgba(192,57,74,.45); outline-offset: 2px; }
+/* Slimmer order-summary header, desktop */
+.ck-sum-head { font-size: .98rem; padding: 13px 26px; }
+.ck-sum-trust { font-size: .64rem; gap: 12px; margin-top: 10px; padding-top: 10px; }
+@media (max-width: 860px) {
+  .ck-sum-head { font-size: .92rem; padding: 12px 16px; }
+  .checkout-form .ck-loc-row { grid-template-columns: 1fr 1fr; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .pay-method, .pay-method * { transition-duration: .08s !important; }
+}
 .form-label { display: block; font-size: .74rem; font-weight: 700; color: var(--t-low); margin-bottom: 6px; }
 textarea.form-input { min-height: 96px; resize: vertical; font-family: inherit; }
 .saved-address-bar {
@@ -9914,19 +9950,20 @@ var BANNER_SLIDES = [
           <div class="form-group"><label class="form-label">Email Address</label><input class="form-input" type="email" placeholder="email@example.com" autocomplete="email" inputmode="email" autocapitalize="off" autocorrect="off" spellcheck="false" enterkeyhint="next" oninput="this.classList.remove('field-error')"></div>
           <div class="form-group"><label class="form-label">Mobile Number</label><input class="form-input" type="tel" placeholder="+91 98765 43210" autocomplete="tel" inputmode="tel" enterkeyhint="next" oninput="this.classList.remove('field-error')"></div>
 
-          <div class="ck-section-title" style="margin-top:24px">📍 <strong style="margin-left:6px">Delivery Address</strong></div>
+          <div class="ck-section-title">📍 <strong style="margin-left:6px">Delivery Address</strong></div>
           <div class="form-group"><label class="form-label">Address Line 1</label><input class="form-input" type="text" placeholder="House / Flat No., Street" autocomplete="address-line1" autocapitalize="words" enterkeyhint="next" oninput="this.classList.remove('field-error')"></div>
           <div class="form-group"><label class="form-label">Address Line 2</label><input class="form-input" type="text" placeholder="Area / Locality (optional)" autocomplete="address-line2" autocapitalize="words" enterkeyhint="next"></div>
-          <div class="form-row">
+          <div class="ck-loc-row">
             <div class="form-group"><label class="form-label">City</label><input class="form-input" type="text" placeholder="City" autocomplete="address-level2" autocapitalize="words" enterkeyhint="next" oninput="this.classList.remove('field-error')"></div>
             <div class="form-group"><label class="form-label">State</label><input class="form-input" type="text" placeholder="State" autocomplete="address-level1" autocapitalize="words" enterkeyhint="next"></div>
-          </div>
-          <div class="form-row">
             <div class="form-group"><label class="form-label">PIN Code</label><input class="form-input" type="text" placeholder="6-digit PIN" autocomplete="postal-code" inputmode="numeric" pattern="[0-9]*" maxlength="6" enterkeyhint="done" oninput="this.classList.remove('field-error')"></div>
-            <div class="form-group"><label class="form-label">Country</label><input class="form-input" type="text" value="India" readonly tabindex="-1" autocomplete="country-name" aria-label="Country"></div>
+          </div>
+          <div class="form-row" style="margin-top:10px">
+            <div class="form-group" style="margin-bottom:0"><label class="form-label">Country</label><input class="form-input" type="text" value="India" readonly tabindex="-1" autocomplete="country-name" aria-label="Country"></div>
+            <div class="form-group" style="margin-bottom:0"></div>
           </div>
 
-          <div class="ck-section-title" style="margin-top:24px">💳 <strong style="margin-left:6px">Payment Method</strong></div>
+          <div class="ck-section-title">💳 <strong style="margin-left:6px">Payment Method</strong></div>
           <div class="pay-methods">
             <div class="pay-method selected" onclick="selPayMethod(this)">
               <span class="pm-icon">📱</span>
@@ -9947,7 +9984,7 @@ var BANNER_SLIDES = [
               <div class="pm-info"><h4>EMI (No Cost available)</h4><p>0% EMI via GoKwik partner banks</p></div>
             </div>
           </div>
-          <div style="background:var(--green-wash);border-radius:9px;padding:12px 16px;margin-top:14px;font-size:.8rem;color:var(--gray);display:flex;align-items:center;gap:9px">
+          <div style="background:var(--green-wash);border-radius:9px;padding:10px 14px;margin-top:12px;font-size:.76rem;color:var(--gray);display:flex;align-items:center;gap:9px">
             🔒 <span>All payments secured by <strong>GoKwik</strong> — India's most trusted payment gateway. 256-bit SSL. COD available · no extra charge</span>
           </div>
         </div>
