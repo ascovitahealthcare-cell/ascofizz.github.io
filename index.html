@@ -20962,6 +20962,73 @@ body:not(.oz-product) #stickyCart { display: none !important; }
       });
     };
   }
+
+// ── Premium account welcome banner ─────────────────────────────
+// Populates the gradient header (name, order count, VitaPoints, savings)
+// whenever the account page or a panel is visited.
+async function refreshAccountWelcome() {
+  const host = document.getElementById('accountWelcome');
+  const nameEl = document.getElementById('awName');
+  const ordersEl = document.getElementById('awOrders');
+  const pointsEl = document.getElementById('awPoints');
+  const savedEl = document.getElementById('awSaved');
+  if (!host) return;
+
+  const user = getCurrentUser();
+  if (!user || !user.email) {
+    if (nameEl) nameEl.textContent = 'Welcome to your Ozylix account';
+    if (ordersEl) ordersEl.textContent = '—';
+    if (pointsEl) pointsEl.textContent = '—';
+    if (savedEl) savedEl.textContent = '—';
+    return;
+  }
+  if (nameEl) nameEl.textContent = 'Welcome back, ' + (user.name || user.email.split('@')[0]) + ' 👋';
+
+  // Points (cached vita state, instantaneous)
+  if (pointsEl) pointsEl.textContent = (Number(getVitaState().balance) || 0).toLocaleString('en-IN');
+
+  // Orders + savings — backend first, localStorage merged as fallback
+  let orders = [];
+  const jwt = localStorage.getItem('asc_jwt') || '';
+  if (jwt) {
+    try {
+      const r = await fetchWithTimeout(API_BASE + '/api/orders/my', {
+        headers: { 'Authorization': 'Bearer ' + jwt }
+      }, 8000);
+      if (r.ok) {
+        const d = await r.json();
+        orders = (d.data || d || []).filter(function(o){
+          return (o.customer_email || '').toLowerCase().trim() === user.email.toLowerCase().trim();
+        });
+      }
+    } catch(e) { console.warn('[Welcome] orders fetch failed:', e.message); }
+  }
+  // Local history (orders placed before accounts existed)
+  try {
+    const local = JSON.parse(localStorage.getItem('asc_orders') || '[]')
+      .filter(function(o){ return (o.userEmail || o.email || '').toLowerCase().trim() === user.email.toLowerCase().trim(); })
+      .filter(function(o){ return !orders.some(function(b){ return b.id === o.orderId || b.id === o.id; }); })
+      .map(function(o){ return Object.assign({}, o, { id: o.orderId }); });
+    orders = orders.concat(local);
+  } catch(e) {}
+
+  if (ordersEl) ordersEl.textContent = orders.length;
+
+  // Lifetime savings = sum of per-item MRP-vs-price discount where available
+  let saved = 0;
+  orders.forEach(function(o){
+    let items = o.items || [];
+    if (typeof items === 'string') { try { items = JSON.parse(items); } catch(e){ items = []; } }
+    items.forEach(function(it){
+      const qty = Number(it.qty) || 0;
+      const mrp = Number(it.mrp || it.max_retail_price || 0);
+      const price = Number(it.price || it.sale_price || it.unit_price || 0);
+      if (mrp > price && qty) saved += (mrp - price) * qty;
+    });
+  });
+  if (savedEl) savedEl.textContent = '₹' + Math.round(saved).toLocaleString('en-IN');
+}
+
 })();
 </script>
 
@@ -21226,69 +21293,3 @@ body:not(.oz-product) #stickyCart { display: none !important; }
 </body>
 </html>
 
-// ── Premium account welcome banner ─────────────────────────────
-// Populates the gradient header (name, order count, VitaPoints, savings)
-// whenever the account page or a panel is visited.
-async function refreshAccountWelcome() {
-  const host = document.getElementById('accountWelcome');
-  const nameEl = document.getElementById('awName');
-  const ordersEl = document.getElementById('awOrders');
-  const pointsEl = document.getElementById('awPoints');
-  const savedEl = document.getElementById('awSaved');
-  if (!host) return;
-
-  const user = getCurrentUser();
-  if (!user || !user.email) {
-    // Guest view — still premium, but no personal data
-    if (nameEl) nameEl.textContent = 'Welcome to your Ozylix account';
-    if (ordersEl) ordersEl.textContent = '—';
-    if (pointsEl) pointsEl.textContent = '—';
-    if (savedEl) savedEl.textContent = '—';
-    return;
-  }
-  if (nameEl) nameEl.textContent = 'Welcome back, ' + (user.name || user.email.split('@')[0]) + ' 👋';
-
-  // Points (cached vita state, instantaneous)
-  if (pointsEl) pointsEl.textContent = (Number(getVitaState().balance) || 0).toLocaleString('en-IN');
-
-  // Orders + savings — backend first, localStorage merged as fallback
-  let orders = [];
-  const jwt = localStorage.getItem('asc_jwt') || '';
-  if (jwt) {
-    try {
-      const r = await fetchWithTimeout(API_BASE + '/api/orders/my', {
-        headers: { 'Authorization': 'Bearer ' + jwt }
-      }, 8000);
-      if (r.ok) {
-        const d = await r.json();
-        orders = (d.data || d || []).filter(function(o){
-          return (o.customer_email || '').toLowerCase().trim() === user.email.toLowerCase().trim();
-        });
-      }
-    } catch(e) { console.warn('[Welcome] orders fetch failed:', e.message); }
-  }
-  // Local history (orders placed before accounts existed)
-  try {
-    const local = JSON.parse(localStorage.getItem('asc_orders') || '[]')
-      .filter(function(o){ return (o.userEmail || o.email || '').toLowerCase().trim() === user.email.toLowerCase().trim(); })
-      .filter(function(o){ return !orders.some(function(b){ return b.id === o.orderId || b.id === o.id; }); })
-      .map(function(o){ return Object.assign({}, o, { id: o.orderId }); });
-    orders = orders.concat(local);
-  } catch(e) {}
-
-  if (ordersEl) ordersEl.textContent = orders.length;
-
-  // Lifetime savings = sum of per-item MRP-vs-price discount where available
-  let saved = 0;
-  orders.forEach(function(o){
-    let items = o.items || [];
-    if (typeof items === 'string') { try { items = JSON.parse(items); } catch(e){ items = []; } }
-    items.forEach(function(it){
-      const qty = Number(it.qty) || 0;
-      const mrp = Number(it.mrp || it.max_retail_price || 0);
-      const price = Number(it.price || it.sale_price || it.unit_price || 0);
-      if (mrp > price && qty) saved += (mrp - price) * qty;
-    });
-  });
-  if (savedEl) savedEl.textContent = '₹' + Math.round(saved).toLocaleString('en-IN');
-}
