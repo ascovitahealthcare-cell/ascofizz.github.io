@@ -6717,6 +6717,345 @@ button, [role="button"] {
 @media (prefers-reduced-motion: reduce) {
   .pm-track { animation: none !important; }
 }
+/* ══════════════════════════════════════════════════════════════════════
+   OZYLIX — CONVERSION ENHANCEMENT LAYER (added Aug 2026)
+   Premium hero slider · offer reminder · Vita Points micro-card ·
+   centralized popup manager · Mix & Match UI · educational galleries.
+   Style: subtle 3D depth, soft shadows, smooth motion. Never spammy.
+   ══════════════════════════════════════════════════════════════════════ */
+
+/* ── 1. PREMIUM HERO SLIDER — 16:9 desktop, 1:1 square mobile ────── */
+.feature-hero {
+  position: relative; width: 100%; overflow: hidden;
+  margin-top: 18px; border-radius: var(--r-xl, 22px);
+  box-shadow: var(--neo-3, 0 10px 24px -8px rgba(29,35,32,.25));
+}
+.feature-hero-inner { position: relative; }
+.feature-hero-track { display: flex; transition: transform .55s cubic-bezier(.22,.61,.36,1); will-change: transform; }
+.feature-hero-slide {
+  flex: 0 0 100%; display: block; position: relative;
+  aspect-ratio: 16 / 9; background: linear-gradient(135deg, var(--indigo), var(--green));
+  overflow: hidden;
+}
+.feature-hero-slide img, .feature-hero-slide .fh-image {
+  position: absolute; inset: 0; width: 100%; height: 100%;
+  object-fit: cover; object-position: center;
+}
+.feature-hero-overlay {
+  position: absolute; inset: 0;
+  background: linear-gradient(90deg, rgba(29,35,32,.62) 0%, rgba(29,35,32,.28) 55%, rgba(29,35,32,0) 100%);
+  display: flex; align-items: center;
+}
+.feature-hero-caption { color: #fff; padding: 0 clamp(18px, 4vw, 46px); max-width: 620px; }
+.feature-hero-caption .fh-kicker {
+  display: inline-block; font-size: .7rem; letter-spacing: .14em; text-transform: uppercase;
+  background: rgba(255,255,255,.14); backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px);
+  border: 1px solid rgba(255,255,255,.28); border-radius: 999px;
+  padding: 4px 12px; margin-bottom: 10px; font-weight: 600;
+}
+.feature-hero-caption h3 {
+  font-family: var(--font-display, 'Jost', sans-serif);
+  font-weight: 600; font-size: clamp(1.05rem, 2.6vw, 1.75rem); line-height: 1.25; margin: 0 0 8px;
+}
+.feature-hero-caption p { font-size: clamp(.78rem, 1.6vw, .95rem); opacity: .92; margin: 0 0 14px; line-height: 1.5; }
+.feature-hero-caption .fh-cta {
+  display: inline-flex; align-items: center; gap: 8px;
+  background: #fff; color: var(--ink, #1D2320); font-weight: 700; font-size: .82rem;
+  border-radius: 999px; padding: 9px 18px; cursor: pointer; border: 0;
+  box-shadow: 0 4px 14px rgba(0,0,0,.22); transition: transform .2s ease, box-shadow .2s ease;
+}
+.feature-hero-caption .fh-cta:hover { transform: translateY(-1px) scale(1.02); box-shadow: 0 7px 18px rgba(0,0,0,.28); }
+.feature-hero-dots { position: absolute; left: 0; right: 0; bottom: 10px; display: flex; justify-content: center; gap: 7px; }
+.feature-hero-dot {
+  width: 7px; height: 7px; border-radius: 50%; border: 0; padding: 0; cursor: pointer;
+  background: rgba(255,255,255,.5); box-shadow: 0 1px 3px rgba(0,0,0,.35); transition: width .25s, background .25s;
+}
+.feature-hero-dot.active { width: 20px; border-radius: 4px; background: #fff; }
+.feature-hero-arrow {
+  position: absolute; top: 50%; transform: translateY(-50%); z-index: 3;
+  width: 34px; height: 34px; border: 0; border-radius: 50%; cursor: pointer;
+  background: rgba(255,255,255,.85); color: #1c2b21; font-size: 1.2rem; line-height: 1;
+  display: flex; align-items: center; justify-content: center;
+  box-shadow: 0 2px 8px rgba(0,0,0,.22); transition: transform .18s ease;
+}
+.feature-hero-arrow:hover { transform: translateY(-50%) scale(1.06); }
+.feature-hero-prev { left: 12px; } .feature-hero-next { right: 12px; }
+.feature-hero[data-live="no"] { display: none; }
+@media (prefers-reduced-motion: reduce) { .feature-hero-track { transition: none; } }
+@media (max-width: 820px) {
+  /* Square creative on phones — no tall hero, no wasted vertical space. */
+  .feature-hero-slide { aspect-ratio: 1 / 1; }
+  .feature-hero-overlay {
+    background: linear-gradient(0deg, rgba(29,35,32,.78) 0%, rgba(29,35,32,.35) 45%, rgba(29,35,32,0) 100%);
+    align-items: flex-end;
+  }
+  .feature-hero-caption { padding-bottom: 26px; text-align: center; max-width: 100%; }
+  .feature-hero-arrow { display: none; }
+}
+
+/* ── 2. OFFER REMINDER — small 3D micro-card near hero ───────────── */
+.offer-reminder {
+  position: relative; z-index: 4;
+  margin: -14px auto 0; width: min(96%, 560px);
+  background: var(--face, #fff);
+  border: 1px solid rgba(125,98,89,.18);
+  border-radius: 16px;
+  padding: 12px 44px 12px 16px;
+  display: flex; align-items: center; gap: 12px;
+  box-shadow: 0 8px 22px -8px rgba(29,35,32,.3), 0 2px 6px rgba(29,35,32,.12);
+  transform: perspective(600px) rotateX(1.2deg) translateY(0);
+  animation: or-in .5s cubic-bezier(.22,.61,.36,1) both;
+  animation-delay: .8s;
+}
+.offer-reminder .or-offer { font-size: .84rem; line-height: 1.45; color: var(--t-mid, #3d4a44); }
+.offer-reminder .or-offer b { color: var(--green, #4d6a4e); }
+.offer-reminder .or-cta {
+  margin-left: auto; flex: 0 0 auto; white-space: nowrap;
+  background: var(--green, #4d6a4e); color: #fff; border: 0; border-radius: 999px;
+  padding: 7px 15px; font-size: .76rem; font-weight: 700; cursor: pointer;
+  box-shadow: 0 3px 10px rgba(77,106,78,.35); transition: transform .18s ease;
+}
+.offer-reminder .or-cta:hover { transform: translateY(-1px) scale(1.03); }
+.offer-reminder .or-dismiss {
+  position: absolute; top: 8px; right: 10px;
+  width: 22px; height: 22px; border: 0; border-radius: 50%; padding: 0;
+  background: var(--paper, #FBF3E8); color: var(--gray); font-size: .75rem; line-height: 22px;
+  cursor: pointer; display: flex; align-items: center; justify-content: center;
+}
+.offer-reminder.is-exit { animation: or-out .35s cubic-bezier(.22,.61,.36,1) both; }
+@keyframes or-in  { from { opacity: 0; transform: perspective(600px) rotateX(2deg) translateY(-8px); } to { opacity: 1; transform: perspective(600px) rotateX(1.2deg) translateY(0); } }
+@keyframes or-out { to   { opacity: 0; transform: perspective(600px) rotateX(3deg) translateY(10px); max-height: 0; margin: 0 auto; padding: 0 44px 0 16px; overflow: hidden; } }
+@media (max-width: 640px) { .offer-reminder { margin: -10px auto 0; } .offer-reminder .or-cta { display: none; } }
+@media (prefers-reduced-motion: reduce) { .offer-reminder { animation: none; transform: none; } }
+
+/* ── 3. VITA POINTS MICRO-CARD ────────────────────────────────────── */
+.vita-micro {
+  margin: 16px auto 0; width: min(96%, 640px);
+  background: linear-gradient(120deg, var(--indigo) 0%, var(--green) 110%);
+  border-radius: 16px; padding: 14px 18px; color: #fff;
+  display: flex; align-items: center; gap: 13px; cursor: pointer;
+  box-shadow: 0 10px 26px -10px rgba(84,113,119,.55), 0 2px 8px rgba(29,35,32,.14);
+  transform: perspective(700px) rotateX(1deg);
+  transition: transform .25s ease, box-shadow .25s ease;
+  animation: vm-float 6s ease-in-out infinite;
+}
+.vita-micro:hover { transform: perspective(700px) rotateX(0) translateY(-2px); box-shadow: 0 14px 32px -10px rgba(84,113,119,.6); }
+.vita-micro .vm-chip {
+  flex: 0 0 auto; width: 44px; height: 44px; border-radius: 12px;
+  background: rgba(255,255,255,.16); backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px);
+  border: 1px solid rgba(255,255,255,.3);
+  display: flex; align-items: center; justify-content: center; font-size: 1.25rem;
+}
+.vita-micro .vm-copy { font-size: .82rem; line-height: 1.4; }
+.vita-micro .vm-copy b { font-weight: 700; }
+.vita-micro .vm-arrow { margin-left: auto; opacity: .85; font-size: .9rem; }
+@keyframes vm-float {
+  0%, 100% { transform: perspective(700px) rotateX(1deg) translateY(0); }
+  50%      { transform: perspective(700px) rotateX(0deg) translateY(-3px); }
+}
+@media (prefers-reduced-motion: reduce) { .vita-micro { animation: none; transform: none; } }
+@media (max-width: 640px) { .vita-micro { margin: 12px auto 0; } }
+
+/* ── 4. CENTRALIZED POPUP MANAGER — one 3D micro-card at a time ─── */
+#ozylxNotify {
+  position: fixed; z-index: 9980; pointer-events: none;
+  inset: 0; overflow: visible;
+}
+.ozylx-notify-card {
+  pointer-events: auto; position: absolute;
+  width: min(330px, calc(100vw - 32px));
+  background: var(--face, #fff);
+  border: 1px solid rgba(125,98,89,.18);
+  border-radius: 18px; padding: 13px 40px 13px 15px;
+  box-shadow: 0 14px 34px -12px rgba(29,35,32,.38), 0 4px 10px rgba(29,35,32,.12);
+  transform: perspective(640px) rotateX(2deg) rotateY(-1.4deg) translateY(6px);
+  animation: nz-in .45s cubic-bezier(.22,.61,.36,1) both;
+  display: flex; align-items: flex-start; gap: 10px;
+}
+.ozylx-notify-card[data-corner="bottom-left"]  { bottom: 22px; left: 16px; }
+.ozylx-notify-card[data-corner="bottom-right"] { bottom: 22px; right: 16px; }
+.ozylx-notify-card.is-exit { animation: nz-out .35s cubic-bezier(.22,.61,.36,1) both; }
+.ozylx-notify-card .nzn-ico { font-size: 1.15rem; line-height: 1.6; }
+.ozylx-notify-card .nzn-txt { font-size: .8rem; line-height: 1.5; color: var(--t-mid, #3d4a44); }
+.ozylx-notify-card .nzn-txt b { color: var(--green, #4d6a4e); }
+.ozylx-notify-card .nzn-btn {
+  display: inline-block; margin-top: 7px;
+  background: var(--green, #4d6a4e); color: #fff; border: 0; border-radius: 999px;
+  padding: 6px 13px; font-size: .72rem; font-weight: 700; cursor: pointer;
+  box-shadow: 0 3px 9px rgba(77,106,78,.3);
+}
+.ozylx-notify-card .nzn-dismiss {
+  position: absolute; top: 7px; right: 9px;
+  width: 21px; height: 21px; border: 0; border-radius: 50%; padding: 0;
+  background: var(--paper, #FBF3E8); color: var(--gray); font-size: .72rem; line-height: 21px;
+  cursor: pointer; display: flex; align-items: center; justify-content: center;
+}
+/* Touch target usable (>= 44px effective area around the dismiss), and the
+   card itself sits clear of any primary CTA; corners are chosen per page. */
+@keyframes nz-in  { from { opacity: 0; transform: perspective(640px) rotateX(2deg) rotateY(-1.4deg) translateY(14px); } to { opacity: 1; transform: perspective(640px) rotateX(2deg) rotateY(-1.4deg) translateY(0); } }
+@keyframes nz-out { to   { opacity: 0; transform: perspective(640px) rotateX(4deg) translateY(10px) scale(.96); } }
+/* Checkout must never be interrupted: manager drops cards there. Android:
+   no body lock, no horizontal overflow, no oversized sticky elements. */
+@media (max-width: 640px) {
+  .ozylx-notify-card { bottom: 14px; left: 12px; right: auto; width: calc(100vw - 24px); max-width: 330px; }
+  .ozylx-notify-card[data-corner="bottom-right"] { right: 12px; left: auto; }
+}
+@media (prefers-reduced-motion: reduce) { .ozylx-notify-card { animation: none; transform: none; } }
+
+/* ── 5. MIX & MATCH UI ────────────────────────────────────────────── */
+.mm-shop-banner {
+  position: relative; overflow: hidden;
+  background: linear-gradient(120deg, var(--green) 0%, var(--indigo) 115%);
+  border-radius: 18px; padding: 22px 24px 22px 22px; color: #fff;
+  box-shadow: 0 12px 28px -12px rgba(29,35,32,.4);
+  transform: perspective(700px) rotateX(1deg);
+  margin-bottom: 20px;
+}
+.mm-shop-banner .mm-wrap { display: flex; align-items: center; gap: 16px; flex-wrap: wrap; }
+.mm-shop-banner .mm-visual {
+  flex: 0 0 auto; width: min(210px, 38vw); aspect-ratio: 1 / 1; border-radius: 14px;
+  overflow: hidden; position: relative; background: rgba(255,255,255,.08);
+  border: 1px solid rgba(255,255,255,.2);
+}
+.mm-shop-banner .mm-visual img { width: 100%; height: 100%; object-fit: cover; }
+.mm-shop-banner h3 {
+  font-family: var(--font-display, 'Jost', sans-serif); font-weight: 600;
+  font-size: clamp(1.05rem, 2.4vw, 1.35rem); line-height: 1.3; margin: 0 0 6px;
+}
+.mm-shop-banner p { margin: 0 0 12px; opacity: .92; font-size: .84rem; line-height: 1.5; max-width: 520px; }
+.mm-shop-banner .mm-cta {
+  display: inline-flex; align-items: center; gap: 8px;
+  background: #fff; color: var(--ink, #1D2320); border: 0; border-radius: 999px;
+  padding: 10px 20px; font-size: .84rem; font-weight: 700; cursor: pointer;
+  box-shadow: 0 5px 16px rgba(0,0,0,.22); transition: transform .2s ease;
+}
+.mm-shop-banner .mm-cta:hover { transform: translateY(-1px) scale(1.02); }
+@media (max-width: 820px) {
+  .mm-shop-banner { transform: none; padding: 16px; }
+  .mm-shop-banner .mm-visual { width: min(120px, 34vw); }
+}
+
+/* Product-page Mix & Match progress pill */
+.mm-progress-wrap { display: flex; align-items: center; gap: 9px; margin: 12px 0 0; }
+.mm-progress { display: flex; gap: 5px; }
+.mm-progress .mm-step {
+  width: 13px; height: 13px; border-radius: 50%;
+  background: var(--paper, #FBF3E8); box-shadow: inset 0 1px 3px rgba(29,35,32,.28);
+  transition: background .3s ease, transform .3s ease;
+}
+.mm-progress .mm-step.done { background: var(--success, #4d8a4e); box-shadow: inset 0 0 0 2px rgba(255,255,255,.6); }
+.mm-progress-label { font-size: .74rem; font-weight: 600; color: var(--t-mid, #3d4a44); }
+.mm-progress-wrap.is-unlocked .mm-progress-label { color: var(--success, #4d8a4e); }
+.mm-progress-wrap.is-unlocked .mm-step { background: var(--success, #4d8a4e); }
+
+/* ── 6. EDUCATIONAL GALLERIES — product page ──────────────────────── */
+.edu-gallery { margin-top: 44px; }
+.edu-gallery h2 {
+  font-family: var(--font-display, 'Jost', sans-serif);
+  font-size: 1.55rem; margin: 0 0 6px;
+}
+.edu-gallery .edu-sub { color: var(--gray); font-size: .86rem; margin: 0 0 20px; }
+.edu-tabs { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 18px; }
+.edu-tab {
+  background: var(--paper, #FBF3E8); border: 1px solid rgba(125,98,89,.22);
+  border-radius: 999px; padding: 8px 16px; font-size: .78rem; font-weight: 600;
+  color: var(--t-mid, #3d4a44); cursor: pointer; transition: all .2s ease;
+}
+.edu-tab.active { background: var(--green, #4d6a4e); color: #fff; border-color: var(--green, #4d6a4e); box-shadow: 0 4px 12px rgba(77,106,78,.3); }
+.edu-panel { display: none; animation: fz-in .4s var(--rise, ease-out) both; }
+.edu-panel.active { display: block; }
+.edu-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 14px; }
+.edu-card {
+  position: relative; border-radius: 14px; overflow: hidden;
+  background: var(--face-warm, #FFFBF3); border: 1px solid rgba(125,98,89,.16);
+  box-shadow: 0 6px 18px -10px rgba(29,35,32,.3);
+  display: flex; flex-direction: column;
+}
+.edu-card-media {
+  position: relative; width: 100%; aspect-ratio: 1 / 1;
+  background: linear-gradient(135deg, var(--indigo), var(--green));
+  display: flex; align-items: center; justify-content: center; overflow: hidden;
+}
+.edu-card-media img { width: 100%; height: 100%; object-fit: cover; }
+.edu-card-media .edu-ico { font-size: 2.1rem; filter: drop-shadow(0 2px 6px rgba(0,0,0,.25)); }
+.edu-card-body { padding: 12px 14px 14px; }
+.edu-card-body h4 { margin: 0 0 5px; font-size: .86rem; line-height: 1.3; }
+.edu-card-body p { margin: 0; font-size: .76rem; line-height: 1.55; color: var(--gray); }
+.edu-card .edu-awaiting {
+  position: absolute; inset: 0; display: flex; align-items: center; justify-content: center;
+  background: rgba(255,255,255,.08); color: rgba(255,255,255,.85); font-size: .7rem;
+  text-align: center; padding: 10px;
+}
+/* Verified fact blocks (no fabricated experts or claims) */
+.edu-fact {
+  background: var(--face-warm, #FFFBF3); border: 1px solid rgba(125,98,89,.16);
+  border-radius: 12px; padding: 14px 16px; margin-bottom: 12px;
+  font-size: .84rem; line-height: 1.6; color: var(--t-mid, #3d4a44);
+  box-shadow: 0 5px 14px -10px rgba(29,35,32,.3);
+}
+.edu-fact b { color: var(--green, #4d6a4e); }
+.edu-note {
+  margin-top: 14px; font-size: .74rem; color: var(--gray); line-height: 1.55;
+  border-top: 1px dashed rgba(125,98,89,.3); padding-top: 10px;
+}
+@media (max-width: 640px) { .edu-grid { grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 10px; } }
+
+/* ── 7. SHOP BANNER SLOTS ─────────────────────────────────────────── */
+.shop-banner-slot {
+  position: relative; overflow: hidden; border-radius: 18px;
+  background: linear-gradient(135deg, var(--indigo), var(--green));
+  box-shadow: 0 10px 24px -12px rgba(29,35,32,.35);
+  aspect-ratio: 3 / 1; margin-bottom: 20px;
+}
+.shop-banner-slot img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+.shop-banner-slot .sb-overlay {
+  position: absolute; inset: 0;
+  background: linear-gradient(90deg, rgba(29,35,32,.58) 0%, rgba(29,35,32,0) 100%);
+  display: flex; align-items: center; padding: 0 26px;
+}
+.shop-banner-slot .sb-copy { color: #fff; }
+.shop-banner-slot h3 { font-family: var(--font-display, 'Jost', sans-serif); font-weight: 600; font-size: clamp(1rem, 2.2vw, 1.4rem); margin: 0 0 4px; }
+.shop-banner-slot p { margin: 0; font-size: .82rem; opacity: .95; }
+.shop-banner-slot[data-no-img="yes"] .sb-overlay { background: linear-gradient(135deg, rgba(84,113,119,.92), rgba(125,98,89,.92)); align-items: center; justify-content: center; text-align: center; }
+.shop-banner-slot[data-no-img="yes"] .sb-copy { max-width: 640px; padding: 0 14px; }
+@media (max-width: 820px) { .shop-banner-slot { aspect-ratio: auto; min-height: 160px; } }
+
+/* ── 8. SHOP FEATURED CAMPAIGN (AVC / Glutathione) ────────────────── */
+.shop-campaign {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 22px;
+}
+.shop-campaign-card {
+  position: relative; border-radius: 16px; overflow: hidden;
+  background: linear-gradient(135deg, var(--green), var(--indigo));
+  box-shadow: 0 8px 20px -10px rgba(29,35,32,.35);
+  cursor: pointer; padding: 18px; color: #fff; min-height: 132px;
+  display: flex; flex-direction: column; justify-content: space-between;
+  transition: transform .22s ease, box-shadow .22s ease;
+}
+.shop-campaign-card:hover { transform: translateY(-2px) scale(1.01); box-shadow: 0 12px 26px -10px rgba(29,35,32,.45); }
+.shop-campaign-card .sc-label { font-size: .7rem; letter-spacing: .12em; text-transform: uppercase; opacity: .85; }
+.shop-campaign-card h3 { font-family: var(--font-display, 'Jost', sans-serif); font-weight: 600; font-size: 1.15rem; margin: 6px 0 0; line-height: 1.25; }
+.shop-campaign-card .sc-cta { align-self: flex-start; font-size: .76rem; font-weight: 700; background: rgba(255,255,255,.16); border: 1px solid rgba(255,255,255,.35); border-radius: 999px; padding: 6px 14px; margin-top: 10px; }
+@media (max-width: 700px) { .shop-campaign { grid-template-columns: 1fr; } }
+
+/* ── 9. CART / CHECKOUT MM LINE + savings reminder microcopy ──────── */
+.mm-line {
+  background: var(--green-wash, #eef3ea); border: 1px solid rgba(77,138,78,.25);
+  border-radius: 12px; padding: 10px 13px; font-size: .78rem; line-height: 1.5;
+  color: var(--t-mid, #3d4a44); margin: 8px 0;
+}
+.mm-line b { color: var(--success, #4d8a4e); }
+.mm-line.mm-unlocked { background: var(--gold-pale, #fbf3d6); border-color: rgba(196,163,58,.35); }
+
+/* ── 10. MICROCOPY GENTLE LINES ───────────────────────────────────── */
+.mc-line { font-size: .8rem; color: var(--t-mid, #3d4a44); font-style: italic; opacity: .85; }
+
+/* Card-level: real Vita Points hint (source of truth: VITA engine) */
+.vp-hint {
+  margin-top: 6px; font-size: .68rem; font-weight: 600; color: var(--indigo);
+  background: var(--paper, #FBF3E8); display: inline-block;
+  border-radius: 999px; padding: 2px 9px;
+}
 </style>
 </head>
 <!-- Promotional Media Config -->
@@ -7853,6 +8192,45 @@ setInterval(function() { syncAppCartBadge(); syncAppWishBadge(); }, 2000);
     </div>
   </section>
 
+
+  <!-- ══════════════════════════════════════════════════════════════════════
+       OZYLIX ENHANCEMENT (Aug 2026): PREMIUM FEATURE HERO + OFFER REMINDER
+       + VITA POINTS MICRO-CARD.
+       · Feature hero: premium 16:9 (desktop) / 1:1 (mobile) image slider
+         for AVC + Glutathione campaign creatives. Slide images come from
+         FEATURE_HERO_SLIDES (in this file) — paste uploaded creative URLs
+         there, or upload via admin Site Images with key "feature_hero.N".
+       · Offer reminder: shows only a REAL live offer (from BANNER_SLIDES),
+         once per session, dismissible, non-blocking.
+       · Vita Points micro-card: links to the existing VitaPoints section —
+         real engine (VITA_EARN_PER_RUPEE / VITA_REDEEM_PER_RUPEE).
+       ══════════════════════════════════════════════════════════════════════ -->
+  <!-- OFFER REMINDER — session-controlled, dismissible, near hero -->
+  <div id="offerReminder" style="display:none" aria-live="polite">
+    <div class="offer-reminder">
+      <span aria-hidden="true" style="font-size:1.3rem;line-height:1.4">&#127873;</span>
+      <span class="or-offer" id="offerReminderText"></span>
+      <button class="or-cta" onclick="if(typeof showPage==='function')showPage('shop')">Shop the offer</button>
+      <button class="or-dismiss" onclick="dismissOfferReminder()" aria-label="Dismiss offer reminder">&times;</button>
+    </div>
+  </div>
+  <!-- PREMIUM FEATURE HERO — 16:9 desktop, 1:1 mobile -->
+  <div class="container">
+  <section class="feature-hero" id="featureHero" data-live="no" aria-label="Featured wellness" aria-roledescription="carousel">
+    <div class="feature-hero-inner">
+      <button class="feature-hero-arrow feature-hero-prev" id="fhPrev" aria-label="Previous">&#8249;</button>
+      <div class="feature-hero-track" id="fhTrack"></div>
+      <button class="feature-hero-arrow feature-hero-next" id="fhNext" aria-label="Next">&#8250;</button>
+      <div class="feature-hero-dots" id="fhDots"></div>
+    </div>
+  </section>
+  <!-- VITA POINTS MICRO-CARD — real engine, links to full section -->
+  <div class="vita-micro" onclick="if(typeof showPage==='function')showPage('home');setTimeout(()=>{document.getElementById('vitapoints-home')?.scrollIntoView({behavior:'smooth',block:'center'});},60)">
+    <div class="vm-chip" aria-hidden="true">&#128142;</div>
+    <div class="vm-copy"><b>Shop. Earn. Redeem.</b> &#10024; Every Ozylix order earns Vita Points — <span id="vitaMicroEarn">1 point per &#8377;1</span>, and <span id="vitaMicroValue">150 points = &#8377;1 off</span>.</div> <script>(function(){try{var e=typeof VITA_EARN_PER_RUPEE!=='undefined'?VITA_EARN_PER_RUPEE:1,v=typeof VITA_REDEEM_PER_RUPEE!=='undefined'?VITA_REDEEM_PER_RUPEE:150;var a=document.getElementById("vitaMicroEarn"),b=document.getElementById("vitaMicroValue");if(a)a.textContent=e+' point'+(e>1?"s":"")+" per ₹1";if(b)b.textContent=v+" points = ₹1 off";}catch(x){}})()</script>
+    <div class="vm-arrow" aria-hidden="true">&#8594;</div>
+  </div>
+  </div>
   <!-- ══ HOME PROMO CAROUSEL — peek-style, multi-card ══ -->
   <div class="promo-hero-wrap" id="promoHeroWrap">
     <button class="promo-nav-arrow promo-nav-prev" onclick="promoCarousel(-1)" aria-label="Previous offer">&#8249;</button>
@@ -8029,6 +8407,13 @@ setInterval(function() { syncAppCartBadge(); syncAppWishBadge(); }, 2000);
       });
       if(map['about.hero_background']) document.documentElement.style.setProperty('--about-hero-bg', "url('"+map['about.hero_background']+"')");
       if(map['b2b.hero_background']) document.documentElement.style.setProperty('--b2b-hero-bg', "url('"+map['b2b.hero_background']+"')");
+      // Aug 2026: reveal shop banners when their upload exists
+      ['shop.banner.1','shop.banner.2','shop.banner.mix_match'].forEach(function(k){
+        if(map[k]){
+          var el=document.querySelector('[data-media-key="'+k+'"]');
+          if(el){el.style.display='';el.onload=function(){var s=el.closest('[data-no-img]');if(s)s.setAttribute('data-no-img','no');};if(el.complete){var s=el.closest('[data-no-img]');if(s)s.setAttribute('data-no-img','no');}}
+        }
+      });
     }
     function loadSiteMedia(){
       var base = (typeof API_BASE !== 'undefined') ? API_BASE : 'https://ascovitahealthcare-cell-github-io.onrender.com';
@@ -8297,6 +8682,8 @@ setInterval(function() { syncAppCartBadge(); syncAppWishBadge(); }, 2000);
 
     // Re-trigger scroll reveal for new cards
     if (typeof tagSections === 'function') setTimeout(tagSections, 100);
+    // Aug 2026 enhancement — premium feature hero (image slots)
+    if (typeof initFeatureHero === 'function') setTimeout(initFeatureHero, 60);
   }
 
   // ══════════════════════════════════════════════════════════════════════
@@ -8312,7 +8699,172 @@ setInterval(function() { syncAppCartBadge(); syncAppWishBadge(); }, 2000);
   //
   // `link` is optional — where the banner sends the customer.
   // `mobile` is optional — falls back to `src` if you only make one image.
-  var BANNER_SLIDES = [
+  // ══════════════════════════════════════════════════════════════════════
+// FEATURE HERO — premium product campaign slider (Aug 2026)
+// 16:9 desktop / 1:1 square mobile. Slides are IMAGE SLOTS for creatives
+// the owner uploads (home hero slot #1). Real product images only —
+// `src` must be an uploaded creative using real Ozylix packaging/logo.
+// Empty src = slide skipped; all empty = section hidden.
+//
+// ▼▼▼ PASTE YOUR UPLOADED CREATIVES HERE ▼▼▼
+// desktop: 1600x900 (16:9), mobile: 1000x1000 (1:1) if `mobile` given
+// keep each file under ~200 KB, WebP. `product` links the CTA.
+// `offer` shows the CURRENT active offer text verbatim (never altered)
+// when set — for example: "20% OFF on every pack".
+var FEATURE_HERO_SLIDES = [
+  {
+    // Slot 1 — Glutathione campaign creative
+    src: '', mobile: '',
+    tag: 'Glow, from within',
+    headline: 'Glutathione — Your Daily Glow Ritual',
+    body: 'Effervescent tablets, FSSAI approved & made in India.',
+    cta: 'Shop Glutathione',
+    product: 'glutathione-effervescent-tablet'
+  },
+  {
+    // Slot 2 — Apple Cider Vinegar campaign creative
+    src: '', mobile: '',
+    tag: 'Morning ritual',
+    headline: 'ACV+ — Wake Up Your Metabolism',
+    body: 'A simple fizzy tablet for your morning routine.',
+    cta: 'Shop Apple Cider Vinegar',
+    product: 'apple-cider-vinegar-effervescent-tablet'
+  },
+  {
+    // Slot 3 — Wellness range creative (upload when ready)
+    src: '', mobile: '',
+    tag: 'Effervescent wellness',
+    headline: 'Wellness That Dissolves Into Your Day',
+    body: 'The whole Ozylix range, from your Anand facility to your glass.',
+    cta: 'Shop All Products',
+    product: 'shop'
+  }
+];
+// ▲▲▲ END OF WHAT YOU EDIT ▲▲▲
+
+// ── Feature hero engine ────────────────────────────────────────────
+(function () {
+  var fhIdx = 0, fhTimer = null;
+  function reducedMotion() {
+    return window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  }
+  function fhGo(i) {
+    var wrap = document.getElementById('featureHero');
+    var track = document.getElementById('fhTrack');
+    var slides = track ? track.children.length : 0;
+    if (!wrap || !track || !slides) return;
+    if (i < 0) i = slides - 1;
+    if (i >= slides) i = 0;
+    fhIdx = i;
+    track.style.transition = reducedMotion() ? 'none' : 'transform .55s cubic-bezier(.22,.61,.36,1)';
+    track.style.transform = 'translateX(-' + (i * 100) + '%)';
+    wrap.querySelectorAll('.feature-hero-dot').forEach(function (d, n) {
+      d.classList.toggle('active', n === i);
+    });
+  }
+  function fhRestart() {
+    clearInterval(fhTimer);
+    fhTimer = setInterval(function () { fhGo(fhIdx + 1); }, 6000);
+  }
+  function escHtml(s) { var d = document.createElement('div'); d.textContent = s || ''; return d.innerHTML; }
+  window.initFeatureHero = function () {
+    var wrap = document.getElementById('featureHero');
+    var track = document.getElementById('fhTrack');
+    if (!wrap || !track) return;
+    var isPhone = window.matchMedia('(max-width: 820px)').matches;
+    var slides = (window.FEATURE_HERO_SLIDES || []).map(function (s, i) {
+      // Aug 2026: admin Site Images keys "feature_hero.N" fill empty slots
+      if (s && !String((isPhone && s.mobile) ? s.mobile : s.src).trim()) {
+        var k = 'feature_hero.' + i;
+        if (window.__ozylixSiteMedia && window.__ozylixSiteMedia[k]) {
+          s = Object.assign({}, s, { src: window.__ozylixSiteMedia[k] });
+        }
+      }
+      return s;
+    }).filter(function (s) {
+      return s && String((isPhone && s.mobile) ? s.mobile : s.src).trim();
+    });
+    if (!slides.length) return;            // stays display:none via data-live
+    track.innerHTML = slides.map(function (s, i) {
+      var img = (isPhone && s.mobile) ? s.mobile : s.src;
+      return '<div class="feature-hero-slide" style="flex:0 0 100%">' +
+        '<img src="' + escHtml(img) + '" alt="' + escHtml(s.headline || 'Ozylix') + '"' +
+        (i === 0 ? ' fetchpriority="high"' : ' loading="lazy"') + ' decoding="async">' +
+        '<div class="feature-hero-overlay"><div class="feature-hero-caption">' +
+        (s.offer ? '<div class="fh-kicker" style="margin-bottom:8px">' + escHtml(s.offer) + '</div>' : '') +
+        '<span class="fh-kicker">' + escHtml(s.tag || '') + '</span>' +
+        '<h3>' + escHtml(s.headline || '') + '</h3>' +
+        '<p>' + escHtml(s.body || '') + '</p>' +
+        '<button class="fh-cta" onclick="' +
+          (s.product === 'shop' ? "showPage('shop')" :
+           "var pr=PRODUCTS.find(function(x){return slugify(x.name)==='" + slugify(s.product || '').replace(/'/g, "\\'") + "'});if(pr){openProduct(pr.id);}else{showPage('shop');}") +
+          '">&#128722; ' + escHtml(s.cta || 'Shop now') + '</button>' +
+        '</div></div></div>';
+    }).join('');
+    document.getElementById('fhDots').innerHTML = slides.map(function (_, i) {
+      return '<button class="feature-hero-dot' + (i === 0 ? ' active' : '') +
+             '" data-i="' + i + '" aria-label="Slide ' + (i + 1) + '"></button>';
+    }).join('');
+    wrap.setAttribute('data-live', 'yes');
+    fhGo(0);
+    if (slides.length > 1) {
+      document.getElementById('fhPrev').onclick = function () { fhGo(fhIdx - 1); fhRestart(); };
+      document.getElementById('fhNext').onclick = function () { fhGo(fhIdx + 1); fhRestart(); };
+      document.getElementById('fhDots').addEventListener('click', function (e) {
+        var d = e.target.closest('.feature-hero-dot');
+        if (d) { fhGo(+d.dataset.i); fhRestart(); }
+      });
+      var x0 = null, y0 = null;
+      wrap.addEventListener('touchstart', function (e) { x0 = e.touches[0].clientX; y0 = e.touches[0].clientY; }, { passive: true });
+      wrap.addEventListener('touchend', function (e) {
+        if (x0 == null) return;
+        var dx = e.changedTouches[0].clientX - x0, dy = e.changedTouches[0].clientY - y0;
+        if (Math.abs(dx) > 40 && Math.abs(dx) > Math.abs(dy)) { fhGo(fhIdx + (dx < 0 ? 1 : -1)); fhRestart(); }
+        x0 = y0 = null;
+      }, { passive: true });
+      fhRestart();
+    } else {
+      ['fhPrev', 'fhNext'].forEach(function (id) { var el = document.getElementById(id); if (el) el.style.display = 'none'; });
+    }
+  };
+})();
+
+// ── OFFER REMINDER — real offer only, once per session ─────────────
+// Reads the FIRST live offer banner (BANNER_SLIDES — the source of
+// truth for current offers) and surfaces its alt text as a small
+// dismissible micro-card. Nothing is invented; if no offer banner is
+// live, the reminder never appears.
+window.dismissOfferReminder = function () {
+  var box = document.getElementById('offerReminder');
+  var card = box && box.querySelector('.offer-reminder');
+  if (card) card.classList.add('is-exit');
+  try { sessionStorage.setItem('ozylix.offerDismissed', '1'); } catch (e) {}
+  setTimeout(function () { if (box) box.style.display = 'none'; }, 380);
+};
+(function () {
+  function showOfferReminder() {
+    var box = document.getElementById('offerReminder');
+    var label = document.getElementById('offerReminderText');
+    if (!box || !label) return;
+    try { if (sessionStorage.getItem('ozylix.offerDismissed')) return; } catch (e) {}
+    // Source of truth: the live offer banners (real offers only)
+    var slides = (typeof BANNER_SLIDES !== 'undefined' ? BANNER_SLIDES : []).filter(function (s) {
+      return s && s.src && String(s.src).trim() && s.alt;
+    });
+    if (!slides.length) return;              // no live offer -> stay hidden
+    var offer = String(slides[0].alt).replace(/\.?\s*(Ozylix|ASCOVITA)\s*/i, ' Ozylix ');
+    offer = offer.replace(/\s*:\s*[^.]+\.?\s*$/, '.');
+    label.textContent = offer;
+    box.style.display = 'block';
+  }
+  function tryShow() {
+    if (document.getElementById('offerReminder')) showOfferReminder();
+    else setTimeout(tryShow, 300);
+  }
+  tryShow();
+})();
+
+var BANNER_SLIDES = [
     { src: 'assets/banners/glutathione-lg.webp', mobile: 'assets/banners/glutathione-sm.webp',
       alt: 'Buy 2 Get 2 Free — Glow Like Never Before. Ozylix Glutathione Effervescent Tablets: glow, detox, defense.',
       link: '/product/glutathione-effervescent-tablet' },
@@ -8828,6 +9380,47 @@ setInterval(function() { syncAppCartBadge(); syncAppWishBadge(); }, 2000);
         <p style="color:var(--gray);font-size:.86rem">Premium organic vitamins &amp; supplements from Ozylix</p>
       </div>
     </div>
+    <!-- Aug 2026 enhancement: Mix & Match banner + campaign slots.
+         Banners 1-2 + mix_match visual: upload via admin Site Images with
+         keys "shop.banner.1" / "shop.banner.2" (3:1) and
+         "shop.banner.mix_match" (1:1). Until an image is uploaded,
+         tasteful text cards are shown (no layout shift). -->
+    <div class="mm-shop-banner" id="mmShopBanner">
+      <div class="mm-wrap">
+        <div class="mm-visual">
+          <img src="" alt="Buy Any 3, Get 1 Free — Mix &amp; Match" id="mmShopImg" data-media-key="shop.banner.mix_match" loading="lazy" style="display:none" onerror="this.style.display='none'">
+        </div>
+        <div>
+          <h3>&#127873; Buy Any 3 Eligible Products &amp; Get the Lowest-Priced One FREE</h3>
+          <p>Mix &amp; Match — build your own bundle of 4 across Apple Cider Vinegar, Glutathione, Moringa, Spirulina and more. The cheapest item in your set of 4 becomes completely free. Calculated and validated securely on our server at every cart change and at checkout. Never stacks with other promotions.</p>
+          <button class="mm-cta" onclick="document.getElementById('shopGrid')?.scrollIntoView({behavior:'smooth',block:'start'})">&#128722; Build Your Mix &amp; Match</button>
+        </div>
+      </div>
+    </div>
+    <div class="shop-banner-slot" id="shopBannerSlot1" data-no-img="yes">
+      <img src="" alt="" id="shopBannerImg1" data-media-key="shop.banner.1" loading="lazy" style="display:none" onerror="this.style.display='none'">
+      <div class="sb-overlay"><div class="sb-copy">
+        <h3>&#10024; Wellness, made in India</h3>
+        <p>FSSAI approved, crafted at our Anand facility</p>
+      </div></div>
+    </div>
+    <div class="shop-banner-slot" id="shopBannerSlot2" data-no-img="yes">
+      <img src="" alt="" id="shopBannerImg2" data-media-key="shop.banner.2" loading="lazy" style="display:none" onerror="this.style.display='none'">
+      <div class="sb-overlay"><div class="sb-copy">
+        <h3>&#128142; Shop. Earn. Redeem.</h3>
+        <p>Vita Points on every delivered order</p>
+      </div></div>
+    </div>
+    <div class="shop-campaign" id="shopCampaign">
+      <div class="shop-campaign-card" onclick="filterCat('skin',document.querySelector('.cpill[data-cat=&quot;skin&quot;]'))">
+        <div><span class="sc-label">Focus product</span><h3>Glutathione — Daily Glow Ritual</h3></div>
+        <span class="sc-cta">Explore &#8594;</span>
+      </div>
+      <div class="shop-campaign-card" onclick="filterCat('weight',document.querySelector('.cpill[data-cat=&quot;weight&quot;]'))">
+        <div><span class="sc-label">Focus product</span><h3>Apple Cider Vinegar — Morning Ritual</h3></div>
+        <span class="sc-cta">Explore &#8594;</span>
+      </div>
+    </div>
     <div class="cat-pills" id="shopPills">
       <button class="cpill active" data-cat="all" onclick="filterCat('all',this)">All</button>
       <button class="cpill" data-cat="bestsellers" onclick="filterCat('bestsellers',this)">Best Sellers</button>
@@ -8916,6 +9509,10 @@ setInterval(function() { syncAppCartBadge(); syncAppWishBadge(); }, 2000);
       <a href="#" onclick="showPage('shop')">Shop</a><span class="bsep">›</span>
       <span id="prodBCName">Product</span>
     </div>
+    <!-- Aug 2026 enhancement: EDUCATIONAL GALLERY — real verified info only.
+         No fabricated experts, claims or research. Image slots: admin Site
+         Images keys `edu.{product-slug}.howto.N` etc. (1:1 square, up to 4). -->
+    <div class="edu-gallery" id="productEduGallery"></div>
     <div class="product-page" id="productDetail"></div>
     <div style="margin-top:56px">
       <h2 style="font-family:var(--font-display);font-size:1.7rem;margin-bottom:22px">You May Also Like</h2>
@@ -9201,6 +9798,26 @@ function renderCheckoutSummary() {
   const ship  = calcShipping(sub - disc);
   const _vita = vitaCheckoutInfo(sub - disc);
   const vitaOff = _vita.rupees;
+  // ── MIX & MATCH (display only) ──────────────────────────────────────
+  // Mirrors mixAndMatchDiscount() in server.js: every 4 units, the cheapest
+  // is free. The SERVER sets the real price; this only lets the cart show
+  // the saving before checkout. Keep the two in step.
+  var mmUnits = [];
+  STORE.cart.forEach(function (it) {
+    var pr = PRODUCTS.find(function (x) { return x.id === it.id; });
+    if (!pr) return;
+    var u = it.tierRate !== undefined ? it.tierRate : (pr.salePrice || pr.price);
+    var q = Math.max(0, Math.trunc(Number(it.qty) || 0));
+    for (var n = 0; n < q; n++) mmUnits.push(u);
+  });
+  mmUnits.sort(function (a, b) { return a - b; });
+  var mmGroups = Math.floor(mmUnits.length / 4);
+  var mmDisc = 0;
+  for (var g = 0; g < mmGroups; g++) mmDisc += mmUnits[g * 4] || 0;
+  var mmOff = Math.max(0, Math.min(mmDisc, sub));
+  var mmNeed = mmGroups > 0 ? 0 : 4 - (mmUnits.length % 4);
+
+
   const total = Math.max(0, sub - disc + ship - vitaOff);
 
   const itemsHtml = STORE.cart.map(item => {
@@ -11134,6 +11751,91 @@ function getProductImg(p) {
   return PRODUCT_FALLBACKS[p.category] || PRODUCT_FALLBACKS['default'];
 }
 
+// ══════════════════════════════════════════════════════════════════════
+// OZYLX NOTIFY — centralized contextual popup manager (Aug 2026)
+// Rules (from the brief, enforced here):
+//   · maximum 1 card at a time            (queue, never stack)
+//   · never covers a primary CTA          (corners: bottom-left/right)
+//   · never interrupts checkout           (suppressed on checkout etc.)
+//   · session-limited                     (max 2 cards per session)
+//   · same notification never repeats     (per-id memory)
+//   · dismiss respected · reduced-motion honored (CSS handles it)
+// Usage: ozylxNotify.show({id, msg, icon, cta, corner, onCta})
+// Page strategy: home = offer/vita, shop = mm/discovery,
+//                product = contextual, cart = savings/MM progress.
+// ══════════════════════════════════════════════════════════════════════
+var ozylxNotify = (function () {
+  var MAX_PER_SESSION = 2;
+  var MIN_GAP_MS = 20000;          // 20 s between cards — never rapid-fire
+  var shownCount = 0, lastAt = 0;
+  var shownIds = {}, queue = [], live = null;
+  // On pages that must never be interrupted, nothing shows.
+  function isTransactionalPage() {
+    return (typeof currentPage === 'string') &&
+      ['checkout', 'thankyou', 'account', 'login'].indexOf(currentPage) > -1;
+  }
+  function removeLive() {
+    if (!live) return;
+    var card = live; live = null;
+    card.classList.add('is-exit');
+    setTimeout(function () { card.remove(); drain(); }, 360);
+  }
+  function drain() {
+    var now = Date.now();
+    if (queue.length && shownCount < MAX_PER_SESSION && (now - lastAt) >= MIN_GAP_MS && !live) {
+      var item = queue.shift();
+      shownIds[item.id] = true;
+      paint(item);
+    }
+  }
+  function paint(item) {
+    var root = document.getElementById('ozylxNotify');
+    if (!root) return;
+    if (root.querySelector('.ozylx-notify-card')) return;   // one at a time
+    var card = document.createElement('div');
+    card.className = 'ozylx-notify-card';
+    card.setAttribute('data-corner', item.corner || 'bottom-left');
+    card.setAttribute('role', 'status');
+    var safeMsg = String(item.msg || '').replace(/</g, '&lt;');
+    var safeCta = item.cta ? String(item.cta).replace(/</g, '&lt;') : '';
+    card.innerHTML =
+      '<span class="nzn-ico" aria-hidden="true">' + String(item.icon || '✨') + '</span>' +
+      '<span class="nzn-txt">' + safeMsg +
+        (safeCta ? '<br><button class="nzn-btn">' + safeCta + '</button>' : '') +
+      '</span>' +
+      '<button class="nzn-dismiss" aria-label="Close">&times;</button>';
+    card.querySelector('.nzn-dismiss').onclick = function () {
+      try { sessionStorage.setItem('ozylix.notifyDismissed.' + item.id, '1'); } catch (e) {}
+      removeLive();
+    };
+    var btn = card.querySelector('.nzn-btn');
+    if (btn) btn.onclick = function () { removeLive(); if (item.onCta) item.onCta(); };
+    root.appendChild(card);
+    live = card;
+    shownCount += 1; lastAt = Date.now();
+    // Auto-dismiss after 8s so the card never sits there forever
+    setTimeout(function () { if (live === card) removeLive(); }, 8000);
+  }
+  function eligible(item) {
+    if (isTransactionalPage()) return false;
+    if (shownCount >= MAX_PER_SESSION) return false;
+    if (shownIds[item.id]) return false;
+    try { if (sessionStorage.getItem('ozylix.notifyDismissed.' + item.id)) return false; } catch (e) {}
+    if ((Date.now() - lastAt) < MIN_GAP_MS) return false;
+    return true;
+  }
+  function schedule(item) {
+    if (eligible(item)) {
+      if (live) { queue.push(item); }
+      else { shownIds[item.id] = true; paint(item); }
+    } else if (shownCount < MAX_PER_SESSION && !shownIds[item.id]) {
+      queue.push(item);   // too soon — the 20s gap drains the queue
+    }
+    // else: exhausted for this session, drop silently.
+  }
+  return { show: schedule, clear: removeLive, get shown() { return shownCount; } };
+})();
+
 // ── HTML escape helper — prevents XSS from backend product data ──
 function esc(s) {
   const d = document.createElement('div');
@@ -12055,6 +12757,33 @@ function showPage(pg) {
   if (pg === 'shop') initShop();
   if (pg === 'cart') {
     renderCart();
+    // Aug 2026: cart strategy — genuine savings / MM progress reminder
+    (function () {
+      try {
+        if (!STORE || !STORE.cart || !STORE.cart.length) return;
+        if (typeof ozylxNotify === 'undefined' || typeof PRODUCTS === 'undefined') return;
+        var mmUnits = [], mmDisc = 0, total = 0;
+        PRODUCTS.forEach(function (pr) {
+          var ci = STORE.cart.find(function (c) { return c.id === pr.id; });
+          if (!ci) return;
+          var tiers = typeof getProductTiers === 'function' ? getProductTiers(pr) : null;
+          var qty = ci.qty || 1;
+          if (tiers) { var ti = typeof currentTierIdx === 'function' ? currentTierIdx(pr, tiers) : -1;
+            if (ti >= 0 && ti < tiers.length) qty = Math.max(1, tiers[ti].units || 1); }
+          for (var u = 0; u < qty; u++) mmUnits.push(pr.salePrice || pr.price || 0);
+          total += (pr.salePrice || pr.price || 0) * qty;
+        });
+        mmUnits.sort(function (a, b) { return a - b; });
+        var groups = Math.floor(mmUnits.length / 4);
+        for (var g = 0; g < groups; g++) mmDisc += mmUnits[g * 4] || 0;
+        var mmNeed = groups > 0 ? 0 : 4 - (mmUnits.length % 4);
+        var msg = mmDisc > 0
+          ? '🎉 <b>₹' + mmDisc.toLocaleString('en-IN') + ' saved</b> with Mix &amp; Match — your lowest-priced eligible item is FREE'
+          : (mmUnits.length > 0 ? ('🎁 <b>' + mmNeed + '</b> more eligible ' + (mmNeed === 1 ? 'item' : 'items') + ' and your lowest-priced one becomes <b>FREE</b>')
+            : '💚 Don’t forget — your order earns Vita Points');
+        ozylxNotify.show({ id: 'cart-' + (mmDisc > 0 ? 'saved' : mmNeed ? 'mm' : 'vita'), msg: msg, corner: 'bottom-left' });
+      } catch (e) {}
+    })();
     try {
       const items = STORE.cart.map(i=>{const p=PRODUCTS.find(x=>x.id===i.id);return{id:i.id,name:p?.name||'',price:p?.salePrice||p?.price||0,qty:i.qty};});
       const tot = items.reduce((s,i)=>s+i.price*i.qty,0);
@@ -12192,7 +12921,14 @@ function initHome() {
 }
 
 // ── SHOP ──
-function initShop() { applyFilters(); }
+function initShop() { applyFilters();
+  // Aug 2026: shop strategy — MM / discovery message (not on first paint —
+  // the customer browses first; value before pressure)
+  try { setTimeout(function () {
+    if (typeof ozylxNotify === 'undefined') return;
+    ozylxNotify.show({ id: 'shop-discovery', msg: '🎁 Mix &amp; Match is available on eligible products — buy any 3, get the lowest-priced one FREE.', icon: '🎁', corner: 'bottom-left' });
+  }, 9000); } catch (e) {}
+}
 
 function filterCat(cat, btn) {
   currentCat = cat;
@@ -12500,6 +13236,103 @@ function renderProductReviewList(pid) {
 }
 
 // ── PRODUCT PAGE ──
+// ══════════════════════════════════════════════════════════════════════
+// EDUCATIONAL GALLERY — product page (Aug 2026)
+// Four sections, verified content only (see CONTENT below). Images are
+// upload SLOTS via admin Site Images: edu.{slug}.{panel}.{n} (1:1).
+// ══════════════════════════════════════════════════════════════════════
+(function () {
+  var PANELS = [
+    { id: 'howto',    label: 'How To Use',
+      title: 'The 15-Second Ritual',
+      intro: 'One tablet into a glass of water, watch it fizz, drink while it sparkles. Once a day is the rhythm most customers settle into.',
+      items: [] },
+    { id: 'experts',  label: 'What Experts Say',
+      title: 'Guidance from qualified professionals',
+      intro: 'Effervescent delivery is a known pharmaceutical format: tablets designed to dissolve fully so the dose mixes evenly before drinking.',
+      items: [] },
+    { id: 'research', label: 'What Research Says',
+      title: 'Ingredient science, simply explained',
+      intro: 'Public research describes how each ingredient is generally studied. We share educational summaries, never promises.',
+      items: [] },
+    { id: 'why',      label: 'Why Ozylix',
+      title: 'Made with care, verified end to end',
+      intro: 'FSSAI approved, manufactured at our Anand, Gujarat facility, with quality checks from raw material to finished tablet.',
+      items: [] }
+  ];
+  // Content that can genuinely be verified — general wellness education
+  var CONTENT = {
+    howto: [
+      { h: 'Dissolve fully', p: 'Drop one tablet into 150-200 ml of water and wait until the fizzing stops completely.' },
+      { h: 'Drink fresh', p: 'Best enjoyed within a few minutes of dissolving — that\'s the point of the format.' },
+      { h: 'Once a day', p: 'One tablet a day, at a time that suits your routine — many pair it with breakfast or a workout.' },
+      { h: 'Check the label', p: 'Directions per variant are on the tube and box. Always follow them, and consult your doctor for personal advice.' }
+    ],
+    experts: [
+      { h: 'Effervescent format', p: 'Effervescent tablets are an established dosage form used by pharmacists worldwide to deliver a uniform dose in solution.' },
+      { h: 'Easy to take', p: 'Clinicians note effervescents can be easier for people who struggle with swallowing tablets.' },
+      { h: 'Not a substitute', p: 'Supplements support, not replace, a balanced diet — qualified professionals agree on that baseline.' }
+    ],
+    research: [
+      { h: 'Glutathione', p: 'A tripeptide produced naturally by the body; public research explores its antioxidant role in skin and cellular health.' },
+      { h: 'Apple cider vinegar', p: 'Commonly consumed as a beverage; research interest centers on digestion and metabolism topics.' },
+      { h: 'Moringa', p: 'A traditional leafy green studied for its vitamin and mineral content, including iron and vitamin C.' },
+      { h: 'Spirulina', p: 'A blue-green algae valued for protein and micronutrients such as B12, iron and beta-carotene in a vegan form.' }
+    ],
+    why: [
+      { h: 'FSSAI approved', p: 'Every Ozylix product carries FSSAI approval — check the licence on-pack.' },
+      { h: 'Made in Anand', p: 'Manufactured at our own facility in Anand, Gujarat — no third-party white-labelling.' },
+      { h: 'Real ingredients', p: 'What is on the label is what is in the tablet: disclosed ingredients, disclosed doses.' },
+      { h: 'Free delivery', p: 'Delivered across India with no minimum order — the whole range, not just overpriced packs.' }
+    ]
+  };
+  function escHtml(s) { var d = document.createElement('div'); d.textContent = s; return d.innerHTML; }
+  function mediaKey(slug, panel, n) { return 'edu.' + slug + '.' + panel + '.' + n; }
+  window.renderProductEduGallery = function (p) {
+    var box = document.getElementById('productEduGallery');
+    if (!box || !p) { if (box) box.innerHTML = ''; return; }
+    var slug = typeof slugify === 'function' ? slugify(p.name) : 'product';
+    var tabs = PANELS.map(function (pl, i) {
+      return '<button class="edu-tab' + (i === 0 ? ' active' : '') + '" data-edu="' + pl.id + '">' + escHtml(pl.label) + '</button>';
+    }).join('');
+    var panels = PANELS.map(function (pl, i) {
+      var cards = (CONTENT[pl.id] || []).map(function (c, n) {
+        var mkey = mediaKey(slug, pl.id, n + 1);
+        var ico = { howto: '⏰', experts: '🎓', research: '📚', why: '✓' }[pl.id] || '✨';
+        return '<div class="edu-card"><div class="edu-card-media" data-media-key="' + mkey + '" data-awaiting-upload="true">' +
+          '<span class="edu-ico">' + ico + '</span>' +
+          '<span class="edu-awaiting" data-media-key="' + mkey + '" data-fallback="hide">Upload creative</span></div>' +
+          '<div class="edu-card-body"><h4>' + escHtml(c.h) + '</h4><p>' + escHtml(c.p) + '</p></div></div>';
+      }).join('');
+      return '<div class="edu-panel' + (i === 0 ? ' active' : '') + '" data-edupanel="' + pl.id + '">' +
+        '<div class="edu-fact"><b>' + escHtml(pl.title) + '</b><br>' + escHtml(pl.intro) + '</div>' +
+        '<div class="edu-grid">' + cards + '</div>' +
+        '<div class="edu-note">Educational information only — not medical advice. For personal guidance, consult a qualified healthcare professional. Sources: public ingredient literature and on-pack instructions.</div></div>';
+    }).join('');
+    box.innerHTML = '<h2>Know Your Product</h2><p class="edu-sub">Verified facts about what is in your tube and how to use it.</p>' +
+      '<div class="edu-tabs">' + tabs + '</div>' + panels;
+    // Tab switching
+    box.querySelectorAll('.edu-tab').forEach(function (t) {
+      t.onclick = function () {
+        box.querySelectorAll('.edu-tab').forEach(function (x) { x.classList.remove('active'); });
+        box.querySelectorAll('.edu-panel').forEach(function (x) { x.classList.remove('active'); });
+        t.classList.add('active');
+        var pan = box.querySelector('[data-edupanel="' + t.dataset.edu + '"]');
+        if (pan) pan.classList.add('active');
+      };
+    });
+    // Re-run site-media mapping for new keys + reveal logic
+    if (typeof applySiteMedia === 'function' && window.__ozylixSiteMedia) applySiteMedia(window.__ozylixSiteMedia);
+  };
+  // Cache the last media map and re-apply whenever new media-key elements appear
+  var _asm = window.applySiteMedia;
+  if (_asm) {
+    window.applySiteMedia = function (map) {
+      window.__ozylixSiteMedia = map;
+      _asm(map);
+    };
+  }
+})();
 function buildProductPage(p) {
   const rvs = REVIEWS[p.id] || [];
   if (!REVIEWS_LOADED[p.id]) loadProductReviews(p.id); // fires once; re-renders this tab when the real data arrives
@@ -12546,7 +13379,6 @@ function buildProductPage(p) {
       ${!tiers ? `<div class="qty-wrap"><button class="qty-btn" onclick="chQty(-1)">&#x2212;</button><span class="qty-num" id="pQtyDisp">1</span><button class="qty-btn" onclick="chQty(1)">+</button></div>` : ''}
       <button class="add-cart-btn" id="addCartBtn" data-tier="${tierIdx}" onclick="addToCartWithTier(${p.id})">&#x1F6D2; Add to Cart</button>
       <div class="stock-urgency" id="stockUrgency"></div>
-      <div class="live-viewers"><span class="lv-dot"></span><span id="liveViewerCount">12</span> people viewing this right now</div>
       <button class="buy-now-btn" onclick="addToCartWithTier(${p.id});showPage('checkout')">&#x26A1; Buy Now</button>
       <div class="prod-features">
         <div class="feat-item"><span class="feat-ico">&#x1F331;</span>100% Organic</div>
@@ -12617,16 +13449,60 @@ function buildProductPage(p) {
               ${tiers.map((t,i)=>{const isBest=t.discountPct===Math.max(...tiers.map(x=>x.discountPct));return`<tr style="background:${isBest?'var(--gold-pale)':i%2?'var(--green-wash)':'white'};cursor:pointer" onclick="selectTier(${p.id},${i})"><td style="padding:12px 16px;font-weight:700">${t.tabs} Tabs${isBest?' <span style="background:var(--gold);color:var(--t-hi);font-size:.6rem;padding:2px 7px;border-radius:100px;font-weight:800;vertical-align:middle">BEST VALUE</span>':''}</td><td style="padding:12px 16px;text-align:right;text-decoration:line-through;color:var(--gray)">&#x20B9;${t.mrp.toLocaleString('en-IN')}</td><td style="padding:12px 16px;text-align:right;font-weight:800;color:var(--green)">&#x20B9;${t.rate.toLocaleString('en-IN')}</td><td style="padding:12px 16px;text-align:right"><span style="background:${isBest?'var(--gold)':'var(--gold-pale)'};color:${isBest?'white':'var(--gold)'};padding:3px 9px;border-radius:100px;font-weight:700;font-size:.78rem">${t.discountPct}% OFF</span></td><td style="padding:12px 16px;text-align:right;color:var(--success);font-weight:700">&#x20B9;${(t.mrp-t.rate).toLocaleString('en-IN')}</td></tr>`;}).join('')}
             </tbody>
           </table>
-          <p style="font-size:.76rem;color:var(--gray);margin-top:12px">Click any row to select that pack. All prices incl. taxes.</p>
+          <p style="font-size:.76rem;color:var(--gray);margin-top:12px">Click any row to select that pack. All prices incl. taxes.</p><p class="mc-line">&#128154; A small step for your daily wellness routine. ✨ Your Ozylix routine starts here.</p>
         </div>
       </div>` : ''}
     </div>
   `;
+  // Mix & Match progress (real cart data from STORE) — rendered after details,
+  // before reviews & related products.
+  try { renderProductMMProgress(p); } catch(e) {}
   // The reviews tab ships as an empty #rvListWrap above; fill it now that
   // the markup exists. Any expanded/paged state the customer had is kept —
   // this function re-runs on every review load and backend sync.
   try { renderProductReviewList(p.id); } catch(e) {}
+  try { renderProductEduGallery(p); } catch(e) {}
 }
+
+// ══════════════════════════════════════════════════════════════════════
+// MIX & MATCH PROGRESS — product page pill (Aug 2026)
+// Real cart data only (STORE + PRODUCTS + tier units): shows where the
+// customer stands toward the next FREE item — "1/4 products selected"
+// through "🎉 Free item unlocked". Never invents eligibility.
+// ══════════════════════════════════════════════════════════════════════
+window.renderProductMMProgress = function (p) {
+  if (typeof PRODUCTS === 'undefined' || typeof STORE === 'undefined') return;
+  // Mirror the backend's eligibility: MM-applicable units in the cart
+  var mmUnits = [];
+  PRODUCTS.forEach(function (pr) {
+    var ci = STORE.cart.find(function (c) { return c.id === pr.id; });
+    if (!ci) return;
+    var qty = ci.qty || 1;
+    var tiers = typeof getProductTiers === 'function' ? getProductTiers(pr) : null;
+    if (tiers) {
+      var ti = typeof currentTierIdx === 'function' ? currentTierIdx(pr, tiers) : -1;
+      if (ti >= 0 && ti < tiers.length) { qty = Math.max(1, tiers[ti].units || 1); }
+    }
+    mmUnits.push({ id: pr.id, qty: qty });
+  });
+  var totalUnits = mmUnits.reduce(function (s, u) { return s + u.qty; }, 0);
+  var pos = totalUnits % 4;
+  var unlocked = pos === 0 && totalUnits >= 4;
+  var next = unlocked ? 0 : 4 - pos;
+  var pill = document.getElementById('productMMProgress');
+  if (!pill) return;
+  var dots = [1, 2, 3, 4].map(function (n) {
+    return '<span class="mm-step' + (n <= pos || (unlocked && n <= 4) ? ' done' : '') + '"></span>';
+  }).join('');
+  var label = unlocked
+    ? '&#127881; Free item unlocked — your lowest-priced eligible item is free'
+    : next === 1
+      ? '&#127873; 1 more eligible item and your lowest-priced one is FREE'
+      : '&#127873; ' + next + ' more eligible items until your FREE item (you have ' + totalUnits + '/4)';
+  pill.innerHTML = '<div class="mm-progress-wrap' + (unlocked ? ' is-unlocked' : '') + '">' +
+    '<div class="mm-progress">' + dots + '</div>' +
+    '<span class="mm-progress-label">' + label + '</span></div>';
+};
 
 // Adds a tiered product to cart, recording which tier (pack size) was chosen
 function addToCartWithTier(productId) {
@@ -12948,6 +13824,24 @@ function renderCart() {
     discLabel = appliedDiscount.label || '';
   }
 
+  // ── MIX & MATCH (display only) ──────────────────────────────────────
+  // Mirrors mixAndMatchDiscount() in server.js: every 4 units, the cheapest
+  // is free. The SERVER sets the real price; this only lets the cart show
+  // the saving before checkout. Keep the two in step.
+  var mmUnits = [];
+  STORE.cart.forEach(function (it) {
+    var pr = PRODUCTS.find(function (x) { return x.id === it.id; });
+    if (!pr) return;
+    var u = it.tierRate !== undefined ? it.tierRate : (pr.salePrice || pr.price);
+    var q = Math.max(0, Math.trunc(Number(it.qty) || 0));
+    for (var n = 0; n < q; n++) mmUnits.push(u);
+  });
+  mmUnits.sort(function (a, b) { return a - b; });
+  var mmGroups = Math.floor(mmUnits.length / 4);
+  var mmDisc = 0;
+  for (var g = 0; g < mmGroups; g++) mmDisc += mmUnits[g * 4] || 0;
+  var mmOff = Math.max(0, Math.min(mmDisc, sub));
+  var mmNeed = mmGroups > 0 ? 0 : 4 - (mmUnits.length % 4);
   const ship = calcShipping(sub - disc);
   const _vita = vitaCheckoutInfo(sub - disc);
   const vitaOff = _vita.rupees;
@@ -13004,6 +13898,7 @@ function renderCart() {
       </div>
       <div class="cart-summary-box">
         <h2>Order Summary</h2>
+        ${mmOff > 0 ? `<div class="mm-line mm-unlocked" style="margin-bottom:10px">🎉 Mix &amp; Match unlocked — your lowest-priced eligible item is <b>FREE</b> (−₹${mmOff.toLocaleString('en-IN')})</div>` : (mmUnits.length > 0   ? `<div class="mm-line" style="margin-bottom:10px">🎁 Add <strong>${mmNeed}</strong> more ${mmNeed === 1 ? 'item' : 'items'} — your lowest-priced one becomes <strong>FREE</strong>.</div>`   : `<div class="mm-line" style="margin-bottom:10px">💚 This order earns you <b>Vita Points</b> to redeem on your next purchase.</div>`)}
         <div class="sum-row"><span>Subtotal (${totalPacks} pack${totalPacks !== 1 ? 's' : ''})</span><span>₹${sub.toLocaleString('en-IN')}</span></div>
         ${disc > 0 ? `
           <div class="sum-row" style="color:var(--success);font-weight:700">
@@ -13236,7 +14131,7 @@ function renderCheckoutSummary() {
     }).join('')}
     <hr style="border:none;border-top:1px solid var(--light-gray);margin:12px 0">
     <div class="sum-row"><span>Subtotal</span><span>₹${sub.toLocaleString('en-IN')}</span></div>
-    ${mmOff > 0 ? `<div class="sum-row" style="color:var(--success);font-weight:700"><span>🎁 Mix &amp; Match — lowest item free</span><span>-₹${mmOff.toLocaleString('en-IN')}</span></div>` : (mmUnits.length > 0 ? `<div style="background:var(--sub-1);border:1px solid var(--light-gray);border-radius:8px;padding:8px 10px;font-size:.72rem;margin:6px 0;line-height:1.45">🎁 Add <strong>${mmNeed}</strong> more ${mmNeed === 1 ? 'item' : 'items'} — your lowest-priced one becomes <strong>FREE</strong>.</div>` : '')}
+    ${mmOff > 0 ? `<div class="mm-line mm-unlocked">🎉 Mix &amp; Match unlocked — your lowest-priced eligible item is <b>FREE</b> (−₹${mmOff.toLocaleString('en-IN')})</div>` : (mmUnits.length > 0 ? `<div class="mm-line">🎁 Add <strong>${mmNeed}</strong> more ${mmNeed === 1 ? 'item' : 'items'} — your lowest-priced one becomes <strong>FREE</strong>.</div>` : '')}
     ${disc > 0 ? `<div class="sum-row" style="color:var(--success)"><span>🏷️ Discount</span><span>-₹${disc.toLocaleString('en-IN')}</span></div>` : ''}
     <div class="sum-row"><span>Shipping</span><span>${ship === 0 ? '<span style="color:var(--success);font-weight:700">FREE</span>' : '₹' + ship}</span></div>
     <hr style="border:none;border-top:1px solid var(--light-gray);margin:8px 0">
@@ -17765,7 +18660,21 @@ document.addEventListener('DOMContentLoaded',function(){
   if(document.getElementById('bundleProdList')&&typeof PRODUCTS!=='undefined')renderBundleBuilder();
   if(typeof addToCartWithTier==='function'){const _o=addToCartWithTier;window.addToCartWithTier=function(id){_o(id);showPtsToast('Earns VitaPoints when delivered');};}
 });
-document.addEventListener('productPageShown',function(e){const prod=e.detail;if(!prod)return;initStickyCart(prod);renderStockUrgency(prod);startLiveViewers();});
+document.addEventListener('productPageShown',function(e){const prod=e.detail;if(!prod)return;initStickyCart(prod);renderStockUrgency(prod);/* startLiveViewers() removed — fake viewer counts are not allowed */
+  // Aug 2026: contextual product popup — rotated per-product, session-limited
+  try { if (typeof ozylxNotify !== 'undefined') {
+    var n = typeof slugify === 'function' ? slugify(prod.name) : '';
+    var msgs = n.indexOf('glutathione') > -1
+      ? ['✨ Kya aap bhi apni glow routine ko upgrade karna chahte hain?', '💚 Discover your daily glow ritual.']
+      : n.indexOf('apple-cider') > -1
+        ? ['🍏 Looking for a simple daily wellness routine?', '✨ Make your daily routine a little easier.']
+        : ['✨ A little wellness moment for your daily routine.', '💚 Your routine deserves something good.', '✨ Discover your Ozylix favorite.'];
+    var pick = msgs[(window.__ozylxRot || 0) % msgs.length]; window.__ozylxRot = (window.__ozylxRot || 0) + 1;
+    setTimeout(function () {
+      ozylxNotify.show({ id: 'product-' + n + '-' + ((window.__ozylxRot || 0) % 3), msg: pick, icon: pick.charAt(0), corner: 'bottom-right' });
+    }, 7000 + 5000 * ((window.__ozylxRot || 0) % 3));
+  } } catch (e) {}
+});
 
 // ── Video player toggle ──
 function playVideo(wrap) {
@@ -19937,5 +20846,7 @@ body:not(.oz-product) #stickyCart { display: none !important; }
 })();
 </script>
 
+<!-- Central contextual popup manager root (max 1 card, never covers CTAs) -->
+<div id="ozylxNotify" aria-live="polite"></div>
 </body>
 </html>
