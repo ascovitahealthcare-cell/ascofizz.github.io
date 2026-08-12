@@ -5795,6 +5795,48 @@ textarea.b2b-form-input { min-height: 110px; resize: vertical; font-family: inhe
   box-shadow: var(--neo-1);
 }
 .account-content { min-width: 0; }
+/* ── Premium account welcome banner ─────────────────────────── */
+.account-welcome {
+  display: flex; align-items: center; justify-content: space-between; gap: 24px; flex-wrap: wrap;
+  margin-bottom: 24px; padding: 26px 30px;
+  border-radius: var(--r-lg);
+  background: linear-gradient(135deg, var(--indigo) 0%, #4a3d8f 55%, #6b5bc8 100%);
+  box-shadow: var(--sink-2), 0 18px 40px -18px rgba(74,61,143,.45);
+  position: relative; overflow: hidden;
+}
+.account-welcome::before {
+  content: ''; position: absolute; top: -60px; right: -60px;
+  width: 200px; height: 200px; border-radius: 50%;
+  background: radial-gradient(circle, rgba(255,255,255,.14) 0%, rgba(255,255,255,0) 70%);
+}
+.aw-eyebrow { font-size: .66rem; font-weight: 800; letter-spacing: .18em; text-transform: uppercase; color: rgba(255,255,255,.65); margin-bottom: 7px; }
+.aw-name { font-family: var(--font-display); font-size: 1.5rem; font-weight: 800; letter-spacing: -.03em; color: #fff; line-height: 1.2; }
+.aw-sub { font-size: .82rem; color: rgba(255,255,255,.72); margin-top: 8px; }
+.aw-stats { display: flex; gap: 14px; }
+.aw-stat {
+  text-align: center; padding: 14px 22px;
+  border-radius: var(--r-sm);
+  background: rgba(255,255,255,.12); backdrop-filter: blur(6px);
+  border: 1px solid rgba(255,255,255,.16);
+  min-width: 118px;
+}
+.aw-stat-val { font-family: var(--font-display); font-size: 1.55rem; font-weight: 800; letter-spacing: -.03em; color: #fff; }
+.aw-stat-lbl { font-size: .7rem; font-weight: 600; color: rgba(255,255,255,.75); margin-top: 3px; letter-spacing: .02em; }
+@media (max-width: 768px) {
+  .account-welcome { flex-direction: column; align-items: flex-start; padding: 22px; }
+  .aw-stats { width: 100%; }
+  .aw-stat { flex: 1; min-width: 0; padding: 12px 8px; }
+  .aw-stat-val { font-size: 1.25rem; }
+  .aw-name { font-size: 1.25rem; }
+}
+@media (max-width: 560px) {
+  .account-welcome { margin: 0 0 18px; border-radius: var(--r-md); }
+}
+/* Premium nav polish */
+.account-nav-item .nav-ico { display: inline-block; width: 22px; text-align: center; font-size: .95rem; transition: transform var(--dur-1) var(--settle); }
+.account-nav-item:hover .nav-ico { transform: translateX(2px); }
+.account-nav-item.active .nav-ico { filter: brightness(1.35); }
+.account-panel-title { margin-bottom: 18px; }
 .account-panel { display: none; }
 .account-panel.active { display: block; animation: fz-in .4s var(--rise) both; }
 .account-panel-title {
@@ -12461,6 +12503,29 @@ function _updateStrength(val) {
       </div>
 
       <div class="account-content">
+        <div class="account-welcome" id="accountWelcome">
+          <div class="aw-greeting">
+            <div class="aw-title-row">
+              <div class="aw-eyebrow">🌿 Ozylix Member</div>
+              <h2 class="aw-name" id="awName">Welcome to your Ozylix account</h2>
+            </div>
+            <p class="aw-sub">Your orders, rewards and rewards balance — all in one place.</p>
+          </div>
+          <div class="aw-stats">
+            <div class="aw-stat">
+              <div class="aw-stat-val" id="awOrders">0</div>
+              <div class="aw-stat-lbl">Orders placed</div>
+            </div>
+            <div class="aw-stat">
+              <div class="aw-stat-val" id="awPoints">0</div>
+              <div class="aw-stat-lbl">💎 VitaPoints</div>
+            </div>
+            <div class="aw-stat">
+              <div class="aw-stat-val" id="awSaved">₹0</div>
+              <div class="aw-stat-lbl">Lifetime savings</div>
+            </div>
+          </div>
+        </div>
         <div class="account-panel active" id="panel-orders">
           <div class="account-panel-title">📦 My Orders</div>
           <div id="ordersList"></div>
@@ -12993,6 +13058,8 @@ function showPage(pg) {
   document.querySelectorAll('.nav-links a').forEach(a => {
     a.classList.toggle('active', a.dataset.page === pg);
   });
+  // Premium account header — populate welcome banner + lifetime stats
+  if (pg === 'account') { try { refreshAccountWelcome(); } catch(e) {} }
   if (pg === 'shop') initShop();
   if (pg === 'cart') {
     renderCart();
@@ -17889,6 +17956,8 @@ function switchAccountPanel(panel) {
   const labels = ['orders','tracking','invoices','vita','returns','profile'];
   if (panel === 'returns') { try { renderReturnsPanel(); } catch(e) { console.error('[renderReturnsPanel]', e); } }
   if (panel === 'vita') { try { renderVitaPanel(); } catch(e) { console.error('[renderVitaPanel]', e); } }
+  if (panel === 'orders') { try { refreshAccountWelcome(); } catch(e) { console.error('[refreshAccountWelcome]', e); } }
+  try { refreshAccountWelcome(); } catch(e) {}
   const idx = labels.indexOf(panel);
   if (idx >= 0 && navItems[idx]) navItems[idx].classList.add('active');
 }
@@ -21156,3 +21225,70 @@ body:not(.oz-product) #stickyCart { display: none !important; }
 <div id="ozylxNotify" aria-live="polite"></div>
 </body>
 </html>
+
+// ── Premium account welcome banner ─────────────────────────────
+// Populates the gradient header (name, order count, VitaPoints, savings)
+// whenever the account page or a panel is visited.
+async function refreshAccountWelcome() {
+  const host = document.getElementById('accountWelcome');
+  const nameEl = document.getElementById('awName');
+  const ordersEl = document.getElementById('awOrders');
+  const pointsEl = document.getElementById('awPoints');
+  const savedEl = document.getElementById('awSaved');
+  if (!host) return;
+
+  const user = getCurrentUser();
+  if (!user || !user.email) {
+    // Guest view — still premium, but no personal data
+    if (nameEl) nameEl.textContent = 'Welcome to your Ozylix account';
+    if (ordersEl) ordersEl.textContent = '—';
+    if (pointsEl) pointsEl.textContent = '—';
+    if (savedEl) savedEl.textContent = '—';
+    return;
+  }
+  if (nameEl) nameEl.textContent = 'Welcome back, ' + (user.name || user.email.split('@')[0]) + ' 👋';
+
+  // Points (cached vita state, instantaneous)
+  if (pointsEl) pointsEl.textContent = (Number(getVitaState().balance) || 0).toLocaleString('en-IN');
+
+  // Orders + savings — backend first, localStorage merged as fallback
+  let orders = [];
+  const jwt = localStorage.getItem('asc_jwt') || '';
+  if (jwt) {
+    try {
+      const r = await fetchWithTimeout(API_BASE + '/api/orders/my', {
+        headers: { 'Authorization': 'Bearer ' + jwt }
+      }, 8000);
+      if (r.ok) {
+        const d = await r.json();
+        orders = (d.data || d || []).filter(function(o){
+          return (o.customer_email || '').toLowerCase().trim() === user.email.toLowerCase().trim();
+        });
+      }
+    } catch(e) { console.warn('[Welcome] orders fetch failed:', e.message); }
+  }
+  // Local history (orders placed before accounts existed)
+  try {
+    const local = JSON.parse(localStorage.getItem('asc_orders') || '[]')
+      .filter(function(o){ return (o.userEmail || o.email || '').toLowerCase().trim() === user.email.toLowerCase().trim(); })
+      .filter(function(o){ return !orders.some(function(b){ return b.id === o.orderId || b.id === o.id; }); })
+      .map(function(o){ return Object.assign({}, o, { id: o.orderId }); });
+    orders = orders.concat(local);
+  } catch(e) {}
+
+  if (ordersEl) ordersEl.textContent = orders.length;
+
+  // Lifetime savings = sum of per-item MRP-vs-price discount where available
+  let saved = 0;
+  orders.forEach(function(o){
+    let items = o.items || [];
+    if (typeof items === 'string') { try { items = JSON.parse(items); } catch(e){ items = []; } }
+    items.forEach(function(it){
+      const qty = Number(it.qty) || 0;
+      const mrp = Number(it.mrp || it.max_retail_price || 0);
+      const price = Number(it.price || it.sale_price || it.unit_price || 0);
+      if (mrp > price && qty) saved += (mrp - price) * qty;
+    });
+  });
+  if (savedEl) savedEl.textContent = '₹' + Math.round(saved).toLocaleString('en-IN');
+}
