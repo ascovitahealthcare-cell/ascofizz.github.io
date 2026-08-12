@@ -1435,6 +1435,181 @@ body.theme-holo canvas{border-radius:10px;}
   body.theme-holo .tb-dot{animation:none !important;}
 }
 
+/* ═══════════════════════════════════════════════════════════════════
+   AURORA FROST — 4th theme. Light, airy, icy-blue dashboard.
+   Reference: white frosted glass cards on icy backdrop, blue-cyan
+   gradient KPI tiles, glow area charts, gradient rings, navy contrast
+   cards, soft 3D shadows (AI UI kit style).
+   Additive only; scoped under body.theme-frost.
+   ═══════════════════════════════════════════════════════════════════ */
+
+/* ── Icy backdrop with soft blue glows ── */
+body.theme-frost{
+  background:
+    radial-gradient(900px 500px at 90% -5%, rgba(34,211,238,0.25), transparent 60%),
+    radial-gradient(800px 450px at 5% 105%, rgba(59,130,246,0.22), transparent 60%),
+    linear-gradient(160deg,#E6EFFB 0%,#DCE9FA 55%,#D3E6F9 100%) !important;
+  color:#0F172A;
+}
+body.theme-frost .main{background:transparent;}
+
+/* ── White frosted glass cards with blue-tinted 3D shadow ── */
+body.theme-frost .card, body.theme-frost .kpi, body.theme-frost .modal,
+body.theme-frost .table-wrap, body.theme-frost .stat-tick{
+  background:
+    linear-gradient(180deg, rgba(255,255,255,0.92) 0%, rgba(255,255,255,0.78) 100%),
+    rgba(255,255,255,0.7);
+  border:1px solid rgba(96,165,250,0.28);
+  border-radius:20px;
+  box-shadow:
+    0 1px 0 rgba(255,255,255,0.9) inset,
+    0 14px 34px -16px rgba(37,99,235,0.30),
+    0 4px 14px -6px rgba(37,99,235,0.14);
+  transition:transform .3s cubic-bezier(.2,.9,.3,1), box-shadow .3s;
+}
+body.theme-frost .card:hover, body.theme-frost .kpi:hover{
+  transform:translateY(-3px);
+  box-shadow:
+    0 1px 0 rgba(255,255,255,0.95) inset,
+    0 22px 44px -18px rgba(37,99,235,0.38),
+    0 6px 18px -8px rgba(37,99,235,0.18);
+}
+
+/* ── Gradient KPI tiles (blue → cyan) with white text ── */
+body.theme-frost .kpi{
+  background:linear-gradient(135deg,#2563EB 0%,#0EA5E9 62%,#22D3EE 100%);
+  border:1px solid rgba(255,255,255,0.55);
+  box-shadow:0 14px 30px -14px rgba(14,165,233,0.55), 0 1px 0 rgba(255,255,255,0.5) inset;
+  overflow:hidden;
+  position:relative;
+}
+body.theme-frost .kpi::before{
+  content:'';position:absolute;right:-26px;top:-26px;width:110px;height:110px;border-radius:50%;
+  background:radial-gradient(circle, rgba(255,255,255,0.35), transparent 70%);
+  filter:blur(4px);pointer-events:none;
+}
+body.theme-frost .kpi .kpi-label{color:rgba(255,255,255,0.85);font-weight:600;}
+body.theme-frost .kpi .kpi-val{
+  color:#fff;background:none;-webkit-background-clip:unset;background-clip:unset;
+  text-shadow:0 1px 2px rgba(15,23,42,0.25);filter:none;
+}
+body.theme-frost .kpi .kpi-sub{color:rgba(255,255,255,0.8);}
+
+/* ── Card titles & labels: dark navy ── */
+body.theme-frost .card-title, body.theme-frost .card-hdr{color:#0F2A52;}
+body.theme-frost td, body.theme-frost th{color:#1E3A5F;}
+body.theme-frost th{background:rgba(59,130,246,0.06);}
+body.theme-frost tr:nth-child(even) td{background:rgba(59,130,246,0.035);}
+body.theme-frost .table-wrap{border:1px solid rgba(96,165,250,0.25);}
+
+/* ── Sidebar: white frosted glass ── */
+body.theme-frost .sidebar{
+  background:linear-gradient(180deg, rgba(255,255,255,0.82), rgba(230,240,252,0.75));
+  backdrop-filter:blur(12px);
+  border-right:1px solid rgba(96,165,250,0.3);
+}
+body.theme-frost .nav-item{color:#1E3A5F;}
+body.theme-frost .nav-item:hover{background:rgba(59,130,246,0.08);}
+body.theme-frost .nav-item.active{
+  background:linear-gradient(90deg,rgba(37,99,235,0.16),transparent);
+  border-left:3px solid #2563EB;color:#1D4ED8;
+  box-shadow:0 0 16px rgba(37,99,235,0.15) inset;font-weight:700;
+  border-radius:10px;
+}
+body.theme-frost .topbar{
+  background:rgba(255,255,255,0.7);backdrop-filter:blur(12px);
+  border-bottom:1px solid rgba(96,165,250,0.3);
+}
+
+/* ── Primary button: gradient blue-cyan pill with glow ── */
+body.theme-frost .btn-primary{
+  background:linear-gradient(90deg,#2563EB,#0EA5E9 62%,#22D3EE);
+  border:none;color:#fff;font-weight:700;
+  box-shadow:0 6px 20px rgba(37,99,235,0.35);
+  border-radius:999px;position:relative;overflow:hidden;
+  transition:transform .25s, box-shadow .25s;
+}
+body.theme-frost .btn-primary::after{
+  content:'';position:absolute;inset:0;pointer-events:none;
+  background:linear-gradient(100deg,transparent 35%,rgba(255,255,255,0.35) 50%,transparent 65%);
+  transform:translateX(-120%);
+  animation:frostSheen 5.5s ease-in-out infinite;
+}
+@keyframes frostSheen{0%{transform:translateX(-120%);}35%{transform:translateX(120%);}100%{transform:translateX(120%);}}
+body.theme-frost .btn-primary:hover{
+  box-shadow:0 8px 28px rgba(14,165,233,0.5);
+  transform:translateY(-2px) scale(1.02);
+}
+
+/* ── Secondary/danger buttons stay soft pills ── */
+body.theme-frost .btn-secondary, body.theme-frost .btn-danger, body.theme-frost .btn-export{
+  border-radius:999px;border:1px solid rgba(59,130,246,0.25);
+  background:#fff;color:#1D4ED8;box-shadow:0 4px 12px rgba(37,99,235,0.12);
+}
+body.theme-frost .btn-danger{color:#DB2777;border-color:rgba(219,39,119,0.25);}
+
+/* ── Badges & chips: soft blue pills ── */
+body.theme-frost .badge, body.theme-frost .status-chip, body.theme-frost .filter-chip{
+  border-radius:999px;background:rgba(219,234,254,0.8);color:#1D4ED8;
+  border:1px solid rgba(96,165,250,0.25);box-shadow:0 2px 8px rgba(37,99,235,0.12);
+}
+body.theme-frost .badge-blue{color:#1D4ED8;}
+body.theme-frost .badge-gray{color:#64748B;}
+
+/* ── Form fields: soft blue inset ── */
+body.theme-frost .form-control, body.theme-frost .filter-input,
+body.theme-frost .filter-select, body.theme-frost .drawer-input{
+  background:#fff;border:1px solid rgba(96,165,250,0.35);border-radius:12px;
+  box-shadow:0 2px 8px rgba(37,99,235,0.08) inset;color:#0F172A;
+}
+
+/* ── Live activity feed: soft blue wash with glow edge ── */
+body.theme-frost .feed-item{
+  border-left:3px solid #38BDF8;
+  background:linear-gradient(90deg, rgba(56,189,248,0.08), transparent);
+  border-radius:0 12px 12px 0;
+}
+
+/* ── Online badges: cyan glow ── */
+body.theme-frost .online-badge{
+  border-radius:999px;background:rgba(219,234,254,0.9);color:#0E7490;
+  box-shadow:0 0 12px rgba(34,211,238,0.35);
+}
+
+/* ── Gradient section accents ── */
+body.theme-frost .section-title, body.theme-frost .panel-title{
+  background:linear-gradient(90deg,#1E3A8A 30%,#0EA5E9 90%);
+  -webkit-background-clip:text;background-clip:text;color:transparent;
+  font-weight:800;
+}
+
+/* ── Gradient progress bars ── */
+body.theme-frost .progress-fill{
+  background:linear-gradient(90deg,#2563EB,#22D3EE);
+  box-shadow:0 0 10px rgba(34,211,238,0.5);border-radius:999px;
+}
+body.theme-frost .progress-bar{background:rgba(59,130,246,0.10);border-radius:999px;}
+
+/* ── Dark navy contrast cards (reference: navy sections) ── */
+body.theme-frost .card.frost-navy, body.theme-frost .kpi.frost-navy{
+  background:linear-gradient(160deg,#0F2451 0%,#123B73 60%,#154C96 100%);
+  color:#E0F2FE;border:1px solid rgba(56,189,248,0.25);
+  box-shadow:0 14px 30px -14px rgba(15,36,81,0.5);
+}
+body.theme-frost .card.frost-navy .kpi-val, body.theme-frost .card.frost-navy .kpi-label{color:#E0F2FE;}
+
+/* Reduced motion safety */
+@media (prefers-reduced-motion: reduce){
+  body.theme-frost .btn-primary::after{animation:none !important;}
+}
+
+/* Theme preview swatch for the picker */
+.theme-preview-frost{background:linear-gradient(160deg,#E6EFFB,#D3E6F9);border:1px solid rgba(96,165,250,0.4);box-shadow:0 6px 16px rgba(37,99,235,0.15);}
+.theme-preview-frost .tp-bar{background:linear-gradient(90deg,#2563EB,#22D3EE);border-radius:4px;}
+.theme-preview-frost .tp-dot:nth-child(1){background:#2563EB;box-shadow:0 0 6px #2563EB;}
+.theme-preview-frost .tp-dot:nth-child(2){background:#0EA5E9;box-shadow:0 0 6px #0EA5E9;}
+.theme-preview-frost .tp-dot:nth-child(3){background:#22D3EE;box-shadow:0 0 6px #22D3EE;}
+.theme-preview-frost .theme-check{color:#1D4ED8;}
 </style>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
 </head>
@@ -3234,29 +3409,36 @@ function azTogglePw() {
   <div class="card" style="margin-bottom:16px">
     <div class="card-hdr"><span class="card-title">🎨 Interface Settings</span></div>
     <div style="color:var(--text3);font-size:0.8rem;margin:-10px 0 16px;">Customize your application theme — this changes the look of the entire backoffice for every admin. Data and functionality stay exactly the same. Editable by both Admin and Owner.</div>
-    <div class="theme-picker">
-      <div class="theme-opt" data-theme="deluxe" onclick="setInterfaceTheme('deluxe')">
+    <div class="theme-picker"><div class="theme-opt" data-theme="deluxe" onclick="setInterfaceTheme('deluxe')">
         <div class="theme-preview theme-preview-deluxe">
-          <div class="theme-check">✓</div>
+          <div class="theme-check">&#10003;</div>
           <div class="tp-dots"><span class="tp-dot"></span><span class="tp-dot"></span><span class="tp-dot"></span></div>
           <div class="tp-bars"><div class="tp-bar w80"></div><div class="tp-bar w60"></div><div class="tp-bar w40"></div></div>
         </div>
         <div class="theme-opt-label">Deluxe</div>
-      </div>
-      <div class="theme-opt" data-theme="neo" onclick="setInterfaceTheme('neo')">
+      </div><div class="theme-opt" data-theme="neo" onclick="setInterfaceTheme('neo')">
         <div class="theme-preview theme-preview-neo">
-          <div class="theme-check">✓</div>
+          <div class="theme-check">&#10003;</div>
           <div class="tp-dots"><span class="tp-dot"></span><span class="tp-dot"></span><span class="tp-dot"></span></div>
           <div class="tp-bars"><div class="tp-bar w80"></div><div class="tp-bar w60"></div><div class="tp-bar w40"></div></div>
         </div>
         <div class="theme-opt-label">Neomorphism</div>
-      <div class="theme-opt" data-theme="holo" onclick="setInterfaceTheme('holo')">
+      </div><div class="theme-opt" data-theme="holo" onclick="setInterfaceTheme('holo')">
         <div class="theme-preview theme-preview-holo">
           <div class="theme-check">&#10003;</div>
           <div class="tp-dots"><span class="tp-dot"></span><span class="tp-dot"></span><span class="tp-dot"></span></div>
           <div class="tp-bars"><div class="tp-bar w80"></div><div class="tp-bar w60"></div><div class="tp-bar w40"></div></div>
         </div>
         <div class="theme-opt-label">Holograph 3D</div>
+      </div><div class="theme-opt" data-theme="frost" onclick="setInterfaceTheme('frost')">
+        <div class="theme-preview theme-preview-frost">
+          <div class="theme-check">&#10003;</div>
+          <div class="tp-dots"><span class="tp-dot"></span><span class="tp-dot"></span><span class="tp-dot"></span></div>
+          <div class="tp-bars"><div class="tp-bar w80"></div><div class="tp-bar w60"></div><div class="tp-bar w40"></div></div>
+        </div>
+        <div class="theme-opt-label">Aurora Frost</div>
+      
+      </div></div>
       </div>
 
       </div>
@@ -4428,6 +4610,10 @@ function animateCount(el, from, to, fmt, dur=900) {
 // 3D Bar Chart with line overlay
 // ── Theme-aware chart palette: reads CSS vars so every theme can restyle charts ──
 function chartTheme(){
+  if((localStorage.getItem('ascovita_theme')||'deluxe')==='frost'){
+    return { primary:'#2563EB', secondary:'#0EA5E9', accent:'#0EA5E9', grid:'rgba(15,42,82,0.08)', legend:'#1E3A5F',
+             line:'#22D3EE', fill:'rgba(14,165,233,0.16)', status:'#1D4ED8', warn:'#F59E0B', bad:'#DB2777' };
+  }
   try{
     const cs=getComputedStyle(document.documentElement);
     return {
