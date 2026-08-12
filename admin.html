@@ -8950,17 +8950,27 @@ const INTEGRATIONS = [
     ]
   },
   {
-    id: 'shiprocket_tracking', name: 'Delhivery / Blue Dart', icon: '📦', category: 'Logistics',
-    desc: 'Additional courier partners via Shiprocket multi-courier',
-    docsUrl: 'https://apidocs.shiprocket.in',
-    envVars: ['Configured via Shiprocket courier preferences'],
-    checkUrl: null,
-    checkAuth: false,
+    // This card used to read "Delhivery / Blue Dart — additional courier
+    // partners via Shiprocket multi-courier", with Shiprocket setup steps and
+    // no health check. That was wrong: Shiprocket is a reseller, Delhivery is
+    // a carrier we hold a direct account with at one.delhivery.com, and the
+    // backend talks straight to Delhivery's API with our own token, warehouse
+    // and waybills — Shiprocket is not involved at any point.
+    id: 'delhivery', name: 'Delhivery (direct)', icon: '📦', category: 'Logistics',
+    desc: 'Direct Delhivery account — shipment booking, AWB, tracking & NDR',
+    docsUrl: 'https://one.delhivery.com/',
+    envVars: ['DELHIVERY_API_TOKEN', 'DELHIVERY_ENV', 'DELHIVERY_PICKUP_LOCATION',
+              'DELHIVERY_PICKUP_ADDRESS', 'DELHIVERY_PICKUP_CITY', 'DELHIVERY_PICKUP_STATE',
+              'DELHIVERY_PICKUP_PIN', 'DELHIVERY_PICKUP_PHONE',
+              'DELHIVERY_SELLER_GST_TIN', 'DELHIVERY_HSN_CODE', 'DELHIVERY_WEBHOOK_SECRET'],
+    checkUrl: () => `${API}/api/health/delhivery`,
+    checkAuth: true,
     setupSteps: [
-      'Log in to Shiprocket → Couriers',
-      'Enable Delhivery, Blue Dart, Xpressbees etc.',
-      'Set preferred courier priority per zone',
-      'Rates auto-calculated based on weight & pincode'
+      'Delhivery One → Settings → API Setup → copy the API token',
+      'DELHIVERY_PICKUP_LOCATION must match the warehouse Facility Name exactly',
+      'Keep the wallet topped up — Delhivery rejects bookings at ₹0',
+      'Register the webhook: <backend>/api/delhivery/webhook/<DELHIVERY_WEBHOOK_SECRET>',
+      'Ship an order from the order screen → "Ship with Delhivery"'
     ]
   },
   {
