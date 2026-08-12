@@ -6945,6 +6945,7 @@ button, [role="button"] {
 }
 .mm-progress .mm-step.done { background: var(--success, #4d8a4e); box-shadow: inset 0 0 0 2px rgba(255,255,255,.6); }
 .mm-progress-label { font-size: .74rem; font-weight: 600; color: var(--t-mid, #3d4a44); }
+.mm-pill-host { margin: 10px 0 0; }
 .mm-progress-wrap.is-unlocked .mm-progress-label { color: var(--success, #4d8a4e); }
 .mm-progress-wrap.is-unlocked .mm-step { background: var(--success, #4d8a4e); }
 
@@ -13380,6 +13381,7 @@ function buildProductPage(p) {
       <button class="add-cart-btn" id="addCartBtn" data-tier="${tierIdx}" onclick="addToCartWithTier(${p.id})">&#x1F6D2; Add to Cart</button>
       <div class="stock-urgency" id="stockUrgency"></div>
       <button class="buy-now-btn" onclick="addToCartWithTier(${p.id});showPage('checkout')">&#x26A1; Buy Now</button>
+      <div id="productMMProgress"></div>
       <div class="prod-features">
         <div class="feat-item"><span class="feat-ico">&#x1F331;</span>100% Organic</div>
         <div class="feat-item"><span class="feat-ico">&#x1F52C;</span>Lab Tested</div>
@@ -13489,8 +13491,12 @@ window.renderProductMMProgress = function (p) {
   var pos = totalUnits % 4;
   var unlocked = pos === 0 && totalUnits >= 4;
   var next = unlocked ? 0 : 4 - pos;
+  // Only show for MM-eligible products — mirror the shop banner's eligible
+  // list (getProductTiers is the same eligibility gate the server uses).
+  var tiers = typeof getProductTiers === 'function' ? getProductTiers(p) : null;
+  if (!tiers || !tiers.length) return;
   var pill = document.getElementById('productMMProgress');
-  if (!pill) return;
+  if (!pill) { pill = document.createElement('div'); pill.id = 'productMMProgress'; pill.className = 'mm-pill-host'; var anchor = document.getElementById('addCartBtn'); if (anchor && anchor.parentNode) { anchor.parentNode.insertBefore(pill, anchor.nextSibling); } else return; }
   var dots = [1, 2, 3, 4].map(function (n) {
     return '<span class="mm-step' + (n <= pos || (unlocked && n <= 4) ? ' done' : '') + '"></span>';
   }).join('');
