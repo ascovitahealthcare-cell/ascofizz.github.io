@@ -13324,7 +13324,10 @@ function bootApp() {
   const _pathSlug = _pathParts[1] || null; // e.g. 'glutathione-effervescent' from /product/glutathione-effervescent
   const _hashPage = window.location.hash.replace('#', '').trim();
   const _initPage = _pathPage || _hashPage;
-  const _validPages = ['home','shop','blog','about','contact','faq','advisor','product'];
+  // wishlist/subscriptions have real page sections but were missing here, so a
+  // direct hit on /wishlist rendered the HOME page at 200 — a soft 404. Keep
+  // this list in step with SPA_ROUTES in worker/index.js.
+  const _validPages = ['home','shop','blog','about','contact','faq','advisor','product','wishlist','subscriptions'];
   // Legacy /b2b links now redirect to the Ascovita corporate B2B page
   if (_initPage === 'b2b') { window.location.href = 'https://www.ascovita.com/#/capabilities'; }
   if (_initPage && _validPages.includes(_initPage)) {
