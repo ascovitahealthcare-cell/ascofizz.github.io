@@ -9131,13 +9131,24 @@ setInterval(function() { syncAppCartBadge(); syncAppWishBadge(); }, 2000);
 
     var isPhone = window.matchMedia('(max-width: 820px)').matches;
     track.innerHTML = shSlides.map(function (s, i) {
-      var img = (isPhone && s.mobile) ? s.mobile : s.src;
-      var inner = '<img src="' + img + '" alt="' + (s.alt || 'Ozylix offer') + '"' +
-                  (i === 0 ? ' fetchpriority="high"' : ' loading="lazy"') + ' decoding="async">';
+      var inner;
+      if (mediaTypeFromUrl && mediaTypeFromUrl(s.src) === 'video') {
+        // Video banners play silently and loop — muted + playsinline is what
+        // lets iOS autoplay them; the autoplay attr covers desktop.
+        inner = '<video src="' + s.src + '" muted loop playsinline preload="metadata" autoplay'
+              + ' aria-label="' + (s.alt || 'Ozylix offer') + '"'
+              + ' style="width:100%;height:100%;object-fit:cover"></video>';
+      } else {
+        var img = (isPhone && s.mobile) ? s.mobile : s.src;
+        inner = '<img src="' + img + '" alt="' + (s.alt || 'Ozylix offer') + '"' +
+                    (i === 0 ? ' fetchpriority="high"' : ' loading="lazy"') + ' decoding="async">';
+      }
       return s.link
         ? '<a class="hero-banner-slide" href="' + s.link + '">' + inner + '</a>'
         : '<div class="hero-banner-slide">' + inner + '</div>';
     }).join('');
+    // Kick any autoplaying video banners (some browsers need a real play() call)
+    track.querySelectorAll('video').forEach(function (v) { v.play().catch(function () {}); });
 
     document.getElementById('shDots').innerHTML = shSlides.length < 2 ? '' :
       shSlides.map(function (_, i) {
@@ -9247,13 +9258,21 @@ window.dismissOfferReminder = function () {
 
     var isPhone = window.matchMedia('(max-width: 820px)').matches;
     track.innerHTML = bnSlides.map(function(s, i) {
-      var img = (isPhone && s.mobile) ? s.mobile : s.src;
-      var inner = '<img src="' + img + '" alt="' + (s.alt || 'Ozylix offer') + '"' +
-                  (i === 0 ? ' fetchpriority="high"' : ' loading="lazy"') + ' decoding="async">';
+      var inner;
+      if (typeof mediaTypeFromUrl === 'function' && mediaTypeFromUrl(s.src) === 'video') {
+        inner = '<video src="' + s.src + '" muted loop playsinline preload="metadata" autoplay'
+              + ' aria-label="' + (s.alt || 'Ozylix offer') + '"'
+              + ' style="width:100%;height:100%;object-fit:cover"></video>';
+      } else {
+        var img = (isPhone && s.mobile) ? s.mobile : s.src;
+        inner = '<img src="' + img + '" alt="' + (s.alt || 'Ozylix offer') + '"' +
+                    (i === 0 ? ' fetchpriority="high"' : ' loading="lazy"') + ' decoding="async">';
+      }
       return s.link
         ? '<a class="hero-banner-slide" href="' + s.link + '">' + inner + '</a>'
         : '<div class="hero-banner-slide">' + inner + '</div>';
     }).join('');
+    track.querySelectorAll('video').forEach(function (v) { v.play().catch(function () {}); });
 
     document.getElementById('heroBannerDots').innerHTML = bnSlides.length < 2 ? '' :
       bnSlides.map(function(_, i) {
@@ -11198,7 +11217,7 @@ function mergeBackendProducts(backendProducts) {
         if (bp.image2 && !alreadyHasImage) p.image2 = bp.image2;
         // Build media array from individual fields for back-compat
         const legacyUrls = [bp.image,bp.image2,bp.image3,bp.image4,bp.image5].filter(Boolean);
-        if (legacyUrls.length) p.media = legacyUrls.map(u=>({url:u,type:'image',thumb:u}));
+        if (legacyUrls.length) p.media = legacyUrls.map(u=>({url:u,type:mediaTypeFromUrl(u),thumb:u}));
       }
       // Key Ingredients
       const ki = parseArr(bp.key_ingredients);
@@ -11233,7 +11252,7 @@ function mergeBackendProducts(backendProducts) {
         price:       bp.price != null ? parseFloat(bp.price) : null,
         salePrice:   bp.sale_price ? parseFloat(bp.sale_price) : null,
         offer:       bp.offer_text || bp.offer || null,
-        media:       (()=>{ const m=parseArr(bp.media||bp.images); return m.length?m.slice(0,10).map(x=>typeof x==='string'?{url:x,type:'image',thumb:x}:x):[]; })(),
+        media:       (()=>{ const m=parseArr(bp.media||bp.images); return m.length?m.slice(0,10).map(x=>typeof x==='string'?{url:x,type:mediaTypeFromUrl(x),thumb:x}:x):[]; })(),
         image:       imgs[0] || bp.image || '',
         image2:      imgs[1] || bp.image2 || '',
         allImages:   imgs,
@@ -12202,6 +12221,17 @@ function cdnImg(url) {
   return s;
 }
 
+// Infer a media item's type from its URL when the backend hasn't supplied one.
+// Product slots now accept short videos (mp4/webm/mov) — anything ending in
+// a video extension (or served with a video content-type) is a video; the
+// storefront renders those as muted, looping, autoplay cards.
+var VIDEO_EXT = /\.(mp4|webm|mov|m4v|3gp)(\?|$)/i;
+function mediaTypeFromUrl(url) {
+  if (!url) return 'image';
+  var s = String(url).toLowerCase();
+  if (VIDEO_EXT.test(s) || /response-content-type=video/.test(s)) return 'video';
+  return 'image';
+}
 function getProductImg(p) {
   if (p.image && p.image.startsWith('http')) return cdnImg(p.image);
   return cdnImg(PRODUCT_FALLBACKS[p.category] || PRODUCT_FALLBACKS['default']);
@@ -14190,22 +14220,32 @@ function buildMediaGallery(p) {
     media = p.media.slice(0, 10);
   } else {
     var urls = [p.image, p.image2, p.image3, p.image4, p.image5].filter(Boolean);
-    media = urls.map(function(u) { return {url: u, type: 'image', thumb: u}; });
+    media = urls.map(function(u) { return {url: u, type: mediaTypeFromUrl(u), thumb: u}; });
   }
   // Use category fallback if no images available
   if (!media.length || !media[0].url) {
     var fbUrl = typeof getProductImg === 'function' ? getProductImg(p) : (PRODUCT_FALLBACKS && (PRODUCT_FALLBACKS[p.category] || PRODUCT_FALLBACKS['default'])) || '';
     media = [{url: fbUrl, type: 'image', thumb: fbUrl}];
   }
-  // Normalize
+  // Normalize — auto-detect videos from the URL when no type was given
   media = media.map(function(m) {
-    if (typeof m === 'string') return {url:m, type:'image', thumb:m};
-    return {url: m.url||m.src||'', type: m.type||'image', thumb: m.thumb||m.url||m.src||''};
+    if (typeof m === 'string') return {url:m, type:mediaTypeFromUrl(m), thumb:m};
+    var t = m.type || mediaTypeFromUrl(m.url||m.src||'');
+    return {url: m.url||m.src||'', type: t, thumb: m.thumb||m.url||m.src||''};
   });
   _galleryMedia = media;
   _galleryIdx = 0;
 
   var mainHtml = renderGalleryMain(media[0], 0, media.length);
+  // Start the main video if the first slide is a video (autoplay needs a
+  // user gesture in some browsers; the gesture history of the page is
+  // enough on all modern browsers, and the muted flag covers the rest).
+  if (media[0] && media[0].type === 'video') {
+    window.setTimeout(function () {
+      var mainVid = document.querySelector('#galleryMain video');
+      if (mainVid) { mainVid.play().catch(function () {}); }
+    }, 100);
+  }
   var thumbsHtml = media.map(function(m, i) {
     var isVid = m.type === 'video';
     return '<div class="thumb' + (i===0?' active':'') + '" onclick="galleryGoto(' + i + ')" title="' + (i+1) + ' of ' + media.length + '">'
@@ -14229,7 +14269,7 @@ function renderGalleryMain(m, idx, total) {
   var isVid = m.type === 'video';
   var counter = total > 1 ? '<span style="position:absolute;bottom:8px;right:10px;background:rgba(0,0,0,0.45);color:#fff;font-size:0.7rem;padding:2px 8px;border-radius:12px;">' + (idx+1) + '/' + total + '</span>' : '';
   if (isVid) {
-    return '<video src="' + m.url + '" controls preload="metadata" playsinline style="width:100%;height:100%;object-fit:contain;border-radius:var(--radius)"></video>'
+    return '<video src="' + m.url + '" muted loop playsinline preload="metadata" autoplay style="width:100%;height:100%;object-fit:contain;border-radius:var(--radius)"></video>'
       + '<span class="vid-badge">▶ Video</span>' + counter;
   }
   return '<img src="' + (m.url||PRODUCT_FALLBACKS.default) + '" id="mainImg" alt="Product" onclick="openLightbox(_galleryIdx)" onerror="this.src=PRODUCT_FALLBACKS.default" decoding="async">' + counter;
@@ -19088,9 +19128,12 @@ function renderPromoCarousel() {
       '</div>' +
       '<div class="promo-card-media">' +
         (img
-          ? '<img src="' + cdnImg(img) + '" alt="' + alt + '" ' +
-            (i === 0 ? 'fetchpriority="high"' : 'loading="lazy"') +
-            ' decoding="async" width="800" height="800">'
+          ? (mediaTypeFromUrl(img) === 'video'
+              ? '<video src="' + cdnImg(img) + '" muted loop playsinline preload="metadata" ' +
+                  'aria-label="' + alt + '" style="width:100%;height:100%;object-fit:cover"></video>'
+              : '<img src="' + cdnImg(img) + '" alt="' + alt + '" ' +
+                  (i === 0 ? 'fetchpriority="high"' : 'loading="lazy"') +
+                  ' decoding="async" width="800" height="800">')
           : '<img src="" data-awaiting-upload="true" alt="' + alt + '">') +
       '</div>' +
     '</div>';

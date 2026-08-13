@@ -424,7 +424,7 @@ textarea.form-control{resize:vertical;min-height:80px;}
 .photo-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:10px;}
 .photo-item{position:relative;aspect-ratio:1;border-radius:10px;overflow:hidden;border:2px solid transparent;cursor:pointer;background:var(--surface2);transition:border-color 0.2s;}
 .photo-item:hover{border-color:var(--green);}
-.photo-item img{width:100%;height:100%;object-fit:cover;}
+.photo-item img,.photo-item video{width:100%;height:100%;object-fit:cover;}
 .photo-item .photo-overlay{position:absolute;inset:0;background:rgba(0,0,0,0.7);display:none;align-items:center;justify-content:center;gap:6px;}
 .photo-item:hover .photo-overlay{display:flex;}
 
@@ -467,6 +467,8 @@ textarea.form-control{resize:vertical;min-height:80px;}
 .img-slot:hover{border-color:var(--green);background:var(--green-glow);}
 .img-slot.filled{border-style:solid;border-color:var(--border);}
 .img-slot-preview{width:100%;height:100%;object-fit:cover;display:none;}
+.img-slot-preview-video{width:100%;height:100%;object-fit:cover;display:none;pointer-events:none;}
+.img-slot-vid-badge{position:absolute;bottom:2px;right:4px;background:#E53535;color:#fff;font-size:0.55rem;font-weight:700;padding:1px 5px;border-radius:6px;pointer-events:none;}
 .img-slot-plus{font-size:1.4rem;color:var(--text3);line-height:1;}
 .img-slot-label{position:absolute;bottom:2px;left:4px;font-size:0.55rem;font-weight:700;color:#fff;background:rgba(0,0,0,0.55);padding:1px 5px;border-radius:6px;pointer-events:none;}
 .img-slot-main-badge{position:absolute;bottom:2px;left:4px;background:var(--green);color:#fff;font-size:0.55rem;font-weight:700;padding:1px 5px;border-radius:6px;pointer-events:none;}
@@ -2813,8 +2815,8 @@ function azTogglePw() {
           <img class="img-slot-preview" id="imgSlotPreview5"><span class="img-slot-plus" id="imgSlotPlus5">＋</span>
         </div>
       </div>
-      <div style="font-size:0.68rem;color:var(--text3);margin-top:6px;">JPG, PNG, WebP, SVG · Max 10MB · Slot 1 is the main product image</div>
-      <input type="file" id="imgSlotFileInput" accept="image/*,.svg" style="display:none;" onchange="handleImgSlotFileChosen(this)">
+      <div style="font-size:0.68rem;color:var(--text3);margin-top:6px;">Images (JPG/PNG/WebP/SVG) or short videos (MP4/WebM/MOV) · Videos are compressed automatically · Slot 1 is the main product image</div>
+      <input type="file" id="imgSlotFileInput" accept="image/*,.svg,video/*,.mp4,.webm,.mov" style="display:none;" onchange="handleImgSlotFileChosen(this)">
       <!-- Hidden fields — keep existing save/load code (dImage..dImage5) working unchanged -->
       <input type="hidden" id="dImage"><input type="hidden" id="dImage2"><input type="hidden" id="dImage3"><input type="hidden" id="dImage4"><input type="hidden" id="dImage5">
     </div>
@@ -3380,7 +3382,7 @@ function azTogglePw() {
   <div class="page-hdr">
     <div><div class="page-title">Banners</div><div class="page-sub">Upload and manage promotional banners</div></div>
     <div class="page-actions">
-      <input type="file" id="bannerFileInput" accept="image/*" onchange="uploadBanner(this)">
+      <input type="file" id="bannerFileInput" accept="image/*,.svg,video/*,.mp4,.webm,.mov" onchange="uploadBanner(this)">
       <button class="btn btn-primary" onclick="document.getElementById('bannerFileInput').click()">＋ Upload Banner</button>
     </div>
   </div>
@@ -3396,7 +3398,7 @@ function azTogglePw() {
         <label class="toggle"><input type="checkbox" id="mediaWebpToggle" checked><span class="toggle-slider"></span></label>
         <span style="font-size:0.75rem;color:var(--text2);">Convert to WebP on upload</span>
       </label>
-      <input type="file" id="photoFileInput" accept="image/*,.svg" multiple onchange="uploadPhotos(this.files)">
+      <input type="file" id="photoFileInput" accept="image/*,.svg,video/*,.mp4,.webm,.mov" multiple onchange="uploadPhotos(this.files)">
       <button class="btn btn-primary" onclick="document.getElementById('photoFileInput').click()">＋ Upload Images</button>
     </div>
   </div>
@@ -7617,21 +7619,49 @@ function renderAllImgSlots() {
 function adminCdnImg(url) {
   if (!url) return url;
   const s = String(url);
-  const m = s.match(/^https?:\/\/[^/]+\/storage\/v1\/object\/public\/([^"'?\s]+)(\?.*)?$/);
+  const m = s.match(/^https?:\/\/[^/]+\/storage\/v1\/object\/public\/([^"'\s]+)(\?.*)?$/);
   if (m) return '/cdn-storage/' + m[1] + (m[2] || '');
   return s;
 }
 
+// Video detection — a product slot can now hold a video (mp4/webm/mov).
+// Checked by filename extension (works for both Supabase and CDN URLs)
+// and by the ?response-content-type param that Supabase appends.
+function isVideoFile(nameOrUrl) {
+  const s = String(nameOrUrl || '').toLowerCase().split('?')[0];
+  return /\.(mp4|webm|mov|m4v|3gp)(\?|$)/.test(s);
+}
+function isVideoFileUrl(url) {
+  if (!url) return false;
+  const s = String(url).toLowerCase();
+  if (/response-content-type=video/.test(s)) return true;
+  return isVideoFile(s);
+}
+
 function renderImgSlot(slot) {
   const url = adminCdnImg(document.getElementById(IMG_SLOT_FIELDS[slot]).value || '');
+  const isVideoUrl = isVideoFileUrl(url);
   const box = document.getElementById('imgSlot' + slot);
   const img = document.getElementById('imgSlotPreview' + slot);
   const plus = document.getElementById('imgSlotPlus' + slot);
-  // clear any old delete button / badge / spinner before redrawing
-  box.querySelectorAll('.img-slot-del,.img-slot-main-badge,.img-slot-spinner').forEach(el => el.remove());
+  // clear any old delete button / badge / spinner / video elements before redrawing
+  box.querySelectorAll('.img-slot-del,.img-slot-main-badge,.img-slot-spinner,.img-slot-vid-badge,video').forEach(el => el.remove());
   if (url) {
-    img.src = url; img.style.display = 'block'; plus.style.display = 'none';
+    plus.style.display = 'none';
     box.classList.add('filled');
+    if (isVideoUrl) {
+      img.style.display = 'none'; img.src = '';
+      const vid = document.createElement('video');
+      vid.className = 'img-slot-preview-video';
+      vid.src = url; vid.muted = true; vid.loop = true; vid.playsInline = true;
+      vid.autoplay = true;
+      box.appendChild(vid);
+      const vb = document.createElement('span');
+      vb.className = 'img-slot-vid-badge'; vb.textContent = 'VIDEO';
+      box.appendChild(vb);
+    } else {
+      img.src = url; img.style.display = 'block';
+    }
     if (slot === 1) {
       const badge = document.createElement('span');
       badge.className = 'img-slot-main-badge'; badge.textContent = 'MAIN';
@@ -7686,7 +7716,7 @@ async function handleImgSlotFileChosen(input) {
       return;
     }
     document.getElementById(IMG_SLOT_FIELDS[slot]).value = d.url || d.public_url || '';
-    toast('✅ Image uploaded');
+    toast('✅ ' + (isVideoFile(file.name) ? 'Video' : 'Image') + ' uploaded — compressed & optimised');
   } catch(e) {
     toast('Upload error: ' + e.message, 'error');
   } finally {
@@ -8912,7 +8942,9 @@ let banners = [...DEMO_BANNERS];
 function loadBanners() {
   document.getElementById('bannerGrid').innerHTML = banners.map((b,i) => `
     <div class="card" style="padding:0;overflow:hidden;">
-      <img src="${adminCdnImg(b.url)}" class="banner-preview" onerror="this.style.display='none'">
+      ${isVideoFileUrl(b.url)
+        ? '<video src="'+adminCdnImg(b.url)+'" muted loop playsinline preload="metadata" autoplay class="banner-preview" style="object-fit:cover;"></video><span class="img-slot-vid-badge">▶ VIDEO</span>'
+        : '<img src="'+adminCdnImg(b.url)+'" class="banner-preview" onerror="this.style.display=\'none\'">'}
       <div style="padding:12px 14px;">
         <div style="font-size:0.85rem;font-weight:600;color:var(--text);margin-bottom:8px;">${b.title}</div>
         <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;">
@@ -8980,7 +9012,9 @@ function renderPhotoGrid() {
     return `
     <div class="photo-item ${_mediaSelected.has(fname)?'selected':''}">
       <input type="checkbox" class="photo-select" ${_mediaSelected.has(fname)?'checked':''} onclick="event.stopPropagation(); togglePhotoSelect('${fname}', this.checked)">
-      <img src="${adminCdnImg(img.url)}" alt="${alt}" loading="lazy">
+      ${isVideoFileUrl(img.url)
+        ? '<video src="'+adminCdnImg(img.url)+'" muted loop playsinline preload="metadata" style="pointer-events:none"></video><span class="img-slot-vid-badge">▶ VIDEO</span>'
+        : '<img src="'+adminCdnImg(img.url)+'" alt="'+alt+'" loading="lazy">'}
       <div class="photo-overlay">
         <button class="btn btn-primary btn-sm btn-icon" onclick="navigator.clipboard.writeText('${img.url}').then(()=>{toast('URL Copied! Paste in product Images tab.');})" title="Copy URL">📋</button>
         <button class="btn btn-secondary btn-sm btn-icon" onclick="addLibraryImageToOpenProduct('${img.url}')" title="Add to the currently-open product">➕</button>
@@ -9037,9 +9071,18 @@ function _mediaMaybeConvertToWebP(file) {
     const url = URL.createObjectURL(file);
     img.onload = () => {
       try {
+        // Downscale oversized photos (above 1920px on the long edge) before
+        // encoding — most product/banner photos are viewed far smaller, and
+        // this can shrink a 20 MB phone photo to well under 1 MB of WebP.
+        const MAX_DIM = 1920;
+        let w = img.naturalWidth, h = img.naturalHeight;
+        if (Math.max(w, h) > MAX_DIM) {
+          const s = MAX_DIM / Math.max(w, h);
+          w = Math.round(w * s); h = Math.round(h * s);
+        }
         const canvas = document.createElement('canvas');
-        canvas.width = img.naturalWidth; canvas.height = img.naturalHeight;
-        canvas.getContext('2d').drawImage(img, 0, 0);
+        canvas.width = w; canvas.height = h;
+        canvas.getContext('2d').drawImage(img, 0, 0, w, h);
         canvas.toBlob(blob => {
           URL.revokeObjectURL(url);
           if(!blob) { resolve(file); return; }
@@ -9064,7 +9107,9 @@ async function uploadPhotos(fileList) {
     status.textContent = `Uploading ${rawFile.name}… (${done+1}/${files.length})`;
     bar.style.width = Math.round((done/files.length)*90 + 5) + '%';
     try {
-      const file = await _mediaMaybeConvertToWebP(rawFile);
+      // Videos skip the client-side WebP pass (canvas can't re-encode video);
+      // the backend re-encodes them to H.264/MP4 automatically.
+      const file = rawFile.type.startsWith('video/') ? rawFile : await _mediaMaybeConvertToWebP(rawFile);
       const fd = new FormData(); fd.append('image', file);
       const r = await fetch(`${API}/api/upload/image`, {method:'POST', headers:{'Authorization':`Bearer ${authToken}`}, body:fd});
       const d = await r.json();
@@ -9073,7 +9118,8 @@ async function uploadPhotos(fileList) {
     done++;
   }
   bar.style.width = '100%';
-  status.textContent = `✅ Uploaded ${done}/${files.length} image(s)`;
+  const vids = files.filter(f => f.type.startsWith('video/')).length;
+  status.textContent = `✅ Uploaded ${done}/${files.length} file(s)` + (vids ? ` (${vids} video(s) compressed on the server)` : '');
   toast('Upload complete ✅');
   setTimeout(() => { document.getElementById('uploadProgress').style.display='none'; bar.style.width='0%'; }, 2000);
   loadPhotoLibrary();
@@ -9115,18 +9161,17 @@ async function deletePhoto(filename) {
 const SITE_IMAGE_CATALOG = [
   { group:'Global',      key:'site.logo',              label:'Site Logo',                 hint:'Header + mobile menu drawer',
     fallback:'assets/ozylix-logo.png' },
-  { group:'Home Page',   key:'home.hero.slide1',       label:'Hero Slide 1 — Glutathione', hint:'Main hero slideshow, slide 1 (desktop + mobile)',
-    fallback:'https://i.ibb.co/pBY2WFQ1/6.png' },
-  { group:'Home Page',   key:'home.hero.slide2',       label:'Hero Slide 2 — Spirulina Combo', hint:'Main hero slideshow, slide 2 (desktop + mobile)',
-    fallback:'https://static.wixstatic.com/media/f0adaf_d2f1f845cbe64f11ba4599fa5b047e7e~mv2.jpg' },
-  { group:'Home Page',   key:'home.hero.slide3',       label:'Hero Slide 3 — Multidiata',  hint:'Main hero slideshow, slide 3 (desktop + mobile)',
-    fallback:'https://static.wixstatic.com/media/f0adaf_ab29bcd839104fbca2ce25f572dd0796~mv2.jpg' },
+  // ── Removed (dead slots — the home hero is now the admin banner
+  //    carousel via Website Images → Offer Banners, and these keys are
+  //    referenced by nothing in index.html):
+  //  home.hero.slide1, home.hero.slide2, home.hero.slide3
+  //  b2b.hero_background        (B2B link is now external — no B2B page)
+  // NOTE: about.manufacturing_photo stays — the About page well on the
+  //       live site still shows "photo coming soon" waiting for an upload.
   { group:'About Page',  key:'about.hero_background',  label:'About Hero Background',      hint:'Faint texture behind the About page header',
     fallback:'https://static.wixstatic.com/media/f0adaf_d2f1f845cbe64f11ba4599fa5b047e7e~mv2.jpg' },
-  { group:'About Page',  key:'about.manufacturing_photo', label:'Manufacturing Photo',     hint:'Large photo in the About page story section — currently unassigned (was reusing the Glutathione product photo by mistake; upload a real manufacturing photo here)',
+  { group:'About Page',  key:'about.manufacturing_photo', label:'Manufacturing Photo',     hint:'About page hero well — "Our plant in Anand — photo coming soon" placeholder until uploaded',
     fallback:'' },
-  { group:'B2B Page',    key:'b2b.hero_background',    label:'B2B Hero Background',        hint:'Faint texture behind the B2B page header',
-    fallback:'https://static.wixstatic.com/media/f0adaf_ab29bcd839104fbca2ce25f572dd0796~mv2.jpg' },
 ];
 
 async function loadSiteImages() {
@@ -9149,11 +9194,13 @@ async function loadSiteImages() {
           const isOverridden = !!overrides[item.key];
           return `
           <div class="card" style="padding:0;overflow:hidden;">
-            <img src="${adminCdnImg(current)}" class="banner-preview" onerror="this.style.display='none'">
+            ${isVideoFileUrl(current)
+              ? '<video src="'+adminCdnImg(current)+'" muted loop playsinline preload="metadata" autoplay class="banner-preview" style="object-fit:cover;"></video><span class="img-slot-vid-badge">▶ VIDEO</span>'
+              : '<img src="'+adminCdnImg(current)+'" class="banner-preview" onerror="this.style.display=\'none\'">'}
             <div style="padding:12px 14px;">
               <div style="font-size:0.85rem;font-weight:600;color:var(--text);">${item.label}</div>
               <div style="font-size:0.72rem;color:var(--text3);margin-bottom:10px;">${item.hint}${isOverridden?' · <span style="color:var(--green-text);font-weight:600;">custom image set</span>':' · using site default'}</div>
-              <input type="file" accept="image/*,.svg" id="siteImgFile-${item.key}" style="display:none;" onchange="uploadSiteImage(this, '${item.key}')">
+              <input type="file" accept="image/*,.svg,video/*,.mp4,.webm,.mov" id="siteImgFile-${item.key}" style="display:none;" onchange="uploadSiteImage(this, '${item.key}')">
               <div style="display:flex;gap:6px;">
                 <button class="btn btn-primary btn-sm" style="flex:1;" onclick="document.getElementById('siteImgFile-${item.key}').click()">📤 Upload Image</button>
                 ${isOverridden ? `<button class="btn btn-danger btn-sm btn-icon" onclick="resetSiteImage('${item.key}', '${current}')" title="Delete this image everywhere and revert to default">🗑️</button>` : ''}
@@ -9242,7 +9289,9 @@ function renderBannerManagers() {
   const sb = document.getElementById('shopBannerManager');
   const cards = (banners, prefix, withMeta) => banners.map(b => `
     <div class="card" style="padding:0;overflow:hidden;">
-      <img src="${adminCdnImg(b.img) || ''}" class="banner-preview" onerror="this.style.display='none'">
+      ${isVideoFileUrl(b.img)
+        ? '<video src="'+adminCdnImg(b.img)+'" muted loop playsinline preload="metadata" autoplay class="banner-preview" style="object-fit:cover;"></video><span class="img-slot-vid-badge">▶ VIDEO</span>'
+        : '<img src="'+adminCdnImg(b.img)+'" class="banner-preview" onerror="this.style.display=\'none\'">'}
       <div style="padding:12px 14px;">
         <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
           <span style="font-size:0.85rem;font-weight:600;">${prefix} #${b.n}</span>
@@ -9254,8 +9303,8 @@ function renderBannerManagers() {
         <input class="form-control" style="font-size:0.8rem;" placeholder="Link, e.g. /product/glutathione-effervescent-tablet" value="${escAttr(b.link)}" onchange="setBannerMeta('${prefix}', ${b.n}, 'link', this.value)">
         ` : '<div style="font-size:0.72rem;color:var(--text3);margin-bottom:10px;">The image is the whole card — no text overlay needed.</div>'}
         <div style="display:flex;gap:6px;margin-top:10px;">
-          <input type="file" accept="image/*,.webp,.svg" id="bannerFile-${prefix}-${b.n}" style="display:none;" onchange="uploadBannerImage('${prefix}', ${b.n}, this)">
-          <button class="btn btn-primary btn-sm" style="flex:1;" onclick="document.getElementById('bannerFile-${prefix}-${b.n}').click()">📤 ${b.img ? 'Replace Image' : 'Upload Image'}</button>
+          <input type="file" accept="image/*,.webp,.svg,video/*,.mp4,.webm,.mov" id="bannerFile-${prefix}-${b.n}" style="display:none;" onchange="uploadBannerImage('${prefix}', ${b.n}, this)">
+          <button class="btn btn-primary btn-sm" style="flex:1;" onclick="document.getElementById('bannerFile-${prefix}-${b.n}').click()">📤 ${b.img ? 'Replace Media' : 'Upload Image / Video'}</button>
         </div>
       </div>
     </div>`).join('');
@@ -9269,7 +9318,7 @@ function emptyMsg(m) { return '<div class="empty-state" style="grid-column:1/-1;
 let _homeBannerNext = 1, _shopBannerNext = 3;
 async function addHomeBanner() {
   const inp = document.createElement('input');
-  inp.type = 'file'; inp.accept = 'image/*,.webp,.svg';
+  inp.type = 'file'; inp.accept = 'image/*,.webp,.svg,video/*,.mp4,.webm,.mov';
   _homeBannerNext = 1;
   const used = new Set(homeBanners().map(b => b.n));
   while (used.has(_homeBannerNext)) _homeBannerNext++;
@@ -9278,7 +9327,7 @@ async function addHomeBanner() {
 }
 async function addShopBanner() {
   const inp = document.createElement('input');
-  inp.type = 'file'; inp.accept = 'image/*,.webp,.svg';
+  inp.type = 'file'; inp.accept = 'image/*,.webp,.svg,video/*,.mp4,.webm,.mov';
   _shopBannerNext = 3;
   const used = new Set(shopBanners().map(b => b.n));
   while (used.has(_shopBannerNext)) _shopBannerNext++;
@@ -9295,7 +9344,7 @@ async function uploadBannerImage(prefix, n, input) {
     if (!r.ok) { toast(d.error || 'Upload failed', 'error'); return; }
     const url = d.url || d.public_url || '';
     await apiFetch(`/api/admin/site-media/${encodeURIComponent(key)}`, { method: 'PUT', body: JSON.stringify({ url }) });
-    toast('✅ Banner image uploaded — live on the site now');
+    toast('✅ ' + (file.type.startsWith('video/') ? 'Video' : 'Banner') + ' uploaded — live on the site now');
     loadBannerManagers();
   } catch(e) { toast('Upload error: ' + e.message, 'error'); }
 }
@@ -9352,11 +9401,13 @@ async function loadFallbackManager() {
         const url = overrides[cat] || '';
         return `
         <div class="card" style="padding:0;overflow:hidden;">
-          <img src="${adminCdnImg(url) || ''}" class="banner-preview" onerror="this.style.display='none'">
+          ${isVideoFileUrl(url)
+            ? '<video src="'+adminCdnImg(url)+'" muted loop playsinline preload="metadata" autoplay class="banner-preview" style="object-fit:cover;"></video><span class="img-slot-vid-badge">▶ VIDEO</span>'
+            : '<img src="'+adminCdnImg(url)+'" class="banner-preview" onerror="this.style.display=\'none\'">'}
           <div style="padding:12px 14px;">
             <div style="font-size:0.85rem;font-weight:600;margin-bottom:10px;">${cat === 'default' ? 'Default (any category)' : cat.charAt(0).toUpperCase() + cat.slice(1)}</div>
             ${url ? '<div style="font-size:0.72rem;color:var(--green-text);margin-bottom:10px;">Custom image set</div>' : '<div style="font-size:0.72rem;color:var(--text3);margin-bottom:10px;">No image yet — placeholder shows</div>'}
-            <input type="file" accept="image/*,.webp,.svg" id="fallbackFile-${cat}" style="display:none;" onchange="uploadFallbackImage('${cat}', this)">
+            <input type="file" accept="image/*,.webp,.svg,video/*,.mp4,.webm,.mov" id="fallbackFile-${cat}" style="display:none;" onchange="uploadFallbackImage('${cat}', this)">
             <div style="display:flex;gap:6px;">
               <button class="btn btn-primary btn-sm" style="flex:1;" onclick="document.getElementById('fallbackFile-${cat}').click()">📤 ${url ? 'Replace Image' : 'Upload Image'}</button>
               ${url ? '<button class="btn btn-danger btn-sm btn-icon" onclick="deleteFallbackImage(\'' + cat + '\')" title="Remove this fallback">🗑️</button>' : ''}
@@ -9419,7 +9470,9 @@ function promoCards() {
 function renderPromoMediaGrid() {
   const cards = promoCards().map(b => `
     <div class="card" style="padding:0;overflow:hidden;">
-      <img src="${adminCdnImg(b.img) || ''}" class="banner-preview" onerror="this.style.display='none'">
+      ${isVideoFileUrl(b.img)
+        ? '<video src="'+adminCdnImg(b.img)+'" muted loop playsinline preload="metadata" autoplay class="banner-preview" style="object-fit:cover;"></video><span class="img-slot-vid-badge">▶ VIDEO</span>'
+        : '<img src="'+adminCdnImg(b.img)+'" class="banner-preview" onerror="this.style.display=\'none\'">'}
       <div style="padding:12px 14px;">
         <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
           <span style="font-size:0.85rem;font-weight:600;">Promo Card #${b.n}</span>
@@ -9428,8 +9481,8 @@ function renderPromoMediaGrid() {
         <div style="font-size:0.72rem;color:var(--text3);margin-bottom:10px;">This image replaces the automatic product photo in carousel position #${b.n}.</div>
         <input class="form-control" style="font-size:0.8rem;" placeholder="Caption shown on the card (optional)" value="${escAttr(b.alt)}" onchange="setPromoCardAlt(${b.n}, this.value)">
         <div style="display:flex;gap:6px;margin-top:10px;">
-          <input type="file" accept="image/*,.webp,.svg" id="promoFile-${b.n}" style="display:none;" onchange="uploadPromoCardImage(${b.n}, this)">
-          <button class="btn btn-primary btn-sm" style="flex:1;" onclick="document.getElementById('promoFile-${b.n}').click()">📤 ${b.img ? 'Replace Image' : 'Upload Image'}</button>
+          <input type="file" accept="image/*,.webp,.svg,video/*,.mp4,.webm,.mov" id="promoFile-${b.n}" style="display:none;" onchange="uploadPromoCardImage(${b.n}, this)">
+          <button class="btn btn-primary btn-sm" style="flex:1;" onclick="document.getElementById('promoFile-${b.n}').click()">📤 ${b.img ? 'Replace Media' : 'Upload Image / Video'}</button>
         </div>
       </div>
     </div>`).join('');
@@ -9442,7 +9495,7 @@ async function addPromoCard() {
   while (n <= 10 && used.has(n)) n++;
   if (n > 10) { toast('All 10 promo card slots are filled — remove one first', 'error'); return; }
   const inp = document.createElement('input');
-  inp.type = 'file'; inp.accept = 'image/*,.webp,.svg';
+  inp.type = 'file'; inp.accept = 'image/*,.webp,.svg,video/*,.mp4,.webm,.mov';
   inp.onchange = () => uploadPromoCardImage(n, inp);
   inp.click();
 }
@@ -9456,7 +9509,7 @@ async function uploadPromoCardImage(n, input) {
     if (!r.ok) { toast(d.error || 'Upload failed', 'error'); return; }
     const url = d.url || d.public_url || '';
     await apiFetch(`/api/admin/site-media/${encodeURIComponent(key)}`, { method: 'PUT', body: JSON.stringify({ url }) });
-    toast('✅ Promo card uploaded — live on the home page now');
+    toast('✅ ' + (file.type.startsWith('video/') ? 'Video' : 'Image') + ' uploaded — live on the home page now');
     loadBannerManagers(); loadPromoMedia();
   } catch(e) { toast('Upload error: ' + e.message, 'error'); }
 }
