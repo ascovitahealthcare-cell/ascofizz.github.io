@@ -8766,9 +8766,8 @@ setInterval(function() { syncAppCartBadge(); syncAppWishBadge(); }, 2000);
       // Watch the hero banner carousel and shop banner container for removals
       // added by admin re-renders; the family functions re-run on each cycle
       // inside applySiteMedia anyway, this covers late DOM changes.
-      var __smTargets = [document.getElementById('heroBanner'), document.getElementById('shopBannerWrap')].filter(Boolean);
+      var __smTargets = [document.getElementById('heroBanner'), document.querySelector('.shop-promos')].filter(Boolean);
       __smTargets.forEach(function (t) { __smObserver.observe(t, { childList: true }); });
-    }
     }
     function loadSiteMedia(){
       var base = (typeof API_BASE !== 'undefined') ? API_BASE : 'https://ascovitahealthcare-cell-github-io.onrender.com';
