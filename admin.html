@@ -3477,6 +3477,14 @@ function azTogglePw() {
     </div>
   </div>
   <div id="promoMediaGrid" class="grid-3"></div>
+
+  <div class="page-hdr" style="margin-top:34px;">
+    <div><div class="page-title">Promo Media Strip</div><div class="page-sub">The infinite scrolling marquee of promo cards on the home page (right below the Offers carousel). Upload image or video per slot — videos autoplay muted automatically. Everything serves from the Cloudflare CDN with auto-compression; changes go live instantly, no redeploy. The hardcoded imgbb cards in the code act only as an offline fallback while slots are empty.</div></div>
+    <div class="page-actions">
+      <button class="btn btn-primary" onclick="addPromoStripCard()">＋ Add Strip Card</button>
+    </div>
+  </div>
+  <div id="promoStripGrid" class="grid-3"></div>
 </div>
 
 <!-- ═════════════ CALENDAR ═════════════ -->
@@ -4997,7 +5005,7 @@ function showPage(name) {
   if(name === 'payments') loadPayments();
   if(name === 'invoices') loadInvoices();
   if(name === 'banners') loadBanners();
-  if(name === 'siteimages') { loadSiteImages(); loadPromoMedia(); loadBannerManagers(); loadFallbackManager(); }
+  if(name === 'siteimages') { loadSiteImages(); loadPromoMedia(); loadBannerManagers(); loadFallbackManager(); loadPromoStripMedia(); }
   if(name === 'settings') { loadSettings(); }
   if(name === 'aiteam') { loadAITeamPage(); }
   if(name === 'calendar') { renderCalendar(); }
@@ -5016,7 +5024,7 @@ function refreshCurrent() {
   const active = document.querySelector('.page.active');
   if(!active) return;
   const id = active.id.replace('page-','');
-  const fns = {dashboard:loadDashboard,orders:loadOrders,products:loadProducts,inventory:loadInventory,discounts:loadDiscounts,customers:loadCustomers,analytics:loadAnalytics,payments:loadPayments,invoices:loadInvoices,photolibrary:loadPhotoLibrary,banners:loadBanners,calendar:renderCalendar,siteimages:()=>{loadSiteImages();loadPromoMedia();loadBannerManagers();loadFallbackManager();}};
+  const fns = {dashboard:loadDashboard,orders:loadOrders,products:loadProducts,inventory:loadInventory,discounts:loadDiscounts,customers:loadCustomers,analytics:loadAnalytics,payments:loadPayments,invoices:loadInvoices,photolibrary:loadPhotoLibrary,banners:loadBanners,calendar:renderCalendar,siteimages:()=>{loadSiteImages();loadPromoMedia();loadBannerManagers();loadFallbackManager();loadPromoStripMedia();}};
   if(fns[id]) fns[id]();
 }
 
@@ -9812,6 +9820,141 @@ async function deletePromoCard(n) {
     await apiFetch(`/api/admin/site-media/${encodeURIComponent(key + '.alt')}`, { method: 'DELETE' }).catch(() => {});
     toast('🗑️ Promo card removed');
     loadBannerManagers(); loadPromoMedia();
+  } catch(e) { toast('Could not delete: ' + e.message, 'error'); }
+}
+// ═══════════════════════════════════════════════
+// PROMO MEDIA STRIP — the infinite scrolling marquee on the home
+// page (below the Offers carousel). Managed through the
+// /api/admin/promo-media endpoints (promo_media table). Cards can be
+// reordered and toggled active/inactive; the storefront serves every
+// card through the Cloudflare CDN (/cdn-storage/) with auto-compression.
+async function loadPromoStripMedia() {
+  try {
+    const r = await apiFetch('/api/admin/promo-media');
+    const d = await r.json();
+    _promoStripAll = d.data || [];
+  } catch(e) { _promoStripAll = _promoStripAll || []; }
+  renderPromoStripGrid();
+}
+function renderPromoStripGrid() {
+  const cards = (_promoStripAll || []).map((c, i) => {
+    const url = c.src || '';
+    const isVid = isVideoFileUrl(url);
+    const pos = i + 1;
+    const cta = (c.cta_page || 'shop').charAt(0).toUpperCase() + (c.cta_page || 'shop').slice(1);
+    return `
+    <div class="card" style="padding:0;overflow:hidden;opacity:${c.active ? '1' : '0.55'};">
+      ${url
+        ? (isVid
+            ? '<video src="'+adminCdnImg(url)+'" muted loop playsinline preload="metadata" autoplay class="banner-preview" style="object-fit:cover;"></video><span class="img-slot-vid-badge">▶ VIDEO</span>'
+            : '<img src="'+adminCdnImg(url)+'" class="banner-preview" onerror="this.style.display=\'none\'">')
+        : '<div class="banner-preview" style="background:var(--surface2);display:flex;align-items:center;justify-content:center;color:var(--text3);font-size:0.78rem;">No media</div>'}
+      <div style="padding:12px 14px;">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
+          <span style="font-size:0.85rem;font-weight:600;">Strip Card #${pos} → ${cta}</span>
+          <div style="display:flex;gap:4px;">
+            ${i > 0 ? '<button class="btn btn-secondary btn-sm btn-icon" onclick="movePromoStripCard(\''+c.id+'\',-1)" title="Move earlier">◀</button>' : ''}
+            ${i < (_promoStripAll||[]).length - 1 ? '<button class="btn btn-secondary btn-sm btn-icon" onclick="movePromoStripCard(\''+c.id+'\',1)" title="Move later">▶</button>' : ''}
+            <button class="btn btn-secondary btn-sm btn-icon" onclick="togglePromoStripCard('${c.id}',${c.active ? 'false' : 'true'})" title="${c.active ? 'Hide' : 'Show'} this card">${c.active ? '👁️' : '🚫'}</button>
+            <button class="btn btn-danger btn-sm btn-icon" onclick="deletePromoStripCard('${c.id}')" title="Remove this card">🗑️</button>
+          </div>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:10px;">
+          <select class="form-control" style="font-size:0.78rem;" onchange="setPromoStripField('${c.id}','type',this.value)">
+            <option value="image"${(c.type||'image')==='image'?' selected':''}>Image</option>
+            <option value="video"${c.type==='video'?' selected':''}>Video</option>
+          </select>
+          <select class="form-control" style="font-size:0.78rem;" onchange="setPromoStripField('${c.id}','cta_page',this.value)">
+            <option value="shop"${(c.cta_page||'shop')==='shop'?' selected':''}>→ Shop (default)</option>
+            <option value="home"${c.cta_page==='home'?' selected':''}>→ Home</option>
+            <option value="about"${c.cta_page==='about'?' selected':''}>→ About</option>
+            <option value="contact"${c.cta_page==='contact'?' selected':''}>→ Contact</option>
+          </select>
+        </div>
+        <div style="display:flex;gap:6px;">
+          <input type="file" accept="image/*,.webp,.svg,video/*,.mp4,.webm,.mov" id="promoStripFile-${c.id}" style="display:none;" onchange="uploadPromoStripCard('${c.id}',this)">
+          <button class="btn btn-primary btn-sm" style="flex:1;" onclick="document.getElementById('promoStripFile-${c.id}').click()">📤 ${url ? 'Replace Media' : 'Upload Image / Video'}</button>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+  document.getElementById('promoStripGrid').innerHTML = cards || emptyMsg('No strip cards yet — click “＋ Add Strip Card” and the marquee appears on the home page instantly.');
+}
+async function addPromoStripCard() {
+  const inp = document.createElement('input');
+  inp.type = 'file'; inp.accept = 'image/*,.webp,.svg,video/*,.mp4,.webm,.mov';
+  inp.onchange = () => createPromoStripCard(inp.files[0]);
+  inp.click();
+}
+async function createPromoStripCard(file) {
+  if (!file) return;
+  const fd = new FormData(); fd.append('image', file);
+  try {
+    const r = await fetch(`${API}/api/upload/image`, { method: 'POST', headers: { 'Authorization': `Bearer ${authToken}` }, body: fd });
+    const d = await r.json();
+    if (!r.ok) { toast(d.error || 'Upload failed', 'error'); return; }
+    const url = d.url || d.public_url || '';
+    await apiFetch('/api/admin/promo-media', {
+      method: 'POST',
+      body: JSON.stringify({ src: url, type: file.type.startsWith('video/') ? 'video' : 'image', cta_page: 'shop' })
+    });
+    toast('✅ ' + (file.type.startsWith('video/') ? 'Video' : 'Image') + ' added to the promo strip — live on the home page now');
+    loadPromoStripMedia();
+  } catch(e) { toast('Could not add card: ' + e.message, 'error'); }
+}
+async function uploadPromoStripCard(id, input) {
+  const file = input.files[0]; if (!file) return;
+  const fd = new FormData(); fd.append('image', file);
+  try {
+    const r = await fetch(`${API}/api/upload/image`, { method: 'POST', headers: { 'Authorization': `Bearer ${authToken}` }, body: fd });
+    const d = await r.json();
+    if (!r.ok) { toast(d.error || 'Upload failed', 'error'); return; }
+    const url = d.url || d.public_url || '';
+    await apiFetch(`/api/admin/promo-media/${encodeURIComponent(id)}`, {
+      method: 'PUT',
+      body: JSON.stringify({ src: url, type: file.type.startsWith('video/') ? 'video' : 'image' })
+    });
+    toast('✅ ' + (file.type.startsWith('video/') ? 'Video' : 'Image') + ' uploaded — live on the home page now');
+    loadPromoStripMedia();
+  } catch(e) { toast('Upload error: ' + e.message, 'error'); }
+}
+async function setPromoStripField(id, field, value) {
+  try {
+    await apiFetch(`/api/admin/promo-media/${encodeURIComponent(id)}`, { method: 'PUT', body: JSON.stringify({ [field]: value }) });
+    toast('✅ Saved');
+    loadPromoStripMedia();
+  } catch(e) { toast('Could not save: ' + e.message, 'error'); }
+}
+async function togglePromoStripCard(id, active) {
+  try {
+    await apiFetch(`/api/admin/promo-media/${encodeURIComponent(id)}`, { method: 'PUT', body: JSON.stringify({ active }) });
+    toast(active ? '👁️ Card is now visible on the home page' : '🚫 Card hidden from the home page');
+    loadPromoStripMedia();
+  } catch(e) { toast('Could not update: ' + e.message, 'error'); }
+}
+async function movePromoStripCard(id, dir) {
+  const all = _promoStripAll || [];
+  const idx = all.findIndex(c => c.id === id);
+  const swapIdx = idx + dir;
+  if (idx < 0 || swapIdx < 0 || swapIdx >= all.length) return;
+  const [a, b] = [all[idx].sort_order, all[swapIdx].sort_order];
+  try {
+    await apiFetch(`/api/admin/promo-media/${encodeURIComponent(id)}`, { method: 'PUT', body: JSON.stringify({ sort_order: b }) });
+    await apiFetch(`/api/admin/promo-media/${encodeURIComponent(all[swapIdx].id)}`, { method: 'PUT', body: JSON.stringify({ sort_order: a }) });
+    loadPromoStripMedia();
+  } catch(e) { toast('Could not reorder: ' + e.message, 'error'); }
+}
+async function deletePromoStripCard(id) {
+  const row = (_promoStripAll || []).find(c => c.id === id);
+  if (!confirm('Remove this promo strip card (its image is also deleted from storage)? This can\'t be undone.')) return;
+  try {
+    if (row && row.src) {
+      const filename = String(row.src).split('/').pop().split('?')[0];
+      await apiFetch(`/api/upload/image/${encodeURIComponent(filename)}`, { method: 'DELETE' }).catch(() => {});
+    }
+    await apiFetch(`/api/admin/promo-media/${encodeURIComponent(id)}`, { method: 'DELETE' });
+    toast('🗑️ Strip card removed');
+    loadPromoStripMedia();
   } catch(e) { toast('Could not delete: ' + e.message, 'error'); }
 }
 // ═══════════════════════════════════════════════

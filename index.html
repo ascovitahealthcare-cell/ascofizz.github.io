@@ -8579,7 +8579,7 @@ setInterval(function() { syncAppCartBadge(); syncAppWishBadge(); }, 2000);
       var page = (item && item.ctaPage) || 'shop';
       var media = hasSrc
         ? (item.type==='video'
-            ? '<video class="pm-card-media" src="'+item.src+'"'+(item.poster?' poster="'+item.poster+'"':'')+' muted playsinline loop preload="metadata"></video>'
+            ? '<video class="pm-card-media" src="'+item.src+'"'+(item.poster?' poster="'+item.poster+'"':'')+' muted playsinline loop preload="metadata" autoplay></video>'
             // loading="lazy" is wrong on a marquee. Lazy only fires when an
             // element enters the VIEWPORT; this track is translated
             // horizontally, so the off-screen half never triggers a load and
@@ -8612,8 +8612,16 @@ setInterval(function() { syncAppCartBadge(); syncAppWishBadge(); }, 2000);
       track.innerHTML = cards
         + '<div class="pm-clone" aria-hidden="true" role="presentation" style="display:contents">' + cards + '</div>';
       track.querySelectorAll('video').forEach(function(v){
-        v.addEventListener('mouseenter',function(){ v.play(); });
-        v.addEventListener('mouseleave',function(){ v.pause(); v.currentTime=0; });
+        v.muted = true;
+        v.setAttribute('playsinline','');
+        v.addEventListener('loadstart',function(){ v.play().catch(function(){}); });
+        // Hover still pauses so users can stare at a still tile without
+        // losing data — it resumes 0.5s after the cursor leaves.
+        v.addEventListener('mouseenter',function(){ try{v.pause();}catch(e){} });
+        v.addEventListener('mouseleave',function(){ v.currentTime=0; v.play().catch(function(){}); });
+        // iOS needs an explicit kick for muted autoplay videos inside a
+        // translated container.
+        v.play().catch(function(){});
       });
     }
     // A card is only worth showing if it actually carries media. The admin
@@ -8647,8 +8655,12 @@ setInterval(function() { syncAppCartBadge(); syncAppWishBadge(); }, 2000);
           clearTimeout(timer);
           var cdn = (typeof cdnImg === 'function') ? cdnImg : function(u){ return u; };
           var remote = usable(d && (d.data || d.items || d)).map(function(m){
-          return m && typeof m === 'object' ? Object.assign({}, m, { src: cdn(m.src), poster: cdn(m.poster) }) : m;
-        });
+            if (m && typeof m === 'object') {
+              var t = m.type || mediaTypeFromUrl(m.src);
+              return Object.assign({}, m, { type: t, src: cdn(m.src), poster: cdn(m.poster) });
+            }
+            return m;
+          });
           if (remote.length) {
             paintPromoMedia(remote);
             if (section) section.style.display = '';
