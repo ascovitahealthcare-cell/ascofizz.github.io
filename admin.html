@@ -2029,7 +2029,7 @@ body.theme-frost .card.frost-navy .kpi-val, body.theme-frost .card.frost-navy .k
     <form class="login-card" onsubmit="event.preventDefault();doLogin();">
       <div class="form-group" style="margin-bottom:16px">
         <label class="field-label" for="loginUser">Username</label>
-        <input type="text" id="loginUser" class="field-input" placeholder="admin" value="admin"
+        <input type="text" id="loginUser" class="field-input" placeholder="Enter admin username"
                autocomplete="username" autocapitalize="none" autocorrect="off" spellcheck="false">
       </div>
       <div class="form-group">
@@ -4449,6 +4449,9 @@ async function doLogin() {
       authToken = d.token;
       localStorage.setItem('ascovita_token', authToken);
       localStorage.setItem('ascovita_role', d.role || 'admin');
+      // A bounce right after sign-in is the main pain point right now;
+      // clear any stale logout message so a fresh session starts clean.
+      try { localStorage.removeItem('ascovita_logout_reason'); } catch(e) {}
       err.style.display = 'none';
       btn.textContent = '✅ Logged in!';
       document.getElementById('loginScreen').style.display = 'none';
