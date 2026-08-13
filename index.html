@@ -12182,7 +12182,7 @@ function cdnImg(url) {
 
 function getProductImg(p) {
   if (p.image && p.image.startsWith('http')) return cdnImg(p.image);
-  return PRODUCT_FALLBACKS[p.category] || PRODUCT_FALLBACKS['default'];
+  return cdnImg(PRODUCT_FALLBACKS[p.category] || PRODUCT_FALLBACKS['default']);
 }
 
 // ══════════════════════════════════════════════════════════════════════
@@ -19063,7 +19063,7 @@ function renderPromoCarousel() {
       '</div>' +
       '<div class="promo-card-media">' +
         (img
-          ? '<img src="' + img + '" alt="' + alt + '" ' +
+          ? '<img src="' + cdnImg(img) + '" alt="' + alt + '" ' +
             (i === 0 ? 'fetchpriority="high"' : 'loading="lazy"') +
             ' decoding="async" width="800" height="800">'
           : '<img src="" data-awaiting-upload="true" alt="' + alt + '">') +
