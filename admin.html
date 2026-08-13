@@ -10075,7 +10075,7 @@ async function testIntegration(id) {
   if(badge) { badge.className='badge badge-gray'; badge.textContent='⏳ Testing…'; }
   try {
     const headers = intg.checkAuth ? {'Authorization':`Bearer ${authToken}`} : {};
-    const r = await fetch(intg.checkUrl(), {headers, signal:AbortSignal.timeout(8000)});
+    const r = await fetch(intg.checkUrl(), {headers, signal:AbortSignal.timeout(sweepBudgetMs || 8000)});
     if(r.ok) {
       // Health endpoints return JSON with a status field — check it
       // Accept: "ok", "connected", "env_missing" (set in Render), or HTTP 200 with no status
@@ -10124,11 +10124,16 @@ async function testIntegration(id) {
 /* Set during the automatic startup sweep so healthy-service pills don't
    stack over the dashboard; manual checks (Check All / Test) unset it. */
 let silentIntgCheck = true;
+/* Check everything in parallel instead of one-by-one. Startup sweep gets a
+   tight 4s per-check budget (healthy services flip their badges fast and a
+   dead service can't stall the dashboard); manual 'Check All' keeps 6s.
+   Per-check fetch timeout inside testIntegration() adapts to the same budget. */
+let sweepBudgetMs = 0;
 async function checkIntegrations(manual=false) {
   silentIntgCheck = !manual;
-  for(const intg of INTEGRATIONS) {
-    if(intg.checkUrl) await testIntegration(intg.id);
-  }
+  sweepBudgetMs = manual ? 6000 : 4000;
+  await Promise.all(INTEGRATIONS.filter(i => i.checkUrl).map(i => testIntegration(i.id)));
+  sweepBudgetMs = 0;
   silentIntgCheck = false;
 }
 
