@@ -848,6 +848,20 @@ img, canvas, svg, table { max-width:100%; }
   .tb-btn { padding:clamp(5px,2vw,7px) clamp(8px,2.5vw,12px) !important; font-size:clamp(0.7rem,2.5vw,0.78rem) !important; }
   #serverStatus { display:none !important; }
 
+  /* ── App-like toasts: a storm of 6 status pills covering the whole
+     screen looked like a broken panel. Mobile keeps only the 2 newest
+     visible; the rest slide into a single compact "+N more" pill. ── */
+  #toastContainer {
+    max-height: calc(100dvh - 150px);
+    overflow: visible;
+    pointer-events: none;
+  }
+  #toastContainer > .toast { pointer-events: auto; }
+  .toast { max-width: 92vw !important; }
+  /* Hide all but the last 2 toasts on mobile, plus a summary pill. */
+  .toast-hidden-mobile { display: none !important; }
+  .toast-summary { display: none; }
+
   /* Admin bottom nav */
   .admin-bnav { height:clamp(58px,10vw,66px) !important; padding:0 2px clamp(6px,2vw,10px) !important; }
   .abn-btn span:first-child { font-size:clamp(18px,5.5vw,22px) !important; }
@@ -4940,11 +4954,41 @@ function switchTab(group, tab, btn) {
 // TOAST
 // ═══════════════════════════════════════════════
 function toast(msg, type='success') {
+  const tc = document.getElementById('toastContainer');
   const t = document.createElement('div');
   t.className = `toast ${type}`;
   t.innerHTML = `<span>${type==='success'?'✅':type==='error'?'❌':'⚠️'}</span><span>${msg}</span>`;
-  document.getElementById('toastContainer').appendChild(t);
-  setTimeout(()=>t.remove(), 3500);
+  tc.appendChild(t);
+  /* Mobile app rule: never let status pills drown the dashboard. */
+  refreshMobileToasts();
+  const ttl = 3500;
+  setTimeout(()=>{ t.remove(); refreshMobileToasts(); }, ttl);
+}
+/* On phones keep at most MAX_MOBILE_TOASTS visible; the rest collapse
+   into a single compact "• +N more" pill so the screen stays readable. */
+function refreshMobileToasts() {
+  const MAX_MOBILE_TOASTS = 2;
+  const isPhone = window.innerWidth <= 600;
+  const tc = document.getElementById('toastContainer');
+  if (!tc) return;
+  const toasts = [...tc.querySelectorAll('.toast:not(.toast-summary)')];
+  const n = toasts.length;
+  let sum = tc.querySelector('.toast-summary');
+  if (isPhone && n > MAX_MOBILE_TOASTS) {
+    if (!sum) {
+      sum = document.createElement('div');
+      sum.className = 'toast warning toast-summary';
+      sum.innerHTML = `<span>•</span><span id="toastSummaryTxt">…</span>`;
+      tc.insertBefore(sum, tc.firstChild);
+    }
+    const hidden = n - MAX_MOBILE_TOASTS;
+    sum.style.display = 'flex';
+    document.getElementById('toastSummaryTxt').textContent = `${hidden} more notice${hidden>1?'s':''} below (tap More → Settings → Integrations for details)`;
+    toasts.forEach((t,i)=>{ t.classList.toggle('toast-hidden-mobile', i < hidden); });
+  } else {
+    toasts.forEach(t=>t.classList.remove('toast-hidden-mobile'));
+    if (sum) sum.style.display = 'none';
+  }
 }
 
 // ═══════════════════════════════════════════════
@@ -10058,21 +10102,34 @@ async function testIntegration(id) {
       } catch(_) { /* non-JSON endpoint — HTTP 200 is enough */ }
       if(connected) {
         if(badge) { badge.className='badge badge-green'; badge.textContent='✅ Online'; }
-        toast(`${intg.name} is online ✅`);
+        /* Success pills are noise on first load — the badge already shows
+           the status. Toasts still fire on manual 'Test' / 'Check All'. */
+        if (!silentIntgCheck) toast(`${intg.name} is online ✅`);
         setIntegrationState(id, true);
         updateIntegrationBtn(id, true);
       } else {
         if(badge) { badge.className='badge badge-gold'; badge.textContent='⚠️ Config Error'; }
+        /* Config errors matter — always toast, but collapse on mobile. */
         toast(`${intg.name}: ${detail || 'credentials not configured'}`, 'error');
       }
     } else {
       if(badge) { badge.className='badge badge-gold'; badge.textContent='⚠️ Error '+r.status; }
-      toast(`${intg.name} returned ${r.status}`, 'error');
+      if (!silentIntgCheck) toast(`${intg.name} returned ${r.status}`, 'error');
     }
   } catch(e) {
     if(badge) { badge.className='badge badge-red'; badge.textContent='❌ Offline'; }
-    toast(`${intg.name} unreachable: ${e.message}`, 'error');
+    if (!silentIntgCheck) toast(`${intg.name} unreachable: ${e.message}`, 'error');
   }
+}
+/* Set during the automatic startup sweep so healthy-service pills don't
+   stack over the dashboard; manual checks (Check All / Test) unset it. */
+let silentIntgCheck = true;
+async function checkIntegrations(manual=false) {
+  silentIntgCheck = !manual;
+  for(const intg of INTEGRATIONS) {
+    if(intg.checkUrl) await testIntegration(intg.id);
+  }
+  silentIntgCheck = false;
 }
 
 function toggleIntegration(id, connect) {
@@ -12383,11 +12440,23 @@ body.role-admin #azRoleBanner{display:block}
   .tb-ico-sm  { display: inline; }
   .tb-btn     { padding: 0 10px !important; min-width: 40px; }
   .logo-badge { display: none; }
+  /* Wordmark must NEVER disappear — truncate it cleanly instead of the
+     ellipsis "O…" that made the header look missing. */
+  .logo-name  { display: inline !important; min-width: 0; }
+  /* Server health dot on the bell — replaces the hidden status pill. */
+  .notif-btn { position: relative; }
+  .notif-btn::after {
+    content: ''; position: absolute; bottom:-2px; right:-2px;
+    width: 8px; height: 8px; border-radius: 50%;
+    background: var(--green-text, #4a8a28);
+    border: 1.5px solid var(--surface, #fff);
+  }
 }
 
 @media (max-width: 380px) {
-  /* Last resort on a 320px screen: the wordmark goes, the mark stays. */
-  .logo-name { display: none; }
+  /* Last resort on a 320px screen: keep an app-like header — the mark
+     plus a tiny ADMIN wordmark stay visible (never show "O…"). */
+  .logo-name::after { content: ' ADMIN'; font-size: 0.65rem; font-weight: 800; letter-spacing: 0.08em; color: var(--green-text); }
   #roleBadge { display: none !important; }
 }
 
