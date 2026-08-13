@@ -13921,6 +13921,9 @@ function renderProductReviewList(pid) {
         var eduSrc = '';
         try {
           eduSrc = ((window.__ozylixSiteMedia && window.__ozylixSiteMedia[mkey]) || '') || '';
+          // Serve the uploaded creative through the Cloudflare CDN edge path,
+          // not the raw Supabase URL (avoids egress and uses the cached copy).
+          if (eduSrc && typeof cdnImg === 'function') eduSrc = cdnImg(eduSrc);
         } catch (e) { eduSrc = ''; }
         var eduIsVideo = typeof mediaTypeFromUrl === 'function' ? mediaTypeFromUrl(eduSrc) === 'video' : /\.(mp4|webm|mov|m4v|3gp)(\?|$)/i.test(eduSrc);
         var eduImg = eduSrc ? (eduIsVideo ? eduSrc : eduSrc) : '';
