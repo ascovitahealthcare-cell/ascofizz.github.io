@@ -74,9 +74,19 @@ async function serveAdmin(request, env, url) {
   return noIndex(await env.ASSETS.fetch(request));
 }
 
+import { isCdnRequest, handleCdnRequest } from './image-cdn.js';
+
 export default {
   async fetch(request, env) {
     const url = new URL(request.url);
+
+    // Edge image CDN: /cdn-storage/<bucket>/<path> is fetched once from
+    // Supabase Storage and cached at the edge forever, so image delivery
+    // costs Supabase egress only on the very first request. Real files
+    // (favicon, logo etc.) still serve from disk; see worker/image-cdn.js.
+    if (isCdnRequest(url.pathname)) {
+      return handleCdnRequest(request);
+    }
 
     if (url.hostname.toLowerCase() === ADMIN_HOST) {
       return serveAdmin(request, env, url);
