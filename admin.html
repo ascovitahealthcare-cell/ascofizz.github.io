@@ -9445,7 +9445,16 @@ const DEMO_BANNERS = [
 ];
 let banners = [...DEMO_BANNERS];
 
-function loadBanners() {
+async function loadBanners() {
+  // Real source of truth: the promo-media table (home-page marquee cards).
+  try {
+    const r = await apiFetch('/api/admin/promo-media');
+    const d = await r.json();
+    banners = (d.data || []).map(c => ({ id: c.id, title: String(c.src).split('/').pop().split('?')[0].replace(/\.\w+$/, ''), url: c.src, active: !!c.active }));
+  } catch (e) { banners = [...DEMO_BANNERS]; }
+  renderBanners();
+}
+function renderBanners() {
   document.getElementById('bannerGrid').innerHTML = banners.map((b,i) => `
     <div class="card" style="padding:0;overflow:hidden;">
       ${isVideoFileUrl(b.url)
@@ -9455,10 +9464,10 @@ function loadBanners() {
         <div style="font-size:0.85rem;font-weight:600;color:var(--text);margin-bottom:8px;">${b.title}</div>
         <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;">
           <label class="toggle-wrap">
-            <label class="toggle"><input type="checkbox" ${b.active?'checked':''} onchange="banners[${i}].active=this.checked;toast('Banner '+this.checked?'enabled':'disabled')"><span class="toggle-slider"></span></label>
+            <label class="toggle"><input type="checkbox" ${b.active?'checked':''} onchange="banners[${i}].active=this.checked;(function(id,ac){if(id){apiFetch('/api/admin/promo-media/'+id,{method:'PUT',body:JSON.stringify({active:ac})}).catch(()=>{})}toast('Banner '+(ac?'enabled':'hidden'))})(${b.id||0},this.checked)"><span class="toggle-slider"></span></label>
             <span style="font-size:0.75rem;color:var(--text3);">Active</span>
           </label>
-          <button class="btn btn-danger btn-sm" onclick="banners.splice(${i},1);loadBanners();toast('Banner removed')">🗑️ Remove</button>
+          <button class="btn btn-danger btn-sm" onclick="removeBanner(${i})">🗑️ Remove</button>
         </div>
       </div>
     </div>
@@ -9475,12 +9484,28 @@ async function uploadBanner(input) {
     const r = await fetch(`${API}/api/upload/image`, {method:'POST', headers:{'Authorization':`Bearer ${authToken}`}, body:fd});
     const d = await r.json();
     if(!r.ok) throw new Error(d.error||'Upload failed');
-    banners.push({id:Date.now(), title:file.name.replace(/\.[^.]+$/,''), url:d.url, active:true});
-    loadBanners(); toast('Banner uploaded ✅');
+    await apiFetch('/api/admin/promo-media', {
+      method:'POST',
+      body: JSON.stringify({ src: d.url, type: file.type.startsWith('video/') ? 'video' : 'image', cta_page: 'shop', active: true })
+    });
+    loadBanners(); toast((file.type.startsWith('video/') ? 'Video' : 'Banner') + ' uploaded ✅ — live on the home page now');
   } catch(e) { toast(e.message,'error'); }
   input.value='';
 }
 
+async function removeBanner(index) {
+  const b = banners[index]; if (!b || !b.id) { banners.splice(index,1); renderBanners(); return; }
+  if (!confirm('Remove this banner (its file is also deleted from storage)? This can\'t be undone.')) return;
+  try {
+    if (b.url) {
+      const filename = String(b.url).split('/').pop().split('?')[0];
+      await apiFetch(`/api/upload/image/${encodeURIComponent(filename)}`, {method:'DELETE'}).catch(()=>{});
+    }
+    await apiFetch(`/api/admin/promo-media/${encodeURIComponent(b.id)}`, {method:'DELETE'}).catch(()=>{});
+    banners.splice(index,1);
+    renderBanners(); toast('🗑️ Banner removed');
+  } catch(e) { toast('Could not delete: ' + e.message,'error'); }
+}
 // ═══════════════════════════════════════════════
 // PHOTO LIBRARY
 // ═══════════════════════════════════════════════
