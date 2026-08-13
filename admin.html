@@ -3008,10 +3008,23 @@ function azTogglePw() {
   </div>
   <div style="padding:16px 20px;border-top:1px solid var(--border);display:flex;gap:8px;position:sticky;bottom:0;background:var(--surface);">
     <button class="btn btn-secondary" style="flex:1;" onclick="closeProductDrawer()">Cancel</button>
-    <button class="btn btn-primary" style="flex:2;" onclick="saveProductFromDrawer()">💾 Save Product</button>
+        <button class="btn btn-primary" style="flex:2;" onclick="saveProductFromDrawer()">💾 Save Product</button>
   </div>
 </div>
-
+<!-- ═════════════ CUSTOMER INSIGHT DRAWER (Aug 2026: re-targeting) ═════════════ -->
+<div class="drawer-overlay" id="custDrawerOverlay" onclick="closeCustomerInsight()"></div>
+<div class="prod-drawer" id="custDrawer">
+  <div class="prod-drawer-hdr">
+    <div>
+      <div style="font-family:var(--display);font-weight:800;font-size:1rem;color:var(--text);" id="custDrawerTitle">Customer</div>
+      <div style="font-size:0.72rem;color:var(--text3);" id="custDrawerSub">Re-targeting insights &amp; contact channels</div>
+    </div>
+    <button class="modal-close" onclick="closeCustomerInsight()">✕</button>
+  </div>
+  <div class="prod-drawer-body" id="custDrawerBody">
+    <div class="empty-state loading-dots">Loading insights</div>
+  </div>
+</div>
 <!-- ═════════════ INVENTORY ═════════════ -->
 <div class="page" id="page-inventory">
   <div class="page-hdr">
@@ -3076,6 +3089,7 @@ function azTogglePw() {
     <div><div class="page-title">Customers</div><div class="page-sub">Customer database, loyalty & order history</div></div>
     <div class="page-actions">
       <button class="btn btn-secondary" onclick="loadCustomers()">↺ Refresh</button>
+      <button class="btn-export" onclick="exportRetargetingList()" title="Export the re-targeting contact list (email + WhatsApp, with consent flags) for Meta/Google ads">📇 Retarget List</button>
       <button class="btn-export" onclick="openExportModal('customers')">📤 Export ▾</button>
     </div>
   </div>
@@ -3128,8 +3142,8 @@ function azTogglePw() {
 
   <div class="table-wrap">
     <table>
-      <thead><tr><th>Name</th><th>Email</th><th>Phone</th><th>City</th><th>Orders</th><th>Spent</th><th>Joined</th></tr></thead>
-      <tbody id="customersTbody"><tr><td colspan="7"><div class="empty-state loading-dots">Loading</div></td></tr></tbody>
+      <thead><tr><th>Name</th><th>Email</th><th>Phone</th><th>City</th><th>Orders</th><th>Spent</th><th>Segment</th><th>Joined</th></tr></thead>
+      <tbody id="customersTbody"><tr><td colspan="8"><div class="empty-state loading-dots">Loading</div></td></tr></tbody>
     </table>
   </div>
   <div style="display:flex;align-items:center;justify-content:space-between;margin-top:14px;flex-wrap:wrap;gap:10px;">
@@ -8217,9 +8231,53 @@ async function loadCustomers() {
   try {
     const r = await apiFetch('/api/admin/customers');
     allCustomers = (await r.json()).data || [];
+    // Aug 2026: enrich with re-targeting segments. Fetching insights for ALL
+    // customers would be one request each, so instead enrich page-by-page in
+    // the background (a few requests per view) and always on the first page.
+    enrichCustomerSegments(1);
     populateCustomerYearFilter();
     filterCustomers();
   } catch(e) { toast('Customers error: '+e.message,'error'); }
+}
+
+// ── Client-side segment fallback until the server pass arrives ──────────
+// Mirrors the backend classify() so the Segment column is never blank.
+function clientSeg(c) {
+  const days = c.last_order_at ? Math.floor((Date.now() - new Date(c.last_order_at).getTime())/86400000) : (c.created_at ? Math.floor((Date.now() - new Date(c.created_at).getTime())/86400000) : null);
+  const o = c.total_orders || 0, ltv = parseFloat(c.total_spent || 0);
+  if (o === 0) return 'new';
+  if (days !== null && days >= 180) return 'churned';
+  if (days !== null && days >= 90) return 'dormant';
+  if (o >= 5 && ltv >= 10000) return 'vip';
+  if (o >= 5) return 'loyal';
+  if (o >= 2) return 'repeat';
+  return 'new';
+}
+
+// Background enrichment: pulls /api/admin/customers/:id/insights for the
+// current page (and caches), then re-renders. Failure is silent — the
+// client-side fallback keeps the column honest either way.
+async function enrichCustomerSegments(page) {
+  const perPage = 50;
+  const start = (page - 1) * perPage;
+  const ids = allCustomers.slice(start, start + perPage).map(c => c.id);
+  if (!ids.length) return;
+  for (const id of ids) {
+    if (allCustomers.find(c => c.id === id && c.segment)) continue;
+    try {
+      const r = await apiFetch('/api/admin/customers/' + id + '/insights');
+      const ins = (await r.json()).data || {};
+      const c = allCustomers.find(x => x.id === id);
+      if (c) {
+        c.segment = ins.segment || clientSeg(c);
+        c.last_order_at = ins.last_order_at || null;
+        c.total_orders = ins.total_orders != null ? ins.total_orders : c.total_orders;
+        c.total_spent = ins.total_spent != null ? ins.total_spent : c.total_spent;
+        c._insight = ins; // keep full insight for the drawer
+      }
+    } catch(e) { /* keep fallback segment */ }
+  }
+  filterCustomers();
 }
 
 function populateCustomerYearFilter() {
@@ -8360,8 +8418,23 @@ function renderCustomersPage() {
 }
 
 function renderCustomersTable(list) {
+  // Aug 2026: re-targeting segments & contact channels. `segment` is filled by
+  // loadCustomers when the insights pass completes; until then we fall back to
+  // a rough client-side label so the column is never empty.
+  const segChip = seg => {
+    if (!seg) return '';
+    const style = {
+      new:'background:rgba(59,126,166,0.14);color:#2C6E94;border-color:rgba(59,126,166,0.35)',
+      repeat:'background:rgba(74,138,40,0.12);color:var(--green-text);border-color:rgba(74,138,40,0.35)',
+      loyal:'background:rgba(169,122,30,0.12);color:var(--gold-text);border-color:rgba(169,122,30,0.4)',
+      vip:'background:linear-gradient(135deg,rgba(169,122,30,0.22),rgba(194,67,79,0.18));color:#7A5410;border-color:rgba(169,122,30,0.55)',
+      dormant:'background:rgba(91,102,92,0.14);color:#5B665C;border-color:rgba(91,102,92,0.35)',
+      churned:'background:var(--red-soft);color:var(--red);border-color:rgba(194,67,79,0.35)',
+    }[seg] || 'background:var(--surface2);color:var(--text3);border-color:var(--border)';
+    return `<span style="display:inline-block;padding:2px 8px;border-radius:999px;border:1px solid;font-size:0.66rem;font-weight:700;text-transform:capitalize;white-space:nowrap;${style}">${seg}</span>`;
+  };
   document.getElementById('customersTbody').innerHTML = list.length ? list.map(c => `
-    <tr>
+    <tr style="cursor:pointer;" onclick="openCustomerInsight(${c.id})">
       <td>
         <div style="display:flex;align-items:center;gap:10px;">
           <div style="width:32px;height:32px;border-radius:50%;background:var(--green-glow);display:flex;align-items:center;justify-content:center;font-size:0.85rem;font-weight:700;color:var(--green-text);flex-shrink:0;">${esc((c.name||'?')[0].toUpperCase())}</div>
@@ -8369,13 +8442,127 @@ function renderCustomersTable(list) {
         </div>
       </td>
       <td style="font-size:0.78rem;">${esc(c.email)||'-'}</td>
-      <td style="font-family:var(--mono);font-size:0.75rem;">${esc(c.phone)||'-'}</td>
+      <td style="font-family:var(--mono);font-size:0.75rem;">
+        ${esc(c.phone)||'-'}
+        <span style="display:inline-block;margin-left:4px;vertical-align:middle;font-size:0.7rem;" title="Re-target channels">${c.email?'✉️':''}${c.phone?' 📱':''}</span>
+      </td>
       <td style="font-size:0.78rem;">${esc(c.city)||'-'}</td>
       <td style="font-family:var(--mono);">${c.total_orders||0}</td>
       <td style="color:var(--green-text);font-weight:600;">₹${fmtNum(c.total_spent||0)}</td>
+      <td style="white-space:nowrap;">${c.segment ? segChip(c.segment) : segChip(clientSeg(c))}</td>
       <td style="font-size:0.72rem;color:var(--text3);">${fmtDate(c.created_at)}</td>
     </tr>
-  `).join('') : '<tr><td colspan="7"><div class="empty-state"><div class="empty-ico">👥</div><div class="empty-msg">No customers found</div></div></td></tr>';
+  `).join('') : '<tr><td colspan="8"><div class="empty-state"><div class="empty-ico">👥</div><div class="empty-msg">No customers found</div></div></td></tr>';
+}
+
+// ── Customer insight drawer (Aug 2026: re-targeting) ──────────────────
+async function openCustomerInsight(id) {
+  const drawer = document.getElementById('custDrawer');
+  const overlay = document.getElementById('custDrawerOverlay');
+  const title = document.getElementById('custDrawerTitle');
+  const sub = document.getElementById('custDrawerSub');
+  const body = document.getElementById('custDrawerBody');
+  const c = allCustomers.find(x => x.id === id);
+  if (!c) return;
+  title.textContent = c.name || 'Customer';
+  sub.textContent = 'Re-targeting insights & contact channels';
+  body.innerHTML = '<div class="empty-state loading-dots">Loading insights</div>';
+  drawer.classList.add('open');
+  overlay.classList.add('open');
+
+  let ins = c._insight || null;
+  if (!ins) {
+    try { const r = await apiFetch('/api/admin/customers/' + id + '/insights'); ins = (await r.json()).data || null; } catch(e) { ins = null; }
+  }
+  if (!ins) {
+    body.innerHTML = '<div class="empty-state"><div class="empty-ico">⚠️</div><div class="empty-msg">Insights unavailable — click Refresh on the Customers page.</div></div>';
+    return;
+  }
+  c._insight = ins; c.segment = ins.segment || clientSeg(c);
+
+  const segStyle = {new:'rgba(59,126,166,0.14)|#2C6E94|rgba(59,126,166,0.35)',repeat:'rgba(74,138,40,0.12)|var(--green-text)|rgba(74,138,40,0.35)',loyal:'rgba(169,122,30,0.12)|var(--gold-text)|rgba(169,122,30,0.4)',vip:'rgba(169,122,30,0.22)|#7A5410|rgba(169,122,30,0.55)',dormant:'rgba(91,102,92,0.14)|#5B665C|rgba(91,102,92,0.35)',churned:'var(--red-soft)|var(--red)|rgba(194,67,79,0.35)'};
+  const [bg,fg,bc] = (segStyle[ins.segment]||'var(--surface2)|var(--text3)|var(--border)').split('|');
+
+  const copyable = (label, value, tone) => value
+    ? `<div class="info-row" style="background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:10px 12px;margin-bottom:10px;display:flex;align-items:center;justify-content:space-between;gap:10px;">
+        <div><div style="font-size:0.65rem;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:0.5px;">${label}</div>
+             <div style="font-size:0.85rem;color:var(--text);font-weight:500;margin-top:2px;word-break:break-all;${tone||''}">${esc(value)}</div></div>
+        <button class="btn btn-secondary btn-sm" style="flex-shrink:0;" onclick="navigator.clipboard.writeText(${JSON.stringify(String(value))});toast('Copied','success')">📋 Copy</button>
+       </div>` : '';
+
+  const kpi = (label, value, ico) => `<div style="flex:1;min-width:108px;background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:9px 10px;text-align:center;">
+    <div style="font-size:0.58rem;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:0.3px;line-height:1.3;">${ico} ${label}</div>
+    <div style="font-family:var(--display);font-size:1rem;font-weight:800;color:var(--green-text);margin-top:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${value}</div></div>`;
+
+  body.innerHTML = `
+    <div style="display:flex;align-items:center;gap:12px;margin-bottom:14px;">
+      <div style="width:46px;height:46px;border-radius:50%;background:var(--green-glow);display:flex;align-items:center;justify-content:center;font-size:1.1rem;font-weight:700;color:var(--green-text);flex-shrink:0;">${esc((c.name||'?')[0].toUpperCase())}</div>
+      <div>
+        <div style="font-size:0.95rem;font-weight:700;color:var(--text);">${esc(c.name)||'-'}</div>
+        <div style="font-size:0.72rem;color:var(--text3);">Customer since ${fmtDate(c.created_at)}${ins.city? ' · ' + esc(ins.city):''}</div>
+      </div>
+      <div style="margin-left:auto;"><span style="display:inline-block;padding:4px 12px;border-radius:999px;border:1px solid ${bc};background:${bg};color:${fg};font-size:0.75rem;font-weight:700;text-transform:capitalize;">${ins.segment}</span></div>
+    </div>
+    <div style="display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap;">
+      ${kpi('Orders', ins.total_orders || 0, '📦')}
+      ${kpi('Lifetime Value', '₹' + fmtNum(ins.total_spent||0), '💰')}
+      ${kpi('Avg / Order', '₹' + fmtNum(ins.avg_order_value||0), '🧾')}
+      ${kpi('Days Since Last Order', ins.days_since_last_order == null ? '–' : ins.days_since_last_order, '⏳')}
+    </div>
+    <h4 style="font-size:0.72rem;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:0.6px;margin:4px 0 8px;">Contact for re-targeting</h4>
+    ${copyable('Email', ins.email)}
+    ${copyable('WhatsApp / Phone', ins.phone)}
+    ${ins.phone ? `<div style="margin-bottom:12px;"><a class="btn btn-primary btn-sm" href="https://wa.me/91${String(ins.phone).replace(/^0+|\D/g,'')}?text=${encodeURIComponent('Hello ' + (c.name||'') + ', this is Ozylix — a special offer just for you!')}" target="_blank" rel="noopener">💬 Open WhatsApp chat</a></div>` : '<div style="font-size:0.7rem;color:var(--text3);margin-bottom:12px;">No phone on file — ask at checkout or update below.</div>'}
+    <h4 style="font-size:0.72rem;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:0.6px;margin:4px 0 8px;">Marketing consent</h4>
+    <div style="display:flex;gap:10px;margin-bottom:14px;">
+      <label style="flex:1;display:flex;align-items:center;gap:8px;background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:10px 12px;cursor:pointer;">
+        <input type="checkbox" id="consentEmail" ${c.marketing_email !== false ? 'checked':''} onchange="updateCustomerConsent(${c.id},'marketing_email',this.checked)">
+        <span style="font-size:0.8rem;">✉️ Email campaigns</span></label>
+      <label style="flex:1;display:flex;align-items:center;gap:8px;background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:10px 12px;cursor:pointer;">
+        <input type="checkbox" id="consentWhatsapp" ${c.marketing_whatsapp !== false ? 'checked':''} onchange="updateCustomerConsent(${c.id},'marketing_whatsapp',this.checked)">
+        <span style="font-size:0.8rem;">📱 WhatsApp messages</span></label>
+    </div>
+    <h4 style="font-size:0.72rem;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:0.6px;margin:4px 0 8px;">Last products bought — re-target on these</h4>
+    <div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:14px;">${(ins.last_products||[]).length
+      ? (ins.last_products||[]).map(p => `<span style="background:var(--bg2);border:1px solid var(--border);border-radius:8px;padding:5px 10px;font-size:0.75rem;">${esc(p.name)} <span style="color:var(--text3);">×${p.times}</span></span>`).join('')
+      : '<span style="font-size:0.75rem;color:var(--text3);">No paid order history to derive products from.</span>'}</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:6px;">
+      <div style="background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:10px 12px;font-size:0.75rem;"><div style="color:var(--text3);font-size:0.62rem;font-weight:700;text-transform:uppercase;">First order</div><div style="margin-top:2px;">${fmtDate(ins.first_order_at)}</div></div>
+      <div style="background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:10px 12px;font-size:0.75rem;"><div style="color:var(--text3);font-size:0.62rem;font-weight:700;text-transform:uppercase;">Payment style</div><div style="margin-top:2px;">${(ins.payment?.preference||'-').toUpperCase()}${ins.payment ? ' (' + (ins.payment.cod_count||0) + ' COD · ' + (ins.payment.prepaid_count||0) + ' prepaid)' : ''}</div></div>
+    </div>`;
+  renderCustomersTable(customersFilteredList); // refresh segment chip
+}
+
+function closeCustomerInsight() {
+  document.getElementById('custDrawer').classList.remove('open');
+  document.getElementById('custDrawerOverlay').classList.remove('open');
+}
+
+async function updateCustomerConsent(id, key, val) {
+  try {
+    const r = await apiFetch('/api/admin/customers/' + id + '/consent', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ [key]: val }) });
+    if (r.ok) { const c = allCustomers.find(x => x.id === id); if (c) c[key] = val; toast('Consent updated', 'success'); }
+    else { const d = await r.json().catch(() => ({})); toast(d.error || 'Could not save consent', 'error'); }
+  } catch(e) { toast('Network error', 'error'); }
+}
+
+// ── Re-targeting contact list export (Aug 2026) ──────────────────────
+// Pulls the server-computed re-targeting list (with consent flags) and
+// downloads it as a CSV ready for Meta/Google customer-list uploads.
+async function exportRetargetingList() {
+  try {
+    toast('Building re-targeting list…');
+    const r = await apiFetch('/api/admin/customers-export?format=csv');
+    if (!r.ok) { toast('Export failed — admin access required', 'error'); return; }
+    const text = await r.text();
+    const blob = new Blob([text], { type: 'text/csv;charset=utf-8;' });
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = 'Ozylix-retarget-list-' + new Date().toISOString().slice(0,10) + '.csv';
+    a.click();
+    URL.revokeObjectURL(a.href);
+    toast('✅ Re-targeting list downloaded');
+  } catch(e) { toast('Export error: ' + e.message, 'error'); }
 }
 
 // ═══════════════════════════════════════════════
