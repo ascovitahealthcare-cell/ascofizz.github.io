@@ -8673,7 +8673,7 @@ setInterval(function() { syncAppCartBadge(); syncAppWishBadge(); }, 2000);
       });
       if(map['about.hero_background']) document.documentElement.style.setProperty('--about-hero-bg', "url('"+cdnImg(map['about.hero_background'])+"')");
       if(map['b2b.hero_background']) document.documentElement.style.setProperty('--b2b-hero-bg', "url('"+cdnImg(map['b2b.hero_background'])+"')");
-      // Aug 2026: reveal shop banners when their upload exists
+      // Reveal shop banners when their upload exists (fixed slots)
       ['shop.banner.1','shop.banner.2','shop.banner.mix_match'].forEach(function(k){
         if(map[k]){
           var el=document.querySelector('[data-media-key="'+k+'"]');
@@ -8684,6 +8684,91 @@ setInterval(function() { syncAppCartBadge(); syncAppWishBadge(); }, 2000);
       // renderer that runs later can pick up an uploaded file for a slot
       // whose hard-coded src is empty.
       window.__ozylixSiteMedia = map || {};
+
+      // ── Admin-managed image families (unlimited, uploaded via admin) ──
+      applyAdminImageFamilies(map);
+    }
+    // Builds image families the admin can manage without limits:
+    //   home.banner.N(.alt/.link) — offer banner carousel (unlimited count)
+    //   shop.banner.N             — shop slots beyond the two fixed ones
+    //   site.og_image             — og:image / twitter:image
+    //   fallback.*                — category product-image fallbacks
+    function applyAdminImageFamilies(map) {
+      if (!map || !Object.keys(map).length) return;
+      // Local CDN rewriter — must not depend on cdnImg() which is declared
+      // later in this file and would throw here (temporal dead zone).
+      var imgCdn = (typeof cdnImg === 'function') ? cdnImg : function (u) { return u; };
+      // Offer banner carousel — admin decides the count (any positive N).
+      var bnSlides = [];
+      for (var i = 1; i <= 9; i++) {
+        var u2 = map['home.banner.' + i];
+        if (u2) bnSlides.push({ n: i, url: imgCdn(u2), alt: map['home.banner.' + i + '.alt'] || '', link: map['home.banner.' + i + '.link'] || '' });
+      }
+      window.ADMIN_HERO_BANNERS = bnSlides.length ? bnSlides : null;
+      // The carousel only initialised itself once on DOMContentLoaded (before
+      // site-media arrived). If the admin has now supplied banners, re-init.
+      if (window.ADMIN_HERO_BANNERS && typeof window.initHeroBanner === 'function') {
+        try { window.initHeroBanner(); } catch (e) { /* ignore */ }
+      }
+      // Shop banners beyond the two hard-coded slots.
+      var sbWrap = document.querySelector('.shop-promos');
+      if (sbWrap) {
+        var taken = new Set(['shop.banner.1', 'shop.banner.2', 'shop.banner.mix_match']);
+        var extras = [];
+        Object.keys(map).forEach(function (k) {
+          if (k.match(/^shop\.banner\.(\d+)$/) && !taken.has(k)) extras.push({ key: k, n: +k.split('.').pop(), url: map[k] });
+        });
+        extras.sort(function (a, b) { return a.n - b.n; });
+        extras.forEach(function (e, idx) {
+          var slot = document.getElementById('shopBannerSlot' + (idx + 3));
+          if (!slot) {
+            slot = document.createElement('div');
+            slot.className = 'shop-banner-slot';
+            slot.id = 'shopBannerSlot' + (idx + 3);
+            slot.setAttribute('data-no-img', 'yes');
+            var img = document.createElement('img');
+            img.id = 'shopBannerImg' + (idx + 3);
+            img.loading = 'lazy';
+            img.style.display = 'none';
+            img.onerror = function () { this.style.display = 'none'; };
+            slot.appendChild(img);
+            sbWrap.appendChild(slot);
+          }
+          var img2 = slot.querySelector('img') || slot.querySelector('[data-media-key]');
+          if (img2) { img2.src = imgCdn(e.url); img2.setAttribute('data-media-key', e.key); img2.style.display = ''; }
+          slot.setAttribute('data-no-img', 'no');
+        });
+      }
+      // og:image + twitter:image
+      var og = map['site.og_image'];
+      if (og) {
+        document.querySelectorAll('meta[property="og:image"]').forEach(function (m) { m.content = og; });
+        document.querySelectorAll('meta[name="twitter:image"]').forEach(function (m) { m.content = og; });
+      }
+      // Product image fallbacks (category + default) — merges over the
+      // built-in placeholder map so products without media get a real image.
+      var fb = {};
+      Object.keys(map).forEach(function (k) {
+        var m = k.match(/^fallback\.(.+)$/);
+        if (m) fb[m[1]] = imgCdn(map[k]);
+      });
+      if (Object.keys(fb).length && typeof PRODUCT_FALLBACKS !== 'undefined') {
+        Object.keys(fb).forEach(function (k) { PRODUCT_FALLBACKS[k] = fb[k]; });
+      }
+    }
+    // Whenever admin media changes after load (upload completes), re-run the
+    // family builders so new banners/slots appear immediately.
+    var __smObserver = null;
+    try {
+      __smObserver = new MutationObserver(function () { applyAdminImageFamilies(window.__ozylixSiteMedia || {}); });
+    } catch (e) { /* old browsers just miss the live refresh */ }
+    if (__smObserver) {
+      // Watch the hero banner carousel and shop banner container for removals
+      // added by admin re-renders; the family functions re-run on each cycle
+      // inside applySiteMedia anyway, this covers late DOM changes.
+      var __smTargets = [document.getElementById('heroBanner'), document.getElementById('shopBannerWrap')].filter(Boolean);
+      __smTargets.forEach(function (t) { __smObserver.observe(t, { childList: true }); });
+    }
     }
     function loadSiteMedia(){
       var base = (typeof API_BASE !== 'undefined') ? API_BASE : 'https://ascovitahealthcare-cell-github-io.onrender.com';
@@ -9106,17 +9191,11 @@ window.dismissOfferReminder = function () {
   tryShow();
 })();
 
-var BANNER_SLIDES = [
-    { src: 'assets/banners/glutathione-lg.webp', mobile: 'assets/banners/glutathione-sm.webp',
-      alt: 'Buy 4 Pack Get 50% Off — Glow Like Never Before. Ozylix Glutathione Effervescent Tablets: glow, detox, defense.',
-      link: '/product/glutathione-effervescent-tablet' },
-    { src: 'assets/banners/acv-lg.webp', mobile: 'assets/banners/acv-sm.webp',
-      alt: 'Buy 4 Pack Get 50% Off — Morning Metabolism Boost. Ozylix Apple Cider Vinegar Effervescent Tablets: burn, balance, boost.',
-      link: '/product/apple-cider-vinegar-effervescent-tablet' },
-    { src: 'assets/banners/ashwagandha-lg.webp', mobile: 'assets/banners/ashwagandha-sm.webp',
-      alt: '30% Off — Strength & Recovery Boost. Ozylix Ashwagandha Effervescent Tablets 4-Pack: strength, recovery, performance.',
-      link: '/product/ashwagandha-effervescent-tablet' }
-  ];
+// Aug 2026: offer banners are fully admin-managed (admin → Site Images →
+  // Offer Banners — upload as many as you want, delete any, each gets alt +
+  // link fields). Nothing to paste here anymore; this array stays empty and
+  // the carousel simply stays hidden until the admin uploads banners.
+  var BANNER_SLIDES = [];
   // ▲▲▲ END OF WHAT YOU EDIT ▲▲▲
 
   var bnIdx = 0, bnTimer = null, bnSlides = [];
@@ -9130,7 +9209,14 @@ var BANNER_SLIDES = [
     // array and rendered <img src="">, which fires an error, removes the
     // card, and leaves the index pointing at a slide that no longer exists —
     // that is what made the carousel open on slide 3 instead of slide 1.
-    bnSlides = BANNER_SLIDES.filter(function(s) { return s && s.src && String(s.src).trim(); });
+    // Aug 2026: admin-managed banners (unlimited count) take priority over
+    // the built-in BANNER_SLIDES array. When the admin has uploaded at least
+    // one offer banner, its entries drive the carousel instead.
+    var adminBanners = window.ADMIN_HERO_BANNERS;
+    var srcSlides = adminBanners && adminBanners.length ? adminBanners.map(function(b) {
+      return { src: b.url, mobile: b.url, alt: b.alt || 'Ozylix offer', link: b.link || '' };
+    }) : BANNER_SLIDES;
+    bnSlides = srcSlides.filter(function(s) { return s && s.src && String(s.src).trim(); });
     if (!bnSlides.length) return;              // stays display:none
 
     var isPhone = window.matchMedia('(max-width: 820px)').matches;
@@ -13769,9 +13855,10 @@ function renderProductReviewList(pid) {
       var cards = (CONTENT[pl.id] || []).map(function (c, n) {
         var mkey = mediaKey(slug, pl.id, n + 1);
         var ico = { howto: '⏰', experts: '🎓', research: '📚', why: '✓' }[pl.id] || '✨';
-        var eduImg = (pl.id === 'howto') ? ('/assets/edu/howto-' + (n + 1) + '.png') :
-                    (pl.id === 'why') ? ('/assets/edu/why-' + (n + 1) + '.png') :
-                    (pl.id === 'research') ? ('/assets/edu/research-' + (n + 1) + '.png') : '';
+        // Aug 2026: edu creatives are fully admin-managed (admin Site Images
+        // → product "Know Your Product" gallery → Upload creative per card).
+        // No built-in image set anymore — cards wait for an upload.
+        var eduImg = '';
         var imgHtml = eduImg ? ('<img src="' + eduImg + '" alt="" loading="lazy" decoding="async">') : '';
         var builtIn = eduImg ? 'edu-builtin' : '';
         return '<div class="edu-card"><div class="edu-card-media edu-builtin-' + (eduImg ? '1' : '0') + '" data-media-key="' + mkey + '" data-awaiting-upload="true">' +

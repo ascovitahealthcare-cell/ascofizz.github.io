@@ -3420,7 +3420,27 @@ function azTogglePw() {
     <div><div class="page-title">Site Images</div><div class="page-sub">Every fixed image on ozylix.com, grouped by where it appears — replace or reset any of them without touching code</div></div>
   </div>
 
-  <div id="siteImagesGroups"></div>
+    <div id="siteImagesGroups"></div>
+
+  <!-- Aug 2026: admin-managed image families with UNLIMITED counts. Offer
+       banners (home top carousel) and shop banners (promotion strips) can
+       be added, replaced or removed here — no code edits, ever. -->
+  <div class="page-hdr" style="margin-top:34px;">
+    <div><div class="page-title">Offer Banners — Home</div><div class="page-sub">The rotating offer carousel at the very top of the home page — add as many banners as you like, each with its own caption and destination link. Upload none and the carousel stays hidden.</div></div>
+    <div class="page-actions"><button class="btn btn-primary" onclick="addHomeBanner()">＋ Add Banner</button></div>
+  </div>
+  <div id="homeBannerManager"></div>
+
+  <div class="page-hdr" style="margin-top:34px;">
+    <div><div class="page-title">Shop Banners</div><div class="page-sub">Promotion strips under the products on the Shop page — add as many as you like, they appear in numbered order after the two built-in slots.</div></div>
+    <div class="page-actions"><button class="btn btn-primary" onclick="addShopBanner()">＋ Add Banner</button></div>
+  </div>
+  <div id="shopBannerManager"></div>
+
+  <div class="page-hdr" style="margin-top:34px;">
+    <div><div class="page-title">Product Image Fallbacks</div><div class="page-sub">Default image shown when a product has no photos yet — one per product category plus an overall default. Upload here and empty product cards show a real image instead of a placeholder.</div></div>
+  </div>
+  <div id="fallbackManager"></div>
 
   <div class="page-hdr" style="margin-top:34px;">
     <div><div class="page-title">Promo Carousel</div><div class="page-sub">The scrolling promo cards on the home page — add, replace, reorder, or remove without editing PROMO_MEDIA.js</div></div>
@@ -4950,7 +4970,7 @@ function showPage(name) {
   if(name === 'payments') loadPayments();
   if(name === 'invoices') loadInvoices();
   if(name === 'banners') loadBanners();
-  if(name === 'siteimages') { loadSiteImages(); loadPromoMedia(); }
+  if(name === 'siteimages') { loadSiteImages(); loadPromoMedia(); loadBannerManagers(); loadFallbackManager(); }
   if(name === 'settings') { loadSettings(); }
   if(name === 'aiteam') { loadAITeamPage(); }
   if(name === 'calendar') { renderCalendar(); }
@@ -4969,7 +4989,7 @@ function refreshCurrent() {
   const active = document.querySelector('.page.active');
   if(!active) return;
   const id = active.id.replace('page-','');
-  const fns = {dashboard:loadDashboard,orders:loadOrders,products:loadProducts,inventory:loadInventory,discounts:loadDiscounts,customers:loadCustomers,analytics:loadAnalytics,payments:loadPayments,invoices:loadInvoices,photolibrary:loadPhotoLibrary,banners:loadBanners,calendar:renderCalendar,siteimages:()=>{loadSiteImages();loadPromoMedia();}};
+  const fns = {dashboard:loadDashboard,orders:loadOrders,products:loadProducts,inventory:loadInventory,discounts:loadDiscounts,customers:loadCustomers,analytics:loadAnalytics,payments:loadPayments,invoices:loadInvoices,photolibrary:loadPhotoLibrary,banners:loadBanners,calendar:renderCalendar,siteimages:()=>{loadSiteImages();loadPromoMedia();loadBannerManagers();loadFallbackManager();}};
   if(fns[id]) fns[id]();
 }
 
@@ -9173,9 +9193,200 @@ async function resetSiteImage(key, currentUrl) {
     await apiFetch(`/api/admin/site-media/${encodeURIComponent(key)}`, {method:'DELETE'}).catch(()=>{});
     toast('🗑️ Deleted — reverted to default');
     loadSiteImages();
-  } catch(e) { toast(e.message,'error'); }
+    } catch(e) { toast(e.message,'error'); }
 }
 
+// ═══════════════════════════════════════════════
+// OFFER BANNERS (home) & SHOP BANNERS — unlimited,
+// admin-managed image families (Aug 2026). Keys live
+// in the site_media table: home.banner.N (+.alt/.link),
+// shop.banner.N. The storefront renders everything
+// with these keys at runtime, so there is no upper
+// limit and nothing to edit in the code.
+// ═══════════════════════════════════════════════
+let _siteMediaAll = [];
+async function loadBannerManagers() {
+  try {
+    const r = await apiFetch('/api/admin/site-media');
+    const d = await r.json();
+    _siteMediaAll = d.data || [];
+  } catch(e) { _siteMediaAll = []; }
+  renderBannerManagers();
+}
+function homeBanners() {
+  const out = [];
+  _siteMediaAll.forEach(row => {
+    const m = row.key.match(/^home\.banner\.(\d+)$/);
+    if (m) out.push({ n: +m[1], img: row.url, alt: (_siteMediaAll.find(x => x.key === 'home.banner.' + m[1] + '.alt') || {}).url || '', link: (_siteMediaAll.find(x => x.key === 'home.banner.' + m[1] + '.link') || {}).url || '' });
+  });
+  return out.sort((a, b) => a.n - b.n);
+}
+function shopBanners() {
+  const fixed = ['1', '2', 'mix_match'];
+  const out = [];
+  _siteMediaAll.forEach(row => {
+    const m = row.key.match(/^shop\.banner\.(\d+)$/);
+    if (m && !fixed.includes(m[1])) out.push({ n: +m[1], img: row.url });
+  });
+  return out.sort((a, b) => a.n - b.n);
+}
+function renderBannerManagers() {
+  const hb = document.getElementById('homeBannerManager');
+  const sb = document.getElementById('shopBannerManager');
+  const cards = (banners, prefix, withMeta) => banners.map(b => `
+    <div class="card" style="padding:0;overflow:hidden;">
+      <img src="${adminCdnImg(b.img) || ''}" class="banner-preview" onerror="this.style.display='none'">
+      <div style="padding:12px 14px;">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
+          <span style="font-size:0.85rem;font-weight:600;">${prefix} #${b.n}</span>
+          <button class="btn btn-danger btn-sm btn-icon" onclick="deleteBanner('${prefix}', ${b.n})" title="Remove this banner">🗑️</button>
+        </div>
+        ${withMeta ? `
+        <div style="font-size:0.72rem;color:var(--text3);margin-bottom:10px;">Caption &amp; destination are optional — the banner works without them.</div>
+        <input class="form-control" style="margin-bottom:6px;font-size:0.8rem;" placeholder="Caption (shown in the offer reminder)" value="${escAttr(b.alt)}" onchange="setBannerMeta('${prefix}', ${b.n}, 'alt', this.value)">
+        <input class="form-control" style="font-size:0.8rem;" placeholder="Link, e.g. /product/glutathione-effervescent-tablet" value="${escAttr(b.link)}" onchange="setBannerMeta('${prefix}', ${b.n}, 'link', this.value)">
+        ` : '<div style="font-size:0.72rem;color:var(--text3);margin-bottom:10px;">The image is the whole card — no text overlay needed.</div>'}
+        <div style="display:flex;gap:6px;margin-top:10px;">
+          <input type="file" accept="image/*,.webp,.svg" id="bannerFile-${prefix}-${b.n}" style="display:none;" onchange="uploadBannerImage('${prefix}', ${b.n}, this)">
+          <button class="btn btn-primary btn-sm" style="flex:1;" onclick="document.getElementById('bannerFile-${prefix}-${b.n}').click()">📤 ${b.img ? 'Replace Image' : 'Upload Image'}</button>
+        </div>
+      </div>
+    </div>`).join('');
+  hb.innerHTML = cards(homeBanners(), 'home.banner', true) || emptyMsg('No offer banners yet — upload your first one and the home-page carousel appears.');
+  sb.innerHTML = cards(shopBanners(), 'shop.banner', false) || emptyMsg('Only the two built-in banners show — add extras and they appear in order underneath.');
+}
+function escAttr(s) { return String(s == null ? '' : s).replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;'); }
+function emptyMsg(m) { return '<div class="empty-state" style="grid-column:1/-1;"><div class="empty-ico">🖼️</div><div class="empty-msg">' + m + '</div></div>'; }
+// The backend refuses empty URLs, so "+ Add Banner" goes straight to
+// the file picker — the slot is created the moment an image is chosen.
+let _homeBannerNext = 1, _shopBannerNext = 3;
+async function addHomeBanner() {
+  const inp = document.createElement('input');
+  inp.type = 'file'; inp.accept = 'image/*,.webp,.svg';
+  _homeBannerNext = 1;
+  const used = new Set(homeBanners().map(b => b.n));
+  while (used.has(_homeBannerNext)) _homeBannerNext++;
+  inp.onchange = () => uploadBannerImage('home.banner', _homeBannerNext, inp);
+  inp.click();
+}
+async function addShopBanner() {
+  const inp = document.createElement('input');
+  inp.type = 'file'; inp.accept = 'image/*,.webp,.svg';
+  _shopBannerNext = 3;
+  const used = new Set(shopBanners().map(b => b.n));
+  while (used.has(_shopBannerNext)) _shopBannerNext++;
+  inp.onchange = () => uploadBannerImage('shop.banner', _shopBannerNext, inp);
+  inp.click();
+}
+async function uploadBannerImage(prefix, n, input) {
+  const file = input.files[0]; if (!file) return;
+  const key = prefix + '.' + n;
+  const fd = new FormData(); fd.append('image', file);
+  try {
+    const r = await fetch(`${API}/api/upload/image`, { method: 'POST', headers: { 'Authorization': `Bearer ${authToken}` }, body: fd });
+    const d = await r.json();
+    if (!r.ok) { toast(d.error || 'Upload failed', 'error'); return; }
+    const url = d.url || d.public_url || '';
+    await apiFetch(`/api/admin/site-media/${encodeURIComponent(key)}`, { method: 'PUT', body: JSON.stringify({ url }) });
+    toast('✅ Banner image uploaded — live on the site now');
+    loadBannerManagers();
+  } catch(e) { toast('Upload error: ' + e.message, 'error'); }
+}
+async function setBannerMeta(prefix, n, field, value) {
+  const key = prefix + '.' + n + '.' + field;
+  try {
+    if (!value.trim()) {
+      // empty = delete the meta key so the storefront falls back to defaults
+      await apiFetch(`/api/admin/site-media/${encodeURIComponent(key)}`, { method: 'DELETE' }).catch(() => {});
+    } else {
+      await apiFetch(`/api/admin/site-media/${encodeURIComponent(key)}`, { method: 'PUT', body: JSON.stringify({ url: value.trim() }) });
+    }
+    toast('✅ Saved');
+    loadBannerManagers();
+  } catch(e) { toast('Could not save: ' + e.message, 'error'); }
+}
+async function deleteBanner(prefix, n) {
+  const key = prefix + '.' + n;
+  if (!confirm('Remove banner #' + n + ' (its image is also deleted from storage)? This can\'t be undone.')) return;
+  try {
+    // 1. find & delete the stored file
+    const row = _siteMediaAll.find(x => x.key === key);
+    if (row && row.url) {
+      const filename = String(row.url).split('/').pop().split('?')[0];
+      await apiFetch(`/api/upload/image/${encodeURIComponent(filename)}`, { method: 'DELETE' }).catch(() => {});
+    }
+    // 2. delete the key + its alt/link companions
+    await apiFetch(`/api/admin/site-media/${encodeURIComponent(key)}`, { method: 'DELETE' }).catch(() => {});
+    await apiFetch(`/api/admin/site-media/${encodeURIComponent(key + '.alt')}`, { method: 'DELETE' }).catch(() => {});
+    await apiFetch(`/api/admin/site-media/${encodeURIComponent(key + '.link')}`, { method: 'DELETE' }).catch(() => {});
+    toast('🗑️ Banner removed');
+    loadBannerManagers();
+  } catch(e) { toast('Could not delete: ' + e.message, 'error'); }
+}
+// ═══════════════════════════════════════════════
+// PRODUCT IMAGE FALLBACKS — default image per
+// category (plus an overall default) for products
+// that have no photos. Keys: fallback.<category>
+// and fallback.default. ═══════════════════════════
+const FALLBACK_CATEGORIES = ['effervescent', 'spirulina', 'premium', 'ayurvedic', 'immunity', 'default'];
+async function loadFallbackManager() {
+  let overrides = {};
+  try {
+    const r = await apiFetch('/api/admin/site-media');
+    const d = await r.json();
+    (d.data || []).forEach(row => {
+      const m = String(row.key).match(/^fallback\.(.+)$/);
+      if (m) overrides[m[1]] = row.url;
+    });
+  } catch(e) { overrides = {}; }
+  document.getElementById('fallbackManager').innerHTML = `
+    <div class="grid-3">
+      ${FALLBACK_CATEGORIES.map(cat => {
+        const url = overrides[cat] || '';
+        return `
+        <div class="card" style="padding:0;overflow:hidden;">
+          <img src="${adminCdnImg(url) || ''}" class="banner-preview" onerror="this.style.display='none'">
+          <div style="padding:12px 14px;">
+            <div style="font-size:0.85rem;font-weight:600;margin-bottom:10px;">${cat === 'default' ? 'Default (any category)' : cat.charAt(0).toUpperCase() + cat.slice(1)}</div>
+            ${url ? '<div style="font-size:0.72rem;color:var(--green-text);margin-bottom:10px;">Custom image set</div>' : '<div style="font-size:0.72rem;color:var(--text3);margin-bottom:10px;">No image yet — placeholder shows</div>'}
+            <input type="file" accept="image/*,.webp,.svg" id="fallbackFile-${cat}" style="display:none;" onchange="uploadFallbackImage('${cat}', this)">
+            <div style="display:flex;gap:6px;">
+              <button class="btn btn-primary btn-sm" style="flex:1;" onclick="document.getElementById('fallbackFile-${cat}').click()">📤 ${url ? 'Replace Image' : 'Upload Image'}</button>
+              ${url ? '<button class="btn btn-danger btn-sm btn-icon" onclick="deleteFallbackImage(\'' + cat + '\')" title="Remove this fallback">🗑️</button>' : ''}
+            </div>
+          </div>
+        </div>`;
+      }).join('')}
+    </div>`;
+}
+async function uploadFallbackImage(cat, input) {
+  const file = input.files[0]; if (!file) return;
+  const fd = new FormData(); fd.append('image', file);
+  try {
+    const r = await fetch(`${API}/api/upload/image`, { method: 'POST', headers: { 'Authorization': `Bearer ${authToken}` }, body: fd });
+    const d = await r.json();
+    if (!r.ok) { toast(d.error || 'Upload failed', 'error'); return; }
+    const url = d.url || d.public_url || '';
+    await apiFetch(`/api/admin/site-media/${encodeURIComponent('fallback.' + cat)}`, { method: 'PUT', body: JSON.stringify({ url }) });
+    toast('✅ Fallback image set — empty product cards in "' + cat + '" use it now');
+    loadFallbackManager();
+  } catch(e) { toast('Upload error: ' + e.message, 'error'); }
+}
+async function deleteFallbackImage(cat) {
+  if (!confirm('Remove the fallback image for "' + cat + '" (the file is deleted from storage)?')) return;
+  try {
+    const r = await apiFetch('/api/admin/site-media');
+    const d = await r.json();
+    const row = (d.data || []).find(x => x.key === 'fallback.' + cat);
+    if (row && row.url) {
+      const filename = String(row.url).split('/').pop().split('?')[0];
+      await apiFetch(`/api/upload/image/${encodeURIComponent(filename)}`, { method: 'DELETE' }).catch(() => {});
+    }
+    await apiFetch(`/api/admin/site-media/${encodeURIComponent('fallback.' + cat)}`, { method: 'DELETE' }).catch(() => {});
+    toast('🗑️ Fallback removed');
+    loadFallbackManager();
+  } catch(e) { toast('Could not delete: ' + e.message, 'error'); }
+}
 // ═══════════════════════════════════════════════
 // PROMO CAROUSEL — home page scrolling promo cards
 // (backend-managed replacement for manually editing PROMO_MEDIA.js)
