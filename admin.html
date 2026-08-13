@@ -768,7 +768,9 @@ img, canvas, svg, table { max-width:100%; }
   /* Gemini above bottom nav */
   .gemini-fab   { bottom:74px !important; right:clamp(12px,3vw,20px) !important; }
   .gemini-panel { bottom:136px !important; right:clamp(12px,3vw,20px) !important; width:min(380px,calc(100vw - 24px)) !important; }
-  #toastContainer { bottom:74px !important; right:clamp(12px,3vw,16px) !important; }
+  /* Toasts live on the LEFT of the Gemini FAB (bottom-right corner), so a
+     status pill can never sit underneath the floating button on phones. */
+  #toastContainer { bottom:74px !important; left:clamp(10px,3vw,16px) !important; right:auto !important; }
 
   /* Grids */
   .grid-4 { grid-template-columns: 1fr 1fr !important; gap: clamp(10px,2.5vw,16px) !important; }
@@ -869,8 +871,13 @@ img, canvas, svg, table { max-width:100%; }
 
   /* Admin bottom nav */
   .admin-bnav { height:clamp(58px,10vw,66px) !important; padding:0 2px clamp(6px,2vw,10px) !important; }
+  .abn-btn { overflow:hidden; display:grid !important; grid-template-columns:auto !important; grid-template-rows:auto auto !important; }
+  /* NOTE: the Orders button's hidden badge dot is the last-child, so the
+     visible label is the SECOND child — style that one for the line fix. */
   .abn-btn span:first-child { font-size:clamp(18px,5.5vw,22px) !important; }
-  .abn-btn span:last-child  { font-size:clamp(7.5px,2.2vw,9px) !important; }
+  .abn-btn span:nth-child(2) { font-size:clamp(7.5px,2.2vw,9px) !important; }
+  /* One clean line under the icon — never 'Ord ers' / 'Produ cts' wrapping */
+  .abn-btn span:nth-child(2) { white-space:nowrap !important; overflow:hidden; text-overflow:ellipsis; min-width:0; max-width:100%; display:block; line-height:1.2 !important; }
 
   /* Modal bottom sheet */
   .modal-overlay { align-items:flex-end !important; padding:0 !important; }
@@ -12670,7 +12677,7 @@ body.role-admin #azRoleBanner{display:block}
   }
   .gemini-fab   { bottom: calc(74px + env(safe-area-inset-bottom)) !important; }
   .gemini-panel { bottom: calc(136px + env(safe-area-inset-bottom)) !important; }
-  #toastContainer { bottom: calc(74px + env(safe-area-inset-bottom)) !important; }
+  #toastContainer { bottom: calc(74px + env(safe-area-inset-bottom)) !important; left: calc(10px + env(safe-area-inset-left)) !important; right:auto !important; }
 
   /* ── 7 · Bottom sheets clear the home indicator too ───────────────── */
   .modal, .drawer {
