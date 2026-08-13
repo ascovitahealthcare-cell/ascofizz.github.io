@@ -11437,12 +11437,22 @@ async function loadVisitorAnalytics(range) {
   if (state) { state.textContent = 'Loading…'; state.style.color = 'var(--text3)'; }
 
   try {
-    const r = await fetch(`${API}/api/analytics/dashboard?range=${encodeURIComponent(_vaRange)}`, {
-      headers: { 'Authorization': `Bearer ${authToken}` },
-      signal: AbortSignal.timeout(20000)
-    });
-    if (!r.ok) throw new Error('HTTP ' + r.status + (r.status === 404 ? ' — analytics-routes.js not deployed yet' : ''));
-    const d = await r.json();
+    // The dashboard is now server-cached (shared, 20s TTL), so one warm
+    // round trip usually takes well under a second. Give slow cold starts
+    // and traffic spikes up to 60s, and retry once before giving up.
+    async function vaTry(timeoutMs) {
+      const r = await fetch(`${API}/api/analytics/dashboard?range=${encodeURIComponent(_vaRange)}`, {
+        headers: { 'Authorization': `Bearer ${authToken}` },
+        signal: AbortSignal.timeout(timeoutMs)
+      });
+      if (!r.ok) throw new Error('HTTP ' + r.status, { cause: { status: r.status } });
+      return await r.json();
+    }
+    let d = null;
+    try { d = await vaTry(45000); } catch (e1) {
+      await new Promise(r => setTimeout(r, 3000));
+      try { d = await vaTry(45000); } catch (e2) { throw e2; }
+    }
     const o = d.overview || {};
 
     document.getElementById('vaSessions').textContent    = _vaNum(o.sessions);
@@ -11515,9 +11525,14 @@ async function loadVisitorAnalytics(range) {
   } catch (e) {
     if (state) {
       state.style.color = 'var(--red)';
-      state.innerHTML = `Could not load analytics — ${_vaEsc(e.message)}.
-        <span style="color:var(--text3);">Deploy <code>analytics-routes.js</code> and run
-        <code>analytics-schema.sql</code>, then refresh. No sample data is shown.</span>`;
+      const aborted = /abort/i.test(String(e.message)) || (e.name === 'AbortError');
+      state.innerHTML = aborted
+        ? `Could not load analytics — the server did not respond in time${_vaEsc(e.message).replace(/^ — .*/, '')}.
+           <span style="color:var(--text3);">Under heavy traffic the backend queues requests and cold starts can take
+           30–60s. Pull to refresh, or check the server is healthy in Settings · Performance.</span>`
+        : `Could not load analytics — ${_vaEsc(e.message)}.
+           <span style="color:var(--text3);">Deploy <code>analytics-routes.js</code> and run
+           <code>analytics-schema.sql</code>, then refresh. No sample data is shown.</span>`;
     }
   } finally {
     _vaLoading = false;
