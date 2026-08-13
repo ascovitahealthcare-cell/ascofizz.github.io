@@ -4505,9 +4505,13 @@ function tokenExpiryMs(t) {
     return (JSON.parse(atob(b64)).exp || 0) * 1000;
   } catch (e) { return 0; }
 }
+// A few seconds of leeway: a phone clock a little ahead of the server
+// would otherwise read a freshly minted token as expired and report the
+// misleading "server rejected your session — check the clock" message.
+// Ten seconds of leeway costs nothing against a 1-hour session.
 function tokenIsExpired(t) {
   var exp = tokenExpiryMs(t);
-  return exp > 0 && exp <= Date.now();
+  return exp > 0 && exp <= Date.now() - 10000;
 }
 
 async function apiFetch(path, opts={}) {
