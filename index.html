@@ -13743,7 +13743,8 @@ function renderProductReviewList(pid) {
         var mkey = mediaKey(slug, pl.id, n + 1);
         var ico = { howto: '⏰', experts: '🎓', research: '📚', why: '✓' }[pl.id] || '✨';
         var eduImg = (pl.id === 'howto') ? ('/assets/edu/howto-' + (n + 1) + '.png') :
-                    (pl.id === 'why') ? ('/assets/edu/why-' + (n + 1) + '.png') : '';
+                    (pl.id === 'why') ? ('/assets/edu/why-' + (n + 1) + '.png') :
+                    (pl.id === 'research') ? ('/assets/edu/research-' + (n + 1) + '.png') : '';
         var imgHtml = eduImg ? ('<img src="' + eduImg + '" alt="" loading="lazy" decoding="async">') : '';
         var builtIn = eduImg ? 'edu-builtin' : '';
         return '<div class="edu-card"><div class="edu-card-media edu-builtin-' + (eduImg ? '1' : '0') + '" data-media-key="' + mkey + '" data-awaiting-upload="true">' +
