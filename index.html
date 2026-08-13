@@ -7140,6 +7140,9 @@ button, [role="button"] {
   display: flex; align-items: center; justify-content: center; overflow: hidden;
 }
 .edu-card-media img { width: 100%; height: 100%; object-fit: cover; }
+.edu-card-media.edu-builtin-1 { background: none; }
+.edu-card-media.edu-builtin-1 .edu-ico,
+.edu-card-media.edu-builtin-1 .edu-awaiting { display: none; }
 .edu-card-media .edu-ico { font-size: 2.1rem; filter: drop-shadow(0 2px 6px rgba(0,0,0,.25)); }
 .edu-card-body { padding: 12px 14px 14px; }
 .edu-card-body h4 { margin: 0 0 5px; font-size: .86rem; line-height: 1.3; }
@@ -13739,7 +13742,11 @@ function renderProductReviewList(pid) {
       var cards = (CONTENT[pl.id] || []).map(function (c, n) {
         var mkey = mediaKey(slug, pl.id, n + 1);
         var ico = { howto: '⏰', experts: '🎓', research: '📚', why: '✓' }[pl.id] || '✨';
-        return '<div class="edu-card"><div class="edu-card-media" data-media-key="' + mkey + '" data-awaiting-upload="true">' +
+        var eduImg = (pl.id === 'howto') ? ('/assets/edu/howto-' + (n + 1) + '.png') : '';
+        var imgHtml = eduImg ? ('<img src="' + eduImg + '" alt="" loading="lazy" decoding="async">') : '';
+        var builtIn = eduImg ? 'edu-builtin' : '';
+        return '<div class="edu-card"><div class="edu-card-media edu-builtin-' + (eduImg ? '1' : '0') + '" data-media-key="' + mkey + '" data-awaiting-upload="true">' +
+          imgHtml +
           '<span class="edu-ico">' + ico + '</span>' +
           '<span class="edu-awaiting" data-media-key="' + mkey + '" data-fallback="hide">Upload creative</span></div>' +
           '<div class="edu-card-body"><h4>' + escHtml(c.h) + '</h4><p>' + escHtml(c.p) + '</p></div></div>';
