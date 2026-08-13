@@ -8489,11 +8489,7 @@ setInterval(function() { syncAppCartBadge(); syncAppWishBadge(); }, 2000);
     <div class="vm-copy"><b>Shop. Earn. Redeem.</b> &#10024; Every Ozylix order earns Vita Points — <span id="vitaMicroEarn">1 point per &#8377;1</span>, and <span id="vitaMicroValue">150 points = &#8377;1 off</span>.</div> <script>(function(){try{var e=typeof VITA_EARN_PER_RUPEE!=='undefined'?VITA_EARN_PER_RUPEE:1,v=typeof VITA_REDEEM_PER_RUPEE!=='undefined'?VITA_REDEEM_PER_RUPEE:150;var a=document.getElementById("vitaMicroEarn"),b=document.getElementById("vitaMicroValue");if(a)a.textContent=e+' point'+(e>1?"s":"")+" per ₹1";if(b)b.textContent=v+" points = ₹1 off";}catch(x){}})()</script>
     <div class="vm-arrow" aria-hidden="true">&#8594;</div>
   </div>
-  <!-- Aug 2026: HOME PROMO CAROUSEL removed per user request — promo
-       cards now live only on the shop/product pages; the home page stays
-       product-first with hero, marquee and trust grid. -->
-
-  <!-- FIZZ COUNTERS — animated on first scroll into view -->
+    <!-- FIZZ COUNTERS — animated on first scroll into view -->
   <div class="fizz-counters">
     <div class="container fizz-counters-grid">
       <div class="fizz-counter"><div class="fc-num" id="statAvgRating" data-count="0" data-decimals="1" data-suffix="★" data-live-rating="1">—</div><div class="fc-label" id="statAvgRatingLabel">Average Rating</div></div>
@@ -8555,10 +8551,19 @@ setInterval(function() { syncAppCartBadge(); syncAppWishBadge(); }, 2000);
         </div>
         <button class="sec-head-link" onclick="showPage('shop')">View all products &rarr;</button>
       </div>
-      <div class="products-grid" id="featuredGrid"></div>
+            <div class="products-grid" id="featuredGrid"></div>
     </div>
   </section>
-
+  <!-- ══ HOME PROMO CAROUSEL — peek-style, multi-card (restored Aug 2026) ══ -->
+  <!-- Cards render from the live product list (category = effervescent) via
+       renderPromoCarousel(); product images now go through the Cloudflare
+       CDN (/cdn-storage/) so visitors never pay Supabase egress. -->
+  <div class="promo-hero-wrap" id="promoHeroWrap">
+    <button class="promo-nav-arrow promo-nav-prev" onclick="promoCarousel(-1)" aria-label="Previous offer">&#8249;</button>
+    <div class="promo-hero-track" id="promoHeroTrack"></div>
+    <button class="promo-nav-arrow promo-nav-next" onclick="promoCarousel(1)" aria-label="Next offer">&#8250;</button>
+    <div class="promo-dots" id="promoDots"></div>
+  </div>
   <!-- ═══ PROMO MEDIA — infinite loop strip ═══ -->
   <section id="promo-media-section" style="padding:36px 0;background:var(--sub-1);overflow:hidden">
     <div class="pm-track-outer">
