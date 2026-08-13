@@ -2238,6 +2238,7 @@ function azTogglePw() {
       <button class="ep-chip active" id="dashGChip7" onclick="setDashGlobalRange(7,this)" style="padding:5px 13px;">7D</button>
       <button class="ep-chip" id="dashGChip30" onclick="setDashGlobalRange(30,this)" style="padding:5px 13px;">30D</button>
       <button class="ep-chip" id="dashGChip90" onclick="setDashGlobalRange(90,this)" style="padding:5px 13px;">90D</button>
+      <button class="ep-chip" id="dashGChip365" onclick="setDashGlobalRange(365,this)" style="padding:5px 13px;">1Y</button>
       <button class="ep-chip" id="dashGChipCustom" onclick="toggleDashGlobalCustom()" style="padding:5px 13px;">Custom</button>
     </div>
     <div id="dashGCustomBar" style="display:none;align-items:center;gap:6px;flex-wrap:wrap;">
@@ -2259,6 +2260,8 @@ function azTogglePw() {
 
   <!-- ══ MINI STAT TICKER ══ -->
   <div id="statsTicker" style="display:flex;gap:12px;margin-bottom:20px;flex-wrap:wrap;"></div>
+  <!-- COD money with the delivery partner — refreshed automatically from courier sync -->
+  <div id="courierWalletRow" style="display:flex;gap:12px;margin-bottom:20px;flex-wrap:wrap;"></div>
 
   <!-- ══ ROW 1: Revenue + Sparkline Widgets ══ -->
   <div style="display:grid;grid-template-columns:2fr 1fr;gap:16px;margin-bottom:16px;">
@@ -5494,6 +5497,7 @@ function _dashGRangeLabel() {
   if (_dashGRange.mode === 'today') return 'Today';
   if (_dashGRange.mode === 'all') return 'All time';
   if (_dashGRange.mode === 'custom' && _dashGRange.from && _dashGRange.to) return `${_dashGRange.from} → ${_dashGRange.to}`;
+  if (_dashGRange.days === 365) return 'Last 1 year';
   return `Last ${_dashGRange.days} days`;
 }
 // Bucket spec reused by every chart on the page so they all slice time the same way
@@ -5501,7 +5505,7 @@ function _dashGBucketSpec() {
   if (_dashGRange.mode === 'custom' && _dashGRange.from && _dashGRange.to) return { days:null, customRange:{from:_dashGRange.from, to:_dashGRange.to} };
   if (_dashGRange.mode === 'today') return { days:1, customRange:null }; // today shown in fine-grained daily slice
   if (_dashGRange.mode === 'all') return { days:90, customRange:null }; // cap chart buckets at 90d for 'all time' for readability
-  return { days:_dashGRange.days||7, customRange:null };
+  return { days:_dashGRange.days||7, customRange:null }; // 365 = '1Y' chip — chart buckets monthly below
 }
 function setDashGlobalRange(days, btn) {
   _dashGRange = days === 'today' ? { mode:'today', days:null, from:null, to:null }
@@ -5548,7 +5552,30 @@ async function loadDashboardCore() {
     const prods   = prdData.data||prdData.products||(Array.isArray(prdData)?prdData:[]);
     allOrders = orders; allProducts = prods; _dashLastStats = stats;
     renderDashboardData(orders, prods, stats);
+    loadCourierWallet();
   } catch(e) { toast('Dashboard error: '+e.message, 'error'); console.error(e); }
+}
+
+// COD wallet with the courier (auto-updates, no manual work)
+async function loadCourierWallet() {
+  try {
+    const r = await apiFetch('/api/admin/courier-wallet');
+    const j = await r.json();
+    renderCourierWallet(j && j.wallet, j && j.sync);
+  } catch(e) { /* not critical — dashboard still works */ }
+}
+function renderCourierWallet(w, sync) {
+  const wrap = document.getElementById('courierWalletRow');
+  if (!wrap) return;
+  if (!w) { wrap.innerHTML = ''; return; }
+  const syncLag = sync && sync.lastRunAt ? Math.round((Date.now()-new Date(sync.lastRunAt))/60000) : null;
+  wrap.innerHTML = `
+    <div class="stat-tick"><span class="stat-tick-ico">💵</span><div><div class="stat-tick-val">₹${fmtNum(Math.round(w.codPendingWithCourier||0))}</div><div class="stat-tick-lbl">COD with courier wallet</div></div></div>
+    <div class="stat-tick up"><span class="stat-tick-ico">✅</span><div><div class="stat-tick-val">₹${fmtNum(Math.round(w.codCollectedMonth||0))}</div><div class="stat-tick-lbl">COD collected this month</div></div></div>
+    <div class="stat-tick"><span class="stat-tick-ico">⏳</span><div><div class="stat-tick-val">₹${fmtNum(Math.round(w.codPendingMonth||0))}</div><div class="stat-tick-lbl">COD placed, not yet collected</div></div></div>
+    <div class="stat-tick"><span class="stat-tick-ico">🚚</span><div><div class="stat-tick-val">${w.inTransitOrders||0}</div><div class="stat-tick-lbl">Orders in transit</div></div></div>
+    <div class="stat-tick"><span class="stat-tick-ico">🔄</span><div><div class="stat-tick-val">${syncLag==null?'—':syncLag+'m ago'}</div><div class="stat-tick-lbl">Courier sync (auto every 10 min)</div></div></div>
+  `;
 }
 
 // Renders every section of the dashboard from already-fetched data.
@@ -5798,22 +5825,51 @@ function renderDashboardData(orders, prods, stats) {
 
 function renderRevenueChart(orders, days=7, customRange=null) {
   let buckets;
+  const monthly = days >= 60; // 90D / 1Y render monthly buckets so the chart stays readable
+  let spanDaysGte60 = false;
+  const isPaid = o => { const s=(o.payment_status||'').toLowerCase(); return s.includes('paid')||s==='success'; };
   if (customRange && customRange.from && customRange.to) {
     const start = new Date(customRange.from), end = new Date(customRange.to);
-    const spanDays = Math.max(1, Math.min(90, Math.round((end-start)/86400000) + 1));
-    buckets = Array.from({length:spanDays},(_,i)=>{
-      const d=new Date(start); d.setDate(d.getDate()+i);
-      return {label:spanDays<=14?d.toLocaleDateString('en-IN',{weekday:'short'}):d.getDate()+'/'+(d.getMonth()+1),
-        date:d.toISOString().split('T')[0], rev:0, cnt:0};
-    });
+    const spanDays = Math.max(1, Math.min(400, Math.round((end-start)/86400000) + 1));
+    spanDaysGte60 = spanDays >= 60;
+    if (spanDays >= 60) {
+      buckets = [];
+      const cur = new Date(Math.max(start.getTime(), Date.now()-366*86400000)); cur.setDate(1);
+      const endM = new Date(end); endM.setDate(1);
+      while (cur <= endM) {
+        const key = cur.toISOString().slice(0,7);
+        buckets.push({label:cur.toLocaleDateString('en-IN',{month:'short'}), key, date:key, rev:0, cnt:0});
+        cur.setMonth(cur.getMonth()+1);
+      }
+      (orders||[]).forEach(o=>{ const b=buckets.find(b=>b.key===(o.created_at||'').slice(0,7)); if(b){b.cnt++; if(isPaid(o)) b.rev+=parseFloat(o.total||0);} });
+    } else {
+      buckets = Array.from({length:spanDays},(_,i)=>{
+        const d=new Date(start); d.setDate(d.getDate()+i);
+        return {label:spanDays<=14?d.toLocaleDateString('en-IN',{weekday:'short'}):d.getDate()+'/'+(d.getMonth()+1),
+          date:d.toISOString().split('T')[0], rev:0, cnt:0};
+      });
+    }
   } else {
-    buckets = Array.from({length:Math.min(days,30)},(_,i)=>{
-      const d=new Date(); d.setDate(d.getDate()-(Math.min(days,30)-1-i));
-      return {label:days<=7?d.toLocaleDateString('en-IN',{weekday:'short'}):d.getDate()+'/'+(d.getMonth()+1),
-        date:d.toISOString().split('T')[0], rev:0, cnt:0};
-    });
+    if (monthly) {
+      buckets = [];
+      spanDaysGte60 = true;
+      const cur = new Date(); cur.setDate(1); cur.setMonth(cur.getMonth()-Math.min(days,365)/30|0);
+      const endM = new Date(); endM.setDate(1);
+      while (cur <= endM) {
+        const key = cur.toISOString().slice(0,7);
+        buckets.push({label:cur.toLocaleDateString('en-IN',{month:'short'}), key, date:key, rev:0, cnt:0});
+        cur.setMonth(cur.getMonth()+1);
+      }
+      (orders||[]).forEach(o=>{ const b=buckets.find(b=>b.key===(o.created_at||'').slice(0,7)); if(b){b.cnt++; if(isPaid(o)) b.rev+=parseFloat(o.total||0);} });
+    } else {
+      buckets = Array.from({length:Math.min(days,30)},(_,i)=>{
+        const d=new Date(); d.setDate(d.getDate()-(Math.min(days,30)-1-i));
+        return {label:days<=7?d.toLocaleDateString('en-IN',{weekday:'short'}):d.getDate()+'/'+(d.getMonth()+1),
+          date:d.toISOString().split('T')[0], rev:0, cnt:0};
+      });
+    }
   }
-  orders.forEach(o=>{
+  if (!monthly && !(customRange && customRange.from && customRange.to && spanDaysGte60)) orders.forEach(o=>{
     const isPaid=(o.payment_status||'').toLowerCase().includes('paid')||o.payment_status==='SUCCESS';
     const b=buckets.find(b=>b.date===(o.created_at||'').split('T')[0]);
     if(b){b.cnt++;if(isPaid)b.rev+=parseFloat(o.total||0);}
