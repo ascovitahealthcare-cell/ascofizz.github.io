@@ -9361,6 +9361,21 @@ const SITE_IMAGE_CATALOG = [
     fallback:'' },
 ];
 
+// ── Aug 2026: PRODUCT EDUCATION GALLERY ──────────────────────────
+// The "Know Your Product" gallery on the product page (How To Use / What
+// Experts Say / What Research Says / Why Ozylix) has 16 creative slots —
+// 4 cards in each of the 4 tabs. Keys are edu.{slug}.{panel}.{n}.
+const EDU_PANELS = [
+  { id:'howto',    label:'How To Use' },
+  { id:'experts',  label:'What Experts Say' },
+  { id:'research', label:'What Research Says' },
+  { id:'why',      label:'Why Ozylix' }
+];
+const EDU_CARDS = 4; // cards per panel
+// The product whose gallery these creatives belong to — the slug comes from
+// the product name on the live site (e.g. "glutathione-effervescent-tablet").
+let EDU_SLUG = (localStorage.getItem('ozylix.eduSlug') || '').trim();
+
 async function loadSiteImages() {
   let overrides = {};
   try {
@@ -9372,7 +9387,44 @@ async function loadSiteImages() {
   const groups = {};
   SITE_IMAGE_CATALOG.forEach(item => { (groups[item.group] = groups[item.group]||[]).push(item); });
 
-  document.getElementById('siteImagesGroups').innerHTML = Object.keys(groups).map(groupName => `
+  // ── Product Education Gallery (Know Your Product tabs) ────────────
+  const eduHtml = `
+    <div style="margin-bottom:28px;">
+      <div style="font-size:0.8rem;font-weight:700;letter-spacing:.5px;text-transform:uppercase;color:var(--text3);margin-bottom:10px;">Product Education Gallery — "Know Your Product" cards</div>
+      <div style="font-size:0.75rem;color:var(--text3);margin-bottom:12px;max-width:640px;">The 16 creatives on the product page's Know Your Product tabs (How To Use / What Experts Say / What Research Says / Why Ozylix — 4 cards each). Set the product slug below, then upload a creative per card. Videos are accepted too — they autoplay silently on the site.</div>
+      <div style="display:flex;gap:8px;align-items:center;margin-bottom:14px;flex-wrap:wrap;">
+        <label style="font-size:0.78rem;color:var(--text2);font-weight:600;">Product slug:</label>
+        <input id="eduSlugInput" value="${EDU_SLUG}" placeholder="e.g. glutathione-effervescent-tablet" style="flex:1;min-width:220px;padding:8px 12px;border:1px solid var(--border);border-radius:8px;background:var(--surface);color:var(--text);">
+        <button class="btn btn-primary btn-sm" onclick="saveEduSlug(document.getElementById('eduSlugInput').value)">Save</button>
+      </div>
+      ${!EDU_SLUG ? '<div style="font-size:0.75rem;color:var(--text3);margin-bottom:14px;">Enter the slug above to see the 16 slots.</div>' :
+      EDU_PANELS.map(pl => `
+        <div style="font-size:0.75rem;font-weight:700;color:var(--text2);margin:12px 0 8px;">${pl.label}</div>
+        <div class="grid-3">
+          ${Array.from({length: EDU_CARDS}, (_, i) => {
+            const key = 'edu.' + EDU_SLUG + '.' + pl.id + '.' + (i + 1);
+            const url = overrides[key] || '';
+            const has = !!url;
+            return `<div class="card" style="padding:0;overflow:hidden;">
+              ${has ? (isVideoFileUrl(url)
+                ? '<video src="'+adminCdnImg(url)+'" muted loop playsinline preload="metadata" autoplay class="banner-preview" style="object-fit:cover;"></video><span class="img-slot-vid-badge">▶ VIDEO</span>'
+                : '<img src="'+adminCdnImg(url)+'" class="banner-preview" onerror="this.style.display=\'none\'">')
+                : '<div class="banner-preview" style="background:var(--surface2);"></div>'}
+              <div style="padding:10px 12px;">
+                <div style="font-size:0.78rem;font-weight:600;color:var(--text);">Card ${i + 1}</div>
+                <div style="font-size:0.7rem;color:var(--text3);margin-bottom:8px;word-break:break-all;">${has ? 'custom creative set' : 'empty — upload a creative'}</div>
+                <input type="file" accept="image/*,.svg,video/*,.mp4,.webm,.mov" id="eduFile-${key}" style="display:none;" onchange="uploadEduCreative(this, '${key}')">
+                <div style="display:flex;gap:6px;">
+                  <button class="btn btn-primary btn-sm" style="flex:1;" onclick="document.getElementById('eduFile-${key}').click()">📤 ${has ? 'Replace' : 'Upload'}</button>
+                  ${has ? `<button class="btn btn-danger btn-sm btn-icon" onclick="deleteEduCreative('${key}', '${url}')" title="Delete this creative">🗑️</button>` : ''}
+                </div>
+              </div>
+            </div>`;
+          }).join('')}
+        </div>`).join('')}
+    </div>`;
+
+  document.getElementById('siteImagesGroups').innerHTML = eduHtml + Object.keys(groups).map(groupName => `
     <div style="margin-bottom:28px;">
       <div style="font-size:0.8rem;font-weight:700;letter-spacing:.5px;text-transform:uppercase;color:var(--text3);margin-bottom:10px;">${groupName}</div>
       <div class="grid-3">
@@ -9435,6 +9487,41 @@ async function resetSiteImage(key, currentUrl) {
     toast('🗑️ Deleted — reverted to default');
     loadSiteImages();
     } catch(e) { toast(e.message,'error'); }
+}
+
+async function uploadEduCreative(input, key) {
+  const file = input.files[0]; if(!file) return;
+  const fd = new FormData(); fd.append('image', file);
+  try {
+    const r = await fetch(`${API}/api/upload/image`, {method:'POST', headers:{'Authorization':`Bearer ${authToken}`}, body:fd});
+    const d = await r.json();
+    if(!r.ok) { toast(d.error || 'Upload failed', 'error'); return; }
+    const url = d.url || d.public_url || '';
+    await apiFetch(`/api/admin/site-media/${encodeURIComponent(key)}`, {method:'PUT', body:JSON.stringify({url})});
+    toast('✅ Creative uploaded — appears on the product page now');
+    loadSiteImages();
+  } catch(e) { toast('Upload error: ' + e.message, 'error'); }
+  input.value = '';
+}
+
+async function deleteEduCreative(key, url) {
+  if(!confirm('Delete this creative from storage and remove it from the product page? This can\'t be undone.')) return;
+  try {
+    if (url) {
+      const filename = url.split('/').pop().split('?')[0];
+      await apiFetch(`/api/upload/image/${encodeURIComponent(filename)}`, {method:'DELETE'}).catch(()=>{});
+    }
+    await apiFetch(`/api/admin/site-media/${encodeURIComponent(key)}`, {method:'DELETE'}).catch(()=>{});
+    toast('🗑️ Creative deleted — card now shows its default state');
+    loadSiteImages();
+  } catch(e) { toast(e.message,'error'); }
+}
+
+function saveEduSlug(slug) {
+  EDU_SLUG = (slug || '').trim().toLowerCase().replace(/[^a-z0-9-]/g, '-').replace(/-+/g, '-').replace(/^-|-$/g, '');
+  localStorage.setItem('ozylix.eduSlug', EDU_SLUG);
+  toast(EDU_SLUG ? ('✅ Product slug set: ' + EDU_SLUG) : 'Slug cleared');
+  loadSiteImages();
 }
 
 // ═══════════════════════════════════════════════

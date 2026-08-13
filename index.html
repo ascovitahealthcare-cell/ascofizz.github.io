@@ -7152,7 +7152,7 @@ button, [role="button"] {
   background: linear-gradient(135deg, var(--indigo), var(--green));
   display: flex; align-items: center; justify-content: center; overflow: hidden;
 }
-.edu-card-media img { width: 100%; height: 100%; object-fit: cover; }
+.edu-card-media img, .edu-card-media video { width: 100%; height: 100%; object-fit: cover; }
 .edu-card-media.edu-builtin-1 { background: none; }
 .edu-card-media.edu-builtin-1 .edu-ico,
 .edu-card-media.edu-builtin-1 .edu-awaiting { display: none; }
@@ -13916,13 +13916,22 @@ function renderProductReviewList(pid) {
         // Aug 2026: edu creatives are fully admin-managed (admin Site Images
         // → product "Know Your Product" gallery → Upload creative per card).
         // No built-in image set anymore — cards wait for an upload.
-        var eduImg = '';
-        var imgHtml = eduImg ? ('<img src="' + eduImg + '" alt="" loading="lazy" decoding="async">') : '';
+        // Aug 2026: creatives are admin-uploaded via Website Images →
+        // Product Education Gallery, stored as edu.{slug}.{panel}.{n}.
+        var eduSrc = '';
+        try {
+          eduSrc = ((window.__ozylixSiteMedia && window.__ozylixSiteMedia[mkey]) || '') || '';
+        } catch (e) { eduSrc = ''; }
+        var eduIsVideo = typeof mediaTypeFromUrl === 'function' ? mediaTypeFromUrl(eduSrc) === 'video' : /\.(mp4|webm|mov|m4v|3gp)(\?|$)/i.test(eduSrc);
+        var eduImg = eduSrc ? (eduIsVideo ? eduSrc : eduSrc) : '';
+        var imgHtml = eduImg ? (eduIsVideo
+          ? '<video src="' + eduImg + '" autoplay muted loop playsinline preload="metadata" loading="lazy" onerror="this.style.display=\'none\'"></video>'
+          : '<img src="' + eduImg + '" alt="" loading="lazy" decoding="async">') : '';
         var builtIn = eduImg ? 'edu-builtin' : '';
         return '<div class="edu-card"><div class="edu-card-media edu-builtin-' + (eduImg ? '1' : '0') + '" data-media-key="' + mkey + '" data-awaiting-upload="true">' +
           imgHtml +
           '<span class="edu-ico">' + ico + '</span>' +
-          '<span class="edu-awaiting" data-media-key="' + mkey + '" data-fallback="hide">Upload creative</span></div>' +
+          (eduImg ? '' : '<span class="edu-awaiting" data-media-key="' + mkey + '" data-fallback="hide">Upload creative</span>') + '</div>' +
           '<div class="edu-card-body"><h4>' + escHtml(c.h) + '</h4><p>' + escHtml(c.p) + '</p></div></div>';
       }).join('');
       return '<div class="edu-panel' + (i === 0 ? ' active' : '') + '" data-edupanel="' + pl.id + '">' +
