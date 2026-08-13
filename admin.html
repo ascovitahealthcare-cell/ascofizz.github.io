@@ -194,11 +194,15 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);min-height:1
 .login-hint{text-align:center;color:var(--text3);font-size:0.75rem;margin-top:20px;}
 
 /* ═══ APP SHELL ═══ */
-#app{display:none;height:100vh;overflow:hidden;}
-.app-layout{display:grid;grid-template-columns:220px 1fr;grid-template-rows:56px calc(100vh - 56px);height:100vh;overflow:hidden;}
+#app{display:none;height:100vh;height:100dvh;overflow:hidden;}
+.app-layout{display:grid;grid-template-columns:220px 1fr;grid-template-rows:56px calc(100vh - 56px);grid-template-rows:56px calc(100dvh - 56px);grid-template-rows:auto 1fr;height:100vh;height:100dvh;overflow:hidden;}
 
 /* ═══ TOPBAR ═══ */
 .topbar{grid-column:1/-1;background:var(--surface);border-bottom:1px solid var(--border);display:flex;align-items:center;padding:0 20px;gap:16px;z-index:100;height:56px;}
+/* iOS notch / status bar: never let the topbar render behind it */
+@supports (padding-top: env(safe-area-inset-top)){
+  .topbar{ padding-top:env(safe-area-inset-top, 0px); height:calc(56px + env(safe-area-inset-top, 0px)); }
+}
 .topbar-logo{display:flex;align-items:center;gap:10px;min-width:180px;text-decoration:none;}
 .logo-icon{width:32px;height:32px;background:var(--white);border:1px solid var(--border);border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:1.1rem;flex-shrink:0;overflow:hidden;}
 .logo-icon img{width:100%;height:100%;object-fit:contain;padding:3px;}
@@ -727,9 +731,9 @@ img, canvas, svg, table { max-width:100%; }
   .sidebar {
     display: none;
     position: fixed;
-    left: 0; top: 56px;
+    left: 0; top: calc(56px + env(safe-area-inset-top, 0px));
     width: clamp(220px, 65vw, 280px);
-    height: calc(100dvh - 56px);
+    height: calc(100dvh - 56px - env(safe-area-inset-top, 0px));
     z-index: 600;
     transform: translateX(-100%);
     transition: transform 0.3s cubic-bezier(0.25,0.46,0.45,0.94);
@@ -753,9 +757,10 @@ img, canvas, svg, table { max-width:100%; }
   .main {
     padding: clamp(12px,3vw,20px) !important;
     padding-bottom: 76px !important;
-    height: calc(100dvh - 56px) !important;
+    height: calc(100dvh - 56px - env(safe-area-inset-top, 0px)) !important;
     overflow-y: auto !important;
   }
+  .topbar { height: calc(56px + env(safe-area-inset-top, 0px)) !important; }
 
   /* Bottom nav visible */
   .admin-bnav { display:flex !important; }
@@ -841,7 +846,7 @@ img, canvas, svg, table { max-width:100%; }
   .card-title { font-size:clamp(0.82rem,3vw,0.95rem) !important; }
 
   /* Topbar */
-  .topbar { padding:0 clamp(10px,3vw,14px) !important; gap:8px !important; height:52px !important; }
+  .topbar { padding:0 clamp(10px,3vw,14px) !important; gap:8px !important; height:calc(52px + env(safe-area-inset-top, 0px)) !important; }
   .logo-icon { font-size:1.1rem !important; }
   .logo-name { font-size:clamp(0.82rem,3vw,0.9rem) !important; }
   .logo-badge { font-size:0.55rem !important; padding:1px 5px !important; }
@@ -12645,6 +12650,11 @@ body.role-admin #azRoleBanner{display:block}
   .topbar {
     padding-left: max(clamp(10px, 3vw, 14px), env(safe-area-inset-left)) !important;
     padding-right: max(clamp(10px, 3vw, 14px), env(safe-area-inset-right)) !important;
+    /* iPhone notch / status bar: the header must render BELOW it, never
+       behind it — without this the logo, timer and sign-out hide under
+       the notch / status bar area. */
+    padding-top: env(safe-area-inset-top, 0px) !important;
+    height: calc(52px + env(safe-area-inset-top, 0px)) !important;
   }
   .admin-bnav {
     height: auto !important;
@@ -12656,6 +12666,7 @@ body.role-admin #azRoleBanner{display:block}
   /* Clear the nav plus whatever the home indicator takes. */
   .main {
     padding-bottom: calc(76px + env(safe-area-inset-bottom)) !important;
+    height: calc(100dvh - 52px - env(safe-area-inset-top, 0px)) !important;
   }
   .gemini-fab   { bottom: calc(74px + env(safe-area-inset-bottom)) !important; }
   .gemini-panel { bottom: calc(136px + env(safe-area-inset-bottom)) !important; }
