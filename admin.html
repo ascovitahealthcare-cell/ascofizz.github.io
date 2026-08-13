@@ -2233,6 +2233,7 @@ function azTogglePw() {
   <div class="card" style="padding:12px 16px;margin-bottom:16px;display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
     <span style="font-size:0.78rem;font-weight:700;color:var(--text2);">📅 Dashboard Range:</span>
     <div style="display:flex;gap:6px;flex-wrap:wrap;">
+      <button class="ep-chip" id="dashGChipToday" onclick="setDashGlobalRange('today',this)" style="padding:5px 13px;">Today</button>
       <button class="ep-chip" id="dashGChipAll" onclick="setDashGlobalRange('all',this)" style="padding:5px 13px;">All Time</button>
       <button class="ep-chip active" id="dashGChip7" onclick="setDashGlobalRange(7,this)" style="padding:5px 13px;">7D</button>
       <button class="ep-chip" id="dashGChip30" onclick="setDashGlobalRange(30,this)" style="padding:5px 13px;">30D</button>
@@ -2412,6 +2413,7 @@ function azTogglePw() {
     <div><div class="page-title">Analytics</div><div class="page-sub">Revenue insights & business performance</div></div>
     <div class="page-actions">
       <select class="filter-select" id="analyticsFilter" onchange="onAnalyticsFilterChange()">
+        <option value="0">Today</option>
         <option value="7">Last 7 Days</option>
         <option value="30" selected>Last 30 Days</option>
         <option value="90">Last 90 Days</option>
@@ -2664,6 +2666,7 @@ function azTogglePw() {
   </div>
   <div class="filter-bar" style="margin-top:8px;align-items:center;">
     <div style="display:flex;gap:4px;">
+      <button class="ep-chip" id="ordDateChipToday" onclick="setOrderDateRange('today',this)" style="padding:5px 12px;font-size:0.75rem;">Today</button>
       <button class="ep-chip active" id="ordDateChipAll" onclick="setOrderDateRange('all',this)" style="padding:5px 12px;font-size:0.75rem;">All Time</button>
       <button class="ep-chip" id="ordDateChip7" onclick="setOrderDateRange(7,this)" style="padding:5px 12px;font-size:0.75rem;">7D</button>
       <button class="ep-chip" id="ordDateChip30" onclick="setOrderDateRange(30,this)" style="padding:5px 12px;font-size:0.75rem;">30D</button>
@@ -3120,6 +3123,7 @@ function azTogglePw() {
   </div>
   <div class="filter-bar" style="margin-top:8px;align-items:center;">
     <div style="display:flex;gap:4px;">
+      <button class="ep-chip" id="custDateChipToday" onclick="setCustomerDateRange('today',this)" style="padding:5px 12px;font-size:0.75rem;">Today</button>
       <button class="ep-chip active" id="custDateChipAll" onclick="setCustomerDateRange('all',this)" style="padding:5px 12px;font-size:0.75rem;">All Time</button>
       <button class="ep-chip" id="custDateChip7" onclick="setCustomerDateRange(7,this)" style="padding:5px 12px;font-size:0.75rem;">7D</button>
       <button class="ep-chip" id="custDateChip30" onclick="setCustomerDateRange(30,this)" style="padding:5px 12px;font-size:0.75rem;">30D</button>
@@ -3577,6 +3581,7 @@ function azTogglePw() {
 
   <div class="filter-bar" style="align-items:center;">
     <div style="display:flex;gap:4px;">
+      <button class="ep-chip" id="payDateChipToday" onclick="setPaymentDateRange('today',this)" style="padding:5px 12px;font-size:0.75rem;">Today</button>
       <button class="ep-chip active" id="payDateChipAll" onclick="setPaymentDateRange('all',this)" style="padding:5px 12px;font-size:0.75rem;">All Time</button>
       <button class="ep-chip" id="payDateChip7" onclick="setPaymentDateRange(7,this)" style="padding:5px 12px;font-size:0.75rem;">7D</button>
       <button class="ep-chip" id="payDateChip30" onclick="setPaymentDateRange(30,this)" style="padding:5px 12px;font-size:0.75rem;">30D</button>
@@ -3631,6 +3636,7 @@ function azTogglePw() {
   </div>
   <div class="filter-bar" style="align-items:center;">
     <div style="display:flex;gap:4px;">
+      <button class="ep-chip" id="invDateChipToday" onclick="setInvoiceDateRange('today',this)" style="padding:5px 12px;font-size:0.75rem;">Today</button>
       <button class="ep-chip active" id="invDateChipAll" onclick="setInvoiceDateRange('all',this)" style="padding:5px 12px;font-size:0.75rem;">All Time</button>
       <button class="ep-chip" id="invDateChip7" onclick="setInvoiceDateRange(7,this)" style="padding:5px 12px;font-size:0.75rem;">7D</button>
       <button class="ep-chip" id="invDateChip30" onclick="setInvoiceDateRange(30,this)" style="padding:5px 12px;font-size:0.75rem;">30D</button>
@@ -5471,6 +5477,10 @@ let _dashGRange = { mode: 'days', days: 7, from: null, to: null };
 let _dashLastStats = {};
 
 function _dashGFilterOrders(orders) {
+  if (_dashGRange.mode === 'today') {
+    const todayStr = new Date().toISOString().split('T')[0];
+    return orders.filter(o => (o.created_at || '').startsWith(todayStr));
+  }
   if (_dashGRange.mode === 'all') return orders;
   if (_dashGRange.mode === 'custom' && _dashGRange.from && _dashGRange.to) {
     const start = new Date(_dashGRange.from);
@@ -5481,6 +5491,7 @@ function _dashGFilterOrders(orders) {
   return orders.filter(o => new Date(o.created_at) >= cutoff);
 }
 function _dashGRangeLabel() {
+  if (_dashGRange.mode === 'today') return 'Today';
   if (_dashGRange.mode === 'all') return 'All time';
   if (_dashGRange.mode === 'custom' && _dashGRange.from && _dashGRange.to) return `${_dashGRange.from} → ${_dashGRange.to}`;
   return `Last ${_dashGRange.days} days`;
@@ -5488,11 +5499,14 @@ function _dashGRangeLabel() {
 // Bucket spec reused by every chart on the page so they all slice time the same way
 function _dashGBucketSpec() {
   if (_dashGRange.mode === 'custom' && _dashGRange.from && _dashGRange.to) return { days:null, customRange:{from:_dashGRange.from, to:_dashGRange.to} };
+  if (_dashGRange.mode === 'today') return { days:1, customRange:null }; // today shown in fine-grained daily slice
   if (_dashGRange.mode === 'all') return { days:90, customRange:null }; // cap chart buckets at 90d for 'all time' for readability
   return { days:_dashGRange.days||7, customRange:null };
 }
 function setDashGlobalRange(days, btn) {
-  _dashGRange = { mode:'days', days, from:null, to:null };
+  _dashGRange = days === 'today' ? { mode:'today', days:null, from:null, to:null }
+                : days === 'all'  ? { mode:'all',   days:null, from:null, to:null }
+                : { mode:'days', days, from:null, to:null };
   document.getElementById('dashGCustomBar').style.display = 'none';
   document.querySelectorAll('[id^=dashGChip]').forEach(b=>b.classList.remove('active'));
   btn.classList.add('active');
@@ -5544,10 +5558,15 @@ function renderDashboardData(orders, prods, stats) {
   orders = orders || [];
   prods  = prods  || [];
   const isPaid = o=>(o.payment_status||'').toLowerCase().includes('paid')||o.payment_status==='SUCCESS';
+  const isCollectedCOD = o=>(o.payment_status||'').toLowerCase().includes('collected');
+  const isPendingCOD = o=>{ const s=(o.payment_status||'').toLowerCase(); return s.includes('cod') && !s.includes('paid'); };
 
   // rangeOrders = orders within the globally-selected date range — drives every range-aware widget below.
   const rangeOrders = _dashGFilterOrders(orders);
   const paidRange = rangeOrders.filter(isPaid);
+  // COD counts as revenue the moment the order is placed (that is the store's main sales channel).
+  // Cash still to collect from uncollected COD is shown separately as "COD outstanding".
+  const collectedRange = rangeOrders.filter(o=>isPaid(o)||isCollectedCOD(o));
 
   // "Today" is always literal-today regardless of the selected range (Today's Revenue / Orders Today
   // are point-in-time snapshots, not trend widgets — same convention most dashboards use).
@@ -5555,27 +5574,25 @@ function renderDashboardData(orders, prods, stats) {
   const paidAll   = orders.filter(isPaid);
   const todayPaid = paidAll.filter(o=>(o.created_at||'').startsWith(todayStr));
   const todayAll  = orders.filter(o=>(o.created_at||'').startsWith(todayStr));
-  const todayRev  = stats.todayRevenue || todayPaid.reduce((s,o)=>s+parseFloat(o.total||0),0);
+  const todayRev  = stats.todayRevenue || todayAll.reduce((s,o)=>s+parseFloat(o.total||0),0);
 
   // Range-based aggregates — these now respond to the dashboard-wide filter
-  const rangeRev   = paidRange.reduce((s,o)=>s+parseFloat(o.total||0),0);
+  const rangeRev   = rangeOrders.reduce((s,o)=>s+parseFloat(o.total||0),0);
   const pending    = rangeOrders.filter(o=>(o.fulfillment||o.status||'')==='Pending').length;
   const conv       = rangeOrders.length ? ((paidRange.length/rangeOrders.length)*100) : 0;
-  const avgOrder   = paidRange.length ? rangeRev/paidRange.length : 0;
+  const avgOrder   = rangeOrders.length ? rangeRev/rangeOrders.length : 0;
 
   // Trend vs yesterday (today-anchored, independent of range — see note above)
   const yday = new Date(); yday.setDate(yday.getDate()-1);
   const yStr = yday.toISOString().split('T')[0];
-  const yestRev = paidAll.filter(o=>(o.created_at||'').startsWith(yStr)).reduce((s,o)=>s+parseFloat(o.total||0),0);
+  const yestRev = orders.filter(o=>(o.created_at||'').startsWith(yStr)).reduce((s,o)=>s+parseFloat(o.total||0),0);
   const revPct = yestRev>0?((todayRev-yestRev)/yestRev*100):0;
   const revUp = revPct>=0;
 
   // Revenue breakdown for KPI display — within range
-  const onlineRev  = paidRange.filter(o=>!(o.payment_status||'').toLowerCase().includes('cod')).reduce((s,o)=>s+parseFloat(o.total||0),0);
-  // Only COD orders actually marked Paid (i.e. delivered & collected) count as revenue here —
-  // matches rangeRev above. Uncollected COD is tracked separately as "outstanding", not revenue.
-  const codRev     = paidRange.filter(o=>(o.payment_status||'').toLowerCase().includes('cod')).reduce((s,o)=>s+parseFloat(o.total||0),0);
-  const codOutstanding = rangeOrders.filter(o=>{ const s=(o.payment_status||'').toLowerCase(); return s.includes('cod') && !s.includes('paid'); }).reduce((s,o)=>s+parseFloat(o.total||0),0);
+  const onlineRev  = collectedRange.filter(o=>!(o.payment_status||'').toLowerCase().includes('cod')).reduce((s,o)=>s+parseFloat(o.total||0),0);
+  const codRev     = collectedRange.filter(o=>(o.payment_status||'').toLowerCase().includes('cod')).reduce((s,o)=>s+parseFloat(o.total||0),0);
+  const codOutstanding = rangeOrders.filter(isPendingCOD).reduce((s,o)=>s+parseFloat(o.total||0),0);
   const rangeLbl  = _dashGRangeLabel();
 
   // KPI Cards with animated counters
@@ -5591,7 +5608,7 @@ function renderDashboardData(orders, prods, stats) {
       <div class="kpi-glow" style="background:radial-gradient(circle at 50% 0%,rgba(32,128,232,0.08),transparent 60%);"></div>
       <div class="kpi-label">Revenue · ${rangeLbl}</div>
       <div class="kpi-val" id="kv1">₹0</div>
-      <div class="kpi-trend" style="color:var(--text3)">💳 ₹${fmtNum(Math.round(onlineRev))} online &nbsp;+&nbsp; 💵 ₹${fmtNum(Math.round(codRev))} COD collected${codOutstanding>0?` &nbsp;·&nbsp; ⏳ ₹${fmtNum(Math.round(codOutstanding))} COD outstanding`:''}</div>
+      <div class="kpi-trend" style="color:var(--text3)">💳 ₹${fmtNum(Math.round(onlineRev))} online &nbsp;+&nbsp; 💵 ₹${fmtNum(Math.round(codRev))} COD${codOutstanding>0?` &nbsp;·&nbsp; ⏳ ₹${fmtNum(Math.round(codOutstanding))} uncollected`:''}</div>
       <span class="kpi-ico">📈</span>
     </div>
     <div class="kpi" style="border-color:rgba(232,173,44,0.3);">
@@ -5859,6 +5876,9 @@ async function loadAnalytics() {
     if (!from || !to) { toast('Pick both a start and end date','error'); return; }
     const fromD = new Date(from), toD = new Date(to); toD.setHours(23,59,59,999);
     orders = allOrders.filter(o => { const d = new Date(o.created_at); return d >= fromD && d <= toD; });
+  } else if (filterVal === '0') {
+    const todayStr = new Date().toISOString().split('T')[0];
+    orders = allOrders.filter(o => (o.created_at||'').startsWith(todayStr));
   } else {
     const days = parseInt(filterVal)||30;
     const cutoff = new Date(); cutoff.setDate(cutoff.getDate() - days);
@@ -6185,7 +6205,8 @@ function renderAdvancedWidgets(orders, prods) {
     const d=new Date();d.setDate(d.getDate()-(29-i));
     return{label:d.getDate()+'/'+(d.getMonth()+1),date:d.toISOString().split('T')[0],rev:0};
   });
-  orders.filter(o=>(o.payment_status||'').toLowerCase().includes('paid')||o.payment_status==='SUCCESS').forEach(o=>{
+  // All placed orders count toward the revenue trend (COD is the main sales channel).
+  orders.filter(o=>true).forEach(o=>{
     const b=n30.find(b=>b.date===(o.created_at||'').split('T')[0]);
     if(b)b.rev+=parseFloat(o.total||0);
   });
@@ -6767,7 +6788,10 @@ function filterOrders() {
   if(st)  list = list.filter(o => (o.status||o.fulfillment) === st);
   if(pay) list = list.filter(o => o.payment_status === pay);
 
-  if (ordersDateMode === 7 || ordersDateMode === 30 || ordersDateMode === 90) {
+  if (ordersDateMode === 'today') {
+    const todayStr = new Date().toISOString().split('T')[0];
+    list = list.filter(o => (o.created_at||'').startsWith(todayStr));
+  } else if (ordersDateMode === 7 || ordersDateMode === 30 || ordersDateMode === 90) {
     const cutoff = Date.now() - ordersDateMode * 86400000;
     list = list.filter(o => new Date(o.created_at).getTime() >= cutoff);
   } else if (ordersDateMode === 'month') {
@@ -8353,11 +8377,12 @@ function clearCustomerDateFilters() {
 
 function filterCustomers() {
   const q = (document.getElementById('custSearch').value||'').toLowerCase();
-  let list = allCustomers;
-
+    let list = allCustomers;
   if (q) list = list.filter(c => (c.name+c.email+c.phone).toLowerCase().includes(q));
-
-  if (customersDateMode === 7 || customersDateMode === 30 || customersDateMode === 90) {
+  if (customersDateMode === 'today') {
+    const todayStr = new Date().toISOString().split('T')[0];
+    list = list.filter(c => (c.created_at||'').startsWith(todayStr));
+  } else if (customersDateMode === 7 || customersDateMode === 30 || customersDateMode === 90) {
     const cutoff = Date.now() - customersDateMode * 86400000;
     list = list.filter(c => new Date(c.created_at).getTime() >= cutoff);
   } else if (customersDateMode === 'month') {
@@ -8657,7 +8682,10 @@ function filterPayments() {
 
   if (f) list = list.filter(o => o.payment_status === f);
 
-  if (paymentsDateMode === 7 || paymentsDateMode === 30 || paymentsDateMode === 90) {
+  if (paymentsDateMode === 'today') {
+    const todayStr = new Date().toISOString().split('T')[0];
+    list = list.filter(o => (o.created_at||'').startsWith(todayStr));
+  } else if (paymentsDateMode === 7 || paymentsDateMode === 30 || paymentsDateMode === 90) {
     const cutoff = Date.now() - paymentsDateMode * 86400000;
     list = list.filter(o => new Date(o.created_at).getTime() >= cutoff);
   } else if (paymentsDateMode === 'month') {
@@ -8693,12 +8721,12 @@ function filterPayments() {
 }
 
 function renderPaymentTrendChart(list) {
-  const days = paymentsDateMode===90?90 : paymentsDateMode===30?30 : paymentsDateMode===7?7 : 30;
+  const days = paymentsDateMode==='today'?1 : paymentsDateMode===90?90 : paymentsDateMode===30?30 : paymentsDateMode===7?7 : 30;
   const buckets = Array.from({length:days}, (_,i) => {
     const d = new Date(); d.setDate(d.getDate() - (days-1-i));
     return { label: d.getDate()+'/'+(d.getMonth()+1), date: d.toISOString().split('T')[0], rev: 0 };
   });
-  list.filter(o=>o.payment_status==='Paid').forEach(o => {
+  list.filter(o=>['Paid','Paid - COD Collected'].includes(o.payment_status)||o.payment_status==='SUCCESS').forEach(o => {
     const day = (o.created_at||'').split('T')[0];
     const b = buckets.find(b=>b.date===day);
     if (b) b.rev += parseFloat(o.total||0);
@@ -8820,11 +8848,12 @@ function clearInvoiceDateFilters() {
 
 function filterInvoices() {
   const q = (document.getElementById('invoiceSearch').value||'').toLowerCase();
-  let list = allOrders;
-
+    let list = allOrders;
   if (q) list = list.filter(o => o.id.toLowerCase().includes(q)||(o.customer_name||'').toLowerCase().includes(q));
-
-  if (invoicesDateMode === 7 || invoicesDateMode === 30 || invoicesDateMode === 90) {
+  if (invoicesDateMode === 'today') {
+    const todayStr = new Date().toISOString().split('T')[0];
+    list = list.filter(o => (o.created_at||'').startsWith(todayStr));
+  } else if (invoicesDateMode === 7 || invoicesDateMode === 30 || invoicesDateMode === 90) {
     const cutoff = Date.now() - invoicesDateMode * 86400000;
     list = list.filter(o => new Date(o.created_at).getTime() >= cutoff);
   } else if (invoicesDateMode === 'month') {
@@ -11719,7 +11748,7 @@ function loadPerformance(){
     </div>`).join('');
   }
   const n30=Array.from({length:30},(_,i)=>{const d=new Date();d.setDate(d.getDate()-(29-i));return{label:d.getDate()+'/'+(d.getMonth()+1),date:d.toISOString().split('T')[0],rev:0};});
-  allOrders.forEach(o=>{const b=n30.find(b=>b.date===(o.created_at||'').split('T')[0]);if(b&&((o.payment_status||'').toLowerCase().includes('paid')||o.payment_status==='SUCCESS'))b.rev+=parseFloat(o.total||0);});
+  allOrders.forEach(o=>{const b=n30.find(b=>b.date===(o.created_at||'').split('T')[0]);if(b)b.rev+=parseFloat(o.total||0);});
   const inStock=allProducts.filter(p=>!p.deleted_at&&(p.stock||0)>10).length;
   const totP=allProducts.filter(p=>!p.deleted_at).length||1;
   setTimeout(()=>{
