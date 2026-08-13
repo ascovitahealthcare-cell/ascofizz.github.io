@@ -7724,6 +7724,18 @@ async function handleImgSlotFileChosen(input) {
   const spinner = document.createElement('div');
   spinner.className = 'img-slot-spinner'; spinner.textContent = '⏳';
   box.appendChild(spinner);
+  // Large videos are re-encoded on the server (H.264/MP4) — on Render's
+  // free tier that can take tens of seconds; warn BEFORE uploading so a
+  // long wait never looks like a broken upload.
+  if (file.type.startsWith('video/')) {
+    const mb = file.size / (1024 * 1024);
+    if (mb > 50) {
+      spinner.remove();
+      toast('❌ Video is ' + mb.toFixed(0) + ' MB — too large. Keep videos under 50 MB (compress on your phone first).', 'error');
+      return;
+    }
+    toast('⏳ Uploading video — the server is compressing it to web size, this can take up to a minute…');
+  }
   const fd = new FormData(); fd.append('image', file);
   try {
     const r = await fetch(`${API}/api/upload/image`, {method:'POST', headers:{'Authorization':`Bearer ${authToken}`}, body: fd});
@@ -9156,6 +9168,9 @@ function loadBanners() {
 
 async function uploadBanner(input) {
   const file = input.files[0]; if(!file) return;
+  const _mb = file.size / (1024 * 1024);
+  if (_mb > 50) { toast('❌ Video is ' + _mb.toFixed(0) + ' MB — too large. Keep videos under 50 MB (compress on your phone first).', 'error'); input.value=''; return; }
+  if (file.type.startsWith('video/')) toast('⏳ Uploading video — the server is compressing it to web size, this can take up to a minute…');
   const fd = new FormData(); fd.append('image', file);
   try {
     const r = await fetch(`${API}/api/upload/image`, {method:'POST', headers:{'Authorization':`Bearer ${authToken}`}, body:fd});
@@ -9488,6 +9503,9 @@ async function loadSiteImages() {
 
 async function uploadSiteImage(input, key) {
   const file = input.files[0]; if(!file) return;
+  const _mb = file.size / (1024 * 1024);
+  if (_mb > 50) { toast('❌ Video is ' + _mb.toFixed(0) + ' MB — too large. Keep videos under 50 MB (compress on your phone first).', 'error'); input.value=''; return; }
+  if (file.type.startsWith('video/')) toast('⏳ Uploading video — the server is compressing it to web size, this can take up to a minute…');
   const fd = new FormData(); fd.append('image', file);
   try {
     const r = await fetch(`${API}/api/upload/image`, {method:'POST', headers:{'Authorization':`Bearer ${authToken}`}, body:fd});
@@ -9644,6 +9662,9 @@ async function addShopBanner() {
 }
 async function uploadBannerImage(prefix, n, input) {
   const file = input.files[0]; if (!file) return;
+  const _mb = file.size / (1024 * 1024);
+  if (_mb > 50) { toast('❌ Video is ' + _mb.toFixed(0) + ' MB — too large. Keep videos under 50 MB (compress on your phone first).', 'error'); input.value=''; return; }
+  if (file.type.startsWith('video/')) toast('⏳ Uploading video — the server is compressing it to web size, this can take up to a minute…');
   const key = prefix + '.' + n;
   const fd = new FormData(); fd.append('image', file);
   try {
@@ -9727,6 +9748,9 @@ async function loadFallbackManager() {
 }
 async function uploadFallbackImage(cat, input) {
   const file = input.files[0]; if (!file) return;
+  const _mb = file.size / (1024 * 1024);
+  if (_mb > 50) { toast('❌ Video is ' + _mb.toFixed(0) + ' MB — too large. Keep videos under 50 MB (compress on your phone first).', 'error'); input.value=''; return; }
+  if (file.type.startsWith('video/')) toast('⏳ Uploading video — the server is compressing it to web size, this can take up to a minute…');
   const fd = new FormData(); fd.append('image', file);
   try {
     const r = await fetch(`${API}/api/upload/image`, { method: 'POST', headers: { 'Authorization': `Bearer ${authToken}` }, body: fd });
@@ -9809,6 +9833,9 @@ async function addPromoCard() {
 }
 async function uploadPromoCardImage(n, input) {
   const file = input.files[0]; if (!file) return;
+  const _mb = file.size / (1024 * 1024);
+  if (_mb > 50) { toast('❌ Video is ' + _mb.toFixed(0) + ' MB — too large. Keep videos under 50 MB (compress on your phone first).', 'error'); input.value=''; return; }
+  if (file.type.startsWith('video/')) toast('⏳ Uploading video — the server is compressing it to web size, this can take up to a minute…');
   const key = 'promo.card.' + n;
   const fd = new FormData(); fd.append('image', file);
   try {
