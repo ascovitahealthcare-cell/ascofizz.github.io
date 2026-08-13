@@ -10370,7 +10370,7 @@ function renderCheckoutSummary() {
           <div class="ty-vita-bar-fill" id="tyVitaBar"></div>
         </div>
         <div class="ty-vita-note" id="tyVitaNote"></div>
-        <button class="ty-vita-link" onclick="showPage('account')">View my VitaPoints &rsaquo;</button>
+        <button class="ty-vita-link" id="tyVitaLink" onclick="showPage('account')">View my VitaPoints &rsaquo;</button>
       </div>
 
       <div class="ty-cta-card">
@@ -16034,6 +16034,15 @@ function showVitaEarned(total) {
   // is what actually lands in the account.
   const pts = Math.max(0, Math.floor((Number(total) || 0) * VITA_EARN_PER_RUPEE));
   if (!pts) return;                       // no points, no card
+  // Guests can't see their balance yet — points are banked against their
+  // checkout email either way, so show a sign-in nudge instead of a dead
+  // "View my VitaPoints" button that would dump them at a login wall.
+  const link = document.getElementById('tyVitaLink');
+  if (link && !localStorage.getItem('asc_jwt')) {
+    link.textContent = "Sign in to see your VitaPoints \u203a";
+    link.setAttribute('aria-label', 'Sign in to view your VitaPoints balance');
+    link.onclick = function () { showPage('login'); };
+  }
 
   card.style.display = 'block';
   const amt = document.getElementById('tyVitaPts');
