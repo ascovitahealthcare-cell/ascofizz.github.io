@@ -1053,6 +1053,20 @@ body.theme-neo .tab-btn.active{color:var(--green-text);}
 
 /* ── Deep layer backdrop: cards sit on a softly lit dark stage ── */
 body.theme-holo{
+  /* ── Holograph 3D needs its own palette: without these the default
+     (dark on cream) text renders invisible over the near-black stage, so
+     the topbar, page titles and card text all looked "missing". ── */
+  --bg:#070A14; --bg2:#0C1224; --bg3:#0A1020;
+  --surface:rgba(14,20,40,0.72);
+  --surface2:rgba(20,28,54,0.6);
+  --border:rgba(34,211,238,0.22);
+  --border2:rgba(34,211,238,0.4);
+  --text:#E6F7FA; --text2:#9FD9E8; --text3:#6FB3C7;
+  --green:#22D3EE; --green-bright:#5BE0F3; --green-text:#7FECF8; --green-glow:rgba(34,211,238,0.25);
+  --gold:#F59E0B; --gold-text:#FBBF24;
+  --red:#F43F5E; --red-soft:rgba(244,63,94,0.14);
+  --orange:#FB923C; --blue:#60A5FA;
+  --white:#F8FBFF;
   background:
     radial-gradient(1200px 600px at 85% -10%, rgba(124,58,237,0.16), transparent 60%),
     radial-gradient(900px 500px at 5% 110%, rgba(34,211,238,0.12), transparent 60%),
@@ -3801,7 +3815,6 @@ function azTogglePw() {
           <div class="tp-bars"><div class="tp-bar w80"></div><div class="tp-bar w60"></div><div class="tp-bar w40"></div></div>
         </div>
         <div class="theme-opt-label">Navy Glass</div>
-      </div>
       </div>
     </div>
   </div>
