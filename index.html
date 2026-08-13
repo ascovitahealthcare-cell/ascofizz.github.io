@@ -15462,6 +15462,8 @@ function validateCheckoutForm() {
 // ── MAIN ENTRY — called by "Pay Online" button ──
 function initiatePayment() {
   if (STORE.cart.length === 0) { showToast('🛒 Your cart is empty!', 'error'); return; }
+  // LOGIN GATE: orders can only be placed by signed-in customers.
+  if (!getCurrentUser()) { requireLoginForCheckout(function(){ initiatePayment(); }); return; }
   const formData = validateCheckoutForm();
   if (!formData) return;
 
@@ -15817,6 +15819,8 @@ async function handleCashfreeReturn(orderId) {
 }
 async function initiateCOD() {
   if (STORE.cart.length === 0) { showToast('🛒 Your cart is empty!', 'error'); return; }
+  // LOGIN GATE: orders can only be placed by signed-in customers.
+  if (!getCurrentUser()) { requireLoginForCheckout(function(){ initiateCOD(); }); return; }
   const formData = validateCheckoutForm();
   if (!formData) return;
 
@@ -17432,6 +17436,7 @@ async function doLogin() {
     localStorage.setItem('asc_jwt', data.token);
     localStorage.setItem('asc_user', JSON.stringify(data.user));
     closeAuth(); updateAccountNavBtn();
+    resumeCheckoutIfWaiting();
     postLoginRedirect();
     showToast('🌿 Welcome back, ' + data.user.name.split(' ')[0] + '!');
   } catch(e) {
@@ -17455,7 +17460,9 @@ async function doLogin() {
     }
     if (!user) { showAuthError('Invalid email or password. Please try again.'); return; }
     localStorage.setItem('asc_user', JSON.stringify(user));
-    closeAuth(); updateAccountNavBtn(); postLoginRedirect();
+    closeAuth(); updateAccountNavBtn();
+    resumeCheckoutIfWaiting();
+    postLoginRedirect();
     showToast('🌿 Welcome back, ' + user.name.split(' ')[0] + '!');
   }
 }
@@ -17477,7 +17484,9 @@ async function doRegister() {
     if (!res.ok) { showAuthError(data.error || 'Registration failed.'); return; }
     localStorage.setItem('asc_jwt', data.token);
     localStorage.setItem('asc_user', JSON.stringify(data.user));
-    closeAuth(); updateAccountNavBtn(); postLoginRedirect();
+    closeAuth(); updateAccountNavBtn();
+    resumeCheckoutIfWaiting();
+    postLoginRedirect();
     showToast('🌿 Account created! Welcome to Ozylix, ' + name.split(' ')[0] + '!');
   } catch(e) {
     // Fallback to localStorage if backend offline
@@ -17488,7 +17497,9 @@ async function doRegister() {
     users.push(newUser);
     localStorage.setItem('asc_users', JSON.stringify(users));
     localStorage.setItem('asc_user', JSON.stringify(newUser));
-    closeAuth(); updateAccountNavBtn(); postLoginRedirect();
+    closeAuth(); updateAccountNavBtn();
+    resumeCheckoutIfWaiting();
+    postLoginRedirect();
     showToast('🌿 Account created! Welcome to Ozylix, ' + name.split(' ')[0] + '!');
   }
 }
@@ -17717,14 +17728,13 @@ async function handleGoogleCredential(response) {
     restoreGoogleBtn();
     updateAccountNavBtn();
     autofillCheckoutFromGoogle(user);
-
     const firstName = (user.name || 'there').split(' ')[0];
     const isNew = payload.iat && (Date.now() / 1000 - payload.iat) < 10;
     showToast('🌿 ' + (isNew ? 'Welcome, ' : 'Welcome back, ') + firstName + '!');
-
+    // Resume a blocked checkout payment flow if the sign-in was triggered from checkout
+    resumeCheckoutIfWaiting();
     // Navigate to account unless mid-checkout or mid-review (see postLoginRedirect)
     postLoginRedirect();
-
   } catch(err) {
     console.error('[Ozylix Auth] handleGoogleCredential error:', err);
     restoreGoogleBtn();
@@ -17873,6 +17883,37 @@ function socialLogin(provider) {
   if (!_tryOneTap()) {
     _tryOAuth2Popup();
   }
+}
+
+// ══════════════════════════════════════════════════════════
+// CHECKOUT LOGIN GATE
+//
+// Ozylix business rule (owner, Aug 2026): every order must belong to a
+// signed-in account — points, orders, invoices and returns all key off the
+// email of a real account, and guest checkout created invisible balances.
+// So the two order paths (initiatePayment / initiateCOD) refuse to run
+// unless asc_jwt exists, and resume automatically once sign-in finishes.
+// ══════════════════════════════════════════════════════════
+var _checkoutResumeCb = null;
+
+function requireLoginForCheckout(resumeCb) {
+  if (getCurrentUser()) return false;   // already signed in
+  _checkoutResumeCb = resumeCb || null;
+  openAuth('login');
+  // Surface a reason inside the auth modal so it doesn't look random.
+  var suc = document.getElementById('authSuccess');
+  if (suc) { suc.style.display = 'block'; suc.textContent = '🔒 Sign in to place your order — you\u2019ll continue right where you left off.'; }
+  return true;
+}
+
+// Called after a successful email-login or Google sign-in. If the person
+// was blocked mid-checkout, resume that exact payment flow instead of the
+// usual account redirect (postLoginRedirect already skips checkout — but
+// the modal flow must also be resumed, not just the page).
+function resumeCheckoutIfWaiting() {
+  var cb = _checkoutResumeCb;
+  _checkoutResumeCb = null;
+  if (typeof cb === 'function') { try { cb(); } catch(e) { console.error('[Ozylix] checkout resume failed', e); } }
 }
 
 // ── Init One Tap (called on SDK load) ──
