@@ -12034,7 +12034,13 @@ async function sbClientWhenReady(waitMs) {
   }
 }
 
+let _loadProductRatingsDone = null;
 async function loadProductRatings() {
+  // One shared promise so the start-up render gate and the DOMContentLoaded
+  // listener wait on the SAME fetch instead of racing twice against the
+  // deferred Supabase bundle.
+  if (_loadProductRatingsDone) return _loadProductRatingsDone;
+  _loadProductRatingsDone = (async () => {
   try {
     const sb = await sbClientWhenReady(8000);
     if (!sb) throw new Error('Supabase client not loaded yet');
@@ -12078,6 +12084,8 @@ async function loadProductRatings() {
   try { updateAllProductCards(); } catch (e) {}
   // The structured data is built from these figures too.
   try { if (typeof syncProductStructuredData === 'function') syncProductStructuredData(); } catch (e) {}
+  })();
+  return _loadProductRatingsDone;
 }
 
 // What a card should show. Live aggregate first, then the full review
@@ -13426,7 +13434,13 @@ function toggleMobile() {
 }
 
 // ── HOME INIT ──
-function initHome() {
+async function initHome() {
+  // ✅ FIX (review count flash): paint product cards only AFTER the live
+  // reviews aggregate has resolved. Without this gate the first paint
+  // showed the catalogue's static figures — a product with zero real
+  // reviews could flash "4.8 ★ (567)" for up to a second before the
+  // honest "No ratings yet" replaced it.
+  try { await loadProductRatings(); } catch (e) { /* cards fall back below */ }
   // ✅ FIX 2: Filter out _hidden (active:false) products from all grids
   const visibleProducts = PRODUCTS.filter(p => !p._hidden && p.active !== false);
   // Featured
