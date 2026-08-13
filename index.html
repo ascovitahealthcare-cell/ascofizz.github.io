@@ -18105,6 +18105,17 @@ function loadAccountPage() {
   loadOrdersList();
   loadInvoicesList();
   prefillProfile(user);
+  // AUTO-REFRESH: the courier sync flips fulfillment (Shipped → Delivered)
+  // server-side every 10 minutes. Without this loop the customer would have
+  // to leave and return to see their order move, and the "Earns VitaPoints
+  // once delivered" line would never update. Re-pull every 60 s while the
+  // account page is visible — harmless repeat calls (authenticated, cheap).
+  clearInterval(window._ordersRefreshTimer);
+  window._ordersRefreshTimer = setInterval(() => {
+    if (document.hidden) return;
+    loadOrdersList();
+    loadInvoicesList();
+  }, 60 * 1000);
 }
 
 // ══════════════════════════════════════════════════════════════
