@@ -9507,20 +9507,35 @@ async function uploadSiteImage(input, key) {
   if (_mb > 50) { toast('❌ Video is ' + _mb.toFixed(0) + ' MB — too large. Keep videos under 50 MB (compress on your phone first).', 'error'); input.value=''; return; }
   if (file.type.startsWith('video/')) toast('⏳ Uploading video — the server is compressing it to web size, this can take up to a minute…');
   const fd = new FormData(); fd.append('image', file);
+  let d = null, r = null;
   try {
-    const r = await fetch(`${API}/api/upload/image`, {method:'POST', headers:{'Authorization':`Bearer ${authToken}`}, body:fd});
-    const d = await r.json();
+    // File uploads (especially phone videos on mobile data) are the most
+    // flaky step — a dropped packet used to fail the whole flow with a
+    // bare "Upload failed". Retry up to twice, waiting a moment between
+    // attempts, so a transient network hiccup can never look like a bug.
+    for (let attempt = 0; attempt < 3; attempt++) {
+      try {
+        r = await fetch(`${API}/api/upload/image`, {method:'POST', headers:{'Authorization':`Bearer ${authToken}`}, body:fd});
+        d = await r.json();
+        if (r.ok) break;
+      } catch (e) {
+        if (attempt === 2) throw e;
+        await new Promise(res => setTimeout(res, 1500 * (attempt + 1)));
+      }
+    }
     if(!r.ok) {
       const msg = (d.error||'').toLowerCase();
       if(msg.includes('bucket') || msg.includes('storage') || msg.includes('not found')) {
         toast('❌ Storage bucket not found. Go to Supabase → Storage → Create bucket named "product-images" (public).', 'error');
       } else {
-        toast(d.error || 'Upload failed', 'error');
+        toast('❌ Upload failed: ' + (d.error || 'the server refused the file'), 'error');
       }
       return;
     }
     const url = d.url || d.public_url || '';
-    await apiFetch(`/api/admin/site-media/${encodeURIComponent(key)}`, {method:'PUT', body:JSON.stringify({url})});
+    if (!url) { toast('❌ Upload failed — the server returned no file URL', 'error'); return; }
+    const put = await apiFetch(`/api/admin/site-media/${encodeURIComponent(key)}`, {method:'PUT', body:JSON.stringify({url})});
+    if (!put.ok) { toast('❌ Saved the video but could not link it to the site — tap Refresh and try again', 'error'); return; }
     toast('✅ Image uploaded — live on the site now');
     loadSiteImages();
   } catch(e) { toast('Upload error: ' + e.message, 'error'); }
