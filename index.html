@@ -13933,6 +13933,11 @@ function renderProductReviewList(pid) {
         var eduSrc = '';
         try {
           eduSrc = ((window.__ozylixSiteMedia && window.__ozylixSiteMedia[mkey]) || '') || '';
+          // Aug 2026: global default creatives — if this product has no
+          // per-product upload for the slot, fall back to the common
+          // edu.global.{panel}.{n} set managed in admin Site Images.
+          var gkey = 'edu.global.' + pl.id + '.' + (n + 1);
+          if (!eduSrc && window.__ozylixSiteMedia && window.__ozylixSiteMedia[gkey]) eduSrc = window.__ozylixSiteMedia[gkey];
           // Serve the uploaded creative through the Cloudflare CDN edge path,
           // not the raw Supabase URL (avoids egress and uses the cached copy).
           if (eduSrc && typeof cdnImg === 'function') eduSrc = cdnImg(eduSrc);
