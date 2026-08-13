@@ -884,6 +884,11 @@ img, canvas, svg, table { max-width:100%; }
 
   /* Sidebar more menu */
   .admin-more-menu { grid-template-columns:1fr 1fr 1fr !important; }
+
+  /* AI Agent Team: two-column grid must collapse on phones — the
+     280px roster column otherwise squeezes the chat row and its
+     controls clip behind the floating action button. */
+  .aiteam-grid { grid-template-columns:1fr !important; }
 }
 
 /* ════ SMALL PHONE (≤380px) ════ */
@@ -3678,7 +3683,7 @@ function azTogglePw() {
     Insights are generated freely — they cost a small Claude API call but never touch real data. Anything that would change real orders, stock, prices, coupons or send a message is queued below as a <strong style="color:var(--gold-text);">draft action</strong> — nothing executes until you click Approve.
   </div>
 
-  <div style="display:grid;grid-template-columns:280px 1fr;gap:16px;align-items:start;">
+  <div class="aiteam-grid" style="display:grid;grid-template-columns:280px 1fr;gap:16px;align-items:start;">
     <!-- Roster -->
     <div class="card" style="padding:10px;">
       <div class="card-hdr" style="padding:4px 6px 10px;"><span class="card-title">Team Roster</span></div>
