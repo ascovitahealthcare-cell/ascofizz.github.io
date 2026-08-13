@@ -8763,6 +8763,21 @@ setInterval(function() { syncAppCartBadge(); syncAppWishBadge(); }, 2000);
       if (Object.keys(fb).length && typeof PRODUCT_FALLBACKS !== 'undefined') {
         Object.keys(fb).forEach(function (k) { PRODUCT_FALLBACKS[k] = fb[k]; });
       }
+      // Promo carousel cards — admin-uploaded card images (promo.card.N, any
+      // N between 1 and 10). When slots are filled, renderPromoCarousel()
+      // uses the uploaded images instead of pulling product photos by link.
+      var promoCards = {};
+      for (var pc = 1; pc <= 10; pc++) {
+        var pu = map['promo.card.' + pc];
+        if (pu) promoCards[pc] = { url: imgCdn(pu), alt: map['promo.card.' + pc + '.alt'] || '' };
+      }
+      if (Object.keys(promoCards).length) {
+        window.ADMIN_PROMO_CARDS = promoCards;
+        try { if (typeof window.renderPromoCarousel === 'function') window.renderPromoCarousel(); } catch (e) { /* ignore */ }
+      } else if (window.ADMIN_PROMO_CARDS) {
+        window.ADMIN_PROMO_CARDS = null;
+        try { if (typeof window.renderPromoCarousel === 'function') window.renderPromoCarousel(); } catch (e) { /* ignore */ }
+      }
     }
     // Whenever admin media changes after load (upload completes), re-run the
     // family builders so new banners/slots appear immediately.
@@ -12175,12 +12190,14 @@ const CDN_IMG_PREFIX = '/cdn-storage/';
 function cdnImg(url) {
   if (!url) return url;
   const s = String(url);
-  // Product images: /storage/v1/object/public/product-images/<name>[?params]
-  const m = s.match(/^https?:\/\/[^/]+\/storage\/v1\/object\/public\/product-images\/([^"'?\s]+)(\?.*)?$/);
+  // Any public Supabase storage URL: /storage/v1/object/public/<bucket>/<name>[?params]
+  // → /cdn-storage/<bucket>/<name>[?params] so the Worker serves and caches it
+  // at the edge (product images, website uploads, banners, fallbacks…).
+  const m = s.match(/^https?:\/\/[^/]+\/storage\/v1\/object\/public\/([^"'?\s]+)(\?.*)?$/);
   if (m) {
     // Preserve any transformation params in the cache key so ?width=300
     // requests don't collide with full-size ones.
-    return CDN_IMG_PREFIX + 'product-images/' + m[1] + (m[2] || '');
+    return CDN_IMG_PREFIX + m[1] + (m[2] || '');
   }
   return s;
 }
@@ -13178,8 +13195,8 @@ function showPage(pg) {
     wishlist:      [
       'My Wishlist | Ozylix Supplements India',
       'Your saved Ozylix supplements. Save for later and never miss a deal on effervescent vitamins, organic spirulina, moringa and multivitamins.'
-    ],
-  };
+  ],
+};
   const seo = PAGE_SEO[pg];
   if (seo) {
     document.title = seo[0];
@@ -19048,8 +19065,11 @@ function renderPromoCarousel() {
 
   track.innerHTML = list.map(function(p, i){
     const short = promoShortName(p.name);
-    const img   = p.image || p.image2 || '';
-    const alt   = 'Ozylix ' + short + ' effervescent tablet';
+    // Admin-uploaded card images (Website Images panel) take priority over
+    // product photos — the slot number (1..10) matches the card position.
+    const adminCard = (window.ADMIN_PROMO_CARDS && window.ADMIN_PROMO_CARDS[i + 1]) || null;
+    const img   = adminCard ? adminCard.url : (p.image || p.image2 || '');
+    const alt   = adminCard && adminCard.alt ? adminCard.alt : ('Ozylix ' + short + ' effervescent tablet');
     const md   = promoMaxDiscount(p);
     const vita = promoMaxVita(p);
     const perks =

@@ -3455,9 +3455,8 @@ function azTogglePw() {
   <div id="fallbackManager"></div>
 
   <div class="page-hdr" style="margin-top:34px;">
-    <div><div class="page-title">Promo Carousel</div><div class="page-sub">The scrolling promo cards on the home page — add, replace, reorder, or remove without editing PROMO_MEDIA.js</div></div>
+    <div><div class="page-title">Promo Carousel</div><div class="page-sub">The 10 promo cards on the home page (between Featured &amp; Best Sellers and the promo strip). Upload a card image per slot — it replaces the automatic product photo for that position. Cards with no upload still show the product photo.</div></div>
     <div class="page-actions">
-      <input type="text" id="promoUrlInput" class="form-control" placeholder="Paste imgbb direct image link" style="width:280px;">
       <button class="btn btn-primary" onclick="addPromoCard()">＋ Add Card</button>
     </div>
   </div>
@@ -7618,8 +7617,8 @@ function renderAllImgSlots() {
 function adminCdnImg(url) {
   if (!url) return url;
   const s = String(url);
-  const m = s.match(/^https?:\/\/[^/]+\/storage\/v1\/object\/public\/product-images\/([^"'?\s]+)(\?.*)?$/);
-  if (m) return '/cdn-storage/product-images/' + m[1] + (m[2] || '');
+  const m = s.match(/^https?:\/\/[^/]+\/storage\/v1\/object\/public\/([^"'?\s]+)(\?.*)?$/);
+  if (m) return '/cdn-storage/' + m[1] + (m[2] || '');
   return s;
 }
 
@@ -9397,102 +9396,97 @@ async function deleteFallbackImage(cat) {
 }
 // ═══════════════════════════════════════════════
 // PROMO CAROUSEL — home page scrolling promo cards
-// (backend-managed replacement for manually editing PROMO_MEDIA.js)
-// ═══════════════════════════════════════════════
-let _promoMediaItems = [];
-
+// Upload-based (like home/shop banners). Slots are site-media keys
+// promo.card.1 .. promo.card.10; the storefront's renderPromoCarousel()
+// uses an uploaded slot in place of the automatic product photo, with
+// live refresh on upload/delete via ADMIN_PROMO_CARDS.
 async function loadPromoMedia() {
   try {
-    const r = await apiFetch('/api/admin/promo-media');
+    const r = await apiFetch('/api/admin/site-media');
     const d = await r.json();
-    _promoMediaItems = d.data || [];
-  } catch(e) {
-    console.error('loadPromoMedia error:', e);
-    document.getElementById('promoMediaGrid').innerHTML = '<div class="empty-state" style="grid-column:1/-1;"><div class="empty-ico">🖼️</div><div class="empty-msg">Could not load promo cards — see browser console</div></div>';
-    return;
-  }
+    _siteMediaAll = (d.data || []).concat(_siteMediaAll || []).filter((v, i, arr) => arr.findIndex(x => x.key === v.key) === i);
+  } catch(e) { /* _siteMediaAll stays what it was */ }
   renderPromoMediaGrid();
 }
-
+function promoCards() {
+  const out = [];
+  (_siteMediaAll || []).forEach(row => {
+    const m = row.key.match(/^promo\.card\.(\d+)$/);
+    if (m) out.push({ n: +m[1], img: row.url, alt: ((_siteMediaAll || []).find(x => x.key === 'promo.card.' + m[1] + '.alt') || {}).url || '' });
+  });
+  return out.sort((a, b) => a.n - b.n);
+}
 function renderPromoMediaGrid() {
-  const items = _promoMediaItems;
-  document.getElementById('promoMediaGrid').innerHTML = items.length ? items.map((item, i) => `
-    <div class="card" style="padding:0;overflow:hidden;${item.active===false?'opacity:0.5;':''}">
-      <img src="${adminCdnImg(item.src)}" class="banner-preview" onerror="this.style.display='none'">
+  const cards = promoCards().map(b => `
+    <div class="card" style="padding:0;overflow:hidden;">
+      <img src="${adminCdnImg(b.img) || ''}" class="banner-preview" onerror="this.style.display='none'">
       <div style="padding:12px 14px;">
-        <div style="display:flex;gap:6px;align-items:center;margin-bottom:8px;">
-          <label style="font-size:0.72rem;color:var(--text3);">Links to:</label>
-          <select class="form-control" style="flex:1;padding:4px 8px;font-size:0.78rem;" onchange="updatePromoCard(${item.id}, {cta_page:this.value})">
-            ${['shop','home','about','b2b','contact'].map(p=>`<option value="${p}" ${item.cta_page===p?'selected':''}>${p}</option>`).join('')}
-          </select>
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
+          <span style="font-size:0.85rem;font-weight:600;">Promo Card #${b.n}</span>
+          <button class="btn btn-danger btn-sm btn-icon" onclick="deletePromoCard(${b.n})" title="Remove this card">🗑️</button>
         </div>
-        <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;">
-          <label class="toggle-wrap">
-            <label class="toggle"><input type="checkbox" ${item.active!==false?'checked':''} onchange="updatePromoCard(${item.id}, {active:this.checked})"><span class="toggle-slider"></span></label>
-            <span style="font-size:0.75rem;color:var(--text3);">Active</span>
-          </label>
-          <div style="display:flex;gap:4px;">
-            <button class="btn btn-secondary btn-sm btn-icon" title="Edit link" onclick="editPromoCardUrl(${item.id})">🔗</button>
-            <button class="btn btn-secondary btn-sm btn-icon" title="Move earlier" ${i===0?'disabled':''} onclick="movePromoCard(${i},-1)">⬆️</button>
-            <button class="btn btn-secondary btn-sm btn-icon" title="Move later" ${i===items.length-1?'disabled':''} onclick="movePromoCard(${i},1)">⬇️</button>
-            <button class="btn btn-danger btn-sm btn-icon" title="Delete" onclick="deletePromoCard(${item.id})">🗑️</button>
-          </div>
+        <div style="font-size:0.72rem;color:var(--text3);margin-bottom:10px;">This image replaces the automatic product photo in carousel position #${b.n}.</div>
+        <input class="form-control" style="font-size:0.8rem;" placeholder="Caption shown on the card (optional)" value="${escAttr(b.alt)}" onchange="setPromoCardAlt(${b.n}, this.value)">
+        <div style="display:flex;gap:6px;margin-top:10px;">
+          <input type="file" accept="image/*,.webp,.svg" id="promoFile-${b.n}" style="display:none;" onchange="uploadPromoCardImage(${b.n}, this)">
+          <button class="btn btn-primary btn-sm" style="flex:1;" onclick="document.getElementById('promoFile-${b.n}').click()">📤 ${b.img ? 'Replace Image' : 'Upload Image'}</button>
         </div>
       </div>
-    </div>
-  `).join('') : '<div class="empty-state" style="grid-column:1/-1;"><div class="empty-ico">🖼️</div><div class="empty-msg">No promo cards yet — add one above</div></div>';
+    </div>`).join('');
+  document.getElementById('promoMediaGrid').innerHTML = cards || emptyMsg('No promo cards yet — add one and it takes carousel position #1; positions fill in upload order.');
 }
-
 async function addPromoCard() {
-  const input = document.getElementById('promoUrlInput');
-  const url = (input.value || '').trim();
-  if(!url) { toast('Paste an image link first','error'); return; }
+  // Slots fill in order — the first empty slot between 1 and 10 is chosen.
+  const used = new Set(promoCards().map(b => b.n));
+  let n = 1;
+  while (n <= 10 && used.has(n)) n++;
+  if (n > 10) { toast('All 10 promo card slots are filled — remove one first', 'error'); return; }
+  const inp = document.createElement('input');
+  inp.type = 'file'; inp.accept = 'image/*,.webp,.svg';
+  inp.onchange = () => uploadPromoCardImage(n, inp);
+  inp.click();
+}
+async function uploadPromoCardImage(n, input) {
+  const file = input.files[0]; if (!file) return;
+  const key = 'promo.card.' + n;
+  const fd = new FormData(); fd.append('image', file);
   try {
-    await apiFetch('/api/admin/promo-media', {method:'POST', body:JSON.stringify({src:url, cta_page:'shop'})});
-    toast('Promo card added ✅');
-    input.value = '';
+    const r = await fetch(`${API}/api/upload/image`, { method: 'POST', headers: { 'Authorization': `Bearer ${authToken}` }, body: fd });
+    const d = await r.json();
+    if (!r.ok) { toast(d.error || 'Upload failed', 'error'); return; }
+    const url = d.url || d.public_url || '';
+    await apiFetch(`/api/admin/site-media/${encodeURIComponent(key)}`, { method: 'PUT', body: JSON.stringify({ url }) });
+    toast('✅ Promo card uploaded — live on the home page now');
+    loadBannerManagers(); loadPromoMedia();
+  } catch(e) { toast('Upload error: ' + e.message, 'error'); }
+}
+async function setPromoCardAlt(n, value) {
+  const key = 'promo.card.' + n + '.alt';
+  try {
+    if (!value.trim()) {
+      await apiFetch(`/api/admin/site-media/${encodeURIComponent(key)}`, { method: 'DELETE' }).catch(() => {});
+    } else {
+      await apiFetch(`/api/admin/site-media/${encodeURIComponent(key)}`, { method: 'PUT', body: JSON.stringify({ url: value.trim() }) });
+    }
+    toast('✅ Saved');
     loadPromoMedia();
-  } catch(e) { toast(e.message,'error'); }
+  } catch(e) { toast('Could not save: ' + e.message, 'error'); }
 }
-
-function editPromoCardUrl(id) {
-  const item = _promoMediaItems.find(i => i.id === id);
-  const url = prompt('Paste the new imgbb direct image link:', item ? item.src : '');
-  if(url === null) return;
-  const trimmed = url.trim();
-  if(!trimmed) { toast('Link can\'t be empty','error'); return; }
-  updatePromoCard(id, {src: trimmed}).then(() => loadPromoMedia());
-}
-
-async function updatePromoCard(id, patch) {
-  try { await apiFetch(`/api/admin/promo-media/${id}`, {method:'PUT', body:JSON.stringify(patch)}); }
-  catch(e) { toast(e.message,'error'); }
-}
-
-async function movePromoCard(index, dir) {
-  const other = index + dir;
-  if(other < 0 || other >= _promoMediaItems.length) return;
-  const a = _promoMediaItems[index], b = _promoMediaItems[other];
-  const aOrder = a.sort_order, bOrder = b.sort_order;
-  [_promoMediaItems[index], _promoMediaItems[other]] = [b, a];
-  renderPromoMediaGrid();
+async function deletePromoCard(n) {
+  const key = 'promo.card.' + n;
+  if (!confirm('Remove promo card #' + n + ' (its image is also deleted from storage)? This can\'t be undone.')) return;
   try {
-    await Promise.all([
-      apiFetch(`/api/admin/promo-media/${a.id}`, {method:'PUT', body:JSON.stringify({sort_order:bOrder})}),
-      apiFetch(`/api/admin/promo-media/${b.id}`, {method:'PUT', body:JSON.stringify({sort_order:aOrder})}),
-    ]);
-  } catch(e) { toast(e.message,'error'); loadPromoMedia(); }
+    const row = (_siteMediaAll || []).find(x => x.key === key);
+    if (row && row.url) {
+      const filename = String(row.url).split('/').pop().split('?')[0];
+      await apiFetch(`/api/upload/image/${encodeURIComponent(filename)}`, { method: 'DELETE' }).catch(() => {});
+    }
+    await apiFetch(`/api/admin/site-media/${encodeURIComponent(key)}`, { method: 'DELETE' }).catch(() => {});
+    await apiFetch(`/api/admin/site-media/${encodeURIComponent(key + '.alt')}`, { method: 'DELETE' }).catch(() => {});
+    toast('🗑️ Promo card removed');
+    loadBannerManagers(); loadPromoMedia();
+  } catch(e) { toast('Could not delete: ' + e.message, 'error'); }
 }
-
-async function deletePromoCard(id) {
-  if(!confirm('Remove this promo card?')) return;
-  try {
-    await apiFetch(`/api/admin/promo-media/${id}`, {method:'DELETE'});
-    toast('Promo card removed');
-    loadPromoMedia();
-  } catch(e) { toast(e.message,'error'); }
-}
-
 // ═══════════════════════════════════════════════
 // NOTIFICATION CENTER
 // Built from data already loaded elsewhere (allOrders, allProducts,
