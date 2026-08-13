@@ -3650,7 +3650,8 @@ img[src=""], img[data-awaiting-upload] { visibility: hidden; width: 100%; }
   box-shadow: var(--lit-green);
   transition: transform var(--dur-2) var(--fizz);
 }
-.wa-btn:hover { transform: translateY(-3px) scale(1.04); }
+.wa-btn:hover { transform: translateY(-3px); }
+@media (hover: hover) and (pointer: fine) { .wa-btn:hover { transform: translateY(-3px) scale(1.04); } }
 .wa-btn svg { width: 28px; height: 28px; }
 .wa-pulse { position: absolute; inset: 0; border-radius: 50%; box-shadow: 0 0 0 2px rgba(107,85,96,.28); animation: fz-pulse 2.6s var(--settle) infinite; }
 .wa-tooltip {
@@ -5099,6 +5100,41 @@ img[src=""], img[data-awaiting-upload] { visibility: hidden; width: 100%; }
 .ck-section-title:first-child { margin-top: 0; }
 .form-row { display: grid; gap: 14px; grid-template-columns: 1fr 1fr; }
 .form-group { margin-bottom: 14px; }
+/* ── ROUND 12: compact, fast-fill checkout (designer-stack principles) ──
+   Fewer, tighter rows + 16px floor on mobile (below it iOS zooms on focus
+   and never zooms back). Everything keeps specific-property transitions. */
+.checkout-form .form-label { font-size: .68rem; margin-bottom: 4px; }
+.checkout-form .form-input { padding: 10px 13px; font-size: .86rem; }
+.checkout-form .form-group { margin-bottom: 10px; }
+.checkout-form .form-row { gap: 12px; }
+.checkout-form .ck-section-title { margin-top: 16px !important; font-size: 1.02rem; }
+/* City / State / PIN in one row — one less row to tab through */
+.checkout-form .ck-loc-row { display: grid; grid-template-columns: 1.15fr 1fr 1fr; gap: 12px; }
+.checkout-form .ck-loc-row > .form-group { margin-bottom: 0; }
+/* Tighter premium checkout header */
+.ck-header-card { padding: 16px 22px; margin-bottom: 18px; }
+.ck-hstep { padding: 7px 14px; font-size: .72rem; }
+.ck-header-steps { gap: 8px; }
+/* Payment rows: one-click radio rows with instant press feedback */
+.pay-method { padding: 12px 14px; gap: 12px; transition: transform 120ms cubic-bezier(.23,1,.32,1), background-color 120ms cubic-bezier(.23,1,.32,1), box-shadow 120ms cubic-bezier(.23,1,.32,1); }
+.pm-icon { font-size: 1.35rem; margin-bottom: 0; }
+.pm-info { padding: 0; }
+.pm-info > *:first-child { font-size: .86rem; }
+.pm-info > *:last-child { font-size: .72rem; }
+.pay-methods { gap: 9px; }
+@media (hover: hover) and (pointer: fine) { .pay-method:hover { transform: translateX(2px); } }
+.pay-method:active { transform: scale(.985); }
+.pay-method:focus-visible { outline: 2px solid rgba(192,57,74,.45); outline-offset: 2px; }
+/* Slimmer order-summary header, desktop */
+.ck-sum-head { font-size: .98rem; padding: 13px 26px; }
+.ck-sum-trust { font-size: .64rem; gap: 12px; margin-top: 10px; padding-top: 10px; }
+@media (max-width: 860px) {
+  .ck-sum-head { font-size: .92rem; padding: 12px 16px; }
+  .checkout-form .ck-loc-row { grid-template-columns: 1fr 1fr; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .pay-method, .pay-method * { transition-duration: .08s !important; }
+}
 .form-label { display: block; font-size: .74rem; font-weight: 700; color: var(--t-low); margin-bottom: 6px; }
 textarea.form-input { min-height: 96px; resize: vertical; font-family: inherit; }
 .saved-address-bar {
@@ -7104,6 +7140,9 @@ button, [role="button"] {
   display: flex; align-items: center; justify-content: center; overflow: hidden;
 }
 .edu-card-media img { width: 100%; height: 100%; object-fit: cover; }
+.edu-card-media.edu-builtin-1 { background: none; }
+.edu-card-media.edu-builtin-1 .edu-ico,
+.edu-card-media.edu-builtin-1 .edu-awaiting { display: none; }
 .edu-card-media .edu-ico { font-size: 2.1rem; filter: drop-shadow(0 2px 6px rgba(0,0,0,.25)); }
 .edu-card-body { padding: 12px 14px 14px; }
 .edu-card-body h4 { margin: 0 0 5px; font-size: .86rem; line-height: 1.3; }
@@ -9914,19 +9953,20 @@ var BANNER_SLIDES = [
           <div class="form-group"><label class="form-label">Email Address</label><input class="form-input" type="email" placeholder="email@example.com" autocomplete="email" inputmode="email" autocapitalize="off" autocorrect="off" spellcheck="false" enterkeyhint="next" oninput="this.classList.remove('field-error')"></div>
           <div class="form-group"><label class="form-label">Mobile Number</label><input class="form-input" type="tel" placeholder="+91 98765 43210" autocomplete="tel" inputmode="tel" enterkeyhint="next" oninput="this.classList.remove('field-error')"></div>
 
-          <div class="ck-section-title" style="margin-top:24px">📍 <strong style="margin-left:6px">Delivery Address</strong></div>
+          <div class="ck-section-title">📍 <strong style="margin-left:6px">Delivery Address</strong></div>
           <div class="form-group"><label class="form-label">Address Line 1</label><input class="form-input" type="text" placeholder="House / Flat No., Street" autocomplete="address-line1" autocapitalize="words" enterkeyhint="next" oninput="this.classList.remove('field-error')"></div>
           <div class="form-group"><label class="form-label">Address Line 2</label><input class="form-input" type="text" placeholder="Area / Locality (optional)" autocomplete="address-line2" autocapitalize="words" enterkeyhint="next"></div>
-          <div class="form-row">
+          <div class="ck-loc-row">
             <div class="form-group"><label class="form-label">City</label><input class="form-input" type="text" placeholder="City" autocomplete="address-level2" autocapitalize="words" enterkeyhint="next" oninput="this.classList.remove('field-error')"></div>
             <div class="form-group"><label class="form-label">State</label><input class="form-input" type="text" placeholder="State" autocomplete="address-level1" autocapitalize="words" enterkeyhint="next"></div>
-          </div>
-          <div class="form-row">
             <div class="form-group"><label class="form-label">PIN Code</label><input class="form-input" type="text" placeholder="6-digit PIN" autocomplete="postal-code" inputmode="numeric" pattern="[0-9]*" maxlength="6" enterkeyhint="done" oninput="this.classList.remove('field-error')"></div>
-            <div class="form-group"><label class="form-label">Country</label><input class="form-input" type="text" value="India" readonly tabindex="-1" autocomplete="country-name" aria-label="Country"></div>
+          </div>
+          <div class="form-row" style="margin-top:10px">
+            <div class="form-group" style="margin-bottom:0"><label class="form-label">Country</label><input class="form-input" type="text" value="India" readonly tabindex="-1" autocomplete="country-name" aria-label="Country"></div>
+            <div class="form-group" style="margin-bottom:0"></div>
           </div>
 
-          <div class="ck-section-title" style="margin-top:24px">💳 <strong style="margin-left:6px">Payment Method</strong></div>
+          <div class="ck-section-title">💳 <strong style="margin-left:6px">Payment Method</strong></div>
           <div class="pay-methods">
             <div class="pay-method selected" onclick="selPayMethod(this)">
               <span class="pm-icon">📱</span>
@@ -9947,7 +9987,7 @@ var BANNER_SLIDES = [
               <div class="pm-info"><h4>EMI (No Cost available)</h4><p>0% EMI via GoKwik partner banks</p></div>
             </div>
           </div>
-          <div style="background:var(--green-wash);border-radius:9px;padding:12px 16px;margin-top:14px;font-size:.8rem;color:var(--gray);display:flex;align-items:center;gap:9px">
+          <div style="background:var(--green-wash);border-radius:9px;padding:10px 14px;margin-top:12px;font-size:.76rem;color:var(--gray);display:flex;align-items:center;gap:9px">
             🔒 <span>All payments secured by <strong>GoKwik</strong> — India's most trusted payment gateway. 256-bit SSL. COD available · no extra charge</span>
           </div>
         </div>
@@ -11721,7 +11761,7 @@ const PRODUCTS = [
   // ─── CATEGORY: PREMIUM MULTIVITAMIN ───
   {id:8, position:14, name:"Multidiata – Ozylix Premium Multivitamin", brand:"Ozylix Premium", category:"premium", tags:["featured","bestseller","immunity","premium"],
    price:120, salePrice:null, offer:"Box Pack 30 Tabs ₹120 | Bottle Pack 60 Tabs ₹231",
-   image:"", image2:"",
+   image2:"",
    rating:4.8, reviews:567, stock:0, badge:"🏆 Premium",
    hasTiers:true,
    seoKeywords:["multivitamin India","best multivitamin India","daily multivitamin"],
@@ -11730,9 +11770,9 @@ const PRODUCTS = [
    howToUse:"Take 1 tablet daily with breakfast or as directed by healthcare professional."},
 
   // ─── CATEGORY: EFFERVESCENT TABLETS (2026 RANGE) ───
-  {id:30, position:4, name:"Green Tea Effervescent Tablet", brand:"Ozylix", category:"effervescent", tags:["featured","new","energy","effervescent"],
+  {id:30, image: "", position:4, name:"Green Tea Effervescent Tablet", brand:"Ozylix", category:"effervescent", tags:["featured","new","energy","effervescent"],
    price:425, salePrice:null, offer:"Price to be updated",
-   image:"", image2:"", image3:"", image4:"", image5:"",
+   image2:"", image3:"", image4:"", image5:"",
    rating:4.5, reviews:0, stock:0, badge:"New",
    hasTiers:false,
    seoKeywords:["green tea effervescent tablet India","green tea tablets online India","ashwagandha caffeine supplement","metabolism booster tablet India","energy effervescent tablet","fat burner tablet India"],
@@ -11741,9 +11781,9 @@ const PRODUCTS = [
    keyIngredients:["Green Tea Extract 500mg","Ashwagandha KSM-66 100mg","Caffeine 100mg"],
    howToUse:"Dissolve 1 tablet in 150–200ml water. Consume once daily as directed. Allow full fizz before drinking."},
 
-  {id:31, position:3, name:"Ashwagandha Effervescent Tablet", brand:"Ozylix", category:"effervescent", tags:["featured","new","immunity","effervescent"],
+  {id:31, image: "", position:3, name:"Ashwagandha Effervescent Tablet", brand:"Ozylix", category:"effervescent", tags:["featured","new","immunity","effervescent"],
    price:495, salePrice:null, offer:"Price to be updated",
-   image:"", image2:"", image3:"", image4:"", image5:"",
+   image2:"", image3:"", image4:"", image5:"",
    rating:4.5, reviews:0, stock:0, badge:"New",
    hasTiers:false,
    seoKeywords:["ashwagandha effervescent tablet India","KSM-66 ashwagandha tablets","stress relief supplement India","ashwagandha zinc vitamin D3 tablet","immunity ashwagandha tablet","stamina booster India"],
@@ -11752,9 +11792,9 @@ const PRODUCTS = [
    keyIngredients:["Ashwagandha KSM-66 650mg","Eclipta Prostrata 20mg","Vitamin D3 500 IU","Zinc 12mg"],
    howToUse:"Dissolve 1 tablet in 150–200ml water. Consume once daily as directed. Allow full fizz before drinking."},
 
-  {id:32, position:5, name:"Men's Multivitamin Effervescent Tablet", brand:"Ozylix", category:"effervescent", tags:["featured","new","energy","effervescent"],
+  {id:32, image: "", position:5, name:"Men's Multivitamin Effervescent Tablet", brand:"Ozylix", category:"effervescent", tags:["featured","new","energy","effervescent"],
    price:399, salePrice:null, offer:"Price to be updated",
-   image:"", image2:"", image3:"", image4:"", image5:"",
+   image2:"", image3:"", image4:"", image5:"",
    rating:4.5, reviews:0, stock:0, badge:"New",
    hasTiers:false,
    seoKeywords:["men's multivitamin effervescent India","multivitamin tablets for men","L-Carnitine L-Arginine supplement","men's energy vitality tablet","ashwagandha multivitamin for men"],
@@ -11763,9 +11803,9 @@ const PRODUCTS = [
    keyIngredients:["Vitamin A 1000mcg","Vitamin C 80mg","Vitamin D2 600 IU","L-Carnitine L-Tartrate 50mg","L-Arginine 50mg","Ashwagandha Extract 55mg","Astaxanthin 1mg"],
    howToUse:"Dissolve 1 tablet in 150–200ml water. Consume once daily as directed. Allow full fizz before drinking."},
 
-  {id:33, position:6, name:"Women's Multivitamin Effervescent Tablet", brand:"Ozylix", category:"effervescent", tags:["featured","new","skin","effervescent"],
+  {id:33, image: "", position:6, name:"Women's Multivitamin Effervescent Tablet", brand:"Ozylix", category:"effervescent", tags:["featured","new","skin","effervescent"],
    price:399, salePrice:null, offer:"Price to be updated",
-   image:"", image2:"", image3:"", image4:"", image5:"",
+   image2:"", image3:"", image4:"", image5:"",
    rating:4.5, reviews:0, stock:0, badge:"New",
    hasTiers:false,
    seoKeywords:["women's multivitamin effervescent India","multivitamin tablets for women","hyaluronic acid inositol tablet","iron multivitamin for women","hormonal balance supplement India"],
@@ -11774,9 +11814,9 @@ const PRODUCTS = [
    keyIngredients:["Vitamin A 840mcg","Vitamin C 65mg","Vitamin D2 600 IU","Iron 14.5mg","Hyaluronic Acid 40mg","Inositol 205mg","D-Chiro Inositol 5mg","Astaxanthin 1mg"],
    howToUse:"Dissolve 1 tablet in 150–200ml water. Consume once daily as directed. Allow full fizz before drinking."},
 
-  {id:34, position:2, name:"Apple Cider Vinegar Effervescent Tablet", brand:"Ozylix", category:"effervescent", tags:["featured","new","weight","effervescent"],
+  {id:34, image: "", position:2, name:"Apple Cider Vinegar Effervescent Tablet", brand:"Ozylix", category:"effervescent", tags:["featured","new","weight","effervescent"],
    price:349, salePrice:null, offer:"Price to be updated",
-   image:"", image2:"", image3:"", image4:"", image5:"",
+   image2:"", image3:"", image4:"", image5:"",
    rating:4.5, reviews:0, stock:0, badge:"New",
    hasTiers:false,
    seoKeywords:["apple cider vinegar effervescent India","ACV garcinia cambogia tablet","weight management effervescent tablet","digestion supplement India","ACV tablets online India"],
@@ -11785,9 +11825,9 @@ const PRODUCTS = [
    keyIngredients:["Apple Cider Vinegar 500mg","Garcinia Cambogia 500mg","Pomegranate Extract 100mg","Chlorophyll 10mg","Vitamin B6 1.3mg","Vitamin B12 2.2mcg"],
    howToUse:"Dissolve 1 tablet in 150–200ml water. Consume once daily before a meal. Allow full fizz before drinking."},
 
-  {id:35, position:7, name:"Complete Bone Health Effervescent Tablet", brand:"Ozylix", category:"effervescent", tags:["featured","new","immunity","effervescent"],
+  {id:35, image: "", position:7, name:"Complete Bone Health Effervescent Tablet", brand:"Ozylix", category:"effervescent", tags:["featured","new","immunity","effervescent"],
    price:349, salePrice:null, offer:"Price to be updated",
-   image:"", image2:"", image3:"", image4:"", image5:"",
+   image2:"", image3:"", image4:"", image5:"",
    rating:4.5, reviews:0, stock:0, badge:"New",
    hasTiers:false,
    seoKeywords:["bone health effervescent tablet India","calcium magnesium D3 K2 tablet","calcium supplement India","bone strength tablet online","vitamin D3 K2 effervescent tablet"],
@@ -11796,9 +11836,9 @@ const PRODUCTS = [
    keyIngredients:["Calcium Carbonate 500mg","Magnesium Carbonate 500mg","Vitamin D3 600 IU","Vitamin K2-7 55mcg","Vitamin C 40mg","Vitamin B6 1.9mg"],
    howToUse:"Dissolve 1 tablet in 150–200ml water. Consume once daily as directed. Allow full fizz before drinking."},
 
-  {id:36, position:8, name:"Rehydration Effervescent Tablet", brand:"Ozylix", category:"effervescent", tags:["featured","new","energy","effervescent"],
+  {id:36, image: "", position:8, name:"Rehydration Effervescent Tablet", brand:"Ozylix", category:"effervescent", tags:["featured","new","energy","effervescent"],
    price:349, salePrice:null, offer:"Price to be updated",
-   image:"", image2:"", image3:"", image4:"", image5:"",
+   image2:"", image3:"", image4:"", image5:"",
    rating:4.5, reviews:0, stock:0, badge:"New",
    hasTiers:false,
    seoKeywords:["rehydration effervescent tablet India","electrolyte BCAA tablet","hydration supplement India","sports recovery tablet India","electrolyte tablet for exercise"],
@@ -11807,9 +11847,9 @@ const PRODUCTS = [
    keyIngredients:["BCAAs 300mg (Leucine 100mg, Isoleucine 100mg, Valine 100mg)","Vitamin C 80mg","Magnesium 25mg","Chloride 130mg","Zinc 12mg"],
    howToUse:"Dissolve 1 tablet in 150–200ml water. Consume during or after exercise, or as directed. Allow full fizz before drinking."},
 
-  {id:37, position:9, name:"Natural Vitamin C + Amla Effervescent Tablet", brand:"Ozylix", category:"effervescent", tags:["featured","new","immunity","effervescent"],
+  {id:37, image: "", position:9, name:"Natural Vitamin C + Amla Effervescent Tablet", brand:"Ozylix", category:"effervescent", tags:["featured","new","immunity","effervescent"],
    price:349, salePrice:null, offer:"Price to be updated",
-   image:"", image2:"", image3:"", image4:"", image5:"",
+   image2:"", image3:"", image4:"", image5:"",
    rating:4.5, reviews:0, stock:0, badge:"New",
    hasTiers:false,
    seoKeywords:["vitamin C amla effervescent India","natural amla tablet India","immunity booster effervescent tablet","vitamin C tablet India","amla vitamin C supplement"],
@@ -11818,9 +11858,9 @@ const PRODUCTS = [
    keyIngredients:["Natural Amla Extract 1000mg","Vitamin C 40mg","Zinc 10mg","Orange Powder 250mg","Lemon Powder 200mg"],
    howToUse:"Dissolve 1 tablet in 150–200ml water. Consume once daily as directed. Allow full fizz before drinking."},
 
-  {id:38, position:1, name:"Glutathione Effervescent Tablet", brand:"Ozylix", category:"effervescent", tags:["featured","new","skin","effervescent"],
+  {id:38, image: "", position:1, name:"Glutathione Effervescent Tablet", brand:"Ozylix", category:"effervescent", tags:["featured","new","skin","effervescent"],
    price:650, salePrice:null, offer:"Price to be updated",
-   image:"", image2:"", image3:"", image4:"", image5:"",
+   image2:"", image3:"", image4:"", image5:"",
    rating:4.5, reviews:0, stock:0, badge:"New",
    hasTiers:false,
    seoKeywords:["glutathione effervescent tablet India","skin brightening glutathione tablet","glutathione hyaluronic acid supplement","antioxidant skin tablet India","glow skin supplement India"],
@@ -11829,9 +11869,9 @@ const PRODUCTS = [
    keyIngredients:["L-Glutathione 600mg","Vitamin C 80mg","Hyaluronic Acid 50mg","Astaxanthin 10mg"],
    howToUse:"Dissolve 1 tablet in 150–200ml water. Consume once daily as directed. Allow full fizz before drinking."},
 
-  {id:39, position:10, name:"L-Carnitine L-Tartrate Effervescent Tablet", brand:"Ozylix", category:"effervescent", tags:["featured","new","weight","energy","effervescent"],
+  {id:39, image: "", position:10, name:"L-Carnitine L-Tartrate Effervescent Tablet", brand:"Ozylix", category:"effervescent", tags:["featured","new","weight","energy","effervescent"],
    price:449, salePrice:null, offer:"Price to be updated",
-   image:"", image2:"", image3:"", image4:"", image5:"",
+   image2:"", image3:"", image4:"", image5:"",
    rating:4.5, reviews:0, stock:0, badge:"New",
    hasTiers:false,
    seoKeywords:["L-Carnitine L-Tartrate effervescent India","L-Carnitine 2000mg tablet","fat metabolism supplement India","energy tablet for exercise","L-Carnitine tablets online India"],
@@ -11843,7 +11883,7 @@ const PRODUCTS = [
   // ─── CATEGORY: SPIRULINA VITAMINS ───
   {id:10, position:11, name:"VitaPlus B12 + D3 Vegan – with Certified Organic Spirulina", brand:"Ozylix Spirulina", category:"spirulina", tags:["featured","new","immunity","energy","spirulina"],
    price:399, salePrice:null, offer:"20% OFF – Introductory Price",
-   image:"", image2:"",
+   image2:"",
    rating:4.7, reviews:89, stock:0, badge:"New",
    hasTiers:true,
    seoKeywords:["spirulina B12 D3 tablet India","spirulina vegan vitamin","spirulina capsules India"],
@@ -11853,7 +11893,7 @@ const PRODUCTS = [
 
   {id:11, position:12, name:"MG+++ Magnesium – B12 + D3 with Magnesium", brand:"Ozylix Spirulina", category:"spirulina", tags:["featured","new","energy","spirulina"],
    price:367, salePrice:null, offer:"20% OFF – Introductory Price",
-   image:"", image2:"",
+   image2:"",
    rating:4.5, reviews:56, stock:0, badge:"New",
    hasTiers:true,
    seoKeywords:["spirulina magnesium supplement India","magnesium B12 tablet India","spirulina muscle support"],
@@ -11863,7 +11903,7 @@ const PRODUCTS = [
 
   {id:12, position:13, name:"CS++ + Iron++ – Calcium + Iron with B12+D3", brand:"Ozylix Spirulina", category:"spirulina", tags:["featured","new","immunity","spirulina"],
    price:383, salePrice:null, offer:"20% OFF – Introductory Price",
-   image:"", image2:"",
+   image2:"",
    rating:4.6, reviews:44, stock:0, badge:"New",
    hasTiers:true,
    seoKeywords:["spirulina calcium iron tablet India","spirulina bone health","iron supplement spirulina India"],
@@ -11874,7 +11914,7 @@ const PRODUCTS = [
   // ─── CATEGORY: AYURVEDIC ───
   {id:20, position:15, name:"Moringa Tablets", brand:"Ozylix Ayurvedic", category:"ayurvedic", tags:["featured","new","immunity","energy","ayurvedic"],
    price:249, salePrice:null, offer:"Price to be updated",
-   image:"", image2:"",
+   image2:"",
    rating:4.7, reviews:156, stock:0, badge:"Ayurvedic",
    hasTiers:false,
    seoKeywords:["moringa tablets India","moringa oleifera supplement India","moringa veggie tablets"],
@@ -11885,7 +11925,7 @@ const PRODUCTS = [
   // ─── CATEGORY: IMMUNITY ───
   {id:22, position:16, name:"Power Pro Tablets", brand:"Ozylix Immunity", category:"immunity", tags:["featured","new","immunity","energy"],
    price:499, salePrice:null, offer:"Price coming soon",
-   image:"", image2:"",
+   image2:"",
    rating:4.7, reviews:34, stock:0, badge:"Coming Soon",
    hasTiers:false,
    seoKeywords:["immunity booster India","power pro tablet India","stamina supplement India","ashwagandha immunity"],
@@ -13702,7 +13742,13 @@ function renderProductReviewList(pid) {
       var cards = (CONTENT[pl.id] || []).map(function (c, n) {
         var mkey = mediaKey(slug, pl.id, n + 1);
         var ico = { howto: '⏰', experts: '🎓', research: '📚', why: '✓' }[pl.id] || '✨';
-        return '<div class="edu-card"><div class="edu-card-media" data-media-key="' + mkey + '" data-awaiting-upload="true">' +
+        var eduImg = (pl.id === 'howto') ? ('/assets/edu/howto-' + (n + 1) + '.png') :
+                    (pl.id === 'why') ? ('/assets/edu/why-' + (n + 1) + '.png') :
+                    (pl.id === 'research') ? ('/assets/edu/research-' + (n + 1) + '.png') : '';
+        var imgHtml = eduImg ? ('<img src="' + eduImg + '" alt="" loading="lazy" decoding="async">') : '';
+        var builtIn = eduImg ? 'edu-builtin' : '';
+        return '<div class="edu-card"><div class="edu-card-media edu-builtin-' + (eduImg ? '1' : '0') + '" data-media-key="' + mkey + '" data-awaiting-upload="true">' +
+          imgHtml +
           '<span class="edu-ico">' + ico + '</span>' +
           '<span class="edu-awaiting" data-media-key="' + mkey + '" data-fallback="hide">Upload creative</span></div>' +
           '<div class="edu-card-body"><h4>' + escHtml(c.h) + '</h4><p>' + escHtml(c.p) + '</p></div></div>';
