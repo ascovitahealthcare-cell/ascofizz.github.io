@@ -8707,8 +8707,11 @@ setInterval(function() { syncAppCartBadge(); syncAppWishBadge(); }, 2000);
       window.ADMIN_HERO_BANNERS = bnSlides.length ? bnSlides : null;
       // The carousel only initialised itself once on DOMContentLoaded (before
       // site-media arrived). If the admin has now supplied banners, re-init.
-      if (window.ADMIN_HERO_BANNERS && typeof window.initHeroBanner === 'function') {
-        try { window.initHeroBanner(); } catch (e) { /* ignore */ }
+      if (window.ADMIN_HERO_BANNERS) {
+        // Refresh both sliders so admin uploads appear on the home carousel
+        // and the shop hero without a page reload.
+        try { if (typeof window.initHeroBanner === 'function') window.initHeroBanner(); } catch (e) { /* ignore */ }
+        try { if (typeof window.initShopHero === 'function') window.initShopHero(); } catch (e) { /* ignore */ }
       }
       // Shop banners beyond the two hard-coded slots.
       var sbWrap = document.querySelector('.shop-promos');
@@ -9063,11 +9066,10 @@ setInterval(function() { syncAppCartBadge(); syncAppWishBadge(); }, 2000);
 // single image slider, #heroBanner, defined by BANNER_SLIDES below.
 
 // ── SHOP HERO SLIDER (Aug 2026) ────────────────────────────────────
-// Deliberately NOT its own slider any more. The owner asked for the shop
-// page banner to be the same one that sits at the top of the home page, so
-// this renders the exact same markup the home #heroBanner renders, from the
-// exact same BANNER_SLIDES config (declared further down this file). There
-// is nothing to edit here — change BANNER_SLIDES and both pages follow.
+// Deliberately NOT its own slider any more. The shop hero renders the exact
+// same markup as the home #heroBanner. Aug 2026: both pages are driven by the
+// admin-uploaded banners (ADMIN_HERO_BANNERS) — upload once in the admin
+// panel and both the home carousel and the shop hero follow automatically.
 (function () {
   var shIdx = 0, shTimer = null, shSlides = [];
   function shGo(i) {
@@ -9097,7 +9099,12 @@ setInterval(function() { syncAppCartBadge(); syncAppWishBadge(); }, 2000);
     // Same source of truth as the home banner, filtered the same way: empty
     // entries are dropped BEFORE render, so an <img src=""> never fires an
     // error and leaves the index pointing at a slide that no longer exists.
-    shSlides = (window.BANNER_SLIDES || []).filter(function (s) {
+    // Aug 2026: admin-uploaded banners (ADMIN_HERO_BANNERS) now drive BOTH
+    // the home carousel and the shop hero — BANNER_SLIDES stays empty.
+    var shSrc = (window.ADMIN_HERO_BANNERS && window.ADMIN_HERO_BANNERS.length) ? window.ADMIN_HERO_BANNERS.map(function (b) {
+      return { src: b.url, mobile: b.url, alt: b.alt || 'Ozylix offer', link: b.link || '' };
+    }) : (window.BANNER_SLIDES || []);
+    shSlides = shSrc.filter(function (s) {
       return s && s.src && String(s.src).trim();
     });
     if (!shSlides.length) return;               // stays display:none
