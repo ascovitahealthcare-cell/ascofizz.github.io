@@ -10280,7 +10280,7 @@ function renderCheckoutSummary() {
   STORE.cart.forEach(function (it) {
     var pr = PRODUCTS.find(function (x) { return x.id === it.id; });
     if (!pr) return;
-    var u = it.tierRate !== undefined ? it.tierRate : (pr.salePrice || pr.price);
+    var u = (function (p, it) { var m = null; if (it.tierTabs != null) m = Number(it.tierTabs) / 15; else if (it.tierIdx != null) { var ts = (typeof getProductTiers === 'function') ? getProductTiers(p) : null; m = (ts && ts[it.tierIdx] && ts[it.tierIdx].tabs) ? ts[it.tierIdx].tabs / 15 : null; } return (m && m > 0) ? (Number(p.price || 0) * m) : (p.salePrice || p.price); })(pr, it);
     var q = Math.max(0, Math.trunc(Number(it.qty) || 0));
     for (var n = 0; n < q; n++) mmUnits.push(u);
   });
@@ -12216,6 +12216,7 @@ const STORE = {
   normalizeCartTiers(){
     let changed = false;
     this.cart.forEach(it => {
+      if (it.isCustomPack) return; // customer-built month pack — server re-prices at checkout, never mangle
       // Tier-less entries on a tiered product are stale (added via
       // upsells/recommendations without a pack choice). Apply the
       // smallest live tier so prices can't silently overstate.
@@ -13390,7 +13391,7 @@ function showPage(pg) {
           var qty = ci.qty || 1;
           if (tiers) { var ti = typeof currentTierIdx === 'function' ? currentTierIdx(pr, tiers) : -1;
             if (ti >= 0 && ti < tiers.length) qty = Math.max(1, tiers[ti].units || 1); }
-          for (var u = 0; u < qty; u++) mmUnits.push(pr.salePrice || pr.price || 0);
+          for (var u = 0; u < qty; u++) mmUnits.push(pr.price || pr.salePrice || 0);
           total += (pr.salePrice || pr.price || 0) * qty;
         });
         mmUnits.sort(function (a, b) { return a - b; });
@@ -13825,7 +13826,7 @@ function buildTierWidget(p) {
                   class="qty-tier${isSel ? ' selected' : ''}${isBest ? ' best-value' : ''}"
                   onclick="selectTier(${p.id}, ${i})">
             ${isBest ? '<span class="qt-flag">Best value</span>' : ''}
-            <span class="qt-size"><b>${tier.tabs}</b> tablets</span>
+            <span class="qt-size"><b>${tier.tabs}</b> tablets (${Math.round(tier.tabs / 15)} month ${Math.round(tier.tabs / 15) === 1 ? "supply" : "supply"})</span>
             <span class="qt-packs">${packs || '&nbsp;'}</span>
             <span class="qt-rate">${rupee(tier.rate)}</span>
             ${per ? `<span class="qt-unit">${'₹' + per} per tablet</span>` : ''}
@@ -13839,8 +13840,76 @@ function buildTierWidget(p) {
       <div class="qty-discount-footer">
         <span>Selected: <b>${t.tabs} tablets</b> for <b>${rupee(t.rate)}</b> · MRP ${rupee(t.mrp)}</span>
         ${saving > 0 ? `<span class="savings-pill">You save ${rupee(saving)}</span>` : ''}
+        <span class="custom-pack-wrap" style="border-top:1px solid rgba(0,0,0,.08);padding-top:10px;display:inline-flex;align-items:center;gap:8px;flex-wrap:wrap">
+          <span style="font-size:.75rem;color:var(--gray);font-weight:600">Build your own:
+            <input type="number" id="customMonths_${p.id}" min="1" max="12" value="" placeholder="months"
+                   style="width:62px;padding:5px 8px;border:1px solid rgba(0,0,0,.15);border-radius:6px;font-size:.78rem"
+                   onkeydown="if(event.key==='Enter'){event.preventDefault();createCustomPack(${p.id})}">
+          </span>
+          <button type="button" onclick="createCustomPack(${p.id})"
+                  style="font-size:.72rem;padding:6px 12px;border-radius:100px;background:var(--t-hi);color:#fff;border:none;font-weight:700;cursor:pointer">Create Pack</button>
+        </span>
       </div>
     </div>`;
+}
+// ── CUSTOM PACK BUILDER ─────────────────────────────────────────────
+// The customer names a month count; we build a synthetic tier with the
+// SAME discount curve the backend interpolates (linear between the two
+// bracketing defined tiers, floored percent; MRP scaled from the
+// per-15-tabs MRP of the smallest tier). The server re-derives the rate
+// from its own curve at checkout, so the cart line can never lie.
+function createCustomPack(productId) {
+  const p = PRODUCTS.find(x => x.id === productId);
+  const tiers = getProductTiers(p);
+  if (!tiers) return;
+  const input = document.getElementById('customMonths_' + productId);
+  const raw = input ? Number(input.value) : 0;
+  const months = Number.isFinite(raw) && raw >= 2 && raw <= 12 ? Math.round(raw) : 0;
+  if (!months) {
+    showToast('Enter a pack length of 2-12 months', 'error');
+    return;
+  }
+  const wantTabs = months * 15;
+  // Defined tier already covers it — use that instead of a synthetic one
+  const exact = tiers.find(t => Number(t.tabs) === wantTabs);
+  if (exact) {
+    const idx = tiers.indexOf(exact);
+    selectTier(productId, idx);
+    showToast(`${p.name} — ${months}-month pack selected`);
+    return;
+  }
+  const rows = tiers.slice().sort((a, b) => Number(a.tabs) - Number(b.tabs));
+  const maxTabs = Number(rows[rows.length - 1].tabs) || 0;
+  if (wantTabs > maxTabs) {
+    showToast(`Pack too large — max ${Math.round(maxTabs / 15)} months on ${p.name}`, 'error');
+    return;
+  }
+  let lo = rows[0], hi = rows[rows.length - 1];
+  for (let k = 0; k < rows.length - 1; k++) {
+    if (Number(rows[k].tabs) <= wantTabs && wantTabs <= Number(rows[k + 1].tabs)) { lo = rows[k]; hi = rows[k + 1]; break; }
+  }
+  const f = (wantTabs - Number(lo.tabs)) / (Number(hi.tabs) - Number(lo.tabs));
+  const discPct = Math.floor((Number(lo.discountPct) || 0) + ((Number(hi.discountPct) || 0) - (Number(lo.discountPct) || 0)) * f);
+  const unitMrp = Number(rows[0].mrp) / Number(rows[0].tabs);
+  const mrp = Math.round(unitMrp * wantTabs * 100) / 100;
+  const rate = Math.round(mrp * (1 - discPct / 100) * 100) / 100;
+  const customTier = { tabs: wantTabs, rate, mrp, discountPct: discPct, _custom: true };
+  const tierIdx = selectedTiers[productId] != null ? selectedTiers[productId] : 0;
+  const physicalPacks = Math.max(1, Math.round(wantTabs / Number(tiers[0].tabs)));
+  const ex = STORE.cart.find(i => i.id === productId && i.isCustomPack);
+  if (ex) {
+    ex.qty += 1; ex.tierIdx = -1;
+    Object.assign(ex, { tierTabs: wantTabs, tierRate: rate, tierMRP: mrp, tierDisc: discPct, isBundle: physicalPacks > 1, isCustomPack: true });
+  } else {
+    STORE.cart.push({
+      id: productId, qty: 1, tierIdx: -1,
+      tierTabs: wantTabs, tierRate: rate, tierMRP: mrp, tierDisc: discPct,
+      isBundle: physicalPacks > 1, isCustomPack: true,
+    });
+  }
+  STORE.save();
+  showToast(`${p.name} — your ${months}-month custom pack (${wantTabs} tablets, ₹${Number(rate).toLocaleString('en-IN')}) added to cart!`);
+  updateCartUI && updateCartUI();
 }
 
 function selectTier(productId, tierIdx) {
@@ -14214,7 +14283,7 @@ function buildProductPage(p) {
               <th style="padding:12px 16px;text-align:right;border-radius:0 8px 0 0">You Save</th>
             </tr></thead>
             <tbody>
-              ${tiers.map((t,i)=>{const isBest=t.discountPct===Math.max(...tiers.map(x=>x.discountPct));return`<tr style="background:${isBest?'var(--gold-pale)':i%2?'var(--green-wash)':'white'};cursor:pointer" onclick="selectTier(${p.id},${i})"><td style="padding:12px 16px;font-weight:700">${t.tabs} Tabs${isBest?' <span style="background:var(--gold);color:var(--t-hi);font-size:.6rem;padding:2px 7px;border-radius:100px;font-weight:800;vertical-align:middle">BEST VALUE</span>':''}</td><td style="padding:12px 16px;text-align:right;text-decoration:line-through;color:var(--gray)">&#x20B9;${t.mrp.toLocaleString('en-IN')}</td><td style="padding:12px 16px;text-align:right;font-weight:800;color:var(--green)">&#x20B9;${t.rate.toLocaleString('en-IN')}</td><td style="padding:12px 16px;text-align:right"><span style="background:${isBest?'var(--gold)':'var(--gold-pale)'};color:${isBest?'white':'var(--gold)'};padding:3px 9px;border-radius:100px;font-weight:700;font-size:.78rem">${t.discountPct}% OFF</span></td><td style="padding:12px 16px;text-align:right;color:var(--success);font-weight:700">&#x20B9;${(t.mrp-t.rate).toLocaleString('en-IN')}</td></tr>`;}).join('')}
+              ${tiers.map((t,i)=>{const isBest=t.discountPct===Math.max(...tiers.map(x=>x.discountPct));return`<tr style="background:${isBest?'var(--gold-pale)':i%2?'var(--green-wash)':'white'};cursor:pointer" onclick="selectTier(${p.id},${i})"><td style="padding:12px 16px;font-weight:700">${t.tabs} Tabs (${Math.round(t.tabs / 15)} month ${Math.round(t.tabs / 15) === 1 ? "supply" : "supply"})${isBest?' <span style="background:var(--gold);color:var(--t-hi);font-size:.6rem;padding:2px 7px;border-radius:100px;font-weight:800;vertical-align:middle">BEST VALUE</span>':''}</td><td style="padding:12px 16px;text-align:right;text-decoration:line-through;color:var(--gray)">&#x20B9;${t.mrp.toLocaleString('en-IN')}</td><td style="padding:12px 16px;text-align:right;font-weight:800;color:var(--green)">&#x20B9;${t.rate.toLocaleString('en-IN')}</td><td style="padding:12px 16px;text-align:right"><span style="background:${isBest?'var(--gold)':'var(--gold-pale)'};color:${isBest?'white':'var(--gold)'};padding:3px 9px;border-radius:100px;font-weight:700;font-size:.78rem">${t.discountPct}% OFF</span></td><td style="padding:12px 16px;text-align:right;color:var(--success);font-weight:700">&#x20B9;${(t.mrp-t.rate).toLocaleString('en-IN')}</td></tr>`;}).join('')}
             </tbody>
           </table>
           <p style="font-size:.76rem;color:var(--gray);margin-top:12px">Click any row to select that pack. All prices incl. taxes.</p><p class="mc-line">&#128154; A small step for your daily wellness routine. ✨ Your Ozylix routine starts here.</p>
@@ -14663,7 +14732,7 @@ function renderCart() {
   STORE.cart.forEach(function (it) {
     var pr = PRODUCTS.find(function (x) { return x.id === it.id; });
     if (!pr) return;
-    var u = it.tierRate !== undefined ? it.tierRate : (pr.salePrice || pr.price);
+    var u = (function (p, it) { var m = null; if (it.tierTabs != null) m = Number(it.tierTabs) / 15; else if (it.tierIdx != null) { var ts = (typeof getProductTiers === 'function') ? getProductTiers(p) : null; m = (ts && ts[it.tierIdx] && ts[it.tierIdx].tabs) ? ts[it.tierIdx].tabs / 15 : null; } return (m && m > 0) ? (Number(p.price || 0) * m) : (p.salePrice || p.price); })(pr, it);
     var q = Math.max(0, Math.trunc(Number(it.qty) || 0));
     for (var n = 0; n < q; n++) mmUnits.push(u);
   });
@@ -14928,7 +14997,7 @@ function renderCheckoutSummary() {
   STORE.cart.forEach(function (it) {
     var pr = PRODUCTS.find(function (x) { return x.id === it.id; });
     if (!pr) return;
-    var u = it.tierRate !== undefined ? it.tierRate : (pr.salePrice || pr.price);
+    var u = (function (p, it) { var m = null; if (it.tierTabs != null) m = Number(it.tierTabs) / 15; else if (it.tierIdx != null) { var ts = (typeof getProductTiers === 'function') ? getProductTiers(p) : null; m = (ts && ts[it.tierIdx] && ts[it.tierIdx].tabs) ? ts[it.tierIdx].tabs / 15 : null; } return (m && m > 0) ? (Number(p.price || 0) * m) : (p.salePrice || p.price); })(pr, it);
     var q = Math.max(0, Math.trunc(Number(it.qty) || 0));
     for (var n = 0; n < q; n++) mmUnits.push(u);
   });
@@ -18916,10 +18985,26 @@ function printInvoice(orderId) {
       o = local.find(function(ord){ return String(ord.orderId) === String(orderId); });
     }
     if (!o) { showToast('Invoice not found for ' + orderId, 'error'); return; }
-    var w = window.open('', '_blank');
-    if (!w) { showToast('Please allow pop-ups to print the invoice', 'error'); return; }
-    w.document.write(buildInvoiceHTML(o));
-    w.document.close();
+    var jwt = localStorage.getItem("asc_jwt") || localStorage.getItem("asc_token") || "";
+    var _pdfHeaders = jwt ? { "Authorization": "Bearer " + jwt } : {};
+    fetchWithTimeout(API_BASE + "/api/orders/" + encodeURIComponent(orderId) + "/pdf", { headers: _pdfHeaders }, 15000)
+      .then(function (r) { if (!r.ok) throw new Error("server " + r.status); return r.blob(); })
+      .then(function (blob) {
+        var _pdfUrl = URL.createObjectURL(blob);
+        var w = window.open("", "_blank");
+        if (!w) { URL.revokeObjectURL(_pdfUrl); showToast('Please allow pop-ups to print the invoice', 'error'); return; }
+        w.document.write('<html><head><title>Ozylix Invoice ' + orderId + '</title></head><body style="margin:0">'
+          + '<object data="' + _pdfUrl + '" type="application/pdf" style="width:100%;height:100vh;border:none"></object></body></html>');
+        w.document.close();
+        setTimeout(function () { try { w.print(); } catch (e) {} }, 700);
+        setTimeout(function () { URL.revokeObjectURL(_pdfUrl); }, 60000);
+      })
+      .catch(function () {
+        var w = window.open("", "_blank");
+        if (!w) { showToast('Please allow pop-ups to print the invoice', 'error'); return; }
+        w.document.write(buildInvoiceHTML(o));
+        w.document.close();
+      });
   } catch(e) {
     console.error('[printInvoice]', e);
     showToast('Could not open invoice', 'error');
@@ -19124,7 +19209,7 @@ function renderSideCart() {
         <img class="sc-img" src="${(typeof getProductImg==='function'?getProductImg(p):p.image)||''}" alt="${p.name}" onerror="this.src=PRODUCT_FALLBACKS.default" decoding="async">
         <div class="sc-info">
           <div class="sc-name">${p.name}</div>
-          ${item.tierTabs ? `<div class="sc-tier-info" style="font-size:.7rem;color:var(--green);font-weight:600;margin:1px 0">${item.tierTabs} Tablets (${item.tierTabs/15} ${item.tierTabs===15?'Pack':'Packs'})</div>` : ''}
+          ${item.tierTabs ? `<div class="sc-tier-info" style="font-size:.7rem;color:var(--green);font-weight:600;margin:1px 0">${item.tierTabs} Tablets (${item.isCustomPack ? 'your ' : ''}${Math.round(item.tierTabs / 15)} month supply)</div>` : ''}
           <div class="sc-brand">${p.brand}</div>
           <div class="sc-price">₹${(price * item.qty).toLocaleString('en-IN')}</div>
           <div class="sc-qty-row">
@@ -19150,7 +19235,7 @@ function renderSideCart() {
   var mmUnits = STORE.cart.map(function (it) {
     var pr = PRODUCTS.find(function (x) { return x.id === it.id; });
     if (!pr) return [];
-    var u = it.tierRate !== undefined ? it.tierRate : (pr.salePrice || pr.price);
+    var u = (function (p, it) { var m = null; if (it.tierTabs != null) m = Number(it.tierTabs) / 15; else if (it.tierIdx != null) { var ts = (typeof getProductTiers === 'function') ? getProductTiers(p) : null; m = (ts && ts[it.tierIdx] && ts[it.tierIdx].tabs) ? ts[it.tierIdx].tabs / 15 : null; } return (m && m > 0) ? (Number(p.price || 0) * m) : (p.salePrice || p.price); })(pr, it);
     var q = Math.max(0, Math.trunc(Number(it.qty) || 0));
     return Array(q).fill(u);
   }).reduce(function (a, b) { return a.concat(b); }, []);
