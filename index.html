@@ -3692,12 +3692,12 @@ img[src=""], img[data-awaiting-upload] { visibility: hidden; width: 100%; }
 .wa-open-btn svg { width: 19px; height: 19px; }
 
 /* ── FOOTER ────────────────────────────────────────────────────── */
-.footer { position: relative; margin-top: clamp(40px, 5vw, 72px); background: var(--paper); box-shadow: inset 0 1px 0 var(--edge); }
-.footer-top { padding: clamp(28px, 3.5vw, 44px) 0 clamp(24px, 3vw, 34px); }
-.footer-grid { display: grid; gap: 26px 24px; grid-template-columns: minmax(240px, 1.6fr) repeat(auto-fit, minmax(130px, 1fr)); }
-.footer-logo-t { font-family: var(--font-display); font-size: 1.25rem; font-weight: 300; letter-spacing: .1em; text-transform: uppercase; color: var(--ink); margin-bottom: 8px; }
-.footer-tag { font-size: .8rem; color: var(--t-low); line-height: 1.6; max-width: 40ch; margin-bottom: 14px; }
-.footer-nl { display: flex; gap: 8px; margin-bottom: 14px; max-width: 380px; }
+.footer { position: relative; margin-top: clamp(32px, 4vw, 56px); background: var(--paper); box-shadow: inset 0 1px 0 var(--edge); }
+.footer-top { padding: clamp(18px, 2.4vw, 28px) 0 clamp(14px, 1.8vw, 20px); }
+.footer-grid { display: grid; gap: 16px 20px; grid-template-columns: minmax(220px, 1.6fr) repeat(auto-fit, minmax(120px, 1fr)); }
+.footer-logo-t { font-family: var(--font-display); font-size: 1.08rem; font-weight: 300; letter-spacing: .1em; text-transform: uppercase; color: var(--ink); margin-bottom: 6px; }
+.footer-tag { font-size: .74rem; color: var(--t-low); line-height: 1.5; max-width: 40ch; margin-bottom: 10px; }
+.footer-nl { display: flex; gap: 8px; margin-bottom: 10px; max-width: 380px; }
 .footer-nl input { flex: 1; border-radius: var(--r-pill); }
 .footer-nl button {
   padding: 13px 22px; border-radius: var(--r-pill);
@@ -3716,15 +3716,15 @@ img[src=""], img[data-awaiting-upload] { visibility: hidden; width: 100%; }
 .soc-link:hover { transform: translateY(-3px); box-shadow: var(--neo-2); }
 .soc-link:active { transform: none; box-shadow: var(--neo-in); }
 .footer-col h4 {
-  font-family: var(--font-ui); font-size: .62rem; font-weight: 600;
-  letter-spacing: .2em; text-transform: uppercase; color: var(--green); margin-bottom: 10px;
+  font-family: var(--font-ui); font-size: .58rem; font-weight: 600;
+  letter-spacing: .2em; text-transform: uppercase; color: var(--green); margin-bottom: 7px;
 }
-.footer-col ul { display: flex; flex-direction: column; gap: 7px; }
-.footer-col a { font-size: .79rem; color: var(--t-low); display: inline-block; transition: color var(--dur-1) var(--settle), transform var(--dur-1) var(--settle); }
+.footer-col ul { display: flex; flex-direction: column; gap: 5px; }
+.footer-col a { font-size: .74rem; color: var(--t-low); display: inline-block; transition: color var(--dur-1) var(--settle), transform var(--dur-1) var(--settle); }
 .footer-col a:hover { color: var(--indigo); transform: translateX(3px); }
 .footer-bottom {
-  display: flex; align-items: center; justify-content: space-between; gap: 14px; flex-wrap: wrap;
-  padding: 12px 0 calc(env(safe-area-inset-bottom, 0px) + 14px);
+  display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap;
+  padding: 9px 0 calc(env(safe-area-inset-bottom, 0px) + 9px);
   box-shadow: inset 0 1px 0 var(--edge);
   font-size: .7rem; color: var(--t-dim);
 }
@@ -4830,6 +4830,22 @@ img[src=""], img[data-awaiting-upload] { visibility: hidden; width: 100%; }
   background: var(--fern-bg);
   box-shadow: inset 0 0 0 1.6px rgba(94,145,121,.5), var(--neo-1);
 }
+/* Best-value tier: a warm, unmistakable catch-color so the eye lands on the
+   deepest discount first. Kept "little" — one accent line, one glow, nothing
+   loud — and it yields to .selected when the customer actually picks it. */
+.qty-tier.best-value {
+  background: linear-gradient(170deg, #FFF8EC 0%, #FCEFD3 100%);
+  box-shadow: 0 0 0 2px #E8A33D, 0 6px 18px rgba(232,163,61,.35);
+}
+.qty-tier.best-value:hover {
+  box-shadow: 0 0 0 2px #E8A33D, 0 10px 26px rgba(232,163,61,.45);
+}
+.qty-tier.best-value.selected {
+  background: linear-gradient(170deg, #F4F9EE 0%, #E3F0D6 100%);
+  box-shadow: inset 0 0 0 1.6px rgba(94,145,121,.5), 0 0 0 2px #5E9179, var(--neo-1);
+}
+.qty-tier.best-value .qt-rate { color: #B45309; }
+.qty-tier.best-value .qt-save { color: #B45309; }
 /* The ribbon overlaps the card's top edge, so the cards need headroom for
    it. Every card carries that headroom, not just the flagged one: this is
    a comparison grid, and one card indented 9px further than its
@@ -4840,6 +4856,10 @@ img[src=""], img[data-awaiting-upload] { visibility: hidden; width: 100%; }
   padding: 3px 10px; border-radius: var(--r-pill); white-space: nowrap;
   font-size: .58rem; font-weight: 800; letter-spacing: .1em; text-transform: uppercase;
   color: #fff; background: var(--indigo); box-shadow: var(--lit-indigo);
+}
+.qty-tier.best-value .qt-flag {
+  background: linear-gradient(100deg, #E8A33D, #D97706);
+  box-shadow: 0 2px 8px rgba(217,119,6,.45);
 }
 .qt-size { font-size: .78rem; font-weight: 600; color: var(--t-mid); line-height: 1.2; }
 .qt-size b {
@@ -5481,7 +5501,7 @@ textarea.form-input { min-height: 96px; resize: vertical; font-family: inherit; 
 .ab-parent-v:hover { text-decoration: underline; text-underline-offset: 3px; }
 .ab-parent-d { flex-basis: 100%; font-size: .74rem; color: var(--t-low); }
 
-.footer-parent { margin-top: 12px; font-size: .78rem; line-height: 1.65; color: var(--t-low); }
+.footer-parent { margin-top: 8px; font-size: .72rem; line-height: 1.5; color: var(--t-low); }
 .footer-parent a { color: var(--indigo-lo); font-weight: 700; text-decoration: none; }
 .footer-parent a:hover { text-decoration: underline; text-underline-offset: 3px; }
 
