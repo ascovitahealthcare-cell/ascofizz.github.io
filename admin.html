@@ -421,12 +421,26 @@ textarea.form-control{resize:vertical;min-height:80px;}
 .mini-bar-col:hover{opacity:1;}
 
 /* ═══ PHOTO GRID ═══ */
-.photo-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:10px;}
-.photo-item{position:relative;aspect-ratio:1;border-radius:10px;overflow:hidden;border:2px solid transparent;cursor:pointer;background:var(--surface2);transition:border-color 0.2s;}
-.photo-item:hover{border-color:var(--green);}
+.photo-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(92px,1fr));gap:8px;}
+.photo-item{position:relative;aspect-ratio:1;border-radius:10px;overflow:hidden;border:2px solid transparent;cursor:pointer;background:var(--surface2);transition:border-color 0.2s,transform 0.15s;}
+.photo-item:hover{border-color:var(--green);transform:translateY(-2px);box-shadow:0 4px 12px rgba(0,0,0,0.25);}
 .photo-item img,.photo-item video{width:100%;height:100%;object-fit:cover;}
-.photo-item .photo-overlay{position:absolute;inset:0;background:rgba(0,0,0,0.7);display:none;align-items:center;justify-content:center;gap:6px;}
+.photo-item.selected{border-color:var(--green);box-shadow:inset 0 0 0 3px rgba(74,138,40,0.45);}
+.photo-item .photo-overlay{position:absolute;inset:0;background:rgba(0,0,0,0.72);display:none;align-items:center;justify-content:center;gap:6px;}
 .photo-item:hover .photo-overlay{display:flex;}
+/* compact caption under each card */
+.photo-cap{position:absolute;bottom:0;left:0;right:0;background:rgba(0,0,0,0.66);color:var(--text2);font-size:0.55rem;padding:2px 5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.photo-cap .pc-size{color:var(--text3);margin-left:4px;}
+/* section tabs, search & sort row */
+.media-tabs{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px;align-items:center;}
+.media-tab{font-size:0.72rem;padding:5px 12px;border-radius:16px;background:var(--surface2);border:1px solid var(--border);color:var(--text2);cursor:pointer;transition:all 0.15s;display:inline-flex;align-items:center;gap:5px;}
+.media-tab:hover{border-color:var(--green);color:var(--text1);}
+.media-tab.active{background:var(--green);border-color:var(--green);color:#fff;}
+.media-tab .tab-count{font-size:0.6rem;opacity:0.75;}
+.media-summary{display:flex;gap:12px;flex-wrap:wrap;font-size:0.7rem;color:var(--text3);margin-left:auto;align-items:center;}
+.media-summary b{color:var(--text2);}
+.media-search{width:165px;font-size:0.72rem;padding:5px 10px;border-radius:8px;border:1px solid var(--border);background:var(--bg);color:var(--text1);}
+.media-sort{font-size:0.72rem;padding:5px 8px;border-radius:8px;border:1px solid var(--border);background:var(--bg);color:var(--text1);}
 
 /* ═══ CODE BLOCK ═══ */
 .code-block{background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:14px;font-family:var(--mono);font-size:0.75rem;color:var(--text2);overflow-x:auto;line-height:1.7;}
@@ -3444,6 +3458,22 @@ function azTogglePw() {
       <span style="font-size:0.78rem;color:var(--text3);" id="mediaSelectedCount">0 selected</span>
     </div>
     <button class="btn btn-danger btn-sm" onclick="deleteSelectedPhotos()">🗑️ Delete Selected</button>
+  </div>
+
+  <!-- Tabs + summary + search/sort: one synchronized row above the grid. -->
+  <div class="media-tabs">
+    <span class="media-tab active" data-tab="all" onclick="setMediaTab('all', this)">🖼️ All <span class="tab-count" id="tabCountAll">0</span></span>
+    <span class="media-tab" data-tab="image" onclick="setMediaTab('image', this)">🖼️ Images <span class="tab-count" id="tabCountImage">0</span></span>
+    <span class="media-tab" data-tab="video" onclick="setMediaTab('video', this)">🎬 Videos <span class="tab-count" id="tabCountVideo">0</span></span>
+    <span class="media-tab" data-tab="recent" onclick="setMediaTab('recent', this)">🕐 Recent <span class="tab-count" id="tabCountRecent">0</span></span>
+    <div class="media-summary" id="mediaSummary"></div>
+    <input class="media-search" id="mediaSearch" placeholder="🔍 Search files…" oninput="_mediaSearchQuery=this.value;renderPhotoGrid();">
+    <select class="media-sort" id="mediaSort" onchange="_mediaSortKey=this.value;renderPhotoGrid();">
+      <option value="newest">Newest first</option>
+      <option value="oldest">Oldest first</option>
+      <option value="name">Name A–Z</option>
+      <option value="size">Largest first</option>
+    </select>
   </div>
 
   <div class="photo-grid" id="photoGrid"></div>
@@ -9537,28 +9567,80 @@ async function loadPhotoLibrary() {
   }
 }
 
+let _mediaTab = 'all';
+let _mediaSearchQuery = '';
+let _mediaSortKey = 'newest';
+// Human file-size string (87 KB, 1.4 MB …) for the compact captions.
+const fmtBytes = (b) => {
+  if (!b) return '';
+  b = Number(b) || 0;
+  if (b < 1024) return b + ' B';
+  if (b < 1048576) return (b / 1024).toFixed(0) + ' KB';
+  return (b / 1048576).toFixed(1) + ' MB';
+};
+const imgExt = (fn) => (fn || '').split('.').pop().toLowerCase();
+function setMediaTab(tab, el) {
+  _mediaTab = tab;
+  document.querySelectorAll('.media-tab').forEach(t => t.classList.toggle('active', t.dataset.tab === tab));
+  renderPhotoGrid();
+}
+// Tab + search + sort filter applied in one place — every render reads
+// the same filtered slice, so counts, summary and grid always agree.
+function _mediaFiltered() {
+  const q = _mediaSearchQuery.trim().toLowerCase();
+  let imgs = (_mediaLibraryImgs || []).filter(img => {
+    // Stray folder placeholders (e.g. a bare 'products' entry with no
+    // extension/size) are not media files — hide them from the grid.
+    if (img.filename && !imgExt(img.filename)) return false;
+    if (_mediaTab === 'image' && isVideoFileUrl(img.url)) return false;
+    if (_mediaTab === 'video' && !isVideoFileUrl(img.url)) return false;
+    if (_mediaTab === 'recent') {
+      const age = (Date.now() - new Date(img.created_at || 0).getTime()) / 86400000;
+      if (age > 7) return false;
+    }
+    if (q && !(img.filename || '').toLowerCase().includes(q)) return false;
+    return true;
+  });
+  const cmp = { newest: (a, b) => (b.created_at || '') > (a.created_at || '') ? 1 : -1,
+                oldest: (a, b) => (a.created_at || '') > (b.created_at || '') ? 1 : -1,
+                name:   (a, b) => (a.filename || '') > (b.filename || '') ? 1 : -1,
+                size:   (a, b) => (Number(b.size) || 0) - (Number(a.size) || 0) }[_mediaSortKey];
+  return imgs.slice().sort(cmp);
+}
 function renderPhotoGrid() {
   const altMap = _mediaAltMap();
-  const imgs = _mediaLibraryImgs;
+  const imgs = _mediaFiltered();
+  const all = _mediaLibraryImgs || [];
+  // Per-tab counts stay synchronized with the live data on every render.
+  const setCount = (id, n) => { const el = document.getElementById(id); if (el) el.textContent = n; };
+  setCount('tabCountAll', all.length);
+  setCount('tabCountImage', all.filter(i => !isVideoFileUrl(i.url) && imgExt(i.filename)).length);
+  setCount('tabCountVideo', all.filter(i => isVideoFileUrl(i.url)).length);
+  setCount('tabCountRecent', all.filter(i => (Date.now() - new Date(i.created_at || 0).getTime()) / 86400000 <= 7).length);
+  // Storage summary: how many files and how much bucket space is used.
+  const totalBytes = all.reduce((s, i) => s + (Number(i.size) || 0), 0);
+  const sumEl = document.getElementById('mediaSummary');
+  if (sumEl) sumEl.innerHTML = `<span><b>${all.length}</b> files</span><span><b>${fmtBytes(totalBytes)}</b> used</span>`;
+
   document.getElementById('photoGrid').innerHTML = imgs.length ? imgs.map(img => {
     const fname = img.filename;
     const alt = altMap[fname] || img.original_name || '';
+    const cap = (img.original_name || fname).replace(/\.[^.]+$/, '');
     return `
     <div class="photo-item ${_mediaSelected.has(fname)?'selected':''}">
       <input type="checkbox" class="photo-select" ${_mediaSelected.has(fname)?'checked':''} onclick="event.stopPropagation(); togglePhotoSelect('${fname}', this.checked)">
       ${isVideoFileUrl(img.url)
         ? '<video src="'+adminCdnImg(img.url)+'" muted loop playsinline preload="metadata" style="pointer-events:none"></video><span class="img-slot-vid-badge">▶ VIDEO</span>'
         : '<img src="'+adminCdnImg(img.url)+'" alt="'+alt+'" loading="lazy">'}
+      <div class="photo-cap">${cap}<span class="pc-size">${fmtBytes(img.size)}</span></div>
       <div class="photo-overlay">
         <button class="btn btn-primary btn-sm btn-icon" onclick="navigator.clipboard.writeText('${img.url}').then(()=>{toast('URL Copied! Paste in product Images tab.');})" title="Copy URL">📋</button>
         <button class="btn btn-secondary btn-sm btn-icon" onclick="addLibraryImageToOpenProduct('${img.url}')" title="Add to the currently-open product">➕</button>
         <button class="btn btn-secondary btn-sm btn-icon" onclick="promptPhotoAlt('${fname}')" title="Edit alt text">🏷️</button>
         <button class="btn btn-danger btn-sm btn-icon" onclick="deletePhoto('${encodeURIComponent(fname)}')" title="Delete">🗑️</button>
       </div>
-      ${alt ? `<div class="photo-alt-tag" title="${alt}">${alt}</div>` : ''}
     </div>
-  `;
-  }).join('') : '<div class="empty-state" style="grid-column:1/-1;"><div class="empty-ico">📸</div><div class="empty-msg">No images uploaded yet</div></div>';
+  `;}).join('') : '<div class="empty-state" style="grid-column:1/-1;"><div class="empty-ico">📸</div><div class="empty-msg">' + (all.length ? 'Nothing matches this filter' : 'No images uploaded yet') + '</div></div>';
   updateMediaSelectedCount();
 }
 
