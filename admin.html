@@ -438,6 +438,15 @@ textarea.form-control{resize:vertical;min-height:80px;}
 .siteimg-sec-name{font-size:0.8rem;font-weight:700;letter-spacing:.4px;text-transform:uppercase;color:var(--text2);}
 .siteimg-sec-count{font-size:0.66rem;padding:2px 9px;border-radius:12px;background:var(--green-glow);color:var(--green-text);font-weight:700;}
 .siteimg-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(118px,1fr));gap:6px;}
+/* Default creatives & per-product override grids are always 4 cards per row —
+   stretch across the full page width instead of clustering on the left */
+.siteimg-grid-full{grid-template-columns:repeat(auto-fill,minmax(190px,1fr))!important;gap:10px;}
+.siteimg-grid-full .siteimg-card .si-media,
+.siteimg-grid-full .siteimg-card .si-media-empty{height:84px;}
+.siteimg-grid-full .siteimg-card .si-meta{min-height:52px;padding:7px 10px;}
+.siteimg-grid-full .siteimg-card .si-name{font-size:0.74rem;}
+.siteimg-grid-full .siteimg-card .si-hint{font-size:0.62rem;}
+.siteimg-grid-full .siteimg-card .si-actions .btn{font-size:0.64rem;padding:4px 0;min-height:23px;}
 .siteimg-card{position:relative;background:var(--surface);border:2px solid transparent;border-radius:10px;overflow:hidden;display:flex;flex-direction:column;transition:border-color 0.15s,transform 0.15s;}
 .siteimg-card:hover{border-color:var(--green);transform:translateY(-2px);box-shadow:0 4px 12px rgba(0,0,0,0.25);}
 .siteimg-card .si-media{width:100%;height:56px;object-fit:cover;background:var(--bg2);}
@@ -9950,7 +9959,7 @@ const __eduHtml = function(overrides){
       <div style="font-size:0.78rem;font-weight:700;color:var(--green-text);margin:4px 0 8px;">🌐 Default creatives — shown on all products that don't have their own set</div>
       ${EDU_PANELS.map(pl => `
         <div style="font-size:0.75rem;font-weight:700;color:var(--text2);margin:12px 0 8px;">${pl.label}</div>
-        <div class="siteimg-grid">
+        <div class="siteimg-grid siteimg-grid-full">
           ${Array.from({length: EDU_CARDS}, (_, i) => {
             const key = 'edu.global.' + pl.id + '.' + (i + 1);
             const url = overrides[key] || '';
@@ -9981,7 +9990,7 @@ const __eduHtml = function(overrides){
       ${!EDU_SLUG ? '<div style="font-size:0.75rem;color:var(--text3);margin-bottom:14px;">Enter the slug above to see the 16 per-product slots.</div>' :
       EDU_PANELS.map(pl => `
         <div style="font-size:0.75rem;font-weight:700;color:var(--text2);margin:12px 0 8px;">${pl.label}</div>
-        <div class="siteimg-grid">
+        <div class="siteimg-grid siteimg-grid-full">
           ${Array.from({length: EDU_CARDS}, (_, i) => {
             const key = 'edu.' + EDU_SLUG + '.' + pl.id + '.' + (i + 1);
             const url = overrides[key] || '';
