@@ -10373,6 +10373,24 @@ function renderCheckoutSummary() {
         <button class="ty-vita-link" id="tyVitaLink" onclick="showPage('account')">View my VitaPoints &rsaquo;</button>
       </div>
 
+      <!-- REVIEW COLLECTION: post-delivery review nudge on the Thank You
+           page. Appears only when the customer is logged in and has at
+           least one delivered order whose products they have not yet
+           reviewed — checked client-side at render time and re-verified
+           server-side at submit (reviews-routes requires a purchase + 1
+           review per product). Hides itself after the customer has
+           reviewed everything, so it never nags about nothing. -->
+      <div class="ty-vita" id="tyReviewNudge" style="display:none;box-shadow:inset 0 0 0 1.5px var(--green-acc,#7db86a)">
+        <div style="display:flex;align-items:flex-start;gap:14px">
+          <div style="font-size:1.6rem;line-height:1">⭐</div>
+          <div style="flex:1">
+            <div class="ty-vita-amt" style="font-size:1rem">Love your order? Share what you think</div>
+            <div class="ty-vita-sub" style="margin-bottom:10px">Your review helps thousands of Indian wellness shoppers choose with confidence — and earns you <strong>VitaPoints</strong> the moment it's published.</div>
+            <button class="ty-vita-link" id="tyReviewNudgeBtn" onclick="openReviewFromThankYou()" style="display:inline-block;background:var(--green,#3a7d44);color:#fff;border-radius:999px;padding:9px 20px;font-weight:700;font-size:.84rem">⭐ Write a Review &rarr;</button>
+          </div>
+        </div>
+      </div>
+
       <div class="ty-cta-card">
         <div style="display:flex;gap:12px;flex-wrap:wrap;justify-content:center">
           <button class="btn-primary" onclick="showPage('shop')">🛍️ Continue Shopping</button>
@@ -16100,12 +16118,74 @@ function showVitaEarned(total) {
   const wrap = document.getElementById('tyVitaBarWrap');
   const pct = Math.min(100, (pts / VITA_MILESTONE) * 100);
   if (pct < 1) {
-    if (wrap) wrap.style.display = 'none';   // a bar at 0.3% just looks broken
+        if (wrap) wrap.style.display = 'none';   // a bar at 0.3% just looks broken
   } else if (bar) {
     requestAnimationFrame(function () { bar.style.width = pct.toFixed(1) + '%'; });
   }
 }
 
+// REVIEW COLLECTION: Thank You page nudge. Runs on every Thank You page
+// render for logged-in customers: fetches their order history, finds
+// delivered products they have NOT yet reviewed, and reveals the nudge
+// card only if there is at least one such product. Clicking the button
+// opens that product's page straight onto the review form — the shortest
+// possible path from "order delivered" to "review published".
+async function evaluateTyReviewNudge() {
+  const card = document.getElementById('tyReviewNudge');
+  if (!card || !localStorage.getItem('asc_jwt')) return;   // guests: sign-in gate covers it
+  try {
+    const r = await fetchWithTimeout(API_BASE + '/api/orders/my', {
+      headers: { 'Authorization': 'Bearer ' + (localStorage.getItem('asc_jwt') || '') }
+    }, 8000);
+    if (!r.ok) return;
+    const data = await r.json();
+    const orders = data.data || data || [];
+    // Collected = delivered AND not cancelled; the item ids are product ids.
+    const eligible = new Set();
+    for (const o of orders) {
+      const f = String(o.fulfillment || '').toLowerCase();
+      if (f !== 'delivered') continue;
+      for (const it of (o.items || [])) eligible.add(Number(it.product_id || it.id || 0));
+      eligible.delete(0);
+    }
+    if (!eligible.size) return;
+    // Load what this customer has already reviewed. The storefront's
+    // Supabase client is public-anon and the reviews table is readable, so
+    // fetch all approved reviews once and filter by the logged-in email —
+    // same pattern loadProductRatings() uses for ratings.
+    const sb = await sbClientWhenReady(6000);
+    const reviewed = new Set();
+    if (sb) {
+      try {
+        const user = getCurrentUser();
+        const email = (user && user.email || '').toLowerCase().trim();
+        if (email) {
+          const { data } = await sb.from('reviews').select('product_id, customer_email').eq('status', 'approved');
+          for (const rv of (data || [])) {
+            if ((rv.customer_email || '').toLowerCase().trim() === email) reviewed.add(Number(rv.product_id));
+          }
+        }
+      } catch(e) {}
+    }
+    const missing = [...eligible].filter(p => !reviewed.has(p));
+    if (!missing.length) return;
+    // Remember the product the customer is missing a review for.
+    try { sessionStorage.setItem('asc_ty_review_product', missing[0]); } catch(e) {}
+    card.style.display = 'block';
+  } catch(e) { /* nudge is non-critical — fail silently */ }
+}
+
+// REVIEW COLLECTION: Thank You button handler. Prefers the product the
+// nudge evaluated; falls back to the just-placed order's first item.
+function openReviewFromThankYou() {
+  let pid = 0;
+  try { pid = Number(sessionStorage.getItem('asc_ty_review_product') || 0) || 0; } catch(e) {}
+  if (!pid) {
+    try { const o = JSON.parse(localStorage.getItem('asc_last_order') || '{}'); pid = Number((o.items||[])[0] && ((o.items[0].product_id) || (o.items[0].id) || 0)) || 0; } catch(e) {}
+  }
+  if (pid) openProductReview(pid);
+  else showPage('account');
+}
 async function finalizeOrder(orderId, formData, total, method, codCharge) {
   const orderNumEl = document.getElementById('orderNum');
   if (orderNumEl) orderNumEl.textContent = orderId;
@@ -16408,6 +16488,10 @@ async function finalizeOrder(orderId, formData, total, method, codCharge) {
     );
   } catch(e) {}
   showPage('thankyou');
+  // REVIEW COLLECTION: once the Thank You page is on screen, evaluate
+  // whether this logged-in customer has delivered orders without reviews
+  // and show the nudge card if so.
+  setTimeout(() => { try { evaluateTyReviewNudge(); } catch(e) {} }, 600);
   /* Record the conversion against this visitor session so the admin
      dashboard's conversion rate and revenue-by-source are real. */
   try {
