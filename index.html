@@ -6803,6 +6803,105 @@ button, [role="button"] {
 .qd-lead { display: inline-flex; align-items: center; gap: 10px; }
 .qd-lead .vp3d { --vp3d: 62px; --vp3d-sm: 50px; align-self: center; }
 
+/* Rollout placements. Each one only sets the size — the component itself
+   is untouched, which is the whole point of having it.
+
+   Three of these (.vm-chip, .ty-vita-badge, .app-menu-icon) are existing
+   icon SLOTS that held an emoji. The 3D object goes into the slot and the
+   slot's own frame is stripped, so it reads as a floating object rather
+   than a picture sitting in a tile — a second round chip beside the first
+   would just be two icons saying the same thing. */
+.vp3d-slot { background: none !important; border: none !important;
+             box-shadow: none !important; backdrop-filter: none !important;
+             -webkit-backdrop-filter: none !important; overflow: visible; }
+
+/* Home — "Shop. Earn. Redeem." micro-card (dark gradient). */
+.vita-micro .vp3d { --vp3d: 46px; --vp3d-sm: 42px; }
+/* Shop — the Vita Points promo banner. */
+/* The slot's own rule is `.shop-banner-slot img { position:absolute;
+   inset:0 }`, meant for the banner artwork — it captured this one too and
+   blew the coin up to fill the strip. Restated here at a specificity that
+   beats it. The strip is an 11:1 band with a 54px floor, so the accent is
+   sized to clear that rather than to match the other placements. */
+.shop-banner-slot .sb-copy .vp3d { --vp3d: 42px; --vp3d-sm: 36px; align-self: center; }
+.shop-banner-slot .vp3d img { position: static; inset: auto; object-fit: contain; }
+.shop-banner-slot.is-vita { cursor: pointer; }
+/* Hamburger drawer + legacy mobile menu. */
+.app-menu-item .vp3d { --vp3d: 38px; --vp3d-sm: 38px; }
+.mobile-menu .vp3d { --vp3d: 30px; --vp3d-sm: 30px; vertical-align: -9px; margin-right: 4px; }
+/* My Account — the balance hero. */
+.vita-hero .vp3d { --vp3d: 84px; --vp3d-sm: 64px; }
+/* Cart page and side cart — a rewards line that opens the popup. One
+   class for both, since they are the same thing said in two widths. */
+.vita-strip { display: flex; align-items: center; gap: 11px; width: 100%;
+              margin: 10px 0 14px; padding: 9px 12px; border: none;
+              border-radius: 12px; background: var(--paper);
+              box-shadow: var(--neo-in); cursor: pointer; text-align: left;
+              font: inherit; color: inherit; }
+.vita-strip .vp3d { --vp3d: 40px; --vp3d-sm: 36px; }
+.vita-strip span { display: block; font-size: .73rem; line-height: 1.4; color: var(--t-low); }
+.vita-strip b { display: block; font-size: .8rem; font-weight: 700; color: var(--t-hi); }
+.vita-strip .vs-arrow { flex: none; font-size: .9rem; color: var(--t-low); }
+/* Thank you — points-earned card. */
+.ty-vita-badge.vp3d-slot { width: 56px; height: 56px; }
+.ty-vita .vp3d { --vp3d: 56px; --vp3d-sm: 50px; }
+
+/* ══ VITAPOINTS POPUP ═════════════════════════════════════════════
+   A read-only window onto the loyalty engine: every figure comes from
+   VITA and getVitaState(), the same sources My Account reads, so it
+   cannot drift from them and cannot change them. Nothing here earns,
+   spends or recalculates anything. */
+.vita-pop-overlay {
+  position: fixed; inset: 0; z-index: 4000;
+  display: grid; place-items: center; padding: 20px;
+  background: rgba(20, 26, 34, .5);
+  -webkit-backdrop-filter: blur(3px); backdrop-filter: blur(3px);
+  opacity: 0; visibility: hidden; transition: opacity .22s ease, visibility .22s;
+}
+.vita-pop-overlay.open { opacity: 1; visibility: visible; }
+.vita-pop {
+  position: relative; width: min(100%, 400px);
+  max-height: min(88vh, 680px); overflow-y: auto; -webkit-overflow-scrolling: touch;
+  padding: 20px 22px 22px; text-align: center;
+  border-radius: var(--r-lg); background: var(--paper-hi); box-shadow: var(--neo-2);
+  transform: translateY(14px) scale(.97); transition: transform .24s var(--rise, ease);
+}
+.vita-pop-overlay.open .vita-pop { transform: none; }
+.vita-pop-close {
+  position: absolute; top: 10px; right: 10px; width: 34px; height: 34px;
+  display: grid; place-items: center; border: none; cursor: pointer;
+  border-radius: 50%; background: var(--paper); box-shadow: var(--neo-1);
+  font-size: 1rem; color: var(--t-mid); line-height: 1;
+}
+.vita-pop .vp3d { --vp3d: 116px; --vp3d-sm: 96px; }
+.vita-pop-title {
+  font-family: var(--font-display); font-weight: 600; line-height: 1.15;
+  font-size: 1.35rem; color: var(--t-hi); margin-top: 2px;
+}
+.vita-pop-bal { margin: 14px 0 4px; }
+.vita-pop-num {
+  font-family: var(--font-display); font-size: 2.4rem; font-weight: 700;
+  line-height: 1; color: var(--indigo-lo); font-variant-numeric: tabular-nums;
+}
+.vita-pop-lbl { font-size: .68rem; letter-spacing: .14em; text-transform: uppercase;
+                color: var(--t-low); margin-top: 7px; }
+.vita-pop-worth { font-size: .84rem; font-weight: 700; color: var(--fern-lo); margin-top: 7px; }
+.vita-pop-lede { font-size: .86rem; line-height: 1.6; color: var(--t-mid); margin-top: 10px; }
+.vita-pop-rules { list-style: none; margin: 16px 0 4px; text-align: left; display: grid; gap: 11px; }
+.vita-pop-rules li { display: flex; align-items: flex-start; gap: 11px; }
+.vita-pop-rules .r-ico {
+  display: grid; place-items: center; flex: none; width: 32px; height: 32px;
+  border-radius: 50%; font-size: .9rem; background: var(--paper); box-shadow: var(--neo-in);
+}
+.vita-pop-rules b { display: block; font-size: .84rem; font-weight: 700; color: var(--t-hi); line-height: 1.35; }
+.vita-pop-rules span { display: block; font-size: .76rem; color: var(--t-low); line-height: 1.45; }
+.vita-pop-acts { display: grid; gap: 9px; margin-top: 18px; }
+.vita-pop-acts .btn-primary { width: 100%; justify-content: center; }
+.vita-pop-note { font-size: .7rem; color: var(--t-low); margin-top: 11px; line-height: 1.5; }
+@media (prefers-reduced-motion: reduce) {
+  .vita-pop-overlay, .vita-pop { transition: none; }
+}
+
 /* ══ VITAPOINTS ═══════════════════════════════════════════════════ */
 .vita-hero {
   display: grid; grid-template-columns: 1.1fr 1.4fr; gap: 18px; align-items: center;
@@ -8513,6 +8612,7 @@ setInterval(function() { syncAppCartBadge(); syncAppWishBadge(); }, 2000);
   <a href="/wishlist" onclick="showPage('wishlist');toggleMobile();return false;">♡ Wishlist</a>
   <a href="/subscriptions" onclick="showPage('subscriptions');toggleMobile();return false;">🔔 Subscribe & Save</a>
   <a href="#" onclick="handleAccountNavClick();toggleMobile()">👤 My Account</a>
+  <a href="#" onclick="openVitaPopup();toggleMobile();return false;"><span class="vp3d" aria-hidden="true"><picture><source srcset="/assets/vitapoint-3d/vitapoint-coin-still.webp" media="(prefers-reduced-motion: reduce)"><img src="/assets/vitapoint-3d/vitapoint-coin.webp" alt="" width="176" height="176" loading="lazy" decoding="async"></picture></span>VitaPoints</a>
 </div>
 
 
@@ -8619,7 +8719,7 @@ setInterval(function() { syncAppCartBadge(); syncAppWishBadge(); }, 2000);
     </div>
   </div>
   <div class="vita-micro" onclick="if(typeof showPage==='function')showPage('home');setTimeout(()=>{document.getElementById('vitapoints-home')?.scrollIntoView({behavior:'smooth',block:'center'});},60)">
-    <div class="vm-chip" aria-hidden="true">&#128142;</div>
+    <div class="vm-chip vp3d-slot" aria-hidden="true"><span class="vp3d"><picture><source srcset="/assets/vitapoint-3d/vitapoint-coin-still.webp" media="(prefers-reduced-motion: reduce)"><img src="/assets/vitapoint-3d/vitapoint-coin.webp" alt="" width="176" height="176" loading="lazy" decoding="async"></picture></span></div>
     <div class="vm-copy"><b>Shop. Earn. Redeem.</b> &#10024; Every Ozylix order earns Vita Points — <span id="vitaMicroEarn">1 point per &#8377;1</span>, and <span id="vitaMicroValue">150 points = &#8377;1 off</span>.</div> <script>(function(){try{var e=typeof VITA_EARN_PER_RUPEE!=='undefined'?VITA_EARN_PER_RUPEE:1,v=typeof VITA_REDEEM_PER_RUPEE!=='undefined'?VITA_REDEEM_PER_RUPEE:150;var a=document.getElementById("vitaMicroEarn"),b=document.getElementById("vitaMicroValue");if(a)a.textContent=e+' point'+(e>1?"s":"")+" per ₹1";if(b)b.textContent=v+" points = ₹1 off";}catch(x){}})()</script>
     <div class="vm-arrow" aria-hidden="true">&#8594;</div>
   </div>
@@ -10043,9 +10143,12 @@ window.dismissOfferReminder = function () {
             <p>FSSAI approved, crafted at our Anand facility</p>
           </div></div>
         </div>
-        <div class="shop-banner-slot" id="shopBannerSlot2" data-no-img="yes">
+        <div class="shop-banner-slot is-vita" id="shopBannerSlot2" data-no-img="yes"
+             onclick="openVitaPopup()" role="button" tabindex="0"
+             onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();openVitaPopup()}">
           <img src="" alt="" id="shopBannerImg2" data-media-key="shop.banner.2" loading="lazy" style="display:none" onerror="this.style.display='none'">
           <div class="sb-overlay"><div class="sb-copy">
+            <span class="vp3d" aria-hidden="true"><picture><source srcset="/assets/vitapoint-3d/vitapoint-coin-still.webp" media="(prefers-reduced-motion: reduce)"><img src="/assets/vitapoint-3d/vitapoint-coin.webp" alt="" width="176" height="176" loading="lazy" decoding="async"></picture></span>
             <h3>&#128142; Shop. Earn. Redeem.</h3>
             <p>Vita Points on every delivered order</p>
           </div></div>
@@ -10502,7 +10605,7 @@ function renderCheckoutSummary() {
            a rewards scheme loses trust on its first use. -->
       <div class="ty-vita" id="tyVita" style="display:none">
         <div class="ty-vita-top">
-          <span class="ty-vita-badge" aria-hidden="true">&#10022;</span>
+          <span class="ty-vita-badge vp3d-slot" aria-hidden="true"><span class="vp3d"><picture><source srcset="/assets/vitapoint-3d/vitapoint-gift-still.webp" media="(prefers-reduced-motion: reduce)"><img src="/assets/vitapoint-3d/vitapoint-gift.webp" alt="" width="200" height="200" loading="lazy" decoding="async"></picture></span></span>
           <div>
             <div class="ty-vita-amt"><span id="tyVitaPts">0</span> VitaPoints</div>
             <div class="ty-vita-sub">earned on this order</div>
@@ -12773,6 +12876,19 @@ if (typeof module !== "undefined") module.exports = { PRODUCT_IMAGES: PRODUCT_IM
 </div>
 <!-- ══════════ END SIDE CART ══════════ -->
 
+<!-- ══════════ VITAPOINTS POPUP ══════════
+     Read-only. Everything inside #vitaPopBody is written by
+     renderVitaPopup() from VITA and getVitaState() — the same two sources
+     My Account reads — so the popup cannot quote a rate the engine does
+     not pay, and cannot earn, spend or recalculate anything itself. -->
+<div class="vita-pop-overlay" id="vitaPopOverlay" onclick="if(event.target===this)closeVitaPopup()">
+  <div class="vita-pop" role="dialog" aria-modal="true" aria-labelledby="vitaPopTitle">
+    <button class="vita-pop-close" onclick="closeVitaPopup()" aria-label="Close">&#10005;</button>
+    <div id="vitaPopBody"></div>
+  </div>
+</div>
+<!-- ══════════ END VITAPOINTS POPUP ══════════ -->
+
 <!-- ══════════ AUTH MODAL ══════════ -->
 <div class="auth-overlay" id="authOverlay">
   <div class="auth-box">
@@ -14949,6 +15065,7 @@ function renderCart() {
       </div>
       <div class="cart-summary-box">
         <h2>Order Summary</h2>
+        ${vitaStripHTML()}
         ${mmOff > 0 ? `<div class="mm-line mm-unlocked" style="margin-bottom:10px">🎉 Mix &amp; Match bundle discount applied (−₹${mmOff.toLocaleString('en-IN')})</div>` : (mmUnits.length > 0   ? `<div class="mm-line" style="margin-bottom:10px">🎁 Add <strong>${mmNeed}</strong> more ${mmNeed === 1 ? 'item' : 'items'} — your Mix &amp; Match discount grows.</div>`   : `<div class="mm-line" style="margin-bottom:10px">💚 This order earns you <b>Vita Points</b> to redeem on your next purchase.</div>`)}
         <div class="sum-row"><span>Subtotal (${totalPacks} pack${totalPacks !== 1 ? 's' : ''})</span><span>₹${sub.toLocaleString('en-IN')}</span></div>
         ${disc > 0 ? `
@@ -17435,6 +17552,130 @@ async function vitaRefreshFromServer() {
 }
 
 function vitaToRupees(points) { return (Number(points) || 0) / VITA.POINTS_PER_RUPEE; }
+
+// ── VitaPoint 3D accents ──────────────────────────────────────
+// One markup builder for every JS-rendered placement, so a change to how
+// the accent is delivered (a new size, a different format, a fallback)
+// happens in one place instead of nine. The static placements in the
+// markup above carry the same structure by hand.
+const VP3D_ART = { gift: 200, coin: 176 };
+function vp3dHTML(kind) {
+  const k = VP3D_ART[kind] ? kind : 'coin';
+  const d = VP3D_ART[k];
+  const base = '/assets/vitapoint-3d/vitapoint-' + k;
+  return '<span class="vp3d" aria-hidden="true"><picture>' +
+    '<source srcset="' + base + '-still.webp" media="(prefers-reduced-motion: reduce)">' +
+    '<img src="' + base + '.webp" alt="" width="' + d + '" height="' + d +
+    '" loading="lazy" decoding="async"></picture></span>';
+}
+
+// The rewards line shared by the cart page and the side cart. States the
+// scheme, does not price it: no total here depends on this markup, and
+// the wording matches showPtsToast() so the two cannot contradict.
+function vitaStripHTML() {
+  return '<button type="button" class="vita-strip" onclick="openVitaPopup()">' +
+    vp3dHTML('coin') +
+    '<span><b>Earns VitaPoints when delivered</b>Redeem them for money off a future order.</span>' +
+    '<span class="vs-arrow" aria-hidden="true">&rsaquo;</span></button>';
+}
+
+// ── VitaPoints popup ──────────────────────────────────────────
+// A window onto the engine, never a second copy of it. Every number is
+// read from VITA or getVitaState() at open time; nothing is cached here
+// and nothing is written back.
+function renderVitaPopup() {
+  const el = document.getElementById('vitaPopBody');
+  if (!el) return;
+  const pts = (n) => Number(n).toLocaleString('en-IN');
+  const u = (typeof getCurrentUser === 'function') ? getCurrentUser() : null;
+  const signedIn = !!(u && u.email);
+
+  let balBlock;
+  if (signedIn) {
+    const st = getVitaState();
+    const avail = Number(st.balance) || 0;
+    const pend  = Number(st.pendingPts) || 0;
+    balBlock =
+      '<div class="vita-pop-bal">' +
+        '<div class="vita-pop-num">' + pts(avail) + '</div>' +
+        '<div class="vita-pop-lbl">VitaPoints available</div>' +
+        '<div class="vita-pop-worth">= ₹' + vitaToRupees(avail).toFixed(2) +
+          ' off your next order</div>' +
+      '</div>' +
+      (pend > 0
+        ? '<p class="vita-pop-lede">' + pts(pend) + ' more are on the way — they unlock ' +
+          VITA.HOLD_DAYS + ' days after delivery.</p>'
+        : '');
+  } else {
+    balBlock = '<p class="vita-pop-lede">Every delivered order earns points on its own. ' +
+      'Sign in to see your balance.</p>';
+  }
+
+  el.innerHTML =
+    vp3dHTML('gift') +
+    '<h2 class="vita-pop-title" id="vitaPopTitle">Ozylix VitaPoints</h2>' +
+    balBlock +
+    '<ul class="vita-pop-rules">' +
+      '<li><span class="r-ico" aria-hidden="true">💎</span><div>' +
+        '<b>' + pts(VITA.EARN_PER_RUPEE) + ' point per ₹' + pts(1) + '</b>' +
+        '<span>on every delivered order</span></div></li>' +
+      '<li><span class="r-ico" aria-hidden="true">🧾</span><div>' +
+        '<b>' + pts(VITA.POINTS_PER_RUPEE) + ' points = ₹1</b>' +
+        '<span>off any future order</span></div></li>' +
+      '<li><span class="r-ico" aria-hidden="true">🗓️</span><div>' +
+        '<b>Spendable in ' + VITA.HOLD_DAYS + ' days</b>' +
+        '<span>once the return window closes</span></div></li>' +
+      '<li><span class="r-ico" aria-hidden="true">🎁</span><div>' +
+        '<b>' + pts(VITA.TIER_50_THRESHOLD) + ' points</b>' +
+        '<span>unlocks 50% off an item, up to ₹' + pts(VITA.MILESTONE_MAX_DISCOUNT) + '</span></div></li>' +
+    '</ul>' +
+    '<div class="vita-pop-acts">' +
+      (signedIn
+        ? '<button class="btn-primary" onclick="closeVitaPopup();showPage(\'account\')">View my VitaPoints</button>'
+        : '<button class="btn-primary" onclick="closeVitaPopup();vitaHomeCta()">Join free</button>') +
+      '<button class="btn-outline" onclick="closeVitaPopup();showPage(\'shop\')">Start shopping</button>' +
+    '</div>' +
+    '<p class="vita-pop-note">Free to join · points never expire · ' +
+      'up to ' + pts(VITA.MAX_REDEEM_PER_ORDER) + ' points on one order</p>';
+}
+
+function openVitaPopup() {
+  const ov = document.getElementById('vitaPopOverlay');
+  if (!ov) return;
+  renderVitaPopup();
+  ov.classList.add('open');
+  document.body.style.overflow = 'hidden';
+  document.addEventListener('keydown', _vitaPopEsc);
+  // Signed-in balances are painted from cache first so the popup opens
+  // instantly, then repainted once the real ledger answers. Same order
+  // My Account uses, and a failed refresh simply leaves the cached
+  // number in place rather than blanking it.
+  try {
+    const u = (typeof getCurrentUser === 'function') ? getCurrentUser() : null;
+    if (u && u.email && typeof vitaRefreshFromServer === 'function') {
+      vitaRefreshFromServer().then(function (ok) {
+        if (ok && ov.classList.contains('open')) renderVitaPopup();
+      }).catch(function () {});
+    }
+  } catch (e) {}
+}
+
+function closeVitaPopup() {
+  const ov = document.getElementById('vitaPopOverlay');
+  if (!ov) return;
+  ov.classList.remove('open');
+  document.removeEventListener('keydown', _vitaPopEsc);
+  // The side cart may still be open underneath, and it owns the scroll
+  // lock in that case — releasing it here would let the page scroll
+  // behind an open drawer.
+  const sc = document.getElementById('sideCart');
+  if (!sc || !sc.classList.contains('open')) {
+    if (typeof unlockBodyScroll === 'function') unlockBodyScroll();
+    else document.body.style.overflow = '';
+  }
+}
+
+function _vitaPopEsc(e) { if (e.key === 'Escape') closeVitaPopup(); }
 function vitaFromRupees(rupees) { return Math.floor((Number(rupees) || 0) * VITA.POINTS_PER_RUPEE); }
 
 // How many points this customer may actually spend on an order.
@@ -17744,6 +17985,7 @@ function _renderVitaPanelBody(el) {
   el.innerHTML =
     '<div class="vita-hero">' +
       '<div class="vita-bal">' +
+        vp3dHTML('gift') +
         '<div class="vita-bal-num" id="vitaBalNum">' + avail.toLocaleString('en-IN') + '</div>' +
         '<div class="vita-bal-lbl">VitaPoints available</div>' +
         '<div class="vita-bal-val">= \u20b9' + vitaToRupees(avail).toFixed(2) + ' off your next order</div>' +
@@ -19406,6 +19648,7 @@ function renderSideCart() {
       <div class="sc-row"><span>Shipping</span><span>${ship === 0 ? '<span style="color:var(--success)">FREE</span>' : '₹' + ship}</span></div>
       <div class="sc-row total"><span>Total</span><span>₹${total.toLocaleString('en-IN')}</span></div>
     </div>
+    ${vitaStripHTML()}
     <button class="sc-checkout-btn" onclick="closeSideCart();showPage('checkout')">🔒 Proceed to Checkout</button>
     <button class="sc-view-btn" onclick="closeSideCart();showPage('cart')">View Full Cart</button>
     <div style="text-align:center;font-size:0.7rem;color:var(--gray);margin-top:10px">🔒 Secured by GoKwik · Free delivery on every order</div>
@@ -20400,6 +20643,7 @@ function closeMoreDrawer() {
   <button class="app-menu-item" onclick="showPage('advisor');closeAppMenu();setAppNav('advisor')"><div class="app-menu-icon">🌿</div><span class="app-menu-item-label">AI Health Advisor</span><span class="app-menu-item-badge">NEW</span><span class="app-menu-item-arrow">›</span></button>
   <button class="app-menu-item" onclick="showPage('wishlist');closeAppMenu();setAppNav('more')"><div class="app-menu-icon">♡</div><span class="app-menu-item-label">Wishlist</span><span class="app-menu-item-arrow">›</span></button>
   <button class="app-menu-item" onclick="showPage('subscriptions');closeAppMenu();setAppNav('more')"><div class="app-menu-icon">🔔</div><span class="app-menu-item-label">Subscribe &amp; Save</span><span class="app-menu-item-badge">Save 15%</span><span class="app-menu-item-arrow">›</span></button>
+  <button class="app-menu-item" onclick="closeAppMenu();openVitaPopup()"><div class="app-menu-icon vp3d-slot"><span class="vp3d" aria-hidden="true"><picture><source srcset="/assets/vitapoint-3d/vitapoint-coin-still.webp" media="(prefers-reduced-motion: reduce)"><img src="/assets/vitapoint-3d/vitapoint-coin.webp" alt="" width="176" height="176" loading="lazy" decoding="async"></picture></span></div><span class="app-menu-item-label">VitaPoints</span><span class="app-menu-item-arrow">›</span></button>
 
   <div class="app-menu-section-title">Company</div>
   <button class="app-menu-item" onclick="showPage('about');closeAppMenu();setAppNav('more')"><div class="app-menu-icon">🌿</div><span class="app-menu-item-label">About Ozylix</span><span class="app-menu-item-arrow">›</span></button>
