@@ -16483,10 +16483,31 @@ async function finalizeOrder(orderId, formData, total, method, codCharge) {
       invBtn.textContent = '🧾 Download / Print Invoice';
       invBtn.style.cssText = 'display:inline-flex;align-items:center;gap:8px;background:#2E7D32;color:white;border-radius:100px;padding:11px 26px;font-weight:700;font-size:.84rem;text-decoration:none;margin:8px 4px;cursor:pointer';
       invBtn.onclick = function() {
-        const b = new Blob([invoiceHtml], { type: 'text/html' });
-        const u = URL.createObjectURL(b);
-        const w = window.open(u, '_blank', 'width=960,height=800,scrollbars=yes');
-        if (w) setTimeout(() => URL.revokeObjectURL(u), 30000); else URL.revokeObjectURL(u);
+        // Prefer the server-side printable A4 PDF (same document My Account
+        // downloads); the already-open HTML preview remains as the fallback.
+        const t = localStorage.getItem('asc_token');
+        const _h = t ? { 'Authorization': 'Bearer ' + t } : {};
+        fetchWithTimeout(API_BASE + '/api/orders/' + encodeURIComponent(orderId) + '/pdf', { headers: _h })
+          .then(function(r){
+            if (!r.ok) throw new Error('server ' + r.status);
+            return r.blob().then(function(blob){
+              const u = URL.createObjectURL(blob);
+              const a = document.createElement('a');
+              a.href = u;
+              a.download = 'Ozylix-Tax-Invoice-' + orderId + '.pdf';
+              document.body.appendChild(a);
+              a.click();
+              setTimeout(function(){ URL.revokeObjectURL(u); if (a.parentNode) a.parentNode.removeChild(a); }, 4000);
+              showToast('🧾 Invoice downloaded (PDF)');
+            });
+          })
+          .catch(function(){
+            const b = new Blob([invoiceHtml], { type: 'text/html' });
+            const u = URL.createObjectURL(b);
+            const w = window.open(u, '_blank', 'width=960,height=800,scrollbars=yes');
+            if (w) setTimeout(() => URL.revokeObjectURL(u), 30000); else URL.revokeObjectURL(u);
+            showToast('Invoice opened for print');
+          });
       };
       // Anchor to the facts block, not to #orderNum's own parent — that
       // is now a row inside a bordered definition list, and appending a
@@ -18749,46 +18770,80 @@ function doTrackOrder() {
 // OZYLIX_LEGAL, IN_STATE_CODES, normaliseOrderForInvoice() and
 // buildInvoiceHTML() all come from there.
 
+// Download a printable A4 PDF tax invoice from the backend
+// (/api/orders/:id/pdf). Authenticated via the JWT, so the server can
+// verify the order belongs to the signed-in customer. Falls back to the
+// client-side HTML blob only if the API is unreachable (offline etc.).
 function downloadInvoice(orderId) {
   try {
-    // The invoices table is populated from the backend (/api/orders/my),
-    // but the old lookup only searched localStorage — so every order not
-    // placed on this exact device reported "Invoice not found". Search the
-    // cache the table was rendered from first, then fall back to local.
-    var o = null;
-    if (Array.isArray(window.__INVOICE_ORDERS)) {
-      o = window.__INVOICE_ORDERS.find(function(x){
-        return String(x.id||x.orderId||x.order_id) === String(orderId);
-      });
+    if (typeof fetch === 'function') {
+      var t = localStorage.getItem('asc_token');
+      var hdrs = t ? { 'Authorization': 'Bearer ' + t } : {};
+      fetchWithTimeout(API_BASE + '/api/orders/' + encodeURIComponent(orderId) + '/pdf', { headers: hdrs })
+        .then(function(r){
+          if (!r.ok) { r.json().then(function(j){ showToast((j && j.error) || 'Could not fetch invoice', 'error'); }).catch(function(){}); return; }
+          return r.blob().then(function(blob){
+            var url = URL.createObjectURL(blob);
+            var a = document.createElement('a');
+            a.href = url;
+            a.download = 'Ozylix-Tax-Invoice-' + orderId + '.pdf';
+            a.style.display = 'none';
+            document.body.appendChild(a);
+            a.click();
+            setTimeout(function(){
+              URL.revokeObjectURL(url);
+              if (a.parentNode) a.parentNode.removeChild(a);
+            }, 4000);
+            showToast('🧾 Invoice downloaded (PDF)');
+          });
+        })
+        .catch(function(e){ console.warn('[downloadInvoice] API failed, using HTML fallback:', e.message || e); downloadInvoiceHTML(orderId); });
+      return;
     }
-    if (!o) {
-      var local = JSON.parse(localStorage.getItem('asc_orders') || '[]');
-      o = local.find(function(ord){ return String(ord.orderId) === String(orderId); });
-    }
-    if (!o) { showToast('Invoice not found for ' + orderId, 'error'); return; }
-
-    var html = buildInvoiceHTML(o);
-    var blob = new Blob([html], { type: 'text/html;charset=utf-8' });
-    var url  = URL.createObjectURL(blob);
-    var a    = document.createElement('a');
-    a.href = url;
-    a.download = 'Ozylix-Tax-Invoice-' + orderId + '.html';
-    a.style.display = 'none';
-    // A detached anchor does not trigger a download in Firefox/Safari —
-    // it has to be in the document before .click().
-    document.body.appendChild(a);
-    a.click();
-    // Revoking synchronously cancels the download before the browser has
-    // read the blob. Give it a tick, then clean up.
-    setTimeout(function(){
-      URL.revokeObjectURL(url);
-      if (a.parentNode) a.parentNode.removeChild(a);
-    }, 4000);
-    showToast('🧾 Invoice downloaded');
+    downloadInvoiceHTML(orderId);
   } catch(e) {
     console.error('[downloadInvoice]', e);
     showToast('Could not generate invoice: ' + (e && e.message ? e.message : 'unknown error'), 'error');
   }
+}
+
+// Legacy client-side fallback: build the A4 HTML document and save it as
+// an HTML file (the browser's print dialog can still produce a PDF from it).
+function downloadInvoiceHTML(orderId) {
+  // The invoices table is populated from the backend (/api/orders/my),
+  // but the old lookup only searched localStorage — so every order not
+  // placed on this exact device reported "Invoice not found". Search the
+  // cache the table was rendered from first, then fall back to local.
+  var o = null;
+  if (Array.isArray(window.__INVOICE_ORDERS)) {
+    o = window.__INVOICE_ORDERS.find(function(x){
+      return String(x.id||x.orderId||x.order_id) === String(orderId);
+    });
+  }
+  if (!o) {
+    var local = JSON.parse(localStorage.getItem('asc_orders') || '[]');
+    o = local.find(function(ord){ return String(ord.orderId) === String(orderId); });
+  }
+  if (!o) { showToast('Invoice not found for ' + orderId, 'error'); return; }
+
+  var html = buildInvoiceHTML(o);
+  var blob = new Blob([html], { type: 'text/html;charset=utf-8' });
+  var url  = URL.createObjectURL(blob);
+  var a    = document.createElement('a');
+  a.href = url;
+  a.download = 'Ozylix-Tax-Invoice-' + orderId + '.html';
+  a.style.display = 'none';
+  // A detached anchor does not trigger a download in Firefox/Safari —
+  // it has to be in the document before .click().
+  document.body.appendChild(a);
+  a.click();
+  // Revoking synchronously cancels the download before the browser has
+  // read the blob. Give it a tick, then clean up.
+  setTimeout(function(){
+    URL.revokeObjectURL(url);
+    if (a.parentNode) a.parentNode.removeChild(a);
+  }, 4000);
+  showToast('🧾 Invoice downloaded (HTML)');
 }
 
 // Open the invoice in a print-ready tab instead of downloading a file.
