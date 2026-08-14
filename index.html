@@ -12211,7 +12211,15 @@ const STORE = {
   normalizeCartTiers(){
     let changed = false;
     this.cart.forEach(it => {
-      if (it.tierIdx === undefined) return;
+      // Tier-less entries on a tiered product are stale (added via
+      // upsells/recommendations without a pack choice). Apply the
+      // smallest live tier so prices can't silently overstate.
+      if (it.tierIdx === undefined) {
+        const p2 = PRODUCTS.find(x => x.id === it.id);
+        const t2 = (typeof getProductTiers === 'function') ? getProductTiers(p2) : null;
+        if (t2 && t2.length) { const first = t2[0]; it.tierIdx = 0; it.tierRate = first.rate; it.tierMRP = first.mrp; it.tierDisc = first.discountPct || 0; it.tierTabs = first.tabs; changed = true; }
+        return;
+      }
       const p = PRODUCTS.find(x => x.id === it.id);
       const tiers = (typeof getProductTiers === 'function') ? getProductTiers(p) : null;
       const tier = tiers && Array.isArray(tiers) ? tiers[it.tierIdx] : null;
@@ -19131,7 +19139,23 @@ function renderSideCart() {
   }, 0);
   const ship = calcShipping(sub);
   const promoDisc = getPromoDiscount ? getPromoDiscount(sub) : 0;
-  const total = Math.max(0, sub - promoDisc + ship);
+  // Mix & Match (cheapest-free every 4 units) — mirrors the cart page
+  // and the server-side mixAndMatchDiscount(). Keeps the side cart
+  // honest; the server still sets the real price at checkout.
+  var mmUnits = STORE.cart.map(function (it) {
+    var pr = PRODUCTS.find(function (x) { return x.id === it.id; });
+    if (!pr) return [];
+    var u = it.tierRate !== undefined ? it.tierRate : (pr.salePrice || pr.price);
+    var q = Math.max(0, Math.trunc(Number(it.qty) || 0));
+    return Array(q).fill(u);
+  }).reduce(function (a, b) { return a.concat(b); }, []);
+  mmUnits.sort(function (a, b) { return a - b; });
+  var mmGroups = Math.floor(mmUnits.length / 4);
+  var mmDisc = 0;
+  for (var g = 0; g < mmGroups; g++) mmDisc += mmUnits[g * 4] || 0;
+  var mmOff = Math.max(0, Math.min(mmDisc, sub));
+  var mmNeed = mmGroups > 0 ? 0 : 4 - (mmUnits.length % 4);
+  const total = Math.max(0, sub - promoDisc - mmOff + ship);
 
   foot.innerHTML = `
     <div class="sc-totals">
