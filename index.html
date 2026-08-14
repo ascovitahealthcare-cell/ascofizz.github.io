@@ -6738,6 +6738,71 @@ button, [role="button"] {
   .vph-join { width: 100%; justify-content: center; }
 }
 
+/* ══ VITAPOINT 3D — ANIMATION DEMO ════════════════════════════════
+   Two small transparent 3D reward accents: one in the home loyalty
+   block, one in the product pack-tier widget. Both go through the one
+   .vp3d class, so the spots still under consideration — shop, cart,
+   hamburger menu, My Account, thank-you — are a markup change and
+   nothing else. Size is a custom property, not a new class per site.
+
+   Animated WebP inside an <img>, deliberately not <video>: Safari will
+   play a VP9-alpha WebM and then paint the frame black, which is
+   exactly the video-rectangle look this must never have. WebP alpha is
+   honoured wherever the format is, needs no player, no JavaScript, and
+   native lazy loading keeps both files off the critical path.
+
+   Decorative only — aria-hidden on the wrapper and pointer-events:none,
+   so it can never swallow a click meant for a control underneath. */
+.vp3d {
+  --vp3d: 120px;              /* desktop box */
+  --vp3d-sm: 76px;            /* phone box */
+  --vp3d-drift: 4%;           /* float travel, relative to the box */
+  flex: none;
+  display: inline-block;
+  width: var(--vp3d); height: var(--vp3d);
+  line-height: 0;
+  pointer-events: none;
+  -webkit-user-select: none; user-select: none;
+}
+.vp3d img {
+  display: block; width: 100%; height: 100%;
+  object-fit: contain;
+  animation: vp3d-drift 5.5s ease-in-out infinite;
+}
+/* Transform-only, so it composites on the GPU and never reflows the
+   block it sits in. */
+@keyframes vp3d-drift {
+  0%, 100% { transform: translate3d(0, var(--vp3d-drift), 0); }
+  50%      { transform: translate3d(0, calc(var(--vp3d-drift) * -1), 0); }
+}
+@media (max-width: 620px) {
+  .vp3d { width: var(--vp3d-sm); height: var(--vp3d-sm); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .vp3d img { animation: none; }
+}
+
+/* Demo 1 — home loyalty block. Rides in the existing visual column,
+   above the mock card. That column is display:none on a phone, so it
+   comes back there carrying the animation alone: the animation is the
+   part worth the vertical space, the decorative mock card is not. */
+#vitapoints-home .vph-visual {
+  display: flex; flex-direction: column; align-items: center; gap: 16px;
+}
+#vitapoints-home .vp3d { --vp3d: 128px; --vp3d-sm: 84px; }
+@media (max-width: 620px) {
+  #vitapoints-home .vph-visual { display: flex; align-items: flex-start; }
+  #vitapoints-home .vph-visual .vph-chip { display: none; }
+}
+
+/* Demo 2 — product pack-tier widget. Inline at the head of the widget's
+   own title row, paired with the label so `space-between` still pushes
+   the hint to the far edge. The title row is the one place in that
+   column that cannot overlap the gallery, the tier buttons or the
+   Add to Cart button no matter how the grid wraps. */
+.qd-lead { display: inline-flex; align-items: center; gap: 10px; }
+.qd-lead .vp3d { --vp3d: 62px; --vp3d-sm: 50px; align-self: center; }
+
 /* ══ VITAPOINTS ═══════════════════════════════════════════════════ */
 .vita-hero {
   display: grid; grid-template-columns: 1.1fr 1.4fr; gap: 18px; align-items: center;
@@ -9599,6 +9664,14 @@ window.dismissOfferReminder = function () {
     <div class="vph-card">
 
       <div class="vph-visual" aria-hidden="true">
+        <!-- Demo 1 of the VitaPoint 3D accents. Transparent animated WebP;
+             the reduced-motion source is the same artwork held still. -->
+        <span class="vp3d">
+          <picture>
+            <source srcset="/assets/vitapoint-3d/vitapoint-gift-still.webp" media="(prefers-reduced-motion: reduce)">
+            <img src="/assets/vitapoint-3d/vitapoint-gift.webp" alt="" width="200" height="200" loading="lazy" decoding="async">
+          </picture>
+        </span>
         <div class="vph-chip">
           <div class="vph-chip-brand">Ozylix</div>
           <div class="vph-chip-name">VitaPoints</div>
@@ -13870,7 +13943,10 @@ function buildTierWidget(p) {
   return `
     <div class="qty-discount-wrap" id="tierWidget_${p.id}">
       <div class="qty-discount-header">
-        <span><span class="spark">⚡</span> Buy more, save more</span>
+        <span class="qd-lead">
+          <span class="vp3d" aria-hidden="true"><picture><source srcset="/assets/vitapoint-3d/vitapoint-coin-still.webp" media="(prefers-reduced-motion: reduce)"><img src="/assets/vitapoint-3d/vitapoint-coin.webp" alt="" width="176" height="176" loading="lazy" decoding="async"></picture></span>
+          <span><span class="spark">⚡</span> Buy more, save more</span>
+        </span>
         <span class="qd-hint">Price per tablet drops with every pack size</span>
       </div>
       <div class="qty-tiers-grid" role="radiogroup" aria-label="Choose a pack size">
