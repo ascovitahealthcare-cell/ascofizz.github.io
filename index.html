@@ -13874,8 +13874,22 @@ function createCustomPack(productId) {
   const exact = tiers.find(t => Number(t.tabs) === wantTabs);
   if (exact) {
     const idx = tiers.indexOf(exact);
-    selectTier(productId, idx);
-    showToast(`${p.name} — ${months}-month pack selected`);
+    selectedTiers[productId] = idx;
+    // Same push path as the synthetic pack — one button, one result.
+    const physicalPacks = Math.max(1, Math.round(wantTabs / Number(tiers[0].tabs)));
+    const ex = STORE.cart.find(i => i.id === productId && i.tierIdx === idx);
+    if (ex) {
+      ex.qty += 1;
+    } else {
+      STORE.cart.push({
+        id: productId, qty: 1, tierIdx: idx,
+        tierTabs: exact.tabs, tierRate: exact.rate, tierMRP: exact.mrp,
+        tierDisc: exact.discountPct, isBundle: physicalPacks > 1,
+      });
+    }
+    STORE.save();
+    showToast(`${p.name} — ${months}-month pack added to cart!`);
+    updateCartUI && updateCartUI();
     return;
   }
   const rows = tiers.slice().sort((a, b) => Number(a.tabs) - Number(b.tabs));
