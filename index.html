@@ -16046,7 +16046,7 @@ function bootApp() {
       setTimeout(function() {
         if (typeof findProductBySlug === 'function' && typeof PRODUCTS !== 'undefined') {
           const prod = findProductBySlug(_pathSlug);
-          if (prod) openProduct(prod.id);
+          if (prod) { showPage('product'); openProduct(prod.id); }
           else showPage('shop');
         }
       }, 300);
