@@ -9855,7 +9855,6 @@ async function loadSiteImages() {
     </div>
   `;
   window.__siteImgState = { tab:'all', overrides: overrides };
-  window.renderSiteImgSections = function () { return renderSiteImgSections(groups, overrides); };
 
   document.getElementById('siteImagesGroups').innerHTML = toolbar + renderSiteImgSections(groups, overrides);
   loadEduSection();
