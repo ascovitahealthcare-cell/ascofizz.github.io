@@ -19161,6 +19161,7 @@ function renderSideCart() {
     <div class="sc-totals">
       <div class="sc-row"><span>Subtotal</span><span>₹${sub.toLocaleString('en-IN')}</span></div>
       ${promoDisc > 0 ? `<div class="sc-row" style="color:var(--success)"><span>Discount</span><span>−₹${promoDisc.toLocaleString('en-IN')}</span></div>` : ''}
+      ${mmOff > 0 ? `<div class="sc-row" style="color:var(--success)"><span>Mix &amp; Match — free unit</span><span>−₹${mmOff.toLocaleString('en-IN')}</span></div>` : (mmNeed > 0 ? `<div class="sc-row" style="color:var(--green)"><span>🎁 Add ${mmNeed} more for a FREE unit</span><span></span></div>` : '')}
       <div class="sc-row"><span>Shipping</span><span>${ship === 0 ? '<span style="color:var(--success)">FREE</span>' : '₹' + ship}</span></div>
       <div class="sc-row total"><span>Total</span><span>₹${total.toLocaleString('en-IN')}</span></div>
     </div>
