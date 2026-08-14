@@ -4815,6 +4815,7 @@ img[src=""], img[data-awaiting-upload] { visibility: hidden; width: 100%; }
      of the card in the row above. */
   gap: 16px 10px;
   grid-template-columns: repeat(auto-fit, minmax(136px, 1fr));
+  perspective: 700px; /* enables the 3D tilt on the tier cards below */
 }
 .qty-tier {
   position: relative; display: flex; flex-direction: column; gap: 2px;
@@ -4822,10 +4823,19 @@ img[src=""], img[data-awaiting-upload] { visibility: hidden; width: 100%; }
   text-align: center; font: inherit; color: inherit;
   background: var(--paper); border: none; box-shadow: var(--neo-1);
   cursor: pointer;
+  transform-style: preserve-3d;
   transition: transform var(--dur-2) var(--rise), box-shadow var(--dur-2) var(--rise),
               background var(--dur-1) var(--settle);
 }
-.qty-tier:hover { transform: translateY(-3px); box-shadow: var(--neo-2); }
+/* 3D hover — the card lifts AND tilts toward the visitor, with a soft
+   mirror glow under it, so the pack grid feels alive without slowing
+   anything down (pure CSS, no JS repaint). */
+.qty-tier:hover { transform: translateY(-3px) rotateX(3deg) scale(1.02); box-shadow: var(--neo-2); }
+.qty-tier:hover::after {
+  content: ""; position: absolute; inset: 60% -6% -12%; z-index: -1;
+  background: radial-gradient(ellipse at center, rgba(94,145,121,.28) 0%, transparent 70%);
+  border-radius: 50%; pointer-events: none;
+}
 .qty-tier.selected {
   background: var(--fern-bg);
   box-shadow: inset 0 0 0 1.6px rgba(94,145,121,.5), var(--neo-1);
@@ -4836,6 +4846,11 @@ img[src=""], img[data-awaiting-upload] { visibility: hidden; width: 100%; }
 .qty-tier.best-value {
   background: linear-gradient(170deg, #FFF8EC 0%, #FCEFD3 100%);
   box-shadow: 0 0 0 2px #E8A33D, 0 6px 18px rgba(232,163,61,.35);
+  animation: bv-pulse 2.6s ease-in-out infinite;
+}
+@keyframes bv-pulse {
+  0%, 100% { box-shadow: 0 0 0 2px #E8A33D, 0 6px 18px rgba(232,163,61,.35); }
+  50% { box-shadow: 0 0 0 3px #E8A33D, 0 6px 26px rgba(232,163,61,.55); }
 }
 .qty-tier.best-value:hover {
   box-shadow: 0 0 0 2px #E8A33D, 0 10px 26px rgba(232,163,61,.45);
@@ -4861,6 +4876,23 @@ img[src=""], img[data-awaiting-upload] { visibility: hidden; width: 100%; }
   background: linear-gradient(100deg, #E8A33D, #D97706);
   box-shadow: 0 2px 8px rgba(217,119,6,.45);
 }
+/* Slowly-floating ribbon on the best-value tier — a subtle 3D motion
+   that draws the eye without feeling gimmicky. */
+.qty-tier.best-value .qt-flag { animation: bv-float 2.4s ease-in-out infinite; }
+@keyframes bv-float {
+  0%, 100% { transform: translate(-50%, -45%) translateY(0); }
+  50% { transform: translate(-50%, -52%) translateY(0); }
+}
+/* Diagonal shimmer sweep across the best-value card on hover — the
+   live "premium" moment the user asked for. */
+.qty-tier.best-value::before {
+  content: ""; position: absolute; inset: 0; border-radius: inherit;
+  background: linear-gradient(105deg, transparent 40%, rgba(255,255,255,.55) 50%, transparent 60%);
+  transform: translateX(-120%);
+  transition: transform .8s ease;
+  pointer-events: none;
+}
+.qty-tier.best-value:hover::before { transform: translateX(120%); }
 .qt-size { font-size: .78rem; font-weight: 600; color: var(--t-mid); line-height: 1.2; }
 .qt-size b {
   display: block; font-family: var(--font-display);
@@ -4868,6 +4900,14 @@ img[src=""], img[data-awaiting-upload] { visibility: hidden; width: 100%; }
   font-variant-numeric: tabular-nums;
 }
 .qt-packs { font-size: .66rem; color: var(--t-low); }
+/* Daily-dosage chip — the one thing every pack has in common, shown as a
+   tiny 3D pill so customers instantly see "how long does this last me". */
+.qt-dose {
+  display: inline-block; margin: 4px auto 0; padding: 2px 9px;
+  border-radius: var(--r-pill); font-size: .6rem; font-weight: 700;
+  color: #3f6b54; background: linear-gradient(180deg, #EAF4EC, #D8EADF);
+  box-shadow: 0 1.5px 0 rgba(63,107,84,.25); letter-spacing: .02em;
+}
 .qt-rate {
   margin-top: 7px; font-family: var(--font-display);
   font-size: 1.18rem; font-weight: 800; line-height: 1.15; color: var(--t-hi);
@@ -13755,6 +13795,26 @@ const selectedTiers = {};
 // and the pane stayed blank with no clue why. Returning null here means a
 // priced-later product simply renders as an untiered product, which is
 // what it is.
+// ── DURATION LABELS: 1 tablet per day ──────────────────────────────
+// The old "month supply" text assumed every pack was a 15-tab box = one
+// month, so the 15-tab tier read "1 month supply" and the 60-tab carton
+// read "4 months" — both wrong. Dosage is ONE tablet a day, so:
+//   15 tabs = 15 days · 30 tabs = 30 days (one month) · 60 tabs = 2 months.
+function durationLabel(tabs) {
+  const n = Number(tabs) || 0;
+  if (n <= 15) return n + '-day' + (n === 1 ? '' : '') + ' pack';
+  const months = Math.round(n / 30);
+  const days = n % 30;
+  if (days) return months + ' month' + (months === 1 ? '' : 's') + ' + ' + days + ' days';
+  return months + ' month' + (months === 1 ? '' : 's');
+}
+function durationLabelShort(tabs) {
+  const n = Number(tabs) || 0;
+  if (n <= 15) return n + ' days';
+  const months = Math.round(n / 30);
+  const days = n % 30;
+  return months + (months === 1 ? ' month' : ' months') + (days ? ' + ' + days + ' days' : '');
+}
 function getProductTiers(p) {
   const raw = p && (p._backendTiers || (typeof QTY_TIERS !== 'undefined' ? QTY_TIERS[p.id] : null));
   if (!Array.isArray(raw)) return null;
@@ -13826,8 +13886,9 @@ function buildTierWidget(p) {
                   class="qty-tier${isSel ? ' selected' : ''}${isBest ? ' best-value' : ''}"
                   onclick="selectTier(${p.id}, ${i})">
             ${isBest ? '<span class="qt-flag">Best value</span>' : ''}
-            <span class="qt-size"><b>${tier.tabs}</b> tablets (${Math.round(tier.tabs / 15)} month ${Math.round(tier.tabs / 15) === 1 ? "supply" : "supply"})</span>
+            <span class="qt-size"><b>${tier.tabs}</b> tablets · ${durationLabel(tier.tabs)}</span>
             <span class="qt-packs">${packs || '&nbsp;'}</span>
+            <span class="qt-dose">1 tablet a day</span>
             <span class="qt-rate">${rupee(tier.rate)}</span>
             ${per ? `<span class="qt-unit">${'₹' + per} per tablet</span>` : ''}
             <span class="qt-compare">
@@ -14297,7 +14358,7 @@ function buildProductPage(p) {
               <th style="padding:12px 16px;text-align:right;border-radius:0 8px 0 0">You Save</th>
             </tr></thead>
             <tbody>
-              ${tiers.map((t,i)=>{const isBest=t.discountPct===Math.max(...tiers.map(x=>x.discountPct));return`<tr style="background:${isBest?'var(--gold-pale)':i%2?'var(--green-wash)':'white'};cursor:pointer" onclick="selectTier(${p.id},${i})"><td style="padding:12px 16px;font-weight:700">${t.tabs} Tabs (${Math.round(t.tabs / 15)} month ${Math.round(t.tabs / 15) === 1 ? "supply" : "supply"})${isBest?' <span style="background:var(--gold);color:var(--t-hi);font-size:.6rem;padding:2px 7px;border-radius:100px;font-weight:800;vertical-align:middle">BEST VALUE</span>':''}</td><td style="padding:12px 16px;text-align:right;text-decoration:line-through;color:var(--gray)">&#x20B9;${t.mrp.toLocaleString('en-IN')}</td><td style="padding:12px 16px;text-align:right;font-weight:800;color:var(--green)">&#x20B9;${t.rate.toLocaleString('en-IN')}</td><td style="padding:12px 16px;text-align:right"><span style="background:${isBest?'var(--gold)':'var(--gold-pale)'};color:${isBest?'white':'var(--gold)'};padding:3px 9px;border-radius:100px;font-weight:700;font-size:.78rem">${t.discountPct}% OFF</span></td><td style="padding:12px 16px;text-align:right;color:var(--success);font-weight:700">&#x20B9;${(t.mrp-t.rate).toLocaleString('en-IN')}</td></tr>`;}).join('')}
+              ${tiers.map((t,i)=>{const isBest=t.discountPct===Math.max(...tiers.map(x=>x.discountPct));return`<tr style="background:${isBest?'var(--gold-pale)':i%2?'var(--green-wash)':'white'};cursor:pointer" onclick="selectTier(${p.id},${i})"><td style="padding:12px 16px;font-weight:700">${t.tabs} Tabs · ${durationLabel(t.tabs)} · 1/day${isBest?' <span style="background:var(--gold);color:var(--t-hi);font-size:.6rem;padding:2px 7px;border-radius:100px;font-weight:800;vertical-align:middle">BEST VALUE</span>':''}</td><td style="padding:12px 16px;text-align:right;text-decoration:line-through;color:var(--gray)">&#x20B9;${t.mrp.toLocaleString('en-IN')}</td><td style="padding:12px 16px;text-align:right;font-weight:800;color:var(--green)">&#x20B9;${t.rate.toLocaleString('en-IN')}</td><td style="padding:12px 16px;text-align:right"><span style="background:${isBest?'var(--gold)':'var(--gold-pale)'};color:${isBest?'white':'var(--gold)'};padding:3px 9px;border-radius:100px;font-weight:700;font-size:.78rem">${t.discountPct}% OFF</span></td><td style="padding:12px 16px;text-align:right;color:var(--success);font-weight:700">&#x20B9;${(t.mrp-t.rate).toLocaleString('en-IN')}</td></tr>`;}).join('')}
             </tbody>
           </table>
           <p style="font-size:.76rem;color:var(--gray);margin-top:12px">Click any row to select that pack. All prices incl. taxes.</p><p class="mc-line">&#128154; A small step for your daily wellness routine. ✨ Your Ozylix routine starts here.</p>
@@ -19223,7 +19284,7 @@ function renderSideCart() {
         <img class="sc-img" src="${(typeof getProductImg==='function'?getProductImg(p):p.image)||''}" alt="${p.name}" onerror="this.src=PRODUCT_FALLBACKS.default" decoding="async">
         <div class="sc-info">
           <div class="sc-name">${p.name}</div>
-          ${item.tierTabs ? `<div class="sc-tier-info" style="font-size:.7rem;color:var(--green);font-weight:600;margin:1px 0">${item.tierTabs} Tablets (${item.isCustomPack ? 'your ' : ''}${Math.round(item.tierTabs / 15)} month supply)</div>` : ''}
+          ${item.tierTabs ? `<div class="sc-tier-info" style="font-size:.7rem;color:var(--green);font-weight:600;margin:1px 0">${item.tierTabs} Tablets · ${item.isCustomPack ? 'your ' : ''}${durationLabel(item.tierTabs)}</div>` : ''}
           <div class="sc-brand">${p.brand}</div>
           <div class="sc-price">₹${(price * item.qty).toLocaleString('en-IN')}</div>
           <div class="sc-qty-row">
