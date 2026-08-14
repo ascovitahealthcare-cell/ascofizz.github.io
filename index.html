@@ -9292,7 +9292,7 @@ window.dismissOfferReminder = function () {
     // one offer banner, its entries drive the carousel instead.
     var adminBanners = window.ADMIN_HERO_BANNERS;
     var srcSlides = adminBanners && adminBanners.length ? adminBanners.map(function(b) {
-      return { src: b.url, mobile: b.url, alt: b.alt || 'Ozylix offer', link: b.link || '' };
+      return { src: b.url, mobile: b.url, alt: (String(b.alt || 'Ozylix offer')).replace(/<[^>]+>/g, ''), link: b.link || '' };
     }) : BANNER_SLIDES;
     bnSlides = srcSlides.filter(function(s) { return s && s.src && String(s.src).trim(); });
     if (!bnSlides.length) return;              // stays display:none
@@ -10292,7 +10292,7 @@ function renderCheckoutSummary() {
   var mmNeed = mmGroups > 0 ? 0 : 4 - (mmUnits.length % 4);
 
 
-  const total = Math.max(0, sub - disc + ship - vitaOff);
+  const total = Math.max(0, sub - disc - mmOff + ship - vitaOff);
 
   const itemsHtml = STORE.cart.map(item => {
     const p = PRODUCTS.find(p => p.id === item.id);
@@ -12199,10 +12199,33 @@ async function loadProductReviews(productId) {
 
 const STORE = {
   cart:[], wishlist:[],
-  init(){try{this.cart=JSON.parse(localStorage.getItem('asc_cart')||'[]');}catch(e){this.cart=[];}try{this.wishlist=JSON.parse(localStorage.getItem('asc_wish')||'[]');}catch(e){this.wishlist=[];}this.updateCartUI();},
+  init(){try{this.cart=JSON.parse(localStorage.getItem('asc_cart')||'[]');}catch(e){this.cart=[];}try{this.wishlist=JSON.parse(localStorage.getItem('asc_wish')||'[]');}catch(e){this.wishlist=[];}this.normalizeCartTiers();this.updateCartUI();},
   save(){try{localStorage.setItem('asc_cart',JSON.stringify(this.cart));localStorage.setItem('asc_wish',JSON.stringify(this.wishlist));}catch(e){}this.updateCartUI();},
   addToCart(id,qty=1){const p=PRODUCTS.find(p=>p.id===id);if(!p)return;const ex=this.cart.find(i=>i.id===id&&i.tierIdx===undefined);if(ex)ex.qty+=qty;else this.cart.push({id,qty});this.save();window._trackAddToCart&&window._trackAddToCart(p,qty);const _dispPrice=p.salePrice||p.price;showToast(`${p.name} added to cart! 🌿`);},
   removeFromCart(id){this.cart=this.cart.filter(i=>i.id!==id);this.save();},
+  // FIX (order-flow audit): cart entries baked a tier rate at add time and
+  // could go stale (wrong product's rate, or a rate from before a price
+  // change). Re-derive every entry's rate from the LIVE product tiers on
+  // load; the server also re-prices at checkout, so the customer can never
+  // be overcharged — this only keeps the cart display truthful.
+  normalizeCartTiers(){
+    let changed = false;
+    this.cart.forEach(it => {
+      if (it.tierIdx === undefined) return;
+      const p = PRODUCTS.find(x => x.id === it.id);
+      const tiers = (typeof getProductTiers === 'function') ? getProductTiers(p) : null;
+      const tier = tiers && Array.isArray(tiers) ? tiers[it.tierIdx] : null;
+      if (tier && tier.rate !== undefined && tier.rate !== it.tierRate) {
+        it.tierRate = tier.rate; it.tierMRP = tier.mrp; it.tierDisc = tier.discountPct || 0;
+        it.tierTabs = tier.tabs; changed = true;
+      } else if (!tier) {
+        delete it.tierRate; delete it.tierMRP; delete it.tierDisc;
+        delete it.tierTabs; delete it.tierIdx; delete it.tierLabel; delete it.isBundle;
+        changed = true;
+      }
+    });
+    if (changed) this.save();
+  },
   updateQty(id,qty){const item=this.cart.find(i=>i.id===id);if(item){item.qty=Math.max(1,qty);this.save();}},
   getSubtotal(){return this.cart.reduce((s,i)=>{const p=PRODUCTS.find(p=>p.id===i.id);return s+(p?((p.salePrice||p.price)||0)*i.qty:0);},0);},
   applyCode(code){return null;}, // All codes validated via backend — see applyCode()
