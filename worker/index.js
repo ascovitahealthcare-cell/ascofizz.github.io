@@ -28,6 +28,7 @@
 const SPA_ROUTES = new Set([
   '/shop',
   '/blog',
+  '/blog/*',
   '/about',
   '/contact',
   '/faq',
@@ -43,7 +44,15 @@ const PRODUCT_PATH = /^\/product\/[^/]+$/;
 
 function isSpaPath(pathname) {
   const path = pathname.length > 1 ? pathname.replace(/\/+$/, '') : pathname;
-  return SPA_ROUTES.has(path) || PRODUCT_PATH.test(path);
+  if (SPA_ROUTES.has(path)) return true;
+  if (PRODUCT_PATH.test(path)) return true;
+  // Wildcard entries like '/blog/*' match any path sharing that prefix.
+  for (const route of SPA_ROUTES) {
+    if (route.endsWith('/*') && path.startsWith(route.slice(0, -2)) && path.length > route.length - 2) {
+      return true;
+    }
+  }
+  return false;
 }
 
 // The admin panel has its own hostname. Without this it is simply another
