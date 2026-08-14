@@ -13803,7 +13803,7 @@ const selectedTiers = {};
 function durationLabel(tabs) {
   const n = Number(tabs) || 0;
   if (n <= 15) return n + '-day' + (n === 1 ? '' : '') + ' pack';
-  const months = Math.round(n / 30);
+  const months = Math.floor(n / 30);
   const days = n % 30;
   if (days) return months + ' month' + (months === 1 ? '' : 's') + ' + ' + days + ' days';
   return months + ' month' + (months === 1 ? '' : 's');
@@ -13811,7 +13811,7 @@ function durationLabel(tabs) {
 function durationLabelShort(tabs) {
   const n = Number(tabs) || 0;
   if (n <= 15) return n + ' days';
-  const months = Math.round(n / 30);
+  const months = Math.floor(n / 30);
   const days = n % 30;
   return months + (months === 1 ? ' month' : ' months') + (days ? ' + ' + days + ' days' : '');
 }
