@@ -493,7 +493,9 @@ textarea.form-control{resize:vertical;min-height:80px;}
 .img-upload-zone{border:2px dashed var(--border2);border-radius:var(--radius);padding:32px;text-align:center;cursor:pointer;transition:all 0.2s;background:var(--bg2);}
 .img-upload-zone:hover,.img-upload-zone.drag{border-color:var(--green);background:var(--green-glow);}
 .img-upload-zone .uico{font-size:2.5rem;margin-bottom:8px;}
-.banner-preview{width:100%;height:160px;object-fit:cover;border-radius:10px;}
+.banner-preview{width:100%;height:64px;object-fit:cover;border-radius:8px;}
+#homeBannerManager,#shopBannerManager,#fallbackManager,#promoCarouselManager,#promoStripManager{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:8px;}
+#homeBannerManager .card,#shopBannerManager .card,#fallbackManager .card,#promoCarouselManager .card,#promoStripManager .card{padding:0;overflow:hidden;}
 /* ── Image slot uploader (product images + site images) ── */
 .img-slot{position:relative;aspect-ratio:1;border:2px dashed var(--border2);border-radius:10px;background:var(--bg2);cursor:pointer;overflow:hidden;transition:all 0.2s;display:flex;align-items:center;justify-content:center;}
 .img-slot:hover{border-color:var(--green);background:var(--green-glow);}
@@ -10141,23 +10143,24 @@ function renderBannerManagers() {
   const hb = document.getElementById('homeBannerManager');
   const sb = document.getElementById('shopBannerManager');
   const cards = (banners, prefix, withMeta) => banners.map(b => `
-    <div class="card" style="padding:0;overflow:hidden;">
+    <div class="card">
       ${isVideoFileUrl(b.img)
         ? '<video src="'+adminCdnImg(b.img)+'" muted loop playsinline preload="metadata" autoplay class="banner-preview" style="object-fit:cover;"></video><span class="img-slot-vid-badge">▶ VIDEO</span>'
         : '<img src="'+adminCdnImg(b.img)+'" class="banner-preview" onerror="this.style.display=\'none\'">'}
-      <div style="padding:12px 14px;">
-        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
-          <span style="font-size:0.85rem;font-weight:600;">${prefix} #${b.n}</span>
-          <button class="btn btn-danger btn-sm btn-icon" onclick="deleteBanner('${prefix}', ${b.n})" title="Remove this banner">🗑️</button>
+      <div style="padding:6px 9px;">
+        <div style="display:flex;align-items:center;justify-content:space-between;">
+          <span style="font-size:0.72rem;font-weight:600;">${prefix} #${b.n}</span>
+          <button class="btn btn-danger btn-sm btn-icon" style="width:24px;height:24px;font-size:0.62rem;" onclick="deleteBanner('${prefix}', ${b.n})" title="Remove this banner">🗑️</button>
         </div>
         ${withMeta ? `
-        <div style="font-size:0.72rem;color:var(--text3);margin-bottom:10px;">Caption &amp; destination are optional — the banner works without them.</div>
-        <input class="form-control" style="margin-bottom:6px;font-size:0.8rem;" placeholder="Caption (shown in the offer reminder)" value="${escAttr(b.alt)}" onchange="setBannerMeta('${prefix}', ${b.n}, 'alt', this.value)">
-        <input class="form-control" style="font-size:0.8rem;" placeholder="Link, e.g. /product/glutathione-effervescent-tablet" value="${escAttr(b.link)}" onchange="setBannerMeta('${prefix}', ${b.n}, 'link', this.value)">
-        ` : '<div style="font-size:0.72rem;color:var(--text3);margin-bottom:10px;">The image is the whole card — no text overlay needed.</div>'}
-        <div style="display:flex;gap:6px;margin-top:10px;">
+        <div style="display:flex;gap:4px;margin-top:5px;">
+          <input class="form-control" style="font-size:0.66rem;padding:3px 6px;min-height:22px;" placeholder="Caption" value="${escAttr(b.alt)}" onchange="setBannerMeta('${prefix}', ${b.n}, 'alt', this.value)">
+          <input class="form-control" style="font-size:0.66rem;padding:3px 6px;min-height:22px;" placeholder="Link e.g. /product/glutathione-effervescent-tablet" value="${escAttr(b.link)}" onchange="setBannerMeta('${prefix}', ${b.n}, 'link', this.value)">
+        </div>
+        ` : ''}
+        <div style="margin-top:5px;">
           <input type="file" accept="image/*,.webp,.svg,video/*,.mp4,.webm,.mov" id="bannerFile-${prefix}-${b.n}" style="display:none;" onchange="uploadBannerImage('${prefix}', ${b.n}, this)">
-          <button class="btn btn-primary btn-sm" style="flex:1;" onclick="document.getElementById('bannerFile-${prefix}-${b.n}').click()">📤 ${b.img ? 'Replace Media' : 'Upload Image / Video'}</button>
+          <button class="btn btn-primary btn-sm" style="flex:1;width:100%;font-size:0.66rem;min-height:24px;" onclick="document.getElementById('bannerFile-${prefix}-${b.n}').click()">📤 ${b.img ? 'Replace' : 'Upload'}</button>
         </div>
       </div>
     </div>`).join('');
@@ -10256,13 +10259,13 @@ async function loadFallbackManager() {
       ${FALLBACK_CATEGORIES.map(cat => {
         const url = overrides[cat] || '';
         return `
-        <div class="card" style="padding:0;overflow:hidden;">
+        <div class="card">
           ${isVideoFileUrl(url)
             ? '<video src="'+adminCdnImg(url)+'" muted loop playsinline preload="metadata" autoplay class="banner-preview" style="object-fit:cover;"></video><span class="img-slot-vid-badge">▶ VIDEO</span>'
             : '<img src="'+adminCdnImg(url)+'" class="banner-preview" onerror="this.style.display=\'none\'">'}
-          <div style="padding:12px 14px;">
-            <div style="font-size:0.85rem;font-weight:600;margin-bottom:10px;">${cat === 'default' ? 'Default (any category)' : cat.charAt(0).toUpperCase() + cat.slice(1)}</div>
-            ${url ? '<div style="font-size:0.72rem;color:var(--green-text);margin-bottom:10px;">Custom image set</div>' : '<div style="font-size:0.72rem;color:var(--text3);margin-bottom:10px;">No image yet — placeholder shows</div>'}
+          <div style="padding:6px 9px;">
+            <div style="font-size:0.72rem;font-weight:600;">${cat === 'default' ? 'Default (any category)' : cat.charAt(0).toUpperCase() + cat.slice(1)}</div>
+            ${url ? '<div style="font-size:0.62rem;color:var(--green-text);">✓ custom image set</div>' : '<div style="font-size:0.62rem;color:var(--text3);">no image yet</div>'}
             <input type="file" accept="image/*,.webp,.svg,video/*,.mp4,.webm,.mov" id="fallbackFile-${cat}" style="display:none;" onchange="uploadFallbackImage('${cat}', this)">
             <div style="display:flex;gap:6px;">
               <button class="btn btn-primary btn-sm" style="flex:1;" onclick="document.getElementById('fallbackFile-${cat}').click()">📤 ${url ? 'Replace Image' : 'Upload Image'}</button>
@@ -10328,18 +10331,17 @@ function promoCards() {
 }
 function renderPromoMediaGrid() {
   const cards = promoCards().map(b => `
-    <div class="card" style="padding:0;overflow:hidden;">
+    <div class="card">
       ${isVideoFileUrl(b.img)
         ? '<video src="'+adminCdnImg(b.img)+'" muted loop playsinline preload="metadata" autoplay class="banner-preview" style="object-fit:cover;"></video><span class="img-slot-vid-badge">▶ VIDEO</span>'
         : '<img src="'+adminCdnImg(b.img)+'" class="banner-preview" onerror="this.style.display=\'none\'">'}
-      <div style="padding:12px 14px;">
-        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
-          <span style="font-size:0.85rem;font-weight:600;">Promo Card #${b.n}</span>
-          <button class="btn btn-danger btn-sm btn-icon" onclick="deletePromoCard(${b.n})" title="Remove this card">🗑️</button>
+      <div style="padding:6px 9px;">
+        <div style="display:flex;align-items:center;justify-content:space-between;">
+          <span style="font-size:0.72rem;font-weight:600;">Promo Card #${b.n}</span>
+          <button class="btn btn-danger btn-sm btn-icon" style="width:24px;height:24px;font-size:0.62rem;" onclick="deletePromoCard(${b.n})" title="Remove this card">🗑️</button>
         </div>
-        <div style="font-size:0.72rem;color:var(--text3);margin-bottom:10px;">This image replaces the automatic product photo in carousel position #${b.n}.</div>
-        <input class="form-control" style="font-size:0.8rem;" placeholder="Caption shown on the card (optional)" value="${escAttr(b.alt)}" onchange="setPromoCardAlt(${b.n}, this.value)">
-        <div style="display:flex;gap:6px;margin-top:10px;">
+        <input class="form-control" style="font-size:0.66rem;padding:3px 6px;min-height:22px;margin-top:5px;" placeholder="Caption (optional)" value="${escAttr(b.alt)}" onchange="setPromoCardAlt(${b.n}, this.value)">
+        <div style="margin-top:5px;">
           <input type="file" accept="image/*,.webp,.svg,video/*,.mp4,.webm,.mov" id="promoFile-${b.n}" style="display:none;" onchange="uploadPromoCardImage(${b.n}, this)">
           <button class="btn btn-primary btn-sm" style="flex:1;" onclick="document.getElementById('promoFile-${b.n}').click()">📤 ${b.img ? 'Replace Media' : 'Upload Image / Video'}</button>
         </div>
@@ -10423,15 +10425,15 @@ function renderPromoStripGrid() {
     const pos = i + 1;
     const cta = (c.cta_page || 'shop').charAt(0).toUpperCase() + (c.cta_page || 'shop').slice(1);
     return `
-    <div class="card" style="padding:0;overflow:hidden;opacity:${c.active ? '1' : '0.55'};">
+    <div class="card" style="opacity:${c.active ? '1' : '0.55'};">
       ${url
         ? (isVid
             ? '<video src="'+adminCdnImg(url)+'" muted loop playsinline preload="metadata" autoplay class="banner-preview" style="object-fit:cover;"></video><span class="img-slot-vid-badge">▶ VIDEO</span>'
             : '<img src="'+adminCdnImg(url)+'" class="banner-preview" onerror="this.style.display=\'none\'">')
-        : '<div class="banner-preview" style="background:var(--surface2);display:flex;align-items:center;justify-content:center;color:var(--text3);font-size:0.78rem;">No media</div>'}
-      <div style="padding:12px 14px;">
-        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
-          <span style="font-size:0.85rem;font-weight:600;">Strip Card #${pos} → ${cta}</span>
+        : '<div class="banner-preview" style="background:var(--surface2);display:flex;align-items:center;justify-content:center;color:var(--text3);font-size:0.66rem;">No media</div>'}
+      <div style="padding:6px 9px;">
+        <div style="display:flex;align-items:center;justify-content:space-between;">
+          <span style="font-size:0.72rem;font-weight:600;">Strip Card #${pos} → ${cta}</span>
           <div style="display:flex;gap:4px;">
             ${i > 0 ? '<button class="btn btn-secondary btn-sm btn-icon" onclick="movePromoStripCard(\''+c.id+'\',-1)" title="Move earlier">◀</button>' : ''}
             ${i < (_promoStripAll||[]).length - 1 ? '<button class="btn btn-secondary btn-sm btn-icon" onclick="movePromoStripCard(\''+c.id+'\',1)" title="Move later">▶</button>' : ''}
