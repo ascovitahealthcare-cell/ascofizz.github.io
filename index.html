@@ -13889,7 +13889,7 @@ function createCustomPack(productId) {
     }
     STORE.save();
     showToast(`${p.name} — ${months}-month pack added to cart!`);
-    updateCartUI && updateCartUI();
+    typeof renderSideCart === "function" && renderSideCart();
     return;
   }
   const rows = tiers.slice().sort((a, b) => Number(a.tabs) - Number(b.tabs));
@@ -13923,7 +13923,7 @@ function createCustomPack(productId) {
   }
   STORE.save();
   showToast(`${p.name} — your ${months}-month custom pack (${wantTabs} tablets, ₹${Number(rate).toLocaleString('en-IN')}) added to cart!`);
-  updateCartUI && updateCartUI();
+  typeof renderSideCart === "function" && renderSideCart();
 }
 
 function selectTier(productId, tierIdx) {
