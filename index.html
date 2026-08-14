@@ -16349,7 +16349,7 @@ async function finalizeOrder(orderId, formData, total, method, codCharge) {
   // Now: the save is verified, retried through a cold start, and the
   // thank-you page is only reached if the database actually has the order.
   // VitaPoints are NOT computed here at all — the server awards them into
-  // vita_ledger when it accepts the order, and we read the real balance
+  // vita_ledger_v2 (the live ledger) when the server accepts the order, and we read the real balance
   // back afterwards.
   let _savedOrder = null;
   let _saveError = null;
@@ -17129,7 +17129,7 @@ function vitaSyncToServer(st) {
   } catch(e) {}
 }
 
-// Pulls the REAL balance/lifetime/history from the server's vita_ledger
+// Pulls the REAL balance/lifetime/history from the server's vita_ledger_v2
 // (via /api/vitapoints/balance + /history) and overwrites the local cache
 // with it. Server is the actual source of truth now (order confirm awards
 // into the ledger with no hold, and a return/refund claws back from it) —
