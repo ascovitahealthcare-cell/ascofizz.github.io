@@ -6947,6 +6947,120 @@ button, [role="button"] {
   .vita-pop-overlay, .vita-pop { transition: none; }
 }
 
+/* ══ VITAMATCH — RULE-BASED RECOMMENDER ═══════════════════════════
+   The advisor's Gemini chat is metered and stops answering when the
+   quota runs out, which leaves the page's whole purpose broken. This
+   is the same job done with a scoring table instead of a model: four
+   questions, deterministic ranking over the real catalogue, no network
+   call, no tokens, and it cannot go down. The chat is still there
+   behind a toggle for anyone who wants it. */
+.vm-wrap { max-width: 640px; margin: 0 auto; }
+.vm-card {
+  padding: clamp(22px, 3.4vw, 34px);
+  border-radius: var(--r-lg); background: var(--paper-hi); box-shadow: var(--neo-2);
+}
+.vm-prog { display: flex; gap: 6px; margin-bottom: 22px; }
+.vm-prog i {
+  flex: 1; height: 5px; border-radius: 99px; background: var(--paper-lo);
+  transition: background var(--dur-1, .3s) ease;
+}
+.vm-prog i.done { background: var(--indigo); }
+.vm-step-n { font-size: .68rem; font-weight: 800; letter-spacing: .16em;
+             text-transform: uppercase; color: var(--indigo-lo); }
+.vm-q { font-family: var(--font-display); font-weight: 600; line-height: 1.18;
+        font-size: clamp(1.3rem, 3vw, 1.75rem); color: var(--t-hi); margin: 8px 0 4px; }
+.vm-hint { font-size: .8rem; color: var(--t-low); margin-bottom: 18px; }
+.vm-opts { display: grid; gap: 10px; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); }
+.vm-opt {
+  display: flex; align-items: center; gap: 11px; text-align: left;
+  padding: 14px 16px; border: none; border-radius: var(--r-md); cursor: pointer;
+  background: var(--paper); box-shadow: var(--neo-1); font: inherit; color: var(--t-hi);
+  transition: transform var(--dur-1, .25s) var(--rise, ease), box-shadow var(--dur-1, .25s) ease;
+}
+.vm-opt:hover { transform: translateY(-2px); box-shadow: var(--neo-2); }
+.vm-opt.sel { background: var(--fern-bg); box-shadow: inset 0 0 0 1.6px rgba(94,145,121,.55), var(--neo-1); }
+.vm-opt-ico { font-size: 1.3rem; flex: none; line-height: 1; }
+.vm-opt b { display: block; font-size: .9rem; font-weight: 700; line-height: 1.3; }
+.vm-opt span { display: block; font-size: .74rem; color: var(--t-low); margin-top: 2px; }
+.vm-nav { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-top: 20px; }
+.vm-back { border: none; background: none; cursor: pointer; font: inherit;
+           font-size: .82rem; font-weight: 600; color: var(--t-low); padding: 6px 2px; }
+.vm-skip { font-size: .76rem; color: var(--t-low); }
+
+/* Results */
+.vm-res-head { text-align: center; margin-bottom: 6px; }
+.vm-res-head .vp3d { --vp3d: 104px; --vp3d-sm: 84px; }
+.vm-res-title { font-family: var(--font-display); font-weight: 600; line-height: 1.15;
+                font-size: clamp(1.35rem, 3vw, 1.8rem); color: var(--t-hi); }
+.vm-res-sub { font-size: .86rem; line-height: 1.6; color: var(--t-mid); margin-top: 8px; }
+.vm-res-list { display: grid; gap: 12px; margin-top: 20px; }
+/* Flex, not grid. A three-column grid with the image and the price both
+   spanning all rows fights auto-placement for the middle column, and the
+   price lands on top of the name. */
+.vm-rec {
+  position: relative; display: flex; align-items: center; gap: 14px;
+  padding: 14px; border-radius: var(--r-md);
+  background: var(--paper); box-shadow: var(--neo-1); cursor: pointer;
+}
+.vm-rec.top { box-shadow: inset 0 0 0 1.6px rgba(94,145,121,.5), var(--neo-1); }
+.vm-rec-img { flex: none; width: 62px; height: 62px; border-radius: var(--r-sm);
+              object-fit: cover; background: var(--paper-lo); }
+.vm-rec-body { flex: 1; min-width: 0; }
+.vm-rec-name { font-size: .9rem; font-weight: 700; color: var(--t-hi); line-height: 1.3; }
+.vm-rec-why { font-size: .76rem; color: var(--t-low); line-height: 1.45; margin-top: 2px; }
+.vm-rec-price { flex: none; text-align: right; font-size: .95rem;
+                font-weight: 800; color: var(--t-hi); white-space: nowrap; }
+.vm-rec-price s { display: block; font-size: .72rem; font-weight: 500; color: var(--t-low); }
+.vm-rec-add { margin-top: 8px;
+              padding: 7px 16px; border: none; border-radius: var(--r-pill); cursor: pointer;
+              font: inherit; font-size: .76rem; font-weight: 700; color: #fff; background: var(--t-hi); }
+/* On a phone the price is pulled out of the row and parked bottom-right,
+   beside the Add button. Left in the flex row it wrapped onto its own
+   line under the thumbnail, which read as a caption on the image. */
+@media (max-width: 480px) {
+  .vm-rec { padding-bottom: 14px; }
+  .vm-rec-img { width: 52px; height: 52px; }
+  .vm-rec-body { padding-right: 76px; }
+  .vm-rec-price { position: absolute; right: 14px; bottom: 14px; font-size: .9rem; }
+}
+.vm-flag { position: absolute; top: -9px; left: 14px; padding: 3px 10px; border-radius: var(--r-pill);
+           font-size: .58rem; font-weight: 800; letter-spacing: .1em; text-transform: uppercase;
+           color: #fff; background: var(--indigo); box-shadow: var(--lit-indigo); }
+.vm-note { font-size: .72rem; color: var(--t-low); line-height: 1.55; margin-top: 16px; text-align: center; }
+.vm-alt { text-align: center; margin-top: 18px; }
+.vm-alt button { border: none; background: none; cursor: pointer; font: inherit;
+                 font-size: .8rem; font-weight: 600; color: var(--indigo-lo); text-decoration: underline; }
+
+/* ══ OFFER COUNTDOWN ══════════════════════════════════════════════
+   Driven by OFFER_DEADLINE, a real date the shop owner sets. If it is
+   unset, unparseable or already past, every one of these renders
+   nothing at all. A timer that restarts on each page load is a lie the
+   customer can catch by pressing reload, and it is exactly what the
+   dark-pattern rules are written about — so this cannot do it. */
+.offer-bar {
+  display: flex; align-items: center; justify-content: center; gap: 14px; flex-wrap: wrap;
+  margin: 0 0 14px; padding: 11px 18px; border-radius: 14px;
+  background: linear-gradient(120deg, var(--indigo) 0%, var(--seal) 130%); color: #fff;
+  box-shadow: 0 8px 20px -12px rgba(29,35,32,.45);
+}
+.offer-bar .vp3d { --vp3d: 38px; --vp3d-sm: 34px; }
+.offer-bar-copy { font-size: .84rem; font-weight: 700; line-height: 1.35; }
+.offer-bar-copy span { display: block; font-size: .72rem; font-weight: 500; opacity: .85; }
+.offer-clock { display: flex; gap: 6px; }
+.offer-clock div {
+  min-width: 42px; padding: 5px 6px; border-radius: 9px; text-align: center;
+  background: rgba(255,255,255,.16); border: 1px solid rgba(255,255,255,.28);
+  -webkit-backdrop-filter: blur(6px); backdrop-filter: blur(6px);
+}
+.offer-clock b { display: block; font-size: 1rem; font-weight: 800; line-height: 1;
+                 font-variant-numeric: tabular-nums; }
+.offer-clock i { display: block; font-style: normal; font-size: .56rem; letter-spacing: .1em;
+                 text-transform: uppercase; opacity: .8; margin-top: 3px; }
+@media (max-width: 620px) {
+  .offer-bar { gap: 10px; padding: 10px 14px; }
+  .offer-bar-copy { font-size: .78rem; }
+}
+
 /* ══ VITAPOINTS ═══════════════════════════════════════════════════ */
 .vita-hero {
   display: grid; grid-template-columns: 1.1fr 1.4fr; gap: 18px; align-items: center;
@@ -9986,13 +10100,22 @@ window.dismissOfferReminder = function () {
 
     <!-- Header -->
     <div style="text-align:center;margin-bottom:36px">
-      <div class="section-label">AI Powered</div>
+      <div class="section-label">Personalised</div>
       <h1 class="section-title">Your Personal Health Advisor</h1>
-      <p class="section-sub" style="margin:0 auto">Answer a few simple questions and Vita will recommend the perfect Ozylix supplements for your body and goals.</p>
+      <p class="section-sub" style="margin:0 auto">Answer four quick questions and we'll match you to the Ozylix supplements that fit your goal, age and routine.</p>
+    </div>
+
+    <!-- VitaMatch — the default path. Deterministic, offline, always
+         available. The Gemini chat below is opt-in from here. -->
+    <div class="vm-wrap" id="vitaMatchWrap">
+      <div class="vm-card" id="vitaMatchCard"></div>
+      <div class="vm-alt">
+        <button type="button" onclick="vitaShowChat()">Prefer to chat with Vita instead?</button>
+      </div>
     </div>
 
     <!-- Chat container -->
-    <div class="vita-chat-wrap">
+    <div class="vita-chat-wrap" id="vitaChatWrap" style="display:none">
       <!-- Chat header -->
       <div class="vita-chat-hdr">
         <div class="vita-chat-avatar">🌿</div>
@@ -10181,6 +10304,10 @@ window.dismissOfferReminder = function () {
           </span>
           <span class="mm-cta">Build Your Mix &amp; Match →</span>
         </button>
+        <!-- Offer bar. Filled by showPage('shop'); empty if OFFER_LABEL is
+             cleared, and it carries a clock only when OFFER_DEADLINE is a
+             real future date. -->
+        <div id="shopOfferBar"></div>
         <div class="shop-banner-slot" id="shopBannerSlot1" data-no-img="yes">
           <img src="" alt="" id="shopBannerImg1" data-media-key="shop.banner.1" loading="lazy" style="display:none" onerror="this.style.display='none'">
           <div class="sb-overlay"><div class="sb-copy">
@@ -13649,7 +13776,13 @@ function showPage(pg) {
   });
   // Premium account header — populate welcome banner + lifetime stats
   if (pg === 'account') { try { refreshAccountWelcome(); } catch(e) {} }
-  if (pg === 'shop') initShop();
+  if (pg === 'shop') {
+    initShop();
+    try {
+      const ob = document.getElementById('shopOfferBar');
+      if (ob) { ob.innerHTML = offerBarHTML(); vp3dScan(ob); offerTick(); }
+    } catch (e) {}
+  }
   if (pg === 'cart') {
     renderCart();
     // Aug 2026: cart strategy — genuine savings / MM progress reminder
@@ -15112,6 +15245,7 @@ function renderCart() {
       </div>
       <div class="cart-summary-box">
         <h2>Order Summary</h2>
+        ${offerBarHTML()}
         ${vitaStripHTML()}
         ${mmOff > 0 ? `<div class="mm-line mm-unlocked" style="margin-bottom:10px">🎉 Mix &amp; Match bundle discount applied (−₹${mmOff.toLocaleString('en-IN')})</div>` : (mmUnits.length > 0   ? `<div class="mm-line" style="margin-bottom:10px">🎁 Add <strong>${mmNeed}</strong> more ${mmNeed === 1 ? 'item' : 'items'} — your Mix &amp; Match discount grows.</div>`   : `<div class="mm-line" style="margin-bottom:10px">💚 This order earns you <b>Vita Points</b> to redeem on your next purchase.</div>`)}
         <div class="sum-row"><span>Subtotal (${totalPacks} pack${totalPacks !== 1 ? 's' : ''})</span><span>₹${sub.toLocaleString('en-IN')}</span></div>
@@ -17634,6 +17768,7 @@ function vp3dScan(root) {
   if (!_vp3dObs) {
     _vp3dObs = new IntersectionObserver(function (entries) {
       entries.forEach(function (e) {
+        e.target.dataset.vp3dSeen = '1';
         e.target.classList.toggle('vp3d-in', e.isIntersecting);
       });
     }, { rootMargin: '80px' });
@@ -17641,6 +17776,15 @@ function vp3dScan(root) {
   (root || document).querySelectorAll('.vp3d:not([data-vp3d])').forEach(function (el) {
     el.dataset.vp3d = '1';
     _vp3dObs.observe(el);
+    // Safety net for elements the observer never reports on at all — a
+    // container it handles oddly, a stacking context that confuses it.
+    // The entrance starts these at opacity 0, so such an element would
+    // stay invisible for good. Gated on vp3dSeen so it only rescues the
+    // genuinely unreported ones: revealing every accent after 2.5s would
+    // undo the off-screen parking for all of them.
+    setTimeout(function () {
+      if (!el.dataset.vp3dSeen) el.classList.add('vp3d-in');
+    }, 2500);
   });
 }
 // This script block may parse after DOMContentLoaded has already gone by,
@@ -19671,7 +19815,9 @@ window.showPage = function(pg) {
   if (pg === 'checkout')      { try { checkSavedAddressForCheckout(); } catch(e){} }
   if (pg === 'wishlist')      { try { renderWishlistPage(); } catch(e){} }
   if (pg === 'subscriptions') { try { initSubscriptionsPage(); } catch(e){} }
-  if (pg === 'advisor')       { try { vitaInit(); } catch(e){} }
+  // VitaMatch is the default now — it works whether or not the chat's
+  // quota is intact. vitaInit() only runs if the visitor asks to chat.
+  if (pg === 'advisor')       { try { vitaShowMatch(); } catch(e){} }
 };
 
 
@@ -20406,6 +20552,299 @@ function playVideo(wrap) {
 // below, matching the existing .vita-msg/.vita-bubble/.vita-chips/
 // .vita-rec-card CSS that was already in place waiting for this JS.
 
+// ══════════════════════════════════════════════════════════════════════
+// VITAMATCH — rule-based recommender
+//
+// The Gemini chat below is metered, and when the quota runs out the
+// advisor page stops doing the one thing it exists for. This does the
+// same job with a scoring table: four questions, ranked against the real
+// catalogue, no network call and no tokens, so it cannot go down.
+//
+// Products are matched on TAGS AND NAME TEXT, never on hardcoded ids.
+// PRODUCTS is synced from the backend and ids change; a rule that says
+// "anything tagged immunity, or with amla or ashwagandha in its name"
+// keeps working when the catalogue does.
+//
+// Wording is deliberately non-clinical — "commonly chosen for", never
+// "treats" or "helps with" a condition. Same FSSAI/ASCI line the chat's
+// system prompt holds, and the same disclaimer is shown with the result.
+// ══════════════════════════════════════════════════════════════════════
+const VITA_MATCH_Q = [
+  { key: 'goal', q: 'What are you shopping for?', hint: 'Pick the one closest to your main goal.',
+    opts: [
+      { v: 'skin',     ico: '✨', t: 'Skin & Glow',        s: 'Radiance and everyday skincare support' },
+      { v: 'energy',   ico: '⚡', t: 'Energy & Focus',      s: 'For long days and slow mornings' },
+      { v: 'immunity', ico: '🛡️', t: 'Immunity',           s: 'Everyday resilience' },
+      { v: 'weight',   ico: '⚖️', t: 'Weight Management',   s: 'Alongside diet and activity' },
+      { v: 'bone',     ico: '🦴', t: 'Bone & Joint',        s: 'Calcium, magnesium and vitamin D' },
+      { v: 'general',  ico: '🌿', t: 'General Wellness',    s: 'A solid daily multivitamin' }
+    ] },
+  { key: 'age', q: 'Which age group are you in?', hint: 'Needs shift with age — this nudges the ranking.',
+    opts: [
+      { v: '18_25', ico: '🎓', t: '18 – 25' },
+      { v: '26_35', ico: '💼', t: '26 – 35' },
+      { v: '36_50', ico: '🌱', t: '36 – 50' },
+      { v: '50p',   ico: '🌟', t: '50 and above' }
+    ] },
+  { key: 'gender', q: 'Who is this for?', hint: 'Only used to pick between the men’s and women’s formulas.',
+    opts: [
+      { v: 'female', ico: '🙋‍♀️', t: 'Woman' },
+      { v: 'male',   ico: '🙋‍♂️', t: 'Man' },
+      { v: 'na',     ico: '➖', t: 'Rather not say', s: 'We’ll skip the gendered formulas' }
+    ] },
+  { key: 'routine', q: 'What best describes your routine?', hint: 'Last one.',
+    opts: [
+      { v: 'veg',    ico: '🥗', t: 'Vegetarian or vegan',  s: 'Plant-based sources matter' },
+      { v: 'active', ico: '🏃', t: 'Active / sporty',      s: 'Training or on your feet' },
+      { v: 'desk',   ico: '💻', t: 'Mostly desk work',     s: 'Long hours sitting' },
+      { v: 'travel', ico: '✈️', t: 'Often travelling',     s: 'Irregular meals and sleep' }
+    ] }
+];
+
+// answer value -> [{ any: [terms], w: weight, why: reason }]
+const VITA_MATCH_RULES = {
+  skin:     [{ any: ['skin', 'glutathione', 'vitamin c', 'amla', 'collagen'], w: 5, why: 'A regular pick for skin and glow routines' },
+             { any: ["women's"], w: 2 }],
+  energy:   [{ any: ['energy', 'b12', 'magnesium', 'green tea', 'l-carnitine', 'rehydration'], w: 5, why: 'Chosen for everyday energy support' }],
+  immunity: [{ any: ['immunity', 'ashwagandha', 'vitamin c', 'amla', 'moringa', 'spirulina'], w: 5, why: 'A staple in everyday immunity routines' }],
+  weight:   [{ any: ['weight', 'apple cider', 'l-carnitine', 'green tea'], w: 5, why: 'Commonly taken alongside a weight routine' }],
+  bone:     [{ any: ['bone', 'calcium', 'magnesium', 'd3'], w: 5, why: 'Built around bone-support nutrients' }],
+  general:  [{ any: ['multivitamin', 'premium', 'bestseller'], w: 4, why: 'A broad daily multivitamin base' }],
+
+  '18_25':  [{ any: ['energy', 'effervescent'], w: 1.5 }],
+  '26_35':  [{ any: ['energy', 'skin'], w: 1.5 }],
+  '36_50':  [{ any: ['immunity', 'multivitamin'], w: 1.5 }, { any: ['bone', 'calcium'], w: 1 }],
+  '50p':    [{ any: ['bone', 'calcium', 'd3', 'iron'], w: 2.5, why: 'Nutrients people commonly top up after 50' },
+             { any: ['immunity'], w: 1 }],
+
+  female:   [{ any: ["women's"], w: 4, why: 'The formula built for women' },
+             { any: ['iron'], w: 2, why: 'Iron and calcium are common top-ups for women' },
+             { any: ['calcium'], w: 1.5 }],
+  male:     [{ any: ["men's"], w: 4, why: 'The formula built for men' }, { any: ['energy'], w: 1 }],
+  na:       [],
+
+  veg:      [{ any: ['spirulina', 'moringa', 'vegan', 'b12'], w: 2, why: 'Plant-based, and B12 is worth topping up on a veg diet' }],
+  active:   [{ any: ['rehydration', 'l-carnitine', 'magnesium', 'energy'], w: 2, why: 'Popular with an active routine' }],
+  desk:     [{ any: ['energy', 'green tea', 'immunity'], w: 1.5 }],
+  travel:   [{ any: ['vitamin c', 'amla', 'immunity', 'effervescent'], w: 2, why: 'Easy to carry, and a common travel top-up' }]
+};
+
+// Answers that rule a product OUT regardless of score. Scoring alone is
+// not enough here: a gendered formula recommended to the other gender is
+// wrong at any score, not merely ranked too high.
+const VITA_MATCH_EXCLUDE = { male: ["women's"], female: ["men's"] };
+
+let vmAnswers = {};
+let vmStep = 0;
+
+// Does this product answer to `term`? Tags first, then name and category,
+// so a rule survives a catalogue that has not been tagged thoroughly.
+//
+// The name test is WORD-BOUNDARY anchored, not a substring test. Plain
+// `includes` matches "men's" inside "Women's Multivitamin", which put the
+// women's formula in front of men carrying the reason "the formula built
+// for men". \b does not fire between the "o" and "m" of "women", so the
+// two stay distinct.
+const _vmRe = {};
+function vmHas(p, term) {
+  const t = term.toLowerCase();
+  if (Array.isArray(p.tags) && p.tags.some(x => String(x).toLowerCase() === t)) return true;
+  if (!_vmRe[t]) _vmRe[t] = new RegExp('\\b' + t.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '\\b', 'i');
+  return _vmRe[t].test((p.name || '') + ' ' + (p.category || ''));
+}
+
+function vitaMatchScore(ans) {
+  const banned = Object.keys(ans).flatMap(k => VITA_MATCH_EXCLUDE[ans[k]] || []);
+  const list = (typeof PRODUCTS !== 'undefined' ? PRODUCTS : [])
+    .filter(p => p && (Number(p.salePrice) > 0 || Number(p.price) > 0))
+    .filter(p => !banned.some(term => vmHas(p, term)));
+  const scored = list.map(p => {
+    let score = 0; const why = [];
+    Object.keys(ans).forEach(k => {
+      (VITA_MATCH_RULES[ans[k]] || []).forEach(rule => {
+        if (rule.any.some(term => vmHas(p, term))) {
+          score += rule.w;
+          if (rule.why && why.length < 2) why.push(rule.why);
+        }
+      });
+    });
+    // Gentle tiebreakers only — never enough to outrank a real goal match.
+    if (Array.isArray(p.tags)) {
+      if (p.tags.includes('bestseller')) score += 0.6;
+      if (p.tags.includes('featured')) score += 0.3;
+    }
+    return { p, score, why };
+  });
+  return scored.filter(x => x.score > 0)
+               .sort((a, b) => b.score - a.score || (a.p.position || 99) - (b.p.position || 99))
+               .slice(0, 3);
+}
+
+function vitaMatchInit(force) {
+  if (force) { vmAnswers = {}; vmStep = 0; }
+  vitaMatchRender();
+}
+
+function vitaMatchRender() {
+  const el = document.getElementById('vitaMatchCard');
+  if (!el) return;
+  if (vmStep >= VITA_MATCH_Q.length) { vitaMatchResults(); return; }
+  const q = VITA_MATCH_Q[vmStep];
+  const esc = (s) => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+  el.innerHTML =
+    '<div class="vm-prog">' +
+      VITA_MATCH_Q.map((_, i) => '<i class="' + (i <= vmStep ? 'done' : '') + '"></i>').join('') +
+    '</div>' +
+    '<div class="vm-step-n">Step ' + (vmStep + 1) + ' of ' + VITA_MATCH_Q.length + '</div>' +
+    '<h2 class="vm-q">' + esc(q.q) + '</h2>' +
+    '<p class="vm-hint">' + esc(q.hint) + '</p>' +
+    '<div class="vm-opts">' +
+      q.opts.map(o =>
+        '<button type="button" class="vm-opt' + (vmAnswers[q.key] === o.v ? ' sel' : '') +
+          '" onclick="vitaMatchPick(\'' + q.key + '\',\'' + o.v + '\')">' +
+          '<span class="vm-opt-ico" aria-hidden="true">' + o.ico + '</span>' +
+          '<span><b>' + esc(o.t) + '</b>' + (o.s ? '<span>' + esc(o.s) + '</span>' : '') + '</span>' +
+        '</button>').join('') +
+    '</div>' +
+    '<div class="vm-nav">' +
+      (vmStep > 0 ? '<button type="button" class="vm-back" onclick="vitaMatchBack()">&lsaquo; Back</button>' : '<span></span>') +
+      '<span class="vm-skip">No sign-in needed</span>' +
+    '</div>';
+  try { vp3dScan(el); } catch (e) {}
+}
+
+function vitaMatchPick(key, val) {
+  vmAnswers[key] = val;
+  vmStep++;
+  vitaMatchRender();
+}
+
+function vitaMatchBack() { if (vmStep > 0) { vmStep--; vitaMatchRender(); } }
+
+function vitaMatchResults() {
+  const el = document.getElementById('vitaMatchCard');
+  if (!el) return;
+  const picks = vitaMatchScore(vmAnswers);
+  const esc = (s) => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+  const rupee = (n) => '₹' + Number(n).toLocaleString('en-IN');
+
+  if (!picks.length) {
+    el.innerHTML = '<h2 class="vm-q">Nothing matched just yet</h2>' +
+      '<p class="vm-hint">The catalogue is still loading, or nothing lines up with those answers. ' +
+      'Browse the full range and everything is there.</p>' +
+      '<button class="btn-primary" onclick="showPage(\'shop\')">Browse all products</button>' +
+      '<div class="vm-alt"><button type="button" onclick="vitaMatchInit(true)">Start over</button></div>';
+    return;
+  }
+
+  const goalLabel = (VITA_MATCH_Q[0].opts.find(o => o.v === vmAnswers.goal) || {}).t || 'your goal';
+  el.innerHTML =
+    '<div class="vm-res-head">' +
+      (typeof vp3dHTML === 'function' ? vp3dHTML('gift') : '') +
+      '<h2 class="vm-res-title">Your VitaMatch is ready</h2>' +
+      '<p class="vm-res-sub">Based on <b>' + esc(goalLabel) + '</b> and the answers you gave, ' +
+        'these are the closest fits in the Ozylix range.</p>' +
+    '</div>' +
+    '<div class="vm-res-list">' +
+      picks.map((x, i) => {
+        const p = x.p;
+        const rate = Number(p.salePrice || p.price) || 0;
+        const mrp = Number(p.price) || 0;
+        const img = (typeof getProductImg === 'function' ? getProductImg(p) : p.image) || '';
+        const why = x.why.length ? x.why.join(' · ') : 'A close fit for the answers you gave';
+        return '<div class="vm-rec' + (i === 0 ? ' top' : '') + '" onclick="openProduct(' + p.id + ')">' +
+          (i === 0 ? '<span class="vm-flag">Best match</span>' : '') +
+          '<img class="vm-rec-img" src="' + esc(img) + '" alt="" loading="lazy" decoding="async"' +
+            ' onerror="this.src=PRODUCT_FALLBACKS.default">' +
+          '<div class="vm-rec-body">' +
+            '<div class="vm-rec-name">' + esc(p.name) + '</div>' +
+            '<div class="vm-rec-why">' + esc(why) + '</div>' +
+            '<button class="vm-rec-add" onclick="event.stopPropagation();STORE.addToCart(' + p.id + ')">Add to cart</button>' +
+          '</div>' +
+          '<div class="vm-rec-price">' + rupee(rate) +
+            (mrp > rate ? '<s>' + rupee(mrp) + '</s>' : '') + '</div>' +
+        '</div>';
+      }).join('') +
+    '</div>' +
+    (typeof offerBarHTML === 'function' ? offerBarHTML('Picked for you') : '') +
+    '<p class="vm-note">These are general wellness suggestions from our own range — not medical advice ' +
+      'or a diagnosis. Please talk to a qualified doctor about any health condition, and before starting ' +
+      'a supplement if you are pregnant, nursing or on medication.</p>' +
+    '<div class="vm-alt"><button type="button" onclick="vitaMatchInit(true)">Start over</button></div>';
+
+  try { vp3dScan(el); } catch (e) {}
+  try { offerTick(); } catch (e) {}
+  try { if (typeof showPtsToast === 'function') showPtsToast('Every order earns VitaPoints'); } catch (e) {}
+}
+
+// Reveals the Gemini chat for anyone who would rather type. Kept opt-in
+// because it is the path that can fail.
+function vitaShowChat() {
+  const chat = document.getElementById('vitaChatWrap');
+  const quiz = document.getElementById('vitaMatchWrap');
+  if (!chat) return;
+  chat.style.display = '';
+  if (quiz) quiz.style.display = 'none';
+  try { vitaInit(); } catch (e) {}
+  chat.scrollIntoView({ behavior: 'smooth', block: 'center' });
+}
+
+function vitaShowMatch() {
+  const chat = document.getElementById('vitaChatWrap');
+  const quiz = document.getElementById('vitaMatchWrap');
+  if (chat) chat.style.display = 'none';
+  if (quiz) { quiz.style.display = ''; vitaMatchInit(true); }
+}
+
+// ══════════════════════════════════════════════════════════════════════
+// OFFER COUNTDOWN
+//
+// OFFER_DEADLINE is a real date the shop owner sets. Leave it empty and
+// the bar still shows the offer, just with no clock. Set it to a real
+// end time and the clock appears; once that time passes the clock
+// disappears again on its own.
+//
+// What it will NOT do is invent a deadline or restart a timer on each
+// page load. That is a lie the customer catches by pressing reload, and
+// it is precisely the practice the dark-pattern rules exist for.
+// ══════════════════════════════════════════════════════════════════════
+const OFFER_DEADLINE = '';   // e.g. '2026-09-30T23:59:59+05:30'
+const OFFER_LABEL    = 'Mix & Match — bundle discounts on every pack';
+const OFFER_SUB      = 'Add any 4 items and the cheapest one is free. No code needed.';
+
+function offerEndsAt() {
+  if (!OFFER_DEADLINE) return null;
+  const t = Date.parse(OFFER_DEADLINE);
+  return Number.isFinite(t) && t > Date.now() ? t : null;
+}
+
+function offerBarHTML(kicker) {
+  if (!OFFER_LABEL) return '';
+  const ends = offerEndsAt();
+  return '<div class="offer-bar" data-offer-bar>' +
+    (typeof vp3dHTML === 'function' ? vp3dHTML('coin') : '') +
+    '<div class="offer-bar-copy">' + (kicker ? kicker + ' · ' : '') + OFFER_LABEL +
+      (OFFER_SUB ? '<span>' + OFFER_SUB + '</span>' : '') + '</div>' +
+    (ends ? '<div class="offer-clock" data-offer-clock></div>' : '') +
+  '</div>';
+}
+
+function offerTick() {
+  const clocks = document.querySelectorAll('[data-offer-clock]');
+  if (!clocks.length) return;
+  const ends = offerEndsAt();
+  if (!ends) { clocks.forEach(c => c.remove()); return; }
+  let left = Math.max(0, ends - Date.now());
+  const d = Math.floor(left / 864e5); left -= d * 864e5;
+  const h = Math.floor(left / 36e5);  left -= h * 36e5;
+  const m = Math.floor(left / 6e4);   left -= m * 6e4;
+  const s = Math.floor(left / 1e3);
+  const cell = (n, l) => '<div><b>' + String(n).padStart(2, '0') + '</b><i>' + l + '</i></div>';
+  const html = (d > 0 ? cell(d, 'days') : '') + cell(h, 'hrs') + cell(m, 'min') + cell(s, 'sec');
+  clocks.forEach(c => { c.innerHTML = html; });
+}
+setInterval(function () { try { offerTick(); } catch (e) {} }, 1000);
+
 let vitaHistory = [];
 let vitaStarted = false;
 let vitaMsgCount = 0;
@@ -20628,7 +21067,18 @@ async function vitaSend() {
   } catch(err) {
     vitaHideTyping();
     console.error('[Vita Gemini]', err);
-    vitaAddMsg("Sorry, I'm having a small connection issue 🌿 Please try again in a moment, or WhatsApp us at +91 98985 82650!", 'bot');
+    // A dead end here used to be the end of the visit. There is now a
+    // recommender that needs no quota, so offer it rather than asking
+    // them to try again at something that is out of tokens.
+    vitaAddMsg("Sorry — I can't answer right now 🌿 The quick 4-question match works offline and gets you the same recommendations. Or WhatsApp us at +91 98985 82650.", 'bot');
+    const box = document.getElementById('vitaMessages');
+    if (box) {
+      const wrap = document.createElement('div');
+      wrap.className = 'vita-chips';
+      wrap.innerHTML = '<button type="button" class="vita-chip-btn" onclick="vitaShowMatch()">Take the 4-question match &rsaquo;</button>';
+      box.appendChild(wrap);
+      box.scrollTop = box.scrollHeight;
+    }
   } finally {
     btn.disabled = false;
     input.focus();
