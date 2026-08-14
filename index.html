@@ -13598,6 +13598,7 @@ const BLOGS = [
     date:"Jun 4, 2026", readTime:"5 min read", author:"Ozylix Team" },
 ];
 
+
 // ── FAQ DATA ──
 const FAQS = [
   { q:"How long does delivery take?", a:"Standard delivery across India takes 3–5 business days. Express delivery in major cities (Mumbai, Delhi, Bangalore, Hyderabad, Ahmedabad, Chennai) takes 1–2 business days. Free delivery on every order, no minimum.", cat:"Shipping" },
@@ -14067,11 +14068,7 @@ function initShop() { applyFilters();
     if (typeof ozylxNotify === 'undefined') return;
     // `cta` is required, not decorative: paint() only renders the button
     // when a label exists, so an onCta passed on its own is unreachable.
-    ozylxNotify.show({ id: 'shop-discovery', msg: '🎁 Mix &amp; Match — the bigger your bundle, the bigger your automatic discount.', icon: '🎁', corner: 'bottom-left', cta: 'Build your bundle', onCta: function () { goMixMatch(); } });,
-    body:'Your glutathione supplement journey follows a predictable arc, and knowing it helps you stay consistent through the weeks when results are still building under the surface. In the first seven days, most people notice their energy settling into a steadier rhythm — L-glutathione is a master antioxidant that supports cellular energy cycles, and the effervescent format means it reaches your bloodstream quickly. Between day eight and day twenty-one, users commonly report their skin feeling less dull after sun exposure and pollution. By week four to six, this is where the visible shift tends to land: a more even tone, softened shadows of hyperpigmentation, and the kind of morning-face that needs less concealer. Ozylix pairs 650mg of L-glutathione with L-cysteine (the building block your body converts into more glutathione) and astaxanthin, one of the strongest carotenoid antioxidants known, so the timeline compounds rather than plateaus. Consistency beats dose size: one tablet daily in water outperforms sporadic double doses, because glutathione levels respond to steady supply.',
-    body:'When a face serum stops delivering, the reason is rarely the formula — it is the delivery route. Topical products work on the outermost layer of skin, the stratum corneum, and only a fraction of actives penetrate deeper. Melanin, the pigment behind hyperpigmentation, is produced by melanocytes living well below that barrier, in response to triggers like UV exposure, hormonal shifts and inflammation. This is the internal approach: glutathione modulates the melanin pathway from within, encouraging the lighter eumelanin-to-pheomelanin balance, while vitamin C slows the tyrosinase enzyme that drives pigment overproduction. Combined with consistent sun protection and gentle exfoliation, internal supplementation addresses the root cause rather than resurfacing it. Ozylix's effervescent glutathione with vitamin C is built for exactly this stack — one glass a day, and the pigment conversation changes from the inside out.',
-    body:'Capsules must survive stomach acid and enzymatic breakdown before their contents reach the small intestine; effervescent tablets dissolve into a pre-absorbed aqueous solution before they ever touch your gut. That difference shows up in bioavailability research: water-soluble nutrients in solution form skip the dissolution step entirely, arriving at the intestinal wall ready to cross. For glutathione — a molecule whose oral absorption has been debated for years — this format matters more than for most supplements. Ozylix's effervescent tablets also dose co-factors that support glutathione synthesis, like L-cysteine, and antioxidant partners like astaxanthin, so each glass works as a complete system rather than a single compound. Practical benefits follow: no capsule shell to swallow, gentler acidity profile, faster uptake on an empty stomach, and an absorption window that suits busy Indian mornings.',
-    body:'Three months gives a wedding skincare plan exactly the runway it needs. Month one is foundation: daily glutathione with vitamin C for melanin balance, plus a B12 and biotin tablet that supports the hair growth cycle — telogen-to-anagen shifts take roughly six to eight weeks to show, which is why early starts win. Month two layers in hydration and recovery: omega-rich nutrition and consistent sleep, because under-eye dullness at family functions is usually fatigue, not pigment. Month three is refinement: steady supplementation, professional facials timed two weeks apart from anything invasive, and SPF without exceptions, even for indoor rehearsals under lights. Ozylix's range covers this stack with its glutathione, B12-biotin and vitamin C effervescent lines — all manufactured in an FSSAI-approved facility in Gujarat, so bridal budgets and safety move together. Start by twelve weeks out; the mirror at the sangeet will thank you.'
+    ozylxNotify.show({ id: 'shop-discovery', msg: '🎁 Mix &amp; Match — the bigger your bundle, the bigger your automatic discount.', icon: '🎁', corner: 'bottom-left', cta: 'Build your bundle', onCta: function () { goMixMatch(); } });
   }, 9000); } catch (e) {}
   try { setTimeout(function () {
     if (typeof ozylxNotify === 'undefined') return;
@@ -16043,7 +16040,7 @@ function bootApp() {
   const _validPages = ['home','shop','blog','about','contact','faq','advisor','product','wishlist','subscriptions'];
   // Legacy /b2b links now redirect to the Ascovita corporate B2B page
   if (_initPage === 'b2b') { window.location.href = 'https://www.ascovita.com/#/capabilities'; }
-  if (_initPage && _validPages.includes(_initPage)) {
+  if (_initPage && (_validPages.includes(_initPage) || _initPage === 'blog')) {
     if (_initPage === 'product' && _pathSlug) {
       // Find product by slug and open it
       setTimeout(function() {
@@ -16052,6 +16049,13 @@ function bootApp() {
           if (prod) openProduct(prod.id);
           else showPage('shop');
         }
+      }, 300);
+    } else if (_initPage === 'blog' && _pathSlug) {
+      // /blog/<slug> deep link — open the blog page, then the matching
+      // article (slugified title). Unknown slugs fall through to /blog.
+      setTimeout(function() {
+        if (typeof showPage === 'function') showPage('blog');
+        if (typeof openBlogBySlug === 'function') openBlogBySlug(_pathSlug);
       }, 300);
     } else {
       setTimeout(function() { showPage(_initPage); }, 200);
@@ -17526,50 +17530,6 @@ function generateInvoice({ orderId, formData, srItems, sub, disc, promoDisc, shi
        driven by the actual PRODUCTS catalog, not a hand-written duplicate.
   -->
 
-<!-- Blog article reader (SEO fix: blog cards are now full articles, not dead
-     cards. Renders the BLOGS entry body with title, meta and related product.) -->
-<div class="blog-overlay" id="blogOverlay" onclick="if(event.target===this)closeBlog()">
-  <div class="blog-reader" id="blogReader"></div>
-</div>
-<style>
-.blog-overlay { display:none; position:fixed; inset:0; z-index:1200; background:rgba(10,15,10,.62); backdrop-filter:blur(4px); overflow-y:auto; padding:60px 16px; }
-.blog-reader { max-width:720px; margin:0 auto; background:#fff; border-radius:16px; padding:36px 32px 40px; position:relative; }
-.blog-reader .br-close { position:absolute; top:16px; right:18px; background:none; border:none; font-size:1.5rem; cursor:pointer; color:var(--gray,#666); }
-.blog-reader img.br-img { width:100%; border-radius:12px; margin-bottom:20px; max-height:360px; object-fit:cover; }
-.blog-reader .br-tag { display:inline-block; background:var(--green-wash,#eef4ee); color:var(--green,#3a7d44); border-radius:999px; padding:4px 12px; font-size:.74rem; font-weight:700; margin-bottom:12px; }
-.blog-reader h2 { font-size:clamp(1.6rem,3vw,2.1rem); line-height:1.25; margin-bottom:12px; }
-.blog-reader .br-meta { color:var(--gray,#666); font-size:.82rem; margin-bottom:22px; }
-.blog-reader .br-body { font-size:1rem; line-height:1.85; color:#2a2f2a; }
-.blog-reader .br-body p { margin-bottom:16px; }
-</style>
-<script>
-function openBlog(id) {
-  const b = BLOGS.find(x => x.id === id);
-  if (!b) return;
-  const ov = document.getElementById('blogOverlay');
-  const rd = document.getElementById('blogReader');
-  const bodyHtml = b.body
-    ? b.body.split(/\.\s*(?=[A-Z])/).filter(s=>s.trim()).map(s=>'<p>'+s.trim()+'</p>').join('')
-    : '<p>'+b.excerpt+'</p>';
-  const shopBtn = b.relatedProduct
-    ? '<div style="margin-top:24px"><button class="btn-primary" onclick="closeBlog();openProduct('+b.relatedProduct+')">🛒 Shop This Product →</button></div>'
-    : '';
-  rd.innerHTML = '<button class="br-close" onclick="closeBlog()" aria-label="Close article">✕</button>'
-    + '<img class="br-img" src="'+b.img+'" alt="'+b.title+'" loading="lazy" decoding="async">'
-    + '<span class="br-tag">'+b.tag+'</span>'
-    + '<h2>'+b.title+'</h2>'
-    + '<div class="br-meta">📅 '+b.date+' · ⏱ '+b.readTime+' · ✍ '+b.author+'</div>'
-    + '<div class="br-body">'+bodyHtml+'</div>'
-    + shopBtn;
-  ov.style.display = 'block';
-  window.location.hash = 'blog-'+id;
-}
-function closeBlog() {
-  const ov = document.getElementById('blogOverlay');
-  if (ov) ov.style.display = 'none';
-  if (location.hash && location.hash.startsWith('#blog-')) history.replaceState(null, '', location.pathname + location.search);
-}
-</script>
 </body></html>`;
 
   // Show invoice in new window + add download button on thank-you page
@@ -19773,52 +19733,8 @@ function printInvoice(orderId) {
         var w = window.open("", "_blank");
         if (!w) { URL.revokeObjectURL(_pdfUrl); showToast('Please allow pop-ups to print the invoice', 'error'); return; }
         w.document.write('<html><head><title>Ozylix Invoice ' + orderId + '</title></head><body style="margin:0">'
-          + '<object data="' + _pdfUrl + '" type="application/pdf" style="width:100%;height:100vh;border:none"></object>
-<!-- Blog article reader (SEO fix: blog cards are now full articles, not dead
-     cards. Renders the BLOGS entry body with title, meta and related product.) -->
-<div class="blog-overlay" id="blogOverlay" onclick="if(event.target===this)closeBlog()">
-  <div class="blog-reader" id="blogReader"></div>
-</div>
-<style>
-.blog-overlay { display:none; position:fixed; inset:0; z-index:1200; background:rgba(10,15,10,.62); backdrop-filter:blur(4px); overflow-y:auto; padding:60px 16px; }
-.blog-reader { max-width:720px; margin:0 auto; background:#fff; border-radius:16px; padding:36px 32px 40px; position:relative; }
-.blog-reader .br-close { position:absolute; top:16px; right:18px; background:none; border:none; font-size:1.5rem; cursor:pointer; color:var(--gray,#666); }
-.blog-reader img.br-img { width:100%; border-radius:12px; margin-bottom:20px; max-height:360px; object-fit:cover; }
-.blog-reader .br-tag { display:inline-block; background:var(--green-wash,#eef4ee); color:var(--green,#3a7d44); border-radius:999px; padding:4px 12px; font-size:.74rem; font-weight:700; margin-bottom:12px; }
-.blog-reader h2 { font-size:clamp(1.6rem,3vw,2.1rem); line-height:1.25; margin-bottom:12px; }
-.blog-reader .br-meta { color:var(--gray,#666); font-size:.82rem; margin-bottom:22px; }
-.blog-reader .br-body { font-size:1rem; line-height:1.85; color:#2a2f2a; }
-.blog-reader .br-body p { margin-bottom:16px; }
-</style>
-<script>
-function openBlog(id) {
-  const b = BLOGS.find(x => x.id === id);
-  if (!b) return;
-  const ov = document.getElementById('blogOverlay');
-  const rd = document.getElementById('blogReader');
-  const bodyHtml = b.body
-    ? b.body.split(/\.\s*(?=[A-Z])/).filter(s=>s.trim()).map(s=>'<p>'+s.trim()+'</p>').join('')
-    : '<p>'+b.excerpt+'</p>';
-  const shopBtn = b.relatedProduct
-    ? '<div style="margin-top:24px"><button class="btn-primary" onclick="closeBlog();openProduct('+b.relatedProduct+')">🛒 Shop This Product →</button></div>'
-    : '';
-  rd.innerHTML = '<button class="br-close" onclick="closeBlog()" aria-label="Close article">✕</button>'
-    + '<img class="br-img" src="'+b.img+'" alt="'+b.title+'" loading="lazy" decoding="async">'
-    + '<span class="br-tag">'+b.tag+'</span>'
-    + '<h2>'+b.title+'</h2>'
-    + '<div class="br-meta">📅 '+b.date+' · ⏱ '+b.readTime+' · ✍ '+b.author+'</div>'
-    + '<div class="br-body">'+bodyHtml+'</div>'
-    + shopBtn;
-  ov.style.display = 'block';
-  window.location.hash = 'blog-'+id;
-}
-function closeBlog() {
-  const ov = document.getElementById('blogOverlay');
-  if (ov) ov.style.display = 'none';
-  if (location.hash && location.hash.startsWith('#blog-')) history.replaceState(null, '', location.pathname + location.search);
-}
-</script>
-</body></html>');
+          + '<object data="' + _pdfUrl + '" type="application/pdf" style="width:100%;height:100vh;border:none"></object>' +
+        '</body></html>');
         w.document.close();
         setTimeout(function () { try { w.print(); } catch (e) {} }, 700);
         setTimeout(function () { URL.revokeObjectURL(_pdfUrl); }, 60000);
@@ -23255,7 +23171,6 @@ window.refreshAccountWelcome = refreshAccountWelcome;
 </script>
 <!-- Central contextual popup manager root (max 1 card, never covers CTAs) -->
 <div id="ozylxNotify" aria-live="polite"></div>
-
 <!-- Blog article reader (SEO fix: blog cards are now full articles, not dead
      cards. Renders the BLOGS entry body with title, meta and related product.) -->
 <div class="blog-overlay" id="blogOverlay" onclick="if(event.target===this)closeBlog()">
@@ -23279,25 +23194,38 @@ function openBlog(id) {
   const ov = document.getElementById('blogOverlay');
   const rd = document.getElementById('blogReader');
   const bodyHtml = b.body
-    ? b.body.split(/\.\s*(?=[A-Z])/).filter(s=>s.trim()).map(s=>'<p>'+s.trim()+'</p>').join('')
-    : '<p>'+b.excerpt+'</p>';
+    ? b.body.split(/\.(?=\s[A-Z])/).map(s => s.trim()).filter(Boolean).map(s => '<p>' + s + '</p>').join('')
+    : '<p>' + b.excerpt + '</p>';
   const shopBtn = b.relatedProduct
-    ? '<div style="margin-top:24px"><button class="btn-primary" onclick="closeBlog();openProduct('+b.relatedProduct+')">🛒 Shop This Product →</button></div>'
+    ? '<div style="margin-top:24px"><button class="btn-primary" onclick="closeBlog();openProduct(' + b.relatedProduct + ')">Shop This Product &rarr;</button></div>'
     : '';
-  rd.innerHTML = '<button class="br-close" onclick="closeBlog()" aria-label="Close article">✕</button>'
-    + '<img class="br-img" src="'+b.img+'" alt="'+b.title+'" loading="lazy" decoding="async">'
-    + '<span class="br-tag">'+b.tag+'</span>'
-    + '<h2>'+b.title+'</h2>'
-    + '<div class="br-meta">📅 '+b.date+' · ⏱ '+b.readTime+' · ✍ '+b.author+'</div>'
-    + '<div class="br-body">'+bodyHtml+'</div>'
+  rd.innerHTML = '<button class="br-close" onclick="closeBlog()" aria-label="Close article">&times;</button>'
+    + '<img class="br-img" src="' + b.img + '" alt="' + b.title + '" loading="lazy" decoding="async">'
+    + '<span class="br-tag">' + b.tag + '</span>'
+    + '<h2>' + b.title + '</h2>'
+    + '<div class="br-meta">' + b.date + ' &middot; ' + b.readTime + ' &middot; ' + b.author + '</div>'
+    + '<div class="br-body">' + bodyHtml + '</div>'
     + shopBtn;
   ov.style.display = 'block';
-  window.location.hash = 'blog-'+id;
+  try { history.pushState(null, '', '#blog-' + id); } catch(e) { window.location.hash = 'blog-' + id; }
 }
+// ── /blog/<slug> deep links ─────────────────────────────────────────────
+// Google can only link to an article it discovered, and it indexes the
+// clean path /blog/<slugified-title>, never the #blog-N hash. On arrival
+// the init code calls this to open the matching entry by slugified title.
+function openBlogBySlug(slug) {
+  if (!slug || typeof BLOGS === 'undefined') return;
+  const wanted = slugify(slug);
+  const b = BLOGS.find(x => slugify(x.title) === wanted || slugify(x.id + '') === wanted);
+  if (b) openBlog(b.id);
+}
+
 function closeBlog() {
   const ov = document.getElementById('blogOverlay');
   if (ov) ov.style.display = 'none';
-  if (location.hash && location.hash.startsWith('#blog-')) history.replaceState(null, '', location.pathname + location.search);
+  if (location.hash && location.hash.startsWith('#blog-')) {
+    try { history.replaceState(null, '', location.pathname + location.search); } catch(e) {}
+  }
 }
 </script>
 </body>
