@@ -9916,10 +9916,20 @@ function renderSiteImgSections(groups, overrides){
 function filterSiteImages(){
   const root = document.getElementById('siteImagesGroups');
   if (!root || !root.querySelector('.siteimg-sec')) return;
+  const q = ((document.getElementById('siteImgSearch')||{}).value||'').trim().toLowerCase();
   root.querySelectorAll('.siteimg-sec').forEach(sec => {
     const name = (sec.dataset.sec || '');
     const visible = (__siteTabActive === 'all' || __siteTabActive === name);
-    sec.style.display = visible ? '' : 'none';
+    if (!visible) { sec.style.display = 'none'; return; }
+    if (!q) { sec.style.display = ''; sec.querySelectorAll('.siteimg-card').forEach(c => c.style.display = ''); return; }
+    // Search applies per-card across both the catalog sections and the edu gallery
+    sec.style.display = '';
+    sec.querySelectorAll('.siteimg-card').forEach(card => {
+      const txt = (card.textContent || '').toLowerCase();
+      card.style.display = txt.includes(q) ? '' : 'none';
+    });
+    // Hide an empty section so there are no orphan headers under a search
+    sec.style.display = sec.querySelector('.siteimg-card:not([style*="display: none"])') ? '' : 'none';
   });
   // Product Gallery tab visibility
   const edu = root.querySelector('#siteimgEdu');
