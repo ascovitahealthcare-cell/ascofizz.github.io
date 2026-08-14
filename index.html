@@ -4265,6 +4265,15 @@ img[src=""], img[data-awaiting-upload] { visibility: hidden; width: 100%; }
 .b-prod-cat { font-size: .66rem; font-weight: 600; letter-spacing: .14em; text-transform: uppercase; color: var(--t-dim); margin-top: 3px; }
 .b-prod-price { font-size: .95rem; font-weight: 600; color: var(--indigo); white-space: nowrap; }
 .b-prod-badge { padding: 3px 9px; border-radius: 99px; font-size: .6rem; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; background: rgba(192,57,74,.10); color: var(--indigo-lo); }
+/* Free-form quantity stepper (Aug 2026): +/− buttons, count, and a remove
+   control per row. Kept touch-friendly — 34px hit targets, no pointer-events
+   on the row's buttons so tapping them never toggles selection. */
+.b-qty-btn { width: 34px; height: 34px; border-radius: 10px; border: none; cursor: pointer; font-size: 1.05rem; font-weight: 700; color: var(--t-hi); background: var(--paper); box-shadow: var(--neo-1); transition: box-shadow var(--dur-2) var(--rise), transform var(--dur-2) var(--rise); }
+.b-qty-btn:hover { transform: translateY(-1px); box-shadow: var(--neo-2); }
+.b-qty-btn:active { transform: translateY(1px); box-shadow: var(--neo-in); }
+.b-qty-val { min-width: 22px; text-align: center; font-weight: 800; font-size: .95rem; color: var(--ink); font-variant-numeric: tabular-nums; }
+.b-rm-btn { width: 34px; height: 34px; border-radius: 10px; border: none; cursor: pointer; font-size: .85rem; color: var(--f-guava); background: rgba(192,57,74,.08); box-shadow: none; transition: background var(--dur-2) var(--rise), transform var(--dur-2) var(--rise); }
+.b-rm-btn:hover { background: rgba(192,57,74,.16); transform: translateY(-1px); }
 .bundle-summary {
   position: sticky; top: 100px;
   padding: 28px; border-radius: var(--r-lg);
@@ -8879,11 +8888,11 @@ setInterval(function() { syncAppCartBadge(); syncAppWishBadge(); }, 2000);
     <div style="margin-bottom:28px">
       <span class="cf-section-label">Mix &amp; Match</span>
       <h2 class="cf-section-title">Buy Any 3. Get the 4th Free.</h2>
-      <p class="cf-section-sub">Pick any 4 eligible products and the lowest-priced one of the four is completely free — no code, applied automatically.</p>
+      <p class="cf-section-sub">Pick any products in any quantities and every 4 units across your selection earns its FREE-est unit — no code, applied automatically.</p>
     </div>
     <div class="bundle-layout">
       <div>
-        <p style="font-size:.9rem;color:var(--t-mid);margin-bottom:16px;line-height:1.6">Tick any 4 products below. The cheapest of the four comes off your total — calculated from real prices (your price / pack tier, whichever applies) and re-checked on our server at checkout. Add 8 and two of them are free, and so on.</p>
+        <p style="font-size:.9rem;color:var(--t-mid);margin-bottom:16px;line-height:1.6">Pick any products in any quantities using the +/− controls — 2 Glutathione, 1 ACV, 1 Multidiata, whatever you like. Every 4 units across your whole selection earns the FREE-est unit automatically, calculated from real prices (your pack tier, whichever applies) and re-checked on our server at checkout. Add 8 units and two are free, and so on.</p>
         <div id="bundleProdList"></div>
       </div>
       <div class="bundle-summary">
@@ -14174,28 +14183,43 @@ function buildProductPage(p) {
 // per-product lookup; products not in the map get no chips.
 // ══════════════════════════════════════════════════════════════════════
 window.buildKeyStatChips = function (p) {
-  var K = {
-    'glutathione': [['30 tabs','Size'], ['1 per day','Dose'], ['FSSAI','Approved'], ['India','Made in']],
-    'acv':        [['30 tabs','Size'], ['1 per day','Dose'], ['FSSAI','Approved'], ['India','Made in']],
-    'ashwagandha':[['30 tabs','Size'], ['1 per day','Dose'], ['FSSAI','Approved'], ['India','Made in']],
-    'spirulina':  [['60 tabs','Size'], ['2 per day','Dose'], ['Organic','Certified'], ['India','Made in']],
-    'multivitamin':[['30 tabs','Size'], ['1 per day','Dose'], ['Vegan','Friendly'], ['India','Made in']],
-    'biotin':     [['60 tabs','Size'], ['1 per day','Dose'], ['FSSAI','Approved'], ['India','Made in']],
-    'calcium':    [['60 tabs','Size'], ['1 per day','Dose'], ['D3+K2','Complex'], ['India','Made in']],
-    'rehydration':[['1 stick','Size'], ['On the go','Format'], ['Electrolyte','Hydration'], ['India','Made in']]
-  };
+  // Aug 2026: the old static lookup hand-typed a different 'Size' and 'Dose'
+  // for each product name pattern, and most of them were wrong (Multidiata
+  // actually ships 30 AND 60 tab packs; several products are 2/day). Every
+  // chip now comes from the catalogue's real data: the pack tiers for SIZE
+  // and the howToUse text for DOSE. Fallbacks below only fill gaps.
   var name = (p && p.name || '').toLowerCase();
-  var key = null;
-  if (/glutathione/.test(name)) key = 'glutathione';
-  else if (/cider|acv/.test(name)) key = 'acv';
-  else if (/ashwagandha/.test(name)) key = 'ashwagandha';
-  else if (/spirulina/.test(name)) key = 'spirulina';
-  else if (/multi/.test(name)) key = 'multivitamin';
-  else if (/biotin|hair/.test(name)) key = 'biotin';
-  else if (/bone|calcium|joint/.test(name)) key = 'calcium';
-  else if (/rehydrat|electrolyte/.test(name)) key = 'rehydration';
-  var chips = K[key];
-  if (!chips || !chips.length) return '';
+  // ── SIZE: real pack tiers (or the offer text when no tiers exist) ──
+  var size = '';
+  try {
+    var tiers = typeof getProductTiers === 'function' ? getProductTiers(p) : null;
+    if (tiers && tiers.length) {
+      var tabSizes = tiers.map(function (t) { return Number(t.tabs) || 0; }).filter(function (v) { return v > 0; });
+      if (tabSizes.length) {
+        var minT = Math.min.apply(null, tabSizes), maxT = Math.max.apply(null, tabSizes);
+        size = minT === maxT ? minT + ' tabs' : minT + '–' + maxT + ' tabs';
+      }
+    } else if (p && p.offer && /pack/i.test(p.offer)) {
+      var found = p.offer.match(/(\d+)\s*tabs?/gi);
+      if (found) { var uniq = []; found.forEach(function (f) { var n = parseInt(f, 10); if (uniq.indexOf(n) < 0) uniq.push(n); }); uniq.sort(function (a, b) { return a - b; }); size = uniq.length === 1 ? uniq[0] + ' tabs' : uniq.join('–') + ' tabs'; }
+    }
+  } catch(e) {}
+  // ── DOSE: parsed from howToUse, not guessed ──
+  var dose = '';
+  try {
+    var ht = ((p && p.howToUse) || '').toLowerCase();
+    var m;
+    if ((m = ht.match(/(\d)\s+(?:tablets?|tabs?|stick|capsules?)\s*(?:per day|daily|a day|each day)/))) dose = m[1] + ' per day';
+    else if (/once daily|1\s+(?:tablet|stick)/.test(ht)) dose = '1 per day';
+    else if (/twice daily|2\s+tablets?\s*(?:per day|a day|in the day)/.test(ht)) dose = '2 per day';
+    else if (/on the go/i.test(ht)) dose = 'On the go';
+  } catch(e) {}
+  var chips = [];
+  if (size)  chips.push([size, 'Size']);
+  if (dose)  chips.push([dose, 'Dose']);
+  // Origin/approval pair — always true for the Ozylix range.
+  chips.push(['FSSAI', 'Approved'], ['India', 'Made in']);
+  if (!chips.length) return '';
   return '<div class="ksc-row">' + chips.map(function (c) {
     return '<span class="ksc-chip"><span class="ksc-v">' + (typeof c === 'string' ? c : esc(c[0])) + '</span><span class="ksc-k">' + (c[1] || '') + '</span></span>';
   }).join('') + '</div>';
@@ -19515,7 +19539,8 @@ function renderQuizResult(){
   ov.innerHTML='<div class="quiz-modal"><div class="qm-head"><div class="qm-title">🎯 Your Personalised Stack<\/div><button class="qm-close" onclick="closeQuiz()">✕<\/button><\/div><div class="qm-body"><div class="qm-result"><div class="qm-result-ico">🌿<\/div><div class="qm-result-title">Here\'s what your body needs<\/div><div class="qm-result-sub">Based on your answers, our nutritionists recommend this personalised Ozylix stack.<\/div><div class="qm-result-prods">'+rp.map(p=>'<div class="qm-rp" onclick="closeQuiz();openProduct('+p.id+')"><img src="'+(esc(cdnImg(p.image||'')))+ '" alt="Ozylix product image" style="width:72px;height:72px;object-fit:cover;border-radius:10px;display:block;margin:0 auto 8px" onerror="this.style.display=\'none\'" decoding="async"><div class="qm-rp-name">'+esc(p.name||'')+'<\/div><div class="qm-rp-price">₹'+(p.salePrice||p.price||0)+'<\/div><\/div>').join('')+'<\/div><button class="btn-primary" onclick="closeQuiz();showPage(\'shop\')" style="margin-bottom:12px">Shop My Recommendations →<\/button><\/div><\/div><\/div>';
 }
 
-let selectedBundleIds=new Set();
+// selectedBundleIds removed (Aug 2026) — Mix & Match is now free-form
+// quantity picking (bundleQty), so a one-flag Set is no longer used.
 // The bundle rows show a real product photo only once the Supabase sync
 // has landed — before that getProductImg() has nothing but the category
 // fallback to return. This list is built at start-up, so it was ALWAYS
@@ -19532,8 +19557,15 @@ let selectedBundleIds=new Set();
 // innerHTML drops it, so the rows would look empty while the summary below
 // still charged for them. Re-applying it here keeps the two in step no
 // matter who calls this or when.
-function renderBundleBuilder(){const list=document.getElementById('bundleProdList');if(!list||!PRODUCTS)return;list.innerHTML=PRODUCTS.filter(p=>p.price||p.salePrice).map(p=>{const img=typeof getProductImg==='function'?getProductImg(p):(p.image||PRODUCT_FALLBACKS&&PRODUCT_FALLBACKS.default||'');return'<div class="b-prod-row" id="brow-'+p.id+'" onclick="toggleBundle('+p.id+')"><div class="b-prod-cb" id="bcb-'+p.id+'">✓</div><div class="b-prod-img"><img src="'+esc(img)+'" alt="Ozylix product image" style="width:54px;height:54px;object-fit:cover;border-radius:10px" onerror="this.style.opacity=0" decoding="async"></div><div class="b-prod-info"><div class="b-prod-name">'+esc(p.name)+'</div><div class="b-prod-cat">'+esc(p.category||'supplement')+'</div>'+(p.badge?'<div class="b-prod-badge">'+esc(p.badge)+'</div>':'')+'</div><div class="b-prod-price">₹'+(p.salePrice||p.price)+'</div></div>';}).join('');try{selectedBundleIds.forEach(function(id){document.getElementById('brow-'+id)?.classList.add('sel');});}catch(e){}}
-function toggleBundle(id){if(selectedBundleIds.has(id)){selectedBundleIds.delete(id);document.getElementById('brow-'+id)?.classList.remove('sel');}else{selectedBundleIds.add(id);document.getElementById('brow-'+id)?.classList.add('sel');}updateBundleSummary();}
+// FREE-FORM MIX & MATCH (Aug 2026): any quantity of any product. The old
+// checkbox rows only allowed one unit per product and had no remove control.
+// bundleQty tracks chosen units per product id; a stepper (+/−) sits on
+// every eligible row and the summary lists each line with its own remove.
+var bundleQty = {};
+function renderBundleBuilder(){const list=document.getElementById('bundleProdList');if(!list||!PRODUCTS)return;list.innerHTML=PRODUCTS.filter(p=>p.price||p.salePrice).map(p=>{const img=typeof getProductImg==='function'?getProductImg(p):(p.image||PRODUCT_FALLBACKS&&PRODUCT_FALLBACKS.default||'');const q=bundleQty[p.id]||0;return'<div class="b-prod-row'+(q>0?' sel':'')+'" id="brow-'+p.id+'"><div class="b-prod-img"><img src="'+esc(img)+'" alt="Ozylix product image" style="width:54px;height:54px;object-fit:cover;border-radius:10px" onerror="this.style.opacity=0" decoding="async"></div><div class="b-prod-info"><div class="b-prod-name">'+esc(p.name)+'</div><div class="b-prod-cat">'+esc(p.category||'supplement')+'</div>'+(p.badge?'<div class="b-prod-badge">'+esc(p.badge)+'</div>':'')+'</div><div style="display:flex;align-items:center;gap:8px">'+(q>0?'<button class="b-qty-btn" onclick="bundleQtyChange('+p.id+',-1,event)" aria-label="Remove one">−</button><span class="b-qty-val">'+q+'</span><button class="b-qty-btn" onclick="bundleQtyChange('+p.id+',1,event)" aria-label="Add one">+</button><button class="b-rm-btn" onclick="bundleQtySet('+p.id+',0,event)" aria-label="Remove product">✕</button>':'<button class="b-qty-btn b-add-btn" onclick="bundleQtyChange('+p.id+',1,event)" aria-label="Add to mix">+ Add</button>')+'</div></div>';}).join('');}
+function bundleQtyChange(id,d,e){if(e)e.stopPropagation();const q=(bundleQty[id]||0)+d;bundleQtySet(id,Math.max(0,q),e);}
+function bundleQtySet(id,q,e){if(e)e.stopPropagation();if(q<=0)delete bundleQty[id];else bundleQty[id]=q;renderBundleBuilder();updateBundleSummary();}
+function toggleBundle(id){bundleQtyChange(id, bundleQty[id]>0? -bundleQty[id] : 1, null);}
 // Mix & Match preview. Mirrors mixAndMatchDiscount() in backend/server.js:
 // units sorted ascending, then index 0, 4, 8... is free — the cheapest of
 // each group of four. Eight products picked means two free, not one, which
@@ -19548,17 +19580,20 @@ function mmPreview(prices){
   return { saving, groups, need: groups>0 ? 0 : MM_GROUP-(units.length%MM_GROUP||0) };
 }
 function updateBundleSummary(){
-  const sel=[...selectedBundleIds].map(id=>PRODUCTS.find(p=>p.id===id)).filter(Boolean);
-  const n=sel.length;
-  const prices=sel.map(p=>p.salePrice||p.price);
-  const sub=prices.reduce((s,v)=>s+v,0);
+  const ids=Object.keys(bundleQty).map(Number);
+  const sel=ids.map(id=>PRODUCTS.find(p=>p.id===id)).filter(Boolean);
+  const lines=sel.map(p=>({p,qty:bundleQty[p.id]||1}));
+  const nUnits=lines.reduce((s,l)=>s+l.qty,0);
+  // Unit prices: a line's per-unit price is the product's chosen tier rate
+  // (default tier when none selected), matching what the cart will charge.
+  const prices=[];const sub=lines.reduce((s,l)=>{const p=l.p;const tiers=typeof getProductTiers==='function'?getProductTiers(p):null;const rate=(tiers&&tiers[currentTierIdx(p,tiers)])?tiers[currentTierIdx(p,tiers)].rate:(p.salePrice||p.price);for(let i=0;i<l.qty;i++)prices.push(rate);return s+rate*l.qty;},0);
   const mm=mmPreview(prices);
   const sav=Math.min(mm.saving,sub);
   const tot=sub-sav;
   const box=document.getElementById('bundleItemsBox');
-  if(box)box.innerHTML=n===0
+  if(box)box.innerHTML=nUnits===0
     ?'<div class="bundle-empty-hint">No products selected yet<\/div>'
-    :sel.map(p=>'<div class="b-item-chip"><span class="b-item-name">'+esc(p.name)+'<\/span><span class="b-item-price">₹'+(p.salePrice||p.price)+'<\/span><\/div>').join('');
+    :lines.map(l=>'<div class="b-item-chip"><span class="b-item-name">'+esc(l.p.name)+' × '+l.qty+'<\/span><button class="b-rm-btn" onclick="bundleQtySet('+l.p.id+',0)" aria-label="Remove">✕<\/button><span class="b-item-price">₹'+((l.p.salePrice||l.p.price)*l.qty)+'<\/span><\/div>').join('');
   const s_=document.getElementById('bundleSubtotal'),t=document.getElementById('bundleTotal'),
         dr=document.getElementById('bundleDiscountRow'),dl=document.getElementById('bundleDiscountLabel'),
         dv=document.getElementById('bundleDiscountVal'),sb=document.getElementById('bundleSavingsBanner');
@@ -19571,14 +19606,15 @@ function updateBundleSummary(){
     if(sb){sb.style.display='block';sb.textContent='🎉 Mix & Match unlocked — ₹'+sav+' off, your '+(mm.groups>1?'cheapest '+mm.groups+' items are':'cheapest item is')+' FREE';}
   }else{
     if(dr)dr.style.display='none';
-    // Progress, not silence: a customer one product short should be told so.
+    // Progress, not silence: a customer short of the next free unit should
+    // be told exactly how many units stand between them and it.
     if(sb){
-      if(n>0){sb.style.display='block';sb.textContent='🎁 Add '+mm.need+' more '+(mm.need===1?'product':'products')+' — your lowest-priced one becomes FREE';}
+      if(nUnits>0){sb.style.display='block';sb.textContent='🎁 Add '+mm.need+' more '+(mm.need===1?'unit':'units')+' — your lowest-priced one becomes FREE';}
       else sb.style.display='none';
     }
   }
 }
-function addBundleToCart(){const sel=[...selectedBundleIds].map(id=>PRODUCTS.find(p=>p.id===id)).filter(Boolean);if(!sel.length){showToast('Select at least one product 🌿','error');return;}sel.forEach(p=>STORE.addToCart(p.id,1));openSideCart();showPtsToast('+'+sel.length*10+' VitaPoints!');}
+function addBundleToCart(){const ids=Object.keys(bundleQty).map(Number);const sel=ids.map(id=>PRODUCTS.find(p=>p.id===id)).filter(Boolean);if(!sel.length){showToast('Select at least one product 🌿','error');return;}sel.forEach(p=>STORE.addToCart(p.id,bundleQty[p.id]||1));openSideCart();const totalUnits=sel.reduce((s,p)=>s+(bundleQty[p.id]||1),0);showPtsToast('Earns VitaPoints on '+totalUnits+' '+(totalUnits===1?'item':'items')+' when delivered');bundleQty={};renderBundleBuilder();updateBundleSummary();}
 
 let stickyQty=1,stickyProdId=null;
 function initStickyCart(prod){if(!prod)return;stickyProdId=prod.id;stickyQty=1;const ne=document.getElementById('scProdName'),pe=document.getElementById('scProdPrice'),qe=document.getElementById('scQtyVal');if(ne)ne.textContent=prod.name;if(pe)pe.textContent='₹'+(prod.salePrice||prod.price);if(qe)qe.textContent=1;const sc=document.getElementById('stickyCart'),ab=document.getElementById('addCartBtn');if(!sc||!ab)return;const obs=new IntersectionObserver(en=>{if(!en[0].isIntersecting){sc.style.display='flex';requestAnimationFrame(()=>{sc.style.transform='translateY(0)';});}else{sc.style.transform='translateY(100%)';setTimeout(()=>{if(sc.style.transform==='translateY(100%)')sc.style.display='none';},300);}},{threshold:0.1});obs.observe(ab);}
