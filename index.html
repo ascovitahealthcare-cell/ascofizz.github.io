@@ -11689,6 +11689,11 @@ async function syncProductsFromBackend() {
       const products = data.data || data;
       if (Array.isArray(products) && products.length) {
         mergeBackendProducts(products);
+        // Re-run the stale-cart fix now that live products exist
+        // (init ran before the backend sync) and refresh the side
+        // cart so stale prices disappear on first paint.
+        STORE.normalizeCartTiers();
+        if (typeof renderSideCart === 'function') renderSideCart();
         // Re-render all grids with updated data (including new backend products)
         try { renderFeatured(); } catch(e){}
         try { renderNewArrivals(); } catch(e){}
