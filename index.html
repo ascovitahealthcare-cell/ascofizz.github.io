@@ -13428,6 +13428,25 @@ function openProduct(id) {
   const bc=document.getElementById('prodBCName'); if(bc) bc.textContent = currentProduct.name;
 }
 
+// REVIEW COLLECTION: called from the "Write a Review" button on delivered
+// order cards in My Account. Opens the product page and jumps straight to
+// the review form — the customer is already logged in (required for the
+// page) and purchase-verified server-side, so it is a two-tap review.
+function openProductReview(productId) {
+  openProduct(productId);
+  // The review list may still be loading from Supabase; scroll after the
+  // live ratings land so rvFormWrap exists in the DOM.
+  const tryScroll = () => {
+    const wrap = document.getElementById('rvFormWrap');
+    if (wrap) { setTimeout(() => wrap.scrollIntoView({ behavior: 'smooth', block: 'center' }), 150); return true; }
+    return false;
+  };
+  if (!tryScroll()) {
+    const h = setInterval(() => { if (tryScroll()) clearInterval(h); }, 300);
+    setTimeout(() => clearInterval(h), 10000);
+  }
+}
+
 // ── MOBILE MENU ──
 function toggleMobile() {
   document.getElementById('mobileMenu')?.classList.toggle('open');
@@ -18428,6 +18447,16 @@ function _renderOrderCards(orders, container) {
       }
     }
     const payStatus = o.payment_status ? `<div style="font-size:.72rem;color:var(--gray,#888);margin-top:4px">${o.payment_status}</div>` : '';
+    // REVIEW COLLECTION: delivered orders get a direct "Write a Review"
+    // button — this is where reviews come from in the real world. It opens
+    // the product page straight onto the review form, so the customer is
+    // one tap from the stars. Only shown when the courier has confirmed
+    // delivery (fulfillment === 'Delivered'), never before.
+    const delivered = String(status).toLowerCase() === 'delivered';
+    const productId = (() => { try { const it = items[0]; return Number(it && (it.product_id || it.id || 0)) || 0; } catch(_) { return 0; } })();
+    const deliveredReviewCta = delivered && productId
+      ? `<button class="order-track-btn" style="background:var(--fern-lo,#2E7D32);color:#fff" onclick="openProductReview(${productId})">⭐ Write a Review</button>`
+      : '';
 
     return `<div class="order-card">
       <div class="order-header">
@@ -18443,7 +18472,7 @@ function _renderOrderCards(orders, container) {
         <div class="order-total">₹${parseFloat(total).toLocaleString('en-IN')}${payStatus}</div>
         <div style="display:flex;gap:8px">
           <button class="invoice-btn" onclick="downloadInvoice('${orderId}')">🧾 Invoice</button>
-          <button class="order-track-btn" onclick="openTracking('${orderId}')">🚚 Track</button>
+          <button class="order-track-btn" onclick="openTracking('${orderId}')">🚚 Track</button>${deliveredReviewCta}
         </div>
       </div>
     </div>`;
