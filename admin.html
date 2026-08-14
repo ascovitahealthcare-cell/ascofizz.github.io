@@ -431,6 +431,24 @@ textarea.form-control{resize:vertical;min-height:80px;}
 /* compact caption under each card */
 .photo-cap{position:absolute;bottom:0;left:0;right:0;background:rgba(0,0,0,0.66);color:var(--text2);font-size:0.55rem;padding:2px 5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
 .photo-cap .pc-size{color:var(--text3);margin-left:4px;}
+
+/* ═══ SITE IMAGES — compact section cards (same language as Photo Library) ═══ */
+.siteimg-sec{margin-bottom:22px;background:var(--surface2);border:1px solid var(--border);border-radius:12px;padding:14px;}
+.siteimg-sec-title{display:flex;align-items:center;gap:8px;margin-bottom:10px;}
+.siteimg-sec-name{font-size:0.8rem;font-weight:700;letter-spacing:.4px;text-transform:uppercase;color:var(--text2);}
+.siteimg-sec-count{font-size:0.66rem;padding:2px 9px;border-radius:12px;background:var(--green-glow);color:var(--green-text);font-weight:700;}
+.siteimg-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:8px;}
+.siteimg-card{position:relative;background:var(--surface);border:2px solid transparent;border-radius:10px;overflow:hidden;display:flex;flex-direction:column;transition:border-color 0.15s,transform 0.15s;}
+.siteimg-card:hover{border-color:var(--green);transform:translateY(-2px);box-shadow:0 4px 12px rgba(0,0,0,0.25);}
+.siteimg-card .si-media{width:100%;height:100px;object-fit:cover;background:var(--bg2);}
+.siteimg-card .si-media-empty{width:100%;height:100px;display:flex;align-items:center;justify-content:center;color:var(--text3);font-size:0.7rem;background:var(--bg2);}
+.siteimg-card .si-meta{padding:8px 10px;flex:1;display:flex;flex-direction:column;gap:4px;min-height:84px;}
+.siteimg-card .si-name{font-size:0.76rem;font-weight:600;color:var(--text);line-height:1.25;}
+.siteimg-card .si-hint{font-size:0.64rem;color:var(--text3);line-height:1.3;flex:1;word-break:break-word;}
+.siteimg-card .si-hint .si-status{font-weight:600;}
+.siteimg-card .si-actions{display:flex;gap:5px;padding:6px 10px 8px;border-top:1px solid var(--border);}
+.siteimg-card .si-actions .btn{font-size:0.66rem;padding:4px 0;min-height:24px;}
+.siteimg-badge{position:absolute;top:6px;right:6px;background:rgba(0,0,0,0.7);color:#fff;font-size:0.58rem;padding:2px 7px;border-radius:8px;pointer-events:none;}
 /* section tabs, search & sort row */
 .media-tabs{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px;align-items:center;}
 .media-tab{font-size:0.72rem;padding:5px 12px;border-radius:16px;background:var(--surface2);border:1px solid var(--border);color:var(--text2);cursor:pointer;transition:all 0.15s;display:inline-flex;align-items:center;gap:5px;}
@@ -9816,32 +9834,129 @@ async function loadSiteImages() {
   const groups = {};
   SITE_IMAGE_CATALOG.forEach(item => { (groups[item.group] = groups[item.group]||[]).push(item); });
 
-  // ── Product Education Gallery (Know Your Product tabs) ────────────
-  const eduHtml = `
-    <div style="margin-bottom:28px;">
-      <div style="font-size:0.8rem;font-weight:700;letter-spacing:.5px;text-transform:uppercase;color:var(--text3);margin-bottom:10px;">Product Education Gallery — "Know Your Product" cards</div>
+  // ── Toolbar: tabs, summary, search, sort (mirrors Photo Library) ──
+  const secNames = Object.keys(groups);
+  const totalOverrides = Object.keys(overrides).length;
+  const toolbar = `
+    <div class="media-tabs" style="margin-top:4px;">
+      <div class="media-tab active" data-sitab="all" onclick="setSiteTab('all', this)">🖼️ All Slots<span class="tab-count">${SITE_IMAGE_CATALOG.length}</span></div>
+      ${secNames.map(g => `<div class="media-tab" data-sitab="${g.toLowerCase().replace(/[^a-z0-9]/g,'')}" onclick="setSiteTab('${g.toLowerCase().replace(/[^a-z0-9]/g,'')}', this)">${g==='Global'?'🌐':g==='About Page'?'📄':'📁'} ${g}<span class="tab-count">${groups[g].length}</span></div>`).join('')}
+      <div class="media-tab" data-sitab="edu" onclick="setSiteTab('edu', this)">🎓 Product Gallery<span class="tab-count">${EDU_CARDS * EDU_PANELS.length}</span></div>
+      <div class="media-summary">
+        <span><b>${totalOverrides}</b> custom ${totalOverrides===1?'override':'overrides'}</span>
+        <span><b>${SITE_IMAGE_CATALOG.length}</b> total slots</span>
+      </div>
+      <input class="media-search" id="siteImgSearch" placeholder="🔍 Search slots…" oninput="filterSiteImages()">
+      <select class="media-sort" id="siteImgSort" onchange="filterSiteImages()">
+        <option value="group">Grouped by section</option>
+        <option value="custom">Custom first</option>
+        <option value="name">Name A–Z</option>
+      </select>
+    </div>
+  `;
+  window.__siteImgState = { tab:'all', overrides: overrides };
+  window.renderSiteImgSections = function () { return renderSiteImgSections(groups, overrides); };
+
+  document.getElementById('siteImagesGroups').innerHTML = toolbar + renderSiteImgSections(groups, overrides);
+  loadEduSection();
+}
+
+let __siteTabActive = 'all';
+function setSiteTab(tab, el){
+  __siteTabActive = tab;
+  document.querySelectorAll('.media-tab[data-sitab]').forEach(t => t.classList.toggle('active', t.dataset.sitab === tab));
+  filterSiteImages();
+}
+
+function renderSiteImgSections(groups, overrides){
+  const state = window.__siteImgState || {};
+  const q = ((document.getElementById('siteImgSearch')||{}).value||'').trim().toLowerCase();
+  const sortBy = ((document.getElementById('siteImgSort')||{}).value||'group');
+  const secNames = Object.keys(groups);
+  return secNames.map(groupName => {
+    let items = groups[groupName].slice();
+    if (sortBy === 'custom') items.sort((a,b)=> (overrides[b.key]?1:0) - (overrides[a.key]?1:0));
+    if (sortBy === 'name') items.sort((a,b)=> a.label.localeCompare(b.label));
+    if (q) items = items.filter(it => (it.label+' '+it.hint+' '+it.key+' '+groupName).toLowerCase().includes(q));
+    if (!items.length && q) return '';
+    if (__siteTabActive !== 'all' && __siteTabActive !== groupName.toLowerCase().replace(/[^a-z0-9]/g,'')) return '';
+    const nCustom = items.filter(it => !!overrides[it.key]).length;
+    return `<div class="siteimg-sec" data-sec="${groupName.toLowerCase()}">
+      <div class="siteimg-sec-title">
+        <div class="siteimg-sec-name">${groupName==='Global'?'🌐':groupName==='About Page'?'📄':'📁'} ${groupName}</div>
+        <div class="siteimg-sec-count">${nCustom}/${items.length} custom</div>
+      </div>
+      <div class="siteimg-grid">
+        ${items.map(item => {
+          const current = overrides[item.key] || item.fallback;
+          const isOverridden = !!overrides[item.key];
+          const empty = !current;
+          return `
+          <div class="siteimg-card">
+            ${isVideoFileUrl(current)
+              ? '<video src="'+adminCdnImg(current)+'" muted loop playsinline preload="metadata" autoplay class="si-media" style="object-fit:cover;"></video><span class="siteimg-badge">▶ VIDEO</span>'
+              : empty
+                ? '<div class="si-media-empty">No image</div>'
+                : '<img src="'+adminCdnImg(current)+'" class="si-media" onerror="this.style.display=\'none\';this.parentElement.querySelector(\'.si-media-empty\')&&(this.parentElement.querySelector(\'.si-media-empty\').style.display=\'flex\')"><div class="si-media-empty" style="display:none;">No image</div>'}
+            <div class="si-meta">
+              <div class="si-name">${item.label}</div>
+              <div class="si-hint">${item.hint}<br><span class="si-status" style="color:${isOverridden?'var(--green-text)':'var(--text3)'};">${isOverridden?'✓ custom image set':'· using site default'}</span></div>
+            </div>
+            <div class="si-actions">
+              <input type="file" accept="image/*,.svg,video/*,.mp4,.webm,.mov" id="siteImgFile-${item.key}" style="display:none;" onchange="uploadSiteImage(this, '${item.key}')">
+              <button class="btn btn-primary btn-sm" style="flex:1;" onclick="document.getElementById('siteImgFile-${item.key}').click()">📤 ${isOverridden ? 'Replace' : 'Upload'}</button>
+              ${isOverridden ? `<button class="btn btn-danger btn-sm btn-icon" onclick="resetSiteImage('${item.key}', '${current}')" title="Delete this image everywhere and revert to default">🗑️</button>` : ''}
+            </div>
+          </div>`;
+        }).join('')}
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function filterSiteImages(){
+  const root = document.getElementById('siteImagesGroups');
+  if (!root || !root.querySelector('.siteimg-sec')) return;
+  root.querySelectorAll('.siteimg-sec').forEach(sec => {
+    const name = (sec.dataset.sec || '');
+    const visible = (__siteTabActive === 'all' || __siteTabActive === name);
+    sec.style.display = visible ? '' : 'none';
+  });
+  // Product Gallery tab visibility
+  const edu = root.querySelector('#siteimgEdu');
+  if (edu) edu.style.display = (__siteTabActive === 'edu') ? '' : 'none';
+}
+
+// ── Product Education Gallery (Know Your Product tabs) ─────────────
+const __eduHtml = function(overrides){
+  return `
+    <div class="siteimg-sec" id="siteimgEdu" style="display:none;">
+      <div class="siteimg-sec-title">
+        <div class="siteimg-sec-name">🎓 Product Gallery — "Know Your Product" cards</div>
+        <div class="siteimg-sec-count">${EDU_CARDS * EDU_PANELS.length} slots</div>
+      </div>
       <div style="font-size:0.75rem;color:var(--text3);margin-bottom:12px;max-width:640px;">The 16 creatives on the product page's Know Your Product tabs (How To Use / What Experts Say / What Research Says / Why Ozylix — 4 cards each). <b style="color:var(--text);">Default set below applies to every product without its own uploads</b> — fill this first (e.g. with the Glutathione creatives), then optionally override individual products by slug. Videos are accepted too — they autoplay silently on the site.</div>
       <div style="font-size:0.78rem;font-weight:700;color:var(--green-text);margin:4px 0 8px;">🌐 Default creatives — shown on all products that don't have their own set</div>
       ${EDU_PANELS.map(pl => `
         <div style="font-size:0.75rem;font-weight:700;color:var(--text2);margin:12px 0 8px;">${pl.label}</div>
-        <div class="grid-3">
+        <div class="siteimg-grid">
           ${Array.from({length: EDU_CARDS}, (_, i) => {
             const key = 'edu.global.' + pl.id + '.' + (i + 1);
             const url = overrides[key] || '';
             const has = !!url;
-            return `<div class="card" style="padding:0;overflow:hidden;outline:2px solid var(--green-text);outline-offset:-2px;">
+            return `<div class="siteimg-card">
               ${has ? (isVideoFileUrl(url)
-                ? '<video src="'+adminCdnImg(url)+'" muted loop playsinline preload="metadata" autoplay class="banner-preview" style="object-fit:cover;"></video><span class="img-slot-vid-badge">▶ VIDEO</span>'
-                : '<img src="'+adminCdnImg(url)+'" class="banner-preview" onerror="this.style.display=\'none\'">')
-                : '<div class="banner-preview" style="background:var(--surface2);"></div>'}
-              <div style="padding:10px 12px;">
-                <div style="font-size:0.78rem;font-weight:600;color:var(--text);">Card ${i + 1}</div>
-                <div style="font-size:0.7rem;color:var(--text3);margin-bottom:8px;word-break:break-all;">${has ? 'default creative set' : 'empty — upload a creative'}</div>
+                ? '<video src="'+adminCdnImg(url)+'" muted loop playsinline preload="metadata" autoplay class="si-media" style="object-fit:cover;"></video><span class="siteimg-badge">▶ VIDEO</span>'
+                : '<img src="'+adminCdnImg(url)+'" class="si-media" onerror="this.style.display=\'none\'"><div class="si-media-empty" style="display:none;">No image</div>')
+                : '<div class="si-media-empty">No image</div>'}
+              <div class="si-meta">
+                <div class="si-name">${pl.label} — Card ${i + 1}</div>
+                <div class="si-hint"><span class="si-status" style="color:var(--green-text);font-weight:600;">${has ? '✓ default creative set' : 'empty — upload a creative'}</span></div>
+              </div>
+              <div class="si-actions">
                 <input type="file" accept="image/*,.svg,video/*,.mp4,.webm,.mov" id="eduFile-${key}" style="display:none;" onchange="uploadEduCreative(this, '${key}')">
-                <div style="display:flex;gap:6px;">
-                  <button class="btn btn-primary btn-sm" style="flex:1;" onclick="document.getElementById('eduFile-${key}').click()">📤 ${has ? 'Replace' : 'Upload'}</button>
-                  ${has ? `<button class="btn btn-danger btn-sm btn-icon" onclick="deleteEduCreative('${key}', '${url}')" title="Delete this creative">🗑️</button>` : ''}
-                </div>
+                <button class="btn btn-primary btn-sm" style="flex:1;" onclick="document.getElementById('eduFile-${key}').click()">📤 ${has ? 'Replace' : 'Upload'}</button>
+                ${has ? `<button class="btn btn-danger btn-sm btn-icon" onclick="deleteEduCreative('${key}', '${url}')" title="Delete this creative">🗑️</button>` : ''}
               </div>
             </div>`;
           }).join('')}
@@ -9852,59 +9967,41 @@ async function loadSiteImages() {
         <input id="eduSlugInput" value="${EDU_SLUG}" placeholder="e.g. glutathione-effervescent-tablet" style="flex:1;min-width:220px;padding:8px 12px;border:1px solid var(--border);border-radius:8px;background:var(--surface);color:var(--text);">
         <button class="btn btn-primary btn-sm" onclick="saveEduSlug(document.getElementById('eduSlugInput').value)">Save</button>
       </div>
-      ${!EDU_SLUG ? '<div style="font-size:0.75rem;color:var(--text3);margin-bottom:14px;">Enter the slug above to see the 16 slots.</div>' :
+      ${!EDU_SLUG ? '<div style="font-size:0.75rem;color:var(--text3);margin-bottom:14px;">Enter the slug above to see the 16 per-product slots.</div>' :
       EDU_PANELS.map(pl => `
         <div style="font-size:0.75rem;font-weight:700;color:var(--text2);margin:12px 0 8px;">${pl.label}</div>
-        <div class="grid-3">
+        <div class="siteimg-grid">
           ${Array.from({length: EDU_CARDS}, (_, i) => {
             const key = 'edu.' + EDU_SLUG + '.' + pl.id + '.' + (i + 1);
             const url = overrides[key] || '';
             const has = !!url;
-            return `<div class="card" style="padding:0;overflow:hidden;">
+            return `<div class="siteimg-card">
               ${has ? (isVideoFileUrl(url)
-                ? '<video src="'+adminCdnImg(url)+'" muted loop playsinline preload="metadata" autoplay class="banner-preview" style="object-fit:cover;"></video><span class="img-slot-vid-badge">▶ VIDEO</span>'
-                : '<img src="'+adminCdnImg(url)+'" class="banner-preview" onerror="this.style.display=\'none\'">')
-                : '<div class="banner-preview" style="background:var(--surface2);"></div>'}
-              <div style="padding:10px 12px;">
-                <div style="font-size:0.78rem;font-weight:600;color:var(--text);">Card ${i + 1}</div>
-                <div style="font-size:0.7rem;color:var(--text3);margin-bottom:8px;word-break:break-all;">${has ? (key.startsWith('edu.global.') ? 'default creative set' : 'custom creative set') : 'empty — upload a creative'}</div>
+                ? '<video src="'+adminCdnImg(url)+'" muted loop playsinline preload="metadata" autoplay class="si-media" style="object-fit:cover;"></video><span class="siteimg-badge">▶ VIDEO</span>'
+                : '<img src="'+adminCdnImg(url)+'" class="si-media" onerror="this.style.display=\'none\'"><div class="si-media-empty" style="display:none;">No image</div>')
+                : '<div class="si-media-empty">No image</div>'}
+              <div class="si-meta">
+                <div class="si-name">${pl.label} — Card ${i + 1}</div>
+                <div class="si-hint"><span class="si-status" style="color:${has?'var(--green-text)':'var(--text3)'};">${has ? (key.startsWith('edu.global.') ? '✓ default creative set' : '✓ custom creative set') : 'empty — upload a creative'}</span></div>
+              </div>
+              <div class="si-actions">
                 <input type="file" accept="image/*,.svg,video/*,.mp4,.webm,.mov" id="eduFile-${key}" style="display:none;" onchange="uploadEduCreative(this, '${key}')">
-                <div style="display:flex;gap:6px;">
-                  <button class="btn btn-primary btn-sm" style="flex:1;" onclick="document.getElementById('eduFile-${key}').click()">📤 ${has ? 'Replace' : 'Upload'}</button>
-                  ${has ? `<button class="btn btn-danger btn-sm btn-icon" onclick="deleteEduCreative('${key}', '${url}')" title="Delete this creative">🗑️</button>` : ''}
-                </div>
+                <button class="btn btn-primary btn-sm" style="flex:1;" onclick="document.getElementById('eduFile-${key}').click()">📤 ${has ? 'Replace' : 'Upload'}</button>
+                ${has ? `<button class="btn btn-danger btn-sm btn-icon" onclick="deleteEduCreative('${key}', '${url}')" title="Delete this creative">🗑️</button>` : ''}
               </div>
             </div>`;
           }).join('')}
         </div>`).join('')}
     </div>`;
-
-  document.getElementById('siteImagesGroups').innerHTML = eduHtml + Object.keys(groups).map(groupName => `
-    <div style="margin-bottom:28px;">
-      <div style="font-size:0.8rem;font-weight:700;letter-spacing:.5px;text-transform:uppercase;color:var(--text3);margin-bottom:10px;">${groupName}</div>
-      <div class="grid-3">
-        ${groups[groupName].map(item => {
-          const current = overrides[item.key] || item.fallback;
-          const isOverridden = !!overrides[item.key];
-          return `
-          <div class="card" style="padding:0;overflow:hidden;">
-            ${isVideoFileUrl(current)
-              ? '<video src="'+adminCdnImg(current)+'" muted loop playsinline preload="metadata" autoplay class="banner-preview" style="object-fit:cover;"></video><span class="img-slot-vid-badge">▶ VIDEO</span>'
-              : '<img src="'+adminCdnImg(current)+'" class="banner-preview" onerror="this.style.display=\'none\'">'}
-            <div style="padding:12px 14px;">
-              <div style="font-size:0.85rem;font-weight:600;color:var(--text);">${item.label}</div>
-              <div style="font-size:0.72rem;color:var(--text3);margin-bottom:10px;">${item.hint}${isOverridden?' · <span style="color:var(--green-text);font-weight:600;">custom image set</span>':' · using site default'}</div>
-              <input type="file" accept="image/*,.svg,video/*,.mp4,.webm,.mov" id="siteImgFile-${item.key}" style="display:none;" onchange="uploadSiteImage(this, '${item.key}')">
-              <div style="display:flex;gap:6px;">
-                <button class="btn btn-primary btn-sm" style="flex:1;" onclick="document.getElementById('siteImgFile-${item.key}').click()">📤 Upload Image</button>
-                ${isOverridden ? `<button class="btn btn-danger btn-sm btn-icon" onclick="resetSiteImage('${item.key}', '${current}')" title="Delete this image everywhere and revert to default">🗑️</button>` : ''}
-              </div>
-            </div>
-          </div>`;
-        }).join('')}
-      </div>
-    </div>
-  `).join('');
+};
+function loadEduSection(){
+  const root = document.getElementById('siteImagesGroups');
+  if (!root) return;
+  const state = window.__siteImgState;
+  const existing = root.querySelector('#siteimgEdu');
+  const html = __eduHtml(state ? state.overrides : {});
+  if (existing) { existing.outerHTML = html; }
+  else { root.insertAdjacentHTML('beforeend', html); }
 }
 
 async function uploadSiteImage(input, key) {
