@@ -11811,29 +11811,6 @@ setTimeout(() => {
 }, 45000);
 
 // B2B Enquiry form → opens WhatsApp with pre-filled message
-function submitB2BEnquiry() {
-  const company = document.getElementById('b2bCompany')?.value.trim() || '';
-  const name    = document.getElementById('b2bName')?.value.trim() || '';
-  const phone   = document.getElementById('b2bPhone')?.value.trim() || '';
-  const email   = document.getElementById('b2bEmail')?.value.trim() || '';
-  const type    = document.getElementById('b2bType')?.value || '';
-  const msg     = document.getElementById('b2bMsg')?.value.trim() || '';
-
-  if (!name || !phone) {
-    showToast('Please enter your name and phone number.'); return;
-  }
-
-  const waMsg = `Hello Ascovita! 🌿 B2B Enquiry\n\n` +
-    `Company: ${company || 'N/A'}\n` +
-    `Contact: ${name}\n` +
-    `Phone: ${phone}\n` +
-    `Email: ${email || 'N/A'}\n` +
-    `Partnership Type: ${type || 'General'}\n\n` +
-    `Requirements:\n${msg || 'Please share details about your B2B programme.'}`;
-
-  openWhatsApp(waMsg);
-  showToast('Opening WhatsApp with your enquiry! ');
-}
 
 // ═══════════════════════════════════════════════════════
 // Ozylix STORE — PRODUCT DATA & ENGINE
@@ -24357,4 +24334,3 @@ function closeBlog() {
 </script>
 </body>
 </html>
-
