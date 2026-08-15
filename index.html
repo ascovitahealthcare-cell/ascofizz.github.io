@@ -11274,7 +11274,7 @@ function renderCheckoutSummary() {
           <h2>Install directly from this website</h2>
           <p>Use Chrome on your Android phone. The install button opens the official browser installation prompt; no APK file or unknown download is used.</p>
           <button class="btn-primary app-install-button" id="androidInstallButton" type="button" onclick="installOzylixAndroid()">Install Ozylix app</button>
-          <p class="app-install-help" id="androidInstallHelp">If the button is not available yet, open this page in Chrome and wait a moment for the install option to become ready.</p>
+          <p class="app-install-help" id="androidInstallHelp">If Chrome does not open the prompt, tap Chrome’s ⋮ menu and choose “Install app” or “Add to Home screen”. No APK download is required.</p>
         </article>
         <article class="app-platform-card app-platform-ios">
           <div class="app-platform-top"><span class="app-platform-icon">□</span><span class="app-platform-label">IPHONE / IPAD</span></div>
@@ -23377,7 +23377,7 @@ window.refreshAccountWelcome = refreshAccountWelcome;
     if (isStandalone) { if (status) status.textContent = 'Ozylix is already installed on this device.'; return; }
     if (!isAndroid) { if (status) status.textContent = isIOS ? 'On iPhone or iPad, follow the Safari steps below.' : 'Desktop does not need a separate app.'; return; }
     if (!deferredInstallPrompt) {
-      if (status) status.textContent = 'Open this page in Chrome on Android. Chrome will show its official install option when the website is ready.';
+      if (status) status.textContent = 'Chrome has not opened the prompt yet. Tap ⋮ → Install app (or Add to Home screen), then confirm the install.';
       return;
     }
     deferredInstallPrompt.prompt();
@@ -23395,7 +23395,7 @@ window.refreshAccountWelcome = refreshAccountWelcome;
   window.addEventListener('appinstalled', function () {
     deferredInstallPrompt = null;
     var status = document.getElementById('appInstallStatus');
-    if (status) status.textContent = 'Ozylix was installed successfully.';
+    if (status) status.textContent = 'Ozylix was installed successfully.'; var button = document.getElementById('androidInstallButton'); if (button) { button.disabled = true; button.textContent = 'Ozylix installed'; }
   });
 
   function updatePlatformCopy() {
@@ -23403,7 +23403,7 @@ window.refreshAccountWelcome = refreshAccountWelcome;
     var android = document.getElementById('androidInstallCard');
     if (!status) return;
     if (isIOS) status.textContent = 'You are on an Apple device. Use Safari and follow the illustrated steps.';
-    else if (isAndroid) status.textContent = isStandalone ? 'Ozylix is already running as an installed app.' : 'Android install is available through Chrome when the browser offers it.';
+    else if (isAndroid) status.textContent = isStandalone ? 'Ozylix is already running as an installed app.' : 'Use Chrome on Android: tap Install app here, or open ⋮ → Install app / Add to Home screen.';
     else status.textContent = 'Desktop mode: use the website directly. No app installation is needed.';
     if (android && !isAndroid) android.classList.add('app-platform-muted');
   }
