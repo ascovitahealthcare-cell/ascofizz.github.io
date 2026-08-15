@@ -14404,7 +14404,7 @@ async function initHome() {
   const newP = visibleProducts.filter(p => p.tags.includes('new')).slice(0,4);
   const nag=document.getElementById('newArrivalsGrid'); if(nag) nag.innerHTML = newP.map(p => renderProductCard(p)).join('');
   // Blog
-  const hbg=document.getElementById('homeBlogGrid'); if(hbg) hbg.innerHTML = BLOGS_NEWEST_FIRST.slice(0,4).map(renderBlogCard).join('');
+  const hbg=document.getElementById('homeBlogGrid'); if(hbg) hbg.innerHTML = BLOGS_NEWEST_FIRST.slice(0,4).map(renderBlogCard).join(''); hydrateBlogImgs();
   // FAQ
   const hfw=document.getElementById('homeFaqWrap'); if(hfw) hfw.innerHTML = FAQS.slice(0,5).map(renderFaqItem).join('');
   // Category tile counts + About page figures
@@ -15997,7 +15997,7 @@ function renderBlogCard(b) {
        </div>`
     : '';
   return `<a class="blog-card" href="#blog-${b.id}" onclick="openBlog(${b.id});return false" aria-label="Read: ${b.title}">
-    <img class="blog-img" src="${b.img}" alt="${b.alt || b.title}" loading="lazy"
+    <img class="blog-img" data-src="${b.img}" alt="${b.alt || b.title}" loading="lazy"
       onerror="this.src=PRODUCT_FALLBACKS.default" decoding="async">
     <div class="blog-body">
       <span class="blog-tag">${b.tag}</span>
@@ -16008,7 +16008,22 @@ function renderBlogCard(b) {
     </div>
   </a>`;
 }
-function renderFullBlog() { const el=document.getElementById('fullBlogGrid'); if(el) el.innerHTML=BLOGS_NEWEST_FIRST.map(renderBlogCard).join(''); }
+function renderFullBlog() { const el=document.getElementById('fullBlogGrid'); if(el) el.innerHTML=BLOGS_NEWEST_FIRST.map(renderBlogCard).join(''); hydrateBlogImgs(); }
+// v10.2: blog tile images hydrate just before entering view, so a stalled
+// image host can never hold the load event hostage. Pattern mirrors the promo
+// marquee (6b6c50b). Any tiles still unhydrated after 6s load anyway.
+function hydrateBlogImgs() {
+  var pending = document.querySelectorAll('img.blog-img[data-src]');
+  if (!pending.length) return;
+  function hydrate(img) { if (img && img.dataset.src) { img.src = img.dataset.src; img.removeAttribute('data-src'); } }
+  if ('IntersectionObserver' in window) {
+    var io = new IntersectionObserver(function(entries) {
+      entries.forEach(function(entry) { if (entry.isIntersecting) { hydrate(entry.target); io.unobserve(entry.target); } });
+    }, { rootMargin: '600px 0px 600px 0px' });
+    pending.forEach(function(img) { io.observe(img); });
+    setTimeout(function() { pending.forEach(hydrate); }, 6000);
+  } else { pending.forEach(hydrate); }
+}
 
 // ── FAQ ──
 function renderFaqItem(f) {
