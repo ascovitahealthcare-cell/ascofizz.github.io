@@ -195,4 +195,25 @@
     <xhtml:link rel="alternate" hreflang="en-IN" href="https://www.ozylix.com/product/power-pro-tablets"/>
     <xhtml:link rel="alternate" hreflang="x-default" href="https://www.ozylix.com/product/power-pro-tablets"/>
   </url>
+
+  <url>
+    <loc>https://www.ozylix.com/blog/from-ozylix-factory-to-your-home</loc>
+    <lastmod>2026-08-15</lastmod><changefreq>monthly</changefreq><priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://www.ozylix.com/blog/ozylix-supplement-manufacturing-anand-gujarat</loc>
+    <lastmod>2026-08-15</lastmod><changefreq>monthly</changefreq><priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://www.ozylix.com/blog/how-to-choose-effervescent-vitamins-india</loc>
+    <lastmod>2026-08-15</lastmod><changefreq>monthly</changefreq><priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://www.ozylix.com/blog/ozylix-effervescent-vitamins-spirulina-wellness-range</loc>
+    <lastmod>2026-08-15</lastmod><changefreq>monthly</changefreq><priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://www.ozylix.com/blog/shopping-direct-from-ozylix-delivery-vita-points-support</loc>
+    <lastmod>2026-08-15</lastmod><changefreq>monthly</changefreq><priority>0.7</priority>
+  </url>
 </urlset>
