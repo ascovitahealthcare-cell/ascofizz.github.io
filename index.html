@@ -16313,7 +16313,6 @@ function goSlide(i) {
 document.addEventListener('DOMContentLoaded', function(){ setInterval(function(){ moveCarousel(1); }, 5500); });
 
 // ── UTILS ──
-function copyCode(code) { navigator.clipboard?.writeText(code).catch(()=>{}); showToast(`Code "${code}" copied! 🌿`); }
 function subscribeNL() {
   const e=document.getElementById('nlEmail')?.value;
   if(!e||!e.includes('@')){showToast('Please enter a valid email','error');return;}
