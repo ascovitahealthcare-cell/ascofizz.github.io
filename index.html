@@ -7688,6 +7688,35 @@ button, [role="button"] {
   border-radius: 999px; padding: 2px 9px;
 }
 </style>
+
+<style>
+  .app-download-header { background: radial-gradient(circle at 50% 0%, rgba(214,238,222,.9), transparent 58%); }
+  .app-download-kicker { color: var(--green, #3d755a); font-size: .72rem; font-weight: 800; letter-spacing: .16em; margin-bottom: 10px; }
+  .app-platform-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 18px; }
+  .app-platform-card { border: 1px solid rgba(57,93,73,.14); border-radius: 22px; padding: 24px; background: rgba(255,255,255,.82); box-shadow: 0 12px 34px rgba(35,65,48,.08); }
+  .app-platform-card h2 { margin: 10px 0 8px; color: var(--text, #173526); font-size: 1.28rem; }
+  .app-platform-card p { color: var(--t-mid, #5c6d63); line-height: 1.65; }
+  .app-platform-top { display: flex; align-items: center; gap: 10px; color: var(--green, #3d755a); font-size: .72rem; font-weight: 800; letter-spacing: .12em; }
+  .app-platform-icon { width: 34px; height: 34px; display: inline-grid; place-items: center; border-radius: 10px; background: #e6f3e9; font-size: 1.15rem; }
+  .app-install-status { min-height: 22px; margin: 0 0 16px; color: var(--green, #3d755a); font-weight: 700; }
+  .app-install-button[disabled] { opacity: .6; cursor: not-allowed; }
+  .app-install-help { font-size: .76rem; margin-top: 12px; }
+  .app-platform-desktop { margin-top: 18px; display: flex; align-items: center; gap: 18px; }
+  .app-platform-desktop h2, .app-platform-desktop p { margin-top: 0; }
+  .app-platform-desktop p { margin-bottom: 0; }
+  .app-platform-muted { opacity: .72; }
+  .ios-steps { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin: 20px 0; }
+  .ios-step { position: relative; text-align: center; }
+  .ios-step-number { position: absolute; top: -6px; left: calc(50% - 50px); width: 22px; height: 22px; border-radius: 50%; background: var(--green, #3d755a); color: white; font-size: .72rem; font-weight: 800; display: grid; place-items: center; z-index: 1; }
+  .ios-step-art { width: 84px; height: 116px; margin: 0 auto 10px; border: 3px solid #263a30; border-radius: 16px; background: linear-gradient(#eef8f0, #fff); display: grid; place-items: center; color: var(--green, #3d755a); font-weight: 800; line-height: 1.1; box-shadow: inset 0 -8px 0 rgba(75,142,101,.08); }
+  .ios-art-share span { font-size: 2.4rem; }
+  .ios-art-menu span, .ios-art-home span { font-size: .8rem; }
+  .ios-step h3 { font-size: .86rem; margin: 0 0 4px; color: var(--text, #173526); }
+  .ios-step p { font-size: .72rem; line-height: 1.45; margin: 0; }
+  .app-download-note { margin-top: 18px; border-radius: 14px; padding: 14px 16px; background: #f3f8f3; color: var(--t-mid, #5c6d63); font-size: .82rem; line-height: 1.6; }
+  @media (max-width: 760px) { .app-platform-grid { grid-template-columns: 1fr; } .app-platform-desktop { display: block; } .ios-step-art { width: 72px; height: 104px; } }
+</style>
+
 </head>
 <!-- Promotional Media Config -->
 <script>
@@ -11227,6 +11256,46 @@ function renderCheckoutSummary() {
 
 
 <!-- ══════════ CONTACT PAGE ══════════ -->
+
+<div class="page" id="page-download" style="padding-top:90px">
+  <div class="page-header app-download-header">
+    <div class="app-download-kicker">OZYLIX APP</div>
+    <h1>Take Ozylix with you</h1>
+    <p>Install the Ozylix website like an app for quicker shopping, saved products and a smoother wellness routine.</p>
+  </div>
+  <section class="section app-download-section">
+    <div class="container" style="max-width:1060px">
+      <div class="app-install-status" id="appInstallStatus" role="status" aria-live="polite"></div>
+      <div class="app-platform-grid">
+        <article class="app-platform-card app-platform-android" id="androidInstallCard">
+          <div class="app-platform-top"><span class="app-platform-icon">▣</span><span class="app-platform-label">ANDROID</span></div>
+          <h2>Install directly from this website</h2>
+          <p>Use Chrome on your Android phone. The install button opens the official browser installation prompt; no APK file or unknown download is used.</p>
+          <button class="btn-primary app-install-button" id="androidInstallButton" type="button" onclick="installOzylixAndroid()">Install Ozylix app</button>
+          <p class="app-install-help" id="androidInstallHelp">If the button is not available yet, open this page in Chrome and wait a moment for the install option to become ready.</p>
+        </article>
+        <article class="app-platform-card app-platform-ios">
+          <div class="app-platform-top"><span class="app-platform-icon">□</span><span class="app-platform-label">IPHONE / IPAD</span></div>
+          <h2>Add Ozylix to your Home Screen</h2>
+          <p>Apple uses the Safari Add to Home Screen flow instead of an automatic website download. Follow these three illustrated steps.</p>
+          <div class="ios-steps" aria-label="iOS Add to Home Screen steps">
+            <div class="ios-step"><div class="ios-step-number">1</div><div class="ios-step-art ios-art-share"><span>↑</span></div><h3>Open in Safari</h3><p>Open Ozylix in Safari, not an in-app browser.</p></div>
+            <div class="ios-step"><div class="ios-step-number">2</div><div class="ios-step-art ios-art-menu"><span>□<br>Share</span></div><h3>Tap Share</h3><p>Tap the Share icon at the bottom of the screen.</p></div>
+            <div class="ios-step"><div class="ios-step-number">3</div><div class="ios-step-art ios-art-home"><span>＋<br>Home</span></div><h3>Add to Home Screen</h3><p>Choose Add to Home Screen, then tap Add.</p></div>
+          </div>
+          <button class="btn-secondary" type="button" onclick="copyAppLink()">Copy Ozylix link</button>
+        </article>
+      </div>
+      <article class="app-platform-card app-platform-desktop">
+        <div class="app-platform-top"><span class="app-platform-icon">⌁</span><span class="app-platform-label">DESKTOP</span></div>
+        <h2>Use the full website on desktop</h2>
+        <p>No separate desktop app is needed. Continue using Ozylix in your browser; the app-install controls stay limited to Android and iPhone/iPad devices.</p>
+      </article>
+      <div class="app-download-note"><strong>Safe install:</strong> Ozylix is installed as a website shortcut/PWA from the browser. We do not ask you to download an APK from an unknown source or enter payment details to install.</div>
+    </div>
+  </section>
+</div>
+
 <div class="page" id="page-contact" style="padding-top:90px">
   <div class="page-header">
     <h1>Contact Us</h1>
@@ -16289,7 +16358,7 @@ function bootApp() {
   // wishlist/subscriptions have real page sections but were missing here, so a
   // direct hit on /wishlist rendered the HOME page at 200 — a soft 404. Keep
   // this list in step with SPA_ROUTES in worker/index.js.
-  const _validPages = ['home','shop','blog','about','contact','faq','advisor','product','wishlist','subscriptions','privacy','terms','shipping','refund','accessibility'];
+  const _validPages = ['home','shop','blog','about','contact','faq','advisor','product','wishlist','subscriptions','privacy','terms','shipping','refund','accessibility','download'];
   // Legacy /b2b links now redirect to the Ascovita corporate B2B page
   if (_initPage === 'b2b') { window.location.href = 'https://www.ascovita.com/#/capabilities'; }
   if (_initPage && (_validPages.includes(_initPage) || _initPage === 'blog')) {
@@ -21633,6 +21702,8 @@ function closeMoreDrawer() {
   </div>
   <!-- Main nav -->
   <div class="app-menu-section-title">Shop</div>
+  <button class="app-menu-item app-menu-install-item" onclick="showPage('download');closeAppMenu();setAppNav('more')"><div class="app-menu-icon">⬇</div><span class="app-menu-item-label">Install Ozylix App</span><span class="app-menu-item-badge">ANDROID / IOS</span><span class="app-menu-item-arrow">›</span></button>
+
   <button class="app-menu-item" onclick="showPage('home');closeAppMenu();setAppNav('home')"><div class="app-menu-icon">🏠</div><span class="app-menu-item-label">Home</span><span class="app-menu-item-arrow">›</span></button>
   <button class="app-menu-item" onclick="showPage('shop');closeAppMenu();setAppNav('shop')"><div class="app-menu-icon">🛍️</div><span class="app-menu-item-label">All Products</span><span class="app-menu-item-badge">12 Products</span><span class="app-menu-item-arrow">›</span></button>
   <button class="app-menu-item" onclick="showPage('advisor');closeAppMenu();setAppNav('advisor')"><div class="app-menu-icon">🌿</div><span class="app-menu-item-label">AI Health Advisor</span><span class="app-menu-item-badge">NEW</span><span class="app-menu-item-arrow">›</span></button>
@@ -23252,6 +23323,67 @@ async function refreshAccountWelcome() {
 // Expose to the earlier (gtag-style) script block that hooks showPage('account')
 window.refreshAccountWelcome = refreshAccountWelcome;
 
+})();
+</script>
+
+
+<script>
+// Platform-aware install UX. Android uses the official beforeinstallprompt;
+// iOS receives honest Safari instructions; desktop receives no install prompt.
+(function () {
+  var deferredInstallPrompt = null;
+  var ua = navigator.userAgent || '';
+  var isAndroid = /Android/i.test(ua);
+  var isIOS = /iPhone|iPad|iPod/i.test(ua) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+  var isStandalone = window.matchMedia && window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
+
+  window.addEventListener('beforeinstallprompt', function (event) {
+    if (!isAndroid || isStandalone) return;
+    event.preventDefault();
+    deferredInstallPrompt = event;
+    var button = document.getElementById('androidInstallButton');
+    var help = document.getElementById('androidInstallHelp');
+    if (button) { button.disabled = false; button.textContent = 'Install Ozylix app'; }
+    if (help) help.textContent = 'Tap the button and confirm Install in Chrome.';
+  });
+
+  window.installOzylixAndroid = async function () {
+    var status = document.getElementById('appInstallStatus');
+    if (isStandalone) { if (status) status.textContent = 'Ozylix is already installed on this device.'; return; }
+    if (!isAndroid) { if (status) status.textContent = isIOS ? 'On iPhone or iPad, follow the Safari steps below.' : 'Desktop does not need a separate app.'; return; }
+    if (!deferredInstallPrompt) {
+      if (status) status.textContent = 'Open this page in Chrome on Android. Chrome will show its official install option when the website is ready.';
+      return;
+    }
+    deferredInstallPrompt.prompt();
+    var result = await deferredInstallPrompt.userChoice;
+    deferredInstallPrompt = null;
+    if (status) status.textContent = result && result.outcome === 'accepted' ? 'Installing Ozylix…' : 'Install cancelled. You can try again from this page.';
+  };
+
+  window.copyAppLink = async function () {
+    var status = document.getElementById('appInstallStatus');
+    try { await navigator.clipboard.writeText(window.location.origin + '/#download'); if (status) status.textContent = 'Ozylix link copied. Open it in Safari on your iPhone or iPad.'; }
+    catch (e) { if (status) status.textContent = window.location.origin + '/#download'; }
+  };
+
+  window.addEventListener('appinstalled', function () {
+    deferredInstallPrompt = null;
+    var status = document.getElementById('appInstallStatus');
+    if (status) status.textContent = 'Ozylix was installed successfully.';
+  });
+
+  function updatePlatformCopy() {
+    var status = document.getElementById('appInstallStatus');
+    var android = document.getElementById('androidInstallCard');
+    if (!status) return;
+    if (isIOS) status.textContent = 'You are on an Apple device. Use Safari and follow the illustrated steps.';
+    else if (isAndroid) status.textContent = isStandalone ? 'Ozylix is already running as an installed app.' : 'Android install is available through Chrome when the browser offers it.';
+    else status.textContent = 'Desktop mode: use the website directly. No app installation is needed.';
+    if (android && !isAndroid) android.classList.add('app-platform-muted');
+  }
+  document.addEventListener('DOMContentLoaded', updatePlatformCopy);
+  window.addEventListener('load', updatePlatformCopy);
 })();
 </script>
 

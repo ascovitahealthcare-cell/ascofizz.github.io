@@ -17,13 +17,14 @@
 // changing this string is what actually evicts the bad copy from devices
 // already carrying it. Bump it on any deploy that fixes a page-breaking
 // bug — a fix nobody can receive is not shipped.
-const CACHE_NAME = 'ozylix-pwa-v8';
+const CACHE_NAME = 'ozylix-pwa-v9';
 const OFFLINE_URL = '/offline.html';
 
 // Files to cache on install (your core pages)
 // Note: CSS/JS are now inlined directly in index.html, so they no longer
 // need separate cache entries here.
 const CORE_FILES = [
+  '/manifest.json',
   '/',
   '/index.html',
   '/shop',
