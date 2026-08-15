@@ -10171,35 +10171,6 @@ window.dismissOfferReminder = function () {
       <div class="hero-banner-dots" id="shDots"></div>
     </section>
     <div class="cat-pills" id="shopPills">
-    <!-- SEO content block: visible text for search engines & readers (mirrors
-         Wellbeing Nutrition's category-page depth pattern) -->
-    <section class="shop-seo" style="max-width:860px;margin:56px auto 40px;padding:0 4px">
-      <h2 style="font-size:clamp(1.5rem,3vw,2rem);margin-bottom:18px">How to choose the right Ozylix supplement</h2>
-      <p style="color:var(--gray);line-height:1.8;margin-bottom:18px">
-        Ozylix builds supplements in the <strong>effervescent format</strong> because water-soluble delivery
-        means higher absorption and easier daily use than hard-to-swallow tablets. Glutathione and vitamin C
-        effervescent tablets suit skin and immunity goals; spirulina and moringa powder cover daily greens and
-        plant protein; ashwagandha and ayurvedic blends support stress and recovery; and protein-focused
-        formats like Power Pro and Multidiata serve muscle and complete nutrition needs.
-      </p>
-      <h2 style="font-size:clamp(1.5rem,3vw,2rem);margin-bottom:18px">Made in India, FSSAI approved</h2>
-      <p style="color:var(--gray);line-height:1.8;margin-bottom:18px">
-        Every Ozylix batch is manufactured and lab tested at our own FSSAI-approved facility in Anand, Gujarat.
-        Subscription customers save on auto-replenishment, and every order qualifies for free pan-India delivery.
-      </p>
-      <h2 style="font-size:clamp(1.5rem,3vw,2rem);margin-bottom:18px">Frequently asked questions</h2>
-      <div style="margin-bottom:10px"><strong>Are effervescent tablets better absorbed?</strong>
-        <p style="color:var(--gray);line-height:1.7;margin:4px 0 16px">
-          Dissolving into water releases nutrients in a readily soluble form, which is gentler on the stomach
-          and easier for the body to use than compressed tablets.</p></div>
-      <div style="margin-bottom:10px"><strong>Is delivery really free?</strong>
-        <p style="color:var(--gray);line-height:1.7;margin:4px 0 16px">
-          Yes — Ozylix ships every order free across India, reaching all PIN codes in 2–7 business days.</p></div>
-      <div style="margin-bottom:10px"><strong>How do subscriptions work?</strong>
-        <p style="color:var(--gray);line-height:1.7;margin:4px 0">
-          Choose any product, set a schedule, and it arrives automatically. Skip, pause or cancel anytime
-          from your account — with extra savings on every cycle.</p></div>
-    </section>
       <button class="cpill active" data-cat="all" onclick="filterCat('all',this)">All</button>
       <button class="cpill" data-cat="bestsellers" onclick="filterCat('bestsellers',this)">Best Sellers</button>
       <button class="cpill sale-only-ui" data-cat="sale" onclick="filterCat('sale',this)">On Sale</button>
@@ -10214,6 +10185,44 @@ window.dismissOfferReminder = function () {
       <button class="cpill" data-cat="weight" onclick="filterCat('weight',this)">Weight</button>
       <button class="cpill" data-cat="combos" onclick="filterCat('combos',this)">Combos</button>
     </div>
+    <!-- SEO content block: visible text for search engines & readers (mirrors
+         Wellbeing Nutrition's category-page depth pattern). Kept OUTSIDE the
+         #shopPills flex row — inside it, the text column collapsed the pills
+         into a vertical stack that overlapped the filter sidebar. -->
+    <section class="shop-seo" style="max-width:860px;margin:56px auto 40px;padding:0 4px">
+      <h2 style="font-size:clamp(1.5rem,3vw,2rem);margin-bottom:18px">How to choose the right Ozylix supplement</h2>
+      <p style="color:var(--gray);line-height:1.8;margin-bottom:18px">
+        Ozylix builds supplements around the <strong>effervescent format</strong> because water-soluble delivery
+        means higher absorption and easier daily use than hard-to-swallow tablets. Glutathione and vitamin C
+        effervescent tablets suit skin and immunity goals; spirulina tablets with B12, D3, magnesium and iron
+        cover daily greens; ashwagandha and ayurvedic blends like moringa support stress, energy and recovery;
+        and multivitamin and energy formulas like Multidiata and Power Pro serve complete nutrition and
+        stamina needs.
+        As dietary supplements, our products support a balanced lifestyle — they are not intended to diagnose,
+        treat, cure or prevent any disease.
+      </p>
+      <h2 style="font-size:clamp(1.5rem,3vw,2rem);margin-bottom:18px">Made in India, FSSAI approved</h2>
+      <p style="color:var(--gray);line-height:1.8;margin-bottom:18px">
+        Every Ozylix batch is manufactured and lab tested at our own FSSAI-approved facility in Anand, Gujarat,
+        and ships straight from the factory — no middlemen. Ozylix VitaPoints earn you 1 point per ₹1 spent,
+        redeemable at 150 points = ₹1 off, and every order qualifies for free pan-India delivery.
+      </p>
+      <h2 style="font-size:clamp(1.5rem,3vw,2rem);margin-bottom:18px">Frequently asked questions</h2>
+      <div style="margin-bottom:10px"><strong>Are effervescent tablets better absorbed?</strong>
+        <p style="color:var(--gray);line-height:1.7;margin:4px 0 16px">
+          Dissolving into water releases nutrients in a readily soluble form, which is gentler on the stomach
+          and easier for the body to use than compressed tablets. As always, results vary from person to
+          person.</p></div>
+      <div style="margin-bottom:10px"><strong>Is delivery really free?</strong>
+        <p style="color:var(--gray);line-height:1.7;margin:4px 0 16px">
+          Yes — Ozylix ships every order free across India, typically delivered within 2–7 business days
+          of dispatch.</p></div>
+      <div style="margin-bottom:10px"><strong>How do subscriptions work?</strong>
+        <p style="color:var(--gray);line-height:1.7;margin:4px 0">
+          Subscriptions let you set a schedule so your supplement arrives automatically — skip, pause or cancel
+          anytime from your account, with extra savings on every renewal cycle. Prefer pay-as-you-go? Every
+          delivered order also earns VitaPoints (1 point per ₹1, 150 points = ₹1 off).</p></div>
+    </section>
     <!-- Phone-only handle for the filter sidebar. Below 820px the sidebar
          becomes an off-canvas drawer (see .filter-sidebar in the stylesheet);
          above it, this button is display:none and the sidebar is a normal
