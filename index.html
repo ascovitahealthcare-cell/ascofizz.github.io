@@ -14716,13 +14716,6 @@ function durationLabel(tabs) {
   if (days) return months + ' month' + (months === 1 ? '' : 's') + ' + ' + days + ' days';
   return months + ' month' + (months === 1 ? '' : 's');
 }
-function durationLabelShort(tabs) {
-  const n = Number(tabs) || 0;
-  if (n <= 15) return n + ' days';
-  const months = Math.floor(n / 30);
-  const days = n % 30;
-  return months + (months === 1 ? ' month' : ' months') + (days ? ' + ' + days + ' days' : '');
-}
 function getProductTiers(p) {
   const raw = p && (p._backendTiers || (typeof QTY_TIERS !== 'undefined' ? QTY_TIERS[p.id] : null));
   if (!Array.isArray(raw)) return null;
