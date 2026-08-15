@@ -2310,6 +2310,12 @@ function azTogglePw() {
   <div id="statsTicker" style="display:flex;gap:12px;margin-bottom:20px;flex-wrap:wrap;"></div>
   <!-- COD money with the delivery partner — refreshed automatically from courier sync -->
   <div id="courierWalletRow" style="display:flex;gap:12px;margin-bottom:20px;flex-wrap:wrap;"></div>
+  <!-- ══ UNIFIED PULSE: marketing automation + audit health, pulled from both
+       standalone services in one row so the main dashboard doubles as the
+       control room for the whole platform — not just orders. Skips quietly
+       if either service is unconfigured, so an empty env never breaks the
+       page. ══ -->
+  <div id="unifiedPulseRow" style="display:flex;gap:12px;margin-bottom:20px;flex-wrap:wrap;"></div>
 
   <!-- ══ ROW 1: Revenue + Sparkline Widgets ══ -->
   <div style="display:grid;grid-template-columns:2fr 1fr;gap:16px;margin-bottom:16px;">
@@ -3232,9 +3238,20 @@ function azTogglePw() {
       <div class="mkt-kpi"><div class="mkt-kpi-label">Active ad sets</div><div class="mkt-kpi-value" id="mkt-kpi-active">–</div></div>
       <div class="mkt-kpi"><div class="mkt-kpi-label">Spend (latest pull)</div><div class="mkt-kpi-value" id="mkt-kpi-spend">–</div></div>
       <div class="mkt-kpi"><div class="mkt-kpi-label">Blended ROAS</div><div class="mkt-kpi-value" id="mkt-kpi-roas">–</div></div>
+      <div class="mkt-kpi"><div class="mkt-kpi-label">Purchases (latest pull)</div><div class="mkt-kpi-value" id="mkt-kpi-purchases">–</div></div>
+      <div class="mkt-kpi"><div class="mkt-kpi-label">Blended CPA</div><div class="mkt-kpi-value" id="mkt-kpi-cpa">–</div></div>
       <div class="mkt-kpi"><div class="mkt-kpi-label">Pending approvals</div><div class="mkt-kpi-value" id="mkt-kpi-pending">–</div></div>
     </div>
 
+    <!-- Automation status strip — one glance at what the automations did
+         overnight: last report window, verdicts applied, budget ceiling -->
+    <div id="mkt-auto-strip" style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;background:var(--card-bg,#fff);border:1px solid var(--border,#e2e2e2);border-radius:10px;padding:10px 14px;margin-bottom:16px;font-size:12.5px;color:var(--text2);">
+      <span>🤖 Automations</span>
+      <span id="mkt-auto-report">Last report: —</span>
+      <span id="mkt-auto-verdicts">Verdicts applied: —</span>
+      <span id="mkt-auto-ceiling">Budget ceiling: —</span>
+      <span id="mkt-auto-strategy" style="margin-left:auto;font-weight:700;color:var(--text);">Strategy: —</span>
+    </div>
     <div class="mkt-split">
       <div>
         <h3 style="margin-bottom:8px;">Top performers</h3>
@@ -3424,7 +3441,7 @@ function azTogglePw() {
   #page-marketing .mkt-pill.approved { background:#F7EFE3; color:#3F565B; }
   #page-marketing .mkt-pill.rejected { background:#fcebeb; color:#963848; }
 
-  #page-marketing .mkt-kpi-row { display:grid; grid-template-columns:repeat(4,1fr); gap:14px; margin-bottom:24px; }
+  #page-marketing .mkt-kpi-row { display:grid; grid-template-columns:repeat(6,1fr); gap:14px; margin-bottom:24px; }
   #page-marketing .mkt-kpi { background:var(--card-bg,#fff); border:1px solid var(--border,#e2e2e2); border-radius:12px; padding:16px 18px; }
   #page-marketing .mkt-kpi-label { font-size:12px; color:var(--text2); text-transform:uppercase; letter-spacing:.04em; margin-bottom:6px; }
   #page-marketing .mkt-kpi-value { font-size:26px; font-weight:700; }
@@ -3441,7 +3458,7 @@ function azTogglePw() {
   #page-marketing .mkt-winner-card .mkt-wc-roas { font-size:20px; font-weight:700; color:#3F565B; }
 
   @media (max-width: 900px) {
-    #page-marketing .mkt-kpi-row { grid-template-columns:1fr 1fr; }
+    #page-marketing .mkt-kpi-row { grid-template-columns:1fr 1fr 1fr; }
     #page-marketing .mkt-split { grid-template-columns:1fr; }
   }
 </style>
@@ -12947,9 +12964,12 @@ async function mktLoadOverview() {
   const blendedRoas = totalSpend > 0 ? weightedRoasSum / totalSpend : null;
   const pending = (campaigns || []).filter(c => c.status === 'pending_approval').length;
 
+  const blendedCpa = totalPurchases > 0 ? totalSpend / totalPurchases : null;
   document.getElementById('mkt-kpi-active').textContent = active.length;
   document.getElementById('mkt-kpi-spend').textContent = mktFmtMoney(totalSpend);
   document.getElementById('mkt-kpi-roas').textContent = blendedRoas !== null ? mktFmtRoas(blendedRoas) : '—';
+  document.getElementById('mkt-kpi-purchases').textContent = totalPurchases > 0 ? Math.round(totalPurchases) : '—';
+  document.getElementById('mkt-kpi-cpa').textContent = blendedCpa !== null ? mktFmtMoney(blendedCpa) : '—';
   document.getElementById('mkt-kpi-pending').textContent = pending;
 
   const winners = active.filter(a => a.last_verdict === 'scale').sort((a, b) => (b.last_roas || 0) - (a.last_roas || 0)).slice(0, 5);
@@ -12962,6 +12982,33 @@ async function mktLoadOverview() {
   document.getElementById('mkt-overview-losers').innerHTML = losers.length
     ? losers.map(a => `<div class="mkt-angle"><div style="display:flex;justify-content:space-between;"><strong>${mktEsc(a.name)}</strong><span style="color:#963848;font-weight:700;">${mktFmtRoas(a.last_roas)}</span></div><div style="font-size:12px;color:var(--text2);">${mktEsc(a.last_reason || '')}</div></div>`).join('')
     : '<p class="mkt-empty">Nothing flagged for pausing right now.</p>';
+
+  // Automation status strip — fetched from the dedicated status endpoint
+  // (one cheap call instead of five), through the admin-gated proxy.
+  mktLoadAutomationStatus();
+}
+
+async function mktLoadAutomationStatus() {
+  try {
+    const res = await fetch(window.MARKETING_BACKEND_URL + '/api/reports/status');
+    if (!res.ok) return;
+    const s = await res.json();
+    const reportEl = document.getElementById('mkt-auto-report');
+    const verdictsEl = document.getElementById('mkt-auto-verdicts');
+    const ceilingEl = document.getElementById('mkt-auto-ceiling');
+    const strategyEl = document.getElementById('mkt-auto-strategy');
+    if (reportEl) reportEl.textContent = s.latest_log_at
+      ? 'Last report: ' + new Date(s.latest_log_at).toLocaleString()
+      : 'Last report: none yet (run one from the Reports tab)';
+    const v = (s.report && s.report.verdicts) || {};
+    if (verdictsEl) verdictsEl.textContent =
+      'Verdicts: ' + (v.scale || 0) + ' scale · ' + (v.pause || 0) + ' pause · ' + (v.hold || 0) + ' hold';
+    if (ceilingEl) ceilingEl.textContent =
+      'Budget ceiling: ₹' + Number(((s.budget_rules && s.budget_rules.max_daily_budget_cents) || 500000) / 100).toLocaleString('en-IN') + '/day per ad set';
+    if (strategyEl) strategyEl.textContent = s.strategy
+      ? 'Strategy: ' + (s.strategy.month || '—') + (s.strategy.title ? ' · ' + s.strategy.title : '')
+      : 'Strategy: none set';
+  } catch (e) { /* silent — strip simply shows defaults */ }
 }
 
 /* ---------- STRATEGY ---------- */
@@ -13661,6 +13708,163 @@ if (typeof _auditOrigShowPage === 'function') {
     } catch (e) { /* never let the shim break a request */ }
     return _fetch.call(this, input, init);
   };
+})();
+</script>
+
+<!-- ══════════════════════════════════════════════════════════════════════
+     UNIFIED PULSE  —  main dashboard control room (v9.4)
+     Two cards glued to the top of the main dashboard so it doubles as the
+     platform control room instead of an orders-only view:
+       • Marketing pulse — reads the new /api/marketing/reports/status
+         endpoint (through the admin-gated proxy, no key in this file).
+       • Audit health — reads /api/audit/health-scores/latest from the
+         audit system with this panel's own JWT.
+     Both cards fail silently and hide their column when their service is
+     unreachable, so an empty env or a crashed Render dyno never breaks
+     the dashboard. Appended at the end of the file — nothing above is
+     edited, per the same convention the role/session layers use.
+     ══════════════════════════════════════════════════════════════════════ -->
+<script>
+(function () {
+  if (window.__unifiedPulse) return;
+  window.__unifiedPulse = true;
+
+  var AUDIT_API_BASE = 'https://auditdebuging.onrender.com/api/audit';
+  var _pulseCharts = {};
+
+  function upMoney(n) {
+    if (n === null || n === undefined) return '—';
+    return '₹' + Number(n).toLocaleString('en-IN', { maximumFractionDigits: 0 });
+  }
+  function upRoas(n) {
+    if (n === null || n === undefined) return '—';
+    return Number(n).toFixed(2) + 'x';
+  }
+  function upEsc(s) { return (s || '').toString().replace(/[&<>]/g, function (c) { return ({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]); }); }
+
+  // Marketing pulse card — verdict pills colored like the marketing page's.
+  function renderMarketingPulse(s) {
+    var row = document.getElementById('unifiedPulseRow');
+    if (!row) return;
+    var report = (s && s.report) || {};
+    var strategy = s && s.strategy;
+    var verdicts = report.verdicts || {};
+    var verdictHtml = [
+      '<span class="badge" style="background:rgba(94,171,48,.14);color:#2d5a2d;font-weight:700;">▲ ' + (verdicts.scale || 0) + ' scaling</span>',
+      '<span class="badge" style="background:rgba(194,67,79,.12);color:#963848;font-weight:700;">▼ ' + (verdicts.pause || 0) + ' paused</span>',
+      '<span class="badge badge-gray">◆ ' + (verdicts.hold || 0) + ' held</span>',
+    ].join(' ');
+
+    var card = document.createElement('div');
+    card.className = 'card';
+    card.style.cssText = 'flex:1;min-width:280px;padding:0;overflow:hidden;';
+    card.innerHTML =
+      '<div class="card-hdr"><span class="card-title">📣 Marketing Automation</span>' +
+      '<span class="badge badge-green" style="font-size:.68rem;">live</span></div>' +
+      '<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;padding:12px 18px;">' +
+      '<div><div style="font-size:.7rem;color:var(--text3);text-transform:uppercase;letter-spacing:.05em;">Spend · latest pull</div><div style="font-size:1.35rem;font-weight:800;">' + upMoney(report.total_spend) + '</div></div>' +
+      '<div><div style="font-size:.7rem;color:var(--text3);text-transform:uppercase;letter-spacing:.05em;">Blended ROAS</div><div style="font-size:1.35rem;font-weight:800;color:var(--green-text);">' + upRoas(report.blended_roas) + '</div></div>' +
+      '<div><div style="font-size:.7rem;color:var(--text3);text-transform:uppercase;letter-spacing:.05em;">Blended CPA</div><div style="font-size:1.35rem;font-weight:800;">' + upMoney(report.blended_cpa) + '</div></div>' +
+      '</div>' +
+      '<div style="display:flex;gap:8px;flex-wrap:wrap;padding:0 18px 12px;">' + verdictHtml + '</div>' +
+      '<div style="border-top:1px solid var(--border);font-size:.75rem;color:var(--text3);padding:8px 18px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">' +
+      (strategy ? '📌 ' + upEsc(strategy.month || '—') + (strategy.title ? ' · ' + upEsc(strategy.title) : '') : '📌 No strategy set yet — create one on the Marketing page') +
+      (report.active_ad_sets !== undefined ? ' · ' + (report.active_ad_sets || 0) + ' active ad set(s)' : '') +
+      '</div>';
+    row.appendChild(card);
+  }
+
+  // Audit health card — overall score ring + open CRITICAL/HIGH counts.
+  function renderAuditPulse(latest, openFindings) {
+    var row = document.getElementById('unifiedPulseRow');
+    if (!row) return;
+    var score = (latest && latest.overall_health_score != null) ? latest.overall_health_score : null;
+    var scoreColor = score === null ? '#9aa5a8' : (score >= 90 ? 'var(--green)' : score >= 70 ? '#A97A1E' : 'var(--red)');
+    var counts = { CRITICAL: 0, HIGH: 0, MEDIUM: 0, LOW: 0 };
+    (openFindings || []).forEach(function (f) { if (counts[f.severity] !== undefined) counts[f.severity] += 1; });
+    var openBad = counts.CRITICAL + counts.HIGH;
+
+    var card = document.createElement('div');
+    card.className = 'card';
+    card.style.cssText = 'flex:1;min-width:280px;padding:0;overflow:hidden;';
+    card.innerHTML =
+      '<div class="card-hdr"><span class="card-title">🛡️ Platform Audit</span>' +
+      (score !== null ? '<span class="badge" style="background:' + (score >= 90 ? 'rgba(94,171,48,.14)' : score >= 70 ? 'rgba(182,91,30,.15)' : 'rgba(194,67,79,.14)') + ';color:' + (score >= 90 ? '#2d5a2d' : score >= 70 ? 'var(--orange)' : '#963848') + ';font-weight:700;font-size:.68rem;">score ' + Math.round(score) + '</span>' : '<span class="badge badge-gray" style="font-size:.68rem;">no runs yet</span>') +
+      '</div>' +
+      '<div style="display:flex;align-items:center;gap:14px;padding:8px 18px;flex-wrap:wrap;">' +
+      '<canvas id="upAuditRing" width="72" height="72" style="width:72px;height:72px;flex-shrink:0;"></canvas>' +
+      '<div style="flex:1;min-width:160px;">' +
+      '<div style="font-size:.78rem;margin-bottom:5px;"><span style="color:var(--red);font-weight:700;">🔴 ' + counts.CRITICAL + ' critical</span> · <span style="color:var(--orange);font-weight:700;">🟠 ' + counts.HIGH + ' high</span></div>' +
+      '<div style="font-size:.78rem;margin-bottom:5px;"><span style="color:var(--gold-text);font-weight:700;">🟡 ' + counts.MEDIUM + ' medium</span> · <span style="color:var(--blue);font-weight:700;">🔵 ' + counts.LOW + ' low</span></div>' +
+      (openBad > 0
+        ? '<div style="font-size:.72rem;color:var(--red);font-weight:700;">⚠ ' + openBad + ' open finding(s) need action → Audit / Debugger</div>'
+        : '<div style="font-size:.72rem;color:var(--green-text);font-weight:700;">✓ No critical/high findings open</div>') +
+      '</div></div>';
+    row.appendChild(card);
+
+    // Draw the ring right away — drawRing() lives higher in this file.
+    setTimeout(function () {
+      if (typeof drawRing === 'function') drawRing('upAuditRing', score !== null ? score : 0, scoreColor, '');
+    }, 50);
+  }
+
+  // One coordinated refresh of both cards; each service fails independently.
+  async function refreshUnifiedPulse() {
+    var row = document.getElementById('unifiedPulseRow');
+    if (!row) return; // user is on a different page — nothing to render
+    row.innerHTML = '<div class="kpi skel" style="height:132px;flex:1;"></div><div class="kpi skel" style="height:132px;flex:1;"></div>';
+    var timeoutMs = 12000;
+    var ctrl = new AbortController();
+    var timer = setTimeout(function () { ctrl.abort(); }, timeoutMs);
+
+    var marketingPromise = fetch(window.MARKETING_BACKEND_URL + '/api/reports/status', { signal: ctrl.signal })
+      .then(function (r) { return r.ok ? r.json() : null; })
+      .catch(function () { return null; });
+
+    var auditPromise = fetch(AUDIT_API_BASE + '/health-scores/latest', {
+      headers: { 'Authorization': 'Bearer ' + (typeof authToken !== 'undefined' ? authToken : '') },
+      signal: ctrl.signal,
+    })
+      .then(function (r) { return r.ok ? r.json() : null; })
+      .catch(function () { return null; });
+
+    var findingsPromise = fetch(AUDIT_API_BASE + '/findings?status=open', {
+      headers: { 'Authorization': 'Bearer ' + (typeof authToken !== 'undefined' ? authToken : '') },
+      signal: ctrl.signal,
+    })
+      .then(function (r) { return r.ok ? r.json() : []; })
+      .catch(function () { return []; });
+
+    var results = await Promise.all([marketingPromise, auditPromise, findingsPromise]);
+    clearTimeout(timer);
+
+    row.innerHTML = '';
+    if (results[0]) renderMarketingPulse(results[0]);
+    if (results[1] || results[2].length) renderAuditPulse(results[1], results[2]);
+    if (!row.children.length) row.style.display = 'none';
+  }
+
+  // Hook into the dashboard loader so the pulse refreshes with every
+  // dashboard load, and onto showPage for instant updates when returning.
+  var _origLoadDashboard = window.loadDashboard;
+  if (typeof _origLoadDashboard === 'function') {
+    window.loadDashboard = async function () {
+      await _origLoadDashboard();
+      refreshUnifiedPulse();
+    };
+  } else {
+    document.addEventListener('DOMContentLoaded', refreshUnifiedPulse);
+  }
+
+  // Light refresh every 5 minutes while the dashboard is visible.
+  var _origShowPage2 = window.showPage;
+  if (typeof _origShowPage2 === 'function') {
+    window.showPage = function (name) {
+      _origShowPage2(name);
+      if (name === 'dashboard') refreshUnifiedPulse();
+    };
+  }
+  setInterval(refreshUnifiedPulse, 5 * 60 * 1000);
 })();
 </script>
 
