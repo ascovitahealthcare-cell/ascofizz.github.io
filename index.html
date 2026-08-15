@@ -19168,29 +19168,35 @@ async function handleGoogleCredential(response) {
       throw new Error('Invalid credential payload');
     }
 
-    // Attempt backend verification.
+        // Attempt backend verification.
     let backendUser = null;
     let backendJwt  = null;
-
-    try {
-      const res = await fetchWithTimeout(API_BASE + '/api/auth/google', {
-        method:  'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body:    JSON.stringify({ credential: response.credential }),
-        // Was 15s to cover a 10-12s cold start. The server does not
-        // cold-start any more, and fifteen seconds of a frozen
-        // sign-in button is how you lose the customer.
-      }, 8000);
-
-      if (res.ok) {
-        const data = await res.json();
-        backendUser = data.user;
-        backendJwt  = data.token;
-      } else {
-        console.warn('[Ozylix Auth] Backend returned', res.status, '— using local JWT fallback');
+    // A real server JWT is REQUIRED for the order to save — a local-only
+    // Google profile (no asc_jwt) would pass the front-end login gate but
+    // the order POST would then be rejected 401 and lost. Render free-tier
+    // cold starts can take 30-60s, so retry with growing timeouts before
+    // ever giving up: the customer waiting on the sign-in button will
+    // happily wait longer than the 8s that silently doomed their order.
+    const googleRetryTimeouts = [8000, 15000, 30000];
+    for (let attempt = 0; attempt < googleRetryTimeouts.length; attempt++) {
+      if (attempt > 0) await new Promise(r => setTimeout(r, 1500 * attempt));
+      try {
+        const res = await fetchWithTimeout(API_BASE + '/api/auth/google', {
+          method:  'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body:    JSON.stringify({ credential: response.credential }),
+        }, googleRetryTimeouts[attempt]);
+        if (res.ok) {
+          const data = await res.json();
+          backendUser = data.user;
+          backendJwt  = data.token;
+          break;   // success — stop retrying
+        } else {
+          console.warn('[Ozylix Auth] Backend returned', res.status, 'on attempt', attempt + 1);
+        }
+      } catch (backendErr) {
+        console.warn('[Ozylix Auth] Backend unreachable on attempt', attempt + 1, ':', backendErr.message);
       }
-    } catch (backendErr) {
-      console.warn('[Ozylix Auth] Backend unreachable:', backendErr.message, '— using local JWT fallback');
     }
 
     // Build user object — backend data wins, local payload is the fallback
@@ -19397,6 +19403,20 @@ function requireLoginForCheckout(resumeCb) {
 function resumeCheckoutIfWaiting() {
   var cb = _checkoutResumeCb;
   _checkoutResumeCb = null;
+  // OWNER FIX (Aug 2026): the order save requires a signed server JWT —
+  // if sign-in completed without one (e.g. the /api/auth/google call timed
+  // out during a Render cold start), resuming now would POST the order to
+  // a server that rejects it 401 — the customer would sit through payment
+  // only to see "Order failed" while appearing signed in. Verify the JWT
+  // actually exists first; if not, re-open sign-in with a clear reason
+  // instead of letting the order attempt fail.
+  if (!localStorage.getItem('asc_jwt')) {
+    console.warn('[Ozylix] login completed without a server JWT — skipping checkout resume');
+    openAuth('login');
+    var suc = document.getElementById('authSuccess');
+    if (suc) { suc.style.display = 'block'; suc.textContent = '⚠️ Your sign-in could not be verified with our server. Please sign in again to place your order.'; }
+    return;
+  }
   if (typeof cb === 'function') { try { cb(); } catch(e) { console.error('[Ozylix] checkout resume failed', e); } }
 }
 
