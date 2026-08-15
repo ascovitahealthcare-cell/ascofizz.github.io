@@ -128,11 +128,14 @@ function normaliseOrderForInvoice(o) {
     if (typeof i === 'string') i = { name: i, qty: 1 };
     var qty  = Number(i.qty || i.units || i.quantity || 1) || 1;
     var rate = Number(i.price || i.selling_price || i.rate || i.unit_price || 0) || 0;
+    var mrp  = Number(i.mrp || i.list_price || i.original_price || i.mrp_price || rate) || rate;
+    var itemDiscount = Math.max(0, (mrp - rate) * qty);
     return {
       name: i.name || i.product_name || i.title || 'Item',
       hsn:  i.hsn || OZYLIX_LEGAL.hsnDefault,
-      qty: qty, rate: rate,
-      mrp: Number(i.mrp || i.list_price || i.original_price || i.mrp_price || rate) || rate,
+      qty: qty, rate: rate, mrp: mrp,
+      itemDiscount: itemDiscount,
+      itemDiscountName: i.discount_name || i.discountName || i.offer_name || i.offerName || i.applied_offer || (itemDiscount ? 'Product price saving' : ''),
       gross: qty * rate
     };
   });
@@ -150,7 +153,7 @@ function normaliseOrderForInvoice(o) {
   if (!gross && total && items.length) {
     var per = total / items.reduce(function(t,i){ return t + i.qty; }, 0);
     items = items.map(function(i){
-      return { name:i.name, hsn:i.hsn, qty:i.qty, rate:per, mrp:per, gross:per*i.qty, estimated:true };
+      return { name:i.name, hsn:i.hsn, qty:i.qty, rate:per, mrp:per, itemDiscount:0, itemDiscountName:'', gross:per*i.qty, estimated:true };
     });
   }
 
@@ -195,8 +198,22 @@ function buildInvoiceHTML(order) {
   if (!o.items.length) o.items = [{ name:'Order '+o.orderId, hsn:OZYLIX_LEGAL.hsnDefault, qty:1, rate:o.total, gross:o.total }];
   const gross    = o.items.reduce(function(t,i){ return t + i.gross; }, 0) || o.total;
   const mrpTotal = o.mrpTotal || o.items.reduce(function(t,i){ return t + (i.mrp || i.rate) * i.qty; }, 0) || gross;
+  const money = function(n){ return '₹' + Number(n||0).toLocaleString('en-IN',{minimumFractionDigits:2,maximumFractionDigits:2}); };
   const componentDiscount = o.tierDiscount + o.mixMatchDiscount + o.couponDiscount + o.vitaPointsDiscount;
-  const totalSavings = componentDiscount || o.discount || Math.max(0, mrpTotal - gross);
+  const itemDiscountTotal = o.items.reduce(function(t,i){ return t + (i.itemDiscount || Math.max(0, (i.mrp - i.rate) * i.qty)); }, 0);
+  const totalSavings = Math.max(0, mrpTotal - (o.total || gross), o.discount || 0, componentDiscount + itemDiscountTotal);
+  const discountLines = [];
+  o.items.forEach(function(i){
+    const amount = i.itemDiscount || Math.max(0, (i.mrp - i.rate) * i.qty);
+    if (amount > 0) discountLines.push({ name: (i.itemDiscountName || 'Product price saving') + ' — ' + i.name, amount: amount });
+  });
+  if (o.tierDiscount) discountLines.push({ name: 'Pack / tier offer', amount: o.tierDiscount });
+  if (o.mixMatchDiscount) discountLines.push({ name: 'Mix & Match — lowest-priced eligible unit free', amount: o.mixMatchDiscount });
+  if (o.couponDiscount || (o.discount && !componentDiscount && !itemDiscountTotal)) discountLines.push({ name: 'Coupon' + (o.couponCode ? ' — ' + o.couponCode : ''), amount: o.couponDiscount || o.discount });
+  if (o.vitaPointsDiscount) discountLines.push({ name: 'VitaPoints redemption — ' + o.vitaPoints + ' points', amount: o.vitaPointsDiscount });
+  const discountDetails = discountLines.length
+    ? '<div class="discount-details"><b>DISCOUNT DETAILS</b>' + discountLines.map(function(d){ return '<br><span>' + _esc(d.name) + ': <strong>− ' + money(d.amount) + '</strong></span>'; }).join('') + '</div>'
+    : '<div class="discount-details"><b>DISCOUNT DETAILS</b><br><span>No additional discount applied.</span></div>';
   const rate     = L.gstRate;
 
   /* GST is charged on what the customer actually pays, not on the list price.
@@ -232,13 +249,11 @@ function buildInvoiceHTML(order) {
   const sgst = intra ? Math.round((taxTotal - cgstHalf) * 100) / 100 : 0;
   const igst = intra ? 0 : taxTotal;
   const grand = o.total || consideration;
-  const money = function(n){ return '₹' + Number(n||0).toLocaleString('en-IN',{minimumFractionDigits:2,maximumFractionDigits:2}); };
-
   const rows = o.items.map(function(i, n){
     const base = i.gross / (1 + rate/100);
     return '<tr>' +
       '<td class="c">' + (n+1) + '</td>' +
-      '<td>' + _esc(i.name) + '</td>' +
+      '<td>' + _esc(i.name) + (i.itemDiscount > 0 ? '<div class="item-offer">' + _esc(i.itemDiscountName || 'Product price saving') + ' · Save ' + money(i.itemDiscount) + '</div>' : '') + '</td>' +
       '<td class="c">' + _esc(i.hsn) + '</td>' +
       '<td class="c">' + i.qty + '</td>' +
       '<td class="r">' + money(i.mrp || i.rate) + '</td>' +
@@ -287,6 +302,9 @@ function buildInvoiceHTML(order) {
     'padding:5pt 4pt;text-align:left;font-weight:700;text-transform:uppercase}' +
   'tbody td{padding:4.5pt 4pt;border-bottom:.5pt solid #E7DED2;font-size:8pt;vertical-align:top}' +
   '.c{text-align:center}.r{text-align:right}.b{font-weight:700}' +
+  '.item-offer{font-size:6.5pt;color:#547177;margin-top:1.5pt;font-weight:600}' +
+  '.discount-details{margin-top:6pt;padding-top:5pt;border-top:.5pt solid #E7DED2;font-size:6.8pt;color:#5A6B72;line-height:1.55}' +
+  '.discount-details b{color:#547177;letter-spacing:.08em;font-size:6.3pt}' +
   '.totwrap{display:flex;gap:8pt;margin-bottom:8pt}' +
   '.words{flex:1;border:.6pt solid #D9CEC0;border-radius:4pt;padding:6pt 7pt;background:#fff;font-size:7.6pt}' +
   '.words h3{font-size:6.6pt;letter-spacing:.16em;color:#A08B72;margin-bottom:3pt;font-weight:700}' +
@@ -370,7 +388,7 @@ function buildInvoiceHTML(order) {
       '<div class="words"><h3>AMOUNT IN WORDS</h3>' + _esc(_amtWords(grand)) +
         '<div style="margin-top:6pt;font-size:6.8pt;color:#8A9AA0">' +
         'All prices are inclusive of GST. Tax is computed on the taxable value shown above ' +
-        'in accordance with Rule 46 of the CGST Rules, 2017.</div></div>' +
+        'in accordance with Rule 46 of the CGST Rules, 2017.</div>' + discountDetails + '</div>' +
       '<div class="tot">' +
         '<div class="row"><span>List / MRP value</span><span>' + money(mrpTotal) + '</span></div>' +
         '<div class="row"><span>Taxable Value</span><span>' + money(taxable) + '</span></div>' +
@@ -378,10 +396,7 @@ function buildInvoiceHTML(order) {
           ? '<div class="row"><span>CGST @ ' + (rate/2) + '%</span><span>' + money(cgst) + '</span></div>' +
             '<div class="row"><span>SGST @ ' + (rate/2) + '%</span><span>' + money(sgst) + '</span></div>'
           : '<div class="row"><span>IGST @ ' + rate + '%</span><span>' + money(igst) + '</span></div>') +
-        (o.tierDiscount ? '<div class="row"><span>Pack / tier saving</span><span>− ' + money(o.tierDiscount) + '</span></div>' : '') +
-        (o.mixMatchDiscount ? '<div class="row"><span>Mix &amp; Match saving</span><span>− ' + money(o.mixMatchDiscount) + '</span></div>' : '') +
-        (o.couponDiscount || (o.discount && !componentDiscount) ? '<div class="row"><span>Coupon saving' + (o.couponCode ? ' (' + _esc(o.couponCode) + ')' : '') + '</span><span>− ' + money(o.couponDiscount || o.discount) + '</span></div>' : '') +
-        (o.vitaPointsDiscount ? '<div class="row"><span>VitaPoints (' + o.vitaPoints + ' points)</span><span>− ' + money(o.vitaPointsDiscount) + '</span></div>' : '') +
+        (discountLines.length ? discountLines.map(function(d){ return '<div class="row"><span>' + _esc(d.name) + '</span><span>− ' + money(d.amount) + '</span></div>'; }).join('') : '') +
         '<div class="row"><span>Total savings</span><span>− ' + money(totalSavings) + '</span></div>' +
         '<div class="row"><span>Shipping</span><span>' + (o.ship ? money(o.ship) : 'FREE') + '</span></div>' +
         '<div class="row grand"><span>GRAND TOTAL</span><span>' + money(grand) + '</span></div>' +
@@ -420,7 +435,7 @@ function buildInvoiceHTML(order) {
       _esc(L.legalName) + ' &nbsp;·&nbsp; ' + _esc(L.addr2) + ' &nbsp;·&nbsp; ' + _esc(L.phone) +
       ' &nbsp;·&nbsp; ' + _esc(L.email) + ' &nbsp;·&nbsp; ' + _esc(L.site) + '<br>' +
       'FSSAI Lic. ' + _esc(L.fssai) + ' &nbsp;|&nbsp; GSTIN ' + _esc(L.gstin) +
-      ' &nbsp;|&nbsp; Made in India, Anand Gujarat &nbsp;|&nbsp; Thank you for shopping with Ozylix 🌿<br>' +
+      ' &nbsp;|&nbsp; Made in India, Anand Gujarat &nbsp;|&nbsp; Thank you, ' + _esc(o.customer || 'Customer') + '! We are happy to connect with you. 🌿✨<br>' +
       'Questions about your order or policy? Aamin Vahora: +91 72658 84137' +
     '</div>' +
   '</div></body></html>';
