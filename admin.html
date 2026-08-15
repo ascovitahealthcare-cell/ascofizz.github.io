@@ -4992,6 +4992,28 @@ async function apiFetch(path, opts={}) {
         if (rr.ok || rr.status !== 401) return rr;
       } catch (e) { /* fall through to a real logout below */ }
     }
+    // ── FIX (mobile session bounce): a token minted moments ago that
+    // gets a 401 is almost never a real revocation — it is the transient
+    // token-version race between the panel's startup burst and the
+    // server's in-memory cache (Render instance churn / a brief DB
+    // blip). Revocation is a rare, deliberate owner action; the panel
+    // must never kick an admin out of a session that is seconds old.
+    // A freshly minted token (a 60-minute session with more than 55
+    // minutes of life left) gets one extra attempt after a short
+    // backoff — by then the server's own self-heal has resynced its
+    // cache and the retry succeeds. Genuinely revoked sessions still
+    // log out on the second refusal.
+    var freshExp = tokenExpiryMs(stored || authToken);
+    var tokenFresh = freshExp > 0 && (freshExp - Date.now()) > 55 * 60_000;
+    if (tokenFresh && !window.__freshTokenRetryDone) {
+      window.__freshTokenRetryDone = true;   // bound to once per session
+      try {
+        await new Promise(res => setTimeout(res, 1500));
+        var retry = await fetch(`${API}${path}`, { ...opts, signal: AbortSignal.timeout(30000) });
+        if (retry.ok || retry.status !== 401) { delete window.__freshTokenRetryDone; return retry; }
+      } catch (e) { /* fall through to a real logout below */ }
+      delete window.__freshTokenRetryDone;
+    }
     try {
       if (!localStorage.getItem('ascovita_logout_reason')) {
         localStorage.setItem('ascovita_logout_reason',
