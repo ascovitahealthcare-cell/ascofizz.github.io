@@ -22963,7 +22963,7 @@ img.az-fade.az-in{opacity:1}
   </div>
   <div class="opb-actions">
     <button class="opb-pay" type="button" onclick="initiatePayment()">🔒 Pay Securely</button>
-    <button class="opb-cod" type="button" onclick="initiateCOD()">or pay cash on delivery</button>
+    <button class="opb-cod" type="button" onclick="initiateCOD()">💵 COD</button>
   </div>
 </div>
 
@@ -23185,16 +23185,21 @@ img.az-fade.az-in{opacity:1}
 #ozPayBar .opb-total { flex: 0 0 auto; line-height: 1.15; }
 #ozPayBar .opb-label { font-size: .62rem; letter-spacing: .07em; text-transform: uppercase; color: var(--t-low, #7a857b); }
 #ozPayBar .opb-amt   { font-size: 1.06rem; font-weight: 800; color: var(--t-hi, #1D2320); font-variant-numeric: tabular-nums; }
-#ozPayBar .opb-actions { margin-left: auto; display: flex; flex-direction: column; align-items: stretch; gap: 3px; }
+#ozPayBar .opb-actions { margin-left: auto; display: flex; gap: 8px; align-items: center; }
 #ozPayBar .opb-pay {
-  border: none; border-radius: 13px; padding: 12px 20px; min-height: 46px;
-  font-size: .9rem; font-weight: 800; cursor: pointer;
+  border: none; border-radius: 13px; padding: 12px 16px; min-height: 46px;
+  font-size: .85rem; font-weight: 800; cursor: pointer; white-space: nowrap;
   background: var(--indigo, #547177); color: #fff; touch-action: manipulation;
 }
+/* FIX (Aug 2026): COD used to be a small underlined link under the pay button,
+   leaving a dead gap beneath it. The owner asked for COD as a proper button
+   styled exactly like the payment button — same size, same gradient, side by
+   side, no gap. */
 #ozPayBar .opb-cod {
-  background: none; border: none; padding: 2px; cursor: pointer;
-  font-size: .7rem; font-weight: 700; color: var(--t-mid, #5B665C);
-  text-decoration: underline; touch-action: manipulation;
+  border: none; border-radius: 13px; padding: 12px 16px; min-height: 46px;
+  font-size: .85rem; font-weight: 800; cursor: pointer; white-space: nowrap;
+  background: var(--indigo-lo, #8E2333); color: #fff; touch-action: manipulation;
+  box-shadow: 0 2px 8px rgba(0,0,0,.18);
 }
 @media (max-width: 900px) {
   body.oz-checkout #ozPayBar { display: flex; }
