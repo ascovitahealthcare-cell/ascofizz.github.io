@@ -3579,15 +3579,20 @@ function azTogglePw() {
 <!-- ═════════════ STORE EDITOR (v9.5) — recolour and restyle ozylix.com ── -->
 <div class="page" id="page-storeeditor">
   <div class="page-hdr">
-    <div><div class="page-title">🎨 Store Editor</div><div class="page-sub">Change the storefront's colours, fonts and layout from here — pick a palette below or tune each token, then hit Save. The live site updates within about a minute (visitors may need a fresh page load).</div></div>
+    <div><div class="page-title">🎨 Store Editor</div><div class="page-sub">Change the storefront's look and page copy from here. <strong>Style</strong> = colours, fonts, layout. <strong>Content</strong> = banners, hero headline, marquee and promo copy. Hit Save to publish — the live site updates within about a minute (visitors may need a fresh page load).</div></div>
     <div class="page-actions" style="display:flex;align-items:center;gap:10px;">
       <button class="btn btn-secondary" onclick="storeEdResetDraft()">↺ Reset to defaults</button>
       <button class="btn btn-primary" onclick="storeEdSave()" style="background:var(--gold);color:#fff;border:none;">💾 Save theme</button>
+      <button class="btn btn-primary" id="storeEdSaveContentBtn" onclick="storeEdSaveContent()" style="display:none;background:var(--green);color:#fff;border:none;">💾 Save content</button>
     </div>
   </div>
   <div id="storeEdStatus" style="font-size:0.76rem;color:var(--text3);margin:-4px 0 12px;">Loading current theme…</div>
-
-  <div style="display:grid;grid-template-columns:340px 1fr;gap:16px;align-items:start;">
+  <div style="display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap;">
+    <button class="btn btn-secondary" id="storeEdTabStyle" onclick="storeEdSwitchTab('style')" style="font-weight:700;">🎨 Style (colours, layout, fonts)</button>
+    <button class="btn btn-secondary" id="storeEdTabContent" onclick="storeEdSwitchTab('content')" style="font-weight:700;">📝 Content (banners, hero, copy)</button>
+    <div id="storeEdContentStatus" style="font-size:0.72rem;color:var(--text3);align-self:center;margin-left:auto;"></div>
+  </div>
+  <div id="storeEdStylePanel" style="display:grid;grid-template-columns:340px 1fr;gap:16px;align-items:start;">
     <!-- Palette library -->
     <div class="card">
       <div class="card-hdr"><span class="card-title">🎨 Curated palettes</span></div>
@@ -3663,6 +3668,22 @@ function azTogglePw() {
               <option value="'Work Sans', sans-serif">Work Sans</option>
               <option value="'DM Sans', sans-serif">DM Sans</option>
             </select>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <!-- Website content editing — same live preview, different draft shape -->
+  <div id="storeEdContentPanel" style="display:none;grid-template-columns:420px 1fr;gap:16px;align-items:start;">
+    <div id="storeEdContentCards" style="display:grid;gap:14px;"></div>
+    <div>
+      <div class="card" style="margin-bottom:16px;">
+        <div class="card-hdr"><span class="card-title">👁️ Live preview</span><button class="btn btn-secondary btn-sm" onclick="storeEdRefreshPreview()">↺ Reload</button></div>
+        <div style="padding:10px;">
+          <div id="storeEdContentPreviewSlot" style="display:flex;justify-content:center;align-items:center;min-height:520px;"></div>
+          <div style="margin-top:8px;display:flex;gap:14px;flex-wrap:wrap;font-size:0.74rem;color:var(--text3);">
+            <span>Preview shows the storefront with your <strong>unsaved content draft</strong> patched in.</span>
+            <span>Everything below is kept as a draft — hit <strong>Save content</strong> to publish.</span>
           </div>
         </div>
       </div>
@@ -15211,6 +15232,312 @@ async function azLoadPerms() {
   if (localStorage.getItem('ascovita_token')) azLoadPerms();
 })();
 </script>
+<script>
+// ═══════════════════════════════════════════════════════════════
+// Aug 2026: Store Editor — Website content tab (v9.6).
+//
+// A second draft shape (content, not style) drives the storefront's
+// page copy: announcement bar, hero headline, stats marquee, trust
+// tiles, the Vita Points micro-card line and the offer reminder.
+//
+// The storefront itself is NOT modified — edits are stored in
+// store_contents via PUT /api/public/content, previewed by patching
+// the live-preview iframe DOM (same-origin in production: the admin
+// panel and ozylix.com live on the same GitHub Pages origin), and
+// will drive the live site once the storefront's loader is updated.
+// ═══════════════════════════════════════════════════════════════
+const STORE_ED_CONTENT_KEY = 'ozylix_content_draft';
+const STORE_ED_CONTENT_API = 'https://ascovitahealthcare-cell-github-io.onrender.com/api/public/content';
+const STORE_ED_CONTENT_STORE = 'ozylix';
 
+// ── Live defaults: the copy currently hard-coded in the storefront.
+//    Editing against these is a diff from the real site. ────────────
+function storeEdDefaultContent() {
+  return {
+    announcement: [
+      { text: 'Mix & Match — bundle discounts on select products', icon: '🌿' },
+      { text: 'Free delivery on every order', icon: '🚚' },
+      { text: 'FSSAI Approved & Lab Tested', icon: '✅' },
+      { text: 'Made in India | Anand, Gujarat', icon: '🇮🇳' },
+      { text: '+91 9898 582 650', icon: '📞' }
+    ],
+    hero: {
+      badge: 'FSSAI Approved · Lab Tested',
+      line1: 'Effervescent', line2: 'Wellness', line3: 'Made in India',
+      sub: 'Fast-absorbing effervescent vitamins, spirulina and ayurvedic supplements — manufactured in our own FSSAI approved facility in Anand, Gujarat.',
+      cta: 'Shop All Products'
+    },
+    stats: [ '500+ Pin Codes Served', '24h Dispatch Time', 'FSSAI Approved Facility — Anand, Gujarat', 'Free Delivery on Every Order' ],
+    trust: {
+      tiles: [ { icon: '🇮🇳', label: 'Made in India<br>Anand, Gujarat' },
+               { icon: '✅', label: 'FSSAI Approved<br>& Lab Tested' },
+               { icon: '🔬', label: 'In-House<br>Manufacturing' },
+               { icon: '🚚', label: 'Fast & Free<br>Delivery' } ],
+      items: [ '🚚 Free Delivery Every Order', '🇮🇳 Made in India — Anand, Gujarat', '✅ FSSAI Approved Facility', '🔬 Lab Tested Formulas' ]
+    },
+    vitaMicro: { earnText: '1 point per ₹1', valueText: '150 points = ₹1 off' },
+    offerReminder: { title: "Today's offer", offerHtml: 'Free delivery on every order — plus bundle discounts on Mix & Match picks.', cta: 'Shop now' }
+  };
+}
+
+function storeEdGetContent() {
+  try { return JSON.parse(window.localStorage.getItem(STORE_ED_CONTENT_KEY) || 'null') || storeEdDefaultContent(); }
+  catch(_) { return storeEdDefaultContent(); }
+}
+function storeEdSetContent(c) { window.localStorage.setItem(STORE_ED_CONTENT_KEY, JSON.stringify(c)); }
+
+// ── Tab switch: Style vs Content. Both share the live preview
+//    iframe; the Content tab patches the storefront DOM directly. ───
+function storeEdSwitchTab(tab) {
+  const stylePanel = document.getElementById('storeEdStylePanel');
+  const contentPanel = document.getElementById('storeEdContentPanel');
+  const saveContentBtn = document.getElementById('storeEdSaveContentBtn');
+  if (tab === 'content') {
+    stylePanel.style.display = 'none';
+    contentPanel.style.display = 'grid';
+    document.getElementById('storeEdTabContent').style.background = 'var(--green)';
+    document.getElementById('storeEdTabContent').style.color = '#fff';
+    document.getElementById('storeEdTabStyle').style.background = '';
+    document.getElementById('storeEdTabStyle').style.color = '';
+    saveContentBtn.style.display = '';
+    renderContentTab();
+    storeEdEnsurePreview();
+    storeEdPatchContentPreview();
+  } else {
+    stylePanel.style.display = 'grid';
+    contentPanel.style.display = 'none';
+    document.getElementById('storeEdTabStyle').style.background = 'var(--gold)';
+    document.getElementById('storeEdTabStyle').style.color = '#fff';
+    document.getElementById('storeEdTabContent').style.background = '';
+    document.getElementById('storeEdTabContent').style.color = '';
+    saveContentBtn.style.display = 'none';
+  }
+}
+
+// ── Content card rendering: one card per editable section. ────────
+const STORE_ED_CONTENT_SECTIONS = [
+  { key: 'announcement', title: '📢 Announcement bar (scrolling strip)',
+    fields: [ { k: 'text', label: 'Item text', list: true }, { k: 'icon', label: 'Emoji icon', list: true, short: true } ] },
+  { key: 'hero', title: '🎬 Hero headline & call-to-action',
+    fields: [ { k: 'badge' }, { k: 'line1' }, { k: 'line2' }, { k: 'line3' }, { k: 'sub', area: true }, { k: 'cta', label: 'Button label' } ] },
+  { key: 'stats', title: '📊 Stats marquee (dots row)',
+    fields: [ { k: 'text', label: 'Stat text', list: true } ] },
+  { key: 'trust', title: '✅ Trust section (tiles & items)',
+    listKey: 'tiles',
+    fields: [ { k: 'icon', label: 'Tile emoji', list: true, short: true }, { k: 'label', label: 'Tile label (2 lines with <br>)', list: true } ] },
+  { key: 'vitaMicro', title: '✨ Vita Points promo line',
+    fields: [ { k: 'earnText', label: 'Earn text (e.g. "1 point per ₹1")' }, { k: 'valueText', label: 'Value text (e.g. "150 points = ₹1 off")' } ] },
+  { key: 'offerReminder', title: '🏷️ Offer reminder card',
+    fields: [ { k: 'title' }, { k: 'offerHtml', label: 'Offer copy', area: true }, { k: 'cta', label: 'Button label' } ] }
+];
+
+function storeEdContentField(section, field, value, listIdx) {
+  if (field.area) return `<textarea data-ce-key="${section.key}" data-ce-field="${field.k}" data-ce-idx="${listIdx}" rows="2" style="width:100%;background:var(--surface2);color:var(--text);border:1px solid var(--border);border-radius:8px;padding:7px 9px;font-size:0.8rem;font-family:var(--font);">${storeEdEscapeAttr(String(value || ''))}</textarea>`;
+  const cls = field.short ? 'width:80px;' : 'width:100%;'
+  return `<input data-ce-key="${section.key}" data-ce-field="${field.k}" data-ce-idx="${listIdx}" value="${storeEdEscapeAttr(String(value || ''))}" style="${cls}background:var(--surface2);color:var(--text);border:1px solid var(--border);border-radius:8px;padding:7px 9px;font-size:0.8rem;font-family:var(--font);">`;
+}
+
+function storeEdEscapeAttr(s) { return s.replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;'); }
+
+function renderContentTab() {
+  const content = storeEdGetContent();
+  const box = document.getElementById('storeEdContentCards');
+  if (!box) return;
+  box.innerHTML = STORE_ED_CONTENT_SECTIONS.map(sec => {
+    const rows = [];
+    if (sec.fields.some(f => f.list)) {
+      const list = (content[sec.key] && (sec.listKey ? content[sec.key][sec.listKey] : content[sec.key])) || [];
+      rows.push('<div style="display:grid;gap:7px;">' + list.map((item, i) => {
+        const cells = sec.fields.filter(f => f.list).map(f =>
+          `<div><div style="font-size:0.66rem;font-weight:700;color:var(--text3);margin-bottom:3px;">${f.label || f.k} ${i + 1}</div>${storeEdContentField(sec, f, item[f.k], i)}</div>`).join('');
+        return `<div style="display:flex;gap:8px;align-items:start;"><div style="flex:1;display:grid;grid-template-columns:${sec.fields.filter(f => f.list).length > 1 ? '1fr 80px' : '1fr'};gap:8px;">${cells}</div><button class="btn btn-secondary btn-sm" onclick="storeEdContentRemove('${sec.key}', ${i})" style="padding:6px 8px;">✕</button></div>`;
+      }).join('') + `<button class="btn btn-secondary btn-sm" onclick="storeEdContentAdd('${sec.key}')" style="justify-self:start;">＋ Add item</button></div>`);
+    } else {
+      rows.push('<div style="display:grid;gap:8px;">' + sec.fields.map(f =>
+        `<div><div style="font-size:0.66rem;font-weight:700;color:var(--text3);margin-bottom:3px;">${f.label || f.k}</div>${storeEdContentField(sec, f, content[sec.key][f.k], '')}</div>`).join('') + '</div>');
+    }
+    return `<div class="card"><div class="card-hdr"><span class="card-title">${sec.title}</span></div><div style="padding:10px 14px 14px;">${rows.join('')}</div></div>`;
+  }).join('');
+  box.querySelectorAll('[data-ce-key]').forEach(el => {
+    const evt = el.tagName === 'TEXTAREA' ? 'input' : 'input';
+    el.addEventListener(evt, () => {
+      const content = storeEdGetContent();
+      const sec = el.dataset.ceKey, f = el.dataset.ceField, i = el.dataset.ceIdx;
+      if (i === '') { content[sec][f] = el.value; }
+      else { if (content[sec][i]) content[sec][i][f] = el.value; }
+      storeEdSetContent(content);
+      storeEdPatchContentPreview();
+      const st = document.getElementById('storeEdContentStatus');
+      if (st) st.textContent = 'Unsaved draft — hit Save content to publish.';
+    });
+  });
+}
+
+function storeEdContentAdd(sec) {
+  const content = storeEdGetContent();
+  const def = storeEdDefaultContent();
+  if (sec === 'announcement') content[sec].push({ text: '', icon: '✨' });
+  else if (sec === 'stats') content[sec].push(def.stats[0]);
+  else if (sec === 'trust') content[sec].tiles.push({ icon: '✅', label: 'New<br>tile' });
+  storeEdSetContent(content);
+  renderContentTab();
+  storeEdPatchContentPreview();
+}
+function storeEdContentRemove(sec, i) {
+  const content = storeEdGetContent();
+  const target = (sec === 'trust') ? content[sec].tiles : content[sec];
+  target.splice(i, 1);
+  storeEdSetContent(content);
+  renderContentTab();
+  storeEdPatchContentPreview();
+}
+
+// ── Preview patch: push the content draft into the live-preview
+//    iframe DOM. Same-origin on production (ozylix.com/admin.html and
+//    ozylix.com share an origin), so contentDocument is reachable. ───
+// Content tab needs the same storefront iframe the Style tab uses —
+// it already carries the live-theme loader draft, so one shared iframe
+// keeps theme + content drafts visible at the same time.
+function storeEdEnsurePreview() {
+  const shared = document.getElementById('storeEdPreview');
+  if (!shared) return;
+  const contentFrame = document.getElementById('storeEdPreviewContent');
+  if (contentFrame) { contentFrame.remove(); }
+  // Move the shared iframe into the Content panel when that tab is open.
+  const panel = document.getElementById('storeEdContentPanel');
+  const target = (panel && panel.style.display === 'grid') ? panel : null;
+  if (target) { const slot = target.querySelector('#storeEdContentPreviewSlot'); if (slot) { slot.appendChild(shared); slot.style.display = ''; slot.style.minHeight = ''; } }
+  else {
+    const stylePanel = document.getElementById('storeEdStylePanel');
+    if (stylePanel) {
+      const slot = stylePanel.querySelector('.card > div');
+      if (slot) slot.appendChild(shared);
+    }
+    const slot2 = document.getElementById('storeEdContentPreviewSlot');
+    if (slot2) slot2.style.display = 'none';
+  }
+  if (!shared.src || shared.src === 'about:blank') storeEdRefreshPreview();
+}
+function storeEdPatchContentPreview() {
+  const iframe = document.getElementById('storeEdPreview');
+  if (!iframe) return;
+  let doc = null;
+  try { doc = iframe.contentDocument; } catch(_) {}
+  if (!doc || !doc.body || doc.body.children.length === 0) return; // iframe still loading
+  const c = storeEdGetContent();
+  try {
+    // Announcement bar: rebuild the scrolling strip items.
+    const annInner = doc.querySelector('.ann-inner');
+    if (annInner && c.announcement && c.announcement.length) {
+      annInner.innerHTML = c.announcement.map(a =>
+        `<span><svg class="ann-svg" width="16" height="16"><use href="#ico-leaf"/></svg> ${storeEdEscapeAttr(a.icon ? a.icon + ' ' : '')}${storeEdEscapeAttr(a.text)}</span>`).join('');
+    }
+    // Hero.
+    const badge = doc.querySelector('.shader-badge span:last-child');
+    if (badge && c.hero.badge) badge.textContent = c.hero.badge;
+    const h1 = doc.querySelector('.shader-headline');
+    if (h1 && c.hero) {
+      const lines = h1.querySelectorAll('.sh-line');
+      if (lines[0] && c.hero.line1) lines[0].textContent = c.hero.line1;
+      if (lines[1] && c.hero.line2) lines[1].textContent = c.hero.line2;
+      if (lines[2] && c.hero.line3) lines[2].textContent = c.hero.line3;
+    }
+    const sub = doc.querySelector('.shader-sub');
+    if (sub && c.hero.sub) sub.textContent = c.hero.sub;
+    const cta = doc.querySelector('.shader-btn-primary');
+    if (cta && c.hero.cta) cta.textContent = c.hero.cta;
+    // Stats marquee dots.
+    const smItems = doc.querySelectorAll('.sm-item');
+    if (smItems.length && c.stats && c.stats.length) {
+      smItems.forEach((el, i) => { if (c.stats[i % c.stats.length]) el.childNodes.forEach(n => { if (n.nodeType === 3) n.textContent = c.stats[i % c.stats.length]; }); });
+    }
+    // Trust tiles.
+    const tiles = doc.querySelectorAll('.trust-tile');
+    if (tiles.length && c.trust && c.trust.tiles) {
+      tiles.forEach((t, i) => {
+        if (c.trust.tiles[i % c.trust.tiles.length]) {
+          const ico = t.querySelector('.tt-ico'), lbl = t.querySelector('.tt-lbl');
+          if (ico) ico.textContent = c.trust.tiles[i % c.trust.tiles.length].icon;
+          if (lbl) lbl.innerHTML = storeEdEscapeAttr(c.trust.tiles[i % c.trust.tiles.length].label).replace(/&lt;br&gt;/g, '<br>');
+        }
+      });
+    }
+    // Trust items (second list).
+    const tItems = doc.querySelectorAll('.trust-item');
+    if (tItems.length && c.trust && c.trust.items) {
+      tItems.forEach((el, i) => { if (c.trust.items[i % c.trust.items.length]) el.childNodes.forEach(n => { if (n.nodeType === 3) n.textContent = c.trust.items[i % c.trust.items.length]; }); });
+    }
+    // Vita Points micro-card.
+    const earn = doc.getElementById('vitaMicroEarn'), val = doc.getElementById('vitaMicroValue');
+    if (earn && c.vitaMicro && c.vitaMicro.earnText) earn.textContent = c.vitaMicro.earnText;
+    if (val && c.vitaMicro && c.vitaMicro.valueText) val.textContent = c.vitaMicro.valueText;
+    // Offer reminder.
+    const orTitle = doc.querySelector('.offer-reminder .or-title, .offer-reminder b'), orOffer = doc.querySelector('.offer-reminder .or-offer');
+    if (orTitle && c.offerReminder && c.offerReminder.title) orTitle.textContent = c.offerReminder.title;
+    if (orOffer && c.offerReminder && c.offerReminder.offerHtml) orOffer.textContent = c.offerReminder.offerHtml;
+  } catch(_) {}
+}
+
+// ── Load published content on first paint of the Content tab. ─────
+async function storeEdLoadContent() {
+  const st = document.getElementById('storeEdContentStatus');
+  try {
+    const res = await fetch(STORE_ED_CONTENT_API + '?key=' + STORE_ED_CONTENT_STORE);
+    if (!res.ok) { if (st) st.textContent = ''; return; }
+    const d = await res.json();
+    if (d && d.ok && d.content && Object.keys(d.content).length) {
+      const published = storeEdDefaultContent();
+      for (const k of Object.keys(d.content)) if (k in published) published[k] = d.content[k];
+      const saved = storeEdGetContent();
+      // Merge: published only wins where the local draft is still default.
+      const def = storeEdDefaultContent();
+      for (const k of Object.keys(published)) {
+        const isDefault = JSON.stringify(saved[k]) === JSON.stringify(def[k]);
+        if (isDefault && JSON.stringify(published[k]) !== JSON.stringify(def[k])) saved[k] = published[k];
+      }
+      storeEdSetContent(saved);
+      if (st) st.textContent = 'Published content loaded — editing builds on it.';
+      setTimeout(() => { if (st) st.textContent = ''; }, 6000);
+    }
+  } catch(_) {}
+}
+
+// ── Save content: publish the draft. ──────────────────────────────
+async function storeEdSaveContent() {
+  const st = document.getElementById('storeEdContentStatus');
+  const btn = document.getElementById('storeEdSaveContentBtn');
+  btn.disabled = true;
+  if (st) st.textContent = 'Publishing content…';
+  try {
+    const res = await fetch(STORE_ED_CONTENT_API, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + (localStorage.getItem('ascovita_token') || '') },
+      body: JSON.stringify({ key: STORE_ED_CONTENT_STORE, content: storeEdGetContent() })
+    });
+    const d = await res.json();
+    if (res.ok && d && d.ok) {
+      if (st) st.textContent = 'Content published ✅ Visitors see it once the storefront picks up the update.';
+    } else if (res.status === 401) {
+      if (st) st.textContent = 'Session expired — sign in again, then hit Save content.';
+    } else {
+      if (st) st.textContent = 'Save failed: ' + ((d && d.error) || ('HTTP ' + res.status));
+    }
+  } catch(e) {
+    if (st) st.textContent = 'Save failed — cannot reach the server.';
+  }
+  setTimeout(() => { btn.disabled = false; if (st) st.textContent = ''; }, 7000);
+}
+
+// ── Wire-up: patch the preview when it finishes loading. ──────────
+(function () {
+  // Auto-patch content drafts into the preview whenever the storefront finishes loading.
+  const iv = setInterval(() => {
+    const iframe = document.getElementById('storeEdPreview');
+    if (!iframe) return;
+    iframe.addEventListener('load', () => { try { storeEdPatchContentPreview(); } catch(_) {} });
+    clearInterval(iv);
+  }, 1000);
+})();
+</script>
 </body>
 </html>
