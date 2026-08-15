@@ -52,7 +52,7 @@
        invoice a customer downloads and the one staff print are one document,
        not two lookalikes that drift apart. Defines OZYLIX_LEGAL,
        IN_STATE_CODES, normaliseOrderForInvoice() and buildInvoiceHTML(). -->
-  <script src="invoice-template.js?v=20260815-2"></script>
+  <script src="invoice-template.js?v=20260815-3"></script>
   <!-- ✅ Indexing directives — placed first so Googlebot reads them before any script loads -->
   <meta name="robots" content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1">
   <meta name="googlebot" content="index, follow, max-image-preview:large">
@@ -19810,7 +19810,7 @@ function _renderOrderCards(orders, container) {
       <div class="order-footer">
         <div class="order-total">₹${parseFloat(total).toLocaleString('en-IN')}${payStatus}</div>
         <div style="display:flex;gap:8px">
-          <button class="invoice-btn" onclick="downloadInvoice('${orderId}')">🧾 Invoice</button>
+          <button class="invoice-btn" onclick="downloadInvoice('${orderId}')">🧾 Updated Invoice</button>
           <button class="order-track-btn" onclick="openTracking('${orderId}')">🚚 Track</button>${deliveredReviewCta}
         </div>
       </div>
@@ -19865,6 +19865,11 @@ async function loadOrdersList() {
     ...localOnly.map(o => ({ ...o, id: o.orderId, _local: true })),
   ].sort((a, b) => new Date(b.created_at || b.date || 0) - new Date(a.created_at || a.date || 0));
 
+  // Keep the exact same order objects available to every invoice action,
+  // including the Orders panel. Previously only the Invoices panel populated
+  // __INVOICE_ORDERS, so Print/Invoice from My Account could fall back to an
+  // incomplete local row and appear to use a different template.
+  window.__INVOICE_ORDERS = merged;
   _renderOrderCards(merged, container);
 
   if (!backendLoaded && merged.length === 0) {
@@ -19931,7 +19936,7 @@ async function loadInvoicesList() {
             <td style="padding:14px 18px;color:var(--gray)">${date}</td>
             <td style="padding:14px 18px;font-weight:600">₹${parseFloat(o.total||0).toLocaleString('en-IN')}</td>
             <td style="padding:14px 18px"><span style="background:${paidBg};color:${paidColor};padding:3px 10px;border-radius:100px;font-size:0.72rem;font-weight:700">${paid}</span></td>
-            <td style="padding:14px 18px;white-space:nowrap"><button class="invoice-btn" onclick="downloadInvoice('${oid}')">⬇ Download</button> <button class="invoice-btn" onclick="printInvoice('${oid}')">🖨️ Print</button></td>
+            <td style="padding:14px 18px;white-space:nowrap"><button class="invoice-btn" onclick="downloadInvoice('${oid}')">⬇ Updated Invoice</button> <button class="invoice-btn" onclick="printInvoice('${oid}')">🖨️ Print</button></td>
           </tr>`;
         }).join('')}</tbody>
       </table>
@@ -20025,6 +20030,34 @@ function findInvoiceOrder(orderId) {
 }
 
 function downloadInvoice(orderId) {
+  // All visible customer invoice actions now use the shared upgraded template.
+  // The generated HTML is self-contained, printable, and can be saved as PDF
+  // from its built-in Print / Save as PDF control. The backend PDF route is
+  // retained separately as downloadInvoicePDF() for API/integration callers.
+  try {
+    var o = findInvoiceOrder(orderId);
+    if (!o) { showToast('Invoice not found for ' + orderId, 'error'); return; }
+    var html = buildInvoiceHTML(o);
+    var blob = new Blob([html], { type: 'text/html;charset=utf-8' });
+    var url = URL.createObjectURL(blob);
+    var a = document.createElement('a');
+    a.href = url;
+    a.download = 'Ozylix-Tax-Invoice-' + orderId + '.html';
+    a.style.display = 'none';
+    document.body.appendChild(a);
+    a.click();
+    setTimeout(function() {
+      URL.revokeObjectURL(url);
+      if (a.parentNode) a.parentNode.removeChild(a);
+    }, 4000);
+    showToast('🧾 Updated invoice downloaded — open it to print or save as PDF');
+  } catch (e) {
+    console.error('[downloadInvoice]', e);
+    showToast('Could not download the updated invoice: ' + (e.message || 'please try again'), 'error');
+  }
+}
+
+function downloadInvoicePDF(orderId) {
   fetchInvoicePDF(orderId).then(function(blob) {
     var url = URL.createObjectURL(blob);
     var a = document.createElement('a');
@@ -20037,9 +20070,9 @@ function downloadInvoice(orderId) {
       URL.revokeObjectURL(url);
       if (a.parentNode) a.parentNode.removeChild(a);
     }, 4000);
-    showToast('🧾 Invoice downloaded (PDF)');
+    showToast('🧾 Updated PDF invoice downloaded');
   }).catch(function(e) {
-    console.error('[downloadInvoice]', e);
+    console.error('[downloadInvoicePDF]', e);
     showToast('Could not download the PDF invoice: ' + (e.message || 'please try again'), 'error');
   });
 }
