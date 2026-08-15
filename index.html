@@ -18551,19 +18551,6 @@ function vitaReverse(orderId, reason) {
   return { reversed: total, heldRemoved: removed, clawedBack: clawed, balance: st.balance };
 }
 
-function vitaRedeem(points, orderId) {
-  const st = getVitaState();
-  const pts = Math.floor(Number(points) || 0);
-  if (pts <= 0) return { ok: false, reason: 'Enter a number of points to redeem.' };
-  if (pts > VITA.MAX_REDEEM_PER_ORDER) {
-    return { ok: false, reason: 'You can use a maximum of ' + VITA.MAX_REDEEM_PER_ORDER.toLocaleString('en-IN') + ' VitaPoints on one order.' };
-  }
-  if (pts > st.balance) return { ok: false, reason: 'You only have ' + st.balance.toLocaleString('en-IN') + ' VitaPoints.' };
-  st.balance -= pts;
-  st.history.unshift({ t: Date.now(), type: 'redeem', pts: -pts, ref: orderId || '' });
-  _saveVita(st);
-  return { ok: true, points: pts, rupees: vitaToRupees(pts), balance: st.balance };
-}
 
 // ── CHECKOUT REDEMPTION ───────────────────────────────────────
 // Points the customer has chosen to spend on the order in progress.
