@@ -3364,7 +3364,7 @@ img[src=""], img[data-awaiting-upload] { visibility: hidden; width: 100%; }
 
 .app-bottom-nav {
   display: none;
-  position: fixed; bottom: 0; left: 0; right: 0; z-index: 880;
+  position: fixed; bottom: 0; left: 0; right: 0; z-index: 925;
   padding: 8px 6px calc(env(safe-area-inset-bottom, 0px) + 8px);
   background: rgba(241,243,248,.96);
   backdrop-filter: blur(18px); -webkit-backdrop-filter: blur(18px);
@@ -4537,6 +4537,21 @@ img[src=""], img[data-awaiting-upload] { visibility: hidden; width: 100%; }
   box-shadow: 0 10px 22px -10px var(--card-flavour, var(--indigo));
 }
 .btn-qadd.in-cart { background: var(--indigo); color: #fff; }
+/* Second action row on every card: "Add to Cart" + "Buy Now" side by side
+   are cramped on a small card, so Buy Now sits in its own row under the
+   first action pair — visible on desktop and phones alike, never colliding
+   with the wishlist/add-to-cart row (see .p-actions above). */
+.p-buyrow { display: flex; gap: 6px; padding: 0 12px 12px; }
+.btn-buynow {
+  flex: 1; padding: 9px 8px; border-radius: 12px;
+  font-size: .74rem; font-weight: 800; color: var(--t-hi);
+  background: var(--paper);
+  box-shadow: inset 0 0 0 1.5px color-mix(in srgb, var(--card-flavour, var(--indigo)) 34%, transparent);
+  transition: transform var(--dur-2) var(--fizz), background var(--dur-2) var(--rise);
+}
+.btn-buynow:hover { transform: translateY(-2px); background: color-mix(in srgb, var(--card-flavour, var(--indigo)) 10%, var(--paper)); }
+.btn-buynow:active { transform: scale(.98); }
+@media (max-width: 420px) { .btn-buynow { font-size: .7rem; padding: 8px 6px; } }
 
 .p-info { display: flex; flex-direction: column; gap: 5px; padding: 15px 12px 13px; }
 /* Category kicker. This slot printed the brand name — "OZYLIX" repeated
@@ -12397,33 +12412,10 @@ async function syncProductsFromBackend() {
         STORE.normalizeCartTiers();
         if (typeof renderSideCart === 'function') renderSideCart();
         // Re-render all grids with updated data (including new backend products)
-// v10.2c: product card images hydrate only when about to enter view, so the
-// stalled cdn-storage requests can never hold the load event hostage
-// (loadEventEnd was measured at 31-54s while ~40 tiles sat pending). The
-// first above-fold tiles hydrate in the same frame (IO callback fires
-// immediately for in-view targets), so nothing visible is delayed.
-function hydrateProductImgs() {
-  var pending = document.querySelectorAll('div.product-card img[data-src]');
-  if (!pending.length) return;
-  function hydrate(img) {
-    if (!img || !img.dataset.src) return;
-    img.src = img.dataset.src;
-    img.removeAttribute('data-src');
-  }
-  if ('IntersectionObserver' in window) {
-    var io = new IntersectionObserver(function(entries) {
-      entries.forEach(function(entry) {
-        if (entry.isIntersecting) { hydrate(entry.target); io.unobserve(entry.target); }
-      });
-    }, { rootMargin: '800px 0px 800px 0px' });
-    pending.forEach(function(img) { io.observe(img); });
-    // Anything still deferred after 4s hydrates anyway — tiles must never
-    // remain placeholders if the observer never reports them intersecting.
-    setTimeout(function() { pending.forEach(hydrate); }, 4000);
-  } else {
-    pending.forEach(hydrate);
-  }
-}
+// v10.3: card images hydrate through the top-level hydrator installed
+// right after renderProductCard() (search installProductImgHydrator). The
+// earlier copy lived inside this sync function and was invisible to bootApp
+// — every render path now shares the one top-level observer + flush.
         try { renderFeatured(); } catch(e){}
         try { renderNewArrivals(); } catch(e){}
         try { hydrateCategoryCounts(); } catch(e){}
@@ -12442,6 +12434,9 @@ function hydrateProductImgs() {
         try { renderBundleBuilder(); } catch(e){}
         // Update prices, images, offers on all visible product cards
         try { updateAllProductCards(); } catch(e){}
+        // The replacement above destroys the previously-observed images —
+        // flush the hydrator so the fresh `img[data-src]` tiles actually load.
+        try { if (typeof window._hpiFlush === 'function') window._hpiFlush(); } catch(e){}
         // Re-render product detail page if currently open (so price/tiers update instantly)
         try {
           const prodPage = document.getElementById('page-product');
@@ -13240,8 +13235,77 @@ function renderProductCard(p){
   const ratingDisplay = rating.count > 0
     ? `${stars(rating.avg)} <span class="review-ct">(${rating.count})</span>`
     : `<span class="review-ct" style="color:var(--gray)">No ratings yet</span>`;
-  return `<div class="product-card" data-product-id="${p.id}" style="--card-flavour:${cardFlavour}" onclick="openProduct(${p.id})"><div class="p-img-wrap"><img data-src="${imgSrc}" alt="${safeName}" loading="lazy" onerror="this.src='${PRODUCT_FALLBACKS.default}'" decoding="async">${safeBadge} ${maxDisc>0?`<span class="p-disc-badge">${tiers?'Up to ':'-'}${maxDisc}%</span>`:''}<div class="p-actions"><button class="btn-wishlist" onclick="event.stopPropagation();STORE.toggleWishlist(${p.id})" title="Wishlist">♡</button><button class="btn-qadd" onclick="event.stopPropagation();${tiers?`openProduct(${p.id})`:`STORE.addToCart(${p.id})`}">${tiers?'Choose Pack':'Add to Cart'}</button></div></div><div class="p-info"><div class="p-brand">${safeKicker}</div><div class="p-name">${safeName}</div><div class="p-rating">${ratingDisplay}</div><div class="p-price"><span class="sale-price">${priceDisplay}</span>${(baseMRP&&baseMRP!==baseRate)?`<span class="orig-price">₹${baseMRP.toLocaleString('en-IN')}</span>`:''}</div>${tiers?`<div class="tier-offer-tag">⚡ Up to ${maxDisc}% OFF on larger packs</div>`:safeOffer}<div class="p-enter" aria-hidden="true">Shop now<svg viewBox="0 0 15 8" fill="none"><path d="M0 4h13M9.5 1L13 4l-3.5 3" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></div></div></div>`;
+  // Two actions on every card — "Add to Cart" (instant, no pack choice)
+  // and "Buy Now" (opens the product page to pick a pack, then checkout).
+  // Tiered products use "Choose Pack" for both since the rate depends on
+  // the chosen pack size.
+  const qAddLabel = tiers ? 'Choose Pack' : 'Add to Cart';
+  const qAddOnclick = tiers ? `event.stopPropagation();openProduct(${p.id})` : `event.stopPropagation();STORE.addToCart(${p.id})`;
+  const buyNowOnclick = `event.stopPropagation();openProduct(${p.id})`;
+  return `<div class="product-card" data-product-id="${p.id}" style="--card-flavour:${cardFlavour}" onclick="openProduct(${p.id})"><div class="p-img-wrap"><img data-src="${imgSrc}" alt="${safeName}" loading="lazy" onerror="this.src='${PRODUCT_FALLBACKS.default}'" decoding="async">${safeBadge} ${maxDisc>0?`<span class="p-disc-badge">${tiers?'Up to ':'-'}${maxDisc}%</span>`:''}<div class="p-actions"><button class="btn-wishlist" onclick="event.stopPropagation();STORE.toggleWishlist(${p.id})" title="Wishlist">♡</button><button class="btn-qadd" onclick="${qAddOnclick}">${qAddLabel}</button></div><div class="p-buyrow"><button class="btn-buynow" onclick="${buyNowOnclick}">⚡ Buy Now</button></div></div><div class="p-info"><div class="p-brand">${safeKicker}</div><div class="p-name">${safeName}</div><div class="p-rating">${ratingDisplay}</div><div class="p-price"><span class="sale-price">${priceDisplay}</span>${(baseMRP&&baseMRP!==baseRate)?`<span class="orig-price">₹${baseMRP.toLocaleString('en-IN')}</span>`:''}</div>${tiers?`<div class="tier-offer-tag">⚡ Up to ${maxDisc}% OFF on larger packs</div>`:safeOffer}<div class="p-enter" aria-hidden="true">Shop now<svg viewBox="0 0 15 8" fill="none"><path d="M0 4h13M9.5 1L13 4l-3.5 3" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></div></div></div>`;
 }
+</script>
+<script>
+// ── PRODUCT CARD IMAGE HYDRATOR (v10.3) ──
+// Defined at top level so EVERY render path can reach it — the previous
+// copy lived inside syncProductsFromBackend() and was unreachable from
+// bootApp, which is why cards stayed blank even after a working page
+// render. Watches the whole document: new `img[data-src]` tiles are
+// hydrated eagerly when near the viewport, lazily via IntersectionObserver
+// otherwise, and a timed flush guarantees nothing stays blank.
+(function installProductImgHydrator() {
+  if (window._hpiInstalled) return;
+  window._hpiInstalled = true;
+  var hydrated = new WeakSet();
+  function hydrate(img) {
+    if (!img || hydrated.has(img) || !img.dataset.src) return;
+    hydrated.add(img);
+    img.src = img.dataset.src;
+    img.removeAttribute('data-src');
+  }
+  function isNearView(img) {
+    try {
+      var r = img.getBoundingClientRect();
+      return r.bottom > -window.innerHeight * 3 && r.top < window.innerHeight * 3;
+    } catch(e) { return true; }
+  }
+  window._hpiFlush = function() {
+    document.querySelectorAll('div.product-card img[data-src]').forEach(hydrate);
+  };
+  if ('IntersectionObserver' in window) {
+    var io = new IntersectionObserver(function(entries) {
+      entries.forEach(function(entry) {
+        if (entry.isIntersecting) { hydrate(entry.target); io.unobserve(entry.target); }
+      });
+    }, { rootMargin: '800px 0px 800px 0px' });
+    var mo = new MutationObserver(function(mutations) {
+      for (var m = 0; m < mutations.length; m++) {
+        var added = mutations[m].addedNodes;
+        for (var i = 0; i < added.length; i++) {
+          var node = added[i];
+          if (!(node instanceof Element)) continue;
+          var imgs = node.tagName === 'IMG' ? [node] : node.querySelectorAll('div.product-card img[data-src]');
+          for (var j = 0; j < imgs.length; j++) {
+            var im = imgs[j];
+            if (im.dataset.src && !im.src) {
+              if (isNearView(im)) { hydrate(im); } else { io.observe(im); }
+            }
+          }
+        }
+      }
+    });
+    mo.observe(document.body, { childList: true, subtree: true });
+    setTimeout(window._hpiFlush, 4000);
+    setTimeout(window._hpiFlush, 9000);
+  } else {
+    window._hpiFlush();
+    setTimeout(window._hpiFlush, 4000);
+    setTimeout(window._hpiFlush, 9000);
+  }
+})();
+installProductImgHydrator();
+// Back-compat alias used by bootApp, applyFilters and the sync flush call.
+function hydrateProductImgs() { try { window._hpiFlush && window._hpiFlush(); } catch(e) {} }
 </script>
 <script>
 // ============================================================
@@ -14520,6 +14584,9 @@ function applyFilters() {
   const cnt = document.getElementById('shopCount');
   if (!grid) return;
   grid.innerHTML = prods.length ? prods.map(p => renderProductCard(p)).join('') : '';
+  // New cards dropped in with `img[data-src]` — wake the hydrator so
+  // filtered/searched results show real photos instead of blank tiles.
+  if (typeof window._hpiFlush === 'function') { try { window._hpiFlush(); } catch(e) {} }
   if (empty) empty.style.display = prods.length ? 'none' : 'block';
   if (cnt) cnt.textContent = `Showing ${prods.length} product${prods.length!==1?'s':''}`;
   syncFilterChrome(prods.length);
@@ -21764,7 +21831,7 @@ function vitaSubmitLead() {
 
 </script>
 
-<div id="stickyCart" style="position:fixed;bottom:0;left:0;right:0;z-index:800;display:none;align-items:center;gap:12px;padding:10px 14px;transform:translateY(100%);background:var(--paper);box-shadow:0 -1px 0 var(--edge),0 -10px 30px rgba(72,62,70,.10)">
+<div id="stickyCart" style="position:fixed;bottom:0;left:0;right:0;z-index:920;display:none;align-items:center;gap:12px;padding:10px 14px;transform:translateY(100%);background:var(--paper);box-shadow:0 -1px 0 var(--edge),0 -10px 30px rgba(72,62,70,.10)">
   <div style="flex:1;min-width:0">
     <div id="scProdName" style="font-size:.78rem;font-weight:700;color:var(--t-hi);white-space:nowrap;overflow:hidden;text-overflow:ellipsis"></div>
     <div id="scProdPrice" style="font-size:.92rem;font-weight:800;color:var(--f-mineral);font-variant-numeric:tabular-nums"></div>
@@ -22593,7 +22660,7 @@ button:active, .btn-primary:active, .btn-outline:active,
   padding-bottom: calc(10px + env(safe-area-inset-bottom, 0px)) !important;
   transition: transform .3s var(--rise, cubic-bezier(.16,1,.3,1));
 }
-@media (max-width: 860px) { #stickyCart { bottom: 62px !important; } }
+@media (max-width: 860px) { #stickyCart { bottom: 62px !important; z-index: 920 !important; } }
 
 /* ── 5 · SHEETS & DRAWERS ─────────────────────────────────────────────
    Scroll containment stops the page behind a drawer from scrolling with
