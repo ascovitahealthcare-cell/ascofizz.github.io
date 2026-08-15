@@ -2052,7 +2052,30 @@ body.theme-frost .card.frost-navy .kpi-val, body.theme-frost .card.frost-navy .k
 .theme-preview-frost .tp-dot:nth-child(2){background:#0EA5E9;box-shadow:0 0 6px #0EA5E9;}
 .theme-preview-frost .tp-dot:nth-child(3){background:#22D3EE;box-shadow:0 0 6px #22D3EE;}
 .theme-preview-frost .theme-check{color:#1D4ED8;}
-</style>
+
+/* v10 design-system strip */
+.store-ed-styles-strip { display:grid; grid-template-columns:repeat(auto-fill,minmax(96px,1fr)); gap:10px; padding:6px 14px 14px; }
+.store-ed-style-tile { background:var(--surface2); border:1px solid var(--border); border-radius:12px; padding:8px; cursor:pointer; text-align:left; display:flex; flex-direction:column; gap:6px; transition:transform .15s ease, border-color .15s ease, box-shadow .15s ease; }
+.store-ed-style-tile:hover { transform:translateY(-2px); box-shadow:var(--neo-1); }
+.store-ed-style-tile.active { border:2px solid var(--gold); box-shadow:var(--neo-1); }
+.store-ed-style-swatch { height:44px; width:100%; border-radius:8px; }
+.store-ed-style-name { font-size:0.7rem; font-weight:700; color:var(--text); line-height:1.25; }
+.store-ed-combos-card { display:grid; gap:0; }
+@media (max-width:1000px) {
+  .store-ed-styles-strip { grid-template-columns:repeat(3,1fr); }
+  .store-ed-combos-card > div > div:last-child { grid-template-columns:repeat(auto-fill,minmax(160px,1fr)) !important; }
+}
+/* v10 editor mobile responsive */
+@media (max-width:1100px) {
+  #storeEdStylePanel,#storeEdContentPanel { grid-template-columns:1fr !important; }
+  #storeEdPreview { min-width:0; }
+  .store-ed-styles-strip { grid-template-columns:repeat(auto-fill,minmax(88px,1fr)); }
+}
+@media (max-width:600px) {
+  #storeEdStylePanel,#storeEdContentPanel { gap:10px; }
+  #storeEdStyles { grid-template-columns:repeat(3,1fr); }
+  .store-ed-card { padding:8px; }
+}</style>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
 </head>
 <body>
@@ -3596,7 +3619,17 @@ function azTogglePw() {
     <!-- Palette library -->
     <div class="card">
       <div class="card-hdr"><span class="card-title">🎨 Curated palettes</span></div>
-      <div id="storeEdPalettes" style="display:grid;gap:8px;padding:6px 14px 14px;"></div>
+      <div id="storeEdPalettes" style="display:grid;gap:8px;padding:6px 14px 14px;"></div>    <!-- v10 Design System card -->
+    <div class="card">
+      <div class="card-hdr"><span class="card-title">✨ Design system</span></div>
+      <div style="padding:0 14px;font-size:0.74rem;color:var(--text3);line-height:1.5;">Pick an overall look for the whole store. Each system sets colours, shadows, radius and surfaces from your current palette — the pickers below it stay yours to fine-tune.</div>
+      <div id="storeEdStyles" class="store-ed-styles-strip" style="padding-top:12px;"></div>
+    </div>
+    <!-- v10 Combinations card -->
+    <div class="card store-ed-combos-card">
+      <div id="storeEdCombos" style="padding:14px;"></div>
+    </div>
+
       <div style="padding:0 14px 14px;font-size:0.74rem;color:var(--text3);line-height:1.5;">Click a palette to apply it to the preview. It becomes your draft immediately — hit <strong>Save theme</strong> to publish it to the live store. The custom pickers on the right always stay in sync.</div>
     </div>
 
@@ -12056,7 +12089,7 @@ const STORE_ED_THEME_API = 'https://ascovitahealthcare-cell-github-io.onrender.c
 function storeEdDefaultDraft() {
   const pal = STORE_ED_PALETTES.find(x => x.default);
   return { palette: JSON.parse(JSON.stringify(pal.p)), radius:'default', shadows:'default',
-           bubbles:'on', fonts: { display: "'Jost', sans-serif", body: "'Schibsted Grotesk', sans-serif" } };
+           bubbles:'on', fonts: { display: "'Jost', sans-serif", body: "'Schibsted Grotesk', sans-serif" } , style: 'default', combos: {}};
 }
 function storeEdGetDraft() {
   try { return JSON.parse(window.localStorage.getItem(STORE_ED_DRAFT_KEY) || 'null') || storeEdDefaultDraft(); }
@@ -12131,6 +12164,9 @@ function renderStoreEditor() {
   storeEdSchedulePreview();
 }
 
+  // v10 design-system strip + combos
+  if (typeof renderStyleStrip === 'function') { try { renderStyleStrip(); } catch(_) {} }
+  if (typeof renderCombos === 'function')   { try { renderCombos(); } catch(_) {} }
 function storeEdPickerChange(key, value) {
   if (!/^#[0-9a-fA-F]{6}$/.test(value)) return;
   storeEdDraft.palette[key] = value;
@@ -12207,7 +12243,9 @@ function storeEdDraftServerMatch() {
   if (!storeEdServerTheme) return false;
   const sp = storeEdServerTheme.palette || {};
   const dp = storeEdDraft.palette || {};
-  return Object.keys(dp).length > 3 && Object.keys(dp).every(k => dp[k] === sp[k]);
+  const sMatch = (storeEdDraft.style || 'default') === (storeEdServerTheme.style || 'default');
+  const cMatch = JSON.stringify(storeEdDraft.combos || {}) === JSON.stringify(storeEdServerTheme.combos || {});
+  return Object.keys(dp).length > 3 && Object.keys(dp).every(k => dp[k] === sp[k]) && sMatch && cMatch;
 }
 
 // ── Save: PUT the draft to the backend's public theme store. Owner/
@@ -15539,5 +15577,365 @@ async function storeEdSaveContent() {
   }, 1000);
 })();
 </script>
+
+<!-- ═════════ STORE EDITOR v10 — design systems + combos ═════════ -->
+<script>
+// ═════════════ STORE EDITOR v10 — DESIGN SYSTEM ENGINE ═════════════
+// Adds 7 design-system presets (Claymorphism, Aurora UI, Bento Grid,
+// Neo-Brutalism, Skeuomorphism, Material/Flat, Default Crimson) plus a
+// deep combinations section. Presets set full token DEFAULTS; the
+// existing palette / custom pickers / layout controls still win when
+// the admin tunes them manually. Appended at end per repo convention.
+(() => {
+  'use strict';
+  // ── Computed helpers: palette colour ops ────────────────────────
+  function storeEdMix(a, b, t) {
+    const pa = [a,b].map(c => {
+      const h = c.replace('#','');
+      return [parseInt(h.slice(0,2),16), parseInt(h.slice(2,4),16), parseInt(h.slice(4,6),16)];
+    });
+    const r = pa[0].map((v,i) => Math.round(v + (pa[1][i]-v)*t));
+    return '#' + r.map(v => Math.min(255,Math.max(0,v)).toString(16).padStart(2,'0')).join('').toUpperCase();
+  }
+  function storeEdLighten(hex, t) { return storeEdMix(hex, '#FFFFFF', Math.min(1, Math.max(0, t))); }
+  function storeEdDarken(hex, t)  { return storeEdMix(hex, '#000000', Math.min(1, Math.max(0, t))); }
+
+  // ── Style registry ──────────────────────────────────────────────
+  // Each preset returns a token map of the storefront's root CSS
+  // variables (and a few targeted rules) for the CURRENT draft palette.
+  // Draft: { palette:{ paper,paperHi,... }, style, combos, ... }
+  function storeEdStyleDefault(draft) {
+    const p = draft.palette || {};
+    const paper = p.paper || '#F5F3F4';
+    const ink = p.ink || '#16121A';
+    return {
+      tokens: {},
+      rules: ['--neo-1: 3px 3px 7px var(--sh-d), -3px -3px 7px var(--sh-l);',
+              '--neo-in: inset 3px 3px 7px var(--sh-d), inset -3px -3px 7px var(--sh-l);',
+              '--radius: var(--r-md);', '--shadow: var(--neo-1);']
+    };
+  }
+
+  function storeEdStyleClay(draft) {
+    // Soft inflatable clay: outer puff + inner highlight on every face.
+    const p = draft.palette || {};
+    const paper = p.paper || '#F2F0F4'; const hi = p.paperHi || '#FFFFFF';
+    const ink = p.ink || '#2A2432';
+    const shd = 'rgba(90,80,110,.16)', lit = 'rgba(255,255,255,.85)';
+    return {
+      tokens: {
+        paper: storeEdLighten(paper, .04), paperHi: storeEdLighten(hi, .03),
+        ink: ink,
+      },
+      rules: [
+        `--sh-d: ${shd}; --sh-l: ${lit};`,
+        `--neo-1: 6px 8px 14px ${shd}, -5px -6px 12px ${lit};`,
+        `--neo-2: 10px 12px 22px ${shd}, -8px -10px 18px ${lit};`,
+        `--neo-in: inset 6px 6px 12px ${shd}, inset -5px -5px 10px ${lit};`,
+        `--neo-shadow: var(--neo-2); --neo-shadow-sm: var(--neo-1);`,
+        `--shadow: var(--neo-1); --shadow-xs: var(--neo-1); --shadow-sm: var(--neo-1);`,
+        `--radius: var(--r-lg);`,
+        `.product-card:hover,.cat-card:hover,.btn-primary:hover,.shader-btn-primary:hover{transform:translateY(-3px) scale(1.015);transition:transform .25s ease, box-shadow .25s ease;}`,
+        `.particle{opacity:.35 !important;}`
+      ]
+    };
+  }
+
+  function storeEdStyleAurora(draft) {
+    // Northern-lights backdrop + glass surfaces.
+    const p = draft.palette || {};
+    const brand = p.brand || '#C0394A';
+    const flav1 = p.flavour1 || '#4B7BE5', flav2 = p.flavour2 || '#9B5DE5';
+    const flav3 = p.flavour3 || '#F15BB5', flav4 = p.flavour4 || '#4CC9F0';
+    return {
+      tokens: { paperHi: 'rgba(255,255,255,.62)', paperLo: 'rgba(245,243,244,.45)' },
+      rules: [
+        `body{background:radial-gradient(1200px 600px at 12% -5%, ${storeEdLighten(flav1,.68)}, transparent 55%), radial-gradient(900px 500px at 88% 8%, ${storeEdLighten(flav2,.62)}, transparent 52%), radial-gradient(1000px 700px at 50% 105%, ${storeEdLighten(flav3,.58)}, transparent 58%), linear-gradient(180deg, #F7F4FC, #EEF2FA);}`,
+        `#liquidFoil{display:none !important;}`,
+        `.navbar,.card,.product-card,.cat-card,.cat-card-sm{background:${'rgba(255,255,255,.62)'} !important;backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border:1px solid rgba(255,255,255,.65);box-shadow:0 8px 30px rgba(90,80,120,.12);}`,
+        `--shadow: 0 8px 30px rgba(90,80,120,.12); --shadow-xs: 0 4px 14px rgba(90,80,120,.10); --shadow-sm: 0 6px 18px rgba(90,80,120,.11);`,
+        `--radius: var(--r-lg);`,
+        `.btn-primary,.shader-btn-primary{background:${brand};box-shadow:0 6px 20px ${storeEdDarken(brand,.25)}40;border:none;}`,
+        `.particle{opacity:.3 !important;animation-duration:38s !important;}`
+      ]
+    };
+  }
+
+  function storeEdStyleBento(draft) {
+    // Clean grid of rounded boxes; tint per zone, consistent radii.
+    const p = draft.palette || {};
+    const paper = p.paper || '#F4F4F5'; const ink = p.ink || '#18181B';
+    const brand = p.brand || '#C0394A';
+    return {
+      tokens: { paper: paper, paperHi: '#FFFFFF', paperLo: '#EDEDF0' },
+      rules: [
+        `--sh-d: rgba(30,30,36,.07); --sh-l: #FFFFFF;`,
+        `--neo-1: 0 0 0 1px rgba(30,30,36,.06), 0 2px 8px rgba(30,30,36,.06);`,
+        `--neo-2: 0 0 0 1px rgba(30,30,36,.07), 0 6px 18px rgba(30,30,36,.08);`,
+        `--shadow: var(--neo-1); --shadow-xs: var(--neo-1); --shadow-sm: var(--neo-1);`,
+        `--radius: var(--r-md);`,
+        `.products-grid,.cat-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:14px;}`,
+        `.navbar{background:#FFFFFF;border-bottom:1px solid rgba(30,30,36,.07);box-shadow:none;}`,
+        `.promo-strip,.announce{border-radius:18px;box-shadow:var(--neo-1);}`,
+        `.btn-primary,.shader-btn-primary{box-shadow:0 2px 8px ${storeEdDarken(brand,.3)}26;border-radius:var(--r-md);}`
+      ]
+    };
+  }
+
+  function storeEdStyleBrutal(draft) {
+    // Neo-brutalism: hard outlines, offset shadows, stark flat type.
+    const p = draft.palette || {};
+    const paper = p.paper || '#FFEFD8'; const brand = p.brand || '#C0394A';
+    const flav1 = p.flavour1 || '#FFD23F', flav2 = p.flavour2 || '#06D6A0';
+    const flav3 = p.flavour3 || '#EF476F', flav4 = p.flavour4 || '#118AB2';
+    return {
+      tokens: { paper: paper, paperHi: '#FFFFFF', ink: '#111111', tHi: '#111111' },
+      rules: [
+        `--sh-d: #111111; --sh-l: #FFFFFF;`,
+        `--neo-1: 4px 4px 0 #111111; --neo-2: 7px 7px 0 #111111;`,
+        `--neo-in: inset 4px 4px 0 rgba(0,0,0,.12);`,
+        `--shadow: var(--neo-1); --shadow-xs: 3px 3px 0 #111111; --shadow-sm: 5px 5px 0 #111111;`,
+        `--radius: var(--r-sm);`,
+        `.card,.product-card,.cat-card,.cat-card-sm,.navbar,.hero-body{border:2.5px solid #111111 !important;}`,
+        `.btn-primary,.shader-btn-primary{border:2.5px solid #111111;box-shadow:4px 4px 0 #111111;transition:transform .12s, box-shadow .12s;}`,
+        `.btn-primary:active,.shader-btn-primary:active{transform:translate(3px,3px);box-shadow:1px 1px 0 #111111;}`,
+        `h1,h2,h3,.page-title{text-transform:uppercase;letter-spacing:.06em;}`,
+        `.products-grid .product-card:nth-child(5n+1){background:${flav1};}.products-grid .product-card:nth-child(5n+2){background:${flav2};color:#0B3D2C;}`,
+        `.products-grid .product-card:nth-child(5n+3){background:${flav3};color:#FFF;}.products-grid .product-card:nth-child(5n+4){background:${flav4};color:#FFF;}`,
+        `.particle{display:none !important;}#liquidFoil{display:none;}`
+      ]
+    };
+  }
+
+  function storeEdStyleSkeuo(draft) {
+    // Real-world materials: gradients, bevels, physical buttons.
+    const p = draft.palette || {};
+    const paper = p.paper || '#EAE2D6'; const ink = p.ink || '#3B2F24';
+    const brand = p.brand || '#C0394A';
+    return {
+      tokens: { paper: paper, paperHi: '#F6EFE3', paperLo: '#DDD2C2' },
+      rules: [
+        `body{background:linear-gradient(180deg, #EDE4D4, #E4D8C4);}`,
+        `--sh-d: rgba(60,45,30,.28); --sh-l: rgba(255,250,238,.75);`,
+        `--neo-1: 2px 3px 5px rgba(60,45,30,.3), inset 0 1px 0 rgba(255,250,238,.9);`,
+        `--neo-2: 4px 6px 10px rgba(60,45,30,.28), inset 0 1px 0 rgba(255,250,238,.8);`,
+        `--neo-in: inset 2px 3px 6px rgba(60,45,30,.3), inset 0 1px 0 rgba(255,250,238,.5);`,
+        `--shadow: var(--neo-1); --shadow-xs: var(--neo-1); --shadow-sm: var(--neo-1);`,
+        `--radius: var(--r-sm);`,
+        `.card,.product-card,.cat-card{background:linear-gradient(180deg,#F8F1E4,#EDE2D0);border:1px solid #CBBBA2;}`,
+        `.btn-primary,.shader-btn-primary{background:linear-gradient(180deg,${storeEdLighten(brand,.15)},${storeEdDarken(brand,.1)});border:1px solid ${storeEdDarken(brand,.3)};box-shadow:0 2px 4px rgba(40,25,15,.35), inset 0 1px 0 rgba(255,255,255,.35);}`,
+        `.navbar{background:linear-gradient(180deg,#EFE6D5,#E2D4BE);border-bottom:1px solid #CBBBA2;}`,
+        `.particle{display:none !important;}#liquidFoil{display:none;}`
+      ]
+    };
+  }
+
+  function storeEdStyleMaterial(draft) {
+    // Flat Material: crisp surfaces, subtle elevation, calm.
+    const p = draft.palette || {};
+    const paper = p.paper || '#FAFAF9'; const brand = p.brand || '#C0394A';
+    return {
+      tokens: { paper: paper, paperHi: '#FFFFFF', paperLo: '#F3F3F2' },
+      rules: [
+        `--sh-d: rgba(30,30,32,.09); --sh-l: #FFFFFF;`,
+        `--neo-1: 0 1px 2px rgba(30,30,32,.06), 0 2px 6px rgba(30,30,32,.05);`,
+        `--neo-2: 0 3px 8px rgba(30,30,32,.08), 0 8px 20px rgba(30,30,32,.07);`,
+        `--neo-in: none;`,
+        `--shadow: var(--neo-1); --shadow-xs: var(--neo-1); --shadow-sm: 0 2px 7px rgba(30,30,32,.07);`,
+        `--radius: var(--r-md);`,
+        `.card,.product-card,.cat-card{border:1px solid rgba(30,30,32,.06);}`,
+        `.btn-primary,.shader-btn-primary{box-shadow:0 2px 6px ${storeEdDarken(brand,.3)}29;}`,
+        `.navbar{border-bottom:1px solid rgba(30,30,32,.07);}`,
+        `.particle{opacity:.2 !important;}`
+      ]
+    };
+  }
+
+  const STORE_ED_STYLES = [
+    { key: 'default', name: 'Crimson Classic', icon: '🩸', fn: storeEdStyleDefault,
+      swatch: ['linear-gradient(135deg,#F5F3F4 50%,#C0394A 50%)','#F5F3F4'],
+      desc: 'The current live look — warm paper, crimson brand, soft neumorphic depth.' },
+    { key: 'clay', name: 'Claymorphism', icon: '🫧', fn: storeEdStyleClay,
+      swatch: ['linear-gradient(135deg,#F6F3FA,#E8E1F2)','#F6F3FA'],
+      desc: 'Soft inflatable clay — puffy 3D faces with inner highlights and bouncy hover lift.' },
+    { key: 'aurora', name: 'Aurora UI', icon: '🌌', fn: storeEdStyleAurora,
+      swatch: ['linear-gradient(135deg,#C9B8F0,#B9D6F7,#F5C1DD)','#E3DCF9'],
+      desc: 'Northern-lights gradients with frosted-glass surfaces floating over the glow.' },
+    { key: 'bento', name: 'Bento Grid', icon: '🗃️', fn: storeEdStyleBento,
+      swatch: ['linear-gradient(135deg,#FFFFFF 50%,#EDEDF0 50%)','#FFFFFF'],
+      desc: 'Tidy rounded boxes in a clean grid — subtle outlines, calm elevation.' },
+    { key: 'brutal', name: 'Neo-Brutalism', icon: '🧱', fn: storeEdStyleBrutal,
+      swatch: ['linear-gradient(135deg,#FFEFD8 50%,#111 50%)','#FFEFD8'],
+      desc: 'Bold outlines, hard offset shadows and stark uppercase type — confident contrast.' },
+    { key: 'skeuo', name: 'Skeuomorphism', icon: '🪵', fn: storeEdStyleSkeuo,
+      swatch: ['linear-gradient(135deg,#F6EFE3,#D9CBB3)','#F6EFE3'],
+      desc: 'Real-world materials — leather-toned gradient panels and extruded buttons.' },
+    { key: 'material', name: 'Material / Flat', icon: '🪄', fn: storeEdStyleMaterial,
+      swatch: ['linear-gradient(135deg,#FFFFFF 50%,#FAFAF9 50%)','#FFFFFF'],
+      desc: 'Minimal 2D flatness — crisp surfaces, gentle elevation, zero gloss.' }
+  ];
+
+  // ── Combinations registry ───────────────────────────────────────
+  const STORE_ED_COMBOS = {
+    corners: { title: '📐 Corner radius', opt: 'radius', items: [
+      { v: 'default', label: 'Pill (default)' }, { v: 'medium', label: 'Medium' },
+      { v: 'sharp', label: 'Sharp' }, { v: 'extra', label: 'Extra round' } ] },
+    shadows: { title: '🌑 Shadow system', opt: 'shadows', items: [
+      { v: 'default', label: 'Neumorphic (default)' }, { v: 'soft', label: 'Soft flat' },
+      { v: 'none', label: 'None' }, { v: 'clay', label: 'Clay puff' },
+      { v: 'hard', label: 'Hard offset' }, { v: 'layered', label: 'Layered depth' } ] },
+    buttons: { title: '🔘 Button style', opt: 'buttons', items: [
+      { v: 'flat', label: 'Flat' }, { v: 'raised', label: 'Raised' },
+      { v: 'extruded', label: 'Extruded clay' }, { v: 'outline', label: 'Bold outline' } ] },
+    borders: { title: '⬛ Borders', opt: 'borders', items: [
+      { v: 'none', label: 'None' }, { v: 'hairline', label: 'Hairline' },
+      { v: 'bold', label: 'Bold outline' } ] },
+    weight: { title: '🔤 Text weight', opt: 'weight', items: [
+      { v: 'light', label: 'Light' }, { v: 'regular', label: 'Regular' },
+      { v: 'bold', label: 'Bold headings' } ] },
+    density: { title: '📏 Spacing density', opt: 'density', items: [
+      { v: 'compact', label: 'Compact' }, { v: 'normal', label: 'Normal' },
+      { v: 'airy', label: 'Airy' } ] },
+    bgfx: { title: '🎆 Background FX', opt: 'bgfx', items: [
+      { v: 'clean', label: 'Clean' }, { v: 'bubbles', label: 'Bubbles' },
+      { v: 'aurora', label: 'Aurora glow' }, { v: 'noise', label: 'Paper noise' } ] },
+    cardstyle: { title: '🃏 Card style', opt: 'cardstyle', items: [
+      { v: 'neumorphic', label: 'Neumorphic' }, { v: 'flat', label: 'Flat' },
+      { v: 'clay', label: 'Clay' }, { v: 'bento', label: 'Bento tile' } ] }
+  };
+
+  // ── Token assembly: defaults ← style ← combos ← palette ← pickers ─
+  function storeEdBuildTokenMap(draft) {
+    const p = draft.palette || {};
+    const c = draft.combos || {};
+    const st = STORE_ED_STYLES.find(x => x.key === (draft.style || 'default'));
+    const map = {};
+    const rules = [];
+
+    // 1. Style preset defaults
+    try {
+      const s = (st && st.fn ? st.fn(draft) : storeEdStyleDefault(draft)) || {};
+      Object.assign(map, s.tokens || {});
+      if (s.rules) rules.push(...s.rules);
+    } catch (_) {}
+
+    // 2. Combo overrides (each maps to token strings)
+    const brand = p.brand || '#C0394A', brandDeep = p.brandDeep || '#8E2333';
+    switch (c.shadows) {
+      case 'none':    rules.push('--neo-1:none;--neo-2:none;--neo-3:none;--neo-4:none;--neo-in:none;--shadow:none;--shadow-xs:none;--shadow-sm:none;'); break;
+      case 'soft':    rules.push('--neo-1:0 1px 4px rgba(0,0,0,.08);--neo-2:0 3px 10px rgba(0,0,0,.09);--neo-in:none;--shadow-xs:0 1px 4px rgba(0,0,0,.08);--shadow-sm:0 3px 10px rgba(0,0,0,.09);'); break;
+      case 'clay':    rules.push('--neo-1:8px 10px 16px rgba(90,80,110,.16), -6px -8px 14px rgba(255,255,255,.85);--neo-2:12px 14px 24px rgba(90,80,110,.18), -9px -11px 20px rgba(255,255,255,.8);--shadow:var(--neo-1);--shadow-xs:var(--neo-1);--shadow-sm:var(--neo-1);--radius:var(--r-lg);'); break;
+      case 'hard':    rules.push('--neo-1:5px 5px 0 #111;--neo-2:8px 8px 0 #111;--neo-in:inset 4px 4px 0 rgba(0,0,0,.1);--shadow:var(--neo-1);--shadow-xs:3px 3px 0 #111;--shadow-sm:6px 6px 0 #111;--radius:var(--r-sm);'); break;
+      case 'layered': rules.push('--neo-1:0 1px 3px rgba(0,0,0,.06), 0 4px 12px rgba(0,0,0,.06);--neo-2:0 4px 10px rgba(0,0,0,.08), 0 12px 28px rgba(0,0,0,.08);--shadow:var(--neo-1);--shadow-xs:var(--neo-1);--shadow-sm:var(--neo-1);'); break;
+    }
+    switch (c.buttons) {
+      case 'flat':    rules.push(`.btn-primary,.shader-btn-primary{box-shadow:none;border:none;border-radius:var(--r-pill);}`); break;
+      case 'extruded':rules.push(`.btn-primary,.shader-btn-primary{box-shadow:7px 8px 14px rgba(90,80,110,.18), -5px -6px 12px rgba(255,255,255,.85);}`); break;
+      case 'outline': rules.push(`.btn-primary,.shader-btn-primary{border:2.5px solid #111;box-shadow:4px 4px 0 #111;box-shadow-offset:0;}`); break;
+      default:        rules.push(`.btn-primary,.shader-btn-primary{box-shadow:0 2px 8px rgba(0,0,0,.15);}`); break;
+    }
+    switch (c.borders) {
+      case 'none':  rules.push(`.card,.product-card,.cat-card,.cat-card-sm,.navbar{border:none !important;}`); break;
+      case 'hairline': rules.push(`.card,.product-card,.cat-card,.cat-card-sm{border:1px solid rgba(0,0,0,.07) !important;}`); break;
+      case 'bold':  rules.push(`.card,.product-card,.cat-card,.cat-card-sm,.navbar{border:2px solid #111 !important;}`); break;
+    }
+    switch (c.weight) {
+      case 'light': rules.push('h1,h2,h3{font-weight:400;}'); break;
+      case 'bold':  rules.push('h1,h2,h3{font-weight:800;}'); break;
+    }
+    switch (c.density) {
+      case 'compact': rules.push('.card,.product-card,.cat-card{padding:12px 14px !important;}'); break;
+      case 'airy':    rules.push('.card,.product-card,.cat-card{padding:26px 30px !important;}'); break;
+    }
+    switch (c.bgfx) {
+      case 'bubbles': rules.push('.particle{display:none !important;}#liquidFoil{display:none;}'); break;
+      case 'aurora':  rules.push(`body{background:radial-gradient(900px 500px at 12% -5%, rgba(75,123,229,.35), transparent 55%), radial-gradient(800px 500px at 88% 8%, rgba(155,93,229,.3), transparent 52%), linear-gradient(180deg, #F7F4FC, #EEF2FA);}#liquidFoil{display:none !important;}`); break;
+      case 'noise':   rules.push(`body::before{content:'';position:fixed;inset:0;pointer-events:none;opacity:.035;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 250 250' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.8' numOctaves='2'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");}`); break;
+      case 'clean':   rules.push('.particle{display:none !important;}#liquidFoil{display:none;}'); break;
+    }
+    switch (c.cardstyle) {
+      case 'flat': rules.push('.product-card,.cat-card,.cat-card-sm{box-shadow:none;border:1px solid rgba(0,0,0,.07);}'); break;
+      case 'clay': rules.push(`.product-card,.cat-card,.cat-card-sm{box-shadow:8px 10px 16px rgba(90,80,110,.16), -6px -8px 14px rgba(255,255,255,.85);border-radius:var(--r-lg);}`); break;
+      case 'bento':rules.push(`.product-card,.cat-card,.cat-card-sm{box-shadow:0 0 0 1px rgba(30,30,36,.06), 0 2px 8px rgba(30,30,36,.06);border-radius:var(--r-md);}div.products-grid,div.cat-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:14px;}`); break;
+      default:     rules.push(`.product-card,.cat-card,.cat-card-sm{box-shadow:var(--neo-1);}`); break;
+    }
+    return { map, rules };
+  }
+
+  // ── UI: style strip + combos section ────────────────────────────
+  function renderStyleStrip() {
+    const box = document.getElementById('storeEdStyles');
+    if (!box) return;
+    box.innerHTML = STORE_ED_STYLES.map(s => {
+      const active = (storeEdDraft.style || 'default') === s.key;
+      return `<button class="store-ed-style-tile ${active ? 'active' : ''}" data-se-style="${s.key}" onclick="storeEdApplyStyle('${s.key}')" title="${storeEdEscapeAttr(s.desc)}">
+        <div class="store-ed-style-swatch" style="background:${s.swatch[0]};border:1px solid ${active ? 'var(--gold)' : 'rgba(0,0,0,.12)'};border-radius:10px;"></div>
+        <div class="store-ed-style-name">${s.icon} ${s.name}${active ? ' ✓' : ''}</div>
+      </button>`;
+    }).join('');
+  }
+
+  function storeEdApplyStyle(key) {
+    storeEdDraft.style = key;
+    storeEdSetDraft(storeEdDraft);
+    renderStyleStrip();
+    storeEdSchedulePreview();
+  }
+
+  function renderCombos() {
+    const box = document.getElementById('storeEdCombos');
+    if (!box) return;
+    const isOpen = box.dataset.open === '1';
+    box.innerHTML = `
+      <div style="display:flex;align-items:center;gap:10px;cursor:pointer;padding:2px 4px;" onclick="storeEdToggleCombos()">
+        <span class="card-title" style="font-size:0.92rem;font-weight:700;">🧩 Combinations — mix & match details</span>
+        <span style="margin-left:auto;font-size:0.7rem;color:var(--text3);">${isOpen ? '▾ hide' : '▸ show ' + Object.keys(STORE_ED_COMBOS).length + ' controls'}</span>
+      </div>
+      ${isOpen ? `<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:16px;padding:14px 4px 4px;">` +
+        Object.entries(STORE_ED_COMBOS).map(([k, g]) => {
+          const val = storeEdDraft.combos && storeEdDraft.combos[k] ? storeEdDraft.combos[k] : g.items[0].v;
+          return `<div>
+            <div style="font-size:0.76rem;font-weight:700;color:var(--text);margin-bottom:6px;">${g.title}</div>
+            <div style="display:flex;gap:6px;flex-wrap:wrap;">` +
+            g.items.map(it => `<button class="btn btn-secondary btn-sm" data-combo="${k}" data-val="${it.v}" onclick="storeEdComboClick(this)" style="${(storeEdDraft.combos||{})[k] === it.v ? 'background:var(--gold);color:#fff;' : ''}">${it.label}</button>`).join('') +
+            `</div></div>`;
+        }).join('') + `</div>` : ''}`;
+  }
+
+  function storeEdToggleCombos() {
+    const box = document.getElementById('storeEdCombos');
+    if (!box) return;
+    box.dataset.open = box.dataset.open === '1' ? '0' : '1';
+    renderCombos();
+  }
+
+  function storeEdComboClick(btn) {
+    const k = btn.dataset.combo, v = btn.dataset.val;
+    if (!storeEdDraft.combos) storeEdDraft.combos = {};
+    storeEdDraft.combos[k] = v;
+    storeEdSetDraft(storeEdDraft);
+    renderCombos();
+    storeEdSchedulePreview();
+  }
+
+  // Patch the existing preview stylesheet to include style+combo rules.
+  // The iframe loader in index.html reads draft.style/combos from the
+  // same localStorage blob — so nothing extra is needed on the
+  // storefront side once the loader is extended (v10 loader block).
+  window.storeEdApplyStyle = storeEdApplyStyle;
+  window.storeEdToggleCombos = storeEdToggleCombos;
+  window.STORE_ED_STYLES = STORE_ED_STYLES;
+  window.STORE_ED_COMBOS = STORE_ED_COMBOS;
+  window.renderStyleStrip = renderStyleStrip;
+  window.renderCombos = renderCombos;
+  window.storeEdComboClick = storeEdComboClick;
+  window.storeEdBuildTokenMap = storeEdBuildTokenMap;
+})();
+// Late pass: the v10 engine loads after renderStoreEditor already ran,
+// so populate the style strip + combos now that the functions exist.
+if (typeof renderStyleStrip === 'function') { try { renderStyleStrip(); } catch(_) {} }
+if (typeof renderCombos === 'function' )   { try { renderCombos(); } catch(_) {} }
+</script>
+
 </body>
 </html>
