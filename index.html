@@ -20924,7 +20924,6 @@ const QUIZ_DATA=[
 ];
 const QUIZ_RECS={0:[4,3,14],1:[5,14,8],2:[15,20,8],3:[8,5,22]};
 let quizStep=0,quizAnswers=[];
-function openQuiz(){quizStep=0;quizAnswers=[];const o=document.getElementById('quizOverlay');if(o)o.style.display='flex';renderQuizStep();}
 function closeQuiz(){const o=document.getElementById('quizOverlay');if(o)o.style.display='none';}
 function renderQuizStep(){
   const ov=document.getElementById('quizOverlay');if(!ov)return;
