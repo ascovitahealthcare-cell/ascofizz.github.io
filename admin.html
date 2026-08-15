@@ -4337,7 +4337,7 @@ function azTogglePw() {
       <div class="form-row col2">
         <div class="form-group"><label class="form-label">Coupon Code *</label><input class="form-control" id="cCode" placeholder="GLOW20" style="text-transform:uppercase" oninput="this.value=this.value.toUpperCase()"></div>
         <div class="form-group"><label class="form-label">Type *</label>
-          <select class="form-control" id="cType"><option value="percent">Percent (%)</option><option value="flat">Flat (₹)</option></select>
+          <select class="form-control" id="cType" onchange="updateCouponTypeHints()"><option value="percent">Percent (%)</option><option value="flat">Flat (₹)</option></select>
         </div>
       </div>
       <div class="form-row col2">
@@ -4346,7 +4346,7 @@ function azTogglePw() {
       </div>
       <div class="form-row col2">
         <div class="form-group"><label class="form-label">Max Uses</label><input type="number" class="form-control" id="cMaxUses" placeholder="Unlimited"></div>
-        <div class="form-group"><label class="form-label">Maximum Discount (₹)</label><input type="number" class="form-control" id="cMaxDiscount" placeholder="No absolute cap" min="0"></div>
+        <div class="form-group"><label class="form-label" id="cMaxDiscountLabel">Maximum Discount (₹) *</label><input type="number" class="form-control" id="cMaxDiscount" placeholder="Required for percent coupons" min="0" step="0.01"><div id="cMaxDiscountHint" style="font-size:11px;color:var(--text3);margin-top:5px;">Percentage coupons must have an absolute rupee cap.</div></div>
         <div class="form-group"><label class="form-label">Max Uses / Customer</label><input type="number" class="form-control" id="cMaxUsesPerCustomer" placeholder="Unlimited" min="1"></div>
         <div class="form-group"><label class="form-label">Expires On</label><input type="date" class="form-control" id="cExpires"></div>
       </div>
@@ -8398,29 +8398,52 @@ function openProductModal(productId) { openProductDrawer(productId); }
 async function loadDiscounts() {
   try {
     const r = await apiFetch('/api/admin/coupons');
-    allDiscounts = (await r.json()).data || [];
+    const result = await r.json().catch(() => ({}));
+    if (!r.ok) throw new Error(result.error || `Coupon list failed (${r.status})`);
+    allDiscounts = result.data || [];
     renderDiscounts();
   } catch(e) { toast('Discounts error: '+e.message,'error'); }
 }
 
 function renderDiscounts() {
-  document.getElementById('discountsTbody').innerHTML = allDiscounts.length ? allDiscounts.map(c => `
-    <tr style="${c.deleted_at?'opacity:0.4;':''}">
-      <td><span style="font-family:var(--mono);font-weight:700;color:var(--gold-text);">${c.code}</span></td>
-      <td><span class="badge badge-gray">${c.type}</span></td>
-      <td style="font-weight:600;">${c.type==='percent'?c.value+'%':'₹'+c.value}</td>
-      <td>₹${c.min_order||0}</td>
-      <td><span style="font-family:var(--mono);">${c.used_count||0}/${c.max_uses||'∞'}${c.max_uses_per_customer?` · ${c.max_uses_per_customer}/customer`:''}${c.max_discount!=null?` · cap ₹${c.max_discount}`:''}</span></td>
+  document.getElementById('discountsTbody').innerHTML = allDiscounts.length ? allDiscounts.map(c => {
+    const isDeleted = !!c.deleted_at;
+    const lifecycleAction = isDeleted
+      ? `<button class="btn btn-secondary btn-sm btn-icon" title="Restore and activate" onclick="restoreCoupon(${Number(c.id)})">↻</button>`
+      : `<button class="btn btn-danger btn-sm btn-icon" title="Deactivate and delete" onclick="deleteCoupon(${Number(c.id)})">🗑️</button>`;
+    return `
+    <tr style="${isDeleted?'opacity:0.55;':''}">
+      <td><span style="font-family:var(--mono);font-weight:700;color:var(--gold-text);">${esc(c.code)}</span></td>
+      <td><span class="badge badge-gray">${esc(c.type)}</span></td>
+      <td style="font-weight:600;">${c.type==='percent'?esc(c.value)+'%':'₹'+esc(c.value)}</td>
+      <td>₹${esc(c.min_order||0)}</td>
+      <td><span style="font-family:var(--mono);">${esc(c.used_count||0)}/${esc(c.max_uses||'∞')}${c.max_uses_per_customer?` · ${esc(c.max_uses_per_customer)}/customer`:''}${c.max_discount!=null?` · cap ₹${esc(c.max_discount)}`:''}</span></td>
       <td style="font-size:0.75rem;color:var(--text3);">${c.expires_at?fmtDate(c.expires_at):'No expiry'}</td>
-      <td>${c.deleted_at?`<span class="badge badge-red">Deleted</span>`:c.active?`<span class="badge badge-green">Active</span>`:`<span class="badge badge-gray">Inactive</span>`}</td>
+      <td>${isDeleted?`<span class="badge badge-red">Deleted / Deactivated</span>`:c.active?`<span class="badge badge-green">Active</span>`:`<span class="badge badge-gray">Inactive</span>`}</td>
       <td>
         <div style="display:flex;gap:4px;">
-          <button class="btn btn-secondary btn-sm btn-icon" onclick="openCouponModal(${c.id})">✏️</button>
-          <button class="btn btn-danger btn-sm btn-icon" onclick="deleteCoupon(${c.id})">🗑️</button>
+          <button class="btn btn-secondary btn-sm btn-icon" title="Edit coupon" onclick="openCouponModal(${Number(c.id)})">✏️</button>
+          ${lifecycleAction}
         </div>
       </td>
-    </tr>
-  `).join('') : '<tr><td colspan="8"><div class="empty-state">No coupons found</div></td></tr>';
+    </tr>`;
+  }).join('') : '<tr><td colspan="8"><div class="empty-state">No coupons found</div></td></tr>';
+}
+
+function updateCouponTypeHints() {
+  const isPercent = document.getElementById('cType').value === 'percent';
+  const label = document.getElementById('cMaxDiscountLabel');
+  const input = document.getElementById('cMaxDiscount');
+  const hint = document.getElementById('cMaxDiscountHint');
+  if (label) label.textContent = isPercent ? 'Maximum Discount (₹) *' : 'Maximum Discount (₹)';
+  if (input) {
+    input.required = isPercent;
+    input.min = isPercent ? '0.01' : '0';
+    input.placeholder = isPercent ? 'Required for percent coupons' : 'Optional absolute cap';
+  }
+  if (hint) hint.textContent = isPercent
+    ? 'Required: the maximum rupee amount this 8% coupon can deduct.'
+    : 'Optional: a flat coupon can also have an absolute rupee cap.';
 }
 
 function openCouponModal(id) {
@@ -8438,42 +8461,77 @@ function openCouponModal(id) {
     document.getElementById('cExpires').value = c.expires_at?c.expires_at.split('T')[0]:'';
     document.getElementById('cActive').checked = c.active !== false;
   } else {
-    ['cCode','cValue','cMaxUses','cMaxDiscount','cMaxUsesPerCustomer','cExpires'].forEach(id => document.getElementById(id).value='');
+    ['cCode','cValue','cMaxUses','cMaxDiscount','cMaxUsesPerCustomer','cExpires'].forEach(fieldId => document.getElementById(fieldId).value='');
     document.getElementById('cMinOrder').value = '0';
     document.getElementById('cActive').checked = true;
     document.getElementById('cType').value = 'percent';
   }
+  updateCouponTypeHints();
   openModal('couponModal');
 }
 
 async function saveCoupon() {
   const code = document.getElementById('cCode').value.trim().toUpperCase();
-  if(!code) { toast('Code required','error'); return; }
+  const type = document.getElementById('cType').value;
+  const value = Number(document.getElementById('cValue').value);
+  const maxDiscountRaw = document.getElementById('cMaxDiscount').value.trim();
+  const maxDiscount = maxDiscountRaw === '' ? null : Number(maxDiscountRaw);
+  const minOrderRaw = document.getElementById('cMinOrder').value.trim();
+  const maxUsesRaw = document.getElementById('cMaxUses').value.trim();
+  const perCustomerRaw = document.getElementById('cMaxUsesPerCustomer').value.trim();
+
+  if(!/^[A-Z0-9][A-Z0-9_-]{2,39}$/.test(code)) {
+    toast('Use a 3–40 character code with letters, numbers, hyphens, or underscores','error'); return;
+  }
+  if(!Number.isFinite(value) || value <= 0) { toast('Coupon value must be greater than 0','error'); return; }
+  if(type === 'percent' && value !== 8) { toast('Percentage coupons must be exactly 8%','error'); return; }
+  if(type === 'percent' && (!Number.isFinite(maxDiscount) || maxDiscount <= 0)) {
+    toast('Percentage coupons require a maximum discount greater than ₹0','error'); return;
+  }
+  if(type === 'flat' && maxDiscount !== null && (!Number.isFinite(maxDiscount) || maxDiscount < 0)) {
+    toast('Enter a valid maximum discount','error'); return;
+  }
+
   const body = {
-    code, type:document.getElementById('cType').value,
-    value:parseFloat(document.getElementById('cValue').value)||0,
-    min_order:parseFloat(document.getElementById('cMinOrder').value)||0,
-    max_uses:parseInt(document.getElementById('cMaxUses').value)||null,
-    max_discount:document.getElementById('cMaxDiscount').value === '' ? null : Number(document.getElementById('cMaxDiscount').value),
-    max_uses_per_customer:document.getElementById('cMaxUsesPerCustomer').value === '' ? null : parseInt(document.getElementById('cMaxUsesPerCustomer').value),
+    code, type, value,
+    min_order: minOrderRaw === '' ? null : Number(minOrderRaw),
+    max_uses: maxUsesRaw === '' ? null : Number(maxUsesRaw),
+    max_discount: maxDiscount,
+    max_uses_per_customer: perCustomerRaw === '' ? null : Number(perCustomerRaw),
     expires_at:document.getElementById('cExpires').value||null,
     active:document.getElementById('cActive').checked,
   };
   try {
     const url  = editingCouponId ? `/api/admin/coupons/${editingCouponId}` : '/api/admin/coupons';
     const meth = editingCouponId ? 'PUT' : 'POST';
-    const r    = await apiFetch(url, {method:meth, body:JSON.stringify(body)});
-    if(!r.ok) throw new Error((await r.json()).error||'Failed');
-    toast(editingCouponId ? 'Coupon updated ✅' : 'Coupon created ✅');
-    closeModal('couponModal'); loadDiscounts();
+    const r = await apiFetch(url, {method:meth, body:JSON.stringify(body)});
+    const result = await r.json().catch(() => ({}));
+    if(!r.ok) throw new Error(result.error || `Coupon save failed (${r.status})`);
+    toast(editingCouponId ? 'Coupon updated and saved ✅' : 'Coupon created and saved to Supabase ✅');
+    closeModal('couponModal');
+    await loadDiscounts();
   } catch(e) { toast(e.message,'error'); }
 }
 
 async function deleteCoupon(id) {
-  if(!confirm('Delete this coupon?')) return;
+  if(!confirm('Deactivate and delete this coupon? It will remain in Supabase as a deleted record and can be restored.')) return;
   try {
-    await apiFetch(`/api/admin/coupons/${id}`,{method:'DELETE'});
-    toast('Coupon deleted'); loadDiscounts();
+    const r = await apiFetch(`/api/admin/coupons/${id}`,{method:'DELETE'});
+    const result = await r.json().catch(() => ({}));
+    if(!r.ok) throw new Error(result.error || `Coupon delete failed (${r.status})`);
+    toast('Coupon deactivated and marked deleted in Supabase');
+    await loadDiscounts();
+  } catch(e) { toast(e.message,'error'); }
+}
+
+async function restoreCoupon(id) {
+  if(!confirm('Restore and activate this coupon?')) return;
+  try {
+    const r = await apiFetch(`/api/admin/coupons/${id}/restore`,{method:'POST'});
+    const result = await r.json().catch(() => ({}));
+    if(!r.ok) throw new Error(result.error || `Coupon restore failed (${r.status})`);
+    toast('Coupon restored and activated ✅');
+    await loadDiscounts();
   } catch(e) { toast(e.message,'error'); }
 }
 
