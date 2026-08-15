@@ -4069,6 +4069,14 @@ function azTogglePw() {
       <div style="margin-top:14px;padding:10px 12px;background:rgba(216,103,110,.08);border-radius:8px;color:var(--text3);font-size:.74rem;line-height:1.5;">Changes apply to new checkout calculations after save. Existing paid orders are not repriced.</div>
     </div>
     <div class="card">
+      <div class="card-hdr"><span class="card-title">⏳ Customer Offers &amp; Reminders</span></div>
+      <div style="color:var(--text3);font-size:0.8rem;line-height:1.55;margin:-10px 0 16px;">Set a real end time for a limited offer. Leave the deadline empty to show the offer without a countdown. Browser reminders remain optional and require customer permission.</div>
+      <div class="form-group" style="margin-bottom:14px"><label class="form-label">Offer deadline (ISO date/time)</label><input type="datetime-local" class="form-control" id="offerDeadline"></div>
+      <div class="form-group" style="margin-bottom:14px"><label class="form-label">Offer headline</label><input type="text" class="form-control" id="offerLabel" value="Mix & Match — bundle discounts on every pack" maxlength="120"></div>
+      <div class="form-group"><label class="form-label">Offer explanation</label><input type="text" class="form-control" id="offerSub" value="Add any 4 items and the cheapest one is free. No code needed." maxlength="180"></div>
+      <div style="margin-top:14px;padding:10px 12px;background:rgba(94,145,121,.10);border-radius:8px;color:var(--text3);font-size:.74rem;line-height:1.5;">Notifications are never sent without browser permission. Customers can choose Allow, Not now, or Do not show again.</div>
+    </div>
+    <div class="card">
       <div class="card-hdr"><span class="card-title">💰 Tax Settings (GST)</span></div>
       <div class="form-row col2">
         <div class="form-group">
@@ -11557,6 +11565,9 @@ async function loadSettings() {
     if(d.razorpay_mode) document.getElementById('pgMode').value = d.razorpay_mode;
     if(d.discount_ceiling_glutathione_acv !== undefined) document.getElementById('discountCeilingGlutathioneAcv').value = d.discount_ceiling_glutathione_acv;
     if(d.discount_ceiling_standard !== undefined) document.getElementById('discountCeilingStandard').value = d.discount_ceiling_standard;
+    if(d.offer_deadline) { const od = document.getElementById('offerDeadline'); if (od) od.value = String(d.offer_deadline).slice(0,16); }
+    if(d.offer_label) document.getElementById('offerLabel').value = d.offer_label;
+    if(d.offer_sub) document.getElementById('offerSub').value = d.offer_sub;
     if(d.interface_theme) {
       // Backend is the source of truth once reachable — keep localStorage in sync too.
       applyThemeClass(d.interface_theme);
@@ -11581,6 +11592,9 @@ async function saveSettings() {
     razorpay_mode: document.getElementById('pgMode').value,
     discount_ceiling_glutathione_acv: ceilingGlutathioneAcv,
     discount_ceiling_standard: ceilingStandard,
+    offer_deadline: document.getElementById('offerDeadline').value ? new Date(document.getElementById('offerDeadline').value).toISOString() : '',
+    offer_label: document.getElementById('offerLabel').value.trim(),
+    offer_sub: document.getElementById('offerSub').value.trim(),
     interface_theme: activeThemeOpt ? activeThemeOpt.dataset.theme : (localStorage.getItem(THEME_KEY) || 'deluxe'),
   };
   try {

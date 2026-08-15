@@ -1,7 +1,18 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<style id="cod-launch-disabled">#codBtn,.opb-cod{display:none!important}</style>
+<style id="cod-launch-disabled">#codBtn,.opb-cod{display:none!important}
+/* Permission-safe customer reminders. No browser permission is requested until the customer presses Allow. */
+#ozylxConsentBar{position:fixed;left:18px;right:18px;bottom:18px;z-index:10050;display:none;max-width:760px;margin:auto;background:var(--dark,#20303a);color:#fff;border:1px solid rgba(255,255,255,.18);border-radius:16px;box-shadow:0 18px 50px rgba(0,0,0,.22);padding:14px 16px;font-size:.82rem;line-height:1.5}
+#ozylxConsentBar .oz-consent-copy{display:flex;gap:10px;align-items:flex-start}
+#ozylxConsentBar .oz-consent-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+#ozylxConsentBar button{border:0;border-radius:999px;padding:8px 13px;font:inherit;font-weight:800;cursor:pointer}
+#ozylxConsentBar .oz-consent-allow{background:#fff;color:var(--dark,#20303a)}
+#ozylxConsentBar .oz-consent-later{background:rgba(255,255,255,.14);color:#fff}
+#ozylxConsentBar .oz-consent-never{background:transparent;color:rgba(255,255,255,.78);text-decoration:underline}
+@media(max-width:600px){#ozylxConsentBar{left:10px;right:10px;bottom:10px}}
+
+</style>
   <meta charset="UTF-8">
   <!-- ── FORCE HTTPS — must stay the first script in the document ──────
        Symptom this fixes, from the Render log:
@@ -7818,7 +7829,6 @@ var PROMO_MEDIA = [
   </a>
   <!-- B2B pill only -->
   <div class="app-topbar-nav">
-    <button class="app-topbar-pill" onclick="window.open('https://www.ascovita.com/#/capabilities','_blank')">🏭 B2B</button>
   </div>
   <!-- Action icons -->
   <div class="app-topbar-actions">
@@ -8714,7 +8724,6 @@ setInterval(function() { syncAppCartBadge(); syncAppWishBadge(); }, 2000);
       <li><a href="/shop" data-page="shop" onclick="showPage('shop');return false;">Shop</a></li>
       <li><a href="/blog" data-page="blog" onclick="showPage('blog');return false;">Blog</a></li>
       <li><a href="/about" data-page="about" onclick="showPage('about');return false;">About</a></li>
-      <li><a href="https://www.ascovita.com/#/capabilities" target="_blank" rel="noopener" data-page="b2b">B2B</a></li>
       <li><a href="/contact" data-page="contact" onclick="showPage('contact');return false;">Contact</a></li>
       <li><a href="/faq" data-page="faq" onclick="showPage('faq');return false;">FAQ</a></li>
       <li><a href="/advisor" data-page="advisor" onclick="showPage('advisor');return false;" style="color:var(--green);font-weight:700">🌿 AI Advisor</a></li>
@@ -8740,7 +8749,6 @@ setInterval(function() { syncAppCartBadge(); syncAppWishBadge(); }, 2000);
   <a href="/shop" onclick="showPage('shop');toggleMobile();return false;">🛍️ Shop</a>
   <a href="/blog" onclick="showPage('blog');toggleMobile();return false;">📖 Blog</a>
   <a href="/about" onclick="showPage('about');toggleMobile();return false;">🌿 About</a>
-  <a href="https://www.ascovita.com/#/capabilities" target="_blank" rel="noopener">B2B &amp; WHOLESALE</a>
   <a href="/contact" onclick="showPage('contact');toggleMobile();return false;">📬 Contact</a>
   <a href="/faq" onclick="showPage('faq');toggleMobile();return false;">❓ FAQ</a>
   <a href="/advisor" onclick="showPage('advisor');toggleMobile();return false;" style="color:var(--green);font-weight:700;background:var(--green-pale)">🌿 AI Health Advisor</a>
@@ -10214,6 +10222,14 @@ window.dismissOfferReminder = function () {
       <button class="cpill" data-cat="weight" onclick="filterCat('weight',this)">Weight</button>
       <button class="cpill" data-cat="combos" onclick="filterCat('combos',this)">Combos</button>
     </div>
+    <div class="oz-search-panel" style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin:18px 0 16px;padding:14px 16px;background:var(--sub-1);border:1px solid var(--light-gray);border-radius:16px">
+      <label for="shopSearch" style="font-weight:800;font-size:.82rem;white-space:nowrap">&#128269; Search your wellness goal</label>
+      <div style="display:flex;gap:8px;flex:1;min-width:240px">
+        <input id="shopSearch" type="search" autocomplete="off" placeholder="Try glutathione, spirulina, energy, skin..." aria-label="Search products" oninput="updateShopSearch(this.value)" style="flex:1;border:1px solid var(--light-gray);border-radius:100px;padding:11px 15px;background:var(--off-white);color:var(--dark);font:inherit">
+        <button type="button" class="btn-outline" onclick="clearShopSearch()" style="padding:10px 16px">Clear</button>
+      </div>
+      <span id="shopSearchHint" style="font-size:.74rem;color:var(--gray)">Search names, benefits, categories and tags.</span>
+    </div>
     <!-- Phone-only handle for the filter sidebar. Below 820px the sidebar
          becomes an off-canvas drawer (see .filter-sidebar in the stylesheet);
          above it, this button is display:none and the sidebar is a normal
@@ -10293,7 +10309,7 @@ window.dismissOfferReminder = function () {
         <div id="shopEmpty" style="display:none;text-align:center;padding:60px 20px">
           <div style="font-size:3rem;margin-bottom:14px">&#128269;</div>
           <h3>No products found</h3>
-          <p style="color:var(--gray);margin:8px 0 20px">Try adjusting your filters</p>
+          <p style="color:var(--gray);margin:8px 0 20px">Try another product name or goal, clear the search, or adjust your filters.</p>
           <button class="btn-primary" onclick="clearFilters()">Clear Filters</button>
         </div>
         <!-- Aug 2026: promotion blocks sit AFTER the product grid so the
@@ -11150,6 +11166,27 @@ function renderCheckoutSummary() {
     </div>
   </section>
 
+  <!-- PARTNERSHIP & B2B INFORMATION -->
+  <section style="padding:70px 0;background:var(--off-white)" id="about-partnerships">
+    <div class="container">
+      <div class="about-contact-grid" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:32px;align-items:start">
+        <div>
+          <div class="section-label">Partnerships</div>
+          <h2 class="section-title" style="margin-bottom:14px">B2B, Wholesale &amp; Private Label</h2>
+          <p style="color:var(--gray);font-size:.9rem;line-height:1.85;margin-bottom:14px">Retailers, clinics, distributors, wellness professionals and brands can speak directly with the Ascovita Healthcare team about bulk supply, private-label manufacturing, contract manufacturing, export enquiries, pack formats and commercial terms.</p>
+          <p style="color:var(--gray);font-size:.9rem;line-height:1.85;margin-bottom:22px">B2B prices, minimum quantities, lead times, certifications and product availability are quoted after reviewing your requirements. Consumer coupons, VitaPoints and Mix &amp; Match are not automatically applied to wholesale quotations.</p>
+          <button onclick="openWhatsApp('Hello Ascovita! I would like to discuss a B2B, wholesale or private-label partnership.')" style="display:inline-flex;align-items:center;gap:8px;background:var(--face-warm);color:var(--fern-lo);box-shadow:inset 0 0 0 1.5px rgba(94,145,121,.34);border:none;border-radius:100px;padding:13px 24px;font-weight:700;font-size:.86rem;cursor:pointer;font-family:var(--font-body)">&#128172; Start a B2B enquiry</button>
+        </div>
+        <div style="background:var(--sub-1);border-radius:18px;padding:26px;border:1px solid var(--light-gray)">
+          <div style="font-weight:800;color:var(--dark);margin-bottom:12px">Direct partnership support</div>
+          <p style="font-size:.84rem;color:var(--gray);line-height:1.75;margin-bottom:10px"><strong>Aamin Vahora</strong> can help with policy questions, product enquiries, customer support and partnership discussions.</p>
+          <p style="font-size:.9rem;line-height:1.8;margin:0"><a href="tel:+917265884137" style="color:var(--green);font-weight:800">&#128222; +91 72658 84137</a><br><a href="mailto:ascovitahealthcare@gmail.com" style="color:var(--green)">&#128231; ascovitahealthcare@gmail.com</a></p>
+          <p style="font-size:.75rem;color:var(--t-low);line-height:1.6;margin:14px 0 0">For medical concerns, please consult a qualified healthcare professional. Our support team can explain product information and website terms, but does not diagnose or prescribe.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
   <!-- CONTACT CTA -->
   <section style="padding:80px 0;background:var(--sub-1)">
     <div class="container">
@@ -11256,59 +11293,78 @@ function renderCheckoutSummary() {
 <!-- ══════════ POLICY PAGES ══════════ -->
 <div class="page" id="page-privacy" style="padding-top:90px">
   <div class="page-header"><h1>Privacy Policy</h1><p>Ozylix | Last Updated: 15 August 2026</p></div>
-  <section class="section"><div class="container" style="max-width:780px;font-size:.88rem;line-height:1.85;color:var(--t-mid)">
-    <p style="margin-bottom:16px">Ozylix is committed to protecting your privacy. This policy explains how we collect, use, and safeguard your personal information.</p>
-    <h3 style="font-size:1.1rem;margin:24px 0 10px;font-family:var(--font-display)">Information We Collect</h3>
-    <p style="margin-bottom:16px">We collect the information needed to provide the store service, such as your name, delivery address, phone number, email address, order details, support messages, and account preferences. Payment credentials are handled by the payment provider and are not stored as raw card or UPI credentials on our application servers. Basic technical data such as device, browser, security logs, and cookie or local-storage identifiers may be processed to keep the site secure and remember your cart or preferences.</p>
-    <h3 style="font-size:1.1rem;margin:24px 0 10px;font-family:var(--font-display)">How We Use Your Data</h3>
-    <p style="margin-bottom:16px">We use information to authenticate accounts, calculate and fulfil orders, arrange delivery, provide invoices and support, prevent abuse, comply with legal obligations, and send marketing only where permitted or requested. We share the minimum information needed with payment, delivery, hosting, analytics, and communication providers acting for the store. We do not sell personal information. You may contact us to request access, correction, deletion where legally available, or withdrawal of marketing consent.</p>
-    <h3 style="font-size:1.1rem;margin:24px 0 10px;font-family:var(--font-display)">Contact for Privacy</h3>
-    <p>Email: <a href="mailto:ascovitahealthcare@gmail.com">ascovitahealthcare@gmail.com</a> | Phone: +91 9898 582 650</p>
+  <section class="section"><div class="container" style="max-width:820px;font-size:.88rem;line-height:1.85;color:var(--t-mid)">
+    <p style="margin-bottom:16px">Ozylix, an online brand of Ascovita Healthcare, respects your privacy and explains below what information we collect, why we need it, how long we keep it, and how you can contact us.</p>
+    <h3>Information we collect</h3>
+    <p>When you browse, create an account, save a wishlist, request support or place an order, we may process your name, phone number, email address, delivery and billing information, order items, payment status, coupon use, VitaPoints activity, reviews, support messages and account preferences. We may also process device, browser, IP-security, cookie and local-storage data needed for site operation, fraud prevention, cart recovery and accessibility.</p>
+    <h3>How we use information</h3>
+    <p>We use information to authenticate accounts, show your saved items, calculate and fulfil orders, arrange delivery, create invoices, manage returns, award or reverse VitaPoints, moderate reviews, answer questions, prevent abuse, comply with law and improve product discovery. Payment credentials are handled by the payment provider; raw card or UPI credentials are not stored by our application servers.</p>
+    <h3>Sharing and retention</h3>
+    <p>We share only the information needed with payment, delivery, hosting, analytics, customer-support and communication providers acting for the store. We do not sell personal information. Records are retained only as long as needed for fulfilment, accounting, support, security, legal obligations and legitimate business operations, after which they are deleted or anonymised where appropriate.</p>
+    <h3>Your choices</h3>
+    <p>You may request access, correction, deletion where legally available, or withdrawal of marketing and browser-notification consent. Essential service messages such as payment, delivery, security and account notices may still be sent when necessary to provide the service. Contact <a href="mailto:ascovitahealthcare@gmail.com">ascovitahealthcare@gmail.com</a> or <a href="tel:+917265884137">Aamin Vahora at +91 72658 84137</a>.</p>
+    <h3>Privacy questions</h3><p>For a privacy request, include the email or phone number used on the account and enough detail for us to identify the request. We may ask for reasonable verification before changing or disclosing personal information.</p>
   </div></section>
 </div>
 
 <div class="page" id="page-refund" style="padding-top:90px">
   <div class="page-header"><h1>Refund, Return &amp; Cancellation Policy</h1><p>Last updated: 15 August 2026</p></div>
-  <section class="section"><div class="container" style="max-width:780px;font-size:.88rem;line-height:1.85;color:var(--t-mid)">
-    <div style="background:var(--green-wash);border-radius:var(--radius);padding:20px;margin-bottom:24px;border-left:1px solid var(--green)">
-      <strong>7-Day Return Window</strong> — We accept returns on sealed, unused products within 7 days of delivery.
-    </div>
-    <h3 style="font-size:1.1rem;margin:0 0 10px;font-family:var(--font-display)">Eligible for Return/Refund</h3>
-    <ul style="margin-left:18px;margin-bottom:16px">
-      <li style="margin-bottom:7px">Damaged or defective products (photo proof required)</li>
-      <li style="margin-bottom:7px">Wrong item delivered</li>
-      <li>Sealed, unopened products within 7 days of delivery</li>
-    </ul>
-    <h3 style="font-size:1.1rem;margin:20px 0 10px;font-family:var(--font-display)">How to Initiate a Return</h3>
-    <p style="margin-bottom:14px">Email <a href="mailto:ascovitahealthcare@gmail.com">ascovitahealthcare@gmail.com</a> with your order number, reason for return, and photographs if the item is damaged or incorrect. If approved, the return method and any pickup instructions will be shared with you. Refunds are initiated after the returned product is received and inspected, and the payment provider may take an additional 5–7 working days to reflect the amount. Any coupon saving, Mix &amp; Match free-item value, or redeemed VitaPoints tied to the returned items may be reversed.</p>
-    <h3 style="font-size:1.1rem;margin:20px 0 10px;font-family:var(--font-display)">Non-Returnable Items</h3>
-    <p>Opened supplement packages cannot be returned for hygiene and safety reasons.</p>
+  <section class="section"><div class="container" style="max-width:820px;font-size:.88rem;line-height:1.85;color:var(--t-mid)">
+    <div style="background:var(--green-wash);border-radius:var(--radius);padding:20px;margin-bottom:24px;border-left:4px solid var(--green)"><strong>7-day return window:</strong> sealed and unused products may be requested for return within 7 days of delivery, subject to inspection and the exclusions below.</div>
+    <h3>Eligible cases</h3><ul><li>Wrong product, missing item, damaged package or manufacturing defect.</li><li>Sealed, unopened product in original packaging requested within 7 days of delivery.</li><li>Damage or shortage should be reported as soon as possible, preferably within 48 hours, with clear photographs or an unboxing video.</li></ul>
+    <h3>How to request help</h3><p>Email <a href="mailto:ascovitahealthcare@gmail.com">ascovitahealthcare@gmail.com</a> with your order number, phone number, reason and photographs. We will review the request and share pickup, replacement or refund instructions. Refunds are initiated after the return is received and inspected; the payment provider may take an additional 5–7 working days to reflect the amount.</p>
+    <h3>Exclusions and adjustments</h3><p>Opened, used, partially consumed, tampered or temperature/moisture-damaged supplements cannot be returned for hygiene and safety. Shipping charges are non-refundable unless the issue was caused by our error. Coupon saving, Mix &amp; Match free-item value and redeemed VitaPoints connected to returned items may be reversed or recalculated against the eligible refund. Cancellation is possible before dispatch when the order has not entered fulfilment; after dispatch, the return process applies.</p>
+    <h3>Escalation</h3><p>If you need help understanding a decision, contact <strong>Aamin Vahora</strong> at <a href="tel:+917265884137">+91 72658 84137</a>.</p>
   </div></section>
 </div>
 
 <div class="page" id="page-shipping" style="padding-top:90px">
-  <div class="page-header"><h1>Shipping Policy</h1><p>Fast delivery via Shiprocket across India.</p></div>
-  <section class="section"><div class="container" style="max-width:780px">
-    <div style="display:grid;gap:16px;margin-bottom:32px">
-      <div style="background:var(--sub-1);border-radius:var(--radius);padding:22px;border:1px solid rgba(0,0,0,0.08);display:flex;gap:16px;align-items:center"><div style="font-size:1.8rem">🚀</div><div><h3 style="font-size:.95rem;margin-bottom:3px">Express Delivery</h3><p style="font-size:.82rem;color:var(--gray)">Major cities (Mumbai, Delhi, Bangalore, Hyderabad, Ahmedabad): 1–2 business days | ₹99</p></div></div>
-      <div style="background:var(--sub-1);border-radius:var(--radius);padding:22px;border:1px solid rgba(0,0,0,0.08);display:flex;gap:16px;align-items:center"><div style="font-size:1.8rem">📦</div><div><h3 style="font-size:.95rem;margin-bottom:3px">Standard Delivery</h3><p style="font-size:.82rem;color:var(--gray)">All India: 3–5 business days | ₹49</p></div></div>
-      <div style="background:var(--green-pale);border-radius:var(--radius);padding:22px;border:1px solid rgba(23,224,192,0.15);display:flex;gap:16px;align-items:center"><div style="font-size:1.8rem">🎁</div><div><h3 style="font-size:.95rem;margin-bottom:3px">FREE Shipping</h3><p style="font-size:.82rem;color:var(--green);font-weight:600">On all orders above ₹599!</p></div></div>
-      <div style="background:var(--sub-1);border-radius:var(--radius);padding:22px;border:1px solid rgba(0,0,0,0.08);display:flex;gap:16px;align-items:center"><div style="font-size:1.8rem">💵</div><div><h3 style="font-size:.95rem;margin-bottom:3px">Cash on Delivery</h3><p style="font-size:.82rem;color:var(--gray)">Available across India · no COD fee · pay the courier at your door</p></div></div>
-    </div>
-    <p style="font-size:.87rem;color:var(--gray);line-height:1.8">Orders are normally dispatched within 24–48 hours and shipped through the available delivery partner. Standard delivery generally takes 3–5 business days after dispatch. A ₹79 shipping fee applies below a paid subtotal of ₹599; shipping is free at or above ₹599. Delivery timelines are estimates and can vary by PIN code, weather, holidays, and carrier operations. Tracking information is sent after dispatch.</p>
+  <div class="page-header"><h1>Shipping Policy</h1><p>Clear delivery terms for orders across India.</p></div>
+  <section class="section"><div class="container" style="max-width:820px;font-size:.88rem;line-height:1.85;color:var(--t-mid)">
+    <div style="display:grid;gap:16px;margin-bottom:28px"><div style="background:var(--green-wash);border-radius:var(--radius);padding:20px"><strong>Standard delivery:</strong> normally 3–5 business days after dispatch. Orders are normally dispatched within 24–48 hours.</div><div style="background:var(--sub-1);border-radius:var(--radius);padding:20px"><strong>Shipping fee:</strong> ₹79 below a paid subtotal of ₹599; shipping is free at or above ₹599. The final amount is shown at checkout.</div></div>
+    <h3>Tracking and delivery attempts</h3><p>Tracking is sent after dispatch through the available delivery partner. Please keep your phone available, provide an accurate PIN code and address, and coordinate with the carrier if a delivery attempt is missed. Timelines are estimates and may change because of PIN-code serviceability, weather, holidays, public events or carrier operations.</p>
+    <h3>Address changes and delays</h3><p>Contact us quickly if an address needs correction. Once a shipment has entered carrier fulfilment, an address change may not be possible. If a parcel is delayed, damaged or marked delivered incorrectly, contact support with the order number and tracking details.</p>
+    <h3>Support</h3><p>For shipping questions, contact <a href="mailto:ascovitahealthcare@gmail.com">ascovitahealthcare@gmail.com</a> or <a href="tel:+917265884137">Aamin Vahora at +91 72658 84137</a>.</p>
   </div></section>
 </div>
 
 <div class="page" id="page-terms" style="padding-top:90px">
   <div class="page-header"><h1>Terms &amp; Conditions</h1><p>Last updated: 15 August 2026</p></div>
-  <section class="section"><div class="container" style="max-width:780px;font-size:.88rem;line-height:1.85;color:var(--t-mid)">
-    <p style="margin-bottom:16px">By purchasing from Ozylix, you agree to the following terms. Please read them carefully.</p>
-    <h3 style="font-size:1.1rem;margin:20px 0 10px;font-family:var(--font-display)">Medical Disclaimer</h3>
-    <p style="margin-bottom:16px">Ozylix products are dietary supplements and are not intended to diagnose, treat, cure, or prevent any disease. Always consult a qualified healthcare professional before starting any supplement regimen, especially if you are pregnant, breastfeeding, or on medication.</p>
-    <h3 style="font-size:1.1rem;margin:20px 0 10px;font-family:var(--font-display)">Pricing & Offers</h3>
-    <p style="margin-bottom:16px">All prices are displayed in Indian Rupees (INR) and the checkout total shows the amount payable, including applicable taxes or charges. The order summary separates product price, pack or tier saving, Mix &amp; Match saving, coupon saving, VitaPoints redemption, shipping, and total where applicable. Only one coupon may be used, and Mix &amp; Match is not stacked with a coupon when it unlocks. The server may reject and re-price a request that exceeds the maximum permitted discount for a product.</p>
-    <h3 style="font-size:1.1rem;margin:20px 0 10px;font-family:var(--font-display)">Contact</h3>
-    <p>Ozylix | Near Rajshivalay Cinema, Anand – 388001, Gujarat | <a href="mailto:ascovitahealthcare@gmail.com">ascovitahealthcare@gmail.com</a></p>
+  <section class="section"><div class="container" style="max-width:820px;font-size:.88rem;line-height:1.85;color:var(--t-mid)">
+    <p>By browsing or purchasing from Ozylix, you agree to use the site lawfully and to provide accurate delivery, account and payment information.</p>
+    <h3>Product and medical disclaimer</h3><p>Ozylix products are food supplements and are not intended to diagnose, treat, cure or prevent any disease. Read the label, directions, ingredients, allergen information and warnings. Ask a qualified healthcare professional before starting a new supplement if you are pregnant, breastfeeding, taking medication, managing a medical condition, or buying for a child.</p>
+    <h3>Orders, pricing and availability</h3><p>Prices, stock, pack sizes, delivery terms and promotional eligibility may change. An order is accepted only when confirmed by the store or payment provider. The checkout total separates product price, pack/tier saving, Mix &amp; Match saving, coupon saving, VitaPoints redemption, shipping and total where applicable. The server may reject or re-price a request that fails stock, coupon, customer-limit or maximum-discount checks.</p>
+    <h3>Prohibited use and violations</h3><p>Do not use the site to abuse staff, submit fraudulent payment or review information, exploit coupons, create accounts to bypass customer limits, scrape protected data, interfere with the service, impersonate another person, or submit unlawful, threatening, hateful or sexually abusive content. We may suspend access, cancel an order, reverse rewards, remove content, block devices/accounts and refer serious matters to the appropriate authority. Legitimate complaints are welcome; a policy violation is not a complaint penalty.</p>
+    <h3>Support and jurisdiction</h3><p>For questions or an appeal, contact <strong>Aamin Vahora</strong> at <a href="tel:+917265884137">+91 72658 84137</a> or <a href="mailto:ascovitahealthcare@gmail.com">ascovitahealthcare@gmail.com</a>. These terms are governed by applicable Indian law, with disputes subject to the competent courts in Anand, Gujarat, unless law requires otherwise.</p>
+  </div></section>
+</div>
+
+<div class="page" id="page-vita-points" style="padding-top:90px">
+  <div class="page-header"><h1>VitaPoints Policy</h1><p>Earn on delivered orders, redeem transparently, and keep control of your balance.</p></div>
+  <section class="section"><div class="container" style="max-width:820px;font-size:.88rem;line-height:1.85;color:var(--t-mid)">
+    <h3>How points are earned</h3><p>Eligible customers earn VitaPoints according to the rate shown on the current site and order confirmation. Points are provisional until the order is delivered and the seven-day return/verification window has closed. They normally become available seven days after delivery. Cancelled, returned, refunded, fraudulent or reversed orders do not generate final points.</p>
+    <h3>How points are redeemed</h3><p>VitaPoints may be redeemed at checkout only within the displayed order limit and balance limit. The checkout shows the points used and the rupee value before payment. VitaPoints are a reward balance, not cash, cannot be transferred or exchanged for cash, and cannot be used to create a negative payable total or bypass a discount ceiling. If a promotion or server-side ceiling prevents redemption, checkout explains the restriction instead of silently applying an excess discount.</p>
+    <h3>Reversals, expiry and misuse</h3><p>Points attached to a returned, cancelled, refunded or chargeback order may be reversed. We may correct an obvious balance error or suspend rewards linked to abuse, duplicate accounts, fraudulent orders or coupon exploitation. Any expiry rule shown in the customer account or campaign terms applies to that balance; if no expiry is displayed, contact support before relying on an old balance.</p>
+    <h3>Questions</h3><p>For a points ledger review, contact <a href="tel:+917265884137">Aamin Vahora at +91 72658 84137</a> with the order reference and account email.</p>
+  </div></section>
+</div>
+
+<div class="page" id="page-discount-policy" style="padding-top:90px">
+  <div class="page-header"><h1>Discount &amp; Offer Policy</h1><p>How tier prices, Mix &amp; Match, coupons and VitaPoints work together.</p></div>
+  <section class="section"><div class="container" style="max-width:820px;font-size:.88rem;line-height:1.85;color:var(--t-mid)">
+    <h3>One clear price calculation</h3><p>The order summary starts with the product price shown for the selected pack or tier, then lists each eligible saving separately. The checkout and server apply the same calculation so the customer sees which saving they received and what amount is payable.</p>
+    <h3>Mix &amp; Match</h3><p>When four eligible units are present, the lowest-priced eligible unit in each group of four is free. Mix &amp; Match is a standalone offer: when it unlocks, a coupon or additional percentage promotion is not stacked on the same qualifying value. The final eligibility and amount are confirmed by the server.</p>
+    <h3>Coupons and maximum savings</h3><p>Only one active coupon may be used at a time. A code may have an expiry date, minimum order, usage limit, per-customer limit and absolute maximum saving. Product-level discount ceilings are controlled by the admin and enforced on the server; changing a ceiling in the admin changes the future validation rule, not historical invoices.</p>
+    <h3>Errors and corrections</h3><p>If an offer was displayed incorrectly or used through a technical exploit, we may cancel the affected order or correct the saving before payment. Customers should never share account credentials or create duplicate accounts to bypass an offer limit. Contact <a href="tel:+917265884137">Aamin Vahora at +91 72658 84137</a> if a legitimate discount appears missing.</p>
+  </div></section>
+</div>
+
+<div class="page" id="page-conduct" style="padding-top:90px">
+  <div class="page-header"><h1>Community Conduct &amp; Violation Policy</h1><p>Fair treatment for customers, staff, partners and reviewers.</p></div>
+  <section class="section"><div class="container" style="max-width:820px;font-size:.88rem;line-height:1.85;color:var(--t-mid)">
+    <p>We welcome honest questions, product feedback and good-faith complaints. We do not tolerate threats, harassment, discrimination, impersonation, fraudulent reviews, payment abuse, coupon manipulation, malicious code, scraping of protected data or attempts to disrupt the store.</p>
+    <h3>What may happen after a violation</h3><p>Depending on seriousness and evidence, Ozylix may warn, moderate or remove content, pause a review, suspend an account, cancel an unfulfilled order, reverse fraudulent VitaPoints, disable promotional eligibility or refer suspected fraud or threats to a relevant authority. We aim to use proportionate action and preserve legitimate customer support.</p>
+    <h3>Appeals</h3><p>Send the order/account reference and a short explanation to <a href="mailto:ascovitahealthcare@gmail.com">ascovitahealthcare@gmail.com</a> or call <a href="tel:+917265884137">+91 72658 84137</a>. Aamin Vahora can help review a customer-service concern.</p>
   </div></section>
 </div>
 <!-- ══════════ END POLICIES ══════════ -->
@@ -11322,13 +11378,13 @@ function renderCheckoutSummary() {
         <h1 style="font-size:2rem;margin-bottom:4px">My Wishlist</h1>
         <p style="color:var(--gray);font-size:0.86rem" id="wishlistSubtitle">Your saved products</p>
       </div>
-      <button class="btn-outline" onclick="showPage('shop')">Continue Shopping →</button>
+      <div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn-outline" onclick="shareWishlist()">Share Wishlist</button><button class="btn-outline" onclick="showPage('shop')">Continue Shopping →</button></div>
     </div>
     <div id="wishlistGrid" class="products-grid"></div>
     <div id="wishlistEmpty" class="wishlist-empty" style="display:none">
       <div style="font-size:4rem;margin-bottom:20px">💚</div>
       <h2 style="margin-bottom:10px">Your wishlist is empty</h2>
-      <p style="color:var(--gray);margin-bottom:24px">Tap the ♡ on any product to save it here for later.</p>
+      <p style="color:var(--gray);margin-bottom:12px">Tap the ♡ on any product to save it here for later. Your list stays on this device, and logged-in customers can keep it with their account.</p><button class="btn-outline" style="margin-bottom:24px" onclick="showPage('advisor')">Need help choosing? Try VitaMatch</button>
       <button class="btn-primary" onclick="showPage('shop')">Explore Products →</button>
     </div>
   </div>
@@ -13466,7 +13522,10 @@ function _updateStrength(val) {
             <li><a href="#" onclick="showPage('privacy')">Privacy Policy</a></li>
             <li><a href="#" onclick="showPage('terms')">Terms &amp; Conditions</a></li>
             <li><a href="#" onclick="showPage('shipping')">Shipping Policy</a></li>
-            <li><a href="#" onclick="showPage('refund')">Refund Policy</a></li>
+            <li><a href="#" onclick="showPage('refund')">Refund &amp; Return Policy</a></li>
+            <li><a href="#" onclick="showPage('vita-points')">VitaPoints Policy</a></li>
+            <li><a href="#" onclick="showPage('discount-policy')">Discount Policy</a></li>
+            <li><a href="#" onclick="showPage('conduct')">Conduct &amp; Violation Policy</a></li>
             <li><a href="#" onclick="showPage('accessibility')">Accessibility Statement</a></li>
             <li><a href="#" onclick="showPage('subscriptions')">Subscribe &amp; Save</a></li>
           </ul>
@@ -13475,6 +13534,7 @@ function _updateStrength(val) {
           <h4>Contact</h4>
           <ul>
             <li><a href="tel:+919898582650">📞 +91 9898 582 650</a></li>
+            <li><a href="tel:+917265884137">Support: Aamin Vahora</a></li>
             <li><a href="mailto:ascovitahealthcare@gmail.com">ascovitahealthcare@gmail.com</a></li>
           </ul>
           <div style="margin-top:16px;font-size:.7rem;color:var(--t-dim);line-height:1.7">
@@ -13496,7 +13556,7 @@ function _updateStrength(val) {
   <div class="container">
     <div class="footer-bottom">
       <span>© 2025 Ozylix. All rights reserved.</span>
-      <span>🌿 Ozylix – Empower Your Health · Made in Anand, Gujarat 🇮🇳</span>
+      <span>Thank you for choosing Ozylix — your wellness journey matters to us. 🌿</span>
       <span>Secured by GoKwik 🔒</span>
     </div>
   </div>
@@ -13762,6 +13822,7 @@ const FAQS = [
 let currentPage = 'home';
 let currentProduct = null;
 let currentCat = 'all';
+let shopQuery = '';
 let priceMax = 2000;
 let carouselIdx = 0;
 let pQty = 1;
@@ -14244,6 +14305,13 @@ function applyFilters() {
   // ✅ FIX 2: Never show hidden/inactive products in shop
   let prods = PRODUCTS.filter(p => !p._hidden && p.active !== false);
   const goalTags = ['skin','immunity','energy','brain','weight'];
+  const query = String(shopQuery || '').trim().toLowerCase();
+  if (query) {
+    prods = prods.filter(p => {
+      const hay = [p.name, p.brand, p.category, p.description, p.shortDescription, ...(Array.isArray(p.tags) ? p.tags : [])].filter(Boolean).join(' ').toLowerCase();
+      return query.split(/\s+/).every(term => hay.includes(term));
+    });
+  }
   if (currentCat === 'bestsellers') prods = prods.filter(p => p.tags.includes('bestseller'));
   else if (currentCat === 'sale') prods = prods.filter(p => p.salePrice || (p.tags && p.tags.includes('sale')));
   else if (currentCat === 'new') prods = prods.filter(p => p.tags.includes('new'));
@@ -14308,6 +14376,7 @@ function syncFilterChrome(resultCount) {
   var active = 0;
   document.querySelectorAll('[id^=fr]:checked, #fSale:checked, #fNew:checked, #fBest:checked').forEach(function () { active++; });
   if (typeof priceMax === 'number' && priceMax < 2000) active++;
+  if (String(shopQuery || '').trim()) active++;
   var sortSel = document.getElementById('sortSel');
   if (sortSel && sortSel.value !== 'def') active++;
   var badge = document.getElementById('filterToggleCount');
@@ -14358,6 +14427,21 @@ window.addEventListener('resize', function () {
   }, 150);
 });
 
+function updateShopSearch(value) {
+  shopQuery = String(value || '');
+  const hint = document.getElementById('shopSearchHint');
+  if (hint) hint.textContent = shopQuery.trim() ? 'Searching names, benefits, categories and tags…' : 'Search names, benefits, categories and tags.';
+  applyFilters();
+}
+function clearShopSearch() {
+  shopQuery = '';
+  const input = document.getElementById('shopSearch');
+  if (input) input.value = '';
+  const hint = document.getElementById('shopSearchHint');
+  if (hint) hint.textContent = 'Search names, benefits, categories and tags.';
+  applyFilters();
+}
+
 function updatePrice(v) {
   priceMax = +v;
   const pd=document.getElementById('priceDisp'); if(pd) pd.textContent = v >= 2000 ? 'Any price' : `Up to ${fmt(+v)}`;
@@ -14365,6 +14449,7 @@ function updatePrice(v) {
 }
 
 function clearFilters() {
+  clearShopSearch();
   const pr=document.getElementById('priceRange'); if(pr) pr.value = 2000;
   priceMax = 2000;
   const pd2=document.getElementById('priceDisp'); if(pd2) pd2.textContent = 'Any price';
@@ -17031,6 +17116,7 @@ async function evaluateTyReviewNudge() {
     // Remember the product the customer is missing a review for.
     try { sessionStorage.setItem('asc_ty_review_product', missing[0]); } catch(e) {}
     card.style.display = 'block';
+    try { ozylixReviewReminder(missing[0]); } catch(e) {}
   } catch(e) { /* nudge is non-critical — fail silently */ }
 }
 
@@ -20172,6 +20258,16 @@ function renderWishlistPage() {
   updateWishBadge();
 }
 
+function shareWishlist() {
+  const ids = STORE.wishlist || [];
+  const names = PRODUCTS.filter(p => ids.includes(p.id)).map(p => p.name);
+  if (!names.length) { showToast('Add a product to your wishlist first.'); return; }
+  const text = 'My Ozylix wishlist: ' + names.join(', ') + ' — ' + window.location.origin + '/#wishlist';
+  if (navigator.share) navigator.share({ title: 'My Ozylix wishlist', text }).catch(function(){});
+  else if (navigator.clipboard) navigator.clipboard.writeText(text).then(function(){ showToast('Wishlist link copied.'); }).catch(function(){ showToast(text); });
+  else showToast(text);
+}
+
 function updateWishBadge() {
   const badge = document.getElementById('wishBadge');
   const count = (STORE.wishlist || []).length;
@@ -20783,35 +20879,40 @@ function playVideo(wrap) {
 // system prompt holds, and the same disclaimer is shown with the result.
 // ══════════════════════════════════════════════════════════════════════
 const VITA_MATCH_Q = [
-  { key: 'goal', q: 'What are you shopping for?', hint: 'Pick the one closest to your main goal.',
-    opts: [
-      { v: 'skin',     ico: '✨', t: 'Skin & Glow',        s: 'Radiance and everyday skincare support' },
-      { v: 'energy',   ico: '⚡', t: 'Energy & Focus',      s: 'For long days and slow mornings' },
-      { v: 'immunity', ico: '🛡️', t: 'Immunity',           s: 'Everyday resilience' },
-      { v: 'weight',   ico: '⚖️', t: 'Weight Management',   s: 'Alongside diet and activity' },
-      { v: 'bone',     ico: '🦴', t: 'Bone & Joint',        s: 'Calcium, magnesium and vitamin D' },
-      { v: 'general',  ico: '🌿', t: 'General Wellness',    s: 'A solid daily multivitamin' }
-    ] },
-  { key: 'age', q: 'Which age group are you in?', hint: 'Needs shift with age — this nudges the ranking.',
-    opts: [
-      { v: '18_25', ico: '🎓', t: '18 – 25' },
-      { v: '26_35', ico: '💼', t: '26 – 35' },
-      { v: '36_50', ico: '🌱', t: '36 – 50' },
-      { v: '50p',   ico: '🌟', t: '50 and above' }
-    ] },
-  { key: 'gender', q: 'Who is this for?', hint: 'Only used to pick between the men’s and women’s formulas.',
-    opts: [
-      { v: 'female', ico: '🙋‍♀️', t: 'Woman' },
-      { v: 'male',   ico: '🙋‍♂️', t: 'Man' },
-      { v: 'na',     ico: '➖', t: 'Rather not say', s: 'We’ll skip the gendered formulas' }
-    ] },
-  { key: 'routine', q: 'What best describes your routine?', hint: 'Last one.',
-    opts: [
-      { v: 'veg',    ico: '🥗', t: 'Vegetarian or vegan',  s: 'Plant-based sources matter' },
-      { v: 'active', ico: '🏃', t: 'Active / sporty',      s: 'Training or on your feet' },
-      { v: 'desk',   ico: '💻', t: 'Mostly desk work',     s: 'Long hours sitting' },
-      { v: 'travel', ico: '✈️', t: 'Often travelling',     s: 'Irregular meals and sleep' }
-    ] }
+  { key: 'goal', q: 'What is your main wellness goal right now?', hint: 'Choose the closest goal. This is general product guidance, not a diagnosis.', opts: [
+    { v: 'skin', ico: '✨', t: 'Skin & Glow', s: 'Radiance and everyday skincare support' },
+    { v: 'energy', ico: '⚡', t: 'Energy & Focus', s: 'For long days and slow mornings' },
+    { v: 'immunity', ico: '🛡️', t: 'Immunity', s: 'Everyday resilience' },
+    { v: 'weight', ico: '⚖️', t: 'Weight Management', s: 'Alongside diet and activity' },
+    { v: 'bone', ico: '🦴', t: 'Bone & Joint', s: 'Calcium, magnesium and vitamin D' },
+    { v: 'general', ico: '🌿', t: 'General Wellness', s: 'A solid daily routine' }
+  ] },
+  { key: 'need', q: 'What would make a product easiest to use consistently?', hint: 'This helps us rank practical matches rather than promising a guaranteed result.', opts: [
+    { v: 'daily', ico: '📅', t: 'Simple daily routine', s: 'One clear habit' },
+    { v: 'beauty', ico: '✨', t: 'Beauty-focused routine', s: 'Glow, hair or skin support' },
+    { v: 'hydration', ico: '💧', t: 'Hydration and recovery', s: 'Water-friendly formats' },
+    { v: 'travel', ico: '✈️', t: 'Portable and convenient', s: 'For busy or changing days' }
+  ] },
+  { key: 'diet', q: 'Which dietary preference should we consider?', hint: 'Always check the product label for the final ingredient and allergen information.', opts: [
+    { v: 'veg', ico: '🥗', t: 'Vegetarian or vegan', s: 'Plant-based sources matter' },
+    { v: 'no_preference', ico: '🍃', t: 'No preference', s: 'Show the broadest range' },
+    { v: 'label', ico: '🔎', t: 'I want to check the label', s: 'Prioritise transparent product details' }
+  ] },
+  { key: 'format', q: 'Which format fits your routine best?', hint: 'If you have swallowing or ingredient concerns, confirm suitability with a professional.', opts: [
+    { v: 'effervescent', ico: '🫧', t: 'Dissolve in water', s: 'Effervescent format' },
+    { v: 'capsule', ico: '💊', t: 'Capsule or tablet', s: 'Compact and familiar' },
+    { v: 'powder', ico: '🥄', t: 'Powder or blend', s: 'Mix into a routine' },
+    { v: 'any_format', ico: '🌿', t: 'Any format', s: 'Let the goal lead' }
+  ] },
+  { key: 'age', q: 'Which age group are you in?', hint: 'This only nudges product ranking and is not a medical assessment.', opts: [
+    { v: '18_25', ico: '🎓', t: '18 – 25' }, { v: '26_35', ico: '💼', t: '26 – 35' }, { v: '36_50', ico: '🌱', t: '36 – 50' }, { v: '50p', ico: '🌟', t: '50 and above' }
+  ] },
+  { key: 'gender', q: 'Who is this for?', hint: 'Optional. Used only to avoid ranking a gender-specific formula incorrectly.', opts: [
+    { v: 'female', ico: '🙋‍♀️', t: 'Woman' }, { v: 'male', ico: '🙋‍♂️', t: 'Man' }, { v: 'na', ico: '➖', t: 'Rather not say', s: 'Skip gendered formulas' }
+  ] },
+  { key: 'routine', q: 'What best describes your routine?', hint: 'The more context you give, the more useful the ranking can be.', opts: [
+    { v: 'veg', ico: '🥗', t: 'Vegetarian or vegan' }, { v: 'active', ico: '🏃', t: 'Active / sporty' }, { v: 'desk', ico: '💻', t: 'Mostly desk work' }, { v: 'travel', ico: '✈️', t: 'Often travelling' }
+  ] }
 ];
 
 // answer value -> [{ any: [terms], w: weight, why: reason }]
@@ -20839,7 +20940,16 @@ const VITA_MATCH_RULES = {
   veg:      [{ any: ['spirulina', 'moringa', 'vegan', 'b12'], w: 2, why: 'Plant-based, and B12 is worth topping up on a veg diet' }],
   active:   [{ any: ['rehydration', 'l-carnitine', 'magnesium', 'energy'], w: 2, why: 'Popular with an active routine' }],
   desk:     [{ any: ['energy', 'green tea', 'immunity'], w: 1.5 }],
-  travel:   [{ any: ['vitamin c', 'amla', 'immunity', 'effervescent'], w: 2, why: 'Easy to carry, and a common travel top-up' }]
+  travel:   [{ any: ['vitamin c', 'amla', 'immunity', 'effervescent'], w: 2, why: 'Easy to carry, and a common travel top-up' }],
+  daily:    [{ any: ['multivitamin', 'bestseller', 'premium'], w: 1.5, why: 'A practical fit for a consistent daily routine' }],
+  beauty:   [{ any: ['skin', 'glutathione', 'biotin', 'collagen'], w: 2.5, why: 'Matches a beauty-focused routine' }],
+  hydration:[{ any: ['effervescent', 'rehydration', 'electrolyte'], w: 2.5, why: 'A water-based format can fit this routine' }],
+  no_preference: [],
+  label:    [{ any: ['premium', 'bestseller'], w: 0.8, why: 'A well-documented product page is easier to compare' }],
+  effervescent: [{ any: ['effervescent', 'rehydration'], w: 2, why: 'Available in a dissolve-in-water format' }],
+  capsule:  [{ any: ['capsule', 'tablet', 'glutathione', 'biotin'], w: 1.5, why: 'Matches a compact capsule or tablet routine' }],
+  powder:   [{ any: ['powder', 'spirulina', 'moringa'], w: 1.5, why: 'Matches a powder or blend format' }],
+  any_format: [],
 };
 
 // Answers that rule a product OUT regardless of score. Scoring alone is
@@ -20955,8 +21065,7 @@ function vitaMatchResults() {
     '<div class="vm-res-head">' +
       (typeof vp3dHTML === 'function' ? vp3dHTML('gift') : '') +
       '<h2 class="vm-res-title">Your VitaMatch is ready</h2>' +
-      '<p class="vm-res-sub">Based on <b>' + esc(goalLabel) + '</b> and the answers you gave, ' +
-        'these are the closest fits in the Ozylix range.</p>' +
+      '<p class="vm-res-sub">Based on <b>' + esc(goalLabel) + '</b> and the additional routine, format and preference answers you gave, these are the closest fits in the Ozylix range. Compare the product page and label before ordering.</p>' +
     '</div>' +
     '<div class="vm-res-list">' +
       picks.map((x, i) => {
@@ -20965,13 +21074,15 @@ function vitaMatchResults() {
         const mrp = Number(p.price) || 0;
         const img = (typeof getProductImg === 'function' ? getProductImg(p) : p.image) || '';
         const why = x.why.length ? x.why.join(' · ') : 'A close fit for the answers you gave';
+        const matchScore = Math.min(99, Math.max(60, Math.round(68 + x.score * 4)));
+        const whyWithScore = why + ' · ' + matchScore + '% match to your answers';
         return '<div class="vm-rec' + (i === 0 ? ' top' : '') + '" onclick="openProduct(' + p.id + ')">' +
           (i === 0 ? '<span class="vm-flag">Best match</span>' : '') +
           '<img class="vm-rec-img" src="' + esc(img) + '" alt="" loading="lazy" decoding="async"' +
             ' onerror="this.src=PRODUCT_FALLBACKS.default">' +
           '<div class="vm-rec-body">' +
             '<div class="vm-rec-name">' + esc(p.name) + '</div>' +
-            '<div class="vm-rec-why">' + esc(why) + '</div>' +
+            '<div class="vm-rec-why">' + esc(whyWithScore) + '</div>' +
             '<button class="vm-rec-add" onclick="event.stopPropagation();STORE.addToCart(' + p.id + ')">Add to cart</button>' +
           '</div>' +
           '<div class="vm-rec-price">' + rupee(rate) +
@@ -21009,6 +21120,104 @@ function vitaShowMatch() {
   if (quiz) { quiz.style.display = ''; vitaMatchInit(true); }
 }
 
+
+// ══════════════════════════════════════════════════════════════════════
+// CUSTOMER REMINDERS — permission-based, non-spammy and consent-safe
+// ══════════════════════════════════════════════════════════════════════
+const OZ_NOTIFY_PREF_KEY = 'ozylix.notification.preference.v1';
+const OZ_NOTIFY_SEEN_KEY = 'ozylix.notification.seen.v1';
+function ozylixNotifyPref() { try { return localStorage.getItem(OZ_NOTIFY_PREF_KEY) || ''; } catch(e) { return ''; } }
+function ozylixSetNotifyPref(v) { try { localStorage.setItem(OZ_NOTIFY_PREF_KEY, v); } catch(e) {} }
+function ozylixSeen(key) { try { return localStorage.getItem(OZ_NOTIFY_SEEN_KEY + '.' + key) === '1'; } catch(e) { return false; } }
+function ozylixMarkSeen(key) { try { localStorage.setItem(OZ_NOTIFY_SEEN_KEY + '.' + key, '1'); } catch(e) {} }
+function ozylixTransactional() { return ['checkout','thankyou','login','account'].indexOf(String(currentPage || '')) >= 0; }
+
+function showOzylixConsentBar() {
+  if (ozylixNotifyPref() || typeof Notification === 'undefined' || ozylixTransactional()) return;
+  if (document.getElementById('ozylxConsentBar')) return;
+  const bar = document.createElement('div');
+  bar.id = 'ozylxConsentBar';
+  bar.setAttribute('role', 'dialog');
+  bar.setAttribute('aria-label', 'Customer reminder preferences');
+  bar.innerHTML = '<div class="oz-consent-copy"><span aria-hidden="true" style="font-size:1.3rem">🔔</span><div><strong>Want helpful Ozylix reminders?</strong><br><span style="opacity:.82">Allow optional browser reminders for genuine limited offers, review requests and saved-cart help. No permission is requested until you choose Allow.</span></div></div>' +
+    '<div class="oz-consent-actions"><button class="oz-consent-allow" type="button">Allow reminders</button><button class="oz-consent-later" type="button">Not now</button><button class="oz-consent-never" type="button">Do not show again</button></div>';
+  document.body.appendChild(bar);
+  bar.style.display = 'block';
+  bar.querySelector('.oz-consent-allow').onclick = async function() {
+    try {
+      const result = await Notification.requestPermission();
+      ozylixSetNotifyPref(result === 'granted' ? 'granted' : 'denied');
+      bar.remove();
+      if (result === 'granted') { showToast('Browser reminders enabled. You can change this in browser settings.'); ozylixBrowserReminder('welcome', 'We will only remind you about relevant Ozylix updates.'); }
+      else showToast('Browser reminders were not enabled.');
+    } catch(e) { ozylixSetNotifyPref('denied'); bar.remove(); showToast('Browser reminders are unavailable here.'); }
+  };
+  bar.querySelector('.oz-consent-later').onclick = function() { ozylixSetNotifyPref('later'); bar.remove(); };
+  bar.querySelector('.oz-consent-never').onclick = function() { ozylixSetNotifyPref('never'); bar.remove(); };
+}
+
+async function ozylixBrowserReminder(key, body, url) {
+  if (ozylixNotifyPref() !== 'granted' || typeof Notification === 'undefined' || Notification.permission !== 'granted') return false;
+  if (ozylixSeen(key)) return false;
+  ozylixMarkSeen(key);
+  const payload = { title: 'Ozylix', body: body, url: url || '/#shop' };
+  try {
+    if ('serviceWorker' in navigator) {
+      const reg = await navigator.serviceWorker.ready;
+      if (reg && reg.showNotification) { await reg.showNotification(payload.title, { body: payload.body, icon: '/assets/ozylix-icon-192.png', badge: '/assets/ozylix-icon-192.png', data: { url: payload.url } }); return true; }
+    }
+  } catch(e) {}
+  try { new Notification(payload.title, { body: payload.body, icon: '/assets/ozylix-icon-192.png' }); return true; } catch(e) { return false; }
+}
+
+function ozylixScheduleReminders() {
+  if (ozylixTransactional()) return;
+  // Ask once after the customer has had time to read the page; this is only a consent bar.
+  if (!ozylixNotifyPref() && typeof Notification !== 'undefined') setTimeout(showOzylixConsentBar, 12000);
+  // Logged-in customer with no known local order: offer help, but only once per device/account.
+  setTimeout(async function() {
+    try {
+      const user = typeof getCurrentUser === 'function' ? getCurrentUser() : null;
+      if (!user || !user.email || ozylixSeen('no-order-' + user.email)) return;
+      let orders = JSON.parse(localStorage.getItem('asc_orders') || '[]');
+      if (!orders.length && localStorage.getItem('asc_jwt')) {
+        const r = await fetchWithTimeout(API_BASE + '/api/orders/my', { headers: { Authorization: 'Bearer ' + localStorage.getItem('asc_jwt') } }, 7000);
+        if (r.ok) { const d = await r.json(); orders = d.data || d || []; }
+      }
+      if (orders.length) return;
+      ozylixMarkSeen('no-order-' + user.email);
+      if (typeof ozylxNotify !== 'undefined') ozylxNotify.show({ id:'no-order-help', icon:'🌿', msg:'Your wellness shortlist is waiting — want help choosing a first product?', cta:'Open VitaMatch', corner:'bottom-right', onCta:function(){showPage('advisor');} });
+      ozylixBrowserReminder('no-order-' + user.email, 'Your Ozylix wellness shortlist is waiting. Try VitaMatch when you are ready.', '/#advisor');
+    } catch(e) {}
+  }, 26000);
+}
+
+// Review reminders use the existing eligibility check, and never fire for a product already reviewed.
+function ozylixReviewReminder(productId) {
+  const p = (typeof PRODUCTS !== 'undefined' ? PRODUCTS : []).find(x => Number(x.id) === Number(productId));
+  const name = p ? p.name : 'your delivered product';
+  if (typeof ozylxNotify !== 'undefined') ozylxNotify.show({ id:'review-' + productId, icon:'★', msg:'How did ' + name + ' fit into your routine?', cta:'Write a review', corner:'bottom-left', onCta:function(){openReviewFromThankYou();} });
+  ozylixBrowserReminder('review-' + productId, 'How did ' + name + ' fit into your routine? Share a review when you have a moment.', '/#account');
+}
+
+if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', ozylixScheduleReminders);
+else setTimeout(ozylixScheduleReminders, 1000);
+
+async function hydrateOzylixPublicSettings() {
+  try {
+    const r = await fetch((typeof API_BASE === 'string' ? API_BASE : '') + '/api/settings', { cache: 'no-store' });
+    if (!r.ok) return;
+    const data = await r.json();
+    window.__OZYLIX_SETTINGS = data.data || data || {};
+    document.querySelectorAll('[data-offer-bar]').forEach(function (bar) {
+      const replacement = offerBarHTML('');
+      if (replacement) { const wrap = document.createElement('div'); wrap.innerHTML = replacement; bar.replaceWith(wrap.firstElementChild); }
+    });
+    try { offerTick(); } catch(e) {}
+  } catch(e) { /* public settings are optional; defaults remain safe */ }
+}
+setTimeout(hydrateOzylixPublicSettings, 350);
+
 // ══════════════════════════════════════════════════════════════════════
 // OFFER COUNTDOWN
 //
@@ -21021,23 +21230,32 @@ function vitaShowMatch() {
 // page load. That is a lie the customer catches by pressing reload, and
 // it is precisely the practice the dark-pattern rules exist for.
 // ══════════════════════════════════════════════════════════════════════
-const OFFER_DEADLINE = '';   // e.g. '2026-09-30T23:59:59+05:30'
-const OFFER_LABEL    = 'Mix & Match — bundle discounts on every pack';
-const OFFER_SUB      = 'Add any 4 items and the cheapest one is free. No code needed.';
+var OFFER_DEADLINE = '';   // Admin may set a real ISO deadline; empty means no fake clock.
+var OFFER_LABEL    = 'Mix & Match — bundle discounts on every pack';
+var OFFER_SUB      = 'Add any 4 items and the cheapest one is free. No code needed.';
 
+function getOfferSetting(key, fallback) {
+  try {
+    const s = window.__OZYLIX_SETTINGS || {};
+    return s[key] != null ? s[key] : fallback;
+  } catch(e) { return fallback; }
+}
 function offerEndsAt() {
-  if (!OFFER_DEADLINE) return null;
-  const t = Date.parse(OFFER_DEADLINE);
+  const configured = getOfferSetting('offer_deadline', OFFER_DEADLINE);
+  if (!configured) return null;
+  const t = Date.parse(configured);
   return Number.isFinite(t) && t > Date.now() ? t : null;
 }
 
 function offerBarHTML(kicker) {
-  if (!OFFER_LABEL) return '';
+  const label = getOfferSetting('offer_label', OFFER_LABEL);
+  const sub = getOfferSetting('offer_sub', OFFER_SUB);
+  if (!label) return '';
   const ends = offerEndsAt();
   return '<div class="offer-bar" data-offer-bar>' +
     (typeof vp3dHTML === 'function' ? vp3dHTML('coin') : '') +
-    '<div class="offer-bar-copy">' + (kicker ? kicker + ' · ' : '') + OFFER_LABEL +
-      (OFFER_SUB ? '<span>' + OFFER_SUB + '</span>' : '') + '</div>' +
+    '<div class="offer-bar-copy">' + (kicker ? kicker + ' · ' : '') + esc(label) +
+      (sub ? '<span>' + esc(sub) + '</span>' : '') + '</div>' +
     (ends ? '<div class="offer-clock" data-offer-clock></div>' : '') +
   '</div>';
 }

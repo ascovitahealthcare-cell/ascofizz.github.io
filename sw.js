@@ -142,6 +142,14 @@ self.addEventListener('fetch', event => {
 });
 
 // ── PUSH NOTIFICATIONS (optional future use) ──
+// The page only calls showNotification after the visitor has granted browser permission.
+self.addEventListener('message', event => {
+  const d = event.data || {};
+  if (d.type !== 'ozylix-show-notification') return;
+  const title = d.title || 'Ozylix';
+  const options = { body: d.body || '', icon: '/assets/ozylix-icon-192.png', badge: '/assets/ozylix-icon-192.png', data: { url: d.url || '/' } };
+  event.waitUntil(self.registration.showNotification(title, options));
+});
 self.addEventListener('push', event => {
   const data = event.data ? event.data.json() : {};
   const title = data.title || 'Ozylix';
