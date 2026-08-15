@@ -12395,6 +12395,33 @@ async function syncProductsFromBackend() {
         STORE.normalizeCartTiers();
         if (typeof renderSideCart === 'function') renderSideCart();
         // Re-render all grids with updated data (including new backend products)
+// v10.2c: product card images hydrate only when about to enter view, so the
+// stalled cdn-storage requests can never hold the load event hostage
+// (loadEventEnd was measured at 31-54s while ~40 tiles sat pending). The
+// first above-fold tiles hydrate in the same frame (IO callback fires
+// immediately for in-view targets), so nothing visible is delayed.
+function hydrateProductImgs() {
+  var pending = document.querySelectorAll('div.product-card img[data-src]');
+  if (!pending.length) return;
+  function hydrate(img) {
+    if (!img || !img.dataset.src) return;
+    img.src = img.dataset.src;
+    img.removeAttribute('data-src');
+  }
+  if ('IntersectionObserver' in window) {
+    var io = new IntersectionObserver(function(entries) {
+      entries.forEach(function(entry) {
+        if (entry.isIntersecting) { hydrate(entry.target); io.unobserve(entry.target); }
+      });
+    }, { rootMargin: '800px 0px 800px 0px' });
+    pending.forEach(function(img) { io.observe(img); });
+    // Anything still deferred after 4s hydrates anyway — tiles must never
+    // remain placeholders if the observer never reports them intersecting.
+    setTimeout(function() { pending.forEach(hydrate); }, 4000);
+  } else {
+    pending.forEach(hydrate);
+  }
+}
         try { renderFeatured(); } catch(e){}
         try { renderNewArrivals(); } catch(e){}
         try { hydrateCategoryCounts(); } catch(e){}
@@ -13211,7 +13238,7 @@ function renderProductCard(p){
   const ratingDisplay = rating.count > 0
     ? `${stars(rating.avg)} <span class="review-ct">(${rating.count})</span>`
     : `<span class="review-ct" style="color:var(--gray)">No ratings yet</span>`;
-  return `<div class="product-card" data-product-id="${p.id}" style="--card-flavour:${cardFlavour}" onclick="openProduct(${p.id})"><div class="p-img-wrap"><img src="${imgSrc}" alt="${safeName}" loading="lazy" onerror="this.src='${PRODUCT_FALLBACKS.default}'" decoding="async">${safeBadge} ${maxDisc>0?`<span class="p-disc-badge">${tiers?'Up to ':'-'}${maxDisc}%</span>`:''}<div class="p-actions"><button class="btn-wishlist" onclick="event.stopPropagation();STORE.toggleWishlist(${p.id})" title="Wishlist">♡</button><button class="btn-qadd" onclick="event.stopPropagation();${tiers?`openProduct(${p.id})`:`STORE.addToCart(${p.id})`}">${tiers?'Choose Pack':'Add to Cart'}</button></div></div><div class="p-info"><div class="p-brand">${safeKicker}</div><div class="p-name">${safeName}</div><div class="p-rating">${ratingDisplay}</div><div class="p-price"><span class="sale-price">${priceDisplay}</span>${(baseMRP&&baseMRP!==baseRate)?`<span class="orig-price">₹${baseMRP.toLocaleString('en-IN')}</span>`:''}</div>${tiers?`<div class="tier-offer-tag">⚡ Up to ${maxDisc}% OFF on larger packs</div>`:safeOffer}<div class="p-enter" aria-hidden="true">Shop now<svg viewBox="0 0 15 8" fill="none"><path d="M0 4h13M9.5 1L13 4l-3.5 3" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></div></div></div>`;
+  return `<div class="product-card" data-product-id="${p.id}" style="--card-flavour:${cardFlavour}" onclick="openProduct(${p.id})"><div class="p-img-wrap"><img data-src="${imgSrc}" alt="${safeName}" loading="lazy" onerror="this.src='${PRODUCT_FALLBACKS.default}'" decoding="async">${safeBadge} ${maxDisc>0?`<span class="p-disc-badge">${tiers?'Up to ':'-'}${maxDisc}%</span>`:''}<div class="p-actions"><button class="btn-wishlist" onclick="event.stopPropagation();STORE.toggleWishlist(${p.id})" title="Wishlist">♡</button><button class="btn-qadd" onclick="event.stopPropagation();${tiers?`openProduct(${p.id})`:`STORE.addToCart(${p.id})`}">${tiers?'Choose Pack':'Add to Cart'}</button></div></div><div class="p-info"><div class="p-brand">${safeKicker}</div><div class="p-name">${safeName}</div><div class="p-rating">${ratingDisplay}</div><div class="p-price"><span class="sale-price">${priceDisplay}</span>${(baseMRP&&baseMRP!==baseRate)?`<span class="orig-price">₹${baseMRP.toLocaleString('en-IN')}</span>`:''}</div>${tiers?`<div class="tier-offer-tag">⚡ Up to ${maxDisc}% OFF on larger packs</div>`:safeOffer}<div class="p-enter" aria-hidden="true">Shop now<svg viewBox="0 0 15 8" fill="none"><path d="M0 4h13M9.5 1L13 4l-3.5 3" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></div></div></div>`;
 }
 </script>
 <script>
@@ -16262,6 +16289,8 @@ function bootApp() {
   // ✅ FIX: Render immediately from static data so shop never shows empty
   try { renderFeatured(); } catch(e) {}
   try { renderNewArrivals(); } catch(e) {}
+  try { hydrateProductImgs(); } catch(e) {}
+  try { hydrateProductImgs(); } catch(e) {}
   try { hydrateCategoryCounts(); } catch(e) {}
   try { hydrateAboutStats(); } catch(e) {}
   try { if(document.getElementById('bundleProdList')) renderBundleBuilder(); } catch(e) {}
