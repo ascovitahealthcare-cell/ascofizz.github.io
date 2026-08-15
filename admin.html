@@ -3894,7 +3894,14 @@ function azTogglePw() {
   </div>
 
   <div style="font-size:0.74rem;color:var(--text3);margin:-6px 0 16px;line-height:1.6;">
-    Insights are generated freely — they cost a small Claude API call but never touch real data. Anything that would change real orders, stock, prices, coupons or send a message is queued below as a <strong style="color:var(--gold-text);">draft action</strong> — nothing executes until you click Approve.
+    Insights are generated freely — they cost a small Claude API call but never touch real data. Anything that would change real orders, stock, prices, coupons or send a message is queued below as a <strong style="color:var(--gold-text);">draft action</strong> — nothing executes until you click Approve. Conversation history is saved in your browser (last 30 messages) so it survives a reload.
+  </div>
+
+  <!-- Company Snapshot (new in v9.4) — grounded numbers straight from the
+       backend's snapshot endpoint, shown before asking any agent. -->
+  <div class="card" style="margin-bottom:16px;">
+    <div class="card-hdr"><span class="card-title">📊 Company Snapshot</span><button class="btn btn-secondary btn-sm" onclick="loadAITeamSnapshot()">↺ Refresh</button></div>
+    <div id="aiteamSnapshot" style="display:grid;grid-template-columns:repeat(4,1fr);gap:14px;padding:6px 18px 18px;"><div style="color:var(--text3);font-size:0.82rem;grid-column:1/-1;text-align:center;padding:10px 0;">Loading snapshot…</div></div>
   </div>
 
   <div class="aiteam-grid" style="display:grid;grid-template-columns:280px 1fr;gap:16px;align-items:start;">
@@ -4244,7 +4251,7 @@ function azTogglePw() {
      .table-wrap, drawRing()) — no separate stylesheet or palette.
      ══════════════════════════════════════ -->
 <div class="page" id="page-auditdebugger">
-  <div class="page-hdr">
+    <div class="page-hdr">
     <div><div class="page-title">Audit / Debugger</div><div class="page-sub">Automated security, code, database and payment audit system</div></div>
     <div class="page-actions">
       <button class="btn btn-primary" onclick="auditRun('full')">▶ Run Full Audit Now</button>
@@ -4254,6 +4261,19 @@ function azTogglePw() {
       <button class="btn btn-secondary btn-sm" onclick="auditRun('payment')">Payment</button>
       <button class="btn btn-secondary btn-sm" onclick="auditRefresh()">↺ Refresh</button>
     </div>
+  </div>
+
+  <!-- Health score hero card (new in v9.4) — overall health ring plus
+       change versus the previous completed run, rendered with the panel's
+       own drawRing() helper and the standard green/gold/red thresholds. -->
+  <div class="card" style="margin-bottom:16px;display:flex;align-items:center;gap:22px;flex-wrap:wrap;">
+    <canvas id="acHeroRing" style="width:90px;height:90px;display:inline-block;flex-shrink:0;"></canvas>
+    <div style="min-width:200px;flex:1 1 240px;">
+      <div style="font-size:0.68rem;color:var(--text3);text-transform:uppercase;letter-spacing:0.08em;">Overall Health</div>
+      <div id="acHeroScore" style="font-size:2rem;font-weight:800;color:var(--green-text);">—</div>
+      <div id="acHeroDelta" style="font-size:0.78rem;color:var(--text3);margin-top:2px;"></div>
+    </div>
+    <div id="acHeroNote" style="font-size:0.78rem;color:var(--text2);line-height:1.6;max-width:340px;flex:1 1 260px;"></div>
   </div>
 
   <!-- Pipeline status -->
@@ -4266,7 +4286,8 @@ function azTogglePw() {
     <div id="acSteps" style="display:flex;flex-wrap:wrap;align-items:center;gap:6px;"></div>
   </div>
 
-  <!-- Severity summary -->
+  <!-- Severity summary (counts are now clickable — they open the drill-down
+       modal listing open findings with resolve controls, new in v9.4) -->
   <div id="acSeverityRow" style="display:grid;grid-template-columns:repeat(5,1fr);gap:16px;margin-bottom:16px;"></div>
 
   <!-- Trend -->
@@ -4298,9 +4319,9 @@ function azTogglePw() {
     <div id="acRepoSummary"><div style="color:var(--text3);font-size:0.85rem;padding:16px 0;text-align:center;">Loading…</div></div>
   </div>
 
-  <!-- Recent runs -->
+  <!-- Recent runs (rows are now clickable — opens the run-detail modal, new in v9.4) -->
   <div class="card">
-    <div class="card-hdr"><span class="card-title">🗂️ Recent Runs</span></div>
+    <div class="card-hdr"><span class="card-title">🗂️ Recent Runs</span><span style="font-size:0.72rem;color:var(--text3);">Click a row for details and a before/after comparison</span></div>
     <div class="table-wrap">
       <table>
         <thead><tr><th>Started</th><th>Type</th><th>Trigger</th><th>Status</th><th>Score</th></tr></thead>
@@ -4309,6 +4330,30 @@ function azTogglePw() {
     </div>
   </div>
 </div>
+<!-- ═════════════ AUDIT SEVERITY DRILL-DOWN (new in v9.4) ═════════════ -->
+<div class="modal-overlay" id="auditSevModal">
+  <div class="modal modal-lg">
+    <div class="modal-hdr">
+      <span class="modal-title" id="auditSevModalTitle">Open Findings</span>
+      <button class="modal-close" onclick="closeModal('auditSevModal')">✕</button>
+    </div>
+    <div class="modal-body" id="auditSevModalBody" style="max-height:60vh;overflow-y:auto;"></div>
+    <div class="modal-ftr"><button class="btn btn-secondary" onclick="closeModal('auditSevModal')">Close</button></div>
+  </div>
+</div>
+
+<!-- ═════════════ AUDIT RUN DETAIL (new in v9.4) ═════════════ -->
+<div class="modal-overlay" id="auditRunModal">
+  <div class="modal modal-lg">
+    <div class="modal-hdr">
+      <span class="modal-title" id="auditRunModalTitle">Run Detail</span>
+      <button class="modal-close" onclick="closeModal('auditRunModal')">✕</button>
+    </div>
+    <div class="modal-body" id="auditRunModalBody" style="max-height:60vh;overflow-y:auto;"></div>
+    <div class="modal-ftr"><button class="btn btn-secondary" onclick="closeModal('auditRunModal')">Close</button></div>
+  </div>
+</div>
+
 </main><!-- /main -->
 </div><!-- /app-layout -->
 </div><!-- /app -->
@@ -11130,6 +11175,7 @@ function toggleAutopilot() {
       const resp = typeof d.response === 'string' ? d.response : (typeof d.error === 'string' ? '⚠️ ' + d.error : '');
       aiteamFeedCard(a.id, resp.replace(/\n/g,'<br>'), 'autopilot');
     } catch(e) { /* silent — next tick will retry */ }
+    loadPendingActions(); // (v9.4) keep the pending queue fresh on every autopilot tick
     if (document.getElementById('aiteamAutopilot')?.checked) {
       const interval = parseInt(document.getElementById('aiteamInterval').value, 10) || 600000;
       aiteamAutopilotTimer = setTimeout(tick, interval);
@@ -11137,6 +11183,93 @@ function toggleAutopilot() {
   };
   const interval = parseInt(document.getElementById('aiteamInterval').value, 10) || 600000;
   aiteamAutopilotTimer = setTimeout(tick, interval);
+}
+
+// ── v9.4 additions for the AI Agent Team (appended here, chaining onto the
+// functions above without touching them): grounded company snapshot card,
+// localStorage-persisted conversation feed, and a compact meeting summary.
+async function loadAITeamSnapshot() {
+  const box = document.getElementById('aiteamSnapshot');
+  if (!box) return;
+  try {
+    const r = await fetch(`${API}/api/owner/ai/snapshot`, { headers: { 'Authorization': 'Bearer ' + authToken } });
+    const d = await r.json();
+    if (!r.ok) throw new Error(d.error || `HTTP ${r.status}`);
+    const fmtINR = v => '₹' + (Math.round(v) || 0).toLocaleString('en-IN');
+    const items = [
+      { label: 'Total Revenue', value: fmtINR(d.totalRevenue), icon: '💰' },
+      { label: 'Today\'s Revenue', value: fmtINR(d.todayRevenue), icon: '📅' },
+      { label: 'Orders', value: `${d.totalOrders} (${d.todayOrders} today)`, icon: '📦' },
+      { label: 'Pending Fulfillment', value: d.pendingOrders, icon: '⏳' },
+      { label: 'Customers', value: d.totalCustomers, icon: '👥' },
+      { label: 'Products', value: `${d.totalProducts} (${(d.lowStock || []).length} low stock)`, icon: '🧴' },
+      { label: 'Active Coupons', value: (d.activeCoupons || []).length, icon: '🎟️' },
+      { label: 'Low Stock Items', value: (d.lowStock || []).map(p => `${p.name} (${p.stock})`).join(', ') || 'None ✓', icon: '⚠️' },
+    ];
+    box.innerHTML = items.map(it => `
+      <div class="kpi" style="padding:10px;">
+        <span class="kpi-ico">${it.icon}</span>
+        <div class="kpi-label" style="margin-top:4px;">${it.label}</div>
+        <div class="kpi-val" style="font-size:1.05rem;">${it.value}</div>
+      </div>`).join('');
+    box.dataset.filled = '1';
+  } catch (e) {
+    box.innerHTML = `<div style="color:var(--text3);font-size:0.8rem;grid-column:1/-1;text-align:center;padding:10px;">Snapshot unavailable (${e.message}) — ask an agent instead.</div>`;
+  }
+}
+
+// ── Feed persistence (v9.4): the conversation survives a reload. Stored as
+// HTML payloads keyed by agent, newest last, capped at 30 entries.
+function aiteamPersistFeed() {
+  try {
+    const feed = document.getElementById('aiteamFeed');
+    if (!feed) return;
+    const items = Array.from(feed.children).map(c => ({ html: c.innerHTML, cls: c.className }));
+    window.localStorage.setItem('ozylix-aiteam-feed', JSON.stringify(items.slice(0, 30)));
+  } catch (_) { /* storage full or disabled — fail silently */ }
+}
+function aiteamRestoreFeed() {
+  try {
+    const feed = document.getElementById('aiteamFeed');
+    if (!feed || feed.dataset.empty === 'false') return;
+    let items = [];
+    try { items = JSON.parse(window.localStorage.getItem('ozylix-aiteam-feed') || '[]'); } catch (_) { items = []; }
+    if (!items.length) return;
+    feed.innerHTML = '';
+    feed.dataset.empty = 'false';
+    items.slice().reverse().forEach(it => {
+      const div = document.createElement('div');
+      div.innerHTML = it.html;
+      feed.appendChild(div.firstChild);
+    });
+  } catch (_) { /* restore is best-effort */ }
+}
+const _aiteamOrigFeedCard = window.aiteamFeedCard;
+window.aiteamFeedCard = function (agentId, html, tag) {
+  _aiteamOrigFeedCard(agentId, html, tag);
+  aiteamPersistFeed();
+};
+
+// ── Meeting summary (v9.4): after a team meeting finishes, append a compact
+// agenda card so the outcome is visible at a glance and persists in the feed.
+const _aiteamOrigTeamMeeting = window.runTeamMeeting;
+window.runTeamMeeting = async function () {
+  await _aiteamOrigTeamMeeting();
+  try {
+    const aiteamFeedCardNow = window.aiteamFeedCard;
+    aiteamFeedCardNow('CEO', `<strong>📋 Meeting summary</strong> — the team has reported in. Ask any agent for a deeper dive, or propose an action to act on what came up.`, 'meeting wrap-up');
+  } catch (_) {}
+};
+
+// ── Load snapshot + restore feed when the page opens (chains onto the
+// existing loader; the original also refreshes pending actions).
+const _aiteamOrigLoadPage = window.loadAITeamPage;
+if (typeof _aiteamOrigLoadPage === 'function') {
+  window.loadAITeamPage = function () {
+    _aiteamOrigLoadPage();
+    loadAITeamSnapshot();
+    aiteamRestoreFeed();
+  };
 }
 
 // ═══════════════════════════════════════════════
@@ -13504,19 +13637,24 @@ function renderPipeline(stageData) {
   `).join('');
 }
 
+// Clickable severity tiles (new in v9.4): open counts open the drill-down
+// modal listing open findings with resolve controls. Counts are stored on
+// the row so the drill-down can filter without a second request for the
+// same severity.
 function renderSeverityRow(findings) {
   const counts = { CRITICAL: 0, HIGH: 0, MEDIUM: 0, LOW: 0, INFO: 0 };
   findings.forEach(f => { counts[f.severity] = (counts[f.severity] || 0) + 1; });
   const icons = { CRITICAL: '🔴', HIGH: '🟠', MEDIUM: '🟡', LOW: '🔵', INFO: '⚪' };
   const colors = { CRITICAL: 'var(--red)', HIGH: 'var(--orange)', MEDIUM: 'var(--gold-text)', LOW: 'var(--blue)', INFO: 'var(--text3)' };
   document.getElementById('acSeverityRow').innerHTML = AC_SEVERITIES.map(sev => `
-    <div class="kpi">
+    <div class="kpi" style="cursor:pointer;" onclick="auditDrillDown('${sev}')" title="Open ${sev} findings — click for details">
       <div class="kpi-label">${sev}</div>
       <div class="kpi-val" style="color:${colors[sev]}">${counts[sev]}</div>
       <span class="kpi-ico">${icons[sev]}</span>
-      ${counts[sev] === 0 ? '<div class="badge badge-green" style="margin-top:8px;">✓ Clear</div>' : ''}
+      ${counts[sev] === 0 ? '<div class="badge badge-green" style="margin-top:8px;">✓ Clear</div>' : '<div style="margin-top:8px;font-size:0.62rem;color:var(--text3);">click →</div>'}
     </div>
   `).join('');
+  window.__acOpenFindings = findings || [];
 }
 
 function renderCategories(scores) {
@@ -13604,17 +13742,21 @@ function renderRepoSummary(repoGroups) {
   `).join('');
 }
 
+// Clickable run rows (new in v9.4): open the run-detail modal with the
+// full score breakdown and a before/after comparison against the run just
+// before it.
 function renderRuns(runs) {
   const body = document.getElementById('acRunsBody');
   if (!runs.length) { body.innerHTML = '<tr><td colspan="5" style="text-align:center;color:var(--text3);">No runs yet.</td></tr>'; return; }
   body.innerHTML = runs.map(r => `
-    <tr>
+    <tr style="cursor:pointer;" onclick="auditShowRun('${r.id}')">
       <td class="td-id">${new Date(r.started_at).toLocaleString()}</td>
       <td>${r.run_type}</td>
       <td>${r.trigger_source}</td>
       <td><span class="badge ${r.status === 'completed' ? 'badge-green' : r.status === 'failed' ? 'badge-red' : 'badge-gray'}">${r.status}</span></td>
       <td style="font-family:var(--mono);color:${r.overall_health_score != null ? acScoreColorVar(r.overall_health_score) : 'inherit'}">${r.overall_health_score ?? '—'}</td>
     </tr>`).join('');
+  window.__acRecentRuns = runs || [];
 }
 
 async function auditSetRange(days) {
@@ -13649,6 +13791,13 @@ async function auditRefresh() {
     renderCategories(latest.scores);
     renderRepoSummary(repoSummary);
     renderRuns(runs);
+    renderHealthHero(latest, latest); // hero shows score; compare fetched below
+    try {
+      const trend = await auditApi('/trends?days=30');
+      const series = (trend && trend.series) || [];
+      const prev = series.filter(p => p.overall_health_score !== null).slice(0, 2);
+      if (prev.length >= 2) renderHealthHero(prev[0], prev[1]);
+    } catch (_) { /* hero already rendered with latest data */ }
     await auditSetRange(acCurrentRange);
     statusEl.textContent = 'connected';
     statusEl.className = 'badge badge-green';
@@ -13669,6 +13818,142 @@ async function auditRun(action) {
   }
 }
 
+// ── v9.4 additions: health hero card, severity drill-down, run detail,
+//    finding resolution workflow, and 5-minute auto-refresh. Everything
+//    below chains onto the functions defined above without touching them. ──
+let acAutoRefreshTimer = null;
+
+function renderHealthHero(latest, previous) {
+  const score = (latest && latest.overall_health_score) ?? null;
+  const ring = document.getElementById('acHeroRing');
+  const scoreEl = document.getElementById('acHeroScore');
+  const deltaEl = document.getElementById('acHeroDelta');
+  const noteEl = document.getElementById('acHeroNote');
+  if (!score && score !== 0) {
+    scoreEl.textContent = '—';
+    deltaEl.textContent = 'No completed run yet — run the first audit to see health.';
+    noteEl.textContent = 'The full audit checks security posture, code quality, database health, checkout/payment integrity, and UX.';
+    return;
+  }
+  scoreEl.textContent = Math.round(score);
+  scoreEl.style.color = acScoreColorVar(score);
+  if (ring && typeof drawRing === 'function') drawRing('acHeroRing', score, acScoreColor(score), 'Health');
+  if (latest && previous && typeof previous.overall_health_score === 'number') {
+    const delta = Math.round((latest.overall_health_score - previous.overall_health_score) * 10) / 10;
+    const arrow = delta > 0 ? '▲ +' : delta < 0 ? '▼ ' : '– ';
+    const color = delta > 0 ? 'var(--green-text)' : delta < 0 ? 'var(--red)' : 'var(--text3)';
+    deltaEl.innerHTML = `<span style="color:${color};font-weight:700;">${arrow}${Math.abs(delta)}</span> vs previous run (${new Date(previous.finished_at).toLocaleDateString('en-IN')})`;
+  } else {
+    deltaEl.textContent = latest && latest.finished_at ? 'As of ' + new Date(latest.finished_at).toLocaleString('en-IN') : '';
+  }
+  const open = (window.__acOpenFindings || []).length;
+  noteEl.textContent = open === 0
+    ? '🎉 No open findings right now. The pipeline re-scans automatically on the scheduler and you can also trigger any audit type from the buttons above.'
+    : `${open} open finding${open === 1 ? '' : 's'} to review — click a severity tile above to triage them (mark fixed, accept risk, or dismiss as false positive).`;
+}
+
+async function auditDrillDown(severity) {
+  const findings = (window.__acOpenFindings || []).filter(f => f.severity === severity);
+  document.getElementById('auditSevModalTitle').textContent = `Open ${severity} Findings${findings.length ? ' — ' + findings.length : ''}`;
+  const body = document.getElementById('auditSevModalBody');
+  if (!findings.length) {
+    body.innerHTML = `<div style="padding:18px;text-align:center;color:var(--text3);">✓ No open ${severity} findings right now.</div>`;
+    openModal('auditSevModal');
+    return;
+  }
+  body.innerHTML = findings.map(f => `
+    <div style="border:1px solid var(--border);border-radius:10px;padding:12px 14px;margin-bottom:10px;">
+      <div style="display:flex;justify-content:space-between;gap:12px;align-items:flex-start;flex-wrap:wrap;">
+        <div style="flex:1 1 260px;">
+          ${acSeverityBadge(f.severity)}
+          <strong style="margin-left:8px;">${mktEsc ? mktEsc(f.title) : (f.title||'')}</strong>
+          ${f.repo ? `<div style="font-family:var(--mono);font-size:0.72rem;color:var(--text3);margin-top:3px;">${mktEsc ? mktEsc(f.repo) : f.repo}${f.file ? ' → ' + (mktEsc ? mktEsc(f.file) : f.file) : ''}</div>` : ''}
+          ${f.recommended_fix ? `<div style="font-size:0.8rem;color:var(--text2);margin-top:6px;line-height:1.5;">Fix: ${mktEsc ? mktEsc(f.recommended_fix) : f.recommended_fix}</div>` : ''}
+          ${f.description ? `<div style="font-size:0.76rem;color:var(--text3);margin-top:4px;line-height:1.5;">${mktEsc ? mktEsc(String(f.description).slice(0, 300)) : String(f.description||'').slice(0, 300)}</div>` : ''}
+        </div>
+        <div style="display:flex;flex-direction:column;gap:6px;flex-shrink:0;">
+          <button class="btn btn-secondary btn-sm" onclick="auditResolveFinding('${f.id}','fixed','✓ Mark Fixed')">✓ Mark Fixed</button>
+          <button class="btn btn-secondary btn-sm" onclick="auditResolveFinding('${f.id}','accepted_risk','⚠️ Accept Risk')">⚠️ Accept Risk</button>
+          <button class="btn btn-secondary btn-sm" onclick="auditResolveFinding('${f.id}','false_positive','🚫 False Positive')">🚫 False Positive</button>
+        </div>
+      </div>
+    </div>
+  `).join('');
+  openModal('auditSevModal');
+}
+
+async function auditResolveFinding(id, status, label) {
+  const note = status === 'accepted_risk' ? prompt('Optional note explaining why this is an accepted risk:') : undefined;
+  if (note === null) return;
+  try {
+    await auditApi(`/findings/${id}/status`, { method: 'PATCH', body: JSON.stringify({ status, note: note || undefined }) });
+    toast(`Finding ${label.toLowerCase()}`);
+    closeModal('auditSevModal');
+    await auditRefresh();
+  } catch (err) { toast('⚠️ Could not update finding: ' + err.message); }
+}
+
+async function auditShowRun(runId) {
+  document.getElementById('auditRunModalTitle').textContent = 'Run Detail';
+  const body = document.getElementById('auditRunModalBody');
+  body.innerHTML = '<div class="empty-state loading-dots">Loading…</div>';
+  openModal('auditRunModal');
+  try {
+    const [run, prevRun] = await Promise.all([
+      auditApi(`/runs/${runId}`),
+      (async () => {
+        try {
+          const runs = await auditApi('/runs?limit=20');
+          const idx = runs.findIndex(r => r.id === runId);
+          // The run started just before this one (runs are newest-first).
+          const prev = runs.slice(idx + 1).find(r => r.status === 'completed' && r.overall_health_score != null);
+          return prev || null;
+        } catch (_) { return null; }
+      })(),
+    ]);
+    const score = run.overall_health_score;
+    let deltaHtml = '';
+    if (prevRun) {
+      const d = Math.round(((score ?? 0) - prevRun.overall_health_score) * 10) / 10;
+      const color = d > 0 ? 'var(--green-text)' : d < 0 ? 'var(--red)' : 'var(--text3)';
+      deltaHtml = `<div style="font-size:0.78rem;color:var(--text3);margin-top:2px;">vs run ${new Date(prevRun.started_at).toLocaleString('en-IN')}: <span style="font-weight:700;color:${color};">${d > 0 ? '+' : ''}${d} points</span></div>`;
+    }
+    const cats = run.scores || {};
+    body.innerHTML = `
+      <div style="display:flex;align-items:center;gap:16px;flex-wrap:wrap;margin-bottom:16px;">
+        <strong style="font-family:var(--mono);font-size:2rem;color:${score != null ? acScoreColorVar(score) : 'inherit'};">${score ?? '—'}</strong>
+        <div>
+          <div style="font-size:0.85rem;color:var(--text);">${run.run_type} audit · <span class="badge ${run.status === 'completed' ? 'badge-green' : run.status === 'failed' ? 'badge-red' : 'badge-gray'}">${run.status}</span></div>
+          <div style="font-size:0.72rem;color:var(--text3);">Triggered by ${run.trigger_source} · started ${new Date(run.started_at).toLocaleString('en-IN')}${run.finished_at ? ' · finished ' + new Date(run.finished_at).toLocaleString('en-IN') : ''}</div>
+          ${deltaHtml}
+        </div>
+      </div>
+      <div style="font-size:0.72rem;color:var(--text3);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:8px;">Category Scores</div>
+      <div class="grid-4">
+        ${Object.entries(AC_CATEGORY_LABELS).map(([key, label]) => `
+          <div style="border:1px solid var(--border);border-radius:8px;padding:8px;text-align:center;">
+            <div style="font-size:0.95rem;font-weight:800;font-family:var(--mono);color:${cats[key] != null ? acScoreColorVar(cats[key]) : 'var(--text3)'}">${cats[key] ?? '—'}</div>
+            <div style="font-size:0.68rem;color:var(--text3);margin-top:2px;">${label}</div>
+          </div>`).join('')}
+      </div>
+      ${run.summary ? `<div style="font-size:0.8rem;color:var(--text2);margin-top:14px;line-height:1.6;">${mktEsc ? mktEsc(run.summary) : run.summary}</div>` : ''}
+    `;
+  } catch (err) {
+    body.innerHTML = `<div style="color:var(--red);padding:16px;">Could not load run: ${err.message}</div>`;
+  }
+}
+
+function auditAutoRefreshTick() {
+  clearTimeout(acAutoRefreshTimer);
+  acAutoRefreshTimer = setTimeout(() => {
+    if (document.getElementById('page-auditdebugger')?.style.display !== 'none' || document.location.hash.includes('auditdebugger')) {
+      auditRefresh().finally(() => auditAutoRefreshTick());
+    } else {
+      auditAutoRefreshTick();
+    }
+  }, 5 * 60 * 1000);
+}
+
 // Patch showPage (chains onto every previous patch above, same pattern the
 // marketing and bottom-nav features already use in this file) so opening
 // the Audit / Debugger tab loads live data automatically.
@@ -13676,7 +13961,7 @@ const _auditOrigShowPage = window.showPage;
 if (typeof _auditOrigShowPage === 'function') {
   window.showPage = function (name) {
     _auditOrigShowPage(name);
-    if (name === 'auditdebugger') auditRefresh();
+    if (name === 'auditdebugger') { auditRefresh(); auditAutoRefreshTick(); }
   };
 }
 </script>
