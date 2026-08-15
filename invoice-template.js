@@ -138,7 +138,10 @@ function normaliseOrderForInvoice(o) {
   });
 
   var stateRaw = (o.state || o.customer_state || (o.formData && o.formData.state) || '').toString();
-  var total = Number(o.total || o.amount || o.order_total || 0) || 0;
+  // Keep one explicit authoritative total name for every invoice path.
+  // Older deployed copies referenced invoiceTotal without declaring it.
+  var invoiceTotal = Number(o.total || o.amount || o.order_total || 0) || 0;
+  var total = invoiceTotal;
 
   // If the stored lines carry no prices (older rows saved only names),
   // fall back to the order total so the tax block is still correct
@@ -147,9 +150,11 @@ function normaliseOrderForInvoice(o) {
   if (!gross && total && items.length) {
     var per = total / items.reduce(function(t,i){ return t + i.qty; }, 0);
     items = items.map(function(i){
-      return { name:i.name, hsn:i.hsn, qty:i.qty, rate:per, gross:per*i.qty, estimated:true };
+      return { name:i.name, hsn:i.hsn, qty:i.qty, rate:per, mrp:per, gross:per*i.qty, estimated:true };
     });
   }
+
+  var mrpTotal = items.reduce(function(t,i){ return t + (i.mrp || i.rate) * i.qty; }, 0) || total;
 
   return {
     orderId:  o.orderId || o.id || o.order_id || '',
@@ -172,7 +177,7 @@ function normaliseOrderForInvoice(o) {
     vitaPointsDiscount: Number(o.vita_points_discount || o.vitaPointsDiscount || o.points_discount || 0) || 0,
     vitaPoints: Number(o.vita_points || o.vitaPoints || o.points_redeemed || 0) || 0,
     discount: Number(o.discount || o.totalDisc || 0) || 0,
-    total:    total,
+    total:    invoiceTotal,
     method:   o.method || o.payment_method || 'Online',
     irn:      o.irn || '', ackNo: o.ack_no || '', ackDate: o.ack_date || ''
   };
