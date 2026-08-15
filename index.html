@@ -18519,29 +18519,6 @@ function vitaPendingTotal() {
   return (st.pending || []).reduce(function(t,x){ return t + x.pts; }, 0);
 }
 
-function vitaEarn(orderTotal, orderId) {
-  const u = getCurrentUser();
-  if (!u || !u.email) return null;
-  let pts = Math.floor((Number(orderTotal) || 0) * VITA.EARN_PER_RUPEE);
-  if (pts <= 0) return null;
-  // Cap what a single order can ever be worth.
-  const capped = pts > VITA.MAX_EARN_PER_ORDER;
-  if (capped) pts = VITA.MAX_EARN_PER_ORDER;
-
-  const st = getVitaState();
-  st.lifetime += pts;
-  st.pending = st.pending || [];
-  st.pending.push({
-    pts: pts,
-    ref: orderId || '',
-    earnedAt: Date.now(),
-    matureAt: Date.now() + VITA.HOLD_DAYS * 86400000
-  });
-  st.history.unshift({ t: Date.now(), type: 'earn', pts: pts, ref: orderId || '' });
-  _saveVita(st);
-  vitaCelebrate(pts, 0, capped);
-  return { earned: pts, capped: capped, pending: vitaPendingTotal(), balance: st.balance };
-}
 
 // Called when an order is returned, refunded or cancelled. Removes the
 // points that order generated — from the pending queue if still held,
