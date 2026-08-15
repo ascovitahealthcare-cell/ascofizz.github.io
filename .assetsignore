@@ -13,9 +13,7 @@ wrangler.jsonc
 # Internal tooling and design notes. .claude alone is ~3 MB of agent skills and
 # has no business being on the public site.
 .claude
-DESIGN.md
 SECURITY.md
-README.ME
 gitignore
 
 # Superseded Ascovita billing page, ~95 KB, referenced from nowhere in the site.
