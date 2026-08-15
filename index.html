@@ -23186,7 +23186,7 @@ img.az-fade.az-in{opacity:1}
    ═══════════════════════════════════════════════════════════════════ */
 #ozPayBar {
   display: none;
-  position: fixed; left: 0; right: 0; bottom: 0; z-index: 900;
+  position: fixed; left: 0; right: 0; z-index: 930;
   padding: 10px 14px calc(10px + env(safe-area-inset-bottom, 0px));
   /* Page tone, not white: this is an extruded surface in the same
      neumorphic system as everything else, and a white slab on parchment
@@ -23211,6 +23211,17 @@ img.az-fade.az-in{opacity:1}
 }
 @media (max-width: 900px) {
   body.oz-checkout #ozPayBar { display: flex; }
+  /* FIX (Aug 2026): the pay bar used bottom:0 with z-index 900 while the
+     app-bottom-nav sits at bottom:0 with z-index 925 — the two bars merged
+     into one strip, hiding the pay bar (and the inline COD/Pay buttons) behind
+     the nav. The pay bar now floats above the app nav (z-index 930) with its
+     bottom edge raised above the nav height plus the iPhone home indicator,
+     so both payment options stay visible and tappable at the checkout bottom. */
+  body.oz-checkout #ozPayBar {
+    bottom: calc(env(safe-area-inset-bottom, 0px) + 68px);
+    border-radius: 18px 18px 0 0;
+  }
+  body.oz-checkout #page-checkout { padding-bottom: 180px !important; }
   /* The class is .wa-fab — the earlier rule guessed at .wa-bubble and never
      matched, so the button still sat on top of the COD link. */
   body.oz-checkout .wa-fab {
