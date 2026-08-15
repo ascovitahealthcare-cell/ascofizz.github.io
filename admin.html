@@ -3606,7 +3606,7 @@ function azTogglePw() {
     <div class="page-actions" style="display:flex;align-items:center;gap:10px;">
       <button class="btn btn-secondary" onclick="storeEdResetDraft()">↺ Reset to defaults</button>
       <button class="btn btn-primary" onclick="storeEdSave()" style="background:var(--gold);color:#fff;border:none;">💾 Save theme</button>
-      <button class="btn btn-primary" id="storeEdSaveContentBtn" onclick="storeEdSaveContent()" style="display:none;background:var(--green);color:#fff;border:none;">💾 Save content</button>
+      <button class="btn btn-primary" id="storeEdSaveContentBtn" onclick="storeEdSaveContent()" style="display:none;background:var(--green);color:#fff;border:none;">💾 Save content</button><button class="btn btn-primary" id="storeEdResetContentBtn" onclick="storeEdResetConfirm()" style="display:none;background:var(--ink);color:#fff;border:none;margin-left:6px;" title="Restore every section to the real live website copy and re-publish it.">⟲ Reset to original website</button>
     </div>
   </div>
   <div id="storeEdStatus" style="font-size:0.76rem;color:var(--text3);margin:-4px 0 12px;">Loading current theme…</div>
@@ -15291,30 +15291,31 @@ const STORE_ED_CONTENT_STORE = 'ozylix';
 // ── Live defaults: the copy currently hard-coded in the storefront.
 //    Editing against these is a diff from the real site. ────────────
 function storeEdDefaultContent() {
+  // v10.1: seed the editor defaults from the REAL live website copy
+  // (extracted from www.ozylix.com on 2026-08-15) so the 'Reset to
+  // original website' button can roll any section back to the true
+  // default, not a hand-typed approximation.
   return {
     announcement: [
-      { text: 'Mix & Match — bundle discounts on select products', icon: '🌿' },
-      { text: 'Free delivery on every order', icon: '🚚' },
-      { text: 'FSSAI Approved & Lab Tested', icon: '✅' },
-      { text: 'Made in India | Anand, Gujarat', icon: '🇮🇳' },
-      { text: '+91 9898 582 650', icon: '📞' }
+      { text: '🔥 Mix More, Save More', icon: '' },
+      { text: '🚚 Free Delivery Every Order', icon: '' },
+      { text: '🌿 FSSAI Approved & Lab Tested', icon: '' },
+      { text: '🇮🇳 Made in India · Anand, Gujarat', icon: '' },
+      { text: '📞 +91 9898 582 650', icon: '' }
     ],
     hero: {
-      badge: 'FSSAI Approved · Lab Tested',
-      line1: 'Effervescent', line2: 'Wellness', line3: 'Made in India',
+      badge: 'FSSAI APPROVED · LAB TESTED',
+      line1: 'EFFERVESCENT', line2: 'Wellness', line3: 'Made in India',
       sub: 'Fast-absorbing effervescent vitamins, spirulina and ayurvedic supplements — manufactured in our own FSSAI approved facility in Anand, Gujarat.',
       cta: 'Shop All Products'
     },
-    stats: [ '500+ Pin Codes Served', '24h Dispatch Time', 'FSSAI Approved Facility — Anand, Gujarat', 'Free Delivery on Every Order' ],
+    stats: ["500+ Pin Codes Served", "24h Dispatch Time", "FSSAI Approved Facility \u2014 Anand, Gujarat", "Free Delivery on Every Order", "100% Organic Ingredients", "Secure Payments via GoKwik"],
     trust: {
-      tiles: [ { icon: '🇮🇳', label: 'Made in India<br>Anand, Gujarat' },
-               { icon: '✅', label: 'FSSAI Approved<br>& Lab Tested' },
-               { icon: '🔬', label: 'In-House<br>Manufacturing' },
-               { icon: '🚚', label: 'Fast & Free<br>Delivery' } ],
-      items: [ '🚚 Free Delivery Every Order', '🇮🇳 Made in India — Anand, Gujarat', '✅ FSSAI Approved Facility', '🔬 Lab Tested Formulas' ]
+      tiles: [{ icon: '🇮🇳', label: 'Made in India<br>Anand, Gujarat' }, { icon: '✅', label: 'FSSAI Approved<br>& Lab Tested' }, { icon: '🔬', label: 'In-House<br>Manufacturing' }, { icon: '🚚', label: 'Fast & Free<br>Delivery' }, { icon: '🚚', label: 'Ships within\n24 Hours' }, { icon: '🔒', label: 'Secure Payments\nvia GoKwik' }],
+      items: ['🇮🇳 Made in India — Anand, Gujarat', '✅ FSSAI Approved — & Lab Tested', '🔬 In-House — Manufacturing', '🚚 Fast & Free — Delivery', '🚚 Ships within\n24 Hours', '🔒 Secure Payments\nvia GoKwik']
     },
     vitaMicro: { earnText: '1 point per ₹1', valueText: '150 points = ₹1 off' },
-    offerReminder: { title: "Today's offer", offerHtml: 'Free delivery on every order — plus bundle discounts on Mix & Match picks.', cta: 'Shop now' }
+    offerReminder: { title: '', offerHtml: 'Free delivery on every order — plus bundle discounts on Mix & Match picks.', cta: 'Shop now' }
   };
 }
 
@@ -15338,6 +15339,8 @@ function storeEdSwitchTab(tab) {
     document.getElementById('storeEdTabStyle').style.background = '';
     document.getElementById('storeEdTabStyle').style.color = '';
     saveContentBtn.style.display = '';
+    const resetBtn = document.getElementById('storeEdResetContentBtn');
+    if (resetBtn) resetBtn.style.display = '';
     renderContentTab();
     storeEdEnsurePreview();
     storeEdPatchContentPreview();
@@ -15349,6 +15352,8 @@ function storeEdSwitchTab(tab) {
     document.getElementById('storeEdTabContent').style.background = '';
     document.getElementById('storeEdTabContent').style.color = '';
     saveContentBtn.style.display = 'none';
+    const resetBtn2 = document.getElementById('storeEdResetContentBtn');
+    if (resetBtn2) resetBtn2.style.display = 'none';
   }
 }
 
@@ -15517,6 +15522,23 @@ function storeEdPatchContentPreview() {
 }
 
 // ── Load published content on first paint of the Content tab. ─────
+// ── Reset: roll every section back to the real live website copy. ──
+// ── Reset confirmation: double-check before wiping edits. ───
+function storeEdResetConfirm() {
+  if (confirm('Reset ALL content sections back to the real live website copy and re-publish it? Your unsaved edits will be lost.')) {
+    const st = document.getElementById('storeEdContentStatus');
+    if (st) st.textContent = 'Restoring original website content…';
+    storeEdResetContent();
+  }
+}
+function storeEdResetContent() {
+  const newContent = storeEdDefaultContent();
+  // The default IS the live site now; publish it so the storefront reverts.
+  storeEdSetContent(newContent);
+  renderContentTab();
+  storeEdPatchContentPreview();
+  storeEdSaveContent();
+}
 async function storeEdLoadContent() {
   const st = document.getElementById('storeEdContentStatus');
   try {
