@@ -3535,6 +3535,54 @@ img[src=""], img[data-awaiting-upload] { visibility: hidden; width: 100%; }
 }
 .sc-view-btn:hover { color: var(--indigo); }
 
+/* Compact side cart: keep selected products visible above the summary. */
+.side-cart .sc-body { padding: 8px 12px; }
+.side-cart .sc-item {
+  gap: 8px; padding: 7px; margin-bottom: 6px; border-radius: 11px;
+}
+.side-cart .sc-img {
+  width: 46px; height: 46px; padding: 4px; border-radius: 10px;
+}
+.side-cart .sc-name {
+  font-size: .79rem; line-height: 1.2; margin-bottom: 2px;
+}
+.side-cart .sc-brand { font-size: .57rem; letter-spacing: .1em; }
+.side-cart .sc-price { font-size: .84rem; margin-top: 3px; }
+.side-cart .sc-tier-info {
+  padding: 4px 6px; margin: 2px 0 3px; border-radius: 6px;
+  font-size: .59rem !important; line-height: 1.2;
+}
+.side-cart .sc-qty-row { gap: 4px; margin-top: 4px; }
+.side-cart .sc-qty-btn { width: 22px; height: 22px; font-size: .8rem; }
+.side-cart .sc-qty-val { min-width: 22px; font-size: .76rem; }
+.side-cart .sc-remove { font-size: .66rem; }
+.side-cart .sc-foot {
+  padding: 8px 12px calc(env(safe-area-inset-bottom, 0px) + 8px);
+}
+.side-cart .vita-strip {
+  gap: 7px; margin: 6px 0 8px; padding: 6px 9px; border-radius: 10px;
+}
+.side-cart .vita-strip .vp3d { --vp3d: 30px; --vp3d-sm: 28px; }
+.side-cart .vita-strip span { font-size: .63rem; line-height: 1.25; }
+.side-cart .vita-strip b { font-size: .7rem; }
+.side-cart .vita-strip .vs-arrow { font-size: .78rem; }
+.side-cart .sc-totals { margin-bottom: 8px; }
+.side-cart .sc-totals .sc-row {
+  min-height: 18px; font-size: .76rem; line-height: 1.25;
+}
+.side-cart .sc-row.total {
+  font-size: 1.02rem; padding-top: 8px; margin-top: 5px;
+}
+.side-cart .sc-checkout-btn {
+  padding: 12px; margin-bottom: 7px; font-size: .84rem; gap: 7px;
+}
+.side-cart .sc-view-btn {
+  padding: 9px; margin-top: 6px; font-size: .78rem;
+}
+.side-cart .sc-foot > div:last-child {
+  margin-top: 6px !important; font-size: .62rem !important;
+}
+
 /* ── AUTH ──────────────────────────────────────────────────────── */
 .auth-overlay {
   position: fixed; inset: 0; z-index: 960;
