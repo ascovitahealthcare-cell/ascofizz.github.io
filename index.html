@@ -266,7 +266,7 @@ window.META_PIXEL_ID = '1031030359902418';
 if (window.META_PIXEL_ID) {
 !function(f,b,e,v,n,t,s){if(f.fbq)return;n=f.fbq=function(){n.callMethod?
 n.callMethod.apply(n,arguments):n.queue.push(arguments)};if(!f._fbq)f._fbq=n;
-n.push=n;n.loaded=!0;n.version='2.0';n.queue=[]}
+n.push=n;n.loaded=!0;n.version='2.0';n.queue=[];
 // v10.2: defer the heavy fbevents.js bundle (~105KB, 2.4s) until after the
 // LCP window so it does not compete with banner/product images on first paint.
 // fbq() calls queue up in n.queue and replay automatically on load, so no
@@ -13280,7 +13280,10 @@ function renderProductCard(p){
     setTimeout(window._hpiFlush, 9000);
   }
 })();
-installProductImgHydrator();
+// The IIFE above already invokes itself. Calling it again by name threw
+// ReferenceError on every page load — a named FUNCTION EXPRESSION binds its
+// name only inside its own body, never in the enclosing scope — which
+// aborted the rest of this script block.
 // Back-compat alias used by bootApp, applyFilters and the sync flush call.
 function hydrateProductImgs() { try { window._hpiFlush && window._hpiFlush(); } catch(e) {} }
 </script>
@@ -20323,6 +20326,13 @@ async function applyPromoCode() {
 
 function removePromoCode() {
   activePromoCode = null;
+  // appliedDiscount is a second copy of the same coupon that carries none
+  // of its constraints, and several display branches fall through to it
+  // when activePromoCode is null. Clearing only one of the two left the
+  // cart showing an uncapped discount after the customer removed the code,
+  // while the payload sent coupon_code: null and the server charged full
+  // price — the customer saw one total and paid a higher one.
+  if (typeof appliedDiscount !== 'undefined') appliedDiscount = null;
   const input = document.getElementById('promoCodeInput');
   const status = document.getElementById('promoStatus');
   if (input) input.value = '';
@@ -20332,8 +20342,11 @@ function removePromoCode() {
 
 function getPromoDiscount(subtotal) {
   if (!activePromoCode) return 0;
-  if (activePromoCode.type === 'pct') return Math.round(subtotal * activePromoCode.value / 100);
-  if (activePromoCode.type === 'flat') return Math.min(activePromoCode.value, subtotal);
+  // Capped like every other site. The side cart calls this one, and showed
+  // a larger discount than the cart and checkout did.
+  const cap = (typeof azPromoCap === 'function') ? azPromoCap : (x) => x;
+  if (activePromoCode.type === 'pct') return cap(Math.round(subtotal * activePromoCode.value / 100));
+  if (activePromoCode.type === 'flat') return cap(Math.min(activePromoCode.value, subtotal));
   return 0;
 }
 
@@ -22713,7 +22726,13 @@ button:active, .btn-primary:active, .btn-outline:active,
      used by all six. */
   window.azPromoCap = function (d) {
     d = Number(d) || 0;
-    var c = window.activePromoCode;
+    /* `activePromoCode` is declared with `let`, and a top-level `let` in a
+       classic script goes into the global LEXICAL environment — it never
+       becomes a property of `window`. So this read was always undefined,
+       `cap` was always null, and the helper returned its input unchanged
+       at every call site. The cap it exists to apply had never once been
+       applied. Read the binding directly; it is visible across scripts. */
+    var c = (typeof activePromoCode !== 'undefined' && activePromoCode) ? activePromoCode : null;
     var cap = c && c.maxDisc != null ? Number(c.maxDisc) : null;
     return cap != null && isFinite(cap) ? Math.min(d, cap) : d;
   };
