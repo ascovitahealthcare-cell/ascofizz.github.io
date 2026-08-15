@@ -2283,7 +2283,8 @@ function azTogglePw() {
     <div class="nav-item" onclick="showPage('geoanalytics')"><span class="nav-ico">🌏</span> Geo Analytics <span class="nav-new"></span></div>
     <div class="nav-item" onclick="showPage('performance')"><span class="nav-ico">⚡</span> Performance <span class="nav-new"></span></div>
     <div class="nav-item" id="navAuditLog" onclick="showPage('auditdebugger')"><span class="nav-ico">🛡️</span> Audit / Debugger</div>
-    <div class="nav-item" id="navSettings" onclick="showPage('settings')"><span class="nav-ico">⚙️</span> Settings</div>
+        <div class="nav-item" onclick="showPage('automation')"><span class="nav-ico">🤖</span> Automation <span class="nav-new"></span></div>
+<div class="nav-item" id="navSettings" onclick="showPage('settings')"><span class="nav-ico">⚙️</span> Settings</div>
   </div>
 </nav>
 
@@ -4322,6 +4323,139 @@ function azTogglePw() {
 
 
 <!-- ═════════════ GEO ANALYTICS ═════════════ -->
+<!-- ═════════════ AUTOMATION (Aug 2026) ═════════════ -->
+<div class="page" id="page-automation">
+  <div class="page-hdr">
+    <div><div class="page-title">Automation</div><div class="page-sub">Returns run themselves, finance reconciles itself, orders ship themselves — manual stays as the safe override</div></div>
+    <div class="page-actions"><button class="btn btn-secondary" onclick="loadAutomation()">↺ Refresh</button></div>
+  </div>
+  <!-- Status chips -->
+  <div class="grid-4" style="margin-bottom:16px;">
+    <div class="kpi"><div class="kpi-label">Auto-Returns Cycle</div><div class="kpi-val" style="font-size:0.85rem" id="autReturnsCycle">–</div><span class="kpi-ico">🔄</span></div>
+    <div class="kpi"><div class="kpi-label">Last Finance Recon</div><div class="kpi-val" style="font-size:0.85rem" id="autRecon">–</div><span class="kpi-ico">🧾</span></div>
+    <div class="kpi"><div class="kpi-label">Auto-Ship (last run)</div><div class="kpi-val" style="font-size:0.85rem" id="autShip">–</div><span class="kpi-ico">🚚</span></div>
+    <div class="kpi"><div class="kpi-label">Next Cycle</div><div class="kpi-val" style="font-size:0.85rem" id="autNext">–</div><span class="kpi-ico">⏭️</span></div>
+  </div>
+  <!-- Returns auto-queue -->
+  <div class="card" style="margin-bottom:16px;">
+    <div class="card-hdr"><span class="card-title">🔁 Returns Auto-Queue</span>
+      <button class="btn btn-secondary btn-sm" onclick="autRunCycleNow()" style="margin-left:auto;">▶ Run cycle now</button></div>
+    <div style="font-size:0.78rem;color:var(--text3);margin-bottom:10px;" id="autQueueIntro">Live preview of what the auto-engine will do next — every item here also has its manual button in the Returns panel.</div>
+    <div id="autQueueTable" style="font-size:0.8rem;color:var(--text3);">Loading…</div>
+  </div>
+  <!-- Config -->
+  <div class="card" style="margin-bottom:16px;">
+    <div class="card-hdr"><span class="card-title">⚙️ Delays &amp; Toggles</span>
+      <button class="btn btn-primary btn-sm" onclick="autSaveConfig()" style="margin-left:auto;">💾 Save</button></div>
+    <div class="grid-3" style="margin-top:12px;gap:12px;">
+      <label style="font-size:0.78rem;color:var(--text3);">Approve returns after (hours)
+        <input type="number" id="autApproveH" min="0" style="width:100%;margin-top:4px;background:var(--input-bg);border:1px solid var(--border);border-radius:8px;padding:6px 10px;color:var(--text);">
+      </label>
+      <label style="font-size:0.78rem;color:var(--text3);">Pickup after approval (hours)
+        <input type="number" id="autPickupH" min="0" style="width:100%;margin-top:4px;background:var(--input-bg);border:1px solid var(--border);border-radius:8px;padding:6px 10px;color:var(--text);">
+      </label>
+      <label style="font-size:0.78rem;color:var(--text3);">Refund after pickup (hours)
+        <input type="number" id="autRefundH" min="0" style="width:100%;margin-top:4px;background:var(--input-bg);border:1px solid var(--border);border-radius:8px;padding:6px 10px;color:var(--text);">
+      </label>
+      <label style="font-size:0.78rem;color:var(--text3);">Expire open returns (hours)
+        <input type="number" id="autExpiryH" min="1" style="width:100%;margin-top:4px;background:var(--input-bg);border:1px solid var(--border);border-radius:8px;padding:6px 10px;color:var(--text);">
+      </label>
+      <label style="font-size:0.78rem;color:var(--text3);">Auto-ship paid orders
+        <div style="margin-top:4px;display:flex;align-items:center;gap:8px;">
+          <input type="checkbox" id="autShipOn" style="width:16px;height:16px;"> <span style="font-size:0.72rem;color:var(--text3);">Waybill created automatically</span>
+        </div>
+      </label>
+      <label style="font-size:0.78rem;color:var(--text3);">Auto request Delhivery pickup
+        <div style="margin-top:4px;display:flex;align-items:center;gap:8px;">
+          <input type="checkbox" id="autPickupOn" style="width:16px;height:16px;"> <span style="font-size:0.72rem;color:var(--text3);">Reverse pickup via API</span>
+        </div>
+      </label>
+    </div>
+    <div id="autConfigMsg" style="font-size:0.75rem;color:var(--green-text);margin-top:8px;min-height:14px;"></div>
+  </div>
+  <!-- Reconciliation history -->
+  <div class="card" style="margin-bottom:16px;">
+    <div class="card-hdr"><span class="card-title">🧾 Finance Reconciliation History</span>
+      <button class="btn btn-secondary btn-sm" onclick="autReconNow()">▶ Reconcile now</button></div>
+    <div id="autReconTable" style="font-size:0.8rem;color:var(--text3);">Loading…</div>
+  </div>
+</div>
+<!-- AUTOMATION JS -->
+<script>
+/* ── Automation page ─────────────────────────────────── */
+async function autFetch(url, opts) {
+  const r = await fetch(url, Object.assign({ headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + (localStorage.getItem('ascovita_token') || '') } }, opts || {}));
+  return r.json().catch(() => ({}));
+}
+function autWhen(ts){ return ts ? (new Date(ts).toLocaleString()) : 'never'; }
+async function loadAutomation() {
+  try {
+    const [st, q, rc] = await Promise.all([
+      autFetch('/api/admin/auto-status'),
+      autFetch('/api/admin/returns/queue'),
+      autFetch('/api/admin/finance/reconciliation'),
+    ]);
+    const cfg = st.config || {};
+    const s = st.state || {};
+    document.getElementById('autReturnsCycle').textContent = autWhen(s.lastCycleAt);
+    document.getElementById('autRecon').textContent = autWhen(s.lastReconAt);
+    document.getElementById('autShip').textContent = s.lastShipAt ? `${autWhen(s.lastShipAt)}` : 'never';
+    document.getElementById('autNext').textContent = (s.lastCycleAt && s.config) ? 'every 30 min' : 'every 30 min';
+    document.getElementById('autApproveH').value = cfg.autoApproveHours;
+    document.getElementById('autPickupH').value = cfg.autoPickupHours;
+    document.getElementById('autRefundH').value = cfg.autoRefundHours;
+    document.getElementById('autExpiryH').value = cfg.expiryHours;
+    document.getElementById('autShipOn').checked = !!cfg.autoShipOn;
+    document.getElementById('autPickupOn').checked = !!cfg.autoPickupOn;
+    // Queue
+    const qe = document.getElementById('autQueueTable');
+    const list = q.queue || [];
+    if (!list.length) { qe.innerHTML = '<div style="color:var(--green-text);">✅ Nothing pending — all returns fully automatic.</div>'; }
+    else {
+      const rows = list.map(x => `<tr><td style="padding:6px 8px;border-top:1px solid var(--border);">${x.id}</td><td style="padding:6px 8px;border-top:1px solid var(--border);">${x.order_id}</td><td style="padding:6px 8px;border-top:1px solid var(--border);">${x.status}</td><td style="padding:6px 8px;border-top:1px solid var(--border);">${x.nextAction}</td><td style="padding:6px 8px;border-top:1px solid var(--border);">${x.dueInHours === 0 ? 'now' : (x.dueInHours + ' h')}</td></tr>`).join('');
+      qe.innerHTML = `<div style="overflow-x:auto;"><table style="width:100%;border-collapse:collapse;"><tr style="text-align:left;font-size:0.72rem;color:var(--text3);"><th style="padding:6px 8px;">Return</th><th style="padding:6px 8px;">Order</th><th style="padding:6px 8px;">Status</th><th style="padding:6px 8px;">Next</th><th style="padding:6px 8px;">Due</th></tr>${rows}</table></div>`;
+    }
+    // Reconciliation
+    const re = document.getElementById('autReconTable');
+    const hist = rc.data || [];
+    if (!hist.length) { re.innerHTML = '<div>History starts after the first scheduled reconciliation run (every 6 hours) or press "Reconcile now".</div>' + (rc.note ? `<div style="color:var(--text3);font-size:0.75rem;margin-top:4px;">${rc.note}</div>` : ''); }
+    else {
+      const hrows = hist.map(h => `<tr><td style="padding:6px 8px;border-top:1px solid var(--border);">${h.period}</td><td style="padding:6px 8px;border-top:1px solid var(--border);">₹${Number(h.online_paid||0).toFixed(0)}</td><td style="padding:6px 8px;border-top:1px solid var(--border);">₹${Number(h.gateway_gross||0).toFixed(0)}</td><td style="padding:6px 8px;border-top:1px solid var(--border);">₹${Number(h.cod_collected||0).toFixed(0)}</td><td style="padding:6px 8px;border-top:1px solid var(--border);">${(h.warnings||'—').slice(0,100)}</td></tr>`).join('');
+      re.innerHTML = `<div style="overflow-x:auto;"><table style="width:100%;border-collapse:collapse;"><tr style="text-align:left;font-size:0.72rem;color:var(--text3);"><th style="padding:6px 8px;">Day</th><th style="padding:6px 8px;">Online paid</th><th style="padding:6px 8px;">Gateway gross</th><th style="padding:6px 8px;">COD collected</th><th style="padding:6px 8px;">Warnings</th></tr>${hrows}</table></div>`;
+    }
+    if (rc.lastRun) {
+      const lr = document.createElement('div');
+      lr.style.cssText = 'font-size:0.72rem;color:var(--text3);margin-top:6px;';
+      const w = rc.lastRun.warnings || [];
+      lr.textContent = (w.length ? '⚠️ ' + w.join(' · ') : '✅ Last reconciliation clean') + ' — ' + (rc.lastRun.period || '');
+      re.appendChild(lr);
+    }
+  } catch (e) { console.error('[automation]', e); }
+}
+async function autSaveConfig() {
+  const msg = document.getElementById('autConfigMsg');
+  try {
+    const r = await autFetch('/api/admin/auto-status', { method: 'PUT', body: JSON.stringify({
+      autoApproveHours: Number(document.getElementById('autApproveH').value) || 0,
+      autoPickupHours: Number(document.getElementById('autPickupH').value) || 0,
+      autoRefundHours: Number(document.getElementById('autRefundH').value) || 0,
+      expiryHours: Number(document.getElementById('autExpiryH').value) || 24,
+      autoShipOn: document.getElementById('autShipOn').checked,
+      autoPickupOn: document.getElementById('autPickupOn').checked,
+    }) });
+    msg.textContent = r.ok ? '✅ Saved — the engine picks up the new values within the next cycle (≤30 min). Manual buttons in Returns keep working as before.' : (r.error || 'Failed');
+    loadAutomation();
+  } catch (e) { msg.textContent = 'Error: ' + e.message; }
+}
+async function autRunCycleNow() {
+  try { await autFetch('/api/admin/auto-status', { method: 'PUT', body: JSON.stringify({ runCycleNow: true }) }); loadAutomation(); }
+  catch (e) { console.error('[automation]', e); }
+}
+async function autReconNow() {
+  try { await autFetch('/api/admin/finance/reconcile-now', { method: 'POST' }); loadAutomation(); }
+  catch (e) { console.error('[automation]', e); }
+}
+</script>
 <div class="page" id="page-geoanalytics">
   <div class="page-hdr">
     <div><div class="page-title">Geo Analytics</div><div class="page-sub">Geographic order distribution & regional insights</div></div>
@@ -5402,6 +5536,7 @@ function showPage(name) {
   if(name === 'database') { loadAuditLog(); loadSoftDeletes(); }
   if(name === 'payments') loadPayments();
   if(name === 'finance') loadFinance();
+  if(name === 'automation') { loadAutomation(); }
   if(name === 'invoices') loadInvoices();
   if(name === 'banners') loadBanners();
   if(name === 'siteimages') { loadSiteImages(); loadPromoMedia(); loadBannerManagers(); loadFallbackManager(); loadPromoStripMedia(); }
