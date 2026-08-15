@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+<style id="cod-launch-disabled">#codBtn,.opb-cod{display:none!important}</style>
   <meta charset="UTF-8">
   <!-- ── FORCE HTTPS — must stay the first script in the document ──────
        Symptom this fixes, from the Render log:
@@ -10631,11 +10632,11 @@ const _origRenderCkSummary = renderCheckoutSummary;
 // confirm still adding 60 — the customer saw FREE and was charged 60.
 // The server (computeServerSideTotal in server.js) must match these
 // two values exactly or the same mismatch reappears.
-//   SHIP_FEE = 0  -> shipping always free (current policy)
-//   SHIP_FEE = 60 -> 60 charged below SHIP_THRESHOLD
+//   SHIP_FEE = 79  -> ₹79 charged below SHIP_THRESHOLD
+//   SHIP_FEE = 0   -> shipping always free
 // ══════════════════════════════════════════════════════════════
 var SHIP_THRESHOLD = 599;
-var SHIP_FEE = 0;
+var SHIP_FEE = 79;
 function calcShipping(netSubtotal) {
   if (!SHIP_FEE) return 0;
   return (Number(netSubtotal) || 0) >= SHIP_THRESHOLD ? 0 : SHIP_FEE;
@@ -10661,10 +10662,18 @@ function renderCheckoutSummary() {
     const unitPrice = item.tierRate !== undefined ? item.tierRate : (p.salePrice || p.price);
     return s + unitPrice * item.qty;
   }, 0);
+  const mrpSub = STORE.cart.reduce((s, item) => {
+    const p = PRODUCTS.find(p => p.id === item.id);
+    if (!p) return s;
+    const unit = item.tierTabs ? Number(p.price || p.mrp || p.salePrice || 0) * (Number(item.tierTabs) / 15) : Number(p.price || p.mrp || p.salePrice || 0);
+    return s + unit * item.qty;
+  }, 0);
+  const tierOff = Math.max(0, mrpSub - sub);
 
   let disc = 0;
   if (typeof activePromoCode !== 'undefined' && activePromoCode) {
-    if (activePromoCode.type === 'pct') disc = azPromoCap(Math.round(sub * activePromoCode.value / 100));
+    if (Number.isFinite(Number(activePromoCode.discount))) disc = Math.min(sub, Math.max(0, Number(activePromoCode.discount)));
+    else if (activePromoCode.type === 'pct') disc = azPromoCap(Math.round(sub * activePromoCode.value / 100));
     else if (activePromoCode.type === 'flat') disc = azPromoCap(Math.min(activePromoCode.value, sub));
   } else if (typeof appliedDiscount !== 'undefined' && appliedDiscount) {
     disc = appliedDiscount.type==='percent' ? Math.round(sub*appliedDiscount.value/100) : appliedDiscount.value;
@@ -10729,7 +10738,7 @@ function renderCheckoutSummary() {
     ${vitaOff > 0 ? `<div class="sum-row" style="color:var(--fern-lo)"><span>💎 VitaPoints (${_vita.applied.toLocaleString('en-IN')})</span><span>-₹${vitaOff.toFixed(2)}</span></div>` : ''}
     <hr style="border:none;border-top:1px solid var(--light-gray);margin:8px 0">
     <div class="sum-row total"><span>Total</span><span style="color:var(--green);font-size:1.1rem">₹${total.toLocaleString('en-IN',{maximumFractionDigits:2})}</span></div>
-    ${vitaRedeemWidgetHTML(sub - mmOff - disc)}`;
+    ${vitaRedeemWidgetHTML(paidSubtotal)}`;
 
   // Also re-render recommendations whenever summary updates
   renderCkRecommendations();
@@ -11209,20 +11218,20 @@ function renderCheckoutSummary() {
 
 <!-- ══════════ POLICY PAGES ══════════ -->
 <div class="page" id="page-privacy" style="padding-top:90px">
-  <div class="page-header"><h1>Privacy Policy</h1><p>Ozylix | Last Updated: Jan 2025</p></div>
+  <div class="page-header"><h1>Privacy Policy</h1><p>Ozylix | Last Updated: 15 August 2026</p></div>
   <section class="section"><div class="container" style="max-width:780px;font-size:.88rem;line-height:1.85;color:var(--t-mid)">
     <p style="margin-bottom:16px">Ozylix is committed to protecting your privacy. This policy explains how we collect, use, and safeguard your personal information.</p>
     <h3 style="font-size:1.1rem;margin:24px 0 10px;font-family:var(--font-display)">Information We Collect</h3>
-    <p style="margin-bottom:16px">We collect information you provide when placing orders (name, address, phone, email), and non-personally identifiable browsing data to improve our website. We never collect sensitive financial data — all payments are processed by GoKwik's secure gateway.</p>
+    <p style="margin-bottom:16px">We collect the information needed to provide the store service, such as your name, delivery address, phone number, email address, order details, support messages, and account preferences. Payment credentials are handled by the payment provider and are not stored as raw card or UPI credentials on our application servers. Basic technical data such as device, browser, security logs, and cookie or local-storage identifiers may be processed to keep the site secure and remember your cart or preferences.</p>
     <h3 style="font-size:1.1rem;margin:24px 0 10px;font-family:var(--font-display)">How We Use Your Data</h3>
-    <p style="margin-bottom:16px">Your data is used solely to process orders, send tracking information, and (with consent) send promotional emails. We never sell your personal information to any third party.</p>
+    <p style="margin-bottom:16px">We use information to authenticate accounts, calculate and fulfil orders, arrange delivery, provide invoices and support, prevent abuse, comply with legal obligations, and send marketing only where permitted or requested. We share the minimum information needed with payment, delivery, hosting, analytics, and communication providers acting for the store. We do not sell personal information. You may contact us to request access, correction, deletion where legally available, or withdrawal of marketing consent.</p>
     <h3 style="font-size:1.1rem;margin:24px 0 10px;font-family:var(--font-display)">Contact for Privacy</h3>
     <p>Email: <a href="mailto:ascovitahealthcare@gmail.com">ascovitahealthcare@gmail.com</a> | Phone: +91 9898 582 650</p>
   </div></section>
 </div>
 
 <div class="page" id="page-refund" style="padding-top:90px">
-  <div class="page-header"><h1>Refund &amp; Return Policy</h1></div>
+  <div class="page-header"><h1>Refund, Return &amp; Cancellation Policy</h1><p>Last updated: 15 August 2026</p></div>
   <section class="section"><div class="container" style="max-width:780px;font-size:.88rem;line-height:1.85;color:var(--t-mid)">
     <div style="background:var(--green-wash);border-radius:var(--radius);padding:20px;margin-bottom:24px;border-left:1px solid var(--green)">
       <strong>7-Day Return Window</strong> — We accept returns on sealed, unused products within 7 days of delivery.
@@ -11234,7 +11243,7 @@ function renderCheckoutSummary() {
       <li>Sealed, unopened products within 7 days of delivery</li>
     </ul>
     <h3 style="font-size:1.1rem;margin:20px 0 10px;font-family:var(--font-display)">How to Initiate a Return</h3>
-    <p style="margin-bottom:14px">Email <a href="mailto:ascovitahealthcare@gmail.com">ascovitahealthcare@gmail.com</a> with your order number, reason for return, and photos (if damaged). We process refunds within 5–7 working days after receiving the returned item.</p>
+    <p style="margin-bottom:14px">Email <a href="mailto:ascovitahealthcare@gmail.com">ascovitahealthcare@gmail.com</a> with your order number, reason for return, and photographs if the item is damaged or incorrect. If approved, the return method and any pickup instructions will be shared with you. Refunds are initiated after the returned product is received and inspected, and the payment provider may take an additional 5–7 working days to reflect the amount. Any coupon saving, Mix &amp; Match free-item value, or redeemed VitaPoints tied to the returned items may be reversed.</p>
     <h3 style="font-size:1.1rem;margin:20px 0 10px;font-family:var(--font-display)">Non-Returnable Items</h3>
     <p>Opened supplement packages cannot be returned for hygiene and safety reasons.</p>
   </div></section>
@@ -11249,18 +11258,18 @@ function renderCheckoutSummary() {
       <div style="background:var(--green-pale);border-radius:var(--radius);padding:22px;border:1px solid rgba(23,224,192,0.15);display:flex;gap:16px;align-items:center"><div style="font-size:1.8rem">🎁</div><div><h3 style="font-size:.95rem;margin-bottom:3px">FREE Shipping</h3><p style="font-size:.82rem;color:var(--green);font-weight:600">On all orders above ₹599!</p></div></div>
       <div style="background:var(--sub-1);border-radius:var(--radius);padding:22px;border:1px solid rgba(0,0,0,0.08);display:flex;gap:16px;align-items:center"><div style="font-size:1.8rem">💵</div><div><h3 style="font-size:.95rem;margin-bottom:3px">Cash on Delivery</h3><p style="font-size:.82rem;color:var(--gray)">Available across India · no COD fee · pay the courier at your door</p></div></div>
     </div>
-    <p style="font-size:.87rem;color:var(--gray);line-height:1.8">All orders are dispatched within 24–48 hours and shipped via Shiprocket. After dispatch, you will receive an SMS and email with a real-time tracking link. We deliver to all pin codes across India.</p>
+    <p style="font-size:.87rem;color:var(--gray);line-height:1.8">Orders are normally dispatched within 24–48 hours and shipped through the available delivery partner. Standard delivery generally takes 3–5 business days after dispatch. A ₹79 shipping fee applies below a paid subtotal of ₹599; shipping is free at or above ₹599. Delivery timelines are estimates and can vary by PIN code, weather, holidays, and carrier operations. Tracking information is sent after dispatch.</p>
   </div></section>
 </div>
 
 <div class="page" id="page-terms" style="padding-top:90px">
-  <div class="page-header"><h1>Terms &amp; Conditions</h1><p>Last updated: January 2025</p></div>
+  <div class="page-header"><h1>Terms &amp; Conditions</h1><p>Last updated: 15 August 2026</p></div>
   <section class="section"><div class="container" style="max-width:780px;font-size:.88rem;line-height:1.85;color:var(--t-mid)">
     <p style="margin-bottom:16px">By purchasing from Ozylix, you agree to the following terms. Please read them carefully.</p>
     <h3 style="font-size:1.1rem;margin:20px 0 10px;font-family:var(--font-display)">Medical Disclaimer</h3>
     <p style="margin-bottom:16px">Ozylix products are dietary supplements and are not intended to diagnose, treat, cure, or prevent any disease. Always consult a qualified healthcare professional before starting any supplement regimen, especially if you are pregnant, breastfeeding, or on medication.</p>
     <h3 style="font-size:1.1rem;margin:20px 0 10px;font-family:var(--font-display)">Pricing & Offers</h3>
-    <p style="margin-bottom:16px">All prices are in Indian Rupees (INR) and exclude taxes where applicable. Promotional offers (including Mix &amp; Match bundle discounts) are valid only on eligible products and may be withdrawn at any time without notice.</p>
+    <p style="margin-bottom:16px">All prices are displayed in Indian Rupees (INR) and the checkout total shows the amount payable, including applicable taxes or charges. The order summary separates product price, pack or tier saving, Mix &amp; Match saving, coupon saving, VitaPoints redemption, shipping, and total where applicable. Only one coupon may be used, and Mix &amp; Match is not stacked with a coupon when it unlocks. The server may reject and re-price a request that exceeds the maximum permitted discount for a product.</p>
     <h3 style="font-size:1.1rem;margin:20px 0 10px;font-family:var(--font-display)">Contact</h3>
     <p>Ozylix | Near Rajshivalay Cinema, Anand – 388001, Gujarat | <a href="mailto:ascovitahealthcare@gmail.com">ascovitahealthcare@gmail.com</a></p>
   </div></section>
@@ -13691,18 +13700,18 @@ const BLOGS = [
 
 // ── FAQ DATA ──
 const FAQS = [
-  { q:"How long does delivery take?", a:"Standard delivery across India takes 3–5 business days. Express delivery in major cities (Mumbai, Delhi, Bangalore, Hyderabad, Ahmedabad, Chennai) takes 1–2 business days. Free delivery on every order, no minimum.", cat:"Shipping" },
-  { q:"What payment methods do you accept?", a:"We accept UPI (Google Pay, PhonePe, Paytm, BHIM), Credit/Debit Cards (Visa, Mastercard, RuPay), Net Banking for all major banks, No-Cost EMI options via GoKwik, and Cash on Delivery (COD).", cat:"Payment" },
-  { q:'How does Mix & Match work?', a:"Pick any products in any quantities and the bigger your mix, the bigger your automatic bundle discount — applied at checkout with no code needed. The saving is calculated on real prices and confirmed when you place your order.", cat:"Offers" },
+  { q:"How long does delivery take?", a:"Standard delivery across India generally takes 3–5 business days. Orders below ₹599 have a ₹79 shipping fee; shipping is free when the paid subtotal reaches ₹599 or more. Dispatch is normally within 24–48 hours, and the tracking link is sent after dispatch.", cat:"Shipping" },
+  { q:"What payment methods do you accept?", a:"Payment options shown at checkout may include UPI, cards, net banking, supported wallets or EMI options, and Cash on Delivery where available for your PIN code. The available methods are confirmed by the payment provider at checkout.", cat:"Payment" },
+  { q:'How does Mix & Match work?', a:"Add four eligible units and the lowest-priced eligible unit becomes free. Mix & Match is a standalone offer: if it unlocks, any coupon code or additional percentage discount is removed rather than stacked. The final saving is recalculated securely at checkout.", cat:"Offers" },
   { q:"Are Ozylix products FSSAI approved?", a:"Yes. All Ozylix products are manufactured in FSSAI-licensed facilities and meet all regulatory requirements for food supplements in India. Product licenses are available on request.", cat:"Products" },
   { q:"Can I take multiple supplements together?", a:"Generally yes, but we recommend checking with your doctor if you're on medications. Ozylix supplements are designed to be safe when combined. Our Combo Kits are specifically curated for safe, effective multi-supplement use.", cat:"Products" },
   { q:"How do I track my order?", a:"After dispatch, you'll receive an SMS and email with a tracking link from our shipping partner (Shiprocket). Track directly at shiprocket.in/shipment-tracking or via the link in your confirmation email.", cat:"Shipping" },
-  { q:"Is COD available? Any extra charges?", a:"Yes, Cash on Delivery is available across India, with no convenience fee on any order.", cat:"Payment" },
-  { q:"Can I return or exchange products?", a:"We offer a 7-day return policy for sealed, unused products. If you receive a damaged or wrong product, we will replace it at no cost. Contact ascovitahealthcare@gmail.com with your order details and photo.", cat:"Returns" },
+  { q:"Is COD available? Are there extra charges?", a:"Cash on Delivery is offered only where the checkout provider and delivery PIN code support it. Any applicable delivery or COD charge is shown before you place the order; orders of ₹599 or more qualify for free shipping under the current policy.", cat:"Payment" },
+  { q:"Can I return or exchange products?", a:"Request a return within 7 days of delivery for sealed and unused products. Damaged, defective, or incorrect items should be reported promptly with photographs. Refunds are processed after the return is received and checked; promotional discounts and redeemed VitaPoints are reversed according to the final eligible amount.", cat:"Returns" },
   { q:"How should I store the products?", a:"Store all Ozylix products in a cool, dry place below 30°C. Keep away from direct sunlight and moisture. After opening effervescent tablet tubes, seal tightly and use within 30 days.", cat:"Products" },
   { q:"Are these suitable for vegetarians/vegans?", a:"All Ozylix supplements are 100% vegetarian. The spirulina products are also vegan. Glutathione and B1+Biotin are vegetarian but check if vegan-strict, as some capsule shells may vary.", cat:"Products" },
-  { q:"How do I apply a discount code?", a:"At checkout, enter your promo code in the 'Apply Coupon' field and click Apply. Valid promo codes are shared on our Instagram, WhatsApp channel, and promotional emails.", cat:"Offers" },
-  { q:"Do you offer bulk/wholesale pricing?", a:"Yes! For bulk orders of 50+ units or wholesale partnerships, contact us at ascovitahealthcare@gmail.com or call +91 9898 582 650. We offer attractive pricing for distributors, pharmacies, and gyms.", cat:"Orders" },
+  { q:"How do I apply a discount code?", a:"Enter one active code in the Apply Coupon field and press Apply. A coupon cannot be stacked with Mix & Match when Mix & Match unlocks, and the server checks expiry, usage limits, minimum order value, and the maximum permitted saving again before payment.", cat:"Offers" },
+  { q:"Do you offer bulk/wholesale pricing?", a:"Yes. For bulk orders or wholesale partnerships, contact ascovitahealthcare@gmail.com or call +91 9898 582 650. Bulk pricing and quantities are quoted separately and are not automatically combined with consumer coupons or Mix & Match.", cat:"Orders" },
 ];
 
 // ── APP STATE ──
@@ -15365,10 +15374,12 @@ function renderCart() {
   for (var g = 0; g < mmGroups; g++) mmDisc += mmUnits[g * 4] || 0;
   var mmOff = Math.max(0, Math.min(mmDisc, sub));
   var mmNeed = mmGroups > 0 ? 0 : 4 - (mmUnits.length % 4);
-  const ship = calcShipping(sub - disc);
-  const _vita = vitaCheckoutInfo(sub - disc);
+  if (mmOff > 0) disc = 0;
+  const paidSubtotal = Math.max(0, sub - mmOff - disc);
+  const ship = calcShipping(paidSubtotal);
+  const _vita = vitaCheckoutInfo(paidSubtotal);
   const vitaOff = _vita.rupees;
-  const total = Math.max(0, sub - disc + ship - vitaOff);
+  const total = Math.max(0, paidSubtotal + ship - vitaOff);
 
   // Count total physical packs for display
   const totalPacks = STORE.cart.reduce((s, item) => {
@@ -15415,7 +15426,7 @@ function renderCart() {
           }).join('')}
           <div style="padding:18px 20px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;">
             <button class="btn-outline" onclick="showPage('shop')">← Continue Shopping</button>
-            <span style="font-size:.82rem;color:var(--gray)">${shippingIsAlwaysFree() ? '🎉 Free shipping on every order!' : ((sub-disc) >= SHIP_THRESHOLD ? '🎉 You qualify for free shipping!' : 'Add ₹' + (SHIP_THRESHOLD - (sub-disc)) + ' more for free shipping')}</span>
+            <span style="font-size:.82rem;color:var(--gray)">${shippingIsAlwaysFree() ? '🎉 Free shipping on every order!' : ((sub-mmOff-disc) >= SHIP_THRESHOLD ? '🎉 You qualify for free shipping!' : 'Add ₹' + Math.max(0, SHIP_THRESHOLD - (sub-mmOff-disc)) + ' more for free shipping')}</span>
           </div>
         </div>
       </div>
@@ -15427,15 +15438,15 @@ function renderCart() {
         <div class="sum-row"><span>Subtotal (${totalPacks} pack${totalPacks !== 1 ? 's' : ''})</span><span>₹${sub.toLocaleString('en-IN')}</span></div>
         ${disc > 0 ? `
           <div class="sum-row" style="color:var(--success);font-weight:700">
-            <span>🏷️ ${discLabel ? discLabel : 'Discount'}</span>
+            <span>🏷️ ${discLabel ? discLabel : 'Promo code'}</span>
             <span>-₹${disc.toLocaleString('en-IN')}</span>
-          </div>
-          <div style="background:var(--st-ok-bg);border:1px solid var(--st-ok-bg);border-radius:8px;padding:8px 12px;font-size:.75rem;color:var(--st-ok-fg);font-weight:600;margin-bottom:6px;display:flex;align-items:center;gap:6px">
-            🎉 Total savings on this order: <strong>₹${disc.toLocaleString('en-IN')}</strong>
+          </div>` : ''}
+        ${(disc + mmOff) > 0 ? `<div style="background:var(--st-ok-bg);border:1px solid var(--st-ok-bg);border-radius:8px;padding:8px 12px;font-size:.75rem;color:var(--st-ok-fg);font-weight:600;margin-bottom:6px;display:flex;align-items:center;gap:6px">
+            🎉 Total promotional savings: <strong>₹${(disc + mmOff).toLocaleString('en-IN')}</strong>
           </div>` : ''}
         <div class="sum-row"><span>Shipping</span><span>${ship === 0 ? '<span style="color:var(--success);font-weight:700">FREE 🎉</span>' : '₹' + ship}</span></div>
-        ${(!shippingIsAlwaysFree() && sub < SHIP_THRESHOLD) ? `<div style="font-size:.72rem;color:var(--gray);margin-bottom:4px;padding:6px 10px;background:var(--st-warn-bg);border-radius:6px;border-left:1px solid var(--seal)">💡 Add ₹${(SHIP_THRESHOLD - sub).toLocaleString('en-IN')} more for FREE shipping + free COD</div>` : ''}
-        <div class="sum-row" style="font-size:.78rem;color:var(--gray)"><span>COD charge</span><span>${calcShipping(sub) === 0 ? '<span style="color:var(--success)">FREE</span>' : '₹' + calcShipping(sub)}</span></div>
+        ${(!shippingIsAlwaysFree() && (sub - mmOff - disc) < SHIP_THRESHOLD) ? `<div style="font-size:.72rem;color:var(--gray);margin-bottom:4px;padding:6px 10px;background:var(--st-warn-bg);border-radius:6px;border-left:1px solid var(--seal)">💡 Add ₹${Math.max(0, SHIP_THRESHOLD - (sub - mmOff - disc)).toLocaleString('en-IN')} more for FREE shipping</div>` : ''}
+        <div class="sum-row" style="font-size:.78rem;color:var(--gray)"><span>COD charge</span><span>${calcShipping(sub - mmOff - disc) === 0 ? '<span style="color:var(--success)">FREE</span>' : '₹' + calcShipping(sub - mmOff - disc)}</span></div>
         <hr style="border:none;border-top:1px solid var(--light-gray);margin:8px 0">
         ${vitaOff > 0 ? `<div class="sum-row" style="color:var(--fern-lo)"><span>💎 VitaPoints (${_vita.applied.toLocaleString('en-IN')})</span><span>-₹${vitaOff.toFixed(2)}</span></div>` : ''}
         <div class="sum-row total"><span>Total</span><span style="color:var(--green)">₹${total.toLocaleString('en-IN',{maximumFractionDigits:2})}</span></div>
@@ -15523,13 +15534,11 @@ async function applyCode() {
   const code = input?.value?.trim().toUpperCase();
   if (!code) return;
 
-  // Local test codes only
-  if (typeof PROMO_CODES !== 'undefined' && PROMO_CODES[code]) {
-    const promo = PROMO_CODES[code];
-    activePromoCode = { code, ...promo };
-    appliedDiscount = { label: promo.label, type: promo.type === 'pct' ? 'percent' : 'flat', value: promo.value };
-    showToast(`🏷️ ${code} applied — ${promo.label}!`);
-    renderCart();
+  // All coupons are validated by the backend; local demo/test maps are
+  // intentionally not accepted as discounts.
+  const currentTotal = getOrderTotal();
+  if (currentTotal.mixMatchDiscount > 0) {
+    showToast('Mix & Match is active, so coupons cannot be stacked.', 'warning');
     return;
   }
 
@@ -15542,7 +15551,7 @@ async function applyCode() {
     const backendPromo = await validateCouponWithBackend(code, subtotal);
     if (backendPromo) {
       const type = backendPromo.type === 'percent' ? 'pct' : 'flat';
-      activePromoCode = { code, type, value: backendPromo.value, maxDisc: (backendPromo.max_discount != null ? Number(backendPromo.max_discount) : null), label: backendPromo.label || `${code} applied` };
+      activePromoCode = { code, type, value: backendPromo.value, discount: Number(backendPromo.discount || 0), maxDisc: (backendPromo.max_discount != null ? Number(backendPromo.max_discount) : null), label: backendPromo.label || `${code} applied` };
       appliedDiscount = { label: activePromoCode.label, type: backendPromo.type, value: backendPromo.value };
       showToast(`🏷️ ${code} applied — ${activePromoCode.label}!`);
       renderCart();
@@ -15557,8 +15566,8 @@ async function applyCode() {
 function updateCodBtnNote() {
   const note = document.getElementById('codBtnNote');
   if (!note) return;
-  const { sub, disc } = getOrderTotal();
-  const net = sub - disc;
+  const { paidSubtotal } = getOrderTotal();
+  const net = paidSubtotal;
   note.textContent = calcShipping(net) === 0 ? '✅ Free COD on your order!' : '+₹' + calcShipping(net) + ' COD charge · Free if order ≥ ₹' + SHIP_THRESHOLD;
   note.style.color = calcShipping(net) === 0 ? 'var(--st-ok-bg)' : 'rgba(255,255,255,0.85)';
 }
@@ -15577,15 +15586,24 @@ function getOrderTotal() {
     const unitPrice = item.tierRate !== undefined ? item.tierRate : (p.salePrice || p.price);
     return s + unitPrice * item.qty;
   }, 0);
-
+  const mmUnits = [];
+  STORE.cart.forEach(item => {
+    const p = PRODUCTS.find(x => x.id === item.id); if (!p) return;
+    let unit = p.salePrice || p.price || 0;
+    if (item.tierTabs) unit = (p.price || p.salePrice || 0) * (Number(item.tierTabs) / 15);
+    for (let n = 0; n < Math.max(0, Math.trunc(Number(item.qty) || 0)); n++) mmUnits.push(unit);
+  });
+  mmUnits.sort((a,b) => a-b);
+  let mixMatchDiscount = 0;
+  for (let i=0; i + 3 < mmUnits.length; i += 4) mixMatchDiscount += mmUnits[i] || 0;
+  mixMatchDiscount = Math.min(sub, mixMatchDiscount);
   let disc = 0;
-  if (typeof activePromoCode !== 'undefined' && activePromoCode) {
-    disc = activePromoCode.type === 'pct' ? azPromoCap(Math.round(sub * activePromoCode.value / 100)) : azPromoCap(Math.min(activePromoCode.value, sub));
-  } else if (typeof appliedDiscount !== 'undefined' && appliedDiscount) {
+  if (mixMatchDiscount <= 0 && typeof activePromoCode !== 'undefined' && activePromoCode) {
+    disc = Number.isFinite(Number(activePromoCode.discount)) ? Math.min(sub, Math.max(0, Number(activePromoCode.discount))) : (activePromoCode.type === 'pct' ? azPromoCap(Math.round(sub * activePromoCode.value / 100)) : azPromoCap(Math.min(activePromoCode.value, sub)));
+  } else if (mixMatchDiscount <= 0 && typeof appliedDiscount !== 'undefined' && appliedDiscount) {
     disc = appliedDiscount.type === 'percent' ? Math.round(sub * appliedDiscount.value / 100) : appliedDiscount.value;
   }
-
-  return { sub, disc };
+  return { sub, disc, mixMatchDiscount, paidSubtotal: Math.max(0, sub - disc - mixMatchDiscount) };
 }
 
 function generateOrderId() {
@@ -15605,6 +15623,12 @@ function renderCheckoutSummary() {
     const unitPrice = item.tierRate !== undefined ? item.tierRate : (p.salePrice || p.price);
     return s + unitPrice * item.qty;
   }, 0);
+  const mrpSub = STORE.cart.reduce((s, item) => {
+    const p = PRODUCTS.find(p => p.id === item.id); if (!p) return s;
+    const unit = item.tierTabs ? Number(p.price || p.mrp || p.salePrice || 0) * (Number(item.tierTabs) / 15) : Number(p.price || p.mrp || p.salePrice || 0);
+    return s + unit * item.qty;
+  }, 0);
+  const tierOff = Math.max(0, mrpSub - sub);
 
   // Use activePromoCode (the working variable) — fix for promo not affecting price
   let disc = 0;
@@ -15633,6 +15657,9 @@ function renderCheckoutSummary() {
   for (var g = 0; g < mmGroups; g++) mmDisc += mmUnits[g * 4] || 0;
   var mmOff = Math.max(0, Math.min(mmDisc, sub));
   var mmNeed = mmGroups > 0 ? 0 : 4 - (mmUnits.length % 4);
+  // Mix & Match is standalone. Keep the UI identical to the server: a live
+  // free-item offer removes the coupon instead of showing a stacked saving.
+  if (mmOff > 0) disc = 0;
   const ship = calcShipping(sub - mmOff - disc);
   const _vita = vitaCheckoutInfo(sub - mmOff - disc);
   const vitaOff = _vita.rupees;
@@ -15656,9 +15683,10 @@ function renderCheckoutSummary() {
       </div>`;
     }).join('')}
     <hr style="border:none;border-top:1px solid var(--light-gray);margin:12px 0">
-    <div class="sum-row"><span>Subtotal</span><span>₹${sub.toLocaleString('en-IN')}</span></div>
-    ${mmOff > 0 ? `<div class="mm-line mm-unlocked">🎉 Mix &amp; Match bundle discount applied (−₹${mmOff.toLocaleString('en-IN')})</div>` : (mmUnits.length > 0 ? `<div class="mm-line">🎁 Add <strong>${mmNeed}</strong> more ${mmNeed === 1 ? 'item' : 'items'} — your Mix &amp; Match discount grows.</div>` : '')}
-    ${disc > 0 ? `<div class="sum-row" style="color:var(--success)"><span>🏷️ Discount</span><span>-₹${disc.toLocaleString('en-IN')}</span></div>` : ''}
+    <div class="sum-row"><span>Product total</span><span>₹${sub.toLocaleString('en-IN')}</span></div>
+    ${tierOff > 0 ? `<div class="sum-row" style="color:var(--success)"><span>Pack / tier saving</span><span>-₹${tierOff.toLocaleString('en-IN')}</span></div>` : ''}
+    ${mmOff > 0 ? `<div class="mm-line mm-unlocked">🎉 Mix &amp; Match bundle discount applied (−₹${mmOff.toLocaleString('en-IN')}) <small style="display:block;margin-top:3px">Any coupon is removed while this offer is active.</small></div>` : (mmUnits.length > 0 ? `<div class="mm-line">🎁 Add <strong>${mmNeed}</strong> more ${mmNeed === 1 ? 'item' : 'items'} — your Mix &amp; Match discount grows.</div>` : '')}
+    ${disc > 0 ? `<div class="sum-row" style="color:var(--success)"><span>🏷️ Promo code ${activePromoCode?.code ? '('+activePromoCode.code+')' : ''}</span><span>-₹${disc.toLocaleString('en-IN')}</span></div>` : ''}
     <div class="sum-row"><span>Shipping</span><span>${ship === 0 ? '<span style="color:var(--success);font-weight:700">FREE</span>' : '₹' + ship}</span></div>
     <hr style="border:none;border-top:1px solid var(--light-gray);margin:8px 0">
     ${vitaOff > 0 ? `<div class="sum-row" style="color:var(--fern-lo)"><span>💎 VitaPoints (${_vita.applied.toLocaleString('en-IN')})</span><span>-₹${vitaOff.toFixed(2)}</span></div>` : ''}
@@ -16132,7 +16160,7 @@ function bootApp() {
   // wishlist/subscriptions have real page sections but were missing here, so a
   // direct hit on /wishlist rendered the HOME page at 200 — a soft 404. Keep
   // this list in step with SPA_ROUTES in worker/index.js.
-  const _validPages = ['home','shop','blog','about','contact','faq','advisor','product','wishlist','subscriptions'];
+  const _validPages = ['home','shop','blog','about','contact','faq','advisor','product','wishlist','subscriptions','privacy','terms','shipping','refund','accessibility'];
   // Legacy /b2b links now redirect to the Ascovita corporate B2B page
   if (_initPage === 'b2b') { window.location.href = 'https://www.ascovita.com/#/capabilities'; }
   if (_initPage && (_validPages.includes(_initPage) || _initPage === 'blog')) {
@@ -16300,21 +16328,17 @@ function initiatePayment() {
   const formData = validateCheckoutForm();
   if (!formData) return;
 
-  const { sub, disc } = getOrderTotal();
-  const netSub  = sub - disc;
-  const promoD  = (typeof activePromoCode !== 'undefined' && activePromoCode)
-    ? (activePromoCode.type === 'pct' ? azPromoCap(Math.round(netSub * activePromoCode.value / 100)) : azPromoCap(Math.min(activePromoCode.value, netSub)))
-    : (appliedDiscount ? (appliedDiscount.type === 'percent' ? Math.round(netSub * appliedDiscount.value / 100) : appliedDiscount.value) : 0);
-  const afterDisc = netSub - promoD;
-  const ship  = calcShipping(afterDisc);
-  const total = afterDisc + ship;
+  const { sub, disc, mixMatchDiscount, paidSubtotal } = getOrderTotal();
+  const ship  = calcShipping(paidSubtotal);
+  const total = paidSubtotal + ship;
+  const displayedDiscount = disc + mixMatchDiscount;
 
   const orderId = generateOrderId();
   const btn = document.getElementById('onlinePayBtn') || document.querySelector('#page-checkout .checkout-btn');
   const origText = btn ? btn.textContent : '';
   if (btn) { btn.disabled = true; btn.textContent = '⏳ Opening Secure Checkout...'; }
 
-  openPaymentGateway(orderId, total, netSub, promoD + disc, ship, formData, btn, origText);
+  openPaymentGateway(orderId, total, sub, displayedDiscount, ship, formData, btn, origText);
 }
 
 // ══════════════════════════════════════════════
@@ -16651,6 +16675,7 @@ async function handleCashfreeReturn(orderId) {
   }
 }
 async function initiateCOD() {
+  showToast('Cash on Delivery is not available at launch. Please use online payment.', 'warning'); return;
   if (STORE.cart.length === 0) { showToast('🛒 Your cart is empty!', 'error'); return; }
   // LOGIN GATE: orders can only be placed by signed-in customers.
   if (!getCurrentUser()) { requireLoginForCheckout(function(){ initiateCOD(); }); return; }
@@ -16689,6 +16714,7 @@ async function initiateCOD() {
 }
 
 async function confirmCODOrder(orderId, codTotal, codCharge) {
+  showToast('Cash on Delivery is not available at launch. Please use online payment.', 'warning'); return;
   const overlay = document.getElementById('codOverlay');
   if (overlay) overlay.innerHTML = `<div style="background:var(--sub-1);border-radius:20px;padding:32px 28px;text-align:center;max-width:340px;width:90%">
     <div style="font-size:2.5rem;margin-bottom:12px">⏳</div>
@@ -16712,6 +16738,7 @@ async function confirmCODOrder(orderId, codTotal, codCharge) {
 // COD PAYMENT FLOW (from modal — kept for compatibility)
 // ══════════════════════════════════════════════
 async function startCOD() {
+  showToast('Cash on Delivery is not available at launch. Please use online payment.', 'warning'); return;
   const pd = window._pendingPayment;
   if (!pd) { showToast('Session expired. Please try again.', 'error'); closePaymentModal(); return; }
 
@@ -17003,14 +17030,11 @@ async function finalizeOrder(orderId, formData, total, method, codCharge) {
   const sub  = srItems.reduce((s, i) => s + i.selling_price * i.units, 0);
   const disc = srItems.reduce((s, i) => s + i.discount * i.units, 0);
   // Also add promo discount (on top of product tier discounts)
-  let promoDisc = 0;
-  if (typeof activePromoCode !== 'undefined' && activePromoCode) {
-    promoDisc = activePromoCode.type === 'pct' ? azPromoCap(Math.round(sub * activePromoCode.value / 100)) : azPromoCap(Math.min(activePromoCode.value, sub));
-  } else if (appliedDiscount) {
-    promoDisc = appliedDiscount.type === 'percent' ? Math.round(sub * appliedDiscount.value / 100) : appliedDiscount.value;
-  }
-  const totalDisc = disc + promoDisc;
-  const ship = total - (sub - promoDisc);
+  const clientBreakdown = getOrderTotal();
+  const promoDisc = Number(clientBreakdown.disc || 0);
+  const mixDisc = Number(clientBreakdown.mixMatchDiscount || 0);
+  const totalDisc = disc + promoDisc + mixDisc;
+  const ship = total - (sub - promoDisc - mixDisc);
 
   const nameParts = (formData.firstName + ' ' + formData.lastName).trim().split(' ');
   const firstName = nameParts[0] || formData.firstName;
@@ -19877,22 +19901,15 @@ async function applyPromoCode() {
 
   status.innerHTML = '<div style="font-size:0.78rem;color:var(--gray);margin-top:6px">⏳ Checking code...</div>';
 
-  // Local-only test codes (never go to backend)
-  const localCode = PROMO_CODES[code];
-  if (localCode) {
-    activePromoCode = { code, ...localCode };
-    status.innerHTML = `<div class="promo-badge">✅ ${code} applied — ${localCode.label} <button class="promo-remove" onclick="removePromoCode()">✕</button></div>`;
-    renderCheckoutSummary();
-    showToast(`🏷️ Code ${code} applied!`);
-    return;
-  }
+  // Every code must be validated by the backend. This deliberately keeps
+  // the legacy local map inert so deleted or inactive codes cannot be used.
 
   // ALL real codes come from backend (Supabase coupons table via admin)
   const subtotal = STORE.getSubtotal ? STORE.getSubtotal() : 0;
   const backendPromo = await validateCouponWithBackend(code, subtotal);
   if (backendPromo) {
     const type = backendPromo.type === 'percent' ? 'pct' : 'flat';
-    activePromoCode = { code, type, value: backendPromo.value, maxDisc: (backendPromo.max_discount != null ? Number(backendPromo.max_discount) : null), label: backendPromo.label || `${code} applied` };
+    activePromoCode = { code, type, value: backendPromo.value, discount: Number(backendPromo.discount || 0), maxDisc: (backendPromo.max_discount != null ? Number(backendPromo.max_discount) : null), label: backendPromo.label || `${code} applied` };
     status.innerHTML = `<div class="promo-badge">✅ ${code} applied — ${activePromoCode.label} <button class="promo-remove" onclick="removePromoCode()">✕</button></div>`;
     renderCheckoutSummary();
     showToast(`🏷️ Code ${code} applied!`);

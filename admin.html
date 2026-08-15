@@ -4044,7 +4044,7 @@ function azTogglePw() {
       </div>
       <div class="form-group" style="margin-bottom:14px">
         <label class="form-label">COD Available</label>
-        <label class="toggle-wrap"><label class="toggle"><input type="checkbox" id="codAvailable"><span class="toggle-slider"></span></label><span style="font-size:0.82rem;color:var(--text2)">Cash on Delivery</span></label>
+        <label class="toggle-wrap"><label class="toggle"><input type="checkbox" id="codAvailable" disabled><span class="toggle-slider"></span></label><span style="font-size:0.82rem;color:var(--text2)">Cash on Delivery — unavailable at launch</span></label>
       </div>
       <div class="form-group" style="margin-bottom:14px">
         <label class="form-label">Free Shipping Threshold (₹)</label>
@@ -4054,6 +4054,19 @@ function azTogglePw() {
         <label class="form-label">WhatsApp Number</label>
         <input type="text" class="form-control" id="whatsappNumber" placeholder="+919898582650">
       </div>
+    </div>
+    <div class="card">
+      <div class="card-hdr"><span class="card-title">🛡️ Discount Guardrails</span></div>
+      <div style="color:var(--text3);font-size:0.8rem;line-height:1.55;margin:-10px 0 16px;">The server rejects and re-prices any checkout that exceeds these product-level ceilings. Values are capped at 50% and are owner-controlled.</div>
+      <div class="form-group" style="margin-bottom:14px">
+        <label class="form-label">Glutathione &amp; ACV maximum discount (%)</label>
+        <input type="number" class="form-control" id="discountCeilingGlutathioneAcv" value="50" min="0" max="50" step="1">
+      </div>
+      <div class="form-group">
+        <label class="form-label">All other products maximum discount (%)</label>
+        <input type="number" class="form-control" id="discountCeilingStandard" value="45" min="0" max="50" step="1">
+      </div>
+      <div style="margin-top:14px;padding:10px 12px;background:rgba(216,103,110,.08);border-radius:8px;color:var(--text3);font-size:.74rem;line-height:1.5;">Changes apply to new checkout calculations after save. Existing paid orders are not repriced.</div>
     </div>
     <div class="card">
       <div class="card-hdr"><span class="card-title">💰 Tax Settings (GST)</span></div>
@@ -4325,6 +4338,8 @@ function azTogglePw() {
       </div>
       <div class="form-row col2">
         <div class="form-group"><label class="form-label">Max Uses</label><input type="number" class="form-control" id="cMaxUses" placeholder="Unlimited"></div>
+        <div class="form-group"><label class="form-label">Maximum Discount (₹)</label><input type="number" class="form-control" id="cMaxDiscount" placeholder="No absolute cap" min="0"></div>
+        <div class="form-group"><label class="form-label">Max Uses / Customer</label><input type="number" class="form-control" id="cMaxUsesPerCustomer" placeholder="Unlimited" min="1"></div>
         <div class="form-group"><label class="form-label">Expires On</label><input type="date" class="form-control" id="cExpires"></div>
       </div>
       <div class="form-group">
@@ -8387,7 +8402,7 @@ function renderDiscounts() {
       <td><span class="badge badge-gray">${c.type}</span></td>
       <td style="font-weight:600;">${c.type==='percent'?c.value+'%':'₹'+c.value}</td>
       <td>₹${c.min_order||0}</td>
-      <td><span style="font-family:var(--mono);">${c.used_count||0}/${c.max_uses||'∞'}</span></td>
+      <td><span style="font-family:var(--mono);">${c.used_count||0}/${c.max_uses||'∞'}${c.max_uses_per_customer?` · ${c.max_uses_per_customer}/customer`:''}${c.max_discount!=null?` · cap ₹${c.max_discount}`:''}</span></td>
       <td style="font-size:0.75rem;color:var(--text3);">${c.expires_at?fmtDate(c.expires_at):'No expiry'}</td>
       <td>${c.deleted_at?`<span class="badge badge-red">Deleted</span>`:c.active?`<span class="badge badge-green">Active</span>`:`<span class="badge badge-gray">Inactive</span>`}</td>
       <td>
@@ -8410,10 +8425,12 @@ function openCouponModal(id) {
     document.getElementById('cValue').value = c.value||'';
     document.getElementById('cMinOrder').value = c.min_order||0;
     document.getElementById('cMaxUses').value = c.max_uses||'';
+    document.getElementById('cMaxDiscount').value = c.max_discount ?? '';
+    document.getElementById('cMaxUsesPerCustomer').value = c.max_uses_per_customer ?? '';
     document.getElementById('cExpires').value = c.expires_at?c.expires_at.split('T')[0]:'';
     document.getElementById('cActive').checked = c.active !== false;
   } else {
-    ['cCode','cValue','cMaxUses','cExpires'].forEach(id => document.getElementById(id).value='');
+    ['cCode','cValue','cMaxUses','cMaxDiscount','cMaxUsesPerCustomer','cExpires'].forEach(id => document.getElementById(id).value='');
     document.getElementById('cMinOrder').value = '0';
     document.getElementById('cActive').checked = true;
     document.getElementById('cType').value = 'percent';
@@ -8429,6 +8446,8 @@ async function saveCoupon() {
     value:parseFloat(document.getElementById('cValue').value)||0,
     min_order:parseFloat(document.getElementById('cMinOrder').value)||0,
     max_uses:parseInt(document.getElementById('cMaxUses').value)||null,
+    max_discount:document.getElementById('cMaxDiscount').value === '' ? null : Number(document.getElementById('cMaxDiscount').value),
+    max_uses_per_customer:document.getElementById('cMaxUsesPerCustomer').value === '' ? null : parseInt(document.getElementById('cMaxUsesPerCustomer').value),
     expires_at:document.getElementById('cExpires').value||null,
     active:document.getElementById('cActive').checked,
   };
@@ -11528,13 +11547,16 @@ async function loadSettings() {
   try {
     const r = await apiFetch('/api/admin/settings');
     if(!r.ok) return; // silently skip if endpoint doesn't exist yet
-    const d = await r.json();
+    const raw = await r.json();
+    const d = raw.data || raw;
     if(d.store_online !== undefined) document.getElementById('storeOnline').checked = d.store_online === 'true' || d.store_online === true;
     if(d.cod_available !== undefined) document.getElementById('codAvailable').checked = d.cod_available === 'true' || d.cod_available === true;
     if(d.free_shipping?.threshold) document.getElementById('freeShippingThreshold').value = d.free_shipping.threshold;
     if(d.whatsapp_number) document.getElementById('whatsappNumber').value = d.whatsapp_number;
     if(d.gst_rate) { document.getElementById('cgstRate').value = d.gst_rate.cgst||2.5; document.getElementById('sgstRate').value = d.gst_rate.sgst||2.5; }
     if(d.razorpay_mode) document.getElementById('pgMode').value = d.razorpay_mode;
+    if(d.discount_ceiling_glutathione_acv !== undefined) document.getElementById('discountCeilingGlutathioneAcv').value = d.discount_ceiling_glutathione_acv;
+    if(d.discount_ceiling_standard !== undefined) document.getElementById('discountCeilingStandard').value = d.discount_ceiling_standard;
     if(d.interface_theme) {
       // Backend is the source of truth once reachable — keep localStorage in sync too.
       applyThemeClass(d.interface_theme);
@@ -11545,6 +11567,11 @@ async function loadSettings() {
 
 async function saveSettings() {
   const activeThemeOpt = document.querySelector('.theme-opt.selected');
+  const ceilingGlutathioneAcv = Number(document.getElementById('discountCeilingGlutathioneAcv').value);
+  const ceilingStandard = Number(document.getElementById('discountCeilingStandard').value);
+  if (!Number.isFinite(ceilingGlutathioneAcv) || ceilingGlutathioneAcv < 0 || ceilingGlutathioneAcv > 50 || !Number.isFinite(ceilingStandard) || ceilingStandard < 0 || ceilingStandard > 50) {
+    toast('Discount ceilings must be between 0% and 50%', 'error'); return;
+  }
   const settings = {
     store_online: document.getElementById('storeOnline').checked,
     cod_available: document.getElementById('codAvailable').checked,
@@ -11552,6 +11579,8 @@ async function saveSettings() {
     whatsapp_number: document.getElementById('whatsappNumber').value,
     gst_rate: {cgst: parseFloat(document.getElementById('cgstRate').value)||2.5, sgst: parseFloat(document.getElementById('sgstRate').value)||2.5},
     razorpay_mode: document.getElementById('pgMode').value,
+    discount_ceiling_glutathione_acv: ceilingGlutathioneAcv,
+    discount_ceiling_standard: ceilingStandard,
     interface_theme: activeThemeOpt ? activeThemeOpt.dataset.theme : (localStorage.getItem(THEME_KEY) || 'deluxe'),
   };
   try {
@@ -11662,7 +11691,7 @@ function renderDiscountsNew() {
         <circle cx="21" cy="21" r="${r}" fill="none" stroke="${col}" stroke-width="4" stroke-dasharray="${dash.toFixed(1)} ${circ.toFixed(1)}" stroke-linecap="round"/>
       </svg></td>
       <td>₹${fmtNum(c.min_order||0)}</td>
-      <td style="font-family:var(--mono);">${c.used_count||0}/${c.max_uses||'∞'}</td>
+      <td style="font-family:var(--mono);">${c.used_count||0}/${c.max_uses||'∞'}${c.max_uses_per_customer?` · ${c.max_uses_per_customer}/customer`:''}${c.max_discount!=null?` · cap ₹${c.max_discount}`:''}</td>
       <td style="font-size:0.75rem;color:var(--text3);">${c.expires_at?fmtDate(c.expires_at):'No expiry'}</td>
       <td>${c.deleted_at?'<span class="badge badge-red">Deleted</span>':c.active!==false?'<span class="badge badge-green">Active</span>':'<span class="badge badge-gray">Inactive</span>'}</td>
       <td><div style="display:flex;gap:4px;">
