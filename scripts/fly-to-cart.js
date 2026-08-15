@@ -185,12 +185,6 @@
       ghost.style.opacity = '0';
       setTimeout(() => ghost.remove(), 150);
 
-      const fab = document.getElementById('ofcFab');
-      if (fab) {
-        fab.classList.remove('pop');
-        void fab.offsetWidth;
-        fab.classList.add('pop');
-      }
       if (opts.done) opts.done();
     }
   }
@@ -220,30 +214,14 @@
     try { return (0, eval)("typeof " + name + " !== 'undefined' ? " + name + " : null"); } catch (e) { return null; }
   }
 
-  /* ── FAB ───────────────────────────────────────────────────── */
-  function ensureFab() {
-    if (document.getElementById('ofcFab') || window.matchMedia('(min-width: 768px)').matches) return;
-    const fab = document.createElement('button');
-    fab.id = 'ofcFab';
-    fab.className = 'ofc-fab';
-    fab.setAttribute('aria-hidden', 'true');
-    fab.innerHTML = '<span class="ofc-count" id="ofcCount">0</span><span>View cart</span>';
-    fab.addEventListener('click', () => {
-      if (typeof window.openSideCart === 'function') window.openSideCart();
-    });
-    document.body.appendChild(fab);
-  }
-
-  function syncFab() {
-    const fab = document.getElementById('ofcFab');
-    if (!fab) return;
-    const store = resolve('STORE');
-    const count = store && Array.isArray(store.cart) ? store.cart.reduce((s, i) => s + (i.qty || 1), 0) : 0;
-    const el = fab.querySelector('#ofcCount');
-    if (el) el.textContent = count;
-    if (count > 0) fab.classList.add('visible');
-    else fab.classList.remove('visible');
-  }
+  /* ── FAB removed (customer request) ───────────────────────────
+     The floating "View cart" pill sat right above the mobile bottom
+     navigation, duplicating the Cart tab that already lives in that bar.
+     It has been removed entirely; the bottom-nav Cart tab + side cart
+     remain the only way to reach the cart on mobile. The fly animation,
+     badge bump and "✓ Added" flip still work. */
+  function ensureFab() { /* removed: duplicated by bottom-nav Cart tab */ }
+  function syncFab() { /* removed: no FAB to sync */ }
 
   /* ── find the product image for a clicked button ───────────── */
   function sourceFor(btn) {
