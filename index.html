@@ -14936,6 +14936,9 @@ function updatePriceDisplay(productId, tierIdx) {
   // Update Add to Cart button label
   const addBtn = document.getElementById('addCartBtn');
   if (addBtn) addBtn.dataset.tier = tierIdx;
+  // The sticky bottom bar must mirror the same selection — it used to stay
+  // on the single-unit price even after a pack was chosen.
+  typeof refreshStickyCart === 'function' && refreshStickyCart();
 }
 
 /* ── PRODUCT-PAGE REVIEW LIST: 3 shown, then paged 50 at a time ──────
@@ -21026,6 +21029,14 @@ function addBundleToCart(){const ids=Object.keys(bundleQty).map(Number);const se
 let stickyQty=1,stickyProdId=null;
 function initStickyCart(prod){if(!prod)return;stickyProdId=prod.id;stickyQty=1;const ne=document.getElementById('scProdName'),pe=document.getElementById('scProdPrice'),qe=document.getElementById('scQtyVal');if(ne)ne.textContent=prod.name;if(pe)pe.textContent='₹'+(prod.salePrice||prod.price);if(qe)qe.textContent=1;const sc=document.getElementById('stickyCart'),ab=document.getElementById('addCartBtn');if(!sc||!ab)return;const obs=new IntersectionObserver(en=>{if(!en[0].isIntersecting){sc.style.display='flex';requestAnimationFrame(()=>{sc.style.transform='translateY(0)';});}else{sc.style.transform='translateY(100%)';setTimeout(()=>{if(sc.style.transform==='translateY(100%)')sc.style.display='none';},300);}},{threshold:0.1});obs.observe(ab);}
 function scQtyChange(d){stickyQty=Math.max(1,stickyQty+d);const e=document.getElementById('scQtyVal');if(e)e.textContent=stickyQty;}
+/* FIX (Aug 2026): the sticky bottom bar showed only the single-unit price
+   (₹900 on Glutathione) and never changed when the customer picked a tier —
+   the 60-tablet pack still said ₹900 and its Add tapped the untiered cart
+   path. It now re-reads the currently selected tier on every pack change,
+   shows the pack's total price with the pack size in the name, and the Add
+   button records the chosen tier like the main button does. */
+function refreshStickyCart(){if(!stickyProdId)return;const p0=PRODUCTS.find(p=>p.id===stickyProdId);if(!p0)return;const tiers=typeof getProductTiers==='function'?getProductTiers(p0):null;const ne=document.getElementById('scProdName'),pe=document.getElementById('scProdPrice');if(!pe)return;const t=tiers&&tiers[selectedTiers[stickyProdId]]||null;if(t){if(ne)ne.textContent=p0.name+' — '+t.tabs+' tablets';pe.textContent='₹'+t.rate.toLocaleString('en-IN');}else{if(ne)ne.textContent=p0.name;pe.textContent='₹'+((p0.salePrice||p0.price)||0).toLocaleString('en-IN');}}
+function scAddToCart(){if(!stickyProdId)return;if(typeof addToCartWithTier==='function'){addToCartWithTier(stickyProdId);}else{STORE.addToCart(stickyProdId,stickyQty);}openSideCart();showPtsToast('Earns VitaPoints when delivered');}
 // Nothing is earned by adding to a cart. Points are created when the order
 // is placed (prepaid) or when the courier delivers it and collects the cash
 // (COD), and the rate is 5 per ₹100 at the base tier — so a flat "+5
