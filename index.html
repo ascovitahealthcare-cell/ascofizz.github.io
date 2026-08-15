@@ -19638,120 +19638,87 @@ function doTrackOrder() {
 // OZYLIX_LEGAL, IN_STATE_CODES, normaliseOrderForInvoice() and
 // buildInvoiceHTML() all come from there.
 
-// Download a printable A4 PDF tax invoice from the backend
-// (/api/orders/:id/pdf). Authenticated via the JWT, so the server can
-// verify the order belongs to the signed-in customer. Falls back to the
-// client-side HTML blob only if the API is unreachable (offline etc.).
-function downloadInvoice(orderId) {
-  try {
-    if (typeof fetch === 'function') {
-      var t = localStorage.getItem('asc_token');
-      var hdrs = t ? { 'Authorization': 'Bearer ' + t } : {};
-      fetchWithTimeout(API_BASE + '/api/orders/' + encodeURIComponent(orderId) + '/pdf', { headers: hdrs })
-        .then(function(r){
-          if (!r.ok) { r.json().then(function(j){ showToast((j && j.error) || 'Could not fetch invoice', 'error'); }).catch(function(){}); return; }
-          return r.blob().then(function(blob){
-            var url = URL.createObjectURL(blob);
-            var a = document.createElement('a');
-            a.href = url;
-            a.download = 'Ozylix-Tax-Invoice-' + orderId + '.pdf';
-            a.style.display = 'none';
-            document.body.appendChild(a);
-            a.click();
-            setTimeout(function(){
-              URL.revokeObjectURL(url);
-              if (a.parentNode) a.parentNode.removeChild(a);
-            }, 4000);
-            showToast('🧾 Invoice downloaded (PDF)');
-          });
-        })
-        .catch(function(e){ console.warn('[downloadInvoice] API failed, using HTML fallback:', e.message || e); downloadInvoiceHTML(orderId); });
-      return;
-    }
-    downloadInvoiceHTML(orderId);
-  } catch(e) {
-    console.error('[downloadInvoice]', e);
-    showToast('Could not generate invoice: ' + (e && e.message ? e.message : 'unknown error'), 'error');
-  }
+// Download a printable A4 PDF tax invoice from the backend. The server
+// authenticates the request and streams application/pdf; HTML is never used
+// as a download fallback because browsers otherwise save the invoice source
+// as an .html file.
+function invoiceAuthHeaders() {
+  var jwt = localStorage.getItem('asc_jwt') || localStorage.getItem('asc_token') || '';
+  return jwt ? { 'Authorization': 'Bearer ' + jwt } : {};
 }
 
-// Legacy client-side fallback: build the A4 HTML document and save it as
-// an HTML file (the browser's print dialog can still produce a PDF from it).
-function downloadInvoiceHTML(orderId) {
-  // The invoices table is populated from the backend (/api/orders/my),
-  // but the old lookup only searched localStorage — so every order not
-  // placed on this exact device reported "Invoice not found". Search the
-  // cache the table was rendered from first, then fall back to local.
+function fetchInvoicePDF(orderId) {
+  return fetchWithTimeout(API_BASE + '/api/orders/' + encodeURIComponent(orderId) + '/pdf', {
+    headers: invoiceAuthHeaders()
+  }, 15000).then(function(r) {
+    var type = (r.headers.get('content-type') || '').toLowerCase();
+    if (!r.ok) {
+      return r.text().then(function(text) {
+        var message = 'Invoice service returned ' + r.status;
+        try { var body = JSON.parse(text); if (body && body.error) message = body.error; } catch (e) {}
+        throw new Error(message);
+      });
+    }
+    if (type.indexOf('application/pdf') === -1) {
+      throw new Error('Invoice service did not return a PDF');
+    }
+    return r.blob();
+  });
+}
+
+function findInvoiceOrder(orderId) {
   var o = null;
   if (Array.isArray(window.__INVOICE_ORDERS)) {
-    o = window.__INVOICE_ORDERS.find(function(x){
-      return String(x.id||x.orderId||x.order_id) === String(orderId);
+    o = window.__INVOICE_ORDERS.find(function(x) {
+      return String(x.id || x.orderId || x.order_id) === String(orderId);
     });
   }
   if (!o) {
-    var local = JSON.parse(localStorage.getItem('asc_orders') || '[]');
-    o = local.find(function(ord){ return String(ord.orderId) === String(orderId); });
+    try {
+      var local = JSON.parse(localStorage.getItem('asc_orders') || '[]');
+      o = local.find(function(ord) { return String(ord.orderId) === String(orderId); });
+    } catch (e) {}
   }
-  if (!o) { showToast('Invoice not found for ' + orderId, 'error'); return; }
-
-  var html = buildInvoiceHTML(o);
-  var blob = new Blob([html], { type: 'text/html;charset=utf-8' });
-  var url  = URL.createObjectURL(blob);
-  var a    = document.createElement('a');
-  a.href = url;
-  a.download = 'Ozylix-Tax-Invoice-' + orderId + '.html';
-  a.style.display = 'none';
-  // A detached anchor does not trigger a download in Firefox/Safari —
-  // it has to be in the document before .click().
-  document.body.appendChild(a);
-  a.click();
-  // Revoking synchronously cancels the download before the browser has
-  // read the blob. Give it a tick, then clean up.
-  setTimeout(function(){
-    URL.revokeObjectURL(url);
-    if (a.parentNode) a.parentNode.removeChild(a);
-  }, 4000);
-  showToast('🧾 Invoice downloaded (HTML)');
+  return o;
 }
 
-// Open the invoice in a print-ready tab instead of downloading a file.
+function downloadInvoice(orderId) {
+  fetchInvoicePDF(orderId).then(function(blob) {
+    var url = URL.createObjectURL(blob);
+    var a = document.createElement('a');
+    a.href = url;
+    a.download = 'Ozylix-Tax-Invoice-' + orderId + '.pdf';
+    a.style.display = 'none';
+    document.body.appendChild(a);
+    a.click();
+    setTimeout(function() {
+      URL.revokeObjectURL(url);
+      if (a.parentNode) a.parentNode.removeChild(a);
+    }, 4000);
+    showToast('🧾 Invoice downloaded (PDF)');
+  }).catch(function(e) {
+    console.error('[downloadInvoice]', e);
+    showToast('Could not download the PDF invoice: ' + (e.message || 'please try again'), 'error');
+  });
+}
+
+// Print is intentionally a print-ready document, not a file download. The
+// browser print dialog can print to a physical printer or Save as PDF, while
+// Download always uses the server-generated PDF above.
 function printInvoice(orderId) {
   try {
-    var o = null;
-    if (Array.isArray(window.__INVOICE_ORDERS)) {
-      o = window.__INVOICE_ORDERS.find(function(x){
-        return String(x.id||x.orderId||x.order_id) === String(orderId);
-      });
-    }
-    if (!o) {
-      var local = JSON.parse(localStorage.getItem('asc_orders') || '[]');
-      o = local.find(function(ord){ return String(ord.orderId) === String(orderId); });
-    }
+    var o = findInvoiceOrder(orderId);
     if (!o) { showToast('Invoice not found for ' + orderId, 'error'); return; }
-    var jwt = localStorage.getItem("asc_jwt") || localStorage.getItem("asc_token") || "";
-    var _pdfHeaders = jwt ? { "Authorization": "Bearer " + jwt } : {};
-    fetchWithTimeout(API_BASE + "/api/orders/" + encodeURIComponent(orderId) + "/pdf", { headers: _pdfHeaders }, 15000)
-      .then(function (r) { if (!r.ok) throw new Error("server " + r.status); return r.blob(); })
-      .then(function (blob) {
-        var _pdfUrl = URL.createObjectURL(blob);
-        var w = window.open("", "_blank");
-        if (!w) { URL.revokeObjectURL(_pdfUrl); showToast('Please allow pop-ups to print the invoice', 'error'); return; }
-        w.document.write('<html><head><title>Ozylix Invoice ' + orderId + '</title></head><body style="margin:0">'
-          + '<object data="' + _pdfUrl + '" type="application/pdf" style="width:100%;height:100vh;border:none"></object>' +
-        '</body></html>');
-        w.document.close();
-        setTimeout(function () { try { w.print(); } catch (e) {} }, 700);
-        setTimeout(function () { URL.revokeObjectURL(_pdfUrl); }, 60000);
-      })
-      .catch(function () {
-        var w = window.open("", "_blank");
-        if (!w) { showToast('Please allow pop-ups to print the invoice', 'error'); return; }
-        w.document.write(buildInvoiceHTML(o));
-        w.document.close();
-      });
-  } catch(e) {
+    var w = window.open('', '_blank', 'width=960,height=800,scrollbars=yes');
+    if (!w) { showToast('Please allow pop-ups to print the invoice', 'error'); return; }
+    w.document.open();
+    w.document.write(buildInvoiceHTML(o));
+    w.document.close();
+    w.focus();
+    setTimeout(function() { try { w.print(); } catch (e) {} }, 800);
+  } catch (e) {
     console.error('[printInvoice]', e);
-    showToast('Could not open invoice', 'error');
+    showToast('Could not open invoice for printing', 'error');
   }
 }
 
