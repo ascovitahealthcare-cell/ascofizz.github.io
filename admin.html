@@ -2242,6 +2242,7 @@ function azTogglePw() {
     <div class="nav-item" onclick="showPage('banners')"><span class="nav-ico">🖼️</span> Banners</div>
     <div class="nav-item" onclick="showPage('photolibrary')"><span class="nav-ico">📸</span> Photo Library</div>
     <div class="nav-item" onclick="showPage('siteimages')"><span class="nav-ico">🖥️</span> Site Images</div>
+    <div class="nav-item" onclick="showPage('storeeditor')"><span class="nav-ico">🎨</span> Store Editor <span class="nav-new"></span></div>
   </div>
   <div class="nav-section owner-only" id="navSecFinance">
     <div class="nav-sec-label">Finance</div>
@@ -3572,7 +3573,101 @@ function azTogglePw() {
       <button class="btn btn-primary" onclick="addPromoStripCard()">＋ Add Strip Card</button>
     </div>
   </div>
-  <div id="promoStripGrid" class="grid-3"></div>
+    <div id="promoStripGrid" class="grid-3"></div>
+</div>
+
+<!-- ═════════════ STORE EDITOR (v9.5) — recolour and restyle ozylix.com ── -->
+<div class="page" id="page-storeeditor">
+  <div class="page-hdr">
+    <div><div class="page-title">🎨 Store Editor</div><div class="page-sub">Change the storefront's colours, fonts and layout from here — pick a palette below or tune each token, then hit Save. The live site updates within about a minute (visitors may need a fresh page load).</div></div>
+    <div class="page-actions" style="display:flex;align-items:center;gap:10px;">
+      <button class="btn btn-secondary" onclick="storeEdResetDraft()">↺ Reset to defaults</button>
+      <button class="btn btn-primary" onclick="storeEdSave()" style="background:var(--gold);color:#fff;border:none;">💾 Save theme</button>
+    </div>
+  </div>
+  <div id="storeEdStatus" style="font-size:0.76rem;color:var(--text3);margin:-4px 0 12px;">Loading current theme…</div>
+
+  <div style="display:grid;grid-template-columns:340px 1fr;gap:16px;align-items:start;">
+    <!-- Palette library -->
+    <div class="card">
+      <div class="card-hdr"><span class="card-title">🎨 Curated palettes</span></div>
+      <div id="storeEdPalettes" style="display:grid;gap:8px;padding:6px 14px 14px;"></div>
+      <div style="padding:0 14px 14px;font-size:0.74rem;color:var(--text3);line-height:1.5;">Click a palette to apply it to the preview. It becomes your draft immediately — hit <strong>Save theme</strong> to publish it to the live store. The custom pickers on the right always stay in sync.</div>
+    </div>
+
+    <!-- Preview + custom pickers -->
+    <div>
+      <div class="card" style="margin-bottom:16px;">
+        <div class="card-hdr"><span class="card-title">👁️ Live preview</span><button class="btn btn-secondary btn-sm" onclick="storeEdRefreshPreview()">↺ Reload</button></div>
+        <div style="padding:10px;">
+          <iframe id="storeEdPreview" src="about:blank" style="width:100%;height:520px;border:1px solid var(--border);border-radius:10px;background:#fff;"></iframe>
+          <div style="margin-top:8px;display:flex;gap:14px;flex-wrap:wrap;font-size:0.74rem;color:var(--text3);">
+            <span>Preview runs your <strong>unsaved draft</strong> (what visitors will see after you save).</span>
+            <span>Editing pickers on the right updates this preview instantly.</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Custom colour tuning -->
+      <div class="card" style="margin-bottom:16px;">
+        <div class="card-hdr"><span class="card-title">🖌️ Custom colours</span><button class="btn btn-secondary btn-sm" onclick="storeEdApplyDefaults()">↺ Original defaults</button></div>
+        <div id="storeEdPickers" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:14px;padding:14px;"></div>
+      </div>
+
+      <!-- Layout & typography -->
+      <div class="card" style="margin-bottom:16px;">
+        <div class="card-hdr"><span class="card-title">📐 Layout & typography</span></div>
+        <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:16px;padding:14px;">
+          <div>
+            <div style="font-size:0.76rem;font-weight:700;color:var(--text);margin-bottom:6px;">Corner radius</div>
+            <div style="display:flex;gap:6px;flex-wrap:wrap;">
+              <button class="btn btn-secondary btn-sm" data-se-radio="radius" data-se-val="default">Pill (default)</button>
+              <button class="btn btn-secondary btn-sm" data-se-radio="radius" data-se-val="medium">Medium</button>
+              <button class="btn btn-secondary btn-sm" data-se-radio="radius" data-se-val="sharp">Sharp</button>
+              <button class="btn btn-secondary btn-sm" data-se-radio="radius" data-se-val="extra">Extra round</button>
+            </div>
+          </div>
+          <div>
+            <div style="font-size:0.76rem;font-weight:700;color:var(--text);margin-bottom:6px;">Shadows</div>
+            <div style="display:flex;gap:6px;flex-wrap:wrap;">
+              <button class="btn btn-secondary btn-sm" data-se-radio="shadows" data-se-val="default">Neumorphic (default)</button>
+              <button class="btn btn-secondary btn-sm" data-se-radio="shadows" data-se-val="soft">Soft flat</button>
+              <button class="btn btn-secondary btn-sm" data-se-radio="shadows" data-se-val="none">None</button>
+            </div>
+          </div>
+          <div>
+            <div style="font-size:0.76rem;font-weight:700;color:var(--text);margin-bottom:6px;">Ambient bubbles</div>
+            <div style="display:flex;gap:6px;flex-wrap:wrap;">
+              <button class="btn btn-secondary btn-sm" data-se-radio="bubbles" data-se-val="on">Show (default)</button>
+              <button class="btn btn-secondary btn-sm" data-se-radio="bubbles" data-se-val="off">Hide</button>
+            </div>
+          </div>
+          <div>
+            <div style="font-size:0.76rem;font-weight:700;color:var(--text);margin-bottom:6px;">Heading font</div>
+            <select id="storeEdFontDisplay" style="width:100%;background:var(--surface2);color:var(--text);border:1px solid var(--border);border-radius:8px;padding:6px 8px;font-size:0.8rem;">
+              <option value="'Jost', sans-serif">Jost (default)</option>
+              <option value="'Fraunces', serif">Fraunces</option>
+              <option value="'Playfair Display', serif">Playfair Display</option>
+              <option value="'Poppins', sans-serif">Poppins</option>
+              <option value="'Montserrat', sans-serif">Montserrat</option>
+              <option value="'DM Sans', sans-serif">DM Sans</option>
+            </select>
+          </div>
+          <div>
+            <div style="font-size:0.76rem;font-weight:700;color:var(--text);margin-bottom:6px;">Body font</div>
+            <select id="storeEdFontBody" style="width:100%;background:var(--surface2);color:var(--text);border:1px solid var(--border);border-radius:8px;padding:6px 8px;font-size:0.8rem;">
+              <option value="'Schibsted Grotesk', sans-serif">Schibsted Grotesk (default)</option>
+              <option value="'Plus Jakarta Sans', sans-serif">Plus Jakarta Sans</option>
+              <option value="'Inter', sans-serif">Inter</option>
+              <option value="'Nunito Sans', sans-serif">Nunito Sans</option>
+              <option value="'Work Sans', sans-serif">Work Sans</option>
+              <option value="'DM Sans', sans-serif">DM Sans</option>
+            </select>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
 </div>
 
 <!-- ═════════════ CALENDAR ═════════════ -->
@@ -11857,6 +11952,290 @@ function payBadge(s) {
 loadSettings();
 </script>
 
+<!-- ═══════════════════════════════════════════════════════════════════
+     Aug 2026: STORE EDITOR (v9.5) — recolour & restyle ozylix.com from
+     the back office. Curated palettes + custom token pickers + live
+     draft preview. Saves to the backend's public theme store; the
+     storefront's live loader (also v9.5) picks it up within ~1 min.
+     ═══════════════════════════════════════════════════════════════════ -->
+<script>
+// ── Curated palettes (each carries a meaning: paper ramp, brand crimson
+//    family, ink family, and the four ambient foil flavours). ──────────
+const STORE_ED_PALETTES = [
+  { name: 'Crimson Classic', desc: 'The current Ozylix look — crimson over warm near-white.', default: true, p: {
+      paper:'#F5F3F4', paperHi:'#FFFFFF', paperLo:'#E9E5E7', white:'#FFFFFF',
+      brand:'#C0394A', brandDeep:'#8E2333', brandHi:'#D7535D',
+      secondary:'#6B5560', secondaryHi:'#EBD9DC',
+      ink:'#16121A', inkMid:'#46404A', tHi:'#16121A', tMid:'#5A5560', tLow:'#6B6570',
+      flavour1:'#C0394A', flavour2:'#46404A', flavour3:'#C0304A', flavour4:'#6B5560' } },
+  { name: 'Royal Plum', desc: 'Deep plum brand on the same warm ground — richer, more premium.', p: {
+      paper:'#F5F3F4', paperHi:'#FFFFFF', paperLo:'#E9E5E7', white:'#FFFFFF',
+      brand:'#6B2F55', brandDeep:'#4A1C3B', brandHi:'#8F4A73',
+      secondary:'#55606B', secondaryHi:'#E0D9EB',
+      ink:'#1A1220', inkMid:'#4A4046', tHi:'#1A1220', tMid:'#5A5060', tLow:'#6B6070',
+      flavour1:'#6B2F55', flavour2:'#4A4046', flavour3:'#7A3A60', flavour4:'#55606B' } },
+  { name: 'Ocean Ink', desc: 'A calm deep-blue brand — trustworthy, pharmacy-grade.', p: {
+      paper:'#F3F5F7', paperHi:'#FFFFFF', paperLo:'#E7EAEE', white:'#FFFFFF',
+      brand:'#1D4E79', brandDeep:'#123553', brandHi:'#3A6FA0',
+      secondary:'#5B6B7A', secondaryHi:'#DCE8F1',
+      ink:'#121820', inkMid:'#3D4A55', tHi:'#121820', tMid:'#4C5862', tLow:'#5F6B74',
+      flavour1:'#1D4E79', flavour2:'#3D4A55', flavour3:'#2A5A88', flavour4:'#5B6B7A' } },
+  { name: 'Forest Tea', desc: 'Deep green brand — natural, wellness-forward.', p: {
+      paper:'#F4F5F1', paperHi:'#FFFFFF', paperLo:'#E7E9E2', white:'#FFFFFF',
+      brand:'#2F5D42', brandDeep:'#1D3E2B', brandHi:'#4A8062',
+      secondary:'#6B6B55', secondaryHi:'#E3E8D9',
+      ink:'#14201B', inkMid:'#404A44', tHi:'#14201B', tMid:'#52605A', tLow:'#63706A',
+      flavour1:'#2F5D42', flavour2:'#404A44', flavour3:'#3A6B4E', flavour4:'#6B6B55' } },
+  { name: 'Sunset Coral', desc: 'Warm coral brand — energetic and friendly.', p: {
+      paper:'#F7F2F0', paperHi:'#FFFFFF', paperLo:'#EDE3DE', white:'#FFFFFF',
+      brand:'#D4603E', brandDeep:'#A3432A', brandHi:'#E58262',
+      secondary:'#6B5A50', secondaryHi:'#F0E0D4',
+      ink:'#1E1614', inkMid:'#4A403A', tHi:'#1E1614', tMid:'#5C514A', tLow:'#6E625A',
+      flavour1:'#D4603E', flavour2:'#4A403A', flavour3:'#E07050', flavour4:'#6B5A50' } },
+  { name: 'Monochrome Graphite', desc: 'Minimal black-on-white with a single graphite accent.', p: {
+      paper:'#F6F6F6', paperHi:'#FFFFFF', paperLo:'#E8E8E8', white:'#FFFFFF',
+      brand:'#3A3A3A', brandDeep:'#1E1E1E', brandHi:'#5A5A5A',
+      secondary:'#5A5A5A', secondaryHi:'#EBEBEB',
+      ink:'#111111', inkMid:'#4A4A4A', tHi:'#111111', tMid:'#555555', tLow:'#6A6A6A',
+      flavour1:'#3A3A3A', flavour2:'#4A4A4A', flavour3:'#2E2E2E', flavour4:'#5A5A5A' } },
+  { name: 'Lavender Mist', desc: 'Soft lavender brand — gentle and modern.', p: {
+      paper:'#F6F4F8', paperHi:'#FFFFFF', paperLo:'#E9E5F0', white:'#FFFFFF',
+      brand:'#6A4C93', brandDeep:'#4A3368', brandHi:'#8B6FB5',
+      secondary:'#5F6B7A', secondaryHi:'#E4DFF2',
+      ink:'#181422', inkMid:'#48405A', tHi:'#181422', tMid:'#58506A', tLow:'#6A6278',
+      flavour1:'#6A4C93', flavour2:'#48405A', flavour3:'#7A5CA5', flavour4:'#5F6B7A' } },
+];
+
+// ── The token pickers (label → palette key) ────────────────────────────
+const STORE_ED_PICKERS = [
+  { key:'paper',    label:'Page (ground)' },
+  { key:'paperHi',  label:'Raised faces' },
+  { key:'paperLo',  label:'Sunken faces' },
+  { key:'brand',    label:'Brand colour' },
+  { key:'brandDeep',label:'Brand (deep)' },
+  { key:'brandHi',  label:'Brand (highlight)' },
+  { key:'secondary',label:'Secondary' },
+  { key:'secondaryHi',label:'Secondary wash' },
+  { key:'ink',      label:'Ink (darkest)' },
+  { key:'inkMid',   label:'Ink (mid)' },
+  { key:'tHi',      label:'Text (headings)' },
+  { key:'tMid',     label:'Text (body)' },
+  { key:'tLow',     label:'Text (muted)' },
+  { key:'flavour1', label:'Flavour — citrus (foil)' },
+  { key:'flavour2', label:'Flavour — cobalt (foil)' },
+  { key:'flavour3', label:'Flavour — guava (foil)' },
+  { key:'flavour4', label:'Flavour — apple (foil)' },
+];
+
+// ── Draft = the in-flight theme (palette + layout + fonts). Kept in
+//    localStorage so a reload does not lose an unsaved edit. ────────────
+const STORE_ED_DRAFT_KEY = 'ozylix_theme';
+const STORE_ED_THEME_API = 'https://ascovitahealthcare-cell-github-io.onrender.com/api/public/theme';
+
+function storeEdDefaultDraft() {
+  const pal = STORE_ED_PALETTES.find(x => x.default);
+  return { palette: JSON.parse(JSON.stringify(pal.p)), radius:'default', shadows:'default',
+           bubbles:'on', fonts: { display: "'Jost', sans-serif", body: "'Schibsted Grotesk', sans-serif" } };
+}
+function storeEdGetDraft() {
+  try { return JSON.parse(window.localStorage.getItem(STORE_ED_DRAFT_KEY) || 'null') || storeEdDefaultDraft(); }
+  catch(_) { return storeEdDefaultDraft(); }
+}
+function storeEdSetDraft(draft) {
+  window.localStorage.setItem(STORE_ED_DRAFT_KEY, JSON.stringify(draft));
+}
+
+let storeEdDraft = storeEdGetDraft();
+let storeEdServerTheme = null;   // what is actually published on the live site
+let storeEdPreviewTimer = null;
+
+// ── Page lifecycle: render pickers + palettes, sync controls to draft,
+//    fetch the live theme so the status line tells the truth. ───────────
+function renderStoreEditor() {
+  // Pickers
+  const box = document.getElementById('storeEdPickers');
+  if (box && !box.children.length) {
+    box.innerHTML = STORE_ED_PICKERS.map(pk => `
+      <label style="font-size:0.76rem;color:var(--text2);display:flex;flex-direction:column;gap:5px;">
+        ${pk.label}
+        <div style="display:flex;align-items:center;gap:8px;">
+          <input type="color" data-se-picker="${pk.key}" value="${storeEdDraft.palette[pk.key] || '#C0394A'}"
+            style="width:34px;height:28px;border:1px solid var(--border);border-radius:6px;padding:0;cursor:pointer;">
+          <input type="text" data-se-picker-txt="${pk.key}" value="${storeEdDraft.palette[pk.key] || ''}"
+            placeholder="#C0394A" maxlength="7"
+            style="flex:1;background:var(--surface2);color:var(--text);border:1px solid var(--border);border-radius:6px;padding:4px 8px;font-family:var(--mono);font-size:0.78rem;">
+        </div>
+      </label>`).join('');
+    box.querySelectorAll('input[type=color]').forEach(inp =>
+      inp.addEventListener('input', e => storeEdPickerChange(e.target.dataset.sePicker, e.target.value)));
+    box.querySelectorAll('input[type=text]').forEach(inp =>
+      inp.addEventListener('input', e => {
+        if (/^#[0-9a-fA-F]{6}$/.test(e.target.value)) storeEdPickerChange(e.target.dataset.sePickerTxt, e.target.value);
+      }));
+  }
+  // Palettes
+  const palBox = document.getElementById('storeEdPalettes');
+  if (palBox && !palBox.children.length) {
+    palBox.innerHTML = STORE_ED_PALETTES.map((pal, i) => `
+      <button class="btn btn-secondary" style="text-align:left;padding:10px 12px;" onclick="storeEdApplyPalette(${i})">
+        <div style="display:flex;align-items:center;gap:7px;margin-bottom:5px;">
+          ${pal.name}${pal.default ? '<span style="font-size:0.62rem;font-weight:800;color:var(--text3);border:1px solid var(--border);border-radius:4px;padding:0 5px;">LIVE</span>' : ''}
+        </div>
+        <div style="display:flex;gap:3px;margin-bottom:4px;">
+          ${['paper','brand','brandHi','secondary','ink','flavour1','flavour3'].map(k =>
+            `<span style="width:15px;height:15px;border-radius:4px;background:${pal.p[k]};border:1px solid rgba(0,0,0,.08);"></span>`).join('')}
+        </div>
+        <div style="font-size:0.68rem;color:var(--text3);line-height:1.4;">${pal.desc}</div>
+      </button>`).join('');
+  }
+  // Layout radio buttons
+  document.querySelectorAll('[data-se-radio]').forEach(btn => {
+    const active = storeEdDraft[btn.dataset.seRadio] === btn.dataset.seVal;
+    btn.style.background = active ? 'var(--gold)' : '';
+    btn.style.color = active ? '#fff' : '';
+    btn.style.borderColor = active ? 'var(--gold)' : '';
+    btn.onclick = () => {
+      storeEdDraft[btn.dataset.seRadio] = btn.dataset.seVal;
+      storeEdSetDraft(storeEdDraft);
+      renderStoreEditor();
+      storeEdSchedulePreview();
+    };
+  });
+  // Fonts
+  const fd = document.getElementById('storeEdFontDisplay');
+  const fb = document.getElementById('storeEdFontBody');
+  if (fd) { fd.value = storeEdDraft.fonts.display; fd.onchange = () => { storeEdDraft.fonts.display = fd.value; storeEdSetDraft(storeEdDraft); storeEdSchedulePreview(); }; }
+  if (fb) { fb.value = storeEdDraft.fonts.body; fb.onchange = () => { storeEdDraft.fonts.body = fb.value; storeEdSetDraft(storeEdDraft); storeEdSchedulePreview(); }; }
+  storeEdStatusLine();
+  storeEdSchedulePreview();
+}
+
+function storeEdPickerChange(key, value) {
+  if (!/^#[0-9a-fA-F]{6}$/.test(value)) return;
+  storeEdDraft.palette[key] = value;
+  storeEdSetDraft(storeEdDraft);
+  // keep the sibling inputs in sync
+  const col = document.querySelector(`[data-se-picker="${key}"]`);
+  const txt = document.querySelector(`[data-se-picker-txt="${key}"]`);
+  if (col && col !== document.activeElement) col.value = value;
+  if (txt && txt !== document.activeElement && /^[0-9a-fA-F]{6}$/.test(value.slice(1))) txt.value = value;
+  storeEdSchedulePreview();
+}
+
+function storeEdApplyPalette(i) {
+  const pal = STORE_ED_PALETTES[i];
+  storeEdDraft.palette = JSON.parse(JSON.stringify(pal.p));
+  storeEdSetDraft(storeEdDraft);
+  // update color inputs
+  document.querySelectorAll('[data-se-picker]').forEach(inp => {
+    const v = storeEdDraft.palette[inp.dataset.sePicker];
+    if (v) { inp.value = v; const t = document.querySelector(`[data-se-picker-txt="${inp.dataset.sePicker}"]`); if (t) t.value = v; }
+  });
+  storeEdSchedulePreview();
+}
+
+function storeEdApplyDefaults() {
+  const pal = STORE_ED_PALETTES.find(x => x.default);
+  storeEdDraft.palette = JSON.parse(JSON.stringify(pal.p));
+  storeEdDraft.radius = 'default'; storeEdDraft.shadows = 'default';
+  storeEdDraft.bubbles = 'on';
+  storeEdDraft.fonts = { display: "'Jost', sans-serif", body: "'Schibsted Grotesk', sans-serif" };
+  const fd = document.getElementById('storeEdFontDisplay'); if (fd) fd.value = storeEdDraft.fonts.display;
+  const fb = document.getElementById('storeEdFontBody'); if (fb) fb.value = storeEdDraft.fonts.body;
+  document.querySelectorAll('[data-se-picker]').forEach(inp => {
+    const v = storeEdDraft.palette[inp.dataset.sePicker];
+    if (v) { inp.value = v; const t = document.querySelector(`[data-se-picker-txt="${inp.dataset.sePicker}"]`); if (t) t.value = v; }
+  });
+  storeEdSetDraft(storeEdDraft);
+  renderStoreEditor();
+}
+
+function storeEdResetDraft() {
+  if (!confirm('Reset the draft to the original store defaults? Unsaved changes will be lost.')) return;
+  storeEdDraft = storeEdDefaultDraft();
+  storeEdSetDraft(storeEdDraft);
+  renderStoreEditor();
+}
+
+function storeEdSchedulePreview() {
+  if (storeEdPreviewTimer) clearTimeout(storeEdPreviewTimer);
+  storeEdPreviewTimer = setTimeout(storeEdRefreshPreview, 250);
+}
+
+// ── The preview loads the real storefront with ?preview=1 so the site's
+//    own live-theme loader applies the draft instead of the published
+//    theme. Cross-origin iframe; query string reaches the loader. ───────
+function storeEdRefreshPreview() {
+  const iframe = document.getElementById('storeEdPreview');
+  if (!iframe) return;
+  try { window.localStorage.setItem(STORE_ED_DRAFT_KEY, JSON.stringify(storeEdDraft)); } catch(_) {}
+  // Demo harness rewrites happen in memory only — keep the production URL
+  // here and let demo-server.js (or this block) map it when previewing:
+  var previewUrl = location.pathname.indexOf('/demo/') === 0 ? '/demo/store?preview=1&ed=' : 'https://ozylix.com/?preview=1&ed=';
+  iframe.src = previewUrl + Date.now();
+}
+
+function storeEdStatusLine() {
+  const st = document.getElementById('storeEdStatus');
+  if (!st) return;
+  const live = storeEdServerTheme ? 'published on the live store' : 'no custom theme published (site runs its built-in look)';
+  const palName = storeEdDraftServerMatch() ? ' (matches published)' : '';
+  st.textContent = `Published theme: ${live}. Your draft${palName} — Save to push it live.`;
+}
+function storeEdDraftServerMatch() {
+  if (!storeEdServerTheme) return false;
+  const sp = storeEdServerTheme.palette || {};
+  const dp = storeEdDraft.palette || {};
+  return Object.keys(dp).length > 3 && Object.keys(dp).every(k => dp[k] === sp[k]);
+}
+
+// ── Save: PUT the draft to the backend's public theme store. Owner/
+//    admin JWT only; the storefront fetches it anonymously. ─────────────
+async function storeEdSave() {
+  const btn = document.querySelector('#page-storeeditor .btn-primary');
+  const prev = btn ? btn.textContent : '';
+  if (btn) btn.textContent = 'Saving…';
+  try {
+    const res = await fetch(STORE_ED_THEME_API, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + authToken },
+      body: JSON.stringify({ key: 'ozylix', theme: storeEdDraft })
+    });
+    const d = await res.json();
+    if (!res.ok) throw new Error((d && (d.error || d.message)) || `HTTP ${res.status}`);
+    storeEdServerTheme = JSON.parse(JSON.stringify(storeEdDraft));
+    storeEdStatusLine();
+    storeEdRefreshPreview();
+    toast('Theme saved ✓ — the live store updates within about a minute.');
+  } catch (e) {
+    toast('❌ Save failed: ' + e.message, 'error');
+  } finally {
+    if (btn) btn.textContent = prev || '💾 Save theme';
+  }
+}
+
+// Load the currently published theme once the editor opens.
+async function storeEdLoadServerTheme() {
+  try {
+    const res = await fetch(STORE_ED_THEME_API + '?key=ozylix');
+    const d = await res.json();
+    if (res.ok && d && d.ok && d.theme && Object.keys(d.theme).length) storeEdServerTheme = d.theme;
+  } catch (_) { /* offline — status line stays honest via null */ }
+}
+
+// Wire the editor to the page switcher (lazy init, same pattern as the
+// v9.4 AI-team additions).
+const _storeEdOrigShowPage = window.showPage;
+window.showPage = function (page) {
+  const out = _storeEdOrigShowPage.apply(this, arguments);
+  if (page === 'storeeditor' && !document.getElementById('storeEdPickers').dataset.ready) {
+    document.getElementById('storeEdPickers').dataset.ready = '1';
+    storeEdLoadServerTheme().then(renderStoreEditor);
+  }
+  return out;
+};
+</script>
+
 <!-- ═════════════ EXPORT MODAL ═════════════ -->
 
 
@@ -12590,6 +12969,7 @@ showPage = function(name){
   <button class="admin-more-btn owner-only" onclick="showPage('banners');syncAbn('banners');closeAdminMoreMenu()"><span>🖼️</span><span>Banners</span></button>
   <button class="admin-more-btn owner-only" onclick="showPage('photolibrary');syncAbn('photolibrary');closeAdminMoreMenu()"><span>📸</span><span>Photo Library</span></button>
   <button class="admin-more-btn owner-only" onclick="showPage('siteimages');syncAbn('siteimages');closeAdminMoreMenu()"><span>🖥️</span><span>Site Images</span></button>
+  <button class="admin-more-btn owner-only" onclick="showPage('storeeditor');syncAbn('storeeditor');closeAdminMoreMenu()"><span>🎨</span><span>Store Editor</span></button>
   <button class="admin-more-btn owner-only" onclick="showPage('finance');syncAbn('finance');closeAdminMoreMenu()"><span>💰</span><span>Finance</span></button>
   <button class="admin-more-btn owner-only" onclick="showPage('payments');syncAbn('payments');closeAdminMoreMenu()"><span>💳</span><span>Payments</span></button>
   <button class="admin-more-btn owner-only" onclick="showPage('invoices');syncAbn('invoices');closeAdminMoreMenu()"><span>🧾</span><span>Invoices</span></button>
