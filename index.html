@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<style id="cod-launch-disabled">#codBtn,.opb-cod{display:none!important}
+<style>
 /* Permission-safe customer reminders. No browser permission is requested until the customer presses Allow. */
 #ozylxConsentBar{position:fixed;left:18px;right:18px;bottom:18px;z-index:10050;display:none;max-width:760px;margin:auto;background:var(--dark,#20303a);color:#fff;border:1px solid rgba(255,255,255,.18);border-radius:16px;box-shadow:0 18px 50px rgba(0,0,0,.22);padding:14px 16px;font-size:.82rem;line-height:1.5}
 #ozylxConsentBar .oz-consent-copy{display:flex;gap:10px;align-items:flex-start}
@@ -3461,7 +3461,7 @@ img[src=""], img[data-awaiting-upload] { visibility: hidden; width: 100%; }
 /* ── SIDE CART ─────────────────────────────────────────────────── */
 .side-cart {
   position: fixed; top: 0; right: 0; bottom: 0; z-index: 950;
-  width: min(94vw, 428px);
+  width: min(88vw, 360px);
   display: flex; flex-direction: column;
   background: var(--paper); box-shadow: var(--neo-4);
   transform: translate3d(102%,0,0);
@@ -3470,40 +3470,40 @@ img[src=""], img[data-awaiting-upload] { visibility: hidden; width: 100%; }
 .side-cart.open { transform: translate3d(0,0,0); }
 .sc-head {
   display: flex; align-items: center; justify-content: space-between; gap: 12px;
-  padding: calc(env(safe-area-inset-top, 0px) + 22px) 22px 18px;
+  padding: calc(env(safe-area-inset-top, 0px) + 16px) 16px 12px;
   box-shadow: inset 0 -1px 0 var(--edge);
 }
 .sc-title { font-family: var(--font-display); font-size: 1.3rem; font-weight: 400; color: var(--ink); }
 .sc-count {
-  display: inline-grid; place-items: center; min-width: 24px; height: 24px; padding: 0 8px;
-  margin-left: 10px; border-radius: 99px; font-size: .72rem; font-weight: 600;
+  display: inline-grid; place-items: center; min-width: 22px; height: 22px; padding: 0 7px;
+  margin-left: 8px; border-radius: 99px; font-size: .68rem; font-weight: 600;
   background: var(--indigo); color: #fff;
 }
 .sc-close {
-  display: grid; place-items: center; width: 38px; height: 38px; flex: none;
+  display: grid; place-items: center; width: 34px; height: 34px; flex: none;
   border-radius: 50%; background: var(--paper); box-shadow: var(--neo-1); color: var(--t-mid);
   transition: box-shadow var(--dur-2) var(--rise), color var(--dur-1) var(--settle);
 }
 .sc-close:hover { color: var(--indigo); }
 .sc-close:active { box-shadow: var(--neo-in); }
-.sc-body { flex: 1; overflow-y: auto; padding: 18px 22px; }
+.sc-body { flex: 1; overflow-y: auto; padding: 12px 16px; }
 .sc-item, .sc-row {
-  display: flex; gap: 14px; align-items: flex-start;
-  padding: 14px; margin-bottom: 12px; border-radius: var(--r-md);
+  display: flex; gap: 10px; align-items: flex-start;
+  padding: 10px; margin-bottom: 8px; border-radius: var(--r-md);
   background: var(--paper); box-shadow: var(--neo-1);
 }
 .sc-img {
-  width: 66px; height: 66px; flex: none; border-radius: 14px;
-  object-fit: contain; padding: 6px;
+  width: 56px; height: 56px; flex: none; border-radius: 12px;
+  object-fit: contain; padding: 5px;
   background: var(--paper); box-shadow: var(--neo-in);
 }
 .sc-info { flex: 1; min-width: 0; }
 .sc-name { font-size: .875rem; font-weight: 600; color: var(--ink); line-height: 1.3; margin-bottom: 3px; }
 .sc-brand { font-size: .64rem; font-weight: 600; letter-spacing: .16em; text-transform: uppercase; color: var(--green); }
 .sc-price { font-size: .95rem; font-weight: 600; color: var(--indigo); margin-top: 6px; }
-.sc-qty-row { display: flex; align-items: center; gap: 8px; margin-top: 10px; }
+.sc-qty-row { display: flex; align-items: center; gap: 6px; margin-top: 6px; }
 .sc-qty-btn {
-  display: grid; place-items: center; width: 28px; height: 28px;
+  display: grid; place-items: center; width: 26px; height: 26px;
   border-radius: 50%; font-weight: 600; color: var(--t-mid);
   background: var(--paper); box-shadow: var(--neo-1);
 }
@@ -3518,7 +3518,7 @@ img[src=""], img[data-awaiting-upload] { visibility: hidden; width: 100%; }
   background: rgba(107,85,96,.07);
 }
 .sc-foot {
-  padding: 18px 22px calc(env(safe-area-inset-bottom, 0px) + 20px);
+  padding: 12px 16px calc(env(safe-area-inset-bottom, 0px) + 14px);
   box-shadow: inset 0 1px 0 var(--edge);
 }
 .sc-totals { margin-bottom: 14px; }
@@ -10619,19 +10619,24 @@ window.dismissOfferReminder = function () {
 // CHECKOUT QUANTITY CONTROLS + RECOMMENDATIONS
 // ══════════════════════════════════════════════
 
+function ckFindItem(id, tierIdx) {
+  return STORE.cart.find(i => i.id === id && (tierIdx >= 0 ? i.tierIdx === tierIdx : (i.tierIdx === undefined || i.tierIdx === null)));
+}
+
+function ckRemoveItem(id, tierIdx) {
+  const index = STORE.cart.findIndex(i => i.id === id && (tierIdx >= 0 ? i.tierIdx === tierIdx : (i.tierIdx === undefined || i.tierIdx === null)));
+  if (index < 0 || !confirm('Remove this item from your cart?')) return;
+  STORE.cart.splice(index, 1);
+  STORE.save();
+  renderCheckoutSummary();
+  renderCkRecommendations();
+  renderSideCart();
+}
+
 function ckUpdateQty(id, newQty, tierIdx) {
-  if (newQty < 1) {
-    if (confirm('Remove this item from your cart?')) {
-      STORE.removeFromCart(id);
-    }
-  } else {
-    if (tierIdx !== undefined && tierIdx >= 0) {
-      const item = STORE.cart.find(i => i.id === id && i.tierIdx === tierIdx);
-      if (item) { item.qty = newQty; STORE.save(); }
-    } else {
-      STORE.updateQty(id, newQty);
-    }
-  }
+  if (newQty < 1) { ckRemoveItem(id, tierIdx); return; }
+  const item = ckFindItem(id, tierIdx);
+  if (item) { item.qty = Math.max(1, Number(newQty) || 1); STORE.save(); }
   renderCheckoutSummary();
   renderCkRecommendations();
   renderSideCart();
@@ -10803,18 +10808,19 @@ function renderCheckoutSummary() {
         <div class="ck-item-price-line">₹${unitPrice.toLocaleString('en-IN')} each</div>
       </div>
       <div class="ck-item-right">
-        <div class="ck-qty-wrap">
-          <button class="ck-qty-btn" onclick="ckUpdateQty(${p.id},${item.qty-1},${tierIdx})" title="Decrease">−</button>
+          <div class="ck-qty-wrap" aria-label="Change quantity for ${p.name}">
+          <button type="button" class="ck-qty-btn" onclick="ckUpdateQty(${p.id},${item.qty-1},${tierIdx})" title="Decrease quantity" aria-label="Decrease quantity">−</button>
           <span class="ck-qty-num">${item.qty}</span>
-          <button class="ck-qty-btn" onclick="ckUpdateQty(${p.id},${item.qty+1},${tierIdx})" title="Increase">+</button>
+          <button type="button" class="ck-qty-btn" onclick="ckUpdateQty(${p.id},${item.qty+1},${tierIdx})" title="Increase quantity" aria-label="Increase quantity">+</button>
         </div>
         <div class="ck-item-total">₹${(unitPrice * item.qty).toLocaleString('en-IN')}</div>
-        <button class="ck-remove-btn" onclick="if(confirm('Remove?')){STORE.removeFromCart(${p.id});renderCheckoutSummary();renderCkRecommendations();renderSideCart();}" title="Remove">Remove ✕</button>
+        <button type="button" class="ck-remove-btn" onclick="ckRemoveItem(${p.id},${tierIdx})" title="Remove item">Remove ✕</button>
       </div>
     </div>`;
   }).join('');
 
   el.innerHTML = `${itemsHtml}
+    <button type="button" class="sc-view-btn" onclick="showPage('shop');window.scrollTo({top:0,behavior:'smooth'})">＋ Add more products</button>
     <hr style="border:none;border-top:1.5px solid var(--light-gray);margin:14px 0 10px">
     <div class="sum-row"><span>Subtotal</span><span>₹${sub.toLocaleString('en-IN')}</span></div>
     ${disc > 0 ? `<div class="sum-row" style="color:var(--success)"><span>🏷️ Discount</span><span>-₹${disc.toLocaleString('en-IN')}</span></div>` : ''}
@@ -16897,16 +16903,15 @@ async function handleCashfreeReturn(orderId) {
   }
 }
 async function initiateCOD() {
-  showToast('Cash on Delivery is not available at launch. Please use online payment.', 'warning'); return;
   if (STORE.cart.length === 0) { showToast('🛒 Your cart is empty!', 'error'); return; }
   // LOGIN GATE: orders can only be placed by signed-in customers.
   if (!getCurrentUser()) { requireLoginForCheckout(function(){ initiateCOD(); }); return; }
   const formData = validateCheckoutForm();
   if (!formData) return;
 
-  const { sub, disc } = getOrderTotal();
+  const { sub, disc, mixMatchDiscount } = getOrderTotal();
   const orderId = generateOrderId();
-  const netSub = sub - disc;
+  const netSub = sub - disc - (mixMatchDiscount || 0);
   const codCharge = calcShipping(netSub);
   const codTotal = netSub + codCharge;
 
@@ -16936,7 +16941,6 @@ async function initiateCOD() {
 }
 
 async function confirmCODOrder(orderId, codTotal, codCharge) {
-  showToast('Cash on Delivery is not available at launch. Please use online payment.', 'warning'); return;
   const overlay = document.getElementById('codOverlay');
   if (overlay) overlay.innerHTML = `<div style="background:var(--sub-1);border-radius:20px;padding:32px 28px;text-align:center;max-width:340px;width:90%">
     <div style="font-size:2.5rem;margin-bottom:12px">⏳</div>
@@ -16960,14 +16964,13 @@ async function confirmCODOrder(orderId, codTotal, codCharge) {
 // COD PAYMENT FLOW (from modal — kept for compatibility)
 // ══════════════════════════════════════════════
 async function startCOD() {
-  showToast('Cash on Delivery is not available at launch. Please use online payment.', 'warning'); return;
   const pd = window._pendingPayment;
   if (!pd) { showToast('Session expired. Please try again.', 'error'); closePaymentModal(); return; }
 
-  const { orderId, sub, disc, formData } = pd;
+  const { orderId, sub, disc, mixMatchDiscount, formData } = pd;
 
   // COD charge — always via calcShipping() so display and charge agree
-  const netSub = sub - disc;
+  const netSub = sub - disc - (mixMatchDiscount || 0);
   const codCharge = calcShipping(netSub);
   const codTotal = netSub + codCharge;
 
@@ -17389,9 +17392,10 @@ async function finalizeOrder(orderId, formData, total, method, codCharge) {
       }).filter(Boolean)),
     };
 
-    const gatewayEndpoint = method === 'cashfree' ? '/api/confirm-cashfree-order' : '/api/confirm-gokwik-order';
-    const url  = API_BASE + (isOnlinePayment ? gatewayEndpoint : '/api/orders');
-    const body = isOnlinePayment
+    const gatewayEndpoint = method === 'cashfree' ? '/api/confirm-cashfree-order' : (method === 'cod' ? '/api/confirm-cod-order' : '/api/confirm-gokwik-order');
+    const useConfirmationEndpoint = isOnlinePayment || method === 'cod';
+    const url  = API_BASE + (useConfirmationEndpoint ? gatewayEndpoint : '/api/orders');
+    const body = useConfirmationEndpoint
       ? JSON.stringify({ order_id: orderId, order_data: orderPayload })
       : JSON.stringify(orderPayload);
 
