@@ -103,7 +103,7 @@
      reintroduced, do NOT also configure G-1SPY139WS1 inside it: two
      consumers of the same measurement ID double every pageview and every
      purchase, and the reports give no sign that it is happening. -->
-<script async src="https://www.googletagmanager.com/gtag/js?id=G-1SPY139WS1"></script>
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-1SPY139WS1" fetchpriority="low"></script>
 <script>
   window.dataLayer = window.dataLayer || [];
   function gtag(){dataLayer.push(arguments);}
@@ -264,11 +264,20 @@ window.META_PIXEL_ID = '1031030359902418';
 if (window.META_PIXEL_ID) {
 !function(f,b,e,v,n,t,s){if(f.fbq)return;n=f.fbq=function(){n.callMethod?
 n.callMethod.apply(n,arguments):n.queue.push(arguments)};if(!f._fbq)f._fbq=n;
-n.push=n;n.loaded=!0;n.version='2.0';n.queue=[];t=b.createElement(e);t.async=!0;
-t.src=v;s=b.getElementsByTagName(e)[0];s.parentNode.insertBefore(t,s)}(window,
-document,'script','https://connect.facebook.net/en_US/fbevents.js');
-fbq('init', window.META_PIXEL_ID);
-fbq('track', 'PageView');
+n.push=n;n.loaded=!0;n.version='2.0';n.queue=[]}
+// v10.2: defer the heavy fbevents.js bundle (~105KB, 2.4s) until after the
+// LCP window so it does not compete with banner/product images on first paint.
+// fbq() calls queue up in n.queue and replay automatically on load, so no
+// event is lost; PageView is explicitly re-fired below once it arrives.
+var __loadFb=function(){if(f._fbLoaded)return;f._fbLoaded=!0;
+t=b.createElement(e);t.async=!0;t.src=v;
+s=b.getElementsByTagName(e)[0];s.parentNode.insertBefore(t,s);
+t.onload=function(){fbq('init', window.META_PIXEL_ID);fbq('track','PageView');};
+};
+if(window.requestIdleCallback){requestIdleCallback(__loadFb,{timeout:2500});}
+else{window.addEventListener('load',function(){setTimeout(__loadFb,1500);});}}
+(window,document,'script','https://connect.facebook.net/en_US/fbevents.js');
+if (window.META_PIXEL_ID && !window._fbq) { fbq('init', window.META_PIXEL_ID); fbq('track', 'PageView'); }
   // Same guard for the no-JS beacon: written from the live ID rather than
   // hard-coded, so the two can never drift apart.
   document.write('<noscript><img height="1" width="1" style="display:none" ' +
@@ -8788,7 +8797,7 @@ setInterval(function() { syncAppCartBadge(); syncAppWishBadge(); }, 2000);
 <nav class="navbar">
   <div class="nav-inner">
     <a href="#" class="nav-logo" onclick="showPage('home')">
-      <img data-media-key="site.logo" src="assets/ozylix-logo.png" alt="Ozylix Logo" onerror="this.style.display='none';document.getElementById('logoFallback').style.display='flex'" decoding="async">
+      <img data-media-key="site.logo" src="assets/ozylix-logo.png" alt="Ozylix Logo" fetchpriority="high" decoding="sync" onerror="this.style.display='none';document.getElementById('logoFallback').style.display='flex'">
       <div id="logoFallback" class="nav-logo-fallback" style="display:none">
         <div class="nav-logo-leaf"><svg width="22" height="22"><use href="#ico-leaf"/></svg></div>
         <div>
@@ -9647,7 +9656,7 @@ setInterval(function() { syncAppCartBadge(); syncAppWishBadge(); }, 2000);
       } else {
         var img = (isPhone && s.mobile) ? s.mobile : s.src;
         inner = '<img src="' + img + '" alt="' + (s.alt || 'Ozylix effervescent supplements offer banner') + '"' +
-                    (i === 0 ? ' fetchpriority="high"' : ' loading="lazy"') + ' decoding="async">';
+                    (i === 0 ? ' fetchpriority="high" decoding="sync"' : ' loading="lazy" decoding="async"') + "'";
       }
       return s.link
         ? '<a class="hero-banner-slide" href="' + s.link + '">' + inner + '</a>'
@@ -9772,7 +9781,7 @@ window.dismissOfferReminder = function () {
       } else {
         var img = (isPhone && s.mobile) ? s.mobile : s.src;
         inner = '<img src="' + img + '" alt="' + (s.alt || 'Ozylix effervescent supplements offer banner') + '"' +
-                    (i === 0 ? ' fetchpriority="high"' : ' loading="lazy"') + ' decoding="async">';
+                    (i === 0 ? ' fetchpriority="high" decoding="sync"' : ' loading="lazy" decoding="async"') + "'";
       }
       return s.link
         ? '<a class="hero-banner-slide" href="' + s.link + '">' + inner + '</a>'
