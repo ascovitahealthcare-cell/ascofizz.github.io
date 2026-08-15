@@ -7717,7 +7717,9 @@ button, [role="button"] {
   @media (max-width: 760px) { .app-platform-grid { grid-template-columns: 1fr; } .app-platform-desktop { display: block; } .ios-step-art { width: 72px; height: 104px; } }
 </style>
 
-</head>
+<style id="ozylix-nav-upgrades">
+.app-topbar-brand-name{font-family:var(--font-display);font-size:1.02rem;font-weight:800;letter-spacing:-.04em;color:var(--t-hi);white-space:nowrap}
+.notification-center-page{min-height:78vh;padding-top:90px}.notification-center-head{display:flex;align-items:flex-end;justify-content:space-between;gap:16px;margin-bottom:18px}.notification-center-actions{display:flex;gap:8px;flex-wrap:wrap}.notification-center-list{display:grid;gap:10px;max-width:820px}.notification-center-card{display:grid;grid-template-columns:auto 1fr auto;gap:12px;align-items:start;padding:15px 16px;border-radius:16px;background:var(--paper);box-shadow:var(--neo-1);border:1px solid var(--edge)}.notification-center-card.unread{border-color:rgba(61,117,90,.45)}.notification-center-icon{width:34px;height:34px;display:grid;place-items:center;border-radius:12px;background:var(--green-lo,#e8f2eb)}.notification-center-message{color:var(--t-mid);line-height:1.55;font-size:.88rem}.notification-center-message strong{color:var(--t-hi);display:block;margin-bottom:3px}.notification-center-time{display:block;margin-top:5px;font-size:.7rem;color:var(--t-dim)}.notification-center-empty{padding:30px 20px;text-align:center;border-radius:16px;background:var(--paper);box-shadow:var(--neo-1);color:var(--t-low)}.notification-center-empty h3{margin:0 0 7px;color:var(--t-hi)}.notification-center-badge{position:absolute;top:2px;right:1px;min-width:16px;height:16px;padding:0 4px;display:none;place-items:center;border-radius:99px;background:#b84242;color:#fff;font-size:.58rem;font-weight:800}.footer-compact .footer-top{padding-top:16px;padding-bottom:14px}.footer-compact .footer-grid{grid-template-columns:minmax(210px,1.45fr) repeat(4,minmax(112px,1fr));gap:12px 16px}.footer-compact .footer-col summary{list-style:none;cursor:pointer;font-size:.58rem;font-weight:700;letter-spacing:.18em;text-transform:uppercase;color:var(--green);margin-bottom:7px}.footer-compact .footer-col summary::-webkit-details-marker{display:none}.footer-compact .footer-col summary:after{content:'⌄';float:right}.footer-compact .footer-col:not([open]) summary:after{transform:rotate(-90deg)}.footer-compact .footer-col ul{gap:3px}.footer-compact .footer-col a{font-size:.7rem}.footer-compact .footer-bottom{padding-top:8px;padding-bottom:8px;font-size:.66rem}@media(min-width:701px){.footer-compact .footer-col summary:after{display:none}}@media(max-width:700px){.app-topbar-brand-name{font-size:.98rem}.notification-center-page{padding-top:82px}.notification-center-head{align-items:flex-start;flex-direction:column}.notification-center-card{grid-template-columns:auto 1fr}.notification-center-card .notification-center-time{grid-column:2}.footer-compact .footer-grid{grid-template-columns:1fr;gap:7px}.footer-compact .footer-col{padding:10px 0;border-top:1px solid var(--edge)}.footer-compact .footer-col ul{margin-top:9px}.footer-compact .footer-col:not([open]) ul{display:none}}</style></head>
 <!-- Promotional Media Config -->
 <script>
 /**
@@ -7850,17 +7852,16 @@ var PROMO_MEDIA = [
 <!-- ═══ APP TOP BAR (mobile only) ═══ -->
 <div class="app-topbar" id="appTopBar">
   <!-- Logo -->
-  <a href="#" onclick="showPage('home');return false;" style="display:flex;align-items:center;text-decoration:none;flex-shrink:0;">
-    <img class="app-topbar-logo"
-      src="assets/ozylix-mark.svg"
-      alt="Ozylix"
-      onerror="this.onerror=null;this.style.display='none';var s=document.createElement('span');s.textContent='Ozylix';s.style.cssText='font-family:var(--font-display);font-weight:800;letter-spacing:-.04em;color:var(--t-hi);font-size:18px;';this.parentNode.appendChild(s);" decoding="async">
+  <a href="#" onclick="showPage('home');return false;" style="display:flex;align-items:center;text-decoration:none;flex-shrink:0;gap:8px;">
+    <img class="app-topbar-logo" src="assets/ozylix-mark.svg" alt="Ozylix" onerror="this.onerror=null;this.style.display='none';" decoding="async">
+    <span class="app-topbar-brand-name">Ozylix</span>
   </a>
   <!-- B2B pill only -->
   <div class="app-topbar-nav">
   </div>
   <!-- Action icons -->
   <div class="app-topbar-actions">
+    <button class="app-topbar-btn" onclick="openNotificationCenter()" title="Notification center" aria-label="Open notification center" style="position:relative;"><span aria-hidden="true">🔔</span><span class="notification-center-badge" id="mobileNotificationBadge">0</span></button>
     <button class="app-topbar-btn" onclick="showPage('shop');setAppNav('shop')" title="Search">
       <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><line x1="16.5" y1="16.5" x2="22" y2="22"/></svg>
     </button>
@@ -8760,6 +8761,7 @@ setInterval(function() { syncAppCartBadge(); syncAppWishBadge(); }, 2000);
     <div class="nav-actions">
       <button class="nav-icon-btn" onclick="showPage('shop')" title="Search"><svg width="20" height="20"><use href="#ico-search"/></svg></button>
       <button class="nav-icon-btn" id="accountNavBtn" onclick="handleAccountNavClick()" title="Account" style="position:relative"><svg width="20" height="20"><use href="#ico-user"/></svg></button>
+      <button class="nav-icon-btn" onclick="openNotificationCenter()" title="Notification center" aria-label="Open notification center" style="position:relative">🔔<span class="notification-center-badge" id="desktopNotificationBadge">0</span></button>
       <button class="nav-icon-btn" onclick="showPage('wishlist')" title="Wishlist" style="position:relative">
         ♡ <span class="wish-badge" id="wishBadge" style="display:none">0</span>
       </button>
@@ -11439,6 +11441,13 @@ function renderCheckoutSummary() {
 <!-- ══════════ END POLICIES ══════════ -->
 
 <!-- ══════════ WISHLIST PAGE ══════════ -->
+<div class="page notification-center-page" id="page-notifications">
+  <div class="container">
+    <div class="notification-center-head"><div><div class="eyebrow">Your Ozylix updates</div><h1 class="page-title" style="margin-bottom:6px;">Notification Center</h1><p class="page-subtitle" style="margin-bottom:0;">Find your recent reminders, offer updates, review requests and helpful wellness notes in one place.</p></div><div class="notification-center-actions"><button class="btn-secondary" type="button" onclick="markAllNotificationsRead()">Mark all read</button><button class="btn-primary" type="button" onclick="showOzylixConsentBar()">Reminder preferences</button></div></div>
+    <div id="notificationCenterList" class="notification-center-list" aria-live="polite"></div>
+  </div>
+</div>
+
 <div class="page" id="page-wishlist" style="padding-top:90px;min-height:80vh">
   <div class="container">
     <div style="padding:40px 0 20px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px">
@@ -12984,6 +12993,16 @@ function getProductImg(p) {
 // Page strategy: home = offer/vita, shop = mm/discovery,
 //                product = contextual, cart = savings/MM progress.
 // ══════════════════════════════════════════════════════════════════════
+var OZYLIX_NOTIFICATION_STORE='ozylix.notificationCenter.v1';
+function ozylixReadCenterEntries(){try{var r=localStorage.getItem(OZYLIX_NOTIFICATION_STORE);var a=r?JSON.parse(r):[];return Array.isArray(a)?a:[]}catch(e){return[]}}
+function ozylixWriteCenterEntries(a){try{localStorage.setItem(OZYLIX_NOTIFICATION_STORE,JSON.stringify(a.slice(0,40)))}catch(e){}}
+function ozylxSaveCenterEntry(i){var a=ozylixReadCenterEntries(),m=String(i.msg||'').replace(/<[^>]*>/g,'').replace(/\s+/g,' ').trim();if(!m)return;a=a.filter(function(x){return x.id!==i.id});a.unshift({id:String(i.id||('note-'+Date.now())),icon:String(i.icon||'✨'),message:m,cta:String(i.cta||''),url:String(i.url||''),createdAt:new Date().toISOString(),read:false});ozylixWriteCenterEntries(a);updateNotificationCenterBadge()}
+function updateNotificationCenterBadge(){var n=ozylixReadCenterEntries().filter(function(x){return !x.read}).length;['mobileNotificationBadge','desktopNotificationBadge'].forEach(function(id){var e=document.getElementById(id);if(!e)return;e.textContent=n>9?'9+':String(n);e.style.display=n?'grid':'none'})}
+function renderNotificationCenter(){var e=document.getElementById('notificationCenterList');if(!e)return;var a=ozylixReadCenterEntries();if(!a.length){e.innerHTML='<div class="notification-center-empty"><h3>You are all caught up</h3><p>No saved updates yet. We will keep helpful offer, review and wellness reminders here when they are relevant to you.</p><button class="btn-primary" type="button" onclick="showPage(\'shop\')">Explore products</button></div>';updateNotificationCenterBadge();return}e.innerHTML=a.map(function(x){var t=x.createdAt?new Date(x.createdAt).toLocaleString('en-IN',{day:'numeric',month:'short',hour:'numeric',minute:'2-digit'}):'';return '<article class="notification-center-card '+(x.read?'':'unread')+'"><span class="notification-center-icon" aria-hidden="true">'+esc(x.icon||'✨')+'</span><div class="notification-center-message"><strong>'+(x.read?'Update':'New update')+'</strong>'+esc(x.message)+'<span class="notification-center-time">'+esc(t)+'</span></div><button class="btn-secondary" type="button" onclick="openSavedNotification(\''+esc(x.id)+'\')">'+(x.cta?esc(x.cta):'Open')+'</button></article>'}).join('');updateNotificationCenterBadge()}
+function openSavedNotification(id){var a=ozylixReadCenterEntries(),i=a.find(function(x){return x.id===id});if(!i)return;a.forEach(function(x){if(x.id===id)x.read=true});ozylixWriteCenterEntries(a);renderNotificationCenter();if(i.url){try{window.location.hash=i.url.replace(/^.*#/,'#')}catch(e){}}else showPage(i.cta&&/review/i.test(i.cta)?'account':'shop')}
+function markAllNotificationsRead(){var a=ozylixReadCenterEntries();a.forEach(function(x){x.read=true});ozylixWriteCenterEntries(a);renderNotificationCenter();showToast('Notification center marked as read.')}
+function openNotificationCenter(){showPage('notifications');renderNotificationCenter()}
+
 var ozylxNotify = (function () {
   var MAX_PER_SESSION = 3;
   var MIN_GAP_MS = 20000;          // 20 s between cards — never rapid-fire
@@ -13045,6 +13064,7 @@ var ozylxNotify = (function () {
     return true;
   }
   function schedule(item) {
+    try { ozylxSaveCenterEntry(item); } catch(e) {}
     if (eligible(item)) {
       if (live) { queue.push(item); }
       else { shownIds[item.id] = true; paint(item); }
@@ -13055,6 +13075,7 @@ var ozylxNotify = (function () {
   }
   return { show: schedule, clear: removeLive, get shown() { return shownCount; } };
 })();
+setTimeout(updateNotificationCenterBadge, 500);
 
 // ── HTML escape helper — prevents XSS from backend product data ──
 function esc(s) {
@@ -13542,7 +13563,7 @@ function _updateStrength(val) {
 <!-- ══════════ END ACCOUNT DASHBOARD ══════════ -->
 
 <!-- ══════════ FOOTER ══════════ -->
-<footer class="footer" id="siteFooter">
+<footer class="footer footer-compact" id="siteFooter">
   <div class="footer-top">
     <div class="container">
       <div class="footer-grid">
@@ -13561,8 +13582,8 @@ function _updateStrength(val) {
             <a class="soc-link" href="https://wa.me/919898582650" target="_blank" title="WhatsApp"></a>
           </div>
         </div>
-        <div class="footer-col">
-          <h4>Shop</h4>
+        <details class="footer-col" open>
+          <summary>Shop</summary>
           <ul>
             <li><a href="#" onclick="showShop('all')">All Products</a></li>
             <li><a href="#" onclick="showShop('bestsellers')">Bestsellers</a></li>
@@ -13573,9 +13594,9 @@ function _updateStrength(val) {
             <li><a href="#" onclick="showShop('combos')">Combo Packs</a></li>
             <li class="sale-only-ui"><a href="#" onclick="showShop('sale');return false;">On Sale</a></li>
           </ul>
-        </div>
-        <div class="footer-col">
-          <h4>Company</h4>
+        </details>
+        <details class="footer-col" open>
+          <summary>Company</summary>
           <ul>
             <li><a href="#" onclick="showPage('about')">About Us</a></li>
             <li><a href="https://www.ascovita.com/#/capabilities" target="_blank" rel="noopener">B2B & Wholesale</a></li>
@@ -13584,9 +13605,9 @@ function _updateStrength(val) {
             <li><a href="#" onclick="showPage('faq')">FAQ</a></li>
             <li><a href="https://www.shiprocket.in/shipment-tracking/" target="_blank">Track Order</a></li>
           </ul>
-        </div>
-        <div class="footer-col">
-          <h4>Policies</h4>
+        </details>
+        <details class="footer-col" open>
+          <summary>Policies</summary>
           <ul>
             <li><a href="#" onclick="showPage('privacy')">Privacy Policy</a></li>
             <li><a href="#" onclick="showPage('terms')">Terms &amp; Conditions</a></li>
@@ -13598,9 +13619,9 @@ function _updateStrength(val) {
             <li><a href="#" onclick="showPage('accessibility')">Accessibility Statement</a></li>
             <li><a href="#" onclick="showPage('subscriptions')">Subscribe &amp; Save</a></li>
           </ul>
-        </div>
-        <div class="footer-col">
-          <h4>Contact</h4>
+        </details>
+        <details class="footer-col" open>
+          <summary>Contact</summary>
           <ul>
             <li><a href="tel:+919898582650">📞 +91 9898 582 650</a></li>
             <li><a href="tel:+917265884137">Support: Aamin Vahora</a></li>
@@ -13608,7 +13629,7 @@ function _updateStrength(val) {
           </ul>
           <div style="margin-top:16px;font-size:.7rem;color:var(--t-dim);line-height:1.7">
             Ozylix — an online brand of Ascovita Healthcare<br>Near Rajshivalay Cinema<br>Anand – 388001, Gujarat, India
-          </div>
+          </details>
           <div style="margin-top:14px">
             <div style="font-size:.68rem;color:var(--t-dim);text-transform:uppercase;letter-spacing:1px;margin-bottom:7px">We Accept</div>
             <div style="display:flex;gap:5px;flex-wrap:wrap">
@@ -14127,6 +14148,7 @@ function showPage(pg) {
   });
   // Premium account header — populate welcome banner + lifetime stats
   if (pg === 'account') { try { refreshAccountWelcome(); } catch(e) {} }
+  if (pg === 'notifications') { try { renderNotificationCenter(); } catch(e) {} }
   if (pg === 'shop') {
     initShop();
     try {
@@ -14319,7 +14341,7 @@ async function initHome() {
   const newP = visibleProducts.filter(p => p.tags.includes('new')).slice(0,4);
   const nag=document.getElementById('newArrivalsGrid'); if(nag) nag.innerHTML = newP.map(p => renderProductCard(p)).join('');
   // Blog
-  const hbg=document.getElementById('homeBlogGrid'); if(hbg) hbg.innerHTML = BLOGS.slice(0,4).map(renderBlogCard).join('');
+  const hbg=document.getElementById('homeBlogGrid'); if(hbg) hbg.innerHTML = BLOGS_NEWEST_FIRST.slice(0,4).map(renderBlogCard).join('');
   // FAQ
   const hfw=document.getElementById('homeFaqWrap'); if(hfw) hfw.innerHTML = FAQS.slice(0,5).map(renderFaqItem).join('');
   // Category tile counts + About page figures
@@ -15900,6 +15922,8 @@ function placeOrder() {
 }
 
 // ── BLOG ──
+const BLOGS_NEWEST_FIRST = BLOGS.slice().sort(function(a,b){ return new Date(b.date).getTime()-new Date(a.date).getTime(); });
+
 function renderBlogCard(b) {
   const shopBtn = b.relatedProduct
     ? `<div style="margin-top:12px">
@@ -15921,7 +15945,7 @@ function renderBlogCard(b) {
     </div>
   </a>`;
 }
-function renderFullBlog() { const el=document.getElementById('fullBlogGrid'); if(el) el.innerHTML=BLOGS.map(renderBlogCard).join(''); }
+function renderFullBlog() { const el=document.getElementById('fullBlogGrid'); if(el) el.innerHTML=BLOGS_NEWEST_FIRST.map(renderBlogCard).join(''); }
 
 // ── FAQ ──
 function renderFaqItem(f) {
@@ -16358,7 +16382,7 @@ function bootApp() {
   // wishlist/subscriptions have real page sections but were missing here, so a
   // direct hit on /wishlist rendered the HOME page at 200 — a soft 404. Keep
   // this list in step with SPA_ROUTES in worker/index.js.
-  const _validPages = ['home','shop','blog','about','contact','faq','advisor','product','wishlist','subscriptions','privacy','terms','shipping','refund','accessibility','download'];
+  const _validPages = ['home','shop','blog','about','contact','faq','advisor','product','wishlist','notifications','subscriptions','privacy','terms','shipping','refund','accessibility','download'];
   // Legacy /b2b links now redirect to the Ascovita corporate B2B page
   if (_initPage === 'b2b') { window.location.href = 'https://www.ascovita.com/#/capabilities'; }
   if (_initPage && (_validPages.includes(_initPage) || _initPage === 'blog')) {
@@ -21708,6 +21732,7 @@ function closeMoreDrawer() {
   <button class="app-menu-item" onclick="showPage('shop');closeAppMenu();setAppNav('shop')"><div class="app-menu-icon">🛍️</div><span class="app-menu-item-label">All Products</span><span class="app-menu-item-badge">12 Products</span><span class="app-menu-item-arrow">›</span></button>
   <button class="app-menu-item" onclick="showPage('advisor');closeAppMenu();setAppNav('advisor')"><div class="app-menu-icon">🌿</div><span class="app-menu-item-label">AI Health Advisor</span><span class="app-menu-item-badge">NEW</span><span class="app-menu-item-arrow">›</span></button>
   <button class="app-menu-item" onclick="showPage('wishlist');closeAppMenu();setAppNav('more')"><div class="app-menu-icon">♡</div><span class="app-menu-item-label">Wishlist</span><span class="app-menu-item-arrow">›</span></button>
+  <button class="app-menu-item" onclick="openNotificationCenter();closeAppMenu();setAppNav('more')"><div class="app-menu-icon">🔔</div><span class="app-menu-item-label">Notification Center</span><span class="app-menu-item-badge">UPDATES</span><span class="app-menu-item-arrow">›</span></button>
   <button class="app-menu-item" onclick="showPage('subscriptions');closeAppMenu();setAppNav('more')"><div class="app-menu-icon">🔔</div><span class="app-menu-item-label">Subscribe &amp; Save</span><span class="app-menu-item-badge">Save 15%</span><span class="app-menu-item-arrow">›</span></button>
   <button class="app-menu-item" onclick="closeAppMenu();openVitaPopup()"><div class="app-menu-icon vp3d-slot"><span class="vp3d" aria-hidden="true"><picture><source srcset="/assets/vitapoint-3d/vitapoint-coin-still.webp" media="(prefers-reduced-motion: reduce)"><img src="/assets/vitapoint-3d/vitapoint-coin.webp" alt="" width="176" height="176" loading="lazy" decoding="async"></picture></span></div><span class="app-menu-item-label">VitaPoints</span><span class="app-menu-item-arrow">›</span></button>
 
