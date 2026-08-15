@@ -13831,6 +13831,13 @@ function showPage(pg) {
     const _hl = document.querySelectorAll('link[rel="alternate"][data-hreflang]');
     _hl.forEach(l => l.setAttribute('href', 'https://www.ozylix.com' + cleanPath));
   }
+  // Shop page gets category-level structured data.
+  // Keep this inside showPage(), where `pg` and `cleanPath` are defined;
+  // placing it in openProduct() makes direct card clicks throw before the
+  // product section receives its active class.
+  if (pg === 'shop' && typeof setShopPageSchema === 'function') {
+    try { setShopPageSchema(); } catch (e) {}
+  }
   // Track page view in GA
   window._trackPage && window._trackPage(pg);
   // Leaving a product: drop its JSON-LD so the head describes this page only.
@@ -13983,8 +13990,6 @@ function openProduct(id) {
   const _can = document.querySelector('link[rel="canonical"]');
   if (_can) _can.setAttribute('href', 'https://www.ozylix.com' + window.location.pathname);
 
-    // Shop page gets category-level structured data
-    if (cleanPath === '/shop' || cleanPath === '/' && pg === 'shop') { setShopPageSchema(); }
   const _ogUrl = document.querySelector('meta[property="og:url"]');
   if (_ogUrl) _ogUrl.setAttribute('content', 'https://www.ozylix.com' + window.location.pathname);
   const metaDesc = document.querySelector('meta[name="description"]');
