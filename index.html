@@ -18042,23 +18042,6 @@ function generateInvoice({ orderId, formData, srItems, sub, disc, promoDisc, shi
 
 
 // ── ORDER TRACKING ──
-function trackOrder() {
-  const input = document.getElementById('trackOrderInput');
-  const orderId = input?.value?.trim();
-  if (!orderId) { showToast('Please enter your Order ID', 'error'); return; }
-
-  try {
-    const allOrders = JSON.parse(localStorage.getItem('asc_orders') || '[]');
-    const _cu = getCurrentUser();
-    const _ce = (_cu?.email || '').toLowerCase().trim();
-    const orders = _ce
-      ? allOrders.filter(o => (o.userEmail || o.email || '').toLowerCase().trim() === _ce)
-      : allOrders;
-    const order = orders.find(o => o.orderId === orderId || o.orderId.includes(orderId));
-    if (order) showToast(`📦 Order ${orderId}: ${order.status}`);
-  } catch(e) {}
-  window.open(SHIPROCKET_CONFIG.trackingUrl + orderId, '_blank');
-}
 
 // placeOrder() routes to initiatePayment() — defined above
 
