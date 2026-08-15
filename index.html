@@ -16613,12 +16613,6 @@ if (document.readyState === 'complete' || document.readyState === 'interactive')
 // (auto-popping a login modal on mobile page-open) has been removed per
 // product decision — it was interrupting first-time visitors before they'd
 // even seen the store.
-function _maybeShowMobileLoginPopup() {
-  // Intentionally a no-op now. Kept (instead of deleted) so any other code
-  // that still calls this function doesn't throw — but it never opens the
-  // auth modal automatically.
-  return;
-}
 
 // ══════════════════════════════════════════════
 // GOKWIK PAYMENT INTEGRATION — LIVE GATEWAY
