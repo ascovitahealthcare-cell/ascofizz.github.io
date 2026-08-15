@@ -14875,7 +14875,6 @@ function createCustomPack(productId) {
   const unitMrp = Number(rows[0].mrp) / Number(rows[0].tabs);
   const mrp = Math.round(unitMrp * wantTabs * 100) / 100;
   const rate = Math.round(mrp * (1 - discPct / 100) * 100) / 100;
-  const customTier = { tabs: wantTabs, rate, mrp, discountPct: discPct, _custom: true };
   const tierIdx = selectedTiers[productId] != null ? selectedTiers[productId] : 0;
   const physicalPacks = Math.max(1, Math.round(wantTabs / Number(tiers[0].tabs)));
   const ex = STORE.cart.find(i => i.id === productId && i.isCustomPack);
