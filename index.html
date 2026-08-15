@@ -18485,11 +18485,6 @@ function vitaFromRupees(rupees) { return Math.floor((Number(rupees) || 0) * VITA
 // (called on login/session-restore) — the server still independently
 // re-verifies and clamps the actual redemption at checkout regardless,
 // so this is what the customer sees, not what's ultimately trusted.
-function vitaMaxRedeemable(orderTotal) {
-  const st = getVitaState();
-  const byOrder = vitaFromRupees(orderTotal);
-  return Math.max(0, Math.min(st.balance, VITA.MAX_REDEEM_PER_ORDER, byOrder));
-}
 
 // Move any pending points whose hold window has expired into the
 // spendable balance. Safe to call as often as you like.
