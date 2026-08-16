@@ -16063,7 +16063,7 @@ body.role-admin #azRoleBanner{display:block}
       err.style.color = '';
       err.textContent =
         why === 'idle'     ? 'Signed out after 60 minutes of inactivity. Please sign in again.' :
-        why === 'rejected' ? 'The server rejected your session. Sign in again — if this keeps happening straight after signing in, check that this device’s clock is correct.'
+        why === 'rejected' ? 'The server rejected your session. Sign in again — the server now auto-heals freshly minted tokens (v9.4.1+), so a bounce straight after signing in should not repeat; if it still does, check that this device’s clock is correct.'
                            : 'Your 1-hour session expired. Please sign in again.';
     }
   }
