@@ -18625,16 +18625,6 @@ function vitaRedeemWidgetHTML(sub) {
 }
 
 // 50% coupon is calculated against MRP, never the sale price.
-function vitaApplyTierCoupon(product) {
-  const st = getVitaState();
-  if (st.coupons < 1) return { ok: false, reason: 'No 50% coupon available.' };
-  const mrp = Number(product.mrp || product.price || 0);
-  if (!mrp) return { ok: false, reason: 'No MRP on this product.' };
-  st.coupons -= 1;
-  st.history.unshift({ t: Date.now(), type: 'coupon', pts: 0, ref: '50% off ' + (product.name || '') });
-  _saveVita(st);
-  return { ok: true, discount: mrp * 0.5, payable: mrp * 0.5, basis: 'MRP ₹' + mrp.toLocaleString('en-IN') };
-}
 
 // ── Collection animation ──────────────────────────────────────
 function vitaCelebrate(pts, unlocked, capped) {
