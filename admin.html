@@ -3103,15 +3103,19 @@ function azTogglePw() {
    Tabs: Overview · Orders & Cancellations · Returns & Refunds · Loyalty (VitaPoints) · Promo Usage · Edit
    All writes require password re-confirmation (confirmCriticalAction). */
 (function az360Patch(){
+  // BUG FIX (Customer 360° invisible): this script block sits BEFORE the
+  // customer drawer markup in the document, so at patch time custT/custS
+  // are null — an early return here would leave window.az360Open undefined
+  // forever, so every '360°' button threw and the row click fell back to
+  // the old re-targeting insights. Resolve the drawer lazily instead.
   var custT = document.getElementById('custDrawerTitle');
   var custS = document.getElementById('custDrawerSub');
-  if (!custT || !custS) return;
-  // Tabs bar — injected under the drawer header row
+  // Tabs bar — injected under the drawer header row (or lazily at open time)
   var bar = document.createElement('div');
   bar.id = 'cust360Tabs';
   bar.className = 'az360-tabs';
   bar.setAttribute('style', 'display:flex;gap:4px;margin:0 0 12px;border-bottom:2px solid var(--border);overflow-x:auto;padding-bottom:0');
-  custS.insertAdjacentElement('afterend', bar);
+  if (custS) { custS.insertAdjacentElement('afterend', bar); var az360TabsBar = bar; }
   // Style block (only once)
   if (!document.getElementById('az360-style')) {
     var st = document.createElement('style');
@@ -3136,10 +3140,22 @@ function azTogglePw() {
   window.az360Open = async function az360Open(id){
     az360Customer = allCustomers.find(function(x){ return x.id === id; });
     if (!az360Customer) return;
-    document.getElementById('custDrawerTitle').textContent = az360Customer.name || 'Customer';
-    document.getElementById('custDrawerSub').textContent = 'Customer 360° — every data point in one place';
+    /* Resolve the drawer lazily — this patch may run before the drawer
+       markup exists in the document (script block precedes the markup). */
+    custT = custT || document.getElementById('custDrawerTitle');
+    custS = custS || document.getElementById('custDrawerSub');
+    if (!custT || !custS) return;
+    if (!az360TabsBar) {
+      az360TabsBar = document.createElement('div');
+      az360TabsBar.id = 'cust360Tabs';
+      az360TabsBar.className = 'az360-tabs';
+      az360TabsBar.setAttribute('style', 'display:flex;gap:4px;margin:0 0 12px;border-bottom:2px solid var(--border);overflow-x:auto;padding-bottom:0');
+      custS.insertAdjacentElement('afterend', az360TabsBar);
+    }
+    custT.textContent = az360Customer.name || 'Customer';
+    custS.textContent = 'Customer 360° — every data point in one place';
     // render tab bar
-    bar.innerHTML = TABS.map(function(t){ return '<button type="button" class="az360-tab' + (t[0]==='overview'?' active':'') + '" onclick="az360Tab(\'' + t[0] + '\')">' + t[1] + '</button>'; }).join('');
+    az360TabsBar.innerHTML = TABS.map(function(t){ return '<button type="button" class="az360-tab' + (t[0]==='overview'?' active':'') + '" onclick="az360Tab(\'' + t[0] + '\')">' + t[1] + '</button>'; }).join('');
     document.getElementById('custDrawerBody').innerHTML = '<div class="az360-body" id="az360Body"><div class="empty-state loading-dots">Loading profile</div></div>';
     // reveal the drawer (the patch's parent script never opened it)
     var __d = document.getElementById('custDrawer');
@@ -3157,8 +3173,12 @@ function azTogglePw() {
     az360Tab('overview');
   };
   window.az360Tab = function az360Tab(name){
-    bar.querySelectorAll('.az360-tab').forEach(function(b){ b.classList.toggle('active', b.textContent.trim().toLowerCase().includes(azTabName(name)) === false && b.getAttribute('onclick').indexOf("'" + name + "'") >= 0); });
-    bar.querySelectorAll('.az360-tab').forEach(function(b){ if (b.getAttribute('onclick') && b.getAttribute('onclick').indexOf("'" + name + "'") >= 0) b.classList.add('active'); else b.classList.remove('active'); });
+    /* Resolve the tab bar lazily too — it may not exist yet if the patch
+       ran before the drawer markup (script precedes markup). */
+    var t = az360TabsBar || document.getElementById('cust360Tabs');
+    if (!t) return;
+    t.querySelectorAll('.az360-tab').forEach(function(b){ b.classList.toggle('active', b.textContent.trim().toLowerCase().includes(azTabName(name)) === false && b.getAttribute('onclick').indexOf("'" + name + "'") >= 0); });
+    t.querySelectorAll('.az360-tab').forEach(function(b){ if (b.getAttribute('onclick') && b.getAttribute('onclick').indexOf("'" + name + "'") >= 0) b.classList.add('active'); else b.classList.remove('active'); });
     var body = document.getElementById('az360Body');
     if (!body) return;
     var d = az360State, c = az360Customer || {};
@@ -5632,6 +5652,8 @@ function __loginSuccess(d) {
 
 function doLogout() {
   localStorage.removeItem('ascovita_token');
+  localStorage.removeItem('ascovita_role');
+  try { localStorage.removeItem('ascovita_session'); } catch (e) {}
   authToken = '';
   document.getElementById('app').style.display = 'none';
   document.getElementById('loginScreen').style.display = 'flex';
@@ -5874,8 +5896,11 @@ async function checkServerStatus() {
 }
 
 // Apply role-based UI (called on login and auto-login)
+// FIX (owner features invisible): an unknown role must never demote the
+// owner to 'admin' — the server is the real enforcer, so default to
+// owner-visible until positively proven otherwise.
 function applyRole(role) {
-  const r = role || localStorage.getItem('ascovita_role') || 'admin';
+  const r = role || localStorage.getItem('ascovita_role');
   document.body.classList.remove('role-owner','role-admin');
   document.body.classList.add('role-' + r);
   // Update topbar indicator
@@ -9756,7 +9781,10 @@ function renderCustomersTable(list) {
       <td style="color:var(--green-text);font-weight:600;">₹${fmtNum(c.total_spent||0)}</td>
       <td style="white-space:nowrap;">${c.segment ? segChip(c.segment) : segChip(clientSeg(c))}</td>
       <td style="font-size:0.72rem;color:var(--text3);">${fmtDate(c.created_at)}</td>
-      <td style="text-align:right"><button class="btn btn-danger btn-sm btn-icon" title="Soft-delete customer (password required)" onclick="event.stopPropagation(); deleteCustomer(${c.id})">🗑️</button></td>
+      <td style="text-align:right;white-space:nowrap">
+        <button class="btn btn-secondary btn-sm btn-icon" style="margin-right:4px" title="Customer 360° — full profile" onclick="event.stopPropagation(); window.az360Open(${c.id})">👁️</button>
+        <button class="btn btn-danger btn-sm btn-icon" title="Soft-delete customer (password required)" onclick="event.stopPropagation(); deleteCustomer(${c.id})">🗑️</button>
+      </td>
     </tr>
   `).join('') : '<tr><td colspan="9"><div class="empty-state"><div class="empty-ico">👥</div><div class="empty-msg">No customers found</div></div></td></tr>';
 }
@@ -13822,6 +13850,8 @@ showPage = function(name){
   <button class="admin-more-btn owner-only" onclick="showPage('payments');syncAbn('payments');closeAdminMoreMenu()"><span>💳</span><span>Payments</span></button>
   <button class="admin-more-btn owner-only" onclick="showPage('invoices');syncAbn('invoices');closeAdminMoreMenu()"><span>🧾</span><span>Invoices</span></button>
   <button class="admin-more-btn owner-only" onclick="showPage('whatsapp');syncAbn('whatsapp');closeAdminMoreMenu()"><span>📱</span><span>WhatsApp</span></button>
+  <button class="admin-more-btn owner-only" id="moreStaff" onclick="showPage('staff');syncAbn('staff');closeAdminMoreMenu()"><span>👤</span><span>Staff &amp; Permissions</span></button>
+  <button class="admin-more-btn" id="moreAutomation" onclick="showPage('automation');syncAbn('automation');closeAdminMoreMenu()"><span>🤖</span><span>Automation</span></button>
   <button class="admin-more-btn" onclick="showPage('livevisitors');syncAbn('livevisitors');closeAdminMoreMenu()"><span>👁️</span><span>Live Visitors</span></button>
   <button class="admin-more-btn owner-only" onclick="showPage('geoanalytics');syncAbn('geoanalytics');closeAdminMoreMenu()"><span>🌏</span><span>Geo Analytics</span></button>
   <button class="admin-more-btn owner-only" onclick="showPage('performance');syncAbn('performance');closeAdminMoreMenu()"><span>⚡</span><span>Performance</span></button>
@@ -15959,8 +15989,19 @@ function azApplyPermsToDOM() {
      state captured before the role was known. Owner-only sections use the
      .owner-only CSS class, which the body's role-admin/role-owner class
      flips; just make sure the body class is current. */
-  var currentRole = (window.AZPerms.loaded ? window.AZPerms.role : null)
-    || localStorage.getItem('ascovita_role') || 'admin';
+  // FIX (owner features invisible on mobile): when the role is still
+  // unknown (server has not answered yet, or gave up after timeouts),
+  // never assume 'admin' — an unknown role defaulting to admin made
+  // body.role-admin hide ALL owner-only sections (Staff & Permissions,
+  // Content, Finance, System) via the .owner-only { display:none!important }
+  // rule, and the body class was sticky. Prefer the cached session
+  // identity, fall back to 'owner' visibility (server still enforces
+  // everything), and only apply role-admin once the server positively
+  // confirms a staff role.
+  var cached = function () { try { return JSON.parse(localStorage.getItem('ascovita_session') || '{}'); } catch (e) { return {}; } }();
+  var knownRole = window.AZPerms.loaded ? window.AZPerms.role : null;
+  if (!knownRole && cached && cached.role) knownRole = cached.role;
+  var currentRole = knownRole || 'owner';
   document.body.classList.remove('role-owner', 'role-admin');
   document.body.classList.add('role-' + currentRole);
   ['navAiTeam', 'moreAiTeam'].forEach(function (id) {
