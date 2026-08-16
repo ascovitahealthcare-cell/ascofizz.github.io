@@ -12404,6 +12404,9 @@ function storeEdDraftServerMatch() {
 // ── Save: PUT the draft to the backend's public theme store. Owner/
 //    admin JWT only; the storefront fetches it anonymously. ─────────────
 async function storeEdSave() {
+  // Always re-hydrate from localStorage so a direct draft reset (or a
+  // multi-tab edit) is never clobbered by a stale in-memory snapshot.
+  try { storeEdDraft = storeEdGetDraft(); } catch(_) {}
   const btn = document.querySelector('#page-storeeditor .btn-primary');
   const prev = btn ? btn.textContent : '';
   if (btn) btn.textContent = 'Saving…';
