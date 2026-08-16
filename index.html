@@ -12920,6 +12920,14 @@ const STORE = {
     let changed = false;
     this.cart.forEach(it => {
       if (it.isCustomPack) return; // customer-built month pack — server re-prices at checkout, never mangle
+      // FIX (Aug 2026, owner video report): this ran during STORE.init()
+      // BEFORE the product catalog had finished loading, so find() returned
+      // undefined for every cart item — tier was treated as unknown and
+      // RESET to the smallest pack, wiping the customer's chosen tier and
+      // price on every page load (and right after the Google sign-in
+      // redirect). If the product isn't known yet, leave the entry alone;
+      // the catalog-sync re-run below catches it once data exists.
+      if (!p) return;
       // Tier-less entries on a tiered product are stale (added via
       // upsells/recommendations without a pack choice). Apply the
       // smallest live tier so prices can't silently overstate.
