@@ -5841,6 +5841,8 @@ function __loginSuccess(d) {
 
 function doLogout() {
   localStorage.removeItem('ascovita_token');
+  localStorage.removeItem('ascovita_role');
+  try { localStorage.removeItem('ascovita_session'); } catch (e) {}
   authToken = '';
   document.getElementById('app').style.display = 'none';
   document.getElementById('loginScreen').style.display = 'flex';
@@ -6080,8 +6082,11 @@ async function checkServerStatus() {
 }
 
 // Apply role-based UI (called on login and auto-login)
+// FIX (owner features invisible): an unknown role must never demote the
+// owner to 'admin' — the server is the real enforcer, so default to
+// owner-visible until positively proven otherwise.
 function applyRole(role) {
-  const r = role || localStorage.getItem('ascovita_role') || 'admin';
+  const r = role || localStorage.getItem('ascovita_role');
   document.body.classList.remove('role-owner','role-admin');
   document.body.classList.add('role-' + r);
   // Update topbar indicator
@@ -16191,8 +16196,20 @@ function azApplyPermsToDOM() {
      state captured before the role was known. Owner-only sections use the
      .owner-only CSS class, which the body's role-admin/role-owner class
      flips; just make sure the body class is current. */
-  var currentRole = (window.AZPerms.loaded ? window.AZPerms.role : null)
-    || localStorage.getItem('ascovita_role') || 'admin';
+  // FIX (owner features invisible): when the role is still unknown (the
+  // server has not answered yet, or gave up after timeouts), never assume
+  // 'admin' — an unknown role defaulting to admin made body.role-admin
+  // hide ALL owner-only sections (Staff & Permissions, Content, Finance,
+  // System) via the .owner-only { display:none!important } rule, and the
+  // body class was sticky even after a successful /api/admin/me later
+  // failed to run because the panel never retried. Prefer the cached
+  // session identity, fall back to 'owner' visibility (server still
+  // enforces everything), and only apply role-admin once the server has
+  // positively confirmed a staff role.
+  var cached = function () { try { return JSON.parse(localStorage.getItem('ascovita_session') || '{}'); } catch (e) { return {}; } }();
+  var knownRole = window.AZPerms.loaded ? window.AZPerms.role : null;
+  if (!knownRole && cached && cached.role) knownRole = cached.role;
+  var currentRole = knownRole || 'owner';
   document.body.classList.remove('role-owner', 'role-admin');
   document.body.classList.add('role-' + currentRole);
   ['navAiTeam', 'moreAiTeam'].forEach(function (id) {
@@ -16230,6 +16247,10 @@ async function azLoadPerms() {
       if (!r.ok) { attempts++; lastErr = new Error('HTTP ' + r.status); continue; }
       const d = await r.json();
       window.AZPerms = { role: d.role, list: d.permissions || [], loaded: true };
+      /* Keep the cached identity in step with the server even when the
+         login page forgot to refresh it (e.g. a bounce left the old
+         session cached). */
+      try { localStorage.setItem('ascovita_role', d.role); } catch (e) {}
       /* Cache the identity so owner-only UI (Staff page, 2FA master) can
          gate itself instantly without a second round trip. */
       try {
