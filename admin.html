@@ -4850,8 +4850,9 @@ async function azRender2faMaster(){
     <div class="page-actions"><button class="btn btn-primary" onclick="saveSettings()">💾 Save Settings</button></div>
   </div>
 
-  <!-- 2FA master toggle — owner-only, every critical save behind password re-auth -->
-  <div class="card" id="az2faMasterCard" style="display:none;margin-bottom:16px">
+  <!-- 2FA master toggle — REMOVED (owner request, 17 Aug 2026): login is
+       password-only. Kept in the DOM for reference but permanently hidden. -->
+  <div class="card" id="az2faMasterCard" style="display:none!important;margin-bottom:16px">
     <div class="card-hdr"><span class="card-title">🔐 Two-factor authentication</span>
       <span class="badge badge-gold" style="margin-left:auto">OWNER ONLY</span></div>
     <table style="width:100%;border-collapse:collapse">
@@ -5885,18 +5886,6 @@ async function apiFetch(path, opts={}) {
   // dozen simultaneous 401s — first reason recorded wins, the rest are
   // no-ops rather than a dozen competing messages.
   if(r.status === 401) {
-    // The server now names its privileged 401s with a `reason` code —
-    // 'invalid-signature' (JWT_SECRET cannot verify, needs a Render fix)
-    // or 'token-version-mismatch' (a real revocation). Reading the body
-    // here lets the logout banner say WHY instead of the generic
-    // "check your clock" text that never helped anyone.
-    var _why401 = '';
-    try {
-      if (r.headers.get && (r.headers.get('content-type') || '').includes('json')) {
-        var _b = await r.clone().json();
-        if (_b && typeof _b.reason === 'string') _why401 = _b.reason;
-      }
-    } catch(e) { _why401 = ''; }
     // One bad 401 must not destroy the session on mobile. Two mobile
     // realities cause transient 401s on a perfectly valid session:
     //   • the in-memory authToken can go stale ('' after a Safari memory
@@ -5939,15 +5928,24 @@ async function apiFetch(path, opts={}) {
       } catch (e) { /* fall through to a real logout below */ }
       delete window.__freshTokenRetryDone;
     }
+    // v9.4.1: the server now returns {reason} on 401 — keep it so the
+    // logout screen and every per-endpoint toast show the TRUE cause
+    // (expired / invalid-signature / revoked / no-token) instead of a
+    // generic 'Session expired' that sent admins chasing the wrong fix.
     try {
+      var body = null;
+      try { body = await r.clone().json(); } catch (e) { /* not JSON */ }
+      var rawReason = (body && (body.reason || body.error)) || '';
+      var serverReason = /expired|revoked|signature|claims/i.test(rawReason) ? String(rawReason) : '';
       if (!localStorage.getItem('ascovita_logout_reason')) {
         localStorage.setItem('ascovita_logout_reason',
-          tokenIsExpired(authToken) ? 'expired' : (_why401 || 'rejected'));
+          serverReason || (tokenIsExpired(authToken) ? 'expired' : 'rejected'));
+        if (serverReason) localStorage.setItem('ascovita_logout_detail', serverReason);
       }
     } catch(e) {}
     doLogout();
     if (typeof showLogoutReason === 'function') showLogoutReason();
-    throw new Error('Session expired');
+    throw new Error('Session expired' + (serverReason ? ' — ' + serverReason : ''));
   }
   // Detect HTML error pages (Express "Cannot POST /route" 404s)
   if(!r.ok) {
@@ -16064,6 +16062,11 @@ body.role-admin #azRoleBanner{display:block}
   function showLogoutReason() {
     var why = localStorage.getItem('ascovita_logout_reason');
     if (!why) return;
+    var detail = '';
+    try {
+      detail = localStorage.getItem('ascovita_logout_detail') || '';
+      localStorage.removeItem('ascovita_logout_detail');
+    } catch (e) {}
     localStorage.removeItem('ascovita_logout_reason');
     var err = document.getElementById('loginError');
     if (err) {
@@ -16073,12 +16076,23 @@ body.role-admin #azRoleBanner{display:block}
          as if it were a progress note rather than the reason you are out. */
       err.style.background = '';
       err.style.color = '';
-      err.textContent =
+      var msg =
         why === 'idle'     ? 'Signed out after 60 minutes of inactivity. Please sign in again.' :
-        why === 'invalid-signature' ? 'The server could not verify this session’s signature — this usually means the JWT_SECRET environment variable on Render was changed or reset. Ask the developer to re-set the same JWT_SECRET in Render and restart the service, then sign in again.' :
-        why === 'token-version-mismatch' ? 'The server says this session was deliberately revoked. Sign in again — if it repeats, the owner has suspended or reset this account.' :
-        why === 'rejected' ? 'The server rejected your session. Sign in again — the server now auto-heals freshly minted tokens (v9.4.1+), so a bounce straight after signing in should not repeat; if it still does, check that this device’s clock is correct.'
-                           : 'Your 1-hour session expired. Please sign in again.';
+        why === 'expired'  ? 'Your 1-hour session expired. Please sign in again.' :
+        why === 'revoked'  ? 'Your session was revoked (a staff change or sign-out from another tab). Please sign in again.' :
+        why === 'no-token' ? 'The sign-in request lost its session token — please sign in again.' :
+                             'The server rejected your session';
+      if (/invalid-signature|claims/i.test(detail)) {
+        msg += ' — the token’s signature did not verify, which happens when the server is redeployed with new security credentials. Sign in again — if it bounces a second time, tell support the server was recently redeployed.';
+      } else if (/expired/i.test(detail)) {
+        msg += ' — the token expired. Please sign in again.';
+      } else if (/revoked/i.test(detail)) {
+        /* already covered above */
+      } else if (why === 'rejected') {
+        msg += '. Sign in again — the server auto-heals freshly minted tokens (v9.4.1+), so a bounce straight after signing in should not repeat; if it still does, the reason below the message tells us exactly why.';
+      }
+      if (detail && !/invalid-signature|claims|expired/i.test(detail)) msg += ' (detail: ' + detail + ')';
+      err.textContent = msg;
     }
   }
   window.showLogoutReason = showLogoutReason;
