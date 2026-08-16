@@ -19005,7 +19005,13 @@ const _GOOGLE_MAX_RETRIES = 8;
   spinner.innerHTML = '<style>@keyframes gs{to{transform:rotate(360deg)}}</style>'
     + '<div style="width:40px;height:40px;border:3px solid var(--edge-hi);border-top-color:var(--f-mineral);border-radius:50%;animation:gs .8s linear infinite"></div>'
     + '<p style="color:var(--f-mineral);margin:0;font-size:14px">Signing you in…</p>';
-  document.addEventListener('DOMContentLoaded', function() { document.body.appendChild(spinner); });
+  // FIX (Aug 2026, owner video report): appending via a DOMContentLoaded
+  // listener could RACE with the async code exchange — if the fetch
+  // resolved first, el.remove() ran on an unattached node (no-op) and the
+  // spinner was then appended AFTER removal, leaving a frozen full-screen
+  // overlay that blocked the page forever. Append synchronously instead;
+  // this IIFE runs in <head> so documentElement already exists.
+  document.documentElement.appendChild(spinner);
 
   // Send code to backend — server holds client_secret securely.
   // redirect_uri MUST byte-for-byte match the one used to request the code
