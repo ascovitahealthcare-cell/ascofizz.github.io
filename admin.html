@@ -15926,6 +15926,113 @@ async function storeEdSaveContent() {
     };
   }
 
+  // ── v10.3 brand-new full templates ────────────────────────────
+  function storeEdStyleMidnight(draft) {
+    // Midnight Luxe: dark premium — ink surfaces, gold accents, serif display.
+    const p = draft.palette || {};
+    const gold = p.brand || '#C9A24B';
+    return {
+      tokens: { paper: '#101217', paperHi: '#171A21', paperLo: '#0A0C10',
+                ink: '#F2EFE8', tHi: '#F2EFE8', tMid: '#A9A498', tLow: '#7C786E' },
+      rules: [
+        `--sh-d: rgba(0,0,0,.55); --sh-l: rgba(255,255,255,.05);`,
+        `--neo-1: 0 8px 30px rgba(0,0,0,.5), inset 0 1px 0 rgba(255,255,255,.04);`,
+        `--neo-2: 0 16px 48px rgba(0,0,0,.6), inset 0 1px 0 rgba(255,255,255,.04);`,
+        `--neo-in: inset 0 2px 8px rgba(0,0,0,.5);`,
+        `--shadow: var(--neo-1); --shadow-xs: 0 4px 14px rgba(0,0,0,.45); --shadow-sm: 0 10px 34px rgba(0,0,0,.5);`,
+        `--radius: var(--r-md); --font-display: 'Playfair Display', Georgia, serif;`,
+        `body{background: linear-gradient(180deg, #0F1116, #0A0C10) !important; color: #F2EFE8;}`,
+        `.navbar,.card,.product-card,.cat-card,.cat-card-sm,.trust-card{background:#171A21 !important;border:1px solid rgba(201,162,75,.22);box-shadow:var(--neo-1);}`,
+        `.hero-body,.shader-stage{background:linear-gradient(180deg,#14161C 0%,#0C0E13 70%);}`,
+        `.btn-primary,.shader-btn-primary{background:linear-gradient(180deg, ${storeEdLighten(gold,.12)}, ${gold});color:#141208;border:none;box-shadow:0 4px 18px ${gold}55;font-weight:600;letter-spacing:.06em;}`,
+        `.shader-badge{background:${gold}22;border:1px solid ${gold}66;color:${storeEdLighten(gold,.35)};}`,
+        `h1,h2,h3{color:#F2EFE8;font-family:'Playfair Display',Georgia,serif;font-weight:500;letter-spacing:.01em;}`,
+        `.trust-tile{background:#171A21;border:1px solid rgba(201,162,75,.2);}`,
+        `.footer-wrap{background:#0A0C10;border-top:1px solid rgba(201,162,75,.18);}`,
+        `.particle{display:none !important;}#liquidFoil{display:none;}`
+      ]
+    };
+  }
+  function storeEdStyleFreshpharm(draft) {
+    // Fresh Pharmacy: clinical clean — white/teal, strict grid, trust-forward.
+    const p = draft.palette || {};
+    const teal = p.brand || '#0E7C86';
+    return {
+      tokens: { paper: '#FFFFFF', paperHi: '#FFFFFF', paperLo: '#F2F6F7',
+                ink: '#0B2529', tHi: '#0B2529', tMid: '#3A5559', tLow: '#5F7A7E' },
+      rules: [
+        `--sh-d: rgba(14,124,134,.14); --sh-l: #FFFFFF;`,
+        `--neo-1: 0 0 0 1px rgba(14,124,134,.10), 0 1px 3px rgba(14,124,134,.06);`,
+        `--neo-2: 0 0 0 1px rgba(14,124,134,.12), 0 4px 12px rgba(14,124,134,.08);`,
+        `--neo-in: none;`,
+        `--shadow: var(--neo-1); --shadow-xs: var(--neo-1); --shadow-sm: var(--neo-2);`,
+        `--radius: 14px; --font-display: 'Jost', system-ui, sans-serif;`,
+        `body{background:#F8FBFB !important;}`,
+        `.navbar{background:#FFFFFF;border-bottom:2px solid ${teal} !important;box-shadow:none;}`,
+        `.card,.product-card,.cat-card,.cat-card-sm{background:#FFFFFF !important;border:1px solid rgba(14,124,134,.16);box-shadow:0 1px 3px rgba(14,124,134,.05);border-radius:14px;}`,
+        `.hero-body{background:linear-gradient(135deg,#F2F8F9,#E7F3F5) !important;}`,
+        `.btn-primary,.shader-btn-primary{background:${teal};color:#FFFFFF;border:none;box-shadow:0 2px 8px rgba(14,124,134,.25);border-radius:12px;font-weight:600;}`,
+        `.shader-badge{background:#E4F2F4;border:1px solid ${teal}55;color:${storeEdDarken(teal,.15)};font-weight:700;letter-spacing:.05em;}`,
+        `.trust-tile{background:#FFFFFF;border:1px solid rgba(14,124,134,.14);}`,
+        `h1,h2,h3{color:#0B2529;font-weight:700;letter-spacing:.005em;}`,
+        `.sm-item{background:#FFFFFF;border:1px solid rgba(14,124,134,.12);}`,
+        `.particle{display:none !important;}#liquidFoil{display:none;}`
+      ]
+    };
+  }
+  function storeEdStyleRetropop(draft) {
+    // Retro Pop: warm 1970s — cream ground, burnt orange, groovy serif,
+    // thick outlines and offset shadows, sticker badges.
+    const p = draft.palette || {};
+    const orange = p.brand || '#E85D26'; const brown = p.ink || '#3A2418';
+    return {
+      tokens: { paper: '#FAF1DE', paperHi: '#FFF7E7', paperLo: '#F0E3C6',
+                ink: brown, tHi: brown, tMid: '#6B4F3C', tLow: '#8A6D55' },
+      rules: [
+        `--sh-d: rgba(58,36,24,.22); --sh-l: rgba(255,250,235,.85);`,
+        `--neo-1: 3px 4px 0 rgba(58,36,24,.35);`,
+        `--neo-2: 6px 7px 0 rgba(58,36,24,.3);`,
+        `--neo-in: inset 2px 3px 0 rgba(58,36,24,.12);`,
+        `--shadow: var(--neo-1); --shadow-xs: 2px 3px 0 rgba(58,36,24,.3); --shadow-sm: 4px 5px 0 rgba(58,36,24,.3);`,
+        `--radius: 22px; --font-display: 'Fraunces', Georgia, serif;`,
+        `body{background:#FAF1DE !important;}`,
+        `.navbar{background:${orange};border-radius:0 0 24px 24px;box-shadow:0 4px 0 rgba(58,36,24,.25);}`,
+        `.navbar a,.nav-link{color:#FFF7E7 !important;}`,
+        `.card,.product-card,.cat-card,.cat-card-sm{background:#FFF7E7 !important;border:2.5px solid ${brown};box-shadow:var(--neo-1);border-radius:24px;}`,
+        `.hero-body{background:radial-gradient(circle at 30% 20%, #FFD97A 0%, #FAF1DE 55%) !important;}`,
+        `.btn-primary,.shader-btn-primary{background:${brown};color:#FAF1DE;border:2.5px solid ${brown};box-shadow:4px 4px 0 ${orange};border-radius:40px;font-weight:700;}`,
+        `.shader-badge{background:${orange};color:#FFF7E7;border:2px solid ${brown};border-radius:40px;font-weight:700;}`,
+        `.trust-tile{background:#FFD97A;border:2.5px solid ${brown};box-shadow:var(--neo-1);}`,
+        `h1,h2,h3{font-family:'Fraunces',Georgia,serif;color:${brown};font-weight:600;}`,
+        `.particle{display:none !important;}#liquidFoil{display:none;}`
+      ]
+    };
+  }
+  function storeEdStyleEditorial(draft) {
+    // Editorial Botanical: magazine layout — oversized italic serif,
+    // off-white/sage, hairline rules, zero chrome.
+    const p = draft.palette || {};
+    const sage = p.brand || '#4A5B35'; const ink = p.ink || '#1E2218';
+    return {
+      tokens: { paper: '#F6F4EC', paperHi: '#FBFAF5', paperLo: '#EAE7DA',
+                ink: ink, tHi: ink, tMid: '#4E5343', tLow: '#6E7462' },
+      rules: [
+        `--sh-d: rgba(30,34,24,.12); --sh-l: #FBFAF5;`,
+        `--neo-1: none; --neo-2: none; --neo-in: none;`,
+        `--shadow: none; --shadow-xs: none; --shadow-sm: none;`,
+        `--radius: 4px; --font-display: 'Playfair Display', Georgia, serif;`,
+        `body{background:#F6F4EC !important;}`,
+        `.navbar{background:#F6F4EC;border-bottom:1.5px solid ${ink} !important;box-shadow:none;}`,
+        `.card,.product-card,.cat-card,.cat-card-sm{background:#FBFAF5 !important;border:none;border-top:1.5px solid ${ink};box-shadow:none;border-radius:0;}`,
+        `.hero-body{background:#F6F4EC !important;border-bottom:1.5px solid ${ink};}`,
+        `.btn-primary,.shader-btn-primary{background:${ink};color:#F6F4EC;border:none;border-radius:0;font-weight:500;letter-spacing:.08em;text-transform:uppercase;}`,
+        `.shader-badge{background:none;border:1.5px solid ${ink};color:${ink};border-radius:0;font-weight:600;letter-spacing:.14em;text-transform:uppercase;}`,
+        `h1,h2,h3{font-family:'Playfair Display',Georgia,serif;color:${ink};font-weight:500;font-style:italic;}`,
+        `.trust-tile{background:none;border:none;border-top:1.5px solid ${ink};border-radius:0;}`,
+        `.particle{display:none !important;}#liquidFoil{display:none;}`
+      ]
+    };
+  }
   const STORE_ED_STYLES = [
     { key: 'default', name: 'Crimson Classic', icon: '🩸', fn: storeEdStyleDefault,
       swatch: ['linear-gradient(135deg,#F5F3F4 50%,#C0394A 50%)','#F5F3F4'],
@@ -15947,7 +16054,19 @@ async function storeEdSaveContent() {
       desc: 'Real-world materials — leather-toned gradient panels and extruded buttons.' },
     { key: 'material', name: 'Material / Flat', icon: '🪄', fn: storeEdStyleMaterial,
       swatch: ['linear-gradient(135deg,#FFFFFF 50%,#FAFAF9 50%)','#FFFFFF'],
-      desc: 'Minimal 2D flatness — crisp surfaces, gentle elevation, zero gloss.' }
+      desc: 'Minimal 2D flatness — crisp surfaces, gentle elevation, zero gloss.' },
+    { key: 'midnight', name: 'Midnight Luxe', icon: '🌙', fn: storeEdStyleMidnight,
+      swatch: ['linear-gradient(135deg,#101217 50%,#C9A24B 50%)','#101217'],
+      desc: 'Dark premium — ink-black surfaces, gold accents, luxury serif — a high-end night-time beauty boutique.' },
+    { key: 'freshpharm', name: 'Fresh Pharmacy', icon: '🩺', fn: storeEdStyleFreshpharm,
+      swatch: ['linear-gradient(135deg,#FFFFFF 50%,#0E7C86 50%)','#FFFFFF'],
+      desc: 'Clinical and trustworthy — crisp white, teal brand, strict grid — a modern digital pharmacy.' },
+    { key: 'retropop', name: 'Retro Pop', icon: '🟠', fn: storeEdStyleRetropop,
+      swatch: ['linear-gradient(135deg,#FAF1DE 50%,#E85D26 50%)','#FAF1DE'],
+      desc: 'Warm 1970s nostalgia — cream ground, burnt orange, groovy serif and sticker badges.' },
+    { key: 'editorial', name: 'Editorial Botanical', icon: '🌿', fn: storeEdStyleEditorial,
+      swatch: ['linear-gradient(135deg,#F6F4EC 50%,#4A5B35 50%)','#F6F4EC'],
+      desc: 'Wellness print-magazine — oversized italic serif, sage accents, hairline rules, zero chrome.' },
   ];
 
   // ── Combinations registry ───────────────────────────────────────
@@ -16050,8 +16169,41 @@ async function storeEdSaveContent() {
     }).join('');
   }
 
+  // ── v10.3 template presets: the tuned palette each template ships with ──
+  const TEMPLATE_PALETTE = {
+    midnight:   { name: 'Midnight Luxe', palette: {
+        paper:'#101217', paperHi:'#171A21', paperLo:'#0A0C10', white:'#171A21',
+        brand:'#C9A24B', brandDeep:'#967833', brandHi:'#E0BC6A',
+        secondary:'#8F7A52', secondaryHi:'#2A2516',
+        ink:'#F2EFE8', inkMid:'#A9A498', tHi:'#F2EFE8', tMid:'#A9A498', tLow:'#7C786E',
+        flavour1:'#C9A24B', flavour2:'#5B5444', flavour3:'#A67C52', flavour4:'#3D4A5C' } },
+    freshpharm: { name: 'Fresh Pharmacy', palette: {
+        paper:'#FFFFFF', paperHi:'#FFFFFF', paperLo:'#F2F6F7', white:'#FFFFFF',
+        brand:'#0E7C86', brandDeep:'#095A62', brandHi:'#2FA0AB',
+        secondary:'#3E8E97', secondaryHi:'#DCEEF1',
+        ink:'#0B2529', inkMid:'#3A5559', tHi:'#0B2529', tMid:'#3A5559', tLow:'#5F7A7E',
+        flavour1:'#0E7C86', flavour2:'#3A5559', flavour3:'#2FA0AB', flavour4:'#5FB8BF' } },
+    retropop:   { name: 'Retro Pop', palette: {
+        paper:'#FAF1DE', paperHi:'#FFF7E7', paperLo:'#F0E3C6', white:'#FFF7E7',
+        brand:'#E85D26', brandDeep:'#C44A18', brandHi:'#F28A5E',
+        secondary:'#3A2418', secondaryHi:'#FFD97A',
+        ink:'#3A2418', inkMid:'#6B4F3C', tHi:'#3A2418', tMid:'#6B4F3C', tLow:'#8A6D55',
+        flavour1:'#E85D26', flavour2:'#FFD97A', flavour3:'#3A2418', flavour4:'#B5543A' } },
+    editorial:  { name: 'Editorial Botanical', palette: {
+        paper:'#F6F4EC', paperHi:'#FBFAF5', paperLo:'#EAE7DA', white:'#FBFAF5',
+        brand:'#4A5B35', brandDeep:'#334122', brandHi:'#6A7C4E',
+        secondary:'#6E7462', secondaryHi:'#E3E6D8',
+        ink:'#1E2218', inkMid:'#4E5343', tHi:'#1E2218', tMid:'#4E5343', tLow:'#6E7462',
+        flavour1:'#4A5B35', flavour2:'#6E7462', flavour3:'#8C8C5C', flavour4:'#3E4630' } }
+  };
   function storeEdApplyStyle(key) {
     storeEdDraft.style = key;
+    // v10.3: templates carry their own tuned palette so one click
+    // recolors the whole website (custom pickers still win afterward).
+    var tpl = TEMPLATE_PALETTE[key];
+    if (tpl && tpl.palette) {
+      storeEdDraft.palette = Object.assign({}, tpl.palette);
+    }
     storeEdSetDraft(storeEdDraft);
     renderStyleStrip();
     storeEdSchedulePreview();

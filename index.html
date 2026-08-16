@@ -24153,7 +24153,92 @@ function closeBlog() {
         '.particle{opacity:.2 !important;}');
     }
 
-    // ── Combination tweaks ────────────────────────────────────────
+
+    // ── v10.3: brand-new full templates ───────────────────────────
+    else if (style === 'midnight') {
+      var md = p.brand || '#C9A24B', mdpaper = p.paper || '#101217', mdink = p.ink || '#F2EFE8';
+      css.push('--paper:' + mdpaper + ';--paper-hi:#171A21;--paper-lo:#0A0C10;',
+        '--ink:' + mdink + ';--t-hi:#F2EFE8;--t-mid:#A9A498;--t-low:#7C786E;',
+        '--sh-d:rgba(0,0,0,.55);--sh-l:rgba(255,255,255,.05);',
+        '--neo-1:0 8px 30px rgba(0,0,0,.5), inset 0 1px 0 rgba(255,255,255,.04);',
+        '--neo-2:0 16px 48px rgba(0,0,0,.6), inset 0 1px 0 rgba(255,255,255,.04);',
+        '--neo-in:inset 0 2px 8px rgba(0,0,0,.5);',
+        '--shadow:var(--neo-1);--shadow-xs:0 4px 14px rgba(0,0,0,.45);--shadow-sm:0 10px 34px rgba(0,0,0,.5);',
+        '--radius:var(--r-md);',
+        '--font-display:\'Playfair Display\',Georgia,serif;',
+        'body{background:linear-gradient(180deg,#0F1116,#0A0C10) !important;color:' + mdink + ';}',
+        '.navbar,.card,.product-card,.cat-card,.cat-card-sm,.trust-card{background:#171A21 !important;border:1px solid rgba(201,162,75,.22);box-shadow:var(--neo-1);}',
+        '.hero-body,.shader-stage{background:linear-gradient(180deg,#14161C 0%,#0C0E13 70%);}',
+        '.btn-primary,.shader-btn-primary{background:linear-gradient(180deg,' + lighten(md, .12) + ',' + md + ');color:#141208;border:none;box-shadow:0 4px 18px ' + md + '55;font-weight:600;letter-spacing:.06em;}',
+        '.shader-badge{background:' + md + '22;border:1px solid ' + md + '66;color:' + lighten(md, .35) + ';}',
+        'h1,h2,h3{color:' + mdink + ';font-family:\'Playfair Display\',Georgia,serif;font-weight:500;letter-spacing:.01em;}',
+        '.trust-tile{background:#171A21;border:1px solid rgba(201,162,75,.2);}',
+        '.footer-wrap{background:#0A0C10;border-top:1px solid rgba(201,162,75,.18);}',
+        '.particle{display:none !important;}#liquidFoil{display:none;}');
+    } else if (style === 'freshpharm') {
+      var fp = p.brand || '#0E7C86', fppaper = p.paper || '#FFFFFF';
+      css.push('--paper:' + fppaper + ';--paper-hi:#FFFFFF;--paper-lo:#F2F6F7;',
+        '--ink:#0B2529;--t-hi:#0B2529;--t-mid:#3A5559;--t-low:#5F7A7E;',
+        '--sh-d:rgba(14,124,134,.14);--sh-l:#FFFFFF;',
+        '--neo-1:0 0 0 1px rgba(14,124,134,.10), 0 1px 3px rgba(14,124,134,.06);',
+        '--neo-2:0 0 0 1px rgba(14,124,134,.12), 0 4px 12px rgba(14,124,134,.08);',
+        '--neo-in:none;',
+        '--shadow:var(--neo-1);--shadow-xs:var(--neo-1);--shadow-sm:var(--neo-2);',
+        '--radius:14px;',
+        '--font-display:\'Jost\',system-ui,sans-serif;',
+        'body{background:#F8FBFB !important;}',
+        '.navbar{background:#FFFFFF;border-bottom:2px solid ' + fp + ' !important;box-shadow:none;}',
+        '.card,.product-card,.cat-card,.cat-card-sm{background:#FFFFFF !important;border:1px solid rgba(14,124,134,.16);box-shadow:0 1px 3px rgba(14,124,134,.05);border-radius:14px;}',
+        '.hero-body{background:linear-gradient(135deg,#F2F8F9,#E7F3F5) !important;}',
+        '.btn-primary,.shader-btn-primary{background:' + fp + ';color:#FFFFFF;border:none;box-shadow:0 2px 8px rgba(14,124,134,.25);border-radius:12px;font-weight:600;}',
+        '.shader-badge{background:#E4F2F4;border:1px solid ' + fp + '55;color:' + darken(fp, .15) + ';font-weight:700;letter-spacing:.05em;}',
+        '.trust-tile{background:#FFFFFF;border:1px solid rgba(14,124,134,.14);}',
+        'h1,h2,h3{color:#0B2529;font-weight:700;letter-spacing:.005em;}',
+        '.sm-item{background:#FFFFFF;border:1px solid rgba(14,124,134,.12);}',
+        '.particle{display:none !important;}#liquidFoil{display:none;}');
+    } else if (style === 'retropop') {
+      var rp = p.brand || '#E85D26', rpink = p.ink || '#3A2418', rppaper = p.paper || '#FAF1DE';
+      css.push('--paper:' + rppaper + ';--paper-hi:#FFF7E7;--paper-lo:#F0E3C6;',
+        '--ink:' + rpink + ';--t-hi:' + rpink + ';--t-mid:#6B4F3C;--t-low:#8A6D55;',
+        '--sh-d:rgba(58,36,24,.22);--sh-l:rgba(255,250,235,.85);',
+        '--neo-1:3px 4px 0 rgba(58,36,24,.35);',
+        '--neo-2:6px 7px 0 rgba(58,36,24,.3);',
+        '--neo-in:inset 2px 3px 0 rgba(58,36,24,.12);',
+        '--shadow:var(--neo-1);--shadow-xs:2px 3px 0 rgba(58,36,24,.3);--shadow-sm:4px 5px 0 rgba(58,36,24,.3);',
+        '--radius:22px;',
+        '--font-display:\'Fraunces\',Georgia,serif;',
+        'body{background:#FAF1DE !important;}',
+        '.navbar{background:#E85D26;border-radius:0 0 24px 24px;box-shadow:0 4px 0 rgba(58,36,24,.25);}',
+        '.navbar a,.nav-link{color:#FFF7E7 !important;}',
+        '.card,.product-card,.cat-card,.cat-card-sm{background:#FFF7E7 !important;border:2.5px solid #3A2418;box-shadow:var(--neo-1);border-radius:24px;}',
+        '.hero-body{background:radial-gradient(circle at 30% 20%,#FFD97A 0%,#FAF1DE 55%) !important;}',
+        '.btn-primary,.shader-btn-primary{background:#3A2418;color:#FAF1DE;border:2.5px solid #3A2418;box-shadow:4px 4px 0 #E85D26;border-radius:40px;font-weight:700;}',
+        '.shader-badge{background:#E85D26;color:#FFF7E7;border:2px solid #3A2418;border-radius:40px;font-weight:700;}',
+        '.trust-tile{background:#FFD97A;border:2.5px solid #3A2418;box-shadow:var(--neo-1);}',
+        'h1,h2,h3{font-family:\'Fraunces\',Georgia,serif;color:#3A2418;font-weight:600;}',
+        '.particle{display:none !important;}#liquidFoil{display:none;}');
+    } else if (style === 'editorial') {
+      var eb = p.brand || '#4A5B35', ebink = p.ink || '#1E2218', ebpaper = p.paper || '#F6F4EC';
+      css.push('--paper:' + ebpaper + ';--paper-hi:#FBFAF5;--paper-lo:#EAE7DA;',
+        '--ink:' + ebink + ';--t-hi:' + ebink + ';--t-mid:#4E5343;--t-low:#6E7462;',
+        '--sh-d:rgba(30,34,24,.12);--sh-l:#FBFAF5;',
+        '--neo-1:none;',
+        '--neo-2:none;',
+        '--neo-in:none;',
+        '--shadow:none;--shadow-xs:none;--shadow-sm:none;',
+        '--radius:4px;',
+        '--font-display:\'Playfair Display\',Georgia,serif;',
+        'body{background:#F6F4EC !important;}',
+        '.navbar{background:#F6F4EC;border-bottom:1.5px solid #1E2218 !important;box-shadow:none;}',
+        '.card,.product-card,.cat-card,.cat-card-sm{background:#FBFAF5 !important;border:none;border-top:1.5px solid #1E2218;box-shadow:none;border-radius:0;}',
+        '.hero-body{background:#F6F4EC !important;border-bottom:1.5px solid #1E2218;}',
+        '.btn-primary,.shader-btn-primary{background:#1E2218;color:#F6F4EC;border:none;border-radius:0;font-weight:500;letter-spacing:.08em;text-transform:uppercase;}',
+        '.shader-badge{background:none;border:1.5px solid #1E2218;color:#1E2218;border-radius:0;font-weight:600;letter-spacing:.14em;text-transform:uppercase;}',
+        'h1,h2,h3{font-family:\'Playfair Display\',Georgia,serif;color:#1E2218;font-weight:500;font-style:italic;}',
+        '.trust-tile{background:none;border:none;border-top:1.5px solid #1E2218;border-radius:0;}',
+        '.particle{display:none !important;}#liquidFoil{display:none;}');
+    }
+    // ── Combination tweaks ────────────────────────────────────────    // ── Combination tweaks ────────────────────────────────────────
     var b = p.brand || '#C0394A';
     if (c.shadows === 'none')    css.push('--neo-1:none;--neo-2:none;--neo-3:none;--neo-4:none;--neo-in:none;--shadow:none;--shadow-xs:none;--shadow-sm:none;');
     else if (c.shadows === 'soft')    css.push('--neo-1:0 1px 4px rgba(0,0,0,.08);--neo-2:0 3px 10px rgba(0,0,0,.09);--neo-in:none;--shadow-xs:0 1px 4px rgba(0,0,0,.08);--shadow-sm:0 3px 10px rgba(0,0,0,.09);');
@@ -24185,7 +24270,19 @@ function closeBlog() {
     else if (c.cardstyle === 'bento') css.push('.product-card,.cat-card,.cat-card-sm{box-shadow:0 0 0 1px rgba(30,30,36,.06), 0 2px 8px rgba(30,30,36,.06);border-radius:var(--r-md);}');
     else                              css.push('.product-card,.cat-card,.cat-card-sm{box-shadow:var(--neo-1);}');
 
-    return css.length ? css.join('') : '';
+    // v10.3: separate root variable declarations from selector rules and
+    // wrap the variables in a :root{} block — bare top-level declarations
+    // are invalid CSS and were silently dropped by the browser.
+    var vars = [], rules = [];
+    for (var i = 0; i < css.length; i++) {
+      var entry = css[i].trim();
+      if (entry && entry.charAt(0) === '-' && entry.indexOf('{') === -1) vars.push(entry);
+      else if (entry.indexOf('{') !== -1) rules.push(entry);
+    }
+    var out = '';
+    if (vars.length) out += ':root{' + vars.join('') + '}';
+    if (rules.length) out += rules.join('');
+    return out;
   }
 
   // ── Published content edits (v9.6) ──────────────────────────────
@@ -24312,7 +24409,7 @@ function closeBlog() {
         if (base && base.nextSibling) base.parentNode.insertBefore(el, base.nextSibling);
         else document.head.appendChild(el);
       }
-      el.textContent += extra;
+      el.textContent = extra;
     } catch (_) {}
   }
 
