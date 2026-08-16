@@ -365,7 +365,7 @@ textarea.form-control{resize:vertical;min-height:80px;}
 .form-hint{font-size:0.7rem;color:var(--text3);}
 
 /* ═══ MODAL ═══ */
-.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.7);backdrop-filter:blur(4px);z-index:500;display:none;align-items:center;justify-content:center;padding:20px;}
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.7);backdrop-filter:blur(4px);z-index:900;display:none;align-items:center;justify-content:center;padding:20px;}
 .modal-overlay.open{display:flex;}
 .modal{background:var(--surface);border:1px solid var(--border2);border-radius:16px;width:100%;max-width:680px;max-height:90vh;overflow-y:auto;box-shadow:var(--shadow-lg);}
 .modal-lg{max-width:900px;}
@@ -3120,7 +3120,8 @@ function azTogglePw() {
       '.az360-tabs .az360-tab{background:none;border:none;border-bottom:3px solid transparent;padding:9px 13px;font-family:var(--font);font-size:.76rem;font-weight:600;color:var(--text3);cursor:pointer;white-space:nowrap;transition:all .2s}' +
       '.az360-tabs .az360-tab:hover{color:var(--green-text)}' +
       '.az360-tabs .az360-tab.active{color:var(--green);border-bottom-color:var(--gold)}' +
-      '.az360-body{max-height:64vh;overflow-y:auto;padding-right:4px}' +
+      '.az360-body{max-height:64vh;overflow-y:auto;padding-right:4px;-webkit-overflow-scrolling:touch}' +
+      '.modal-overlay{z-index:900 !important}.modal{max-height:min(88dvh,640px) !important;overflow-y:auto}' +
       '.az360-kpi{flex:1;min-width:96px;background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:9px 10px;text-align:center}' +
       '.az360-kpi .k{font-size:.58rem;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.3px}' +
       '.az360-kpi .v{font-family:var(--display);font-size:.95rem;font-weight:800;color:var(--green-text);margin-top:3px}' +
@@ -12705,7 +12706,7 @@ async function loadSettings() {
       try { localStorage.setItem(THEME_KEY, d.interface_theme); } catch {}
     }
   } catch {}
-
+}
 
 async function saveSettings() {
   if (typeof confirmCriticalAction === 'function') {
@@ -12746,10 +12747,14 @@ async function saveSettingsCore() {
   } catch(e) { toast(e.message, 'error'); }
 
   try {
-  const cur = document.getElementById('curPwd').value;
-  const nw  = document.getElementById('newPwd').value;
-  if(!cur||!nw) { toast('Both fields required','error'); return; }
-  toast('Password change requires server-side support. Contact system admin.','warning');
+    const cur = document.getElementById('curPwd').value;
+    const nw  = document.getElementById('newPwd').value;
+    if(!cur||!nw) { toast('Both fields required','error'); return; }
+    // Changing the admin password from the panel requires a server endpoint
+    // (a client-only check would be cosmetic). Keep the honest message until
+    // that endpoint exists instead of pretending the password changed.
+    toast('Password change requires server-side support. Contact system admin.','warning');
+  } catch(e) { toast(e.message, 'error'); }
 }
 
 // ═══════════════════════════════════════════════
