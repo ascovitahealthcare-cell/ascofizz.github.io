@@ -24269,24 +24269,26 @@ function closeBlog() {
     else if (c.cardstyle === 'clay') css.push('.product-card,.cat-card,.cat-card-sm{box-shadow:8px 10px 16px rgba(90,80,110,.16), -6px -8px 14px rgba(255,255,255,.85);border-radius:var(--r-lg);}');
     else if (c.cardstyle === 'bento') css.push('.product-card,.cat-card,.cat-card-sm{box-shadow:0 0 0 1px rgba(30,30,36,.06), 0 2px 8px rgba(30,30,36,.06);border-radius:var(--r-md);}');
     else                              css.push('.product-card,.cat-card,.cat-card-sm{box-shadow:var(--neo-1);}');
-    // ── v10.4: Design & Layout controls (banner / cards / borders / image shape-fit-position)
-    if (c.banner === 'full')     css.push('.hero-banner,.hero-banner-slide img{min-height:640px;}.hero-banner-slide img{aspect-ratio:auto;height:640px;object-fit:cover !important;}#shopBannerSlot1 img,#shopBannerSlot2 img{height:460px !important;}');
-    else if (c.banner === 'compact') css.push('.hero-banner,.hero-banner-slide img{min-height:300px;}.hero-banner-slide img{aspect-ratio:auto;height:300px;object-fit:cover !important;}#shopBannerSlot1 img,#shopBannerSlot2 img{height:240px !important;}');
-    else                           css.push('.hero-banner,.hero-banner-slide img{min-height:460px;}.hero-banner-slide img{aspect-ratio:auto;height:460px;object-fit:cover !important;}#shopBannerSlot1 img,#shopBannerSlot2 img{height:360px !important;}');
-    if (c.cards === 's')      css.push('.products-grid{grid-template-columns:repeat(auto-fill,minmax(170px,1fr)) !important;}.product-card .p-info{font-size:.82rem !important;}.product-card{padding:5px !important;}');
-    else if (c.cards === 'l') css.push('.products-grid{grid-template-columns:repeat(auto-fill,minmax(300px,1fr)) !important;}.product-card .p-info{font-size:1rem !important;}.product-card{padding:11px !important;}');
-    else                      css.push('.products-grid{grid-template-columns:repeat(auto-fill,minmax(252px,1fr)) !important;}.product-card .p-info{font-size:.9rem !important;}.product-card{padding:7px !important;}');
-    if (c.cardborder === 'none')   css.push('.product-card,.cat-card,.cat-card-sm,.promo-card-media{border:none !important;box-shadow:none !important;}');
-    else if (c.cardborder === 'thin')   css.push('.product-card,.cat-card,.cat-card-sm,.promo-card-media{border:1px solid rgba(0,0,0,.09) !important;}');
-    else if (c.cardborder === 'medium') css.push('.product-card,.cat-card,.cat-card-sm,.promo-card-media{border:2.5px solid rgba(0,0,0,.16) !important;}');
-    else if (c.cardborder === 'thick')  css.push('.product-card,.cat-card,.cat-card-sm,.promo-card-media{border:4px solid #111 !important;}');
-    if (c.imgshape === 'rounded') css.push('.p-img-wrap,.p-img-wrap img,.promo-card-media,.promo-card-media img,.blog-img,.blog-img img{border-radius:18px !important;}');
-    else if (c.imgshape === 'circle') css.push('.p-img-wrap,.p-img-wrap img,.promo-card-media,.promo-card-media img,.blog-img,.blog-img img{border-radius:50% !important;}.p-img-wrap img{aspect-ratio:1/1 !important;object-fit:cover !important;}');
-    if (c.imgfit === 'contain')  css.push('.hero-banner-slide img,.p-img-wrap img,.shop-banner-slot img,.promo-card-media img,.blog-img img{object-fit:contain !important;}');
-    else if (c.imgfit === 'center') css.push('.hero-banner-slide img,.p-img-wrap img,.shop-banner-slot img,.promo-card-media img,.blog-img img{object-fit:cover !important;object-position:center !important;}');
-    if (c.imgpos === 'top')    css.push('.hero-banner-slide img,.shop-banner-slot img,.p-img-wrap img{object-position:top !important;}');
-    else if (c.imgpos === 'bottom') css.push('.hero-banner-slide img,.shop-banner-slot img,.p-img-wrap img{object-position:bottom !important;}');
-    else if (c.imgpos === 'center') css.push('.hero-banner-slide img,.shop-banner-slot img,.p-img-wrap img{object-position:center !important;}');
+    // ── v10.4: Design & Layout controls (banner / cards / borders / image shape-fit-position).
+    //    Default path emits NO rules — the site renders exactly like before
+    //    when no combos are published. Banner height rules are desktop-only
+    //    (>=821px) so phones keep the original aspect-ratio artwork layout.
+    const _b = c.banner, _k = c.cards, _cb = c.cardborder, _is = c.imgshape, _if = c.imgfit, _ip = c.imgpos;
+    if (_b === 'full') css.push('@media(min-width:821px){.hero-banner,.hero-banner-slide img{min-height:640px;}.hero-banner-slide img{aspect-ratio:auto;height:640px;object-fit:cover !important;}#shopBannerSlot1 img,#shopBannerSlot2 img{height:460px !important;}}');
+    else if (_b === 'compact') css.push('.hero-banner,.hero-banner-slide img{min-height:300px;}.hero-banner-slide img{aspect-ratio:auto;height:300px;object-fit:cover !important;}#shopBannerSlot1 img,#shopBannerSlot2 img{height:240px !important;}');
+    if (_k === 's')      css.push('.products-grid{grid-template-columns:repeat(auto-fill,minmax(170px,1fr)) !important;}.product-card .p-info{font-size:.82rem !important;}');
+    else if (_k === 'l') css.push('.products-grid{grid-template-columns:repeat(auto-fill,minmax(300px,1fr)) !important;}.product-card .p-info{font-size:1rem !important;}.product-card{padding:11px !important;}');
+    if (_cb === 'none')   css.push('.product-card,.cat-card,.cat-card-sm,.promo-card-media{border:none !important;box-shadow:none !important;}');
+    else if (_cb === 'thin')   css.push('.product-card,.cat-card,.cat-card-sm,.promo-card-media{border:1px solid rgba(0,0,0,.09) !important;}');
+    else if (_cb === 'medium') css.push('.product-card,.cat-card,.cat-card-sm,.promo-card-media{border:2.5px solid rgba(0,0,0,.16) !important;}');
+    else if (_cb === 'thick')  css.push('.product-card,.cat-card,.cat-card-sm,.promo-card-media{border:4px solid #111 !important;}');
+    if (_is === 'rounded') css.push('.p-img-wrap,.p-img-wrap img,.promo-card-media,.promo-card-media img,.blog-img,.blog-img img{border-radius:18px !important;}');
+    else if (_is === 'circle') css.push('.p-img-wrap,.p-img-wrap img,.promo-card-media,.promo-card-media img,.blog-img,.blog-img img{border-radius:50% !important;}.p-img-wrap img{aspect-ratio:1/1 !important;object-fit:cover !important;}');
+    if (_if === 'contain')  css.push('.hero-banner-slide img,.p-img-wrap img,.shop-banner-slot img,.promo-card-media img,.blog-img img{object-fit:contain !important;}');
+    else if (_if === 'center') css.push('.hero-banner-slide img,.p-img-wrap img,.shop-banner-slot img,.promo-card-media img,.blog-img img{object-fit:cover !important;object-position:center !important;}');
+    if (_ip === 'top')    css.push('.hero-banner-slide img,.shop-banner-slot img,.p-img-wrap img{object-position:top !important;}');
+    else if (_ip === 'bottom') css.push('.hero-banner-slide img,.shop-banner-slot img,.p-img-wrap img{object-position:bottom !important;}');
+    else if (_ip === 'center') css.push('.hero-banner-slide img,.shop-banner-slot img,.p-img-wrap img{object-position:center !important;}');
 
 
     // v10.3: separate root variable declarations from selector rules and
