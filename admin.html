@@ -10367,7 +10367,7 @@ function renderSiteImgSections(groups, overrides){
             </div>
             <div class="si-actions">
               <input type="file" accept="image/*,.svg,video/*,.mp4,.webm,.mov" id="siteImgFile-${item.key}" style="display:none;" onchange="uploadSiteImage(this, '${item.key}')">
-              <button class="btn btn-secondary btn-sm" style="flex:1;" onclick="storeEdOpenGallery(String(item.key))" title="Pick from your photo gallery">🖼️ Gallery</button><button class="btn btn-primary btn-sm" style="flex:1;" onclick="document.getElementById('siteImgFile-${item.key}').click()">📤 ${isOverridden ? 'Replace' : 'Upload'}</button>
+              <button class="btn btn-secondary btn-sm" style="flex:1;" onclick="storeEdOpenGallery(String('${item.key}'))" title="Pick from your photo gallery">🖼️ Gallery</button><button class="btn btn-primary btn-sm" style="flex:1;" onclick="document.getElementById('siteImgFile-${item.key}').click()">📤 ${isOverridden ? 'Replace' : 'Upload'}</button>
               ${isOverridden ? `<button class="btn btn-danger btn-sm btn-icon" onclick="resetSiteImage('${item.key}', '${current}')" title="Delete this image everywhere and revert to default">🗑️</button>` : ''}
             </div>
           </div>`;
@@ -10428,7 +10428,7 @@ const __eduHtml = function(overrides){
               </div>
               <div class="si-actions">
                 <input type="file" accept="image/*,.svg,video/*,.mp4,.webm,.mov" id="eduFile-${key}" style="display:none;" onchange="uploadEduCreative(this, '${key}')">
-                <button class="btn btn-secondary btn-sm" style="flex:1;" onclick="storeEdOpenGallery(String(key))" title="Pick from your photo gallery">🖼️ Gallery</button><button class="btn btn-primary btn-sm" style="flex:1;" onclick="document.getElementById('eduFile-${key}').click()">📤 ${has ? 'Replace' : 'Upload'}</button>
+                <button class="btn btn-secondary btn-sm" style="flex:1;" onclick="storeEdOpenGallery(String('${key}'))" title="Pick from your photo gallery">🖼️ Gallery</button><button class="btn btn-primary btn-sm" style="flex:1;" onclick="document.getElementById('eduFile-${key}').click()">📤 ${has ? 'Replace' : 'Upload'}</button>
                 ${has ? `<button class="btn btn-danger btn-sm btn-icon" onclick="deleteEduCreative('${key}', '${url}')" title="Delete this creative">🗑️</button>` : ''}
               </div>
             </div>`;
@@ -10459,7 +10459,7 @@ const __eduHtml = function(overrides){
               </div>
               <div class="si-actions">
                 <input type="file" accept="image/*,.svg,video/*,.mp4,.webm,.mov" id="eduFile-${key}" style="display:none;" onchange="uploadEduCreative(this, '${key}')">
-                <button class="btn btn-secondary btn-sm" style="flex:1;" onclick="storeEdOpenGallery(String(key))" title="Pick from your photo gallery">🖼️ Gallery</button><button class="btn btn-primary btn-sm" style="flex:1;" onclick="document.getElementById('eduFile-${key}').click()">📤 ${has ? 'Replace' : 'Upload'}</button>
+                <button class="btn btn-secondary btn-sm" style="flex:1;" onclick="storeEdOpenGallery(String('${key}'))" title="Pick from your photo gallery">🖼️ Gallery</button><button class="btn btn-primary btn-sm" style="flex:1;" onclick="document.getElementById('eduFile-${key}').click()">📤 ${has ? 'Replace' : 'Upload'}</button>
                 ${has ? `<button class="btn btn-danger btn-sm btn-icon" onclick="deleteEduCreative('${key}', '${url}')" title="Delete this creative">🗑️</button>` : ''}
               </div>
             </div>`;
