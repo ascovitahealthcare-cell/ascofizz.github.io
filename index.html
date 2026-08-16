@@ -23977,6 +23977,7 @@ window.refreshAccountWelcome = refreshAccountWelcome;
 ═══════════════════════════════════════════════════════════════ */
 (function () {
   const POS_KEY = 'ozylix-position';
+  window.__ozyPosMarker = true;
   const MAX_AGE_MS = 60 * 60 * 1000; // ignore positions older than 1 hour
 
   // Capture the saved state SYNCHRONOUSLY at parse time (during the reload,
@@ -24243,7 +24244,13 @@ window.refreshAccountWelcome = refreshAccountWelcome;
   if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', function () { scheduleRestore(900); });
     window.addEventListener('pageshow', function (ev) {
-      if (ev.persisted) scheduleRestore(400);
+      if (ev.persisted) {
+        // bfcache restores the JS state from the earlier page load, where
+        // restorePosition was already scheduled once — reset the flag so the
+        // restored session resumes again instead of skipping it.
+        _restoreScheduled = false;
+        scheduleRestore(400);
+      }
     });
   } else {
     scheduleRestore(900);
@@ -24279,6 +24286,10 @@ window.refreshAccountWelcome = refreshAccountWelcome;
   } catch (e) {}
 })();
 </script>
+
+
+
+
 
 <!-- Blog article reader (SEO fix: blog cards are now full articles, not dead
      cards. Renders the BLOGS entry body with title, meta and related product.) -->
