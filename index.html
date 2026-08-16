@@ -5420,6 +5420,65 @@ textarea.form-input { min-height: 96px; resize: vertical; font-family: inherit; 
 }
 .pf-icon { font-size: 3.4rem; margin-bottom: 18px; }
 .pf-title { font-family: var(--font-display); font-size: clamp(1.7rem, 3.4vw, 2.5rem); font-weight: 800; letter-spacing: -.04em; color: var(--t-hi); margin-bottom: 12px; }
+/* ═══════════════════════════════════════════════════════════════════
+   PAYMENT RESULT — success OR failure, shown in place during checkout.
+   A real modal (fixed inset, dimmed backdrop, high z-index), centred on
+   screen so the outcome is unmistakable on phones — never floating at
+   the bottom behind the sticky pay bar. See showPaymentResult() and
+   showPaymentError() below.
+   ═══════════════════════════════════════════════════════════════════ */
+.pay-result-overlay {
+  position: fixed; inset: 0; z-index: 99998;
+  display: flex; align-items: center; justify-content: center;
+  padding: 18px;
+  background: rgba(10, 8, 12, 0.72);
+  -webkit-backdrop-filter: blur(6px); backdrop-filter: blur(6px);
+  animation: pay-result-fade-in .22s ease-out;
+}
+@keyframes pay-result-fade-in { from { opacity: 0; } to { opacity: 1; } }
+body.oz-pay-result #ozPayBar { display: none !important; }
+body.oz-pay-result { overflow: hidden; }
+.pay-result-box {
+  position: relative;
+  width: 100%; max-width: 430px; max-height: 88vh; overflow-y: auto;
+  padding: 34px 26px 26px; border-radius: 22px; text-align: center;
+  background: var(--paper, #F5F3F4);
+  box-shadow: 0 30px 90px rgba(16, 12, 20, 0.45);
+  animation: pay-result-pop-in .28s cubic-bezier(.34, 1.56, .64, 1);
+}
+@keyframes pay-result-pop-in { from { opacity: 0; transform: scale(.92) translateY(14px); } to { opacity: 1; transform: scale(1) translateY(0); } }
+.pay-result-icon {
+  display: grid; place-items: center; width: 96px; height: 96px; margin: 0 auto 20px;
+  border-radius: 50%; font-size: 2.6rem;
+  border: 2px solid transparent;
+}
+.pay-result-icon.ok {
+  color: #2f5d3a;
+  background: radial-gradient(circle at 38% 32%, rgba(107,240,218,.30), rgba(47,93,58,.06) 58%, transparent);
+  border-color: rgba(47,93,58,.34);
+  box-shadow: 0 0 50px rgba(47,93,58,.22), inset 0 1px 0 rgba(255,255,255,.35);
+}
+.pay-result-icon.fail {
+  color: #8E2333;
+  background: radial-gradient(circle at 38% 32%, rgba(192,48,74,.16), rgba(192,48,74,.05) 58%, transparent);
+  border-color: rgba(192,48,74,.34);
+  box-shadow: 0 0 50px rgba(192,48,74,.18), inset 0 1px 0 rgba(255,255,255,.35);
+}
+.pay-result-title { font-family: var(--font-display); font-size: 1.7rem; font-weight: 800; letter-spacing: -.03em; color: var(--t-hi); margin-bottom: 10px; }
+.pay-result-ref { display: inline-block; font-size: .74rem; font-weight: 700; color: var(--t-low); margin-bottom: 14px; background: var(--st-muted-bg); padding: 7px 14px; border-radius: 999px; }
+.pay-result-msg { font-size: .92rem; line-height: 1.55; color: var(--t-mid); margin: 0 0 22px; }
+.pay-result-note { font-size: .78rem; color: var(--t-low); background: var(--fern-bg); color: var(--fern-lo); font-weight: 600; border-radius: 12px; padding: 11px 14px; margin: 0 0 22px; text-align: left; }
+.pay-result-actions { display: flex; flex-direction: column; gap: 10px; }
+.pay-result-actions .pay-result-btn { width: 100%; padding: 14px 20px; border-radius: 999px; font-size: .92rem; font-weight: 700; cursor: pointer; touch-action: manipulation; }
+.pay-result-primary { border: none; color: #fff; background: var(--indigo, #547177); box-shadow: var(--neo-1); }
+.pay-result-primary.ok { background: #2f5d3a; }
+.pay-result-primary.fail { background: var(--indigo-lo, #8E2333); }
+.pay-result-secondary { border: 1.5px solid var(--edge); color: var(--t-mid); background: transparent; }
+.pay-result-wa { border: none; color: #16592f; background: #E8F5EA; font-weight: 800; }
+@media (prefers-reduced-motion: reduce) {
+  .pay-result-overlay, .pay-result-box { animation: none; }
+}
+
 .pay-error-box {
   max-width: 520px; margin: 0 auto; padding: 34px; border-radius: var(--r-xl); text-align: center;
   background: var(--paper);
@@ -17209,39 +17268,87 @@ function hideProcessingScreen() {
   document.getElementById('cfProcessing')?.remove();
 }
 
-// ── PAYMENT ERROR — with Retry, Back to Cart, Contact buttons ──
-function showPaymentError(msg, orderId, formData, total, method) {
+/* ── Friendly copy for known backend/gateway errors so customers never
+   see internal provider wording like "Merchant Data Not Found". ── */
+const PAY_RESULT_ERROR_MAP = [
+  { re: /merchant data not found/i, text: 'We could not reach our payment provider. Please wait a moment and try again.' },
+  { re: /transactions are not enabled/i, text: 'Online payments are temporarily unavailable with our provider. Please try again shortly, or use Cash on Delivery.' },
+  { re: /payment gateway account/i, text: 'Online payments are temporarily unavailable with our provider. Please try again shortly, or use Cash on Delivery.' },
+  { re: /could not verify/i, text: 'We could not confirm this payment automatically. If money was deducted, it will be auto-refunded within 5-7 days.' },
+];
+function friendlyPaymentError(raw) {
+  for (const m of PAY_RESULT_ERROR_MAP) { if (m.re.test(raw || '')) return m.text; }
+  return raw;
+}
+
+// ── PAYMENT RESULT — success OR failure, centred in place ──
+// Shows a real modal (dimmed backdrop, sticky pay bar hidden, page locked)
+// so the outcome is obvious on phones, not floating at the bottom.
+function closePaymentResult() {
+  document.getElementById('payResultOverlay')?.remove();
+  document.getElementById('payErrorOverlay')?.remove();
+  document.body.classList.remove('oz-pay-result');
+  if (!document.querySelector('.pay-result-overlay, #payErrorOverlay')) {
+    document.body.style.overflow = '';
+  }
+}
+function showPaymentResult(state, opts) {
+  // state: 'ok' | 'fail'
+  closePaymentResult();
   hideProcessingScreen();
   closePaymentModal();
-  document.getElementById('payErrorOverlay')?.remove();
+  document.body.classList.add('oz-pay-result'); // hides #ozPayBar + locks scroll
 
+  const ok = state === 'ok';
   const el = document.createElement('div');
-  el.className = 'pay-error-overlay';
-  el.id = 'payErrorOverlay';
-  const orderRef = orderId ? `<div style="font-size:.72rem;color:var(--t-low);margin-bottom:16px;background:var(--st-muted-bg);padding:8px 14px;border-radius:8px">Order Ref: <strong>${orderId}</strong></div>` : '';
-  el.innerHTML = `
-    <div class="pay-error-box">
-      <div class="pay-error-icon">❌</div>
-      <div class="pay-error-title">Payment Failed</div>
-      ${orderRef}
-      <p class="pay-error-msg">${msg}</p>
-      <div class="pay-error-actions">
-        <button class="pay-error-try" onclick="document.getElementById('payErrorOverlay')?.remove(); initiatePayment();">
-          🔄 Retry Payment
-        </button>
-        <button class="pay-error-back" onclick="document.getElementById('payErrorOverlay')?.remove(); showPage('cart');">
-          ← Back to Cart
-        </button>
-        <button class="pay-error-back" style="background:var(--st-warn-bg);border-color:var(--st-warn-fg);color:var(--st-warn-fg)" onclick="document.getElementById('payErrorOverlay')?.remove(); window.open('https://wa.me/919898582650?text=Payment+failed+for+order+${orderId || ''}+amount+₹${total || ''}+please+help','_blank')">
-           WhatsApp Support
-        </button>
-        <button class="pay-error-cancel" onclick="document.getElementById('payErrorOverlay')?.remove(); showPage('home');">
-          Cancel & Continue Shopping
-        </button>
-      </div>
-    </div>
-  `;
+  el.className = 'pay-result-overlay';
+  el.id = 'payResultOverlay';
+  el.onclick = function (e) { if (e.target === el) closePaymentResult(); };
+
+  const refHtml = opts.orderId ? `<div class="pay-result-ref">Order Ref: <strong>${opts.orderId}</strong></div>` : '';
+  const amountHtml = opts.total ? `<span style="font-weight:800;font-variant-numeric:tabular-nums">₹${Number(opts.total).toLocaleString('en-IN')}</span>` : '';
+
+  const iconHtml = ok
+    ? `<div class="pay-result-icon ok"><svg width="44" height="44" viewBox="0 0 52 52" aria-hidden="true"><circle cx="26" cy="26" r="24" fill="none" stroke="#2f5d3a" stroke-width="2"/><path d="M14.1 27.2l7.1 7.2 16.7-16.8" fill="none" stroke="#2f5d3a" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div>`
+    : `<div class="pay-result-icon fail">✕</div>`;
+
+  const title = ok ? 'Payment Successful' : 'Payment Failed';
+  const msg = ok
+    ? (opts.msg || 'Your payment went through and your order is confirmed.')
+    : friendlyPaymentError(opts.msg || 'Your payment could not be completed.');
+
+  const noteHtml = ok
+    ? (opts.note ? `<div class="pay-result-note">${opts.note}</div>` : '')
+    : `<div class="pay-result-note">${opts.refundNote || 'No money has been deducted from your account.'}</div>`;
+
+  const actionsHtml = ok
+    ? `<button class="pay-result-btn pay-result-primary ok" onclick="closePaymentResult(); showPage('thankyou');">Continue to Order Confirmation →</button>
+       <button class="pay-result-btn pay-result-secondary" onclick="closePaymentResult(); showPage('home');">Back to Home</button>`
+    : `<button class="pay-result-btn pay-result-primary fail" onclick="closePaymentResult(); initiatePayment();">🔄 Retry Payment</button>
+       <button class="pay-result-btn pay-result-wa" onclick="window.open('https://wa.me/919898582650?text=${encodeURIComponent('Payment failed for order ' + (opts.orderId || '') + (opts.total ? ' amount ₹' + opts.total : '') + ', please help')}', '_blank')">💬 WhatsApp Support</button>
+       <button class="pay-result-btn pay-result-secondary" onclick="closePaymentResult(); showPage('cart');">← Back to Cart</button>
+       <button class="pay-result-btn pay-result-secondary" onclick="closePaymentResult(); showPage('home');">Cancel & Continue Shopping</button>`;
+
+  el.innerHTML = `<div class="pay-result-box">
+    ${iconHtml}
+    <div class="pay-result-title">${title}</div>
+    ${amountHtml && ok ? `<div style="font-size:1.05rem;color:var(--t-hi);margin-bottom:12px">${amountHtml} paid</div>` : ''}
+    ${refHtml}
+    <p class="pay-result-msg">${msg}</p>
+    ${noteHtml}
+    <div class="pay-result-actions">${actionsHtml}</div>
+  </div>`;
+
   document.body.appendChild(el);
+  // Focus first button for accessibility after the pop animation.
+  const firstBtn = el.querySelector('button');
+  if (firstBtn) setTimeout(() => firstBtn.focus(), 320);
+}
+
+// ── Legacy helper used across the checkout paths — routes through the
+// centred modal above so failures are never buried at the page bottom. ──
+function showPaymentError(msg, orderId, formData, total, method) {
+  showPaymentResult('fail', { orderId: orderId, total: total, msg: msg });
 }
 
 // ── FINALIZE ORDER AFTER SUCCESSFUL PAYMENT ──
@@ -17694,6 +17801,11 @@ async function finalizeOrder(orderId, formData, total, method, codCharge) {
       srItems.map(i => ({ item_name: i.name, price: i.selling_price, quantity: i.units }))
     );
   } catch(e) {}
+  // Payment just succeeded — show the SUCCESS result in place first so the
+  // customer clearly sees the outcome on screen before the thank-you page.
+  showPaymentResult('ok', { orderId: orderId, total: total,
+    msg: 'Your payment of ₹' + Number(total).toLocaleString('en-IN') + ' was received successfully.',
+    note: (method ? 'Payment method: ' + (PAY_METHOD_LABEL[method] || method) : '') + '. You will receive your invoice and tracking link by email and SMS.' });
   showPage('thankyou');
   // REVIEW COLLECTION: once the Thank You page is on screen, evaluate
   // whether this logged-in customer has delivered orders without reviews
