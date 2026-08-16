@@ -5580,7 +5580,7 @@ async function doLogin() {
       }
 
       // Success — the server matched the password and returned the token directly.
-      // authToken and falls through to the shared finish below).
+      authToken = d.token; // put the fresh token in memory before the shared finish
       __loginSuccess(d);
       return;
 
@@ -5611,7 +5611,7 @@ async function doLogin() {
 // burned two of the five allowed attempts on every single typo.
 // Shared success path entered after a successful password login.
 function __loginSuccess(d) {
-  localStorage.setItem('ascovita_token', authToken);
+  localStorage.setItem('ascovita_token', d.token); // persist the fresh token
   localStorage.setItem('ascovita_role', d.role || 'admin');
   // Cache the session identity so the UI can hide owner/staff features
   // instantly, without a round trip on every render.
