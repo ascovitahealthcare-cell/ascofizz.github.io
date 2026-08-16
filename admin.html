@@ -3169,6 +3169,11 @@ function azTogglePw() {
     // render tab bar
     az360TabsBar.innerHTML = TABS.map(function(t){ return '<button type="button" class="az360-tab' + (t[0]==='overview'?' active':'') + '" onclick="az360Tab(\'' + t[0] + '\')">' + t[1] + '</button>'; }).join('');
     document.getElementById('custDrawerBody').innerHTML = '<div class="az360-body" id="az360Body"><div class="empty-state loading-dots">Loading profile</div></div>';
+    // reveal the drawer (the patch's parent script never opened it)
+    var __d = document.getElementById('custDrawer');
+    var __o = document.getElementById('custDrawerOverlay');
+    if (__d && !__d.classList.contains('open')) __d.classList.add('open');
+    if (__o && !__o.classList.contains('open')) __o.classList.add('open');
     try {
       var r = await apiFetch('/api/admin/customers/' + id + '/360');
       az360State = r.ok ? ((await r.json()).data || null) : null;
