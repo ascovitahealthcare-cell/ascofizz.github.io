@@ -5885,6 +5885,18 @@ async function apiFetch(path, opts={}) {
   // dozen simultaneous 401s — first reason recorded wins, the rest are
   // no-ops rather than a dozen competing messages.
   if(r.status === 401) {
+    // The server now names its privileged 401s with a `reason` code —
+    // 'invalid-signature' (JWT_SECRET cannot verify, needs a Render fix)
+    // or 'token-version-mismatch' (a real revocation). Reading the body
+    // here lets the logout banner say WHY instead of the generic
+    // "check your clock" text that never helped anyone.
+    var _why401 = '';
+    try {
+      if (r.headers.get && (r.headers.get('content-type') || '').includes('json')) {
+        var _b = await r.clone().json();
+        if (_b && typeof _b.reason === 'string') _why401 = _b.reason;
+      }
+    } catch(e) { _why401 = ''; }
     // One bad 401 must not destroy the session on mobile. Two mobile
     // realities cause transient 401s on a perfectly valid session:
     //   • the in-memory authToken can go stale ('' after a Safari memory
@@ -5930,7 +5942,7 @@ async function apiFetch(path, opts={}) {
     try {
       if (!localStorage.getItem('ascovita_logout_reason')) {
         localStorage.setItem('ascovita_logout_reason',
-          tokenIsExpired(authToken) ? 'expired' : 'rejected');
+          tokenIsExpired(authToken) ? 'expired' : (_why401 || 'rejected'));
       }
     } catch(e) {}
     doLogout();
@@ -16063,6 +16075,8 @@ body.role-admin #azRoleBanner{display:block}
       err.style.color = '';
       err.textContent =
         why === 'idle'     ? 'Signed out after 60 minutes of inactivity. Please sign in again.' :
+        why === 'invalid-signature' ? 'The server could not verify this session’s signature — this usually means the JWT_SECRET environment variable on Render was changed or reset. Ask the developer to re-set the same JWT_SECRET in Render and restart the service, then sign in again.' :
+        why === 'token-version-mismatch' ? 'The server says this session was deliberately revoked. Sign in again — if it repeats, the owner has suspended or reset this account.' :
         why === 'rejected' ? 'The server rejected your session. Sign in again — if this keeps happening straight after signing in, check that this device’s clock is correct.'
                            : 'Your 1-hour session expired. Please sign in again.';
     }
