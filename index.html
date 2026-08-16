@@ -21060,23 +21060,6 @@ document.addEventListener('productPageShown',function(e){const prod=e.detail;if(
 });
 
 // ── Video player toggle ──
-function playVideo(wrap) {
-  const video = wrap.querySelector('video');
-  const btn = wrap.querySelector('.video-play-btn');
-  if (!video) return;
-  if (video.paused) {
-    // Pause all other videos
-    document.querySelectorAll('.video-thumb-wrap video').forEach(v => {
-      if (v !== video) { v.pause(); const b = v.parentElement.querySelector('.video-play-btn'); if(b) b.style.display = 'flex'; }
-    });
-    video.play();
-    if (btn) btn.style.display = 'none';
-    video.addEventListener('ended', () => { if(btn) btn.style.display = 'flex'; }, {once:true});
-  } else {
-    video.pause();
-    if (btn) btn.style.display = 'flex';
-  }
-}
 
 
 // ═══════════════════════════════════════════════════════════════
