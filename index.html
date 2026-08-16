@@ -18533,6 +18533,33 @@ function vitaPendingTotal() {
 // Called when an order is returned, refunded or cancelled. Removes the
 // points that order generated — from the pending queue if still held,
 // otherwise clawed back out of the spendable balance.
+function vitaReverse(orderId, reason) {
+  const u = getCurrentUser();
+  if (!u || !u.email) return null;
+  const st = getVitaState();
+  let removed = 0;
+  st.pending = (st.pending || []).filter(function(x){
+    if (String(x.ref) === String(orderId)) { removed += x.pts; return false; }
+    return true;
+  });
+  let clawed = 0;
+  const original = (st.history || []).filter(function(h){
+    return h.type === 'earn' && String(h.ref) === String(orderId);
+  }).reduce(function(t,h){ return t + h.pts; }, 0);
+  const stillOwed = Math.max(0, original - removed);
+  if (stillOwed > 0) {
+    clawed = Math.min(st.balance, stillOwed);
+    st.balance -= clawed;
+  }
+  const total = removed + clawed;
+  if (total > 0) {
+    st.lifetime = Math.max(0, st.lifetime - total);
+    st.history.unshift({ t: Date.now(), type: 'reverse', pts: -total,
+      ref: (orderId || '') + (reason ? ' — ' + reason : ' — returned') });
+    _saveVita(st);
+  }
+  return { reversed: total, heldRemoved: removed, clawedBack: clawed, balance: st.balance };
+}
 
 
 // ── CHECKOUT REDEMPTION ───────────────────────────────────────
@@ -18589,8 +18616,44 @@ function vitaUseMax() {
 }
 
 // The block that renders inside the checkout / cart summary.
+function vitaRedeemWidgetHTML(sub) {
+  const i = vitaCheckoutInfo(sub);
+  if (!i.signedIn) {
+    return '<div class="vita-ck"><div class="vita-ck-head">💎 VitaPoints</div>' +
+      '<div class="vita-ck-note">Sign in to use your VitaPoints on this order.</div></div>';
+  }
+  if (i.balance <= 0) {
+    return '<div class="vita-ck"><div class="vita-ck-head">💎 VitaPoints</div>' +
+      '<div class="vita-ck-note">No points available yet' +
+      (i.pending ? ' — ' + i.pending.toLocaleString('en-IN') + ' still in the ' + VITA.HOLD_DAYS + '-day return window.' : '.') +
+      '</div></div>';
+  }
+  return '<div class="vita-ck">' +
+    '<div class="vita-ck-head">💎 VitaPoints <b>' + i.balance.toLocaleString('en-IN') + ' available</b></div>' +
+    '<div class="vita-ck-row">' +
+      '<input id="vitaRedeemInput" type="number" min="0" step="1" max="' + i.max + '" ' +
+        'value="' + (i.applied || '') + '" placeholder="0" class="vita-ck-input" ' +
+        'oninput="vitaApplyAtCheckout(this.value)">' +
+      '<button type="button" class="vita-ck-max" onclick="vitaUseMax()">Use max</button>' +
+    '</div>' +
+    '<div class="vita-ck-note">Max ' + i.max.toLocaleString('en-IN') + ' points on this order · ' +
+      VITA.POINTS_PER_RUPEE + ' points = ₹1' +
+      (i.pending ? ' · ' + i.pending.toLocaleString('en-IN') + ' pending' : '') + '</div>' +
+    (i.applied ? '<div class="vita-ck-applied">− ₹' + i.rupees.toFixed(2) + ' applied</div>' : '') +
+  '</div>';
+}
 
 // 50% coupon is calculated against MRP, never the sale price.
+function vitaApplyTierCoupon(product) {
+  const st = getVitaState();
+  if (st.coupons < 1) return { ok: false, reason: 'No 50% coupon available.' };
+  const mrp = Number(product.mrp || product.price || 0);
+  if (!mrp) return { ok: false, reason: 'No MRP on this product.' };
+  st.coupons -= 1;
+  st.history.unshift({ t: Date.now(), type: 'coupon', pts: 0, ref: '50% off ' + (product.name || '') });
+  _saveVita(st);
+  return { ok: true, discount: mrp * 0.5, payable: mrp * 0.5, basis: 'MRP ₹' + mrp.toLocaleString('en-IN') };
+}
 
 // ── Collection animation ──────────────────────────────────────
 function vitaCelebrate(pts, unlocked, capped) {
