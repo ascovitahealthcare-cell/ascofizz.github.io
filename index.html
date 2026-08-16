@@ -18533,33 +18533,6 @@ function vitaPendingTotal() {
 // Called when an order is returned, refunded or cancelled. Removes the
 // points that order generated — from the pending queue if still held,
 // otherwise clawed back out of the spendable balance.
-function vitaReverse(orderId, reason) {
-  const u = getCurrentUser();
-  if (!u || !u.email) return null;
-  const st = getVitaState();
-  let removed = 0;
-  st.pending = (st.pending || []).filter(function(x){
-    if (String(x.ref) === String(orderId)) { removed += x.pts; return false; }
-    return true;
-  });
-  let clawed = 0;
-  const original = (st.history || []).filter(function(h){
-    return h.type === 'earn' && String(h.ref) === String(orderId);
-  }).reduce(function(t,h){ return t + h.pts; }, 0);
-  const stillOwed = Math.max(0, original - removed);
-  if (stillOwed > 0) {
-    clawed = Math.min(st.balance, stillOwed);
-    st.balance -= clawed;
-  }
-  const total = removed + clawed;
-  if (total > 0) {
-    st.lifetime = Math.max(0, st.lifetime - total);
-    st.history.unshift({ t: Date.now(), type: 'reverse', pts: -total,
-      ref: (orderId || '') + (reason ? ' — ' + reason : ' — returned') });
-    _saveVita(st);
-  }
-  return { reversed: total, heldRemoved: removed, clawedBack: clawed, balance: st.balance };
-}
 
 
 // ── CHECKOUT REDEMPTION ───────────────────────────────────────
