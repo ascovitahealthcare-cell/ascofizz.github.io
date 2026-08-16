@@ -3112,13 +3112,22 @@ function azTogglePw() {
 (function az360Patch(){
   var custT = document.getElementById('custDrawerTitle');
   var custS = document.getElementById('custDrawerSub');
-  if (!custT || !custS) return;
+  // BUG FIX (Customer 360° invisible): this script block sits BEFORE the
+  // customer drawer markup in the document, so at patch time custT/custS
+  // are null and the function used to return early — leaving
+  // window.az360Open undefined forever, which made every '360°' button
+  // throw and the row click fall back to the old re-targeting insights.
+  // Now the patch injects the style + tab bar ONLY when the drawer exists,
+  // but the open function is ALWAYS defined (it resolves the drawer lazily
+  // on first call, and creates the tab bar on demand).
   // Tabs bar — injected under the drawer header row
   var bar = document.createElement('div');
   bar.id = 'cust360Tabs';
   bar.className = 'az360-tabs';
   bar.setAttribute('style', 'display:flex;gap:4px;margin:0 0 12px;border-bottom:2px solid var(--border);overflow-x:auto;padding-bottom:0');
-  custS.insertAdjacentElement('afterend', bar);
+  // Guard: custS is null when this script runs before the drawer markup —
+  // the tab bar is then injected lazily by az360Open instead.
+  if (custS) { custS.insertAdjacentElement('afterend', bar); az360TabsBar = bar; }
   // Style block (only once)
   if (!document.getElementById('az360-style')) {
     var st = document.createElement('style');
@@ -3139,13 +3148,26 @@ function azTogglePw() {
   var TABS = [['overview','📊 Overview'],['orders','📦 Orders'],['returns','🔄 Returns & Refunds'],['loyalty','🌟 Loyalty'],['promos','🏷 Promo Usage'],['edit','✏️ Edit']];
   var az360State = null; // fetched profile
   var az360Customer = null; // customer row from allCustomers
+  var az360TabsBar = (custT && custS) ? bar : null; // injected tab bar (may be created lazily)
   window.az360Open = async function az360Open(id){
     az360Customer = allCustomers.find(function(x){ return x.id === id; });
     if (!az360Customer) return;
-    document.getElementById('custDrawerTitle').textContent = az360Customer.name || 'Customer';
-    document.getElementById('custDrawerSub').textContent = 'Customer 360° — every data point in one place';
+    /* Resolve the drawer lazily — the patch may have run before the drawer
+       markup existed in the document (script block precedes the markup). */
+    custT = custT || document.getElementById('custDrawerTitle');
+    custS = custS || document.getElementById('custDrawerSub');
+    if (!custT || !custS) return;
+    if (!az360TabsBar) {
+      az360TabsBar = document.createElement('div');
+      az360TabsBar.id = 'cust360Tabs';
+      az360TabsBar.className = 'az360-tabs';
+      az360TabsBar.setAttribute('style', 'display:flex;gap:4px;margin:0 0 12px;border-bottom:2px solid var(--border);overflow-x:auto;padding-bottom:0');
+      custS.insertAdjacentElement('afterend', az360TabsBar);
+    }
+    custT.textContent = az360Customer.name || 'Customer';
+    custS.textContent = 'Customer 360° — every data point in one place';
     // render tab bar
-    bar.innerHTML = TABS.map(function(t){ return '<button type="button" class="az360-tab' + (t[0]==='overview'?' active':'') + '" onclick="az360Tab(\'' + t[0] + '\')">' + t[1] + '</button>'; }).join('');
+    az360TabsBar.innerHTML = TABS.map(function(t){ return '<button type="button" class="az360-tab' + (t[0]==='overview'?' active':'') + '" onclick="az360Tab(\'' + t[0] + '\')">' + t[1] + '</button>'; }).join('');
     document.getElementById('custDrawerBody').innerHTML = '<div class="az360-body" id="az360Body"><div class="empty-state loading-dots">Loading profile</div></div>';
     try {
       var r = await apiFetch('/api/admin/customers/' + id + '/360');
@@ -3158,8 +3180,12 @@ function azTogglePw() {
     az360Tab('overview');
   };
   window.az360Tab = function az360Tab(name){
-    bar.querySelectorAll('.az360-tab').forEach(function(b){ b.classList.toggle('active', b.textContent.trim().toLowerCase().includes(azTabName(name)) === false && b.getAttribute('onclick').indexOf("'" + name + "'") >= 0); });
-    bar.querySelectorAll('.az360-tab').forEach(function(b){ if (b.getAttribute('onclick') && b.getAttribute('onclick').indexOf("'" + name + "'") >= 0) b.classList.add('active'); else b.classList.remove('active'); });
+    /* Resolve the tab bar lazily too — it may not exist yet if the patch
+       ran before the drawer markup (script precedes markup). */
+    var t = az360TabsBar || document.getElementById('cust360Tabs');
+    if (!t) return;
+    t.querySelectorAll('.az360-tab').forEach(function(b){ b.classList.toggle('active', b.textContent.trim().toLowerCase().includes(azTabName(name)) === false && b.getAttribute('onclick').indexOf("'" + name + "'") >= 0); });
+    t.querySelectorAll('.az360-tab').forEach(function(b){ if (b.getAttribute('onclick') && b.getAttribute('onclick').indexOf("'" + name + "'") >= 0) b.classList.add('active'); else b.classList.remove('active'); });
     var body = document.getElementById('az360Body');
     if (!body) return;
     var d = az360State, c = az360Customer || {};
