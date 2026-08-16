@@ -14692,8 +14692,14 @@ function clearFilters() {
 }
 
 // ── QUANTITY DISCOUNT WIDGET ──
-// Tracks which tier is selected per product (productId → tierIndex)
-const selectedTiers = {};
+// Tracks which tier is selected per product (productId → tierIndex).
+// FIX (Aug 2026, owner video report): the tier lived in memory only, so
+// the Google sign-in redirect reload (which unloads the whole page) wiped
+// the customer's pack choice and they had to redo the full price ladder.
+// Selected tiers now survive reloads via localStorage.
+let selectedTiers = {};
+try { const _st = JSON.parse(localStorage.getItem('asc_selected_tiers') || '{}'); for (const k of Object.keys(_st)) selectedTiers[Number(k)] = _st[k]; } catch(e) {}
+function _persistSelectedTiers(){ try { localStorage.setItem('asc_selected_tiers', JSON.stringify(selectedTiers)); } catch(e) {} }
 
 // The one place the product page is allowed to read a tier table.
 //
@@ -14898,6 +14904,7 @@ function selectTier(productId, tierIdx) {
   const tiers = getProductTiers(p2);
   if (!tiers || !tiers[tierIdx]) return;
   selectedTiers[productId] = tierIdx;
+  _persistSelectedTiers();
 
   // Rebuild widget in place
   const widget = document.getElementById(`tierWidget_${productId}`);
@@ -18843,11 +18850,17 @@ function getCurrentUser() {
 // a product page (rebuild it and drop them back on the reviews tab
 // instead of yanking them away from what they were doing).
 function postLoginRedirect() {
+  // FIX (Aug 2026, owner video report): after a mid-checkout Google sign-in
+  // (popup path, same SPA session), the product page rebuild below did not
+  // re-apply the customer's saved pack tier — buildProductPage only knows
+  // selectedTiers, which a previous version kept in memory. It now also
+  // refreshes the sticky bottom bar so the price keeps matching the tier.
   const onCheckout = document.getElementById('page-checkout')?.classList.contains('active');
   if (onCheckout) return;
   const onProduct = document.getElementById('page-product')?.classList.contains('active');
   if (onProduct && currentProduct) {
     try { buildProductPage(currentProduct); switchTab(document.querySelectorAll('.tab')[2], 'rvs'); } catch(e) {}
+    try { if (typeof refreshStickyCart === 'function') refreshStickyCart(); } catch(e) {}
     return;
   }
   showPage('account'); loadAccountPage();
@@ -19043,11 +19056,48 @@ const _GOOGLE_MAX_RETRIES = 8;
     localStorage.setItem('asc_user', JSON.stringify(data.user));
     var el = document.getElementById('g-spinner');
     if (el) el.remove();
+    // FIX (Aug 2026, owner video report): this handler used to land every
+    // returning customer on the ACCOUNT page — even when they were mid-
+    // checkout or on a product page with a pack tier picked. The full-page
+    // reload also wiped the in-memory tier and the checkout resume
+    // callback, so after sign-in the customer had to rebuild the whole
+    // order. It now reads the return-to context that requireLoginFor-
+    // Checkout stashed in sessionStorage and goes back to that page,
+    // re-applying the restored tier and resuming the payment flow.
+    var _ret = null;
+    try { _ret = JSON.parse(sessionStorage.getItem('ozylix.login_return') || 'null'); } catch(e) {}
+    var _retFresh = _ret && (Date.now() - (_ret.at || 0)) < 10 * 60 * 1000;
+    try { sessionStorage.removeItem('ozylix.login_return'); } catch(e) {}
     // SDK may not be ready yet — defer UI updates to DOMContentLoaded
     function _finishMobileLogin() {
       try { updateAccountNavBtn(); } catch(e) {}
       var name = ((data.user && data.user.name) || 'there').split(' ')[0];
       try { showToast('🌿 Welcome back, ' + name + '!'); } catch(e) {}
+      if (_retFresh && _ret && (_ret.page === 'product' || _ret.page === 'checkout') && _ret.productId) {
+        try {
+          // Open the product with the previously selected tier (selectedTiers
+          // was restored from localStorage at module load above, so the
+          // widget builds with the right pack and price already chosen).
+          openProduct(_ret.productId);
+          if (typeof refreshStickyCart === 'function') refreshStickyCart();
+          if (_ret.intent === 'checkout_payment') {
+            // _checkoutResumeCb (the in-memory "re-run initiatePayment" cb)
+            // does not survive the full-page redirect, so rebuild the flow:
+            // go to checkout → let the page render → autofill from the just-
+            // logged-in profile → initiatePayment() which now finds the user
+            // signed in and continues straight to the secure payment modal.
+            setTimeout(function() {
+              try { showPage('checkout'); } catch(e) {}
+              setTimeout(function() {
+                var _u = null; try { _u = getCurrentUser(); } catch(e) {}
+                if (_u) { try { autofillCheckoutFromGoogle(_u); } catch(e) {} }
+                try { if (typeof initiatePayment === 'function') initiatePayment(); } catch(e) { console.warn('[Auth] payment resume failed', e); }
+              }, 400);
+            }, 600);
+          }
+          return;
+        } catch(e) { console.warn('[Auth] return-to product navigation failed', e); }
+      }
       try { showPage('account'); loadAccountPage(); } catch(e) {}
     }
     if (document.readyState === 'loading') {
@@ -19347,10 +19397,23 @@ function socialLogin(provider) {
 // unless asc_jwt exists, and resume automatically once sign-in finishes.
 // ══════════════════════════════════════════════════════════
 var _checkoutResumeCb = null;
-
 function requireLoginForCheckout(resumeCb) {
   if (getCurrentUser()) return false;   // already signed in
   _checkoutResumeCb = resumeCb || null;
+  // FIX (Aug 2026, owner video report): the mobile Google sign-in runs as a
+  // full-page redirect (FedCM), which unloads the SPA — _checkoutResumeCb
+  // and the selected pack tier were both memory-only and vanished with it.
+  // Stash the resume intent in sessionStorage so the redirect return can
+  // pick exactly where the customer left off, and restore the tier from
+  // the localStorage copy saved by selectTier().
+  try {
+    sessionStorage.setItem('ozylix.login_return', JSON.stringify({
+      page: currentPage || 'checkout',
+      productId: (typeof currentProduct !== 'undefined' && currentProduct) ? currentProduct.id : null,
+      intent: 'checkout_payment',
+      at: Date.now(),
+    }));
+  } catch(e) {}
   openAuth('login');
   // Surface a reason inside the auth modal so it doesn't look random.
   var suc = document.getElementById('authSuccess');
