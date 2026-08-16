@@ -2130,13 +2130,6 @@ body.theme-frost .card.frost-navy .kpi-val, body.theme-frost .card.frost-navy .k
                   onclick="azTogglePw()">👁</button>
         </div>
       </div>
-      <!-- 2FA step 2 — hidden until the server answers pending_2fa -->
-      <div class="form-group" id="login2faGroup" style="display:none;margin-top:4px">
-        <label class="field-label" for="login2faCode">Authenticator code</label>
-        <input type="text" id="login2faCode" class="field-input" inputmode="numeric"
-               autocomplete="one-time-code" autocapitalize="none" autocorrect="off" spellcheck="false"
-               maxlength="10" placeholder="6-digit code or backup code">
-      </div>
       <div class="login-error" id="loginError">Invalid credentials. Please try again.</div>
       <button class="btn-login" type="submit" style="margin-top:20px">Sign In →</button>
     </form>
@@ -3112,22 +3105,13 @@ function azTogglePw() {
 (function az360Patch(){
   var custT = document.getElementById('custDrawerTitle');
   var custS = document.getElementById('custDrawerSub');
-  // BUG FIX (Customer 360° invisible): this script block sits BEFORE the
-  // customer drawer markup in the document, so at patch time custT/custS
-  // are null and the function used to return early — leaving
-  // window.az360Open undefined forever, which made every '360°' button
-  // throw and the row click fall back to the old re-targeting insights.
-  // Now the patch injects the style + tab bar ONLY when the drawer exists,
-  // but the open function is ALWAYS defined (it resolves the drawer lazily
-  // on first call, and creates the tab bar on demand).
+  if (!custT || !custS) return;
   // Tabs bar — injected under the drawer header row
   var bar = document.createElement('div');
   bar.id = 'cust360Tabs';
   bar.className = 'az360-tabs';
   bar.setAttribute('style', 'display:flex;gap:4px;margin:0 0 12px;border-bottom:2px solid var(--border);overflow-x:auto;padding-bottom:0');
-  // Guard: custS is null when this script runs before the drawer markup —
-  // the tab bar is then injected lazily by az360Open instead.
-  if (custS) { custS.insertAdjacentElement('afterend', bar); az360TabsBar = bar; }
+  custS.insertAdjacentElement('afterend', bar);
   // Style block (only once)
   if (!document.getElementById('az360-style')) {
     var st = document.createElement('style');
@@ -3148,26 +3132,13 @@ function azTogglePw() {
   var TABS = [['overview','📊 Overview'],['orders','📦 Orders'],['returns','🔄 Returns & Refunds'],['loyalty','🌟 Loyalty'],['promos','🏷 Promo Usage'],['edit','✏️ Edit']];
   var az360State = null; // fetched profile
   var az360Customer = null; // customer row from allCustomers
-  var az360TabsBar = (custT && custS) ? bar : null; // injected tab bar (may be created lazily)
   window.az360Open = async function az360Open(id){
     az360Customer = allCustomers.find(function(x){ return x.id === id; });
     if (!az360Customer) return;
-    /* Resolve the drawer lazily — the patch may have run before the drawer
-       markup existed in the document (script block precedes the markup). */
-    custT = custT || document.getElementById('custDrawerTitle');
-    custS = custS || document.getElementById('custDrawerSub');
-    if (!custT || !custS) return;
-    if (!az360TabsBar) {
-      az360TabsBar = document.createElement('div');
-      az360TabsBar.id = 'cust360Tabs';
-      az360TabsBar.className = 'az360-tabs';
-      az360TabsBar.setAttribute('style', 'display:flex;gap:4px;margin:0 0 12px;border-bottom:2px solid var(--border);overflow-x:auto;padding-bottom:0');
-      custS.insertAdjacentElement('afterend', az360TabsBar);
-    }
-    custT.textContent = az360Customer.name || 'Customer';
-    custS.textContent = 'Customer 360° — every data point in one place';
+    document.getElementById('custDrawerTitle').textContent = az360Customer.name || 'Customer';
+    document.getElementById('custDrawerSub').textContent = 'Customer 360° — every data point in one place';
     // render tab bar
-    az360TabsBar.innerHTML = TABS.map(function(t){ return '<button type="button" class="az360-tab' + (t[0]==='overview'?' active':'') + '" onclick="az360Tab(\'' + t[0] + '\')">' + t[1] + '</button>'; }).join('');
+    bar.innerHTML = TABS.map(function(t){ return '<button type="button" class="az360-tab' + (t[0]==='overview'?' active':'') + '" onclick="az360Tab(\'' + t[0] + '\')">' + t[1] + '</button>'; }).join('');
     document.getElementById('custDrawerBody').innerHTML = '<div class="az360-body" id="az360Body"><div class="empty-state loading-dots">Loading profile</div></div>';
     // reveal the drawer (the patch's parent script never opened it)
     var __d = document.getElementById('custDrawer');
@@ -3185,12 +3156,8 @@ function azTogglePw() {
     az360Tab('overview');
   };
   window.az360Tab = function az360Tab(name){
-    /* Resolve the tab bar lazily too — it may not exist yet if the patch
-       ran before the drawer markup (script precedes markup). */
-    var t = az360TabsBar || document.getElementById('cust360Tabs');
-    if (!t) return;
-    t.querySelectorAll('.az360-tab').forEach(function(b){ b.classList.toggle('active', b.textContent.trim().toLowerCase().includes(azTabName(name)) === false && b.getAttribute('onclick').indexOf("'" + name + "'") >= 0); });
-    t.querySelectorAll('.az360-tab').forEach(function(b){ if (b.getAttribute('onclick') && b.getAttribute('onclick').indexOf("'" + name + "'") >= 0) b.classList.add('active'); else b.classList.remove('active'); });
+    bar.querySelectorAll('.az360-tab').forEach(function(b){ b.classList.toggle('active', b.textContent.trim().toLowerCase().includes(azTabName(name)) === false && b.getAttribute('onclick').indexOf("'" + name + "'") >= 0); });
+    bar.querySelectorAll('.az360-tab').forEach(function(b){ if (b.getAttribute('onclick') && b.getAttribute('onclick').indexOf("'" + name + "'") >= 0) b.classList.add('active'); else b.classList.remove('active'); });
     var body = document.getElementById('az360Body');
     if (!body) return;
     var d = az360State, c = az360Customer || {};
@@ -4418,7 +4385,7 @@ function azTogglePw() {
 <!-- ═════════════ STAFF & PERMISSIONS (owner-only) ═════════════ -->
 <div class="page" id="page-staff">
   <div class="page-hdr">
-    <div><div class="page-title">Staff &amp; Permissions</div><div class="page-sub">One identity per person — each staff member has their own username, password, Google Authenticator and permission set</div></div>
+    <div><div class="page-title">Staff &amp; Permissions</div><div class="page-sub">One identity per person — each staff member has their own username, password and permission set</div></div>
     <div class="page-actions">
       <button class="btn btn-secondary" onclick="loadStaffPage()">↺ Refresh</button>
       <button class="btn btn-gold" onclick="azToggleStaffInvite()">＋ Invite staff</button>
@@ -4434,7 +4401,7 @@ function azTogglePw() {
   <div id="staffInviteCard" class="card" style="display:none;margin-bottom:16px">
     <div style="padding:16px 20px;border-bottom:1px solid var(--border)">
       <div class="page-title" style="font-size:1rem">Invite a new staff member</div>
-      <div class="page-sub" style="font-size:.72rem">Minimum 3 characters · password 10+ characters · they set up Google Authenticator at first login</div>
+      <div class="page-sub" style="font-size:.72rem">Minimum 3 characters · password 10+ characters · share the one-time credentials securely</div>
     </div>
     <div style="padding:16px 20px;display:grid;gap:12px">
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
@@ -4458,11 +4425,6 @@ function azTogglePw() {
           <option value="admin">Admin</option>
         </select>
         <div style="font-size:.66rem;color:var(--text3);margin-top:4px">Owner accounts cannot be created from here — the owner account is your own.</div>
-      </div>
-      <div>
-        <label class="field-label">Force 2FA for this person</label>
-        <label class="switch"><input type="checkbox" id="azStaffNewEnforced" checked><span class="switch-slider"></span></label>
-        <div style="font-size:.66rem;color:var(--text3);margin-top:4px">They must enroll Google Authenticator at first login and cannot disable it.</div>
       </div>
       <div>
         <label class="field-label">Permissions</label>
@@ -4490,9 +4452,6 @@ function azTogglePw() {
         <div class="page-title" style="font-size:1rem">Your team</div>
         <div class="page-sub" style="font-size:.72rem">Revoke kills every open session instantly. Suspend keeps the account but blocks login.</div>
       </div>
-      <div style="display:flex;gap:8px">
-        <button class="btn btn-secondary" style="font-size:.72rem;padding:6px 12px" onclick="azOpenOwn2fa()">🔐 My 2FA</button>
-      </div>
     </div>
     <div style="overflow-x:auto;padding:8px 12px 16px">
       <table class="az-table" style="width:100%;border-collapse:collapse">
@@ -4501,7 +4460,6 @@ function azTogglePw() {
             <th style="text-align:left;padding:8px 10px">Username</th>
             <th style="text-align:left;padding:8px 10px">Role</th>
             <th style="text-align:left;padding:8px 10px">Status</th>
-            <th style="text-align:left;padding:8px 10px">2FA</th>
             <th style="text-align:left;padding:8px 10px">Permissions</th>
             <th style="text-align:left;padding:8px 10px">Last login</th>
             <th style="text-align:right;padding:8px 10px">Actions</th>
@@ -4564,14 +4522,13 @@ function closeModal(id){ document.getElementById(id).classList.remove('open'); }
 
 /* ── Password re-confirmation gate ────────────────────────────────────
    Every destructive or sensitive change goes through this. The admin
-   types their password (and 2FA code if enrolled) — the server returns a
+   types their password — the server returns a
    one-use proof valid 5 minutes — which is sent with the real action
    as X-Password-Proof. Never rely on the open session alone. */
 let __proof = null, __proofExp = 0;
 function azSessionUser(){ try{ return JSON.parse(localStorage.getItem('ascovita_session')||'{}'); }catch(e){ return {}; } }
 async function confirmCriticalAction(promptText, actionFn){
   const sess = azSessionUser();
-  const enrolled = !!(sess.totp && (sess.totp.enrolled || sess.totp.enforced));
   const reuses = __proof && Date.now() < __proofExp;
   if (reuses) return actionFn(__proof);
   return new Promise(function(resolve, reject){
@@ -4581,18 +4538,16 @@ async function confirmCriticalAction(promptText, actionFn){
         <div style="font-size:.8rem;margin-bottom:12px;color:var(--text2)">${escHtml(promptText)}</div>
         <label class="field-label">Password</label>
         <div class="pw-wrap"><input type="password" id="azProofPw" class="field-input" autocomplete="current-password"><button type="button" class="pw-toggle" onclick="var i=document.getElementById('azProofPw');i.type=i.type==='password'?'text':'password'">👁</button></div>
-        ${enrolled ? '<label class="field-label" style="margin-top:10px">2FA code <span style="font-weight:400;color:var(--text3)">(your authenticator)</span></label><input type="text" id="azProofCode" class="field-input" inputmode="numeric" maxlength="10" autocomplete="one-time-code">' : ''}
         <div id="${msgId}" class="login-error" style="display:none"></div>
       </div>`, [
       { label: 'Confirm', cls: 'btn-gold', action: async function(){
         const pw = document.getElementById('azProofPw').value;
-        const code = (document.getElementById('azProofCode')||{}).value || undefined;
         const msg = document.getElementById(msgId);
         if (!pw) { msg.textContent = 'Enter your password.'; msg.style.display = 'block'; return; }
         msg.style.display = 'none';
         try {
           const r = await apiFetch('/api/admin/confirm-password', {
-            method: 'POST', body: JSON.stringify({ username: sess.username || '', password: pw, code: code }),
+            method: 'POST', body: JSON.stringify({ username: sess.username || '', password: pw }),
           });
           const d = await r.json();
           if (!r.ok || !d.proof) throw new Error(d.error || 'Password did not match');
@@ -4645,20 +4600,17 @@ async function loadStaffPage(){
     const rows = (d.staff || []).map(s => {
       const statusCls = s.enabled ? 'badge-ok' : 'badge-bad';
       const statusTxt = s.enabled ? 'Active' : 'Suspended';
-      const totpCls = s.enrolled ? 'badge-ok' : 'badge-soft';
-      const totpTxt = s.enrolled ? 'Enrolled' : (s.enforced ? 'Required — not enrolled' : 'Not enrolled');
       const permTags = (s.permissions && s.permissions.length)
         ? s.permissions.map(p=>`<span style="font-size:.62rem;background:var(--bg2);border:1px solid var(--border);border-radius:6px;padding:1px 5px">${escHtml(azStaffPermLabel(p))}</span>`).join(' ')
         : '<span style="font-size:.7rem;color:var(--text3)">Full admin (default role)</span>';
       return `<tr style="border-bottom:1px solid var(--border);vertical-align:top">
-        <td style="padding:10px;font-weight:600">${escHtml(s.username)}${s.enforced?'<div style="font-size:.62rem;color:var(--gold-text);font-weight:500">2FA enforced</div>':''}</td>
+        <td style="padding:10px;font-weight:600">${escHtml(s.username)}</td>
         <td style="padding:10px"><span class="badge badge-gold">${escHtml(s.role)}</span></td>
         <td style="padding:10px"><span class="badge ${statusCls}">${statusTxt}</span></td>
-        <td style="padding:10px"><span class="badge ${totpCls}">${totpTxt}</span></td>
         <td style="padding:10px;max-width:320px">${permTags}</td>
         <td style="padding:10px;font-size:.72rem;color:var(--text3)">${s.last_login_at ? new Date(s.last_login_at).toLocaleString() : '—'}</td>
         <td style="padding:10px;text-align:right;white-space:nowrap">
-          <button class="btn btn-secondary" style="font-size:.68rem;padding:4px 9px" onclick="azStaffEditPerms('${escHtml(s.username)}', ${JSON.stringify(s.permissions||[]).replace(/"/g,'&quot;')}, ${!!s.enforced})">✏️ Perms</button>
+          <button class="btn btn-secondary" style="font-size:.68rem;padding:4px 9px" onclick="azStaffEditPerms('${escHtml(s.username)}', ${JSON.stringify(s.permissions||[]).replace(/"/g,'&quot;')})">✏️ Perms</button>
           <button class="btn btn-secondary" style="font-size:.68rem;padding:4px 9px" onclick="azStaffToggle('${escHtml(s.username)}', ${s.enabled})">${s.enabled ? '⏸ Suspend' : '▶ Enable'}</button>
           <button class="btn" style="font-size:.68rem;padding:4px 9px;color:var(--red-text);border-color:var(--red)" onclick="azStaffRevoke('${escHtml(s.username)}')">Revoke</button>
         </td>
@@ -4684,7 +4636,7 @@ async function azStaffInvite(){
       const r = await apiFetch('/api/admin/staff/invite', {
         method: 'POST',
         headers: headers,
-        body: JSON.stringify({ username, password, role: 'admin', permissions: permissions.length ? permissions : null, enforced }),
+        body: JSON.stringify({ username, password, role: 'admin', permissions: permissions.length ? permissions : null }),
       });
       const d = await r.json();
       if (!r.ok) throw new Error(d.error || 'Invite failed');
@@ -4693,7 +4645,7 @@ async function azStaffInvite(){
     document.getElementById('azStaffNewUsername').value = '';
     document.getElementById('azStaffNewPassword').value = '';
     azToggleStaffInvite();
-    toast(`✅ ${username} invited — ask them to sign in and set up Google Authenticator`);
+    toast(`✅ ${username} invited — share the one-time credentials securely and ask them to sign in`);
     loadStaffPage();
   } catch (e) {
     if (e.message !== 'cancelled') { msg.textContent = e.message || 'Invite failed'; msg.style.display = 'block'; }
@@ -4729,27 +4681,24 @@ async function azStaffRevoke(username){
   catch (e) { toast('❌ ' + e.message, 'error'); }
 }
 
-async function azStaffEditPerms(username, currentPerms, enforced){
+async function azStaffEditPerms(username, currentPerms, _unused){
   const custom = currentPerms && currentPerms.length > 0;
   const checked = custom ? new Set(currentPerms) : new Set(AZ_STAFF_PERMS.map(p=>p[0]));
   let html = `<div style="padding:4px 0"><strong>${escHtml(username)}</strong> — ${custom ? 'custom set' : 'full admin (default role)'}</div>
     <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:3px 12px;max-height:300px;overflow-y:auto;border:1px solid var(--border);border-radius:10px;padding:10px;background:var(--surface2)">
     ${AZ_STAFF_PERMS.map(([k,lab])=>`<label style="font-size:.75rem;display:flex;align-items:center;gap:6px;padding:2px 0;cursor:pointer"><input type="checkbox" class="az-edit-perm" value="${k}" ${checked.has(k)?'checked':''}> ${escHtml(lab)}</label>`).join('')}
     </div>
-    <div style="font-size:.7rem;color:var(--text3);margin-top:8px">Leave everything ticked = full admin role. Uncheck any to create a custom set — the server enforces it immediately.</div>
-    <div style="margin-top:8px"><label style="font-size:.75rem;display:flex;align-items:center;gap:8px">
-    <input type="checkbox" id="azEditPermsEnforced" ${enforced?'checked':''}> Force 2FA for this person</label></div>`;
+    <div style="font-size:.7rem;color:var(--text3);margin-top:8px">Leave everything ticked = full admin role. Uncheck any to create a custom set — the server enforces it immediately.</div>`;
     azBuildModal2('azStaffEditModal', 'Edit permissions — ' + username, html, [
     { label: 'Save', cls: 'btn-gold', action: async function(){
       const perms = [...document.querySelectorAll('.az-edit-perm:checked')].map(c=>c.value);
-      const enforcedNow = document.getElementById('azEditPermsEnforced').checked;
       const all = AZ_STAFF_PERMS.every(p => perms.includes(p[0]));
       try {
         await confirmCriticalAction(`Apply permission changes for ${username}?`, async function(proof){
           const headers = proof ? { 'X-Password-Proof': proof } : {};
           const r = await apiFetch('/api/admin/staff/' + encodeURIComponent(username), {
             method: 'PUT', headers: headers,
-            body: JSON.stringify({ permissions: all ? null : perms, enforced: enforcedNow }),
+            body: JSON.stringify({ permissions: all ? null : perms }),
           });
           const d = await r.json();
           if (!r.ok) throw new Error(d.error || 'Update failed');
@@ -4764,133 +4713,12 @@ async function azStaffEditPerms(username, currentPerms, enforced){
   ]);
 }
 
-/* ═══ Own 2FA modal (every signed-in person) ═══ */
-async function azOpenOwn2fa(){
-  try {
-    const st = await apiFetch('/api/admin/2fa/status');
-    const enrolled = !!st.enrolled, masterOn = !!st.master_on, enforced = !!st.enforced;
-    let html = '';
-    if (enrolled) {
-      html = `<div style="padding:4px 0">
-        <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px"><span class="badge badge-ok">2FA active</span>
-          ${enforced ? '<span class="badge badge-gold">Enforced — cannot disable</span>' : ''}
-          ${masterOn ? '<span class="badge badge-soft">Master: ON</span>' : '<span class="badge badge-soft">Master: OFF</span>'}</div>
-        <div style="font-size:.78rem;color:var(--text3);margin-bottom:12px">Every login from any device now needs your authenticator code.</div>
-        <div style="display:flex;gap:8px;flex-wrap:wrap">
-          <button class="btn btn-secondary" style="font-size:.72rem;padding:5px 11px" onclick="azOwn2faCodes()">🔑 Backup codes</button>
-          ${enforced ? '' : '<button class="btn" style="font-size:.72rem;padding:5px 11px;color:var(--red-text);border-color:var(--red)" onclick="azOwn2faDisable()">Turn off 2FA</button>'}
-        </div></div>`;
-    } else {
-      const en = await apiFetch('/api/admin/2fa/enroll', { method: 'POST' });
-      if (!en.ok) throw new Error((await en.json()).error || 'Enroll failed');
-      const ev = await en.json();
-      html = `<div style="padding:4px 0">
-        <div style="font-size:.85rem;font-weight:700;margin-bottom:8px">1. Scan with Google Authenticator</div>
-        <img src="${ev.qr}" alt="QR" style="background:#fff;padding:10px;border-radius:10px;border:1px solid var(--border);width:190px;height:190px">
-        <div style="font-size:.68rem;color:var(--text3);margin:6px 0 14px;word-break:break-all">Manual key: ${escHtml(ev.secret)}</div>
-        <div style="font-size:.85rem;font-weight:700;margin-bottom:8px">2. Enter a code to finish</div>
-        <input type="text" id="azOwn2faCode" class="field-input" inputmode="numeric" maxlength="10" placeholder="6-digit code" style="max-width:220px">
-        <div style="margin-top:12px;display:flex;gap:8px">
-          <button class="btn btn-gold" style="font-size:.72rem;padding:5px 14px" onclick="azOwn2faConfirm('${ev.nonce}')">Complete setup</button>
-          <button class="btn btn-secondary" style="font-size:.72rem;padding:5px 11px" onclick="closeModal('azOwn2faModal')">Cancel</button>
-        </div>
-        <div id="azOwn2faMsg" class="login-error" style="display:none"></div></div>`;
-    }
-    azBuildModal2('azOwn2faModal', 'Two-factor authentication', html, []);
-  } catch (e) { toast('❌ ' + e.message, 'error'); closeModal('azOwn2faModal'); }
-}
-async function azOwn2faConfirm(nonce){
-  const code = document.getElementById('azOwn2faCode').value.trim();
-  const msg = document.getElementById('azOwn2faMsg');
-  if (!code) { msg.textContent = 'Enter the 6-digit code.'; msg.style.display = 'block'; return; }
-  try {
-    const r = await apiFetch('/api/admin/2fa/confirm-enroll', { method: 'POST', body: JSON.stringify({ nonce, code }) });
-    const d = await r.json();
-    if (!r.ok) throw new Error(d.error || 'Code did not match');
-    const codes = (d.backup_codes || []).join('\n');
-    closeModal('azOwn2faModal');
-    azBuildModal2('azOwn2faModal', '✅ 2FA active — save these backup codes', `<div style="padding:4px 0">
-      <div style="font-size:.8rem;margin-bottom:8px">One-time codes that work even without your phone. <strong>Each works only once</strong> — store them somewhere safe:</div>
-      <pre style="background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:12px;font-size:.8rem;font-family:var(--mono,monospace);letter-spacing:1px">${escHtml(codes)}</pre>
-      <button class="btn btn-gold" style="margin-top:10px;font-size:.72rem;padding:5px 14px" onclick="closeModal('azOwn2faModal');azOpenOwn2fa()">Done</button></div>`, []);
-    // Refresh cached session
-    try { const m = await apiFetch('/api/admin/me'); if (m && !m.error) localStorage.setItem('ascovita_session', JSON.stringify({ username: m.username, role: m.role, is_owner: !!m.is_owner, permissions: m.permissions, denied: m.denied, totp: m.totp })); } catch(e){}
-  } catch (e) { msg.textContent = e.message; msg.style.display = 'block'; }
-}
-async function azOwn2faDisable(){
-  if (!confirm('Turn off 2FA for your account? Any device can then log in with your password alone.')) return;
-  try {
-    await confirmCriticalAction('Disable 2FA — re-enter your password:', async function(proof){
-      const headers = proof ? { 'X-Password-Proof': proof } : {};
-      const r = await apiFetch('/api/admin/2fa/disable', { method: 'POST', headers });
-      const d = await r.json();
-      if (!r.ok) throw new Error(d.error || 'Failed');
-      return d;
-    });
-    closeModal('azOwn2faModal');
-    toast('2FA turned off');
-    try { const m = await apiFetch('/api/admin/me'); if (m && !m.error) localStorage.setItem('ascovita_session', JSON.stringify({ username: m.username, role: m.role, is_owner: !!m.is_owner, permissions: m.permissions, denied: m.denied, totp: m.totp })); } catch(e){}
-  } catch (e) { toast('❌ ' + e.message, 'error'); }
-}
-async function azOwn2faCodes(){
-  try {
-    const d = await confirmCriticalAction('Re-issue backup codes — old unused codes are cancelled.', async function(proof){
-      const headers = proof ? { 'X-Password-Proof': proof } : {};
-      const r = await apiFetch('/api/admin/2fa/backup-codes', { method: 'POST', headers });
-      const d2 = await r.json();
-      if (!r.ok) throw new Error(d2.error || 'Failed');
-      return d2;
-    });
-    const codes = (d.codes || []).join('\n');
-    azBuildModal2('azOwn2faModal', 'New backup codes', `<div style="padding:4px 0">
-      <pre style="background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:12px;font-size:.8rem;font-family:var(--mono,monospace);letter-spacing:1px">${escHtml(codes)}</pre>
-      <button class="btn btn-gold" style="margin-top:10px;font-size:.72rem;padding:5px 14px" onclick="closeModal('azOwn2faModal')">Done</button></div>`, []);
-  } catch (e) { toast('❌ ' + e.message, 'error'); }
-}
-
-/* ═══ Owner-only 2FA master toggle ═══ */
-async function azToggle2faMaster(masterOn){
-  try {
-    await confirmCriticalAction(masterOn ? 'Turn 2FA ON for every staff account? (Enrolled users + anyone with 2FA forced)' : 'Turn 2FA OFF for everyone? (Password-only login again — less secure)', async function(proof){
-      const headers = proof ? { 'X-Password-Proof': proof } : {};
-      const r = await apiFetch('/api/admin/2fa/master', { method: 'POST', headers, body: JSON.stringify({ master_on: masterOn }) });
-      const d = await r.json();
-      if (!r.ok) throw new Error(d.error || 'Failed');
-      return d;
-    });
-    toast(masterOn ? '✅ 2FA is now required for everyone' : '2FA master toggle is off');
-    if (document.getElementById('az2faMasterRow')) await azRender2faMaster();
-  } catch (e) { toast('❌ ' + e.message, 'error'); }
-}
-async function azRender2faMaster(){
-  const row = document.getElementById('az2faMasterRow');
-  if (!row) return;
-  try {
-    const st = await apiFetch('/api/admin/2fa/status');
-    const on = !!st.master_on;
-    row.innerHTML = `<td style="padding:10px">2FA required for all staff</td>
-      <td style="padding:10px"><span class="badge ${on?'badge-ok':'badge-soft'}">${on ? 'ON' : 'OFF'}</span></td>
-      <td style="padding:10px;text-align:right"><label class="switch"><input type="checkbox" ${on?'checked':''} onchange="azToggle2faMaster(this.checked)"><span class="switch-slider"></span></label></td>`;
-  } catch (e) { row.innerHTML = `<td colspan="3" style="padding:10px;color:var(--red-text)">Could not load 2FA status: ${escHtml(e.message)}</td>`; }
-}
 </script>
 
 <div class="page" id="page-settings">
   <div class="page-hdr">
     <div><div class="page-title">Settings</div><div class="page-sub">Store configuration & admin preferences</div></div>
     <div class="page-actions"><button class="btn btn-primary" onclick="saveSettings()">💾 Save Settings</button></div>
-  </div>
-
-  <!-- 2FA master toggle — REMOVED (owner request, 17 Aug 2026): login is
-       password-only. Kept in the DOM for reference but permanently hidden. -->
-  <div class="card" id="az2faMasterCard" style="display:none!important;margin-bottom:16px">
-    <div class="card-hdr"><span class="card-title">🔐 Two-factor authentication</span>
-      <span class="badge badge-gold" style="margin-left:auto">OWNER ONLY</span></div>
-    <table style="width:100%;border-collapse:collapse">
-      <tr id="az2faMasterRow" style="border-bottom:1px solid var(--border)">
-        <td style="padding:10px" colspan="3">Loading 2FA status…</td>
-      </tr>
-    </table>
   </div>
 
   <div class="card" style="margin-bottom:16px">
@@ -5740,23 +5568,6 @@ async function doLogin() {
       });
 
       const d = await r.json();
-      if (d.pending_2fa && d.nonce) {
-        // Step 2 of login: prove you hold the authenticator (or an unused
-        // backup code). The server matched the password already — only the
-        // code is left.
-        _login2fa = { nonce: d.nonce, username: d.username, enforced: !!d.enforced };
-        err.style.background = '#1a3a2a';
-        err.style.color = '#4ade80';
-        err.textContent = 'Two-factor authentication — enter the 6-digit code from Google Authenticator (or an unused backup code).';
-        err.style.display = 'block';
-        const codeInp = document.getElementById('login2faCode');
-        if (codeInp) { codeInp.value = ''; codeInp.style.display = 'block'; codeInp.focus(); }
-        btn.disabled = false;
-        btn.textContent = 'Verify code';
-        // Route this attempt into the 2FA step on the next click.
-        doLogin = __doLogin2faStep;
-        return;
-      }
       if (!r.ok || !d.token) {
         err.style.background = '';
         err.style.color = '';
@@ -5767,11 +5578,8 @@ async function doLogin() {
         return;
       }
 
-      // Success (password-only login, or the 2FA step already set
+      // Success — the server matched the password and returned the token directly.
       // authToken and falls through to the shared finish below).
-      authToken = d.token; // FIX (login bounce): without this, __loginSuccess
-      // stores the OLD (empty/stale) token and every app startup call goes
-      // out unauthenticated → instant 'Session expired' toast after login.
       __loginSuccess(d);
       return;
 
@@ -5800,56 +5608,7 @@ async function doLogin() {
 // field, not just the password one. Leaving both in place fired doLogin()
 // twice per keypress, which with the new per-account lockout would have
 // burned two of the five allowed attempts on every single typo.
-
-// ── 2FA step 2: {nonce, code} until a token arrives ──────────
-// doLogin() re-points here after the first call returns pending_2fa,
-// so pressing the button (or Enter) sends the code without re-typing
-// the password. A wrong code re-renders the prompt, never the password
-// fields — and the server rate-limits the whole login by username.
-let _login2fa = null;
-async function __doLogin2faStep() {
-  const code = document.getElementById('login2faCode')?.value.trim();
-  const err  = document.getElementById('loginError');
-  const btn  = document.querySelector('.btn-login');
-  if (!code) { err.textContent = 'Enter the 6-digit code.'; return; }
-  err.style.display = 'none';
-  btn.disabled = true;
-  btn.textContent = 'Verifying…';
-  try {
-    const r = await fetch(`${API}/api/admin/login`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ nonce: _login2fa.nonce, code }),
-      signal: AbortSignal.timeout(35000),
-    });
-    const d = await r.json();
-    if (!r.ok || !d.token) {
-      err.style.background = '';
-      err.style.color = '';
-      err.textContent = d.error || 'That code did not match.';
-      err.style.display = 'block';
-      const codeInp = document.getElementById('login2faCode');
-      if (codeInp) { codeInp.value = ''; codeInp.focus(); }
-      btn.disabled = false;
-      btn.textContent = 'Verify code';
-      return;
-    }
-    _login2fa = null;
-    // Continue with the shared success path below.
-    authToken = d.token;
-    __loginSuccess(d);
-    return;
-  } catch (e) {
-    err.style.background = '';
-    err.style.color = '';
-    err.textContent = 'Cannot reach server. Check your connection.';
-    err.style.display = 'block';
-    btn.disabled = false;
-    btn.textContent = 'Verify code';
-    return;
-  }
-}
-// Shared success path entered by both the password step and the 2FA step.
+// Shared success path entered after a successful password login.
 function __loginSuccess(d) {
   localStorage.setItem('ascovita_token', authToken);
   localStorage.setItem('ascovita_role', d.role || 'admin');
@@ -5858,7 +5617,7 @@ function __loginSuccess(d) {
   try { apiFetch('/api/admin/me').then(m => {
     if (m && !m.error) localStorage.setItem('ascovita_session', JSON.stringify({
       username: m.username, role: m.role, is_owner: !!m.is_owner,
-      permissions: m.permissions, denied: m.denied, totp: m.totp,
+      permissions: m.permissions, denied: m.denied,
     }));
   }).catch(() => {}); } catch(e) {}
   try { localStorage.removeItem('ascovita_logout_reason'); } catch(e) {}
@@ -5872,8 +5631,6 @@ function __loginSuccess(d) {
 
 function doLogout() {
   localStorage.removeItem('ascovita_token');
-  localStorage.removeItem('ascovita_role');
-  try { localStorage.removeItem('ascovita_session'); } catch (e) {}
   authToken = '';
   document.getElementById('app').style.display = 'none';
   document.getElementById('loginScreen').style.display = 'flex';
@@ -5922,6 +5679,18 @@ async function apiFetch(path, opts={}) {
   // dozen simultaneous 401s — first reason recorded wins, the rest are
   // no-ops rather than a dozen competing messages.
   if(r.status === 401) {
+    // The server now names its privileged 401s with a `reason` code —
+    // 'invalid-signature' (JWT_SECRET cannot verify, needs a Render fix)
+    // or 'token-version-mismatch' (a real revocation). Reading the body
+    // here lets the logout banner say WHY instead of the generic
+    // "check your clock" text that never helped anyone.
+    var _why401 = '';
+    try {
+      if (r.headers.get && (r.headers.get('content-type') || '').includes('json')) {
+        var _b = await r.clone().json();
+        if (_b && typeof _b.reason === 'string') _why401 = _b.reason;
+      }
+    } catch(e) { _why401 = ''; }
     // One bad 401 must not destroy the session on mobile. Two mobile
     // realities cause transient 401s on a perfectly valid session:
     //   • the in-memory authToken can go stale ('' after a Safari memory
@@ -5964,24 +5733,15 @@ async function apiFetch(path, opts={}) {
       } catch (e) { /* fall through to a real logout below */ }
       delete window.__freshTokenRetryDone;
     }
-    // v9.4.1: the server now returns {reason} on 401 — keep it so the
-    // logout screen and every per-endpoint toast show the TRUE cause
-    // (expired / invalid-signature / revoked / no-token) instead of a
-    // generic 'Session expired' that sent admins chasing the wrong fix.
     try {
-      var body = null;
-      try { body = await r.clone().json(); } catch (e) { /* not JSON */ }
-      var rawReason = (body && (body.reason || body.error)) || '';
-      var serverReason = /expired|revoked|signature|claims/i.test(rawReason) ? String(rawReason) : '';
       if (!localStorage.getItem('ascovita_logout_reason')) {
         localStorage.setItem('ascovita_logout_reason',
-          serverReason || (tokenIsExpired(authToken) ? 'expired' : 'rejected'));
-        if (serverReason) localStorage.setItem('ascovita_logout_detail', serverReason);
+          tokenIsExpired(authToken) ? 'expired' : (_why401 || 'rejected'));
       }
     } catch(e) {}
     doLogout();
     if (typeof showLogoutReason === 'function') showLogoutReason();
-    throw new Error('Session expired' + (serverReason ? ' — ' + serverReason : ''));
+    throw new Error('Session expired');
   }
   // Detect HTML error pages (Express "Cannot POST /route" 404s)
   if(!r.ok) {
@@ -6113,11 +5873,8 @@ async function checkServerStatus() {
 }
 
 // Apply role-based UI (called on login and auto-login)
-// FIX (owner features invisible): an unknown role must never demote the
-// owner to 'admin' — the server is the real enforcer, so default to
-// owner-visible until positively proven otherwise.
 function applyRole(role) {
-  const r = role || localStorage.getItem('ascovita_role');
+  const r = role || localStorage.getItem('ascovita_role') || 'admin';
   document.body.classList.remove('role-owner','role-admin');
   document.body.classList.add('role-' + r);
   // Update topbar indicator
@@ -9998,10 +9755,7 @@ function renderCustomersTable(list) {
       <td style="color:var(--green-text);font-weight:600;">₹${fmtNum(c.total_spent||0)}</td>
       <td style="white-space:nowrap;">${c.segment ? segChip(c.segment) : segChip(clientSeg(c))}</td>
       <td style="font-size:0.72rem;color:var(--text3);">${fmtDate(c.created_at)}</td>
-      <td style="text-align:right;white-space:nowrap">
-        <button class="btn btn-secondary btn-sm btn-icon" style="margin-right:4px" title="Customer 360° — full profile" onclick="event.stopPropagation(); window.az360Open(${c.id})">👁️</button>
-        <button class="btn btn-danger btn-sm btn-icon" title="Soft-delete customer (password required)" onclick="event.stopPropagation(); deleteCustomer(${c.id})">🗑️</button>
-      </td>
+      <td style="text-align:right"><button class="btn btn-danger btn-sm btn-icon" title="Soft-delete customer (password required)" onclick="event.stopPropagation(); deleteCustomer(${c.id})">🗑️</button></td>
     </tr>
   `).join('') : '<tr><td colspan="9"><div class="empty-state"><div class="empty-ico">👥</div><div class="empty-msg">No customers found</div></div></td></tr>';
 }
@@ -12609,7 +12363,7 @@ const INTEGRATIONS = [
     checkUrl: null,
     checkAuth: false,
     setupSteps: [
-      'Use Gmail: enable 2FA, create App Password',
+      'Use Gmail: enable 2FA on your Google account, create an App Password',
       'Set MAIL_USER=your@gmail.com',
       'Set MAIL_PASSWORD=your-app-password',
       'Optional: use SendGrid SMTP for higher volumes'
@@ -12951,15 +12705,7 @@ async function loadSettings() {
       try { localStorage.setItem(THEME_KEY, d.interface_theme); } catch {}
     }
   } catch {}
-  // Owner-only 2FA master toggle — reveal and render only for the owner
-  try {
-    const sess = JSON.parse(localStorage.getItem('ascovita_session') || '{}');
-    if (sess.is_owner && document.getElementById('az2faMasterCard')) {
-      document.getElementById('az2faMasterCard').style.display = '';
-      await azRender2faMaster();
-    }
-  } catch {}
-}
+
 
 async function saveSettings() {
   if (typeof confirmCriticalAction === 'function') {
@@ -12998,14 +12744,8 @@ async function saveSettingsCore() {
     if(!r.ok) throw new Error(d.error || d.message || `Server error (${r.status})`);
     toast('Settings saved ✅');
   } catch(e) { toast(e.message, 'error'); }
-  // Refresh the owner's 2FA master card after settings are persisted
-  try {
-    const sess = JSON.parse(localStorage.getItem('ascovita_session') || '{}');
-    if (sess.is_owner && document.getElementById('az2faMasterCard')) await azRender2faMaster();
-  } catch {}
-}
 
-function changePassword() {
+  try {
   const cur = document.getElementById('curPwd').value;
   const nw  = document.getElementById('newPwd').value;
   if(!cur||!nw) { toast('Both fields required','error'); return; }
@@ -14087,8 +13827,6 @@ showPage = function(name){
   <button class="admin-more-btn" id="moreAiTeam" onclick="showPage('aiteam');syncAbn('aiteam');closeAdminMoreMenu()" style="display:none"><span>🧠</span><span>AI Team</span></button>
   <button class="admin-more-btn owner-only" id="moreAuditLog" onclick="showPage('auditdebugger');syncAbn('auditdebugger');closeAdminMoreMenu()"><span>🛡️</span><span>Audit / Debugger</span></button>
   <button class="admin-more-btn owner-only" id="moreSettings" onclick="showPage('settings');syncAbn('settings');closeAdminMoreMenu()"><span>⚙️</span><span>Settings</span></button>
-  <button class="admin-more-btn owner-only" id="moreStaff" onclick="showPage('staff');syncAbn('staff');closeAdminMoreMenu()"><span>👤</span><span>Staff &amp; Permissions</span></button>
-  <button class="admin-more-btn owner-only" id="moreAutomation" onclick="showPage('automation');syncAbn('automation');closeAdminMoreMenu()"><span>🤖</span><span>Automation</span></button>
 </div>
 
 <script>
@@ -16106,11 +15844,6 @@ body.role-admin #azRoleBanner{display:block}
   function showLogoutReason() {
     var why = localStorage.getItem('ascovita_logout_reason');
     if (!why) return;
-    var detail = '';
-    try {
-      detail = localStorage.getItem('ascovita_logout_detail') || '';
-      localStorage.removeItem('ascovita_logout_detail');
-    } catch (e) {}
     localStorage.removeItem('ascovita_logout_reason');
     var err = document.getElementById('loginError');
     if (err) {
@@ -16120,23 +15853,12 @@ body.role-admin #azRoleBanner{display:block}
          as if it were a progress note rather than the reason you are out. */
       err.style.background = '';
       err.style.color = '';
-      var msg =
+      err.textContent =
         why === 'idle'     ? 'Signed out after 60 minutes of inactivity. Please sign in again.' :
-        why === 'expired'  ? 'Your 1-hour session expired. Please sign in again.' :
-        why === 'revoked'  ? 'Your session was revoked (a staff change or sign-out from another tab). Please sign in again.' :
-        why === 'no-token' ? 'The sign-in request lost its session token — please sign in again.' :
-                             'The server rejected your session';
-      if (/invalid-signature|claims/i.test(detail)) {
-        msg += ' — the token’s signature did not verify, which happens when the server is redeployed with new security credentials. Sign in again — if it bounces a second time, tell support the server was recently redeployed.';
-      } else if (/expired/i.test(detail)) {
-        msg += ' — the token expired. Please sign in again.';
-      } else if (/revoked/i.test(detail)) {
-        /* already covered above */
-      } else if (why === 'rejected') {
-        msg += '. Sign in again — the server auto-heals freshly minted tokens (v9.4.1+), so a bounce straight after signing in should not repeat; if it still does, the reason below the message tells us exactly why.';
-      }
-      if (detail && !/invalid-signature|claims|expired/i.test(detail)) msg += ' (detail: ' + detail + ')';
-      err.textContent = msg;
+        why === 'invalid-signature' ? 'The server could not verify this session’s signature — this usually means the JWT_SECRET environment variable on Render was changed or reset. Ask the developer to re-set the same JWT_SECRET in Render and restart the service, then sign in again.' :
+        why === 'token-version-mismatch' ? 'The server says this session was deliberately revoked. Sign in again — if it repeats, the owner has suspended or reset this account.' :
+        why === 'rejected' ? 'The server rejected your session. Sign in again — the server now auto-heals freshly minted tokens (v9.4.1+), so a bounce straight after signing in should not repeat; if it still does, check that this device’s clock is correct.'
+                           : 'Your 1-hour session expired. Please sign in again.';
     }
   }
   window.showLogoutReason = showLogoutReason;
@@ -16180,12 +15902,9 @@ var AZ_UI_PERMS = [
   ['[onclick*="testEmail"]',          'system.maintenance'],
   ['[onclick*="revokeTokens"]',       'tokens.revoke'],
   ['#navCoupons',                     'coupons.manage'],
-  ['#navSettings',                     'settings.manage'],
+  ['#navSettings',                    'settings.manage'],
   ['#navAuditLog',                    'audit.view'],
   ['#navMarketing',                   'marketing.manage'],
-  ['#navStaff',                       'settings.manage'],
-  ['#moreStaff',                      'settings.manage'],
-  ['#moreAutomation',                 'settings.manage'],
   ['#moreCoupons',                    'coupons.manage'],
   ['#moreSettings',                   'settings.manage'],
 ];
@@ -16235,20 +15954,8 @@ function azApplyPermsToDOM() {
      state captured before the role was known. Owner-only sections use the
      .owner-only CSS class, which the body's role-admin/role-owner class
      flips; just make sure the body class is current. */
-  // FIX (owner features invisible): when the role is still unknown (the
-  // server has not answered yet, or gave up after timeouts), never assume
-  // 'admin' — an unknown role defaulting to admin made body.role-admin
-  // hide ALL owner-only sections (Staff & Permissions, Content, Finance,
-  // System) via the .owner-only { display:none!important } rule, and the
-  // body class was sticky even after a successful /api/admin/me later
-  // failed to run because the panel never retried. Prefer the cached
-  // session identity, fall back to 'owner' visibility (server still
-  // enforces everything), and only apply role-admin once the server has
-  // positively confirmed a staff role.
-  var cached = function () { try { return JSON.parse(localStorage.getItem('ascovita_session') || '{}'); } catch (e) { return {}; } }();
-  var knownRole = window.AZPerms.loaded ? window.AZPerms.role : null;
-  if (!knownRole && cached && cached.role) knownRole = cached.role;
-  var currentRole = knownRole || 'owner';
+  var currentRole = (window.AZPerms.loaded ? window.AZPerms.role : null)
+    || localStorage.getItem('ascovita_role') || 'admin';
   document.body.classList.remove('role-owner', 'role-admin');
   document.body.classList.add('role-' + currentRole);
   ['navAiTeam', 'moreAiTeam'].forEach(function (id) {
@@ -16286,16 +15993,12 @@ async function azLoadPerms() {
       if (!r.ok) { attempts++; lastErr = new Error('HTTP ' + r.status); continue; }
       const d = await r.json();
       window.AZPerms = { role: d.role, list: d.permissions || [], loaded: true };
-      /* Keep the cached identity in step with the server even when the
-         login page forgot to refresh it (e.g. a bounce left the old
-         session cached). */
-      try { localStorage.setItem('ascovita_role', d.role); } catch (e) {}
-      /* Cache the identity so owner-only UI (Staff page, 2FA master) can
+      /* Cache the identity so owner-only UI (Staff page) can
          gate itself instantly without a second round trip. */
       try {
         localStorage.setItem('ascovita_session', JSON.stringify({
           username: d.username, role: d.role, is_owner: !!d.is_owner,
-          permissions: d.permissions || [], denied: d.denied || [], totp: d.totp || null,
+          permissions: d.permissions || [], denied: d.denied || [],
         }));
         var _staffNav = document.getElementById('navStaff');
         if (_staffNav) _staffNav.style.display = d.is_owner ? '' : 'none';
