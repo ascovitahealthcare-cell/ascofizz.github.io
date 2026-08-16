@@ -9967,7 +9967,10 @@ function renderCustomersTable(list) {
       <td style="color:var(--green-text);font-weight:600;">₹${fmtNum(c.total_spent||0)}</td>
       <td style="white-space:nowrap;">${c.segment ? segChip(c.segment) : segChip(clientSeg(c))}</td>
       <td style="font-size:0.72rem;color:var(--text3);">${fmtDate(c.created_at)}</td>
-      <td style="text-align:right"><button class="btn btn-danger btn-sm btn-icon" title="Soft-delete customer (password required)" onclick="event.stopPropagation(); deleteCustomer(${c.id})">🗑️</button></td>
+      <td style="text-align:right;white-space:nowrap">
+        <button class="btn btn-secondary btn-sm btn-icon" style="margin-right:4px" title="Customer 360° — full profile" onclick="event.stopPropagation(); window.az360Open(${c.id})">👁️</button>
+        <button class="btn btn-danger btn-sm btn-icon" title="Soft-delete customer (password required)" onclick="event.stopPropagation(); deleteCustomer(${c.id})">🗑️</button>
+      </td>
     </tr>
   `).join('') : '<tr><td colspan="9"><div class="empty-state"><div class="empty-ico">👥</div><div class="empty-msg">No customers found</div></div></td></tr>';
 }
@@ -14053,6 +14056,8 @@ showPage = function(name){
   <button class="admin-more-btn" id="moreAiTeam" onclick="showPage('aiteam');syncAbn('aiteam');closeAdminMoreMenu()" style="display:none"><span>🧠</span><span>AI Team</span></button>
   <button class="admin-more-btn owner-only" id="moreAuditLog" onclick="showPage('auditdebugger');syncAbn('auditdebugger');closeAdminMoreMenu()"><span>🛡️</span><span>Audit / Debugger</span></button>
   <button class="admin-more-btn owner-only" id="moreSettings" onclick="showPage('settings');syncAbn('settings');closeAdminMoreMenu()"><span>⚙️</span><span>Settings</span></button>
+  <button class="admin-more-btn owner-only" id="moreStaff" onclick="showPage('staff');syncAbn('staff');closeAdminMoreMenu()"><span>👤</span><span>Staff &amp; Permissions</span></button>
+  <button class="admin-more-btn owner-only" id="moreAutomation" onclick="showPage('automation');syncAbn('automation');closeAdminMoreMenu()"><span>🤖</span><span>Automation</span></button>
 </div>
 
 <script>
@@ -16144,9 +16149,12 @@ var AZ_UI_PERMS = [
   ['[onclick*="testEmail"]',          'system.maintenance'],
   ['[onclick*="revokeTokens"]',       'tokens.revoke'],
   ['#navCoupons',                     'coupons.manage'],
-  ['#navSettings',                    'settings.manage'],
+  ['#navSettings',                     'settings.manage'],
   ['#navAuditLog',                    'audit.view'],
   ['#navMarketing',                   'marketing.manage'],
+  ['#navStaff',                       'settings.manage'],
+  ['#moreStaff',                      'settings.manage'],
+  ['#moreAutomation',                 'settings.manage'],
   ['#moreCoupons',                    'coupons.manage'],
   ['#moreSettings',                   'settings.manage'],
 ];
