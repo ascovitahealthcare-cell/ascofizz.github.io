@@ -2130,6 +2130,13 @@ body.theme-frost .card.frost-navy .kpi-val, body.theme-frost .card.frost-navy .k
                   onclick="azTogglePw()">👁</button>
         </div>
       </div>
+      <!-- 2FA step 2 — hidden until the server answers pending_2fa -->
+      <div class="form-group" id="login2faGroup" style="display:none;margin-top:4px">
+        <label class="field-label" for="login2faCode">Authenticator code</label>
+        <input type="text" id="login2faCode" class="field-input" inputmode="numeric"
+               autocomplete="one-time-code" autocapitalize="none" autocorrect="off" spellcheck="false"
+               maxlength="10" placeholder="6-digit code or backup code">
+      </div>
       <div class="login-error" id="loginError">Invalid credentials. Please try again.</div>
       <button class="btn-login" type="submit" style="margin-top:20px">Sign In →</button>
     </form>
@@ -2284,7 +2291,8 @@ function azTogglePw() {
     <div class="nav-item" onclick="showPage('performance')"><span class="nav-ico">⚡</span> Performance <span class="nav-new"></span></div>
     <div class="nav-item" id="navAuditLog" onclick="showPage('auditdebugger')"><span class="nav-ico">🛡️</span> Audit / Debugger</div>
         <div class="nav-item" onclick="showPage('automation')"><span class="nav-ico">🤖</span> Automation <span class="nav-new"></span></div>
-<div class="nav-item" id="navSettings" onclick="showPage('settings')"><span class="nav-ico">⚙️</span> Settings</div>
+    <div class="nav-item" id="navStaff" onclick="showPage('staff')" style="display:none;"><span class="nav-ico">👤</span> Staff & Permissions <span style="margin-left:auto;font-size:0.6rem;font-weight:800;color:#000;background:var(--gold-text);padding:1px 6px;border-radius:5px;">OWNER</span></div>
+    <div class="nav-item" id="navSettings" onclick="showPage('settings')"><span class="nav-ico">⚙️</span> Settings</div>
   </div>
 </nav>
 
@@ -3096,6 +3104,229 @@ function azTogglePw() {
         <button class="btn btn-primary" style="flex:2;" onclick="saveProductFromDrawer()">💾 Save Product</button>
   </div>
 </div>
+<!-- ═════════════ CUSTOMER 360 — TABS INSERTED BY SCRIPT (see az360Patch below) ═════════════ -->
+<script>
+/* ═══ Customer 360° — re-targeting drawer becomes a full per-customer profile ═══
+   Tabs: Overview · Orders & Cancellations · Returns & Refunds · Loyalty (VitaPoints) · Promo Usage · Edit
+   All writes require password re-confirmation (confirmCriticalAction). */
+(function az360Patch(){
+  var custT = document.getElementById('custDrawerTitle');
+  var custS = document.getElementById('custDrawerSub');
+  if (!custT || !custS) return;
+  // Tabs bar — injected under the drawer header row
+  var bar = document.createElement('div');
+  bar.id = 'cust360Tabs';
+  bar.className = 'az360-tabs';
+  bar.setAttribute('style', 'display:flex;gap:4px;margin:0 0 12px;border-bottom:2px solid var(--border);overflow-x:auto;padding-bottom:0');
+  custS.insertAdjacentElement('afterend', bar);
+  // Style block (only once)
+  if (!document.getElementById('az360-style')) {
+    var st = document.createElement('style');
+    st.id = 'az360-style';
+    st.textContent =
+      '.az360-tabs .az360-tab{background:none;border:none;border-bottom:3px solid transparent;padding:9px 13px;font-family:var(--font);font-size:.76rem;font-weight:600;color:var(--text3);cursor:pointer;white-space:nowrap;transition:all .2s}' +
+      '.az360-tabs .az360-tab:hover{color:var(--green-text)}' +
+      '.az360-tabs .az360-tab.active{color:var(--green);border-bottom-color:var(--gold)}' +
+      '.az360-body{max-height:64vh;overflow-y:auto;padding-right:4px}' +
+      '.az360-kpi{flex:1;min-width:96px;background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:9px 10px;text-align:center}' +
+      '.az360-kpi .k{font-size:.58rem;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.3px}' +
+      '.az360-kpi .v{font-family:var(--display);font-size:.95rem;font-weight:800;color:var(--green-text);margin-top:3px}' +
+      '.az360-tbl{width:100%;border-collapse:collapse;font-size:.72rem}' +
+      '.az360-tbl th{text-align:left;padding:6px 8px;border-bottom:1px solid var(--border);color:var(--text3);text-transform:uppercase;font-size:.62rem;letter-spacing:.4px}' +
+      '.az360-tbl td{padding:6px 8px;border-bottom:1px solid var(--border)}';
+    document.head.appendChild(st);
+  }
+  var TABS = [['overview','📊 Overview'],['orders','📦 Orders'],['returns','🔄 Returns & Refunds'],['loyalty','🌟 Loyalty'],['promos','🏷 Promo Usage'],['edit','✏️ Edit']];
+  var az360State = null; // fetched profile
+  var az360Customer = null; // customer row from allCustomers
+  window.az360Open = async function az360Open(id){
+    az360Customer = allCustomers.find(function(x){ return x.id === id; });
+    if (!az360Customer) return;
+    document.getElementById('custDrawerTitle').textContent = az360Customer.name || 'Customer';
+    document.getElementById('custDrawerSub').textContent = 'Customer 360° — every data point in one place';
+    // render tab bar
+    bar.innerHTML = TABS.map(function(t){ return '<button type="button" class="az360-tab' + (t[0]==='overview'?' active':'') + '" onclick="az360Tab(\'' + t[0] + '\')">' + t[1] + '</button>'; }).join('');
+    document.getElementById('custDrawerBody').innerHTML = '<div class="az360-body" id="az360Body"><div class="empty-state loading-dots">Loading profile</div></div>';
+    try {
+      var r = await apiFetch('/api/admin/customers/' + id + '/360');
+      az360State = r.ok ? ((await r.json()).data || null) : null;
+    } catch(e){ az360State = null; }
+    if (!az360State) {
+      document.getElementById('az360Body').innerHTML = '<div class="empty-state"><div class="empty-ico">⚠️</div><div class="empty-msg">Profile unavailable — check permissions and refresh.</div></div>';
+      return;
+    }
+    az360Tab('overview');
+  };
+  window.az360Tab = function az360Tab(name){
+    bar.querySelectorAll('.az360-tab').forEach(function(b){ b.classList.toggle('active', b.textContent.trim().toLowerCase().includes(azTabName(name)) === false && b.getAttribute('onclick').indexOf("'" + name + "'") >= 0); });
+    bar.querySelectorAll('.az360-tab').forEach(function(b){ if (b.getAttribute('onclick') && b.getAttribute('onclick').indexOf("'" + name + "'") >= 0) b.classList.add('active'); else b.classList.remove('active'); });
+    var body = document.getElementById('az360Body');
+    if (!body) return;
+    var d = az360State, c = az360Customer || {};
+    if (name === 'overview') body.innerHTML = az360Overview(d, c);
+    if (name === 'orders') body.innerHTML = az360Orders(d);
+    if (name === 'returns') body.innerHTML = az360Returns(d);
+    if (name === 'loyalty') body.innerHTML = az360Loyalty(d);
+    if (name === 'promos') body.innerHTML = az360Promos(d);
+    if (name === 'edit') body.innerHTML = az360Edit(d, c);
+  };
+  function azTabName(n){ return n; }
+  function az360Money(v){ return '₹' + Number(v||0).toLocaleString('en-IN'); }
+  function az360Overview(d, c){
+    var o = d.orders, l = d.loyalty;
+    var kpi = function(lab, val, ico){ return '<div class="az360-kpi"><div class="k">' + ico + ' ' + lab + '</div><div class="v">' + val + '</div></div>'; };
+    var first = o.history.length ? o.history[o.history.length - 1] : null;
+    return '<div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px">' +
+      kpi('Orders', o.total, '📦') + kpi('Lifetime Value', az360Money(o.total_spent), '💰') +
+      kpi('VitaPoints', l.balance.toLocaleString('en-IN'), '🌟') +
+      kpi('Cancelled', o.cancelled, '❌') +
+      kpi('Returns', d.returns.count, '🔄') + kpi('Coupons Used', d.promos.coupon_codes_used_count, '🏷') +
+      '</div>' +
+      '<h4 style="font-size:.68rem;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.6px;margin:10px 0 8px">Contact</h4>' +
+      '<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px">' +
+      '<div class="az360-kpi" style="text-align:left;padding:10px 12px"><div class="k">✉️ Email</div><div class="v" style="font-size:.78rem;font-family:var(--font);word-break:break-all">' + (escHtml(d.customer.email) || '–') + '</div></div>' +
+      '<div class="az360-kpi" style="text-align:left;padding:10px 12px"><div class="k">📱 Phone</div><div class="v" style="font-size:.78rem;font-family:var(--font)">' + (escHtml(d.customer.phone) || '–') + '</div></div>' +
+      '</div>' +
+      '<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:8px">' +
+      '<div class="az360-kpi" style="text-align:left;padding:10px 12px"><div class="k">📍 City</div><div class="v" style="font-size:.78rem;font-family:var(--font)">' + (escHtml(d.customer.city) || '–') + '</div></div>' +
+      '<div class="az360-kpi" style="text-align:left;padding:10px 12px"><div class="k">🗺 State</div><div class="v" style="font-size:.78rem;font-family:var(--font)">' + (escHtml(d.customer.state) || '–') + '</div></div>' +
+      '<div class="az360-kpi" style="text-align:left;padding:10px 12px"><div class="k">📮 Pincode</div><div class="v" style="font-size:.78rem;font-family:var(--font)">' + (escHtml(d.customer.pincode) || '–') + '</div></div>' +
+      '</div>' +
+      '<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">' +
+      '<div class="az360-kpi" style="text-align:left;padding:10px 12px"><div class="k">✉️ Email campaigns</div><div class="v" style="font-size:.78rem;font-family:var(--font)">' + (d.consent.email !== false ? '✅ Subscribed' : '⛔ Opted out') + '</div></div>' +
+      '<div class="az360-kpi" style="text-align:left;padding:10px 12px"><div class="k">📱 WhatsApp</div><div class="v" style="font-size:.78rem;font-family:var(--font)">' + (d.consent.whatsapp !== false ? '✅ Subscribed' : '⛔ Opted out') + '</div></div>' +
+      '</div>' +
+      (first ? '<div style="margin-top:10px;font-size:.7rem;color:var(--text3)">First order on record: ' + fmtDate(first.created_at) + '</div>' : '');
+  }
+  function az360Orders(d){
+    var o = d.orders;
+    var rows = o.history.map(function(r){
+      var cancelled = String(r.fulfillment||'').toLowerCase()==='cancelled';
+      return '<tr><td style="font-family:var(--mono)">' + r.id + '</td><td>' + fmtDate(r.created_at) + '</td><td><span class="badge ' + (cancelled ? 'badge-red' : (r.status==='Delivered' ? 'badge-green' : 'badge-gold')) + '">' + (cancelled ? 'Cancelled' : r.status) + '</span></td><td style="font-weight:600">' + az360Money(r.total) + '</td><td>' + (r.payment_method||'–').toUpperCase() + '</td><td>' + (r.coupon_code||'–') + '</td></tr>';
+    }).join('');
+    return '<div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px">' +
+      '<div class="az360-kpi"><div class="k">Total orders</div><div class="v">' + o.total + '</div></div>' +
+      '<div class="az360-kpi"><div class="k">Total spent</div><div class="v">' + az360Money(o.total_spent) + '</div></div>' +
+      '<div class="az360-kpi"><div class="k">Cancelled</div><div class="v">' + o.cancelled + ' (' + az360Money(o.cancelled_value) + ')</div></div>' +
+      '<div class="az360-kpi"><div class="k">Payment mix</div><div class="v">' + o.payment_mix.prepaid + ' prepaid · ' + o.payment_mix.cod + ' COD</div></div>' +
+      '</div><table class="az360-tbl"><thead><tr><th>Order</th><th>Date</th><th>Status</th><th>Total</th><th>Payment</th><th>Coupon</th></tr></thead><tbody>' +
+      (rows || '<tr><td colspan="6" class="empty-state">No orders</td></tr>') + '</tbody></table>';
+  }
+  function az360Returns(d){
+    var rs = d.returns.list, fs = d.refunds.list;
+    var rows = rs.map(function(r){
+      return '<tr><td style="font-family:var(--mono)">' + (r.order_id||'–') + '</td><td>' + fmtDate(r.created_at) + '</td><td>' + (escHtml(r.reason)||'–') + '</td><td><span class="badge ' + (String(r.status||'').toLowerCase()==='refunded' ? 'badge-green' : 'badge-gold') + '">' + r.status + '</span></td><td>' + az360Money(r.refund_amount) + '</td></tr>';
+    }).join('');
+    var fr = fs.slice(0, 40).map(function(r){
+      return '<tr><td style="font-family:var(--mono)">' + (r.order_id||'–') + '</td><td>' + fmtDate(r.created_at) + '</td><td>' + (r.gateway||'–') + '</td><td><span class="badge ' + (String(r.status||'').toLowerCase().includes('success') ? 'badge-green' : 'badge-gold') + '">' + r.status + '</span></td><td>' + az360Money(r.amount) + '</td></tr>';
+    }).join('');
+    return '<div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px">' +
+      '<div class="az360-kpi"><div class="k">Return requests</div><div class="v">' + d.returns.count + '</div></div>' +
+      '<div class="az360-kpi"><div class="k">Refunded returns</div><div class="v">' + d.returns.refunded + '</div></div>' +
+      '<div class="az360-kpi"><div class="k">Refund value</div><div class="v">' + az360Money(d.returns.refund_amount_total) + '</div></div>' +
+      '<div class="az360-kpi"><div class="k">Gateway refunds</div><div class="v">' + d.refunds.count + '</div></div>' +
+      '</div>' +
+      '<h4 style="font-size:.68rem;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.6px;margin:10px 0 6px">Return requests</h4>' +
+      '<table class="az360-tbl"><thead><tr><th>Order</th><th>Date</th><th>Reason</th><th>Status</th><th>Amount</th></tr></thead><tbody>' + (rows || '<tr><td colspan="5" class="empty-state">No returns</td></tr>') + '</tbody></table>' +
+      '<h4 style="font-size:.68rem;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.6px;margin:14px 0 6px">Gateway refunds (latest 40)</h4>' +
+      '<table class="az360-tbl"><thead><tr><th>Order</th><th>Date</th><th>Gateway</th><th>Status</th><th>Amount</th></tr></thead><tbody>' + (fr || '<tr><td colspan="5" class="empty-state">No gateway refunds</td></tr>') + '</tbody></table>';
+  }
+  function az360Loyalty(d){
+    var l = d.loyalty;
+    var kpi = function(lab, val, ico){ return '<div class="az360-kpi"><div class="k">' + ico + ' ' + lab + '</div><div class="v">' + Number(val||0).toLocaleString('en-IN') + '</div></div>'; };
+    var leRows = l.ledger.slice(0, 60).map(function(r){
+      var pos = Number(r.points||0) >= 0;
+      return '<tr><td>' + fmtDate(r.created_at) + '</td><td>' + escHtml(r.transaction_type) + '</td><td style="font-weight:700;color:' + (pos ? 'var(--green-text)' : 'var(--red)') + '">' + (pos ? '+' : '') + Number(r.points||0).toLocaleString('en-IN') + '</td><td style="font-family:var(--mono);font-size:.66rem">' + (r.order_id || '–') + '</td><td style="color:var(--text3);max-width:240px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="' + escHtml(r.reason||'') + '">' + escHtml(r.reason||'') + '</td></tr>';
+    }).join('');
+    var peRows = l.pending_events.map(function(r){
+      return '<tr><td>' + fmtDate(r.created_at) + '</td><td>' + Number(r.points||0).toLocaleString('en-IN') + '</td><td style="font-family:var(--mono);font-size:.66rem">' + (r.order_id||'–') + '</td><td>' + (r.delivered_at ? 'Delivered ' + fmtDate(r.delivered_at) : 'Releases ' + fmtDate(r.release_at)) + '</td></tr>';
+    }).join('');
+    var rwRows = l.rewards.map(function(r){
+      return '<tr><td>' + fmtDate(r.claimed_at) + '</td><td>' + escHtml(r.kind||'–') + '</td><td style="font-family:var(--mono)">' + (escHtml(r.code)||'–') + '</td><td><span class="badge ' + (r.used_at ? 'badge-green' : 'badge-gold') + '">' + (r.used_at ? 'Used ' + fmtDate(r.used_at) : 'Active') + '</span></td></tr>';
+    }).join('');
+    return '<div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px">' +
+      kpi('Balance', l.balance, '🌟') + kpi('Pending', l.pending, '⏳') + kpi('Locked', l.locked, '🔒') +
+      kpi('Debt', l.debt, '➖') + kpi('Lifetime earned', l.lifetime_earned, '⬆') + kpi('Lifetime redeemed', l.lifetime_redeemed, '⬇') +
+      '</div>' +
+      '<h4 style="font-size:.68rem;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.6px;margin:10px 0 6px">Ledger (latest 60)</h4>' +
+      '<table class="az360-tbl"><thead><tr><th>Date</th><th>Type</th><th>Points</th><th>Order</th><th>Reason</th></tr></thead><tbody>' + (leRows || '<tr><td colspan="5" class="empty-state">No ledger entries</td></tr>') + '</tbody></table>' +
+      '<h4 style="font-size:.68rem;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.6px;margin:14px 0 6px">Pending releases</h4>' +
+      '<table class="az360-tbl"><thead><tr><th>Date</th><th>Points</th><th>Order</th><th>Release</th></tr></thead><tbody>' + (peRows || '<tr><td colspan="4" class="empty-state">No pending points</td></tr>') + '</tbody></table>' +
+      '<h4 style="font-size:.68rem;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.6px;margin:14px 0 6px">Rewards</h4>' +
+      '<table class="az360-tbl"><thead><tr><th>Claimed</th><th>Kind</th><th>Code</th><th>Status</th></tr></thead><tbody>' + (rwRows || '<tr><td colspan="4" class="empty-state">No rewards claimed</td></tr>') + '</tbody></table>';
+  }
+  function az360Promos(d){
+    var m = d.promos.coupons_used || {};
+    var keys = Object.keys(m);
+    var rows = keys.sort(function(a,b){ return m[b] - m[a]; }).map(function(k){
+      return '<tr><td style="font-family:var(--mono);font-weight:600">' + escHtml(k) + '</td><td><span class="badge badge-gold">' + m[k] + '×</span></td></tr>';
+    }).join('');
+    return '<div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px">' +
+      '<div class="az360-kpi"><div class="k">Distinct coupons used</div><div class="v">' + d.promos.coupon_codes_used_count + '</div></div>' +
+      '<div class="az360-kpi"><div class="k">Orders with a coupon</div><div class="v">' + keys.reduce(function(s,k){ return s + m[k]; }, 0) + '</div></div>' +
+      '</div><table class="az360-tbl" style="max-width:380px"><thead><tr><th>Coupon code</th><th>Times used</th></tr></thead><tbody>' +
+      (rows || '<tr><td colspan="2" class="empty-state">No coupons used</td></tr>') + '</tbody></table>' +
+      '<div style="margin-top:12px;font-size:.7rem;color:var(--text3)">Codes are derived from order history (orders where the customer checked out with that code). Cancelled orders are included — cross-check against the Orders tab if a number looks off.</div>';
+  }
+  function az360Edit(d, c){
+    var f = d.customer;
+    return '<div style="font-size:.72rem;color:var(--text3);margin-bottom:12px">Edits are saved only after password re-confirmation. Every change is written to the audit log.</div>' +
+      '<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">' +
+      az360Field('az360Name', 'Full name', f.name) + az360Field('az360Phone', 'Phone', f.phone) +
+      az360Field('az360Email', 'Email', f.email) + az360Field('az360City', 'City', f.city) +
+      az360Field('az360State', 'State', f.state) + az360Field('az360Pincode', 'Pincode', f.pincode) +
+      '</div>' +
+      '<div style="display:flex;gap:12px;margin:12px 0 4px">' +
+      '<label style="flex:1;display:flex;align-items:center;gap:8px;background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:10px 12px;cursor:pointer"><input type="checkbox" id="az360MktEmail" ' + (f.marketing_email !== false ? 'checked' : '') + '> <span style="font-size:.8rem">✉️ Email campaigns</span></label>' +
+      '<label style="flex:1;display:flex;align-items:center;gap:8px;background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:10px 12px;cursor:pointer"><input type="checkbox" id="az360MktWhatsapp" ' + (f.marketing_whatsapp !== false ? 'checked' : '') + '> <span style="font-size:.8rem">📱 WhatsApp messages</span></label>' +
+      '</div>' +
+      '<div style="margin:12px 0 4px"><label class="field-label">Manual VitaPoints adjustment (−10,000 … +10,000, ledger-logged)</label>' +
+      '<input type="number" id="az360Points" class="field-input" placeholder="e.g. -200 to remove, 500 to credit" min="-10000" max="10000"></div>' +
+      '<div id="az360EditMsg" class="login-error" style="display:none"></div>' +
+      '<div style="margin-top:14px"><button class="btn btn-gold" onclick="az360Save()">💾 Save changes (password required)</button></div>';
+  }
+  function az360Field(id, label, value){
+    return '<div><label class="field-label">' + label + '</label><input type="text" id="' + id + '" class="field-input" value="' + escHtml(value || '') + '"></div>';
+  }
+  window.az360Save = async function az360Save(){
+    var id = az360Customer ? az360Customer.id : null;
+    if (!id) return;
+    var body = {
+      name: document.getElementById('az360Name').value.trim(),
+      phone: document.getElementById('az360Phone').value.trim(),
+      email: document.getElementById('az360Email').value.trim(),
+      city: document.getElementById('az360City').value.trim(),
+      state: document.getElementById('az360State').value.trim(),
+      pincode: document.getElementById('az360Pincode').value.trim(),
+      marketing_email: !!document.getElementById('az360MktEmail').checked,
+      marketing_whatsapp: !!document.getElementById('az360MktWhatsapp').checked,
+    };
+    var pm = document.getElementById('az360Points').value;
+    if (pm !== '' && Number.isFinite(Number(pm))) body.points_manual = Number(pm);
+    try {
+      await confirmCriticalAction('Save changes to this customer\u2019s profile? (Audit-logged)', async function(proof){
+        var r = await apiFetch('/api/admin/customers/' + id + '/360', { method: 'PUT', headers: { 'X-Password-Proof': proof }, body: JSON.stringify(body) });
+        var d = await r.json();
+        if (!r.ok) throw new Error(d.error || 'Could not save changes');
+        // refresh local rows so the customers table stays truthful
+        var row = allCustomers.find(function(x){ return x.id === id; });
+        if (row) { Object.assign(row, { name: body.name, phone: body.phone, email: body.email, city: body.city, state: body.state, pincode: body.pincode, marketing_email: body.marketing_email, marketing_whatsapp: body.marketing_whatsapp }); row._insight = null; }
+        az360State = null;
+        await az360Open(id);
+        renderCustomersTable(customersFilteredList);
+        toast('Customer profile saved ✅');
+      });
+    } catch(e){
+      if (String(e.message) !== 'cancelled') { var m = document.getElementById('az360EditMsg'); if (m) { m.textContent = e.message; m.style.display = 'block'; } toast('❌ ' + e.message, 'error'); }
+    }
+  };
+  // Patch the existing row click to open the 360 profile instead of the old insight pass
+  // (guarded: only replace if az360Open is reachable, keeping old behaviour as fallback)
+  window.__az360OpenInsight = window.openCustomerInsight;
+  window.openCustomerInsight = function(id){ if (window.az360Open) { window.az360Open(id); } else { window.__az360OpenInsight(id); } };
+})();
+</script>
+
 <!-- ═════════════ CUSTOMER INSIGHT DRAWER (Aug 2026: re-targeting) ═════════════ -->
 <div class="drawer-overlay" id="custDrawerOverlay" onclick="closeCustomerInsight()"></div>
 <div class="prod-drawer" id="custDrawer">
@@ -3228,8 +3459,8 @@ function azTogglePw() {
 
   <div class="table-wrap">
     <table>
-      <thead><tr><th>Name</th><th>Email</th><th>Phone</th><th>City</th><th>Orders</th><th>Spent</th><th>Segment</th><th>Joined</th></tr></thead>
-      <tbody id="customersTbody"><tr><td colspan="8"><div class="empty-state loading-dots">Loading</div></td></tr></tbody>
+      <thead><tr><th>Name</th><th>Email</th><th>Phone</th><th>City</th><th>Orders</th><th>Spent</th><th>Segment</th><th>Joined</th><th style="width:44px"></th></tr></thead>
+      <tbody id="customersTbody"><tr><td colspan="9"><div class="empty-state loading-dots">Loading</div></td></tr></tbody>
     </table>
   </div>
   <div style="display:flex;align-items:center;justify-content:space-between;margin-top:14px;flex-wrap:wrap;gap:10px;">
@@ -4152,10 +4383,482 @@ function azTogglePw() {
 </div>
 
 <!-- ═════════════ SETTINGS ═════════════ -->
+
+<!-- ═════════════ STAFF & PERMISSIONS (owner-only) ═════════════ -->
+<div class="page" id="page-staff">
+  <div class="page-hdr">
+    <div><div class="page-title">Staff &amp; Permissions</div><div class="page-sub">One identity per person — each staff member has their own username, password, Google Authenticator and permission set</div></div>
+    <div class="page-actions">
+      <button class="btn btn-secondary" onclick="loadStaffPage()">↺ Refresh</button>
+      <button class="btn btn-gold" onclick="azToggleStaffInvite()">＋ Invite staff</button>
+    </div>
+  </div>
+
+  <div id="staffOwnerNotice" class="card" style="display:none;background:var(--red-soft);border:1px solid var(--red);margin-bottom:16px">
+    <div style="padding:14px;color:var(--red-text);font-weight:600">⛔ Staff &amp; Permissions is an owner-only area. Your account cannot see this page.</div>
+  </div>
+
+  <div id="staffPageContent">
+  <!-- Invite form -->
+  <div id="staffInviteCard" class="card" style="display:none;margin-bottom:16px">
+    <div style="padding:16px 20px;border-bottom:1px solid var(--border)">
+      <div class="page-title" style="font-size:1rem">Invite a new staff member</div>
+      <div class="page-sub" style="font-size:.72rem">Minimum 3 characters · password 10+ characters · they set up Google Authenticator at first login</div>
+    </div>
+    <div style="padding:16px 20px;display:grid;gap:12px">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+        <div>
+          <label class="field-label">Username</label>
+          <input type="text" id="azStaffNewUsername" class="field-input" placeholder="e.g. priya.support"
+                 autocomplete="off" autocapitalize="none" maxlength="30">
+          <div style="font-size:.66rem;color:var(--text3);margin-top:4px">a-z, 0-9, dots, underscores, hyphens</div>
+        </div>
+        <div>
+          <label class="field-label">Password</label>
+          <div class="pw-wrap">
+            <input type="password" id="azStaffNewPassword" class="field-input" placeholder="Minimum 10 characters" autocomplete="new-password">
+            <button type="button" class="pw-toggle" onclick="azToggleStaffNewPw()">👁</button>
+          </div>
+        </div>
+      </div>
+      <div>
+        <label class="field-label">Role</label>
+        <select id="azStaffNewRole" class="field-input">
+          <option value="admin">Admin</option>
+        </select>
+        <div style="font-size:.66rem;color:var(--text3);margin-top:4px">Owner accounts cannot be created from here — the owner account is your own.</div>
+      </div>
+      <div>
+        <label class="field-label">Force 2FA for this person</label>
+        <label class="switch"><input type="checkbox" id="azStaffNewEnforced" checked><span class="switch-slider"></span></label>
+        <div style="font-size:.66rem;color:var(--text3);margin-top:4px">They must enroll Google Authenticator at first login and cannot disable it.</div>
+      </div>
+      <div>
+        <label class="field-label">Permissions</label>
+        <div id="azStaffNewPerms" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:4px 12px;max-height:190px;overflow-y:auto;border:1px solid var(--border);border-radius:10px;padding:10px;background:var(--surface2)"></div>
+        <div style="display:flex;gap:8px;margin-top:6px">
+          <button type="button" class="btn btn-secondary" style="font-size:.7rem;padding:4px 10px" onclick="azStaffNewPermsAll(true)">Select all</button>
+          <button type="button" class="btn btn-secondary" style="font-size:.7rem;padding:4px 10px" onclick="azStaffNewPermsAll(false)">Clear</button>
+          <button type="button" class="btn btn-secondary" style="font-size:.7rem;padding:4px 10px" onclick="azStaffNewPermsPreset('warehouse')">Warehouse preset</button>
+          <button type="button" class="btn btn-secondary" style="font-size:.7rem;padding:4px 10px" onclick="azStaffNewPermsPreset('support')">Support preset</button>
+          <button type="button" class="btn btn-secondary" style="font-size:.7rem;padding:4px 10px" onclick="azStaffNewPermsPreset('marketing')">Marketing preset</button>
+        </div>
+      </div>
+      <div style="display:flex;gap:10px">
+        <button class="btn btn-gold" onclick="azStaffInvite()">Invite →</button>
+        <button class="btn btn-secondary" onclick="azToggleStaffInvite()">Cancel</button>
+      </div>
+      <div id="azStaffInviteMsg" class="login-error" style="display:none"></div>
+    </div>
+  </div>
+
+  <!-- Staff table -->
+  <div class="card">
+    <div style="padding:16px 20px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap">
+      <div>
+        <div class="page-title" style="font-size:1rem">Your team</div>
+        <div class="page-sub" style="font-size:.72rem">Revoke kills every open session instantly. Suspend keeps the account but blocks login.</div>
+      </div>
+      <div style="display:flex;gap:8px">
+        <button class="btn btn-secondary" style="font-size:.72rem;padding:6px 12px" onclick="azOpenOwn2fa()">🔐 My 2FA</button>
+      </div>
+    </div>
+    <div style="overflow-x:auto;padding:8px 12px 16px">
+      <table class="az-table" style="width:100%;border-collapse:collapse">
+        <thead>
+          <tr style="font-size:.7rem;text-transform:uppercase;letter-spacing:.5px;color:var(--text3);border-bottom:1px solid var(--border)">
+            <th style="text-align:left;padding:8px 10px">Username</th>
+            <th style="text-align:left;padding:8px 10px">Role</th>
+            <th style="text-align:left;padding:8px 10px">Status</th>
+            <th style="text-align:left;padding:8px 10px">2FA</th>
+            <th style="text-align:left;padding:8px 10px">Permissions</th>
+            <th style="text-align:left;padding:8px 10px">Last login</th>
+            <th style="text-align:right;padding:8px 10px">Actions</th>
+          </tr>
+        </thead>
+        <tbody id="azStaffBody"></tbody>
+      </table>
+    </div>
+  </div>
+  </div>
+</div>
+
+<script>
+/* ═══ Staff & Permissions — owner-only page ═══ */
+const AZ_STAFF_PERMS = [
+  ['orders.view','View orders'],['orders.fulfil','Fulfil / dispatch'],['orders.delete','Delete orders'],['orders.refund','Refund orders'],
+  ['customers.view','View customers'],['customers.edit','Edit customers'],['products.view','View products'],['products.edit','Edit products'],
+  ['products.delete','Delete products'],['reviews.view','View reviews'],['reviews.moderate','Moderate reviews'],
+  ['coupons.view','View coupons'],['coupons.edit','Edit coupons'],['coupons.delete','Delete coupons'],['coupons.publish','Publish coupons'],
+  ['content.view','View content'],['content.edit','Edit content'],['finance.view','View finance'],['finance.refund','Finance refunds'],
+  ['analytics.view','Analytics'],['reports.view','Reports'],['shipping.view','Shipping'],['shipping.dispatch','Dispatch shipping'],
+  ['settings.manage','Settings'],['alerts.view','Alerts'],['alerts.resolve','Resolve alerts'],['audit.view','Audit log'],
+  ['fraud.view','Fraud alerts'],['media.view','Media library'],['site-media.view','Site media'],
+];
+const AZ_STAFF_PRESETS = {
+  warehouse: ['orders.view','orders.fulfil','products.view','shipping.view','shipping.dispatch','reviews.view','returns.view'].filter(k=>AZ_STAFF_PERMS.find(p=>p[0]===k)).concat(AZ_STAFF_PERMS.filter(p=>['orders.view','orders.fulfil','products.view','shipping.view','shipping.dispatch','reviews.view'].includes(p[0])).map(p=>p[0])),
+  support:   ['orders.view','customers.view','customers.edit','reviews.view','reviews.moderate','products.view','content.view'],
+  marketing: ['products.view','content.view','content.edit','coupons.view','coupons.edit','coupons.publish','analytics.view','site-media.view','media.view'],
+};
+
+/* ── Shared helpers used by the staff page, the 360 drawer and the
+   password gate. Defined once so every caller uses the same logic. */
+function escHtml(str){ return retEsc(str); }
+
+/* Generic modal builder — title + HTML body + buttons. Creates the overlay
+   markup on first call and reuses it afterwards. */
+const AZ_MODAL_TPL2 = '<div class="modal-overlay" id="{id}"><div class="modal" style="max-width:640px"><div class="modal-hdr"><div class="modal-title">{title}</div><button class="modal-close" onclick="closeModal(\'{id}\')">✕</button></div><div class="modal-body">{body}</div>{btns}</div></div>';
+function azBuildModal2(id, title, body, buttons){
+  let el = document.getElementById(id);
+  if (!el) {
+    el = document.createElement('div');
+    el.id = id;
+    el.className = 'modal-overlay';
+    el.addEventListener('click', e => { if (e.target === el) el.classList.remove('open'); });
+    document.body.appendChild(el);
+  }
+  const btnsHtml = (buttons || []).map((b,i) =>
+    `<button class="btn ${b.cls||''}" data-azmodal-idx="${i}">${escHtml(b.label)}</button>`).join('');
+  el.innerHTML = AZ_MODAL_TPL2.replace('{id}', id).replace('{title}', escHtml(title))
+    .replace('{body}', body).replace('{btns}', btnsHtml
+      ? '<div style="padding:12px 20px;border-top:1px solid var(--border);display:flex;gap:8px;justify-content:flex-end">' + btnsHtml + '</div>' : '');
+  (buttons || []).forEach((b,i) => {
+    const btn = el.querySelector(`button[data-azmodal-idx="${i}"]`);
+    if (btn) btn.addEventListener('click', () => { try { b.action(); } catch (e) { toast('❌ ' + e.message, 'error'); } });
+  });
+  el.classList.add('open');
+}
+function openModal(id){ document.getElementById(id).classList.add('open'); }
+function closeModal(id){ document.getElementById(id).classList.remove('open'); }
+
+/* ── Password re-confirmation gate ────────────────────────────────────
+   Every destructive or sensitive change goes through this. The admin
+   types their password (and 2FA code if enrolled) — the server returns a
+   one-use proof valid 5 minutes — which is sent with the real action
+   as X-Password-Proof. Never rely on the open session alone. */
+let __proof = null, __proofExp = 0;
+function azSessionUser(){ try{ return JSON.parse(localStorage.getItem('ascovita_session')||'{}'); }catch(e){ return {}; } }
+async function confirmCriticalAction(promptText, actionFn){
+  const sess = azSessionUser();
+  const enrolled = !!(sess.totp && (sess.totp.enrolled || sess.totp.enforced));
+  const reuses = __proof && Date.now() < __proofExp;
+  if (reuses) return actionFn(__proof);
+  return new Promise(function(resolve, reject){
+    const msgId = 'azProofMsg';
+    azBuildModal2('azProofModal', 'Confirm with your password', `
+      <div style="padding:4px 0">
+        <div style="font-size:.8rem;margin-bottom:12px;color:var(--text2)">${escHtml(promptText)}</div>
+        <label class="field-label">Password</label>
+        <div class="pw-wrap"><input type="password" id="azProofPw" class="field-input" autocomplete="current-password"><button type="button" class="pw-toggle" onclick="var i=document.getElementById('azProofPw');i.type=i.type==='password'?'text':'password'">👁</button></div>
+        ${enrolled ? '<label class="field-label" style="margin-top:10px">2FA code <span style="font-weight:400;color:var(--text3)">(your authenticator)</span></label><input type="text" id="azProofCode" class="field-input" inputmode="numeric" maxlength="10" autocomplete="one-time-code">' : ''}
+        <div id="${msgId}" class="login-error" style="display:none"></div>
+      </div>`, [
+      { label: 'Confirm', cls: 'btn-gold', action: async function(){
+        const pw = document.getElementById('azProofPw').value;
+        const code = (document.getElementById('azProofCode')||{}).value || undefined;
+        const msg = document.getElementById(msgId);
+        if (!pw) { msg.textContent = 'Enter your password.'; msg.style.display = 'block'; return; }
+        msg.style.display = 'none';
+        try {
+          const r = await apiFetch('/api/admin/confirm-password', {
+            method: 'POST', body: JSON.stringify({ username: sess.username || '', password: pw, code: code }),
+          });
+          const d = await r.json();
+          if (!r.ok || !d.proof) throw new Error(d.error || 'Password did not match');
+          __proof = d.proof; __proofExp = Date.now() + 4 * 60 * 1000;
+          closeModal('azProofModal');
+          resolve(await actionFn(__proof));
+        } catch (e) { msg.textContent = e.message; msg.style.display = 'block'; }
+      }},
+      { label: 'Cancel', cls: 'btn-secondary', action: function(){ closeModal('azProofModal'); reject(new Error('cancelled')); } },
+    ]);
+  });
+}
+
+function azStaffPermLabel(k){ const f = AZ_STAFF_PERMS.find(p=>p[0]===k); return f ? f[1] : k; }
+
+function azToggleStaffInvite(){
+  const c = document.getElementById('staffInviteCard');
+  c.style.display = c.style.display === 'none' ? 'block' : 'none';
+  if (c.style.display === 'block') { renderAzStaffNewPerms([]); document.getElementById('azStaffNewUsername').focus(); }
+}
+function azToggleStaffNewPw(){
+  const i = document.getElementById('azStaffNewPassword');
+  i.type = i.type === 'password' ? 'text' : 'password';
+}
+function renderAzStaffNewPerms(selected){
+  const w = document.getElementById('azStaffNewPerms');
+  w.innerHTML = AZ_STAFF_PERMS.map(([k,lab]) =>
+    `<label style="font-size:.75rem;display:flex;align-items:center;gap:6px;padding:2px 0;cursor:pointer">
+       <input type="checkbox" class="az-new-perm" value="${k}" ${selected.includes(k)?'checked':''}> ${escHtml(lab)}</label>`).join('');
+}
+function azStaffNewPermsAll(on){ document.querySelectorAll('.az-new-perm').forEach(c=>{c.checked=on;}); }
+function azStaffNewPermsPreset(name){
+  const sel = new Set(AZ_STAFF_PRESETS[name] || []);
+  document.querySelectorAll('.az-new-perm').forEach(c=>{ c.checked = sel.has(c.value); });
+}
+
+async function loadStaffPage(){
+  const body = document.getElementById('azStaffBody');
+  const notice = document.getElementById('staffOwnerNotice');
+  const content = document.getElementById('staffPageContent');
+  if (!body) return;
+  body.innerHTML = '<tr><td colspan="7" style="padding:22px;text-align:center;color:var(--text3)">Loading team…</td></tr>';
+  try {
+    const d = await apiFetch('/api/admin/staff');
+    if (d.error) throw new Error(d.error);
+    const isOwner = (function(){ try{ return JSON.parse(localStorage.getItem('ascovita_session')||'{}').is_owner; }catch(e){return false;} })();
+    notice.style.display = isOwner ? 'none' : 'block';
+    content.style.display = isOwner ? '' : 'none';
+    if (!isOwner) return;
+    const rows = (d.staff || []).map(s => {
+      const statusCls = s.enabled ? 'badge-ok' : 'badge-bad';
+      const statusTxt = s.enabled ? 'Active' : 'Suspended';
+      const totpCls = s.enrolled ? 'badge-ok' : 'badge-soft';
+      const totpTxt = s.enrolled ? 'Enrolled' : (s.enforced ? 'Required — not enrolled' : 'Not enrolled');
+      const permTags = (s.permissions && s.permissions.length)
+        ? s.permissions.map(p=>`<span style="font-size:.62rem;background:var(--bg2);border:1px solid var(--border);border-radius:6px;padding:1px 5px">${escHtml(azStaffPermLabel(p))}</span>`).join(' ')
+        : '<span style="font-size:.7rem;color:var(--text3)">Full admin (default role)</span>';
+      return `<tr style="border-bottom:1px solid var(--border);vertical-align:top">
+        <td style="padding:10px;font-weight:600">${escHtml(s.username)}${s.enforced?'<div style="font-size:.62rem;color:var(--gold-text);font-weight:500">2FA enforced</div>':''}</td>
+        <td style="padding:10px"><span class="badge badge-gold">${escHtml(s.role)}</span></td>
+        <td style="padding:10px"><span class="badge ${statusCls}">${statusTxt}</span></td>
+        <td style="padding:10px"><span class="badge ${totpCls}">${totpTxt}</span></td>
+        <td style="padding:10px;max-width:320px">${permTags}</td>
+        <td style="padding:10px;font-size:.72rem;color:var(--text3)">${s.last_login_at ? new Date(s.last_login_at).toLocaleString() : '—'}</td>
+        <td style="padding:10px;text-align:right;white-space:nowrap">
+          <button class="btn btn-secondary" style="font-size:.68rem;padding:4px 9px" onclick="azStaffEditPerms('${escHtml(s.username)}', ${JSON.stringify(s.permissions||[]).replace(/"/g,'&quot;')}, ${!!s.enforced})">✏️ Perms</button>
+          <button class="btn btn-secondary" style="font-size:.68rem;padding:4px 9px" onclick="azStaffToggle('${escHtml(s.username)}', ${s.enabled})">${s.enabled ? '⏸ Suspend' : '▶ Enable'}</button>
+          <button class="btn" style="font-size:.68rem;padding:4px 9px;color:var(--red-text);border-color:var(--red)" onclick="azStaffRevoke('${escHtml(s.username)}')">Revoke</button>
+        </td>
+      </tr>`;
+    }).join('');
+    body.innerHTML = rows || '<tr><td colspan="7" style="padding:22px;text-align:center;color:var(--text3)">No staff yet — invite someone to join the team.</td></tr>';
+  } catch (e) {
+    body.innerHTML = `<tr><td colspan="7" style="padding:22px;text-align:center;color:var(--red-text)">Could not load the team: ${escHtml(e.message)}</td></tr>`;
+  }
+}
+
+async function azStaffInvite(){
+  const msg = document.getElementById('azStaffInviteMsg');
+  const username = document.getElementById('azStaffNewUsername').value.trim();
+  const password = document.getElementById('azStaffNewPassword').value;
+  const enforced = document.getElementById('azStaffNewEnforced').checked;
+  const permissions = [...document.querySelectorAll('.az-new-perm:checked')].map(c=>c.value);
+  if (!/^[A-Za-z0-9._-]{3,30}$/.test(username)) { msg.textContent = 'Username: 3–30 characters, a-z, 0-9, dots, underscores, hyphens.'; msg.style.display = 'block'; return; }
+  if (password.length < 10) { msg.textContent = 'Password must be at least 10 characters.'; msg.style.display = 'block'; return; }
+  try {
+    await confirmCriticalAction(`Invite ${username} as staff?`, async function(proof){
+      const headers = proof ? { 'X-Password-Proof': proof } : {};
+      const r = await apiFetch('/api/admin/staff/invite', {
+        method: 'POST',
+        headers: headers,
+        body: JSON.stringify({ username, password, role: 'admin', permissions: permissions.length ? permissions : null, enforced }),
+      });
+      const d = await r.json();
+      if (!r.ok) throw new Error(d.error || 'Invite failed');
+      return d;
+    });
+    document.getElementById('azStaffNewUsername').value = '';
+    document.getElementById('azStaffNewPassword').value = '';
+    azToggleStaffInvite();
+    toast(`✅ ${username} invited — ask them to sign in and set up Google Authenticator`);
+    loadStaffPage();
+  } catch (e) {
+    if (e.message !== 'cancelled') { msg.textContent = e.message || 'Invite failed'; msg.style.display = 'block'; }
+  }
+}
+
+async function azStaffToggle(username, currentlyEnabled){
+  const req = confirmCriticalAction(`${currentlyEnabled ? 'Suspend' : 'Enable'} ${username}?`, async function(proof){
+    const headers = proof ? { 'X-Password-Proof': proof } : {};
+    const r = await apiFetch(`/api/admin/staff/${currentlyEnabled ? 'suspend' : 'enable'}`, {
+      method: 'POST', headers: headers, body: JSON.stringify({ username }),
+    });
+    const d = await r.json();
+    if (!r.ok) throw new Error(d.error || 'Failed');
+    return d;
+  });
+  try { await req; toast('Done'); loadStaffPage(); }
+  catch (e) { toast('❌ ' + e.message, 'error'); }
+}
+
+async function azStaffRevoke(username){
+  if (!confirm(`Revoke ${username}?\n\nTheir account is disabled and every open session is killed instantly. You can enable them again later.`)) return;
+  const req = confirmCriticalAction(`Permanently revoke ${username}?`, async function(proof){
+    const headers = proof ? { 'X-Password-Proof': proof } : {};
+    const r = await apiFetch('/api/admin/staff/revoke', {
+      method: 'POST', headers: headers, body: JSON.stringify({ username }),
+    });
+    const d = await r.json();
+    if (!r.ok) throw new Error(d.error || 'Revoke failed');
+    return d;
+  });
+  try { await req; toast(`${username} revoked`); loadStaffPage(); }
+  catch (e) { toast('❌ ' + e.message, 'error'); }
+}
+
+async function azStaffEditPerms(username, currentPerms, enforced){
+  const custom = currentPerms && currentPerms.length > 0;
+  const checked = custom ? new Set(currentPerms) : new Set(AZ_STAFF_PERMS.map(p=>p[0]));
+  let html = `<div style="padding:4px 0"><strong>${escHtml(username)}</strong> — ${custom ? 'custom set' : 'full admin (default role)'}</div>
+    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:3px 12px;max-height:300px;overflow-y:auto;border:1px solid var(--border);border-radius:10px;padding:10px;background:var(--surface2)">
+    ${AZ_STAFF_PERMS.map(([k,lab])=>`<label style="font-size:.75rem;display:flex;align-items:center;gap:6px;padding:2px 0;cursor:pointer"><input type="checkbox" class="az-edit-perm" value="${k}" ${checked.has(k)?'checked':''}> ${escHtml(lab)}</label>`).join('')}
+    </div>
+    <div style="font-size:.7rem;color:var(--text3);margin-top:8px">Leave everything ticked = full admin role. Uncheck any to create a custom set — the server enforces it immediately.</div>
+    <div style="margin-top:8px"><label style="font-size:.75rem;display:flex;align-items:center;gap:8px">
+    <input type="checkbox" id="azEditPermsEnforced" ${enforced?'checked':''}> Force 2FA for this person</label></div>`;
+    azBuildModal2('azStaffEditModal', 'Edit permissions — ' + username, html, [
+    { label: 'Save', cls: 'btn-gold', action: async function(){
+      const perms = [...document.querySelectorAll('.az-edit-perm:checked')].map(c=>c.value);
+      const enforcedNow = document.getElementById('azEditPermsEnforced').checked;
+      const all = AZ_STAFF_PERMS.every(p => perms.includes(p[0]));
+      try {
+        await confirmCriticalAction(`Apply permission changes for ${username}?`, async function(proof){
+          const headers = proof ? { 'X-Password-Proof': proof } : {};
+          const r = await apiFetch('/api/admin/staff/' + encodeURIComponent(username), {
+            method: 'PUT', headers: headers,
+            body: JSON.stringify({ permissions: all ? null : perms, enforced: enforcedNow }),
+          });
+          const d = await r.json();
+          if (!r.ok) throw new Error(d.error || 'Update failed');
+          return d;
+        });
+        closeModal('azStaffEditModal');
+        toast('Permissions updated');
+        loadStaffPage();
+      } catch (e) { toast('❌ ' + e.message, 'error'); }
+    }},
+    { label: 'Cancel', cls: 'btn-secondary', action: function(){ closeModal('azStaffEditModal'); } },
+  ]);
+}
+
+/* ═══ Own 2FA modal (every signed-in person) ═══ */
+async function azOpenOwn2fa(){
+  try {
+    const st = await apiFetch('/api/admin/2fa/status');
+    const enrolled = !!st.enrolled, masterOn = !!st.master_on, enforced = !!st.enforced;
+    let html = '';
+    if (enrolled) {
+      html = `<div style="padding:4px 0">
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px"><span class="badge badge-ok">2FA active</span>
+          ${enforced ? '<span class="badge badge-gold">Enforced — cannot disable</span>' : ''}
+          ${masterOn ? '<span class="badge badge-soft">Master: ON</span>' : '<span class="badge badge-soft">Master: OFF</span>'}</div>
+        <div style="font-size:.78rem;color:var(--text3);margin-bottom:12px">Every login from any device now needs your authenticator code.</div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap">
+          <button class="btn btn-secondary" style="font-size:.72rem;padding:5px 11px" onclick="azOwn2faCodes()">🔑 Backup codes</button>
+          ${enforced ? '' : '<button class="btn" style="font-size:.72rem;padding:5px 11px;color:var(--red-text);border-color:var(--red)" onclick="azOwn2faDisable()">Turn off 2FA</button>'}
+        </div></div>`;
+    } else {
+      const en = await apiFetch('/api/admin/2fa/enroll', { method: 'POST' });
+      if (!en.ok) throw new Error((await en.json()).error || 'Enroll failed');
+      const ev = await en.json();
+      html = `<div style="padding:4px 0">
+        <div style="font-size:.85rem;font-weight:700;margin-bottom:8px">1. Scan with Google Authenticator</div>
+        <img src="${ev.qr}" alt="QR" style="background:#fff;padding:10px;border-radius:10px;border:1px solid var(--border);width:190px;height:190px">
+        <div style="font-size:.68rem;color:var(--text3);margin:6px 0 14px;word-break:break-all">Manual key: ${escHtml(ev.secret)}</div>
+        <div style="font-size:.85rem;font-weight:700;margin-bottom:8px">2. Enter a code to finish</div>
+        <input type="text" id="azOwn2faCode" class="field-input" inputmode="numeric" maxlength="10" placeholder="6-digit code" style="max-width:220px">
+        <div style="margin-top:12px;display:flex;gap:8px">
+          <button class="btn btn-gold" style="font-size:.72rem;padding:5px 14px" onclick="azOwn2faConfirm('${ev.nonce}')">Complete setup</button>
+          <button class="btn btn-secondary" style="font-size:.72rem;padding:5px 11px" onclick="closeModal('azOwn2faModal')">Cancel</button>
+        </div>
+        <div id="azOwn2faMsg" class="login-error" style="display:none"></div></div>`;
+    }
+    azBuildModal2('azOwn2faModal', 'Two-factor authentication', html, []);
+  } catch (e) { toast('❌ ' + e.message, 'error'); closeModal('azOwn2faModal'); }
+}
+async function azOwn2faConfirm(nonce){
+  const code = document.getElementById('azOwn2faCode').value.trim();
+  const msg = document.getElementById('azOwn2faMsg');
+  if (!code) { msg.textContent = 'Enter the 6-digit code.'; msg.style.display = 'block'; return; }
+  try {
+    const r = await apiFetch('/api/admin/2fa/confirm-enroll', { method: 'POST', body: JSON.stringify({ nonce, code }) });
+    const d = await r.json();
+    if (!r.ok) throw new Error(d.error || 'Code did not match');
+    const codes = (d.backup_codes || []).join('\n');
+    closeModal('azOwn2faModal');
+    azBuildModal2('azOwn2faModal', '✅ 2FA active — save these backup codes', `<div style="padding:4px 0">
+      <div style="font-size:.8rem;margin-bottom:8px">One-time codes that work even without your phone. <strong>Each works only once</strong> — store them somewhere safe:</div>
+      <pre style="background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:12px;font-size:.8rem;font-family:var(--mono,monospace);letter-spacing:1px">${escHtml(codes)}</pre>
+      <button class="btn btn-gold" style="margin-top:10px;font-size:.72rem;padding:5px 14px" onclick="closeModal('azOwn2faModal');azOpenOwn2fa()">Done</button></div>`, []);
+    // Refresh cached session
+    try { const m = await apiFetch('/api/admin/me'); if (m && !m.error) localStorage.setItem('ascovita_session', JSON.stringify({ username: m.username, role: m.role, is_owner: !!m.is_owner, permissions: m.permissions, denied: m.denied, totp: m.totp })); } catch(e){}
+  } catch (e) { msg.textContent = e.message; msg.style.display = 'block'; }
+}
+async function azOwn2faDisable(){
+  if (!confirm('Turn off 2FA for your account? Any device can then log in with your password alone.')) return;
+  try {
+    await confirmCriticalAction('Disable 2FA — re-enter your password:', async function(proof){
+      const headers = proof ? { 'X-Password-Proof': proof } : {};
+      const r = await apiFetch('/api/admin/2fa/disable', { method: 'POST', headers });
+      const d = await r.json();
+      if (!r.ok) throw new Error(d.error || 'Failed');
+      return d;
+    });
+    closeModal('azOwn2faModal');
+    toast('2FA turned off');
+    try { const m = await apiFetch('/api/admin/me'); if (m && !m.error) localStorage.setItem('ascovita_session', JSON.stringify({ username: m.username, role: m.role, is_owner: !!m.is_owner, permissions: m.permissions, denied: m.denied, totp: m.totp })); } catch(e){}
+  } catch (e) { toast('❌ ' + e.message, 'error'); }
+}
+async function azOwn2faCodes(){
+  try {
+    const d = await confirmCriticalAction('Re-issue backup codes — old unused codes are cancelled.', async function(proof){
+      const headers = proof ? { 'X-Password-Proof': proof } : {};
+      const r = await apiFetch('/api/admin/2fa/backup-codes', { method: 'POST', headers });
+      const d2 = await r.json();
+      if (!r.ok) throw new Error(d2.error || 'Failed');
+      return d2;
+    });
+    const codes = (d.codes || []).join('\n');
+    azBuildModal2('azOwn2faModal', 'New backup codes', `<div style="padding:4px 0">
+      <pre style="background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:12px;font-size:.8rem;font-family:var(--mono,monospace);letter-spacing:1px">${escHtml(codes)}</pre>
+      <button class="btn btn-gold" style="margin-top:10px;font-size:.72rem;padding:5px 14px" onclick="closeModal('azOwn2faModal')">Done</button></div>`, []);
+  } catch (e) { toast('❌ ' + e.message, 'error'); }
+}
+
+/* ═══ Owner-only 2FA master toggle ═══ */
+async function azToggle2faMaster(masterOn){
+  try {
+    await confirmCriticalAction(masterOn ? 'Turn 2FA ON for every staff account? (Enrolled users + anyone with 2FA forced)' : 'Turn 2FA OFF for everyone? (Password-only login again — less secure)', async function(proof){
+      const headers = proof ? { 'X-Password-Proof': proof } : {};
+      const r = await apiFetch('/api/admin/2fa/master', { method: 'POST', headers, body: JSON.stringify({ master_on: masterOn }) });
+      const d = await r.json();
+      if (!r.ok) throw new Error(d.error || 'Failed');
+      return d;
+    });
+    toast(masterOn ? '✅ 2FA is now required for everyone' : '2FA master toggle is off');
+    if (document.getElementById('az2faMasterRow')) await azRender2faMaster();
+  } catch (e) { toast('❌ ' + e.message, 'error'); }
+}
+async function azRender2faMaster(){
+  const row = document.getElementById('az2faMasterRow');
+  if (!row) return;
+  try {
+    const st = await apiFetch('/api/admin/2fa/status');
+    const on = !!st.master_on;
+    row.innerHTML = `<td style="padding:10px">2FA required for all staff</td>
+      <td style="padding:10px"><span class="badge ${on?'badge-ok':'badge-soft'}">${on ? 'ON' : 'OFF'}</span></td>
+      <td style="padding:10px;text-align:right"><label class="switch"><input type="checkbox" ${on?'checked':''} onchange="azToggle2faMaster(this.checked)"><span class="switch-slider"></span></label></td>`;
+  } catch (e) { row.innerHTML = `<td colspan="3" style="padding:10px;color:var(--red-text)">Could not load 2FA status: ${escHtml(e.message)}</td>`; }
+}
+</script>
+
 <div class="page" id="page-settings">
   <div class="page-hdr">
     <div><div class="page-title">Settings</div><div class="page-sub">Store configuration & admin preferences</div></div>
     <div class="page-actions"><button class="btn btn-primary" onclick="saveSettings()">💾 Save Settings</button></div>
+  </div>
+
+  <!-- 2FA master toggle — owner-only, every critical save behind password re-auth -->
+  <div class="card" id="az2faMasterCard" style="display:none;margin-bottom:16px">
+    <div class="card-hdr"><span class="card-title">🔐 Two-factor authentication</span>
+      <span class="badge badge-gold" style="margin-left:auto">OWNER ONLY</span></div>
+    <table style="width:100%;border-collapse:collapse">
+      <tr id="az2faMasterRow" style="border-bottom:1px solid var(--border)">
+        <td style="padding:10px" colspan="3">Loading 2FA status…</td>
+      </tr>
+    </table>
   </div>
 
   <div class="card" style="margin-bottom:16px">
@@ -5005,6 +5708,23 @@ async function doLogin() {
       });
 
       const d = await r.json();
+      if (d.pending_2fa && d.nonce) {
+        // Step 2 of login: prove you hold the authenticator (or an unused
+        // backup code). The server matched the password already — only the
+        // code is left.
+        _login2fa = { nonce: d.nonce, username: d.username, enforced: !!d.enforced };
+        err.style.background = '#1a3a2a';
+        err.style.color = '#4ade80';
+        err.textContent = 'Two-factor authentication — enter the 6-digit code from Google Authenticator (or an unused backup code).';
+        err.style.display = 'block';
+        const codeInp = document.getElementById('login2faCode');
+        if (codeInp) { codeInp.value = ''; codeInp.style.display = 'block'; codeInp.focus(); }
+        btn.disabled = false;
+        btn.textContent = 'Verify code';
+        // Route this attempt into the 2FA step on the next click.
+        doLogin = __doLogin2faStep;
+        return;
+      }
       if (!r.ok || !d.token) {
         err.style.background = '';
         err.style.color = '';
@@ -5015,19 +5735,9 @@ async function doLogin() {
         return;
       }
 
-      // Success
-      authToken = d.token;
-      localStorage.setItem('ascovita_token', authToken);
-      localStorage.setItem('ascovita_role', d.role || 'admin');
-      // A bounce right after sign-in is the main pain point right now;
-      // clear any stale logout message so a fresh session starts clean.
-      try { localStorage.removeItem('ascovita_logout_reason'); } catch(e) {}
-      err.style.display = 'none';
-      btn.textContent = '✅ Logged in!';
-      document.getElementById('loginScreen').style.display = 'none';
-      document.getElementById('app').style.display = 'block';
-      applyRole(d.role);
-      initApp();
+      // Success (password-only login, or the 2FA step already set
+      // authToken and falls through to the shared finish below).
+      __loginSuccess(d);
       return;
 
     } catch(e) {
@@ -5055,6 +5765,75 @@ async function doLogin() {
 // field, not just the password one. Leaving both in place fired doLogin()
 // twice per keypress, which with the new per-account lockout would have
 // burned two of the five allowed attempts on every single typo.
+
+// ── 2FA step 2: {nonce, code} until a token arrives ──────────
+// doLogin() re-points here after the first call returns pending_2fa,
+// so pressing the button (or Enter) sends the code without re-typing
+// the password. A wrong code re-renders the prompt, never the password
+// fields — and the server rate-limits the whole login by username.
+let _login2fa = null;
+async function __doLogin2faStep() {
+  const code = document.getElementById('login2faCode')?.value.trim();
+  const err  = document.getElementById('loginError');
+  const btn  = document.querySelector('.btn-login');
+  if (!code) { err.textContent = 'Enter the 6-digit code.'; return; }
+  err.style.display = 'none';
+  btn.disabled = true;
+  btn.textContent = 'Verifying…';
+  try {
+    const r = await fetch(`${API}/api/admin/login`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ nonce: _login2fa.nonce, code }),
+      signal: AbortSignal.timeout(35000),
+    });
+    const d = await r.json();
+    if (!r.ok || !d.token) {
+      err.style.background = '';
+      err.style.color = '';
+      err.textContent = d.error || 'That code did not match.';
+      err.style.display = 'block';
+      const codeInp = document.getElementById('login2faCode');
+      if (codeInp) { codeInp.value = ''; codeInp.focus(); }
+      btn.disabled = false;
+      btn.textContent = 'Verify code';
+      return;
+    }
+    _login2fa = null;
+    // Continue with the shared success path below.
+    authToken = d.token;
+    __loginSuccess(d);
+    return;
+  } catch (e) {
+    err.style.background = '';
+    err.style.color = '';
+    err.textContent = 'Cannot reach server. Check your connection.';
+    err.style.display = 'block';
+    btn.disabled = false;
+    btn.textContent = 'Verify code';
+    return;
+  }
+}
+// Shared success path entered by both the password step and the 2FA step.
+function __loginSuccess(d) {
+  localStorage.setItem('ascovita_token', authToken);
+  localStorage.setItem('ascovita_role', d.role || 'admin');
+  // Cache the session identity so the UI can hide owner/staff features
+  // instantly, without a round trip on every render.
+  try { apiFetch('/api/admin/me').then(m => {
+    if (m && !m.error) localStorage.setItem('ascovita_session', JSON.stringify({
+      username: m.username, role: m.role, is_owner: !!m.is_owner,
+      permissions: m.permissions, denied: m.denied, totp: m.totp,
+    }));
+  }).catch(() => {}); } catch(e) {}
+  try { localStorage.removeItem('ascovita_logout_reason'); } catch(e) {}
+  document.getElementById('loginError').style.display = 'none';
+  document.querySelector('.btn-login').textContent = '✅ Logged in!';
+  document.getElementById('loginScreen').style.display = 'none';
+  document.getElementById('app').style.display = 'block';
+  applyRole(d.role);
+  initApp();
+}
 
 function doLogout() {
   localStorage.removeItem('ascovita_token');
@@ -5485,18 +6264,23 @@ async function markRefunded(id) {
   if (amt === null) return;
   const ref = prompt('Gateway refund reference (so this reconciles with GoKwik):', '') || '';
   try {
-    await apiFetch('/api/admin/returns/' + id + '/status', {
-      method: 'PUT',
-      body: JSON.stringify({
-        status: 'refunded',
-        refund_amount: Number(amt) || 0,
-        refund_method: 'gateway',
-        refund_ref: ref,
-      }),
+    await confirmCriticalAction('Mark this return as refunded? Money is about to move — this is password-gated.', async function(proof){
+      const r = await apiFetch('/api/admin/returns/' + id + '/status', {
+        method: 'PUT',
+        headers: proof ? { 'X-Password-Proof': proof } : {},
+        body: JSON.stringify({
+          status: 'refunded',
+          refund_amount: Number(amt) || 0,
+          refund_method: 'gateway',
+          refund_ref: ref,
+        }),
+      });
+      const d = await r.json().catch(() => ({}));
+      if (!r.ok) throw new Error(d.error || 'Could not mark refunded');
+      toast('💸 Marked refunded');
+      loadReturns();
     });
-    toast('💸 Marked refunded');
-    loadReturns();
-  } catch (e) { toast('❌ ' + e.message, 'error'); }
+  } catch (e) { if (String(e.message) !== 'cancelled') toast('❌ ' + e.message, 'error'); }
 }
 
 // Keep the sidebar badge live even when the page is not open.
@@ -5542,6 +6326,7 @@ function showPage(name) {
   if(name === 'siteimages') { loadSiteImages(); loadPromoMedia(); loadBannerManagers(); loadFallbackManager(); loadPromoStripMedia(); }
   if(name === 'settings') { loadSettings(); }
   if(name === 'aiteam') { loadAITeamPage(); }
+  if(name === 'staff') { loadStaffPage(); }
   if(name === 'calendar') { renderCalendar(); }
 }
 
@@ -7655,17 +8440,20 @@ async function softDeleteOrder(id) {
   const idx = allOrders.findIndex(o => o.id === id);
   if (idx < 0) return;
   const removed = allOrders[idx];
-
+  try {
+    await confirmCriticalAction(`Delete order ${id}? It will be hidden from the list (soft-delete).`, async function(proof){
   await optimistic({
     // Splice rather than filter-and-reassign, so the rollback can put
     // the order back exactly where it was instead of at the end of a
     // list the admin is trying to work down in order.
     apply:    () => { allOrders.splice(idx, 1); filterOrders(); },
-    commit:   () => expectOk(apiFetch(`/api/admin/orders/${id}`, {method:'DELETE'}), 'Delete failed'),
+    commit:   () => expectOk(apiFetch(`/api/admin/orders/${id}`, {method:'DELETE', headers: proof ? {'X-Password-Proof': proof} : {}}), 'Delete failed'),
     rollback: () => { allOrders.splice(idx, 0, removed); filterOrders(); },
     flash:    `#ordersTbody tr[data-oid="${id}"]`,
     successMsg: 'Order deleted',
   });
+    });
+  } catch (e) { if (String(e.message) !== 'cancelled') toast(e.message, 'error'); }
 }
 
 // ═══════════════════════════════════════════════
@@ -8584,16 +9372,19 @@ async function deleteProduct(id) {
   const p = allProducts.find(x => x.id === id);
   if (!p) return;
   const prev = p.deleted_at;
-
+  try {
+    await confirmCriticalAction('Delete this product? It will be hidden from the store until restored.', async function(proof){
   await optimistic({
     // Gone from the list straight away — the row is what the admin is
     // looking at, so that is what has to change first.
     apply:    () => { p.deleted_at = new Date().toISOString(); filterProducts(); },
-    commit:   () => expectOk(apiFetch(`/api/admin/products/${id}`, {method:'DELETE'}), 'Delete failed'),
+    commit:   () => expectOk(apiFetch(`/api/admin/products/${id}`, {method:'DELETE', headers: proof ? {'X-Password-Proof': proof} : {}}), 'Delete failed'),
     rollback: () => { p.deleted_at = prev; filterProducts(); },
     flash:    `#productsTbody tr[data-pid="${id}"]`,
     successMsg: 'Product deleted',
   });
+    });
+  } catch (e) { if (String(e.message) !== 'cancelled') toast(e.message, 'error'); }
 }
 
 async function restoreProduct(id) {
@@ -8877,12 +9668,14 @@ async function saveCoupon() {
 async function deleteCoupon(id) {
   if(!confirm('Deactivate and delete this coupon? It will remain in Supabase as a deleted record and can be restored.')) return;
   try {
-    const r = await apiFetch(`/api/admin/coupons/${id}`,{method:'DELETE'});
-    const result = await r.json().catch(() => ({}));
-    if(!r.ok) throw new Error(result.error || `Coupon delete failed (${r.status})`);
-    toast('Coupon deactivated and marked deleted in Supabase');
-    await loadDiscounts();
-  } catch(e) { toast(e.message,'error'); }
+    await confirmCriticalAction('Delete this coupon? Customers who already have it will see it expire.', async function(proof){
+      const r = await apiFetch(`/api/admin/coupons/${id}`,{method:'DELETE', headers: proof ? {'X-Password-Proof': proof} : {}});
+      const result = await r.json().catch(() => ({}));
+      if(!r.ok) throw new Error(result.error || `Coupon delete failed (${r.status})`);
+      toast('Coupon deactivated and marked deleted in Supabase');
+      await loadDiscounts();
+    });
+  } catch(e) { if (String(e.message) !== 'cancelled') toast(e.message,'error'); }
 }
 
 async function restoreCoupon(id) {
@@ -8896,9 +9689,33 @@ async function restoreCoupon(id) {
   } catch(e) { toast(e.message,'error'); }
 }
 
-// ═══════════════════════════════════════════════
-// CUSTOMERS
-// ═══════════════════════════════════════════════
+// ── Customer soft-delete / restore (customers.delete, password-gated) ──
+async function deleteCustomer(id) {
+  if(!confirm('Soft-delete this customer? Their order history is preserved and the record can be restored.')) return;
+  try {
+    await confirmCriticalAction('Delete this customer from the list? (Soft-delete — order history is preserved)', async function(proof){
+      const r = await apiFetch(`/api/admin/customers/${id}`, {method:'DELETE', headers: proof ? {'X-Password-Proof': proof} : {}});
+      const d = await r.json().catch(() => ({}));
+      if(!r.ok) throw new Error(d.error || `Delete failed (${r.status})`);
+      const idx = allCustomers.findIndex(x => x.id === id);
+      if (idx > -1) allCustomers.splice(idx, 1);
+      toast('Customer soft-deleted ✅');
+      filterCustomers();
+    });
+  } catch(e) { if (String(e.message) !== 'cancelled') toast(e.message,'error'); }
+}
+
+async function restoreCustomer(id) {
+  if(!confirm('Restore this soft-deleted customer?')) return;
+  try {
+    const r = await apiFetch(`/api/admin/customers/${id}/restore`, {method:'PUT'});
+    const d = await r.json().catch(() => ({}));
+    if(!r.ok) throw new Error(d.error || `Restore failed (${r.status})`);
+    toast('Customer restored ✅');
+    loadCustomers();
+  } catch(e) { toast(e.message,'error'); }
+}
+
 // ═══════════════════════════════════════════════
 // CUSTOMERS
 // ═══════════════════════════════════════════════
@@ -9132,8 +9949,9 @@ function renderCustomersTable(list) {
       <td style="color:var(--green-text);font-weight:600;">₹${fmtNum(c.total_spent||0)}</td>
       <td style="white-space:nowrap;">${c.segment ? segChip(c.segment) : segChip(clientSeg(c))}</td>
       <td style="font-size:0.72rem;color:var(--text3);">${fmtDate(c.created_at)}</td>
+      <td style="text-align:right"><button class="btn btn-danger btn-sm btn-icon" title="Soft-delete customer (password required)" onclick="event.stopPropagation(); deleteCustomer(${c.id})">🗑️</button></td>
     </tr>
-  `).join('') : '<tr><td colspan="8"><div class="empty-state"><div class="empty-ico">👥</div><div class="empty-msg">No customers found</div></div></td></tr>';
+  `).join('') : '<tr><td colspan="9"><div class="empty-state"><div class="empty-ico">👥</div><div class="empty-msg">No customers found</div></div></td></tr>';
 }
 
 // ── Customer insight drawer (Aug 2026: re-targeting) ──────────────────
@@ -12081,9 +12899,25 @@ async function loadSettings() {
       try { localStorage.setItem(THEME_KEY, d.interface_theme); } catch {}
     }
   } catch {}
+  // Owner-only 2FA master toggle — reveal and render only for the owner
+  try {
+    const sess = JSON.parse(localStorage.getItem('ascovita_session') || '{}');
+    if (sess.is_owner && document.getElementById('az2faMasterCard')) {
+      document.getElementById('az2faMasterCard').style.display = '';
+      await azRender2faMaster();
+    }
+  } catch {}
 }
 
 async function saveSettings() {
+  if (typeof confirmCriticalAction === 'function') {
+    await confirmCriticalAction('Save global store settings? These changes affect every visitor immediately.', saveSettingsCore);
+    return;
+  }
+  await saveSettingsCore();
+}
+
+async function saveSettingsCore() {
   const activeThemeOpt = document.querySelector('.theme-opt.selected');
   const ceilingGlutathioneAcv = Number(document.getElementById('discountCeilingGlutathioneAcv').value);
   const ceilingStandard = Number(document.getElementById('discountCeilingStandard').value);
@@ -12112,6 +12946,11 @@ async function saveSettings() {
     if(!r.ok) throw new Error(d.error || d.message || `Server error (${r.status})`);
     toast('Settings saved ✅');
   } catch(e) { toast(e.message, 'error'); }
+  // Refresh the owner's 2FA master card after settings are persisted
+  try {
+    const sess = JSON.parse(localStorage.getItem('ascovita_session') || '{}');
+    if (sess.is_owner && document.getElementById('az2faMasterCard')) await azRender2faMaster();
+  } catch {}
 }
 
 function changePassword() {
@@ -15360,6 +16199,16 @@ async function azLoadPerms() {
       if (!r.ok) { attempts++; lastErr = new Error('HTTP ' + r.status); continue; }
       const d = await r.json();
       window.AZPerms = { role: d.role, list: d.permissions || [], loaded: true };
+      /* Cache the identity so owner-only UI (Staff page, 2FA master) can
+         gate itself instantly without a second round trip. */
+      try {
+        localStorage.setItem('ascovita_session', JSON.stringify({
+          username: d.username, role: d.role, is_owner: !!d.is_owner,
+          permissions: d.permissions || [], denied: d.denied || [], totp: d.totp || null,
+        }));
+        var _staffNav = document.getElementById('navStaff');
+        if (_staffNav) _staffNav.style.display = d.is_owner ? '' : 'none';
+      } catch (e) {}
 
       const banner = document.getElementById('azRoleBanner');
       if (banner && d.role === 'admin') {
@@ -15399,6 +16248,11 @@ async function azLoadPerms() {
   window.applyRole = function (role) {
     var r = _orig ? _orig.apply(this, arguments) : undefined;
     azLoadPerms();
+    /* Staff page is owner-only — reveal the nav item even before
+       /api/admin/me answers, using the cached session identity. */
+    var _s = function () { try { return JSON.parse(localStorage.getItem('ascovita_session') || '{}'); } catch (e) { return {}; } }();
+    var _nv = document.getElementById('navStaff');
+    if (_nv) _nv.style.display = (_s.is_owner || r === 'owner') ? '' : 'none';
 
     /* Session countdown pill next to the role badge. */
     var tickNow = function () { try { if (window.__azTick) window.__azTick(); } catch (e) {} };
