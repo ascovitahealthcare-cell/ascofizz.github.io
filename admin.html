@@ -5738,6 +5738,9 @@ async function doLogin() {
 
       // Success (password-only login, or the 2FA step already set
       // authToken and falls through to the shared finish below).
+      authToken = d.token; // FIX (login bounce): without this, __loginSuccess
+      // stores the OLD (empty/stale) token and every app startup call goes
+      // out unauthenticated → instant 'Session expired' toast after login.
       __loginSuccess(d);
       return;
 
