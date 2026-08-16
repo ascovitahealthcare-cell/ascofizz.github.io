@@ -23977,7 +23977,7 @@ window.refreshAccountWelcome = refreshAccountWelcome;
 ═══════════════════════════════════════════════════════════════ */
 (function () {
   const POS_KEY = 'ozylix-position';
-  window.__ozyPosMarker = true;
+
   const MAX_AGE_MS = 60 * 60 * 1000; // ignore positions older than 1 hour
 
   // Capture the saved state SYNCHRONOUSLY at parse time (during the reload,
@@ -24084,7 +24084,7 @@ window.refreshAccountWelcome = refreshAccountWelcome;
 
   // ── Restore ──
   function restorePosition() {
-    window.__ozyPosStage = 1;
+  
     if (new URLSearchParams(location.search).get('fresh')) { clearPosition(); return; }
     // Prefer the synchronous parse-time snapshot; fall back to a fresh read.
     let state = BOOT_STATE;
@@ -24101,25 +24101,26 @@ window.refreshAccountWelcome = refreshAccountWelcome;
       }
       return;
     }
-    if (Date.now() - (state.at || 0) > MAX_AGE_MS) { window.__ozyPosStage = 'stale'; clearPosition(); return; }
+    if (Date.now() - (state.at || 0) > MAX_AGE_MS) { clearPosition(); return; }
 
     const qs = new URLSearchParams(location.search);
+    const bootParams = new URLSearchParams(BOOT_QS);
     // An explicit deep link (?p= /shop etc., via the site's 404.html redirect)
-    // is intentional — honor it and don't hijack it with the saved position.
-    // The raw query is read at parse time because the boot router replaces
-    // ?p= with a clean URL before restore ever runs.
-    if ((new URLSearchParams(BOOT_QS)).get('p') || qs.get('p')) { window.__ozyPosStage = 'deeplink'; window.__ozyPosWhyDL = JSON.stringify({boot:BOOT_QS, cur:location.search}); return; }
+    // is intentional — honor the URL and never hijack the navigation with the
+    // saved position. The raw query is read at parse time because the boot
+    // router replaces ?p= with a clean URL before restore ever runs.
+    const deepLink = bootParams.get('p') || qs.get('p');
 
-    window.__ozyPosStage = 3; window.__ozyPosBootQS = BOOT_QS;
+  
     const pathPage = (location.pathname.replace(/\/+$/, '') || '/').replace(/^\//, '').split('/')[0];
-    // Deep-link rule: an intentional URL (e.g. /product/xyz, /blog/abc, /shop)
-    // wins EXCEPT when it is exactly the page the shopper left — in that case
-    // this is a reload of their own session, not a fresh deep link, so resume
-    // their saved position (section, category, scroll and all).
-    if (pathPage && state.page !== pathPage && VALID_PAGES.filter(function (p) {
+    // Deep-link rule: an intentional URL (e.g. /product/xyz, /blog/abc, /shop
+    // or ?p=...) wins EXCEPT when it is exactly the page the shopper left —
+    // in that case this is a reload of their own session, not a fresh deep
+    // link, so resume their saved position (section, category, scroll and all).
+    if ((pathPage || deepLink) && state.page !== pathPage && VALID_PAGES.filter(function (p) {
         return p !== 'cart' && p !== 'checkout' && p !== 'thankyou' && p !== 'orders' && p !== 'account' && p !== 'login';
-      }).indexOf(pathPage) >= 0) {
-      window.__ozyPosStage = 'pathpage';
+      }).indexOf(pathPage || String(deepLink).replace(/^\//, '').split('/')[0]) >= 0) {
+
       return;
     }
 
@@ -24129,9 +24130,12 @@ window.refreshAccountWelcome = refreshAccountWelcome;
     if (page === 'checkout' && (!STORE || !STORE.cart || STORE.cart.length === 0)) page = 'cart';
     if (page === 'thankyou') page = 'home';
 
-    // Navigate — showPage sets scrollY=0; scroll is re-applied after render.
-    window.__ozyPosStage = 4;
-    if (typeof showPage === 'function') { try { showPage(page); } catch (e) { console.error('[ozylix-position] showPage failed', e); } }
+    // Navigate — only if the app didn't already get here via its own
+    // deep-link boot (?p=) or a path that matches; showPage sets scrollY=0
+    // and scroll is re-applied after render.
+  
+    const ownBoot = (deepLink && String(deepLink).replace(/^\//, '').split('/')[0] === page) || pathPage === page;
+    if (typeof showPage === 'function' && !ownBoot) { try { showPage(page); } catch (e) { console.error('[ozylix-position] showPage failed', e); } }
 
     // Sections — these run after the page has a moment to render.
     // Some sections (shop grid, checkout summary) render asynchronously, so
@@ -24290,6 +24294,8 @@ window.refreshAccountWelcome = refreshAccountWelcome;
   } catch (e) {}
 })();
 </script>
+
+
 
 
 
