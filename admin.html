@@ -4691,7 +4691,7 @@ async function autReconNow() {
       </div>
       <div class="form-row col2">
         <div class="form-group"><label class="form-label">Max Uses</label><input type="number" class="form-control" id="cMaxUses" placeholder="Unlimited"></div>
-        <div class="form-group"><label class="form-label" id="cMaxDiscountLabel">Maximum Discount (₹) *</label><input type="number" class="form-control" id="cMaxDiscount" placeholder="Required for percent coupons" min="0" step="0.01"><div id="cMaxDiscountHint" style="font-size:11px;color:var(--text3);margin-top:5px;">Percentage coupons must have an absolute rupee cap.</div></div>
+        <div class="form-group"><label class="form-label" id="cMaxDiscountLabel">Maximum Discount (₹)</label><input type="number" class="form-control" id="cMaxDiscount" placeholder="Optional absolute cap" min="0" step="0.01"><div id="cMaxDiscountHint" style="font-size:11px;color:var(--text3);margin-top:5px;">Recommended: a hard rupee cap on percent coupons.</div></div>
         <div class="form-group"><label class="form-label">Max Uses / Customer</label><input type="number" class="form-control" id="cMaxUsesPerCustomer" placeholder="Unlimited" min="1"></div>
         <div class="form-group"><label class="form-label">Expires On</label><input type="date" class="form-control" id="cExpires"></div>
       </div>
@@ -8799,14 +8799,14 @@ function updateCouponTypeHints() {
   const label = document.getElementById('cMaxDiscountLabel');
   const input = document.getElementById('cMaxDiscount');
   const hint = document.getElementById('cMaxDiscountHint');
-  if (label) label.textContent = isPercent ? 'Maximum Discount (₹) *' : 'Maximum Discount (₹)';
+  if (label) label.textContent = 'Maximum Discount (₹)';
   if (input) {
-    input.required = isPercent;
-    input.min = isPercent ? '0.01' : '0';
-    input.placeholder = isPercent ? 'Required for percent coupons' : 'Optional absolute cap';
+    input.required = false;
+    input.min = '0';
+    input.placeholder = isPercent ? 'Optional absolute cap (recommended)' : 'Optional absolute cap';
   }
   if (hint) hint.textContent = isPercent
-    ? 'Required: the maximum rupee amount this 8% coupon can deduct.'
+    ? 'Optional: a hard rupee cap on this percent coupon. Strongly recommended for % coupons.'
     : 'Optional: a flat coupon can also have an absolute rupee cap.';
 }
 
@@ -8848,10 +8848,7 @@ async function saveCoupon() {
     toast('Use a 3–40 character code with letters, numbers, hyphens, or underscores','error'); return;
   }
   if(!Number.isFinite(value) || value <= 0) { toast('Coupon value must be greater than 0','error'); return; }
-  if(type === 'percent' && value !== 8) { toast('Percentage coupons must be exactly 8%','error'); return; }
-  if(type === 'percent' && (!Number.isFinite(maxDiscount) || maxDiscount <= 0)) {
-    toast('Percentage coupons require a maximum discount greater than ₹0','error'); return;
-  }
+  if(type === 'percent' && (value <= 0 || value > 100)) { toast('Percent value must be between 1 and 100','error'); return; }
   if(type === 'flat' && maxDiscount !== null && (!Number.isFinite(maxDiscount) || maxDiscount < 0)) {
     toast('Enter a valid maximum discount','error'); return;
   }
