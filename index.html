@@ -24108,9 +24108,9 @@ window.refreshAccountWelcome = refreshAccountWelcome;
     // is intentional — honor it and don't hijack it with the saved position.
     // The raw query is read at parse time because the boot router replaces
     // ?p= with a clean URL before restore ever runs.
-    if ((new URLSearchParams(BOOT_QS)).get('p') || qs.get('p')) { window.__ozyPosStage = 'deeplink'; return; }
+    if ((new URLSearchParams(BOOT_QS)).get('p') || qs.get('p')) { window.__ozyPosStage = 'deeplink'; window.__ozyPosWhyDL = JSON.stringify({boot:BOOT_QS, cur:location.search}); return; }
 
-    window.__ozyPosStage = 3;
+    window.__ozyPosStage = 3; window.__ozyPosBootQS = BOOT_QS;
     const pathPage = (location.pathname.replace(/\/+$/, '') || '/').replace(/^\//, '').split('/')[0];
     // Deep-link rule: an intentional URL (e.g. /product/xyz, /blog/abc, /shop)
     // wins EXCEPT when it is exactly the page the shopper left — in that case
@@ -24290,6 +24290,8 @@ window.refreshAccountWelcome = refreshAccountWelcome;
   } catch (e) {}
 })();
 </script>
+
+
 
 
 
