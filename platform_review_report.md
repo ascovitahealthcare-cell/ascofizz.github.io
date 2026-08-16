@@ -315,3 +315,31 @@ The full loop was verified live: logging into the admin panel with the owner acc
 ### 12.4 How to use it
 
 Open `ozylix.com/admin` → **Store Editor** → the style strip now shows the default plus the four new templates. Click any tile to preview it instantly (the preview loads the real storefront), then press **Save theme**; the live store adopts the template within about a minute. The **Reset to original website** button still rolls back to the seeded production defaults at any time.
+
+## 13. v10.4 — Design & Layout Controls and Photo-Gallery Picker (2026-08-16)
+
+### 13.1 What was requested
+A single follow-on to the template work: direct control over **banner heights, product-card sizes, card borders, image shapes (square/rounded/circle), image fit (cover/contain/center), image placement (top/center/bottom)** — and the ability to pick any image for banners and site-image slots **directly from the admin's existing Photo Library** instead of uploading files one at a time.
+
+### 13.2 Implementation
+- **Six new layout control groups** in the Store Editor's Combinations panel (`🧩 Combinations`): Banner height (Full 640px / Medium 460px / Compact 300px), Card size (S/M/L), Card border (none/thin/medium/thick black), Image shape (square/rounded/circle), Image fit (cover/contain/center), Image placement (top/center/bottom). Together with the eight pre-existing combo groups (corners, shadows, buttons, borders, weight, density, background FX, card style), the editor now offers **14 independent mix-and-match groups** — roughly 30 tiles — that layer on top of any of the 7 style systems, producing thousands of valid design combinations.
+- **CSS injection engine in the storefront** converts each combo into `:root` token overrides and targeted rules (banner `min-height`, card grid `minmax`, `border` + `border-color`, `border-radius` on `.p-img-wrap`/`.promo-card-media`/`.blog-img`, `object-fit`/`object-position`). The storefront fetches the published theme (including `combos`) anonymously from the backend, so layout edits go live automatically.
+- **🖼️ Gallery picker modal** wired into every image slot: site-logo, about-hero, manufacturing photo, all 16 "Know Your Product" cards, and every home/shop banner slot. Clicking it opens a fixed full-screen modal that loads the admin's full **photo library** (searchable), filters out videos, and on picking, pushes the chosen URL to the same backend endpoint a file upload would use — the storefront picks it up with no further action.
+- **Save-hydration fix**: `Save theme` now re-reads the draft from `localStorage` on every save, so a manual "Reset to original website" followed by Save publishes the reset correctly (previously the in-memory snapshot clobbered the reset).
+
+### 13.3 End-to-end verification (live, Chromium headless)
+| Step | Result |
+|---|---|
+| Login → Store Editor → click all 6 layout tiles | All 6 applied to draft (`ozylix_theme` localStorage) |
+| Save theme | Backend confirmed published combos live via anonymous API |
+| Restore defaults → Save | Backend confirmed `combos: {}, style: default` live |
+| Site Images → 🖼️ Gallery on logo slot | Modal opened, **105 photos** loaded from library |
+| Mobile + desktop storefront rendering | Confirmed responsive (390px + 1366px screenshots) |
+
+### 13.4 Deployment
+Commits `f78d251` (core implementation), `9d86432` (gallery button key interpolation fix), `c6dcdef` (save hydration) — all on `main`; GitHub Pages rebuilt from `main` and the live admin at `ozylix.com/admin` now serves v10.4. After verification, the published theme was restored to the default crimson look, so the live store is unchanged for visitors until you publish something yourself.
+
+### 13.5 How to use it
+1. **Layout**: `ozylix.com/admin` → **Store Editor** → **Style (colours, layout, fonts)** → expand **🧩 Combinations** → pick tiles → **Save theme**. Changes appear on the live store within about a minute (a fresh page load for visitors).
+2. **Pick an image from the gallery**: **Site Images** (or Banners) → any slot → **🖼️ Gallery** → search and pick. **Reset to original website** on any slot reverts it instantly.
+3. Anything you publish composes freely with the 5 templates — e.g., *Midnight Luxe* style + Thick black card borders + Circle images is a valid combination.
