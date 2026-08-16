@@ -10367,7 +10367,7 @@ function renderSiteImgSections(groups, overrides){
             </div>
             <div class="si-actions">
               <input type="file" accept="image/*,.svg,video/*,.mp4,.webm,.mov" id="siteImgFile-${item.key}" style="display:none;" onchange="uploadSiteImage(this, '${item.key}')">
-              <button class="btn btn-primary btn-sm" style="flex:1;" onclick="document.getElementById('siteImgFile-${item.key}').click()">📤 ${isOverridden ? 'Replace' : 'Upload'}</button>
+              <button class="btn btn-secondary btn-sm" style="flex:1;" onclick="storeEdOpenGallery(String(item.key))" title="Pick from your photo gallery">🖼️ Gallery</button><button class="btn btn-primary btn-sm" style="flex:1;" onclick="document.getElementById('siteImgFile-${item.key}').click()">📤 ${isOverridden ? 'Replace' : 'Upload'}</button>
               ${isOverridden ? `<button class="btn btn-danger btn-sm btn-icon" onclick="resetSiteImage('${item.key}', '${current}')" title="Delete this image everywhere and revert to default">🗑️</button>` : ''}
             </div>
           </div>`;
@@ -10428,7 +10428,7 @@ const __eduHtml = function(overrides){
               </div>
               <div class="si-actions">
                 <input type="file" accept="image/*,.svg,video/*,.mp4,.webm,.mov" id="eduFile-${key}" style="display:none;" onchange="uploadEduCreative(this, '${key}')">
-                <button class="btn btn-primary btn-sm" style="flex:1;" onclick="document.getElementById('eduFile-${key}').click()">📤 ${has ? 'Replace' : 'Upload'}</button>
+                <button class="btn btn-secondary btn-sm" style="flex:1;" onclick="storeEdOpenGallery(String(key))" title="Pick from your photo gallery">🖼️ Gallery</button><button class="btn btn-primary btn-sm" style="flex:1;" onclick="document.getElementById('eduFile-${key}').click()">📤 ${has ? 'Replace' : 'Upload'}</button>
                 ${has ? `<button class="btn btn-danger btn-sm btn-icon" onclick="deleteEduCreative('${key}', '${url}')" title="Delete this creative">🗑️</button>` : ''}
               </div>
             </div>`;
@@ -10459,7 +10459,7 @@ const __eduHtml = function(overrides){
               </div>
               <div class="si-actions">
                 <input type="file" accept="image/*,.svg,video/*,.mp4,.webm,.mov" id="eduFile-${key}" style="display:none;" onchange="uploadEduCreative(this, '${key}')">
-                <button class="btn btn-primary btn-sm" style="flex:1;" onclick="document.getElementById('eduFile-${key}').click()">📤 ${has ? 'Replace' : 'Upload'}</button>
+                <button class="btn btn-secondary btn-sm" style="flex:1;" onclick="storeEdOpenGallery(String(key))" title="Pick from your photo gallery">🖼️ Gallery</button><button class="btn btn-primary btn-sm" style="flex:1;" onclick="document.getElementById('eduFile-${key}').click()">📤 ${has ? 'Replace' : 'Upload'}</button>
                 ${has ? `<button class="btn btn-danger btn-sm btn-icon" onclick="deleteEduCreative('${key}', '${url}')" title="Delete this creative">🗑️</button>` : ''}
               </div>
             </div>`;
@@ -10620,9 +10620,9 @@ function renderBannerManagers() {
           <input class="form-control" style="font-size:0.66rem;padding:3px 6px;min-height:22px;" placeholder="Link e.g. /product/glutathione-effervescent-tablet" value="${escAttr(b.link)}" onchange="setBannerMeta('${prefix}', ${b.n}, 'link', this.value)">
         </div>
         ` : ''}
-        <div style="margin-top:5px;">
+        <div style="display:flex;gap:5px;margin-top:5px;">
           <input type="file" accept="image/*,.webp,.svg,video/*,.mp4,.webm,.mov" id="bannerFile-${prefix}-${b.n}" style="display:none;" onchange="uploadBannerImage('${prefix}', ${b.n}, this)">
-          <button class="btn btn-primary btn-sm" style="flex:1;width:100%;font-size:0.66rem;min-height:24px;" onclick="document.getElementById('bannerFile-${prefix}-${b.n}').click()">📤 ${b.img ? 'Replace' : 'Upload'}</button>
+          <button class="btn btn-secondary btn-sm" style="flex:1;width:100%;font-size:0.66rem;min-height:24px;" onclick="storeEdOpenGallery('${prefix}.'+${b.n})" title="Pick from your photo gallery">🖼️ Gallery</button><button class="btn btn-primary btn-sm" style="flex:1;width:100%;font-size:0.66rem;min-height:24px;" onclick="document.getElementById('bannerFile-${prefix}-${b.n}').click()">📤 ${b.img ? 'Replace' : 'Upload'}</button>
         </div>
       </div>
     </div>`).join('');
@@ -16095,7 +16095,25 @@ async function storeEdSaveContent() {
       { v: 'aurora', label: 'Aurora glow' }, { v: 'noise', label: 'Paper noise' } ] },
     cardstyle: { title: '🃏 Card style', opt: 'cardstyle', items: [
       { v: 'neumorphic', label: 'Neumorphic' }, { v: 'flat', label: 'Flat' },
-      { v: 'clay', label: 'Clay' }, { v: 'bento', label: 'Bento tile' } ] }
+      { v: 'clay', label: 'Clay' }, { v: 'bento', label: 'Bento tile' } ] },
+    banner: { title: '🖼️ Banner height', opt: 'banner', items: [
+      { v: 'full', label: 'Full (640px)' }, { v: 'medium', label: 'Medium (460px)' },
+      { v: 'compact', label: 'Compact (300px)' } ] },
+    cards: { title: '📦 Card size', opt: 'cards', items: [
+      { v: 's', label: 'Small' }, { v: 'm', label: 'Medium (default)' },
+      { v: 'l', label: 'Large' } ] },
+    cardborder: { title: '🔲 Card border', opt: 'cardborder', items: [
+      { v: 'none', label: 'None' }, { v: 'thin', label: 'Thin' },
+      { v: 'medium', label: 'Medium' }, { v: 'thick', label: 'Thick black' } ] },
+    imgshape: { title: '🟦 Image shape', opt: 'imgshape', items: [
+      { v: 'square', label: 'Square (default)' }, { v: 'rounded', label: 'Rounded' },
+      { v: 'circle', label: 'Circle' } ] },
+    imgfit: { title: '📐 Image fit', opt: 'imgfit', items: [
+      { v: 'cover', label: 'Cover (default)' }, { v: 'contain', label: 'Contain' },
+      { v: 'center', label: 'Center crop' } ] },
+    imgpos: { title: '📌 Image placement', opt: 'imgpos', items: [
+      { v: 'center', label: 'Center (default)' }, { v: 'top', label: 'Top' },
+      { v: 'bottom', label: 'Bottom' } ] },
   };
 
   // ── Token assembly: defaults ← style ← combos ← palette ← pickers ─
@@ -16151,7 +16169,25 @@ async function storeEdSaveContent() {
       case 'flat': rules.push('.product-card,.cat-card,.cat-card-sm{box-shadow:none;border:1px solid rgba(0,0,0,.07);}'); break;
       case 'clay': rules.push(`.product-card,.cat-card,.cat-card-sm{box-shadow:8px 10px 16px rgba(90,80,110,.16), -6px -8px 14px rgba(255,255,255,.85);border-radius:var(--r-lg);}`); break;
       case 'bento':rules.push(`.product-card,.cat-card,.cat-card-sm{box-shadow:0 0 0 1px rgba(30,30,36,.06), 0 2px 8px rgba(30,30,36,.06);border-radius:var(--r-md);}div.products-grid,div.cat-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:14px;}`); break;
-      default:     rules.push(`.product-card,.cat-card,.cat-card-sm{box-shadow:var(--neo-1);}`); break;
+      default:     rules.push(`.product-card,.cat-card,.cat-card-sm{box-shadow:var(--neo-1);}`); break;    // v10.4 — Design & Layout controls
+    if (c.banner === 'full')        rules.push('.hero-banner,.hero-banner-slide img{min-height:640px;}.hero-banner-slide img{aspect-ratio:auto;height:640px;object-fit:cover !important;}#shopBannerSlot1 img,#shopBannerSlot2 img{height:460px !important;}');
+    else if (c.banner === 'compact') rules.push('.hero-banner,.hero-banner-slide img{min-height:300px;}.hero-banner-slide img{aspect-ratio:auto;height:300px;object-fit:cover !important;}#shopBannerSlot1 img,#shopBannerSlot2 img{height:240px !important;}');
+    else                            rules.push('.hero-banner,.hero-banner-slide img{min-height:460px;}.hero-banner-slide img{aspect-ratio:auto;height:460px;object-fit:cover !important;}#shopBannerSlot1 img,#shopBannerSlot2 img{height:360px !important;}');
+    if (c.cards === 's')      rules.push('.products-grid{grid-template-columns:repeat(auto-fill,minmax(170px,1fr)) !important;}.product-card .p-info{font-size:.82rem !important;}.product-card{padding:5px !important;}');
+    else if (c.cards === 'l') rules.push('.products-grid{grid-template-columns:repeat(auto-fill,minmax(300px,1fr)) !important;}.product-card .p-info{font-size:1rem !important;}.product-card{padding:11px !important;}');
+    else                      rules.push('.products-grid{grid-template-columns:repeat(auto-fill,minmax(252px,1fr)) !important;}.product-card .p-info{font-size:.9rem !important;}.product-card{padding:7px !important;}');
+    if (c.cardborder === 'none')   rules.push('.product-card,.cat-card,.cat-card-sm,.promo-card-media{border:none !important;box-shadow:none !important;}');
+    else if (c.cardborder === 'thin')   rules.push('.product-card,.cat-card,.cat-card-sm,.promo-card-media{border:1px solid rgba(0,0,0,.09) !important;}');
+    else if (c.cardborder === 'medium') rules.push('.product-card,.cat-card,.cat-card-sm,.promo-card-media{border:2.5px solid rgba(0,0,0,.16) !important;}');
+    else if (c.cardborder === 'thick')  rules.push('.product-card,.cat-card,.cat-card-sm,.promo-card-media{border:4px solid #111 !important;}');
+    if (c.imgshape === 'rounded') rules.push('.p-img-wrap,.p-img-wrap img,.promo-card-media,.promo-card-media img,.blog-img,.blog-img img{border-radius:18px !important;}');
+    else if (c.imgshape === 'circle') rules.push('.p-img-wrap,.p-img-wrap img,.promo-card-media,.promo-card-media img,.blog-img,.blog-img img{border-radius:50% !important;}.p-img-wrap img{aspect-ratio:1/1 !important;object-fit:cover !important;}');
+    if (c.imgfit === 'contain')  rules.push('.hero-banner-slide img,.p-img-wrap img,.shop-banner-slot img,.promo-card-media img,.blog-img img{object-fit:contain !important;}');
+    else if (c.imgfit === 'center') rules.push('.hero-banner-slide img,.p-img-wrap img,.shop-banner-slot img,.promo-card-media img,.blog-img img{object-fit:cover !important;object-position:center !important;}');
+    if (c.imgpos === 'top')    rules.push('.hero-banner-slide img,.shop-banner-slot img,.p-img-wrap img{object-position:top !important;}');
+    else if (c.imgpos === 'bottom') rules.push('.hero-banner-slide img,.shop-banner-slot img,.p-img-wrap img{object-position:bottom !important;}');
+    else if (c.imgpos === 'center') rules.push('.hero-banner-slide img,.shop-banner-slot img,.p-img-wrap img{object-position:center !important;}');
+
     }
     return { map, rules };
   }
@@ -16264,5 +16300,64 @@ if (typeof renderStyleStrip === 'function') { try { renderStyleStrip(); } catch(
 if (typeof renderCombos === 'function' )   { try { renderCombos(); } catch(_) {} }
 </script>
 
+
+<!-- v10.4: Store Editor gallery picker modal -->
+<div id="storeEdGalleryModal" style="display:none;position:fixed;inset:0;background:rgba(10,8,14,.62);z-index:9999;align-items:center;justify-content:center;">
+  <div class="card" style="width:min(92vw,1080px);max-height:86vh;overflow:hidden;display:flex;flex-direction:column;">
+    <div style="padding:12px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px;">
+      <span class="card-title" style="font-size:.95rem;">🖼️ Pick from photo gallery</span>
+      <input id="storeEdGallerySearch" placeholder="🔍 Search…" style="flex:1;max-width:260px;padding:6px 10px;border:1px solid var(--border);border-radius:8px;font-size:.8rem;background:var(--bg2);" oninput="_seGalQuery=this.value.toLowerCase();storeEdRenderGalleryGrid();">
+      <button class="btn btn-secondary btn-sm" onclick="storeEdCloseGallery()">✕ Close</button>
+    </div>
+    <div style="padding:4px 14px;display:flex;gap:8px;align-items:center;font-size:.75rem;color:var(--text3);">
+      <span id="storeEdGalleryTarget" style="color:var(--brand);font-weight:600;"></span>
+      <span style="margin-left:auto;">Click any image to set it on the live store.</span>
+    </div>
+    <div id="storeEdGalleryGrid" style="flex:1;overflow-y:auto;padding:10px 14px;display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:8px;"></div>
+  </div>
+</div>
+<script>
+(function(){
+  let _seGalKey = ''; let _seGalLib = []; window._seGalQuery = '';
+  window.storeEdOpenGallery = async function(mediaKey){
+    _seGalKey = mediaKey;
+    document.getElementById('storeEdGalleryTarget').textContent = 'Target: ' + mediaKey;
+    const modal = document.getElementById('storeEdGalleryModal');
+    modal.style.display = 'flex';
+    const grid = document.getElementById('storeEdGalleryGrid');
+    grid.innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:22px;color:var(--text3);">Loading photos…</div>';
+    try {
+      const r = await fetch(API + '/api/upload/library', { headers: { 'Authorization': 'Bearer ' + authToken } });
+      const d = await r.json();
+      _seGalLib = (d && (d.data || d.images || d.files || d.photos)) || [];
+      _seGalLib = _seGalLib.filter(i => !isVideoFileUrl(i.url));
+      storeEdRenderGalleryGrid();
+    } catch(e) { grid.innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:22px;color:var(--danger);">Could not load photos: ' + e.message + '</div>'; }
+  };
+  window.storeEdRenderGalleryGrid = function(){
+    const grid = document.getElementById('storeEdGalleryGrid');
+    const q = window._seGalQuery || '';
+    const list = _seGalLib.filter(i => !q || (i.filename||'').toLowerCase().includes(q));
+    grid.innerHTML = list.length ? list.map(i =>
+      '<div class="photo-item" onclick="storeEdPickGallery(' + JSON.stringify(i.url) + ')" style="cursor:pointer;">' +
+      '<img src="' + adminCdnImg(i.url) + '" alt="' + escAttr(i.original_name||i.filename||'') + '" loading="lazy">' +
+      '<div class="photo-cap">' + esc((i.original_name||i.filename||'').replace(/\.[^.]+$/,'')) + '</div></div>'
+    ).join('') : '<div style="grid-column:1/-1;text-align:center;padding:22px;color:var(--text3);">No photos match' + (q ? ' "' + esc(q) + '"' : '') + '</div>';
+  };
+  window.storeEdPickGallery = async function(url){
+    try {
+      const r = await fetch(API + '/api/admin/site-media/' + encodeURIComponent(_seGalKey), { method: 'PUT', headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + authToken }, body: JSON.stringify({ url: url }) });
+      if (!r.ok) throw new Error('HTTP ' + r.status);
+      toast('✅ Image set — live on the site now');
+      storeEdCloseGallery();
+    } catch(e) { toast('❌ Could not set image: ' + e.message, 'error'); }
+  };
+  window.storeEdCloseGallery = function(){ document.getElementById('storeEdGalleryModal').style.display = 'none'; };
+  document.addEventListener('keydown', function(e){ if (e.key === 'Escape') storeEdCloseGallery(); });
+  // small helpers
+  function escAttr(s){ return String(s||'').replace(/"/g,'&quot;'); }
+  function esc(s){ return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;'); }
+})();
+</script>
 </body>
 </html>
