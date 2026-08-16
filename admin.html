@@ -12777,11 +12777,17 @@ async function saveSettingsCore() {
   try {
     const cur = document.getElementById('curPwd').value;
     const nw  = document.getElementById('newPwd').value;
-    if(!cur||!nw) { toast('Both fields required','error'); return; }
-    // Changing the admin password from the panel requires a server endpoint
-    // (a client-only check would be cosmetic). Keep the honest message until
-    // that endpoint exists instead of pretending the password changed.
-    toast('Password change requires server-side support. Contact system admin.','warning');
+    if(cur || nw) {
+      if(!cur||!nw) { toast('Both password fields are required — enter current and new.','error'); return; }
+      const r = await apiFetch('/api/admin/change-password', { method:'POST', body:JSON.stringify({ current:cur, new:nw }) });
+      const ct = r.headers.get('content-type') || '';
+      let d = {};
+      if(ct.includes('application/json')) d = await r.json().catch(()=>({}));
+      if(!r.ok) throw new Error(d.error || d.message || `Server error (${r.status})`);
+      if(d.builtin && d.note) toast(d.note, 'success'); else toast('Password updated successfully — please sign in again with the new password.','success');
+      document.getElementById('curPwd').value = '';
+      document.getElementById('newPwd').value = '';
+    }
   } catch(e) { toast(e.message, 'error'); }
 }
 
