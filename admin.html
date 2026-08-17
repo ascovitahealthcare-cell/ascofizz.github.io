@@ -3142,9 +3142,9 @@ function azTogglePw() {
       '.prod-drawer::-webkit-scrollbar-thumb,.az360-tbl-wrap::-webkit-scrollbar-thumb{background:var(--gold);border-radius:3px}' +
       '.prod-drawer::-webkit-scrollbar-track,.az360-tbl-wrap::-webkit-scrollbar-track{background:transparent}' +
       '.az360-kpi{min-width:72px;padding:8px 6px}' +
-      '.az360-kpi .k{font-size:.5rem;letter-spacing:0}' +
+      '.az360-kpi .k{font-size:.5rem !important;letter-spacing:0 !important}' +
       '.az360-kpi .v{font-size:.85rem;word-spacing:0}' +
-      '.az360-kpi .k,.az360-body h4{letter-spacing:0}' +
+      '.az360-kpi .k,.az360-body h4{letter-spacing:0 !important}' +
       '.az360-body{max-height:62dvh}' +
       '.modal{max-height:94dvh !important;width:100% !important;max-width:100% !important;border-radius:0 !important}' +
       '.az360-field-grid{grid-template-columns:1fr !important}' +
@@ -3174,8 +3174,10 @@ function azTogglePw() {
     }
     custT.textContent = az360Customer.name || 'Customer';
     custS.textContent = 'Customer 360° — every data point in one place';
-    // render tab bar
-    az360TabsBar.innerHTML = TABS.map(function(t){ return '<button type="button" class="az360-tab' + (t[0]==='overview'?' active':'') + '" onclick="az360Tab(\'' + t[0] + '\')">' + t[1] + '</button>'; }).join('');
+    // render tab bar — on phones use compact labels so all tabs fit the drawer
+    var __mob = window.matchMedia('(max-width:768px)').matches;
+    var __compact = { 'returns': 'Returns', 'promos': 'Promos', 'loyalty': 'Loyalty', 'edit': 'Edit' };
+    az360TabsBar.innerHTML = TABS.map(function(t){ var lab = (__mob && __compact[t[0]]) ? __compact[t[0]] : t[1]; return '<button type="button" class="az360-tab' + (t[0]==='overview'?' active':'') + '" onclick="az360Tab(\'' + t[0] + '\')">' + lab + '</button>'; }).join('');
     document.getElementById('custDrawerBody').innerHTML = '<div class="az360-body" id="az360Body"><div class="empty-state loading-dots">Loading profile</div></div>';
     // reveal the drawer (the patch's parent script never opened it)
     var __d = document.getElementById('custDrawer');
