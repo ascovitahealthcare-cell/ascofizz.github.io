@@ -9570,7 +9570,11 @@ let customersFilteredList = [];
 
 async function loadCustomers() {
   try {
-    const r = await apiFetch('/api/admin/customers');
+    // Aug 2026: fetch the full (non-deleted) list in one request so
+    // client-side paging, filters and KPIs cover every customer. The server
+    // caps a single page at 200 rows; with dozens of customers one call
+    // returns them all (the orders table already does the same with ?limit=2000).
+    const r = await apiFetch('/api/admin/customers?limit=200');
     allCustomers = (await r.json()).data || [];
     // Aug 2026: enrich with re-targeting segments. Fetching insights for ALL
     // customers would be one request each, so instead enrich page-by-page in
