@@ -5693,6 +5693,16 @@ function doLogout() {
   authToken = '';
   document.getElementById('app').style.display = 'none';
   document.getElementById('loginScreen').style.display = 'flex';
+  // Clear any leftover login-card state from a previous session — without
+  // this, an automatic (401-driven) logout leaves the green '✅ Logged in!'
+  // button and whatever error text happened to be on #loginError visible
+  // at the same time, which reads as 'I just logged in and got logged out'.
+  try {
+    var err = document.getElementById('loginError');
+    if (err) { err.style.display = 'none'; err.style.background = ''; err.style.color = ''; }
+    var btn = document.querySelector('.btn-login');
+    if (btn) btn.textContent = 'Sign In →';
+  } catch (e) {}
 }
 
 // Read the token's own expiry without trusting the server round trip.
@@ -12830,9 +12840,34 @@ async function saveSettingsCore() {
       let d = {};
       if(ct.includes('application/json')) d = await r.json().catch(()=>({}));
       if(!r.ok) throw new Error(d.error || d.message || `Server error (${r.status})`);
-      if(d.builtin && d.note) toast(d.note, 'success'); else toast('Password updated successfully — please sign in again with the new password.','success');
+      if(d.builtin && d.note) toast(d.note, 'success'); else toast('Password updated ✅ Session refreshed — you stay signed in.','success');
       document.getElementById('curPwd').value = '';
       document.getElementById('newPwd').value = '';
+      // Changing the password bumps this account's token version, which
+      // revokes the token the panel is holding right now — the next
+      // background request would 401 and kick the admin back to the login
+      // screen ('session expired' the moment the password changed). Re-
+      // authenticate silently with the NEW credentials instead, so the
+      // change of password never looks like a forced logout.
+      try {
+        var who = String(localStorage.getItem('ascovita_session') ? JSON.parse(localStorage.getItem('ascovita_session')).username : (localStorage.getItem('ascovita_role') === 'owner' ? 'owner' : 'admin'));
+        var lr = await fetch(`${API}/api/admin/login`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ username: who, password: nw }),
+          signal: AbortSignal.timeout(35000),
+        });
+        var ld = await lr.json().catch(() => ({}));
+        if (lr.ok && ld.token) {
+          __loginSuccess(ld);
+        } else {
+          // Auto re-login failed (e.g. Render env still holds the old
+          // password for a built-in account) — warn instead of bouncing.
+          toast('Password changed, but the session could not be refreshed — sign in again with the new password.', 'warning');
+        }
+      } catch (e) {
+        toast('Password changed — sign in again with the new password if the panel asks.', 'warning');
+      }
     }
   } catch(e) { toast(e.message, 'error'); }
 }
