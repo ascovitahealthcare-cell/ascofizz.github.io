@@ -5306,6 +5306,32 @@ textarea.form-input { min-height: 96px; resize: vertical; font-family: inherit; 
 .pm-info > *:first-child { font-size: .92rem; font-weight: 700; color: var(--t-hi); }
 .pm-info > *:last-child { font-size: .76rem; color: var(--t-dim); }
 
+/* ── 2026-08: compact gateway row — Cashfree · GoKwik · COD in one slim band
+   (user asked to keep BOTH Cashfree and GoKwik visible but drop the bulky UI) */
+.pay-methods-compact { display: grid; grid-template-columns: repeat(3, 1fr); gap: 9px; }
+.pay-method-compact {
+  display: flex; align-items: center; gap: 9px;
+  padding: 10px 12px; border-radius: 12px; cursor: pointer;
+  background: var(--paper);
+  border: 2px solid transparent;
+  box-shadow: var(--neo-1);
+  transition: border-color var(--dur-1) var(--settle), background var(--dur-1) var(--settle), box-shadow var(--dur-1) var(--settle), transform var(--dur-2) var(--rise);
+}
+.pay-method-compact:hover { transform: translateY(-1px); }
+.pay-method-compact:active { transform: scale(.985); }
+.pay-method-compact.selected {
+  background: rgba(192,57,74,.10);
+  border-color: rgba(192,57,74,.55);
+  box-shadow: 0 0 20px rgba(192,57,74,.14);
+}
+.pmc-icon { font-size: 1.15rem; flex: none; }
+.pmc-info { flex: 1; min-width: 0; }
+.pmc-info > *:first-child { font-size: .78rem; font-weight: 800; color: var(--t-hi); }
+.pmc-info > *:last-child { font-size: .63rem; color: var(--t-dim); margin-top: 1px; }
+.pmc-check { font-size: .85rem; font-weight: 900; color: transparent; flex: none; }
+.pay-method-compact.selected .pmc-check { color: var(--indigo); }
+@media (prefers-reduced-motion: reduce) { .pay-method-compact { transition: none; } }
+
 .ck-reco-card {
   display: flex; align-items: center; gap: 12px;
   padding: 12px; margin-bottom: 10px; border-radius: var(--r-md);
@@ -10665,18 +10691,26 @@ window.dismissOfferReminder = function () {
           </div>
 
           <div class="ck-section-title">💳 <strong style="margin-left:6px">Payment Method</strong></div>
-          <div class="pay-methods">
-            <div class="pay-method selected" onclick="selPayMethod(this)">
-              <span class="pm-icon">🔒</span>
-              <div class="pm-info"><h4>Secure Online Payment</h4><p>UPI · GPay · PhonePe · BHIM · Cards · Net Banking · EMI — powered by GoKwik, processed server-side</p></div>
+          <div class="pay-methods pay-methods-compact">
+            <!-- Online options: Cashfree and GoKwik sit side-by-side as one compact row -->
+            <div class="pay-method-compact selected" data-gateway="cashfree" onclick="selPayGateway(this)">
+              <span class="pmc-icon">💳</span>
+              <div class="pmc-info"><h4>Cashfree</h4><p>UPI · Cards · Net Banking · EMI</p></div>
+              <span class="pmc-check" aria-hidden="true">✓</span>
             </div>
-            <div class="pay-method" onclick="selPayMethod(this)">
-              <span class="pm-icon">💵</span>
-              <div class="pm-info"><h4>Cash on Delivery (COD)</h4><p>Pay in cash when your parcel arrives — no extra charge</p></div>
+            <div class="pay-method-compact" data-gateway="gokwik" onclick="selPayGateway(this)">
+              <span class="pmc-icon">🔒</span>
+              <div class="pmc-info"><h4>GoKwik</h4><p>GPay · PhonePe · UPI · Cards</p></div>
+              <span class="pmc-check" aria-hidden="true">✓</span>
+            </div>
+            <div class="pay-method-compact" data-gateway="cod" onclick="selPayGateway(this)">
+              <span class="pmc-icon">💵</span>
+              <div class="pmc-info"><h4>COD</h4><p>Cash on Delivery · no extra charge</p></div>
+              <span class="pmc-check" aria-hidden="true">✓</span>
             </div>
           </div>
-          <div style="background:var(--green-wash);border-radius:9px;padding:10px 14px;margin-top:12px;font-size:.76rem;color:var(--gray);display:flex;align-items:center;gap:9px">
-            🔒 <span>All payments secured by <strong>GoKwik</strong> — India's most trusted payment gateway. 256-bit SSL. COD available · no extra charge</span>
+          <div style="text-align:center;font-size:.7rem;color:var(--gray);margin-top:8px">
+            🔒 256-bit SSL · PCI DSS — pay via Cashfree or GoKwik, both secured
           </div>
         </div>
       </div>
@@ -16113,7 +16147,33 @@ function renderCheckoutSummary() {
     ${vitaRedeemWidgetHTML(sub - mmOff - disc)}`;
 }
 
-function selPayMethod(el) { /* handled by new payment modal */ }
+// ── 2026-08: compact gateway row — both Cashfree and GoKwik stay visible
+// as slim tiles; the selection travels with the order so the saved row,
+// invoice and My Account all record the same method.
+function selPayGateway(el) {
+  document.querySelectorAll('.pay-method-compact').forEach(function (t) { t.classList.remove('selected'); });
+  el.classList.add('selected');
+  const gw = el.getAttribute('data-gateway');
+  const onlineBtn = document.getElementById('onlinePayBtn');
+  const codBtn = document.getElementById('codBtn');
+  const payBarBtn = document.getElementById('ozPayBarPayBtn');
+  if (onlineBtn) {
+    onlineBtn.textContent = gw === 'cashfree'
+      ? '🔒 Pay Securely via Cashfree'
+      : gw === 'gokwik' ? '🔒 Pay Securely via GoKwik' : '💵 Pay Cash on Delivery (COD)';
+  }
+  // Mobile sticky pay bar mirrors the gateway the customer picked above.
+  if (payBarBtn) {
+    payBarBtn.textContent = gw === 'cashfree'
+      ? '🔒 Pay via Cashfree'
+      : gw === 'gokwik' ? '🔒 Pay via GoKwik' : '💵 Pay COD';
+  }
+}
+function getSelectedGateway() {
+  const sel = document.querySelector('#page-checkout .pay-method-compact.selected');
+  return (sel && sel.getAttribute('data-gateway')) || 'cashfree';
+}
+function selPayMethod(el) { /* superseded by selPayGateway */ }
 
 function placeOrder() {
   // Route to the real payment gateway
@@ -16783,14 +16843,24 @@ function initiatePayment() {
   const origText = btn ? btn.textContent : '';
   if (btn) { btn.disabled = true; btn.textContent = '⏳ Opening Secure Checkout...'; }
 
-  openPaymentGateway(orderId, total, sub, displayedDiscount, ship, formData, btn, origText);
+  // 2026-08: the compact gateway row lets the customer pick Cashfree or
+  // GoKwik before paying — send each to its own processor. COD bypasses
+  // the online modal entirely.
+  const gw = getSelectedGateway();
+  if (gw === 'cod') {
+    initiateCOD();
+    if (btn) { btn.disabled = false; btn.textContent = origText || '💳 Pay Online'; }
+    return;
+  }
+  openPaymentGateway(orderId, total, sub, displayedDiscount, ship, formData, btn, origText, gw);
 }
 
 // ══════════════════════════════════════════════
 // PAYMENT MODAL — GoKwik only
 // ══════════════════════════════════════════════
-function openPaymentGateway(orderId, total, sub, disc, ship, formData, btn, origText) {
-  window._pendingPayment = { orderId, total, sub, disc, ship, formData };
+function openPaymentGateway(orderId, total, sub, disc, ship, formData, btn, origText, gateway) {
+  gateway = gateway === 'cashfree' ? 'cashfree' : 'gokwik';
+  window._pendingPayment = { orderId, total, sub, disc, ship, formData, gateway };
   document.getElementById('cfPayModal')?.remove();
 
   const cartItems = STORE.cart.map(item => {
@@ -16845,16 +16915,16 @@ function openPaymentGateway(orderId, total, sub, disc, ship, formData, btn, orig
           ${formData.addr1}, ${formData.city}, ${formData.state} – ${formData.pin}<br>
           <span style="color:var(--f-mineral-d)">✉ ${formData.email}</span>
         </div>
-        <!-- Single Secure Pay Button (2026-08: removed the dual-gateway
-             selector — customers don't care which processor sits behind the
-             card; one confident button is faster and less confusing) -->
-        <button class="cfPayBtn gk-pay-btn" onclick="startPayment('gokwik')"
+        <!-- Single Secure Pay Button (2026-08: one confident button per
+             picked gateway — Cashfree or GoKwik, both kept visible in the
+             compact selector above so the customer knows their choice) -->
+        <button class="cfPayBtn ${gateway === 'cashfree' ? 'cashfree-pay-btn' : 'gk-pay-btn'}" onclick="startPayment('${gateway}')"
           style="width:100%;background:var(--face-warm);color:var(--st-danger-fg);box-shadow:inset 0 0 0 1.5px rgba(192,48,74,.34);border:none;border-radius:14px;padding:18px 20px;font-size:.95rem;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:14px;margin-bottom:10px;transition:opacity .15s">
           <span style="display:inline-flex;align-items:center;justify-content:center;width:42px;height:42px;background:rgba(255,255,255,0.18);border-radius:10px;flex-shrink:0">
             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
           </span>
           <div style="flex:1;text-align:left">
-            <div style="font-size:1rem;font-weight:800">Pay ₹${total.toLocaleString('en-IN')} Securely</div>
+            <div style="font-size:1rem;font-weight:800">Pay ₹${total.toLocaleString('en-IN')} via ${gateway === 'cashfree' ? 'Cashfree' : 'GoKwik'}</div>
             <div style="font-size:.7rem;opacity:.85;margin-top:2px">UPI · GPay · PhonePe · BHIM · Card · Net Banking · EMI</div>
           </div>
           <span style="background:rgba(255,255,255,.22);padding:4px 10px;border-radius:100px;font-size:.6rem;font-weight:800;letter-spacing:.5px">SECURE →</span>
@@ -16863,7 +16933,7 @@ function openPaymentGateway(orderId, total, sub, disc, ship, formData, btn, orig
         <div style="display:flex;align-items:center;justify-content:center;gap:14px;margin-bottom:14px;flex-wrap:wrap">
           <span style="font-size:.67rem;color:var(--t-low)">🔒 256-bit SSL</span>
           <span style="font-size:.67rem;color:var(--t-low)">✅ PCI DSS</span>
-          <span style="font-size:.67rem;color:var(--t-low)">🛡️ GoKwik Secured</span>
+          <span style="font-size:.67rem;color:var(--t-low)">🛡️ ${gateway === 'cashfree' ? 'Cashfree' : 'GoKwik'} Secured</span>
         </div>
         <!-- Cancel -->
         <button onclick="closePaymentModal()" style="width:100%;background:var(--st-muted-bg);color:var(--t-low);border:none;border-radius:10px;padding:11px;font-size:.82rem;cursor:pointer">
@@ -16873,7 +16943,7 @@ function openPaymentGateway(orderId, total, sub, disc, ship, formData, btn, orig
     </div>
   `;
   document.body.appendChild(modal);
-  if (btn) { btn.disabled = false; btn.textContent = origText || '💳 Pay via GoKwik'; }
+  if (btn) { btn.disabled = false; btn.textContent = origText || '💳 Pay Online'; }
 }
 
 function closePaymentModal() { document.getElementById('cfPayModal')?.remove(); }
@@ -17634,7 +17704,10 @@ async function finalizeOrder(orderId, formData, total, method, codCharge) {
       tier_discount: Number(disc || 0),
       mix_match_discount: Number(mixDisc || 0),
       coupon_discount: Number(promoDisc || 0),
-      vita_points_discount: Number(_vitaOffForOrder || 0),
+      // _vitaOffForOrder is computed right after getOrderTotal() above —
+      // if it is ever undefined (defensive guard), fall back to the
+      // checkout summary's own vitaOff value.
+      vita_points_discount: Number((typeof _vitaOffForOrder !== 'undefined' ? _vitaOffForOrder : (clientBreakdown.vitaOff || 0)) || 0),
       vita_points_used: Number(_vitaPointsForOrder || 0),
       payment_status: method === 'cod' ? 'COD - Pending' : 'Paid',
       fulfillment: 'Pending',
@@ -23231,7 +23304,7 @@ img.az-fade.az-in{opacity:1}
     <div class="opb-amt" id="ozPayBarAmt">—</div>
   </div>
   <div class="opb-actions">
-    <button class="opb-pay" type="button" onclick="initiatePayment()">🔒 Pay Securely</button>
+    <button class="opb-pay" type="button" onclick="initiatePayment()" id="ozPayBarPayBtn">🔒 Pay Securely</button>
     <button class="opb-cod" type="button" onclick="initiateCOD()">💵 COD</button>
   </div>
 </div>
@@ -23409,6 +23482,13 @@ img.az-fade.az-in{opacity:1}
   #page-checkout .pm-info > *:first-child { font-size: .86rem; line-height: 1.3; }
   #page-checkout .pm-icon { font-size: 1.15rem; }
   #page-checkout .pm-badge { font-size: .62rem; padding: 2px 7px; }
+  /* 2026-08: compact gateway row stays a 3-column band on phones — it was
+     already a fraction of the height of the old four-card layout it
+     replaces. */
+  #page-checkout .pay-methods-compact { grid-template-columns: repeat(3, 1fr); gap: 8px; }
+  #page-checkout .pay-method-compact { padding: 8px 8px; gap: 6px; }
+  #page-checkout .pmc-info > *:first-child { font-size: .7rem; }
+  #page-checkout .pmc-info > *:last-child { font-size: .56rem; }
 
   /* Room for the sticky pay bar. */
   #page-checkout .checkout-layout { padding-bottom: 96px; }
@@ -24177,6 +24257,11 @@ window.refreshAccountWelcome = refreshAccountWelcome;
         else if (/Cash on Delivery|COD/i.test(lbl)) snap_.payMethod = 'cod';
         else snap_.payMethod = lbl.slice(0, 24);
       }
+      // 2026-08: also persist the compact gateway row (cashfree · gokwik · cod)
+      if (!snap_.payMethod) {
+        const gw = document.querySelector('#page-checkout .pay-method-compact.selected');
+        if (gw) snap_.payMethod = gw.getAttribute('data-gateway') || 'online';
+      }
     } catch (e) {}
     // Checkout form field values (never store passwords — there are none)
     if (typeof currentPage !== 'undefined' && currentPage === 'checkout') {
@@ -24300,16 +24385,22 @@ window.refreshAccountWelcome = refreshAccountWelcome;
             }
           }
         }
-        if (page === 'checkout' && state.payMethod && typeof selPayMethod === 'function') {
+        if (page === 'checkout' && state.payMethod && typeof selPayGateway === 'function') {
           let target = null;
-          document.querySelectorAll('#page-checkout .pay-method').forEach(function (m) {
-            const lbl = (m.textContent || '').trim();
-            const key = /GoKwik|Online|UPI|Card|Net Banking/i.test(lbl) ? 'online'
-                      : /Cash on Delivery|COD/i.test(lbl) ? 'cod'
-                      : lbl.slice(0, 24);
-            if (key === state.payMethod || lbl === state.payMethod) target = m;
-          });
-          if (target) { try { selPayMethod(target); } catch (e) {} }
+          // Compact gateway row (2026-08): cashfree · gokwik · cod tiles
+          if (['cashfree', 'gokwik', 'cod'].includes(state.payMethod)) {
+            target = document.querySelector('#page-checkout .pay-method-compact[data-gateway="' + state.payMethod + '"]');
+          }
+          if (!target) {
+            document.querySelectorAll('#page-checkout .pay-method').forEach(function (m) {
+              const lbl = (m.textContent || '').trim();
+              const key = /GoKwik|Online|UPI|Card|Net Banking/i.test(lbl) ? 'online'
+                        : /Cash on Delivery|COD/i.test(lbl) ? 'cod'
+                        : lbl.slice(0, 24);
+              if (key === state.payMethod || lbl === state.payMethod) target = m;
+            });
+          }
+          if (target) { try { (typeof selPayGateway === 'function' ? selPayGateway : selPayMethod)(target); } catch (e) {} }
         }
       } catch (e) { console.warn('[ozylix-position] sections:', e && e.message); }
       if (_restoreTries < 6) { _restoreTries++; setTimeout(_restoreSections, 450); }
