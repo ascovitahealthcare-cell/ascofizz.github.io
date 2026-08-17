@@ -11025,7 +11025,7 @@ function renderCheckoutSummary() {
       </div>
       <!-- Premium support strip -->
       <div style="display:flex;align-items:center;justify-content:center;gap:18px;flex-wrap:wrap;max-width:460px;margin:14px auto 4px;font-size:.78rem;font-weight:600;color:var(--t-mid)">
-        <span style="display:inline-flex;align-items:center;gap:6px">🔒 <strong style="color:var(--t-hi)">Secure payment</strong> via GoKwik</span>
+        <span id="tySecurePay" style="display:inline-flex;align-items:center;gap:6px">🔒 <strong style="color:var(--t-hi)">Secure payment</strong> via GoKwik</span>
         <span style="display:inline-flex;align-items:center;gap:6px">💬 <a href="https://wa.me/919898582650" target="_blank" rel="noopener" style="color:var(--green);text-decoration:none">WhatsApp support</a> · replies within 1 hr</span>
       </div>
       <!-- Step 1 shipped with an empty icon div, which .ty-step > *:first-child
@@ -17581,6 +17581,15 @@ async function finalizeOrder(orderId, formData, total, method, codCharge) {
   if (orderNumEl) orderNumEl.textContent = orderId;
   const payEl = document.getElementById('tyPayMethod');
   if (payEl) payEl.textContent = PAY_METHOD_LABEL[method] || 'Paid online';
+  // The secure-payment strip above the tracker was hard-coded to 'via GoKwik'
+  // — on COD orders that confused customers (no money changes hands at all).
+  const secureEl = document.getElementById('tySecurePay');
+  if (secureEl) {
+    const m = String(method || '').toLowerCase();
+    secureEl.innerHTML = m === 'cod'
+      ? '💵 <strong style="color:var(--t-hi)">Cash on delivery</strong> — pay when your parcel arrives'
+      : '🔒 <strong style="color:var(--t-hi)">Secure payment</strong> via ' + (m === 'cashfree' ? 'Cashfree' : 'GoKwik');
+  }
   try { showVitaEarned(total); } catch (e) {}
 
   // Build order items
