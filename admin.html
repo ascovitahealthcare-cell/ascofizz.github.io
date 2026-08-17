@@ -3120,7 +3120,7 @@ function azTogglePw() {
     var st = document.createElement('style');
     st.id = 'az360-style';
     st.textContent =
-      '.az360-tabs{display:flex;gap:4px;margin:0 0 12px;border-bottom:2px solid var(--border);overflow-x:auto;-webkit-overflow-scrolling:touch;-ms-overflow-style:none;scrollbar-width:none}' +
+      '.az360-tabs{display:flex;gap:4px;margin:0 0 12px;border-bottom:2px solid var(--border);overflow-x:auto;-webkit-overflow-scrolling:touch;-ms-overflow-style:none;scrollbar-width:thin}' +
       '.az360-tabs::-webkit-scrollbar{display:none}' +
       '.az360-tabs .az360-tab{background:none;border:none;border-bottom:3px solid transparent;padding:9px 12px;font-family:var(--font);font-size:.74rem;font-weight:600;color:var(--text3);cursor:pointer;white-space:nowrap;flex:1 0 auto;min-width:0;transition:all .2s}' +
       '.az360-tabs .az360-tab:hover{color:var(--green-text)}' +
@@ -3133,15 +3133,20 @@ function azTogglePw() {
       '.az360-tbl{width:100%;border-collapse:collapse;font-size:.72rem;min-width:300px}' +
       '.az360-tbl th{text-align:left;padding:6px 8px;border-bottom:1px solid var(--border);color:var(--text3);text-transform:uppercase;font-size:.62rem;letter-spacing:.4px}' +
       '.az360-tbl td{padding:6px 8px;border-bottom:1px solid var(--border);word-break:break-word}' +
-      '.az360-tbl-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch;margin:0 -4px 14px;padding:0 4px}' +
+      '.az360-tbl-wrap{overflow-x:auto !important;-webkit-overflow-scrolling:touch;margin:0 -4px 14px;padding:0 4px}' +
+      '.az360-tbl-wrap .az360-tbl{min-width:0}' +
       '@media (max-width:768px){' +
       '.az360-tabs .az360-tab{padding:10px 10px;font-size:.7rem}' +
+      '.az360-tabs .az360-tab{white-space:nowrap}' +
       '.az360-kpi{min-width:72px;padding:8px 6px}' +
-      '.az360-kpi .k{font-size:.5rem}' +
-      '.az360-kpi .v{font-size:.85rem}' +
+      '.az360-kpi .k{font-size:.5rem;letter-spacing:0}' +
+      '.az360-kpi .v{font-size:.85rem;word-spacing:0}' +
+      '.az360-kpi .k,.az360-body h4{letter-spacing:0}' +
       '.az360-body{max-height:62dvh}' +
       '.modal{max-height:94dvh !important;width:100% !important;max-width:100% !important;border-radius:0 !important}' +
       '.az360-field-grid{grid-template-columns:1fr !important}' +
+      '.az360-tbl th,.az360-tbl td{white-space:normal !important;letter-spacing:0;word-break:break-word}' +
+      '.az360-tbl{font-size:.66rem}' +
       '}';
     document.head.appendChild(st);
   }
