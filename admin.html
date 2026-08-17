@@ -15671,7 +15671,9 @@ body.role-admin #azRoleBanner{display:block}
   .tb-ico-sm  { display: inline; }
   .tb-btn     { padding: 0 10px !important; min-width: 40px; }
   .logo-badge { display: none; }
-  /* Wordmark must NEVER disappear — truncate it cleanly instead of the
+  /* Role badge: keep the crown, drop the word (space for the pill + buttons).
+     Fully hidden only on 320px screens (see ≤380px block below). */
+  #roleBadge { white-space: nowrap; }
      ellipsis "O…" that made the header look missing. */
   .logo-name  { display: inline !important; min-width: 0; }
   /* Server health dot on the bell — replaces the hidden status pill. */
