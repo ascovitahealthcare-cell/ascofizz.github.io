@@ -3136,8 +3136,11 @@ function azTogglePw() {
       '.az360-tbl-wrap{overflow-x:auto !important;-webkit-overflow-scrolling:touch;margin:0 -4px 14px;padding:0 4px}' +
       '.az360-tbl-wrap .az360-tbl{min-width:0}' +
       '@media (max-width:768px){' +
-      '.az360-tabs .az360-tab{padding:10px 10px;font-size:.7rem}' +
-      '.az360-tabs .az360-tab{white-space:nowrap}' +
+      '.az360-tabs .az360-tab{padding:10px 4px !important;font-size:.62rem !important;min-width:0 !important;white-space:nowrap !important;overflow:hidden !important;text-overflow:ellipsis}' +
+      '.prod-drawer{overflow-x:auto !important}' +
+      '.prod-drawer::-webkit-scrollbar,.az360-tbl-wrap::-webkit-scrollbar{height:6px;width:6px}' +
+      '.prod-drawer::-webkit-scrollbar-thumb,.az360-tbl-wrap::-webkit-scrollbar-thumb{background:var(--gold);border-radius:3px}' +
+      '.prod-drawer::-webkit-scrollbar-track,.az360-tbl-wrap::-webkit-scrollbar-track{background:transparent}' +
       '.az360-kpi{min-width:72px;padding:8px 6px}' +
       '.az360-kpi .k{font-size:.5rem;letter-spacing:0}' +
       '.az360-kpi .v{font-size:.85rem;word-spacing:0}' +
