@@ -4548,23 +4548,34 @@ function closeModal(id){ document.getElementById(id).classList.remove('open'); }
    as X-Password-Proof. Never rely on the open session alone. */
 let __proof = null, __proofExp = 0;
 function azSessionUser(){ try{ return JSON.parse(localStorage.getItem('ascovita_session')||'{}'); }catch(e){ return {}; } }
+// Dual security (Aug 2026): when the backend has SAVE_PASSWORD configured,
+// critical actions require that separate save/transaction password — never
+// the login password — so a leaked login password can't approve changes.
+// The flag arrives via /api/admin/me and is cached on the session object.
+function azSavePwRequired(){ return !!azSessionUser().security?.save_pw_required; }
 async function confirmCriticalAction(promptText, actionFn){
   const sess = azSessionUser();
   const reuses = __proof && Date.now() < __proofExp;
   if (reuses) return actionFn(__proof);
+  const saveRequired = azSavePwRequired();
+  const modalTitle = saveRequired ? 'Confirm with your save password' : 'Confirm with your password';
+  const fieldLabel = saveRequired ? 'Save (transaction) password' : 'Password';
+  const emptyMsg = saveRequired ? 'Enter your save password.' : 'Enter your password.';
+  const hintHtml = saveRequired ? '<div style="font-size:.72rem;color:var(--accent);margin-bottom:10px">This is the separate save password you set in Render — not your login password.</div>' : '';
   return new Promise(function(resolve, reject){
     const msgId = 'azProofMsg';
-    azBuildModal2('azProofModal', 'Confirm with your password', `
+    azBuildModal2('azProofModal', modalTitle, `
       <div style="padding:4px 0">
         <div style="font-size:.8rem;margin-bottom:12px;color:var(--text2)">${escHtml(promptText)}</div>
-        <label class="field-label">Password</label>
+        ${hintHtml}
+        <label class="field-label">${fieldLabel}</label>
         <div class="pw-wrap"><input type="password" id="azProofPw" class="field-input" autocomplete="current-password"><button type="button" class="pw-toggle" onclick="var i=document.getElementById('azProofPw');i.type=i.type==='password'?'text':'password'">👁</button></div>
         <div id="${msgId}" class="login-error" style="display:none"></div>
       </div>`, [
       { label: 'Confirm', cls: 'btn-gold', action: async function(){
         const pw = document.getElementById('azProofPw').value;
         const msg = document.getElementById(msgId);
-        if (!pw) { msg.textContent = 'Enter your password.'; msg.style.display = 'block'; return; }
+        if (!pw) { msg.textContent = emptyMsg; msg.style.display = 'block'; return; }
         msg.style.display = 'none';
         try {
           const r = await apiFetch('/api/admin/confirm-password', {
@@ -5639,6 +5650,7 @@ function __loginSuccess(d) {
     if (m && !m.error) localStorage.setItem('ascovita_session', JSON.stringify({
       username: m.username, role: m.role, is_owner: !!m.is_owner,
       permissions: m.permissions, denied: m.denied,
+      security: m.security || null,
     }));
   }).catch(() => {}); } catch(e) {}
   try { localStorage.removeItem('ascovita_logout_reason'); } catch(e) {}
@@ -16051,6 +16063,7 @@ async function azLoadPerms() {
         localStorage.setItem('ascovita_session', JSON.stringify({
           username: d.username, role: d.role, is_owner: !!d.is_owner,
           permissions: d.permissions || [], denied: d.denied || [],
+          security: d.security || null,
         }));
         var _staffNav = document.getElementById('navStaff');
         if (_staffNav) _staffNav.style.display = d.is_owner ? '' : 'none';
