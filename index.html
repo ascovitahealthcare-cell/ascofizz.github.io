@@ -17354,10 +17354,25 @@ const PAY_RESULT_ERROR_MAP = [
   { re: /merchant data not found/i, text: 'We could not reach our payment provider. Please wait a moment and try again.' },
   { re: /transactions are not enabled/i, text: 'Online payments are temporarily unavailable with our provider. Please try again shortly, or use Cash on Delivery.' },
   { re: /payment gateway account/i, text: 'Online payments are temporarily unavailable with our provider. Please try again shortly, or use Cash on Delivery.' },
+  // COD orders mention no money at all (nothing was charged in the first
+  // place); claiming an auto-refund on a COD failure confused customers.
+  { re: /could not verify/i, codText: 'We could not place your order just now. Please check your details and try again in a moment — no money is involved with Cash on Delivery.' },
   { re: /could not verify/i, text: 'We could not confirm this payment automatically. If money was deducted, it will be auto-refunded within 5-7 days.' },
 ];
-function friendlyPaymentError(raw) {
-  for (const m of PAY_RESULT_ERROR_MAP) { if (m.re.test(raw || '')) return m.text; }
+function friendlyPaymentError(raw, method) {
+  for (const m of PAY_RESULT_ERROR_MAP) {
+    if (!m.re.test(raw || '')) continue;
+    // COD orders get the money-free variant (codText); prepaid flows use
+    // the refund-safety wording (text). Entries may define only one of
+    // the two — fall through to the next matching rule or the raw text.
+    if (method === 'cod') {
+      if (m.codText) return m.codText;
+      if (m.text) return m.text;
+      return raw;
+    }
+    if (m.text) return m.text;
+    continue;
+  }
   return raw;
 }
 
@@ -17428,7 +17443,7 @@ function showPaymentResult(state, opts) {
 // ── Legacy helper used across the checkout paths — routes through the
 // centred modal above so failures are never buried at the page bottom. ──
 function showPaymentError(msg, orderId, formData, total, method) {
-  showPaymentResult('fail', { orderId: orderId, total: total, msg: msg });
+  showPaymentResult('fail', { orderId: orderId, total: total, msg: friendlyPaymentError(msg || '', method) });
 }
 
 // ── FINALIZE ORDER AFTER SUCCESSFUL PAYMENT ──
@@ -17756,7 +17771,12 @@ async function finalizeOrder(orderId, formData, total, method, codCharge) {
     // worse than waiting — but not 45 seconds longer, because a shopper
     // watching a frozen Pay button for two minutes assumes it broke and
     // presses it again.
-    const timeouts = [20000, 25000, 25000];
+    // Cold starts on the free-tier host take up to ~45s; the first attempt
+    // gets the longer window because Render only wakes on the first hit —
+    // a 20s timeout on attempt 1 guaranteed failure whenever the host was
+    // sleeping, which was the single most common cause of the 'could not
+    // confirm this payment' COD failures reported by customers.
+    const timeouts = [45000, 25000, 25000];
     for (let attempt = 0; attempt < timeouts.length; attempt++) {
       try {
         if (attempt > 0) {
@@ -17792,7 +17812,7 @@ async function finalizeOrder(orderId, formData, total, method, codCharge) {
     try {
       showPaymentError(
         (method === 'cod'
-          ? 'We could not place your order just now — nothing has been charged and your cart is safe. Please try again in a moment.'
+          ? 'We could not place your order just now — no money is involved with Cash on Delivery and your cart is safe. Please check your details and try again in a moment.'
           : 'Your payment went through but we could not confirm the order on our server. Please do not pay again — contact +91 98985 82650 with Order ID: ' + orderId)
           + (_saveError ? ' (' + _saveError + ')' : ''),
         orderId, formData, total, method
