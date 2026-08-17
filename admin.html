@@ -6118,12 +6118,18 @@ async function rejectReturn(id) {
 
 async function setReturnStatus(id, status) {
   try {
-    await apiFetch('/api/admin/returns/' + id + '/status', {
-      method: 'PUT', body: JSON.stringify({ status: status }),
+    await confirmCriticalAction('Change this return\u2019s status to \u201c' + status.replace('_', ' ') + '\u201d? This update is password-gated.', async function(proof){
+      const r = await apiFetch('/api/admin/returns/' + id + '/status', {
+        method: 'PUT',
+        headers: proof ? { 'X-Password-Proof': proof } : {},
+        body: JSON.stringify({ status: status }),
+      });
+      const d = await r.json().catch(() => ({}));
+      if (!r.ok) throw new Error(d.error || 'Could not update return status');
+      toast('Status updated');
+      loadReturns();
     });
-    toast('Status updated');
-    loadReturns();
-  } catch (e) { toast('❌ ' + e.message, 'error'); }
+  } catch (e) { if (String(e.message) !== 'cancelled') toast('❌ ' + e.message, 'error'); }
 }
 
 async function markRefunded(id) {
