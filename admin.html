@@ -3114,24 +3114,35 @@ function azTogglePw() {
   var bar = document.createElement('div');
   bar.id = 'cust360Tabs';
   bar.className = 'az360-tabs';
-  bar.setAttribute('style', 'display:flex;gap:4px;margin:0 0 12px;border-bottom:2px solid var(--border);overflow-x:auto;padding-bottom:0');
   if (custS) { custS.insertAdjacentElement('afterend', bar); var az360TabsBar = bar; }
   // Style block (only once)
   if (!document.getElementById('az360-style')) {
     var st = document.createElement('style');
     st.id = 'az360-style';
     st.textContent =
-      '.az360-tabs .az360-tab{background:none;border:none;border-bottom:3px solid transparent;padding:9px 13px;font-family:var(--font);font-size:.76rem;font-weight:600;color:var(--text3);cursor:pointer;white-space:nowrap;transition:all .2s}' +
+      '.az360-tabs{display:flex;gap:4px;margin:0 0 12px;border-bottom:2px solid var(--border);overflow-x:auto;-webkit-overflow-scrolling:touch;-ms-overflow-style:none;scrollbar-width:none}' +
+      '.az360-tabs::-webkit-scrollbar{display:none}' +
+      '.az360-tabs .az360-tab{background:none;border:none;border-bottom:3px solid transparent;padding:9px 12px;font-family:var(--font);font-size:.74rem;font-weight:600;color:var(--text3);cursor:pointer;white-space:nowrap;flex:1 0 auto;min-width:0;transition:all .2s}' +
       '.az360-tabs .az360-tab:hover{color:var(--green-text)}' +
       '.az360-tabs .az360-tab.active{color:var(--green);border-bottom-color:var(--gold)}' +
       '.az360-body{max-height:64vh;overflow-y:auto;padding-right:4px;-webkit-overflow-scrolling:touch}' +
       '.modal-overlay{z-index:900 !important}.modal{max-height:min(88dvh,640px) !important;overflow-y:auto}' +
-      '.az360-kpi{flex:1;min-width:96px;background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:9px 10px;text-align:center}' +
+      '.az360-kpi{flex:1 1 auto;min-width:96px;background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:9px 10px;text-align:center}' +
       '.az360-kpi .k{font-size:.58rem;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.3px}' +
-      '.az360-kpi .v{font-family:var(--display);font-size:.95rem;font-weight:800;color:var(--green-text);margin-top:3px}' +
-      '.az360-tbl{width:100%;border-collapse:collapse;font-size:.72rem}' +
+      '.az360-kpi .v{font-family:var(--display);font-size:.95rem;font-weight:800;color:var(--green-text);margin-top:3px;word-break:break-word}' +
+      '.az360-tbl{width:100%;border-collapse:collapse;font-size:.72rem;min-width:300px}' +
       '.az360-tbl th{text-align:left;padding:6px 8px;border-bottom:1px solid var(--border);color:var(--text3);text-transform:uppercase;font-size:.62rem;letter-spacing:.4px}' +
-      '.az360-tbl td{padding:6px 8px;border-bottom:1px solid var(--border)}';
+      '.az360-tbl td{padding:6px 8px;border-bottom:1px solid var(--border);word-break:break-word}' +
+      '.az360-tbl-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch;margin:0 -4px 14px;padding:0 4px}' +
+      '@media (max-width:768px){' +
+      '.az360-tabs .az360-tab{padding:10px 10px;font-size:.7rem}' +
+      '.az360-kpi{min-width:72px;padding:8px 6px}' +
+      '.az360-kpi .k{font-size:.5rem}' +
+      '.az360-kpi .v{font-size:.85rem}' +
+      '.az360-body{max-height:62dvh}' +
+      '.modal{max-height:94dvh !important;width:100% !important;max-width:100% !important;border-radius:0 !important}' +
+      '.az360-field-grid{grid-template-columns:1fr !important}' +
+      '}';
     document.head.appendChild(st);
   }
   var TABS = [['overview','📊 Overview'],['orders','📦 Orders'],['returns','🔄 Returns & Refunds'],['loyalty','🌟 Loyalty'],['promos','🏷 Promo Usage'],['edit','✏️ Edit']];
@@ -3149,7 +3160,7 @@ function azTogglePw() {
       az360TabsBar = document.createElement('div');
       az360TabsBar.id = 'cust360Tabs';
       az360TabsBar.className = 'az360-tabs';
-      az360TabsBar.setAttribute('style', 'display:flex;gap:4px;margin:0 0 12px;border-bottom:2px solid var(--border);overflow-x:auto;padding-bottom:0');
+      az360TabsBar.setAttribute('style', '');
       custS.insertAdjacentElement('afterend', az360TabsBar);
     }
     custT.textContent = az360Customer.name || 'Customer';
@@ -3179,6 +3190,9 @@ function azTogglePw() {
     if (!t) return;
     t.querySelectorAll('.az360-tab').forEach(function(b){ b.classList.toggle('active', b.textContent.trim().toLowerCase().includes(azTabName(name)) === false && b.getAttribute('onclick').indexOf("'" + name + "'") >= 0); });
     t.querySelectorAll('.az360-tab').forEach(function(b){ if (b.getAttribute('onclick') && b.getAttribute('onclick').indexOf("'" + name + "'") >= 0) b.classList.add('active'); else b.classList.remove('active'); });
+    // keep the active tab visible inside the horizontally-scrollable tab bar
+    var act = t.querySelector('.az360-tab.active');
+    if (act) { try { act.scrollIntoView({ block: 'nearest', inline: 'nearest', behavior: 'smooth' }); } catch(e){} }
     var body = document.getElementById('az360Body');
     if (!body) return;
     var d = az360State, c = az360Customer || {};
@@ -3195,23 +3209,22 @@ function azTogglePw() {
     var o = d.orders, l = d.loyalty;
     var kpi = function(lab, val, ico){ return '<div class="az360-kpi"><div class="k">' + ico + ' ' + lab + '</div><div class="v">' + val + '</div></div>'; };
     var first = o.history.length ? o.history[o.history.length - 1] : null;
-    return '<div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px">' +
+        return '<div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px">' +
       kpi('Orders', o.total, '📦') + kpi('Lifetime Value', az360Money(o.total_spent), '💰') +
       kpi('VitaPoints', l.balance.toLocaleString('en-IN'), '🌟') +
-      kpi('Cancelled', o.cancelled, '❌') +
-      kpi('Returns', d.returns.count, '🔄') + kpi('Coupons Used', d.promos.coupon_codes_used_count, '🏷') +
+      kpi('Cancelled', o.cancelled, '❌') + kpi('Returns', d.returns.count, '🔄') + kpi('Coupons Used', d.promos.coupon_codes_used_count, '🏷') +
       '</div>' +
       '<h4 style="font-size:.68rem;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.6px;margin:10px 0 8px">Contact</h4>' +
-      '<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px">' +
+      '<div class="az360-field-grid" style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px">' +
       '<div class="az360-kpi" style="text-align:left;padding:10px 12px"><div class="k">✉️ Email</div><div class="v" style="font-size:.78rem;font-family:var(--font);word-break:break-all">' + (escHtml(d.customer.email) || '–') + '</div></div>' +
       '<div class="az360-kpi" style="text-align:left;padding:10px 12px"><div class="k">📱 Phone</div><div class="v" style="font-size:.78rem;font-family:var(--font)">' + (escHtml(d.customer.phone) || '–') + '</div></div>' +
       '</div>' +
-      '<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:8px">' +
+      '<div class="az360-field-grid" style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:8px">' +
       '<div class="az360-kpi" style="text-align:left;padding:10px 12px"><div class="k">📍 City</div><div class="v" style="font-size:.78rem;font-family:var(--font)">' + (escHtml(d.customer.city) || '–') + '</div></div>' +
       '<div class="az360-kpi" style="text-align:left;padding:10px 12px"><div class="k">🗺 State</div><div class="v" style="font-size:.78rem;font-family:var(--font)">' + (escHtml(d.customer.state) || '–') + '</div></div>' +
       '<div class="az360-kpi" style="text-align:left;padding:10px 12px"><div class="k">📮 Pincode</div><div class="v" style="font-size:.78rem;font-family:var(--font)">' + (escHtml(d.customer.pincode) || '–') + '</div></div>' +
       '</div>' +
-      '<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">' +
+      '<div class="az360-field-grid" style="display:grid;grid-template-columns:1fr 1fr;gap:8px">' +
       '<div class="az360-kpi" style="text-align:left;padding:10px 12px"><div class="k">✉️ Email campaigns</div><div class="v" style="font-size:.78rem;font-family:var(--font)">' + (d.consent.email !== false ? '✅ Subscribed' : '⛔ Opted out') + '</div></div>' +
       '<div class="az360-kpi" style="text-align:left;padding:10px 12px"><div class="k">📱 WhatsApp</div><div class="v" style="font-size:.78rem;font-family:var(--font)">' + (d.consent.whatsapp !== false ? '✅ Subscribed' : '⛔ Opted out') + '</div></div>' +
       '</div>' +
@@ -3228,8 +3241,8 @@ function azTogglePw() {
       '<div class="az360-kpi"><div class="k">Total spent</div><div class="v">' + az360Money(o.total_spent) + '</div></div>' +
       '<div class="az360-kpi"><div class="k">Cancelled</div><div class="v">' + o.cancelled + ' (' + az360Money(o.cancelled_value) + ')</div></div>' +
       '<div class="az360-kpi"><div class="k">Payment mix</div><div class="v">' + o.payment_mix.prepaid + ' prepaid · ' + o.payment_mix.cod + ' COD</div></div>' +
-      '</div><table class="az360-tbl"><thead><tr><th>Order</th><th>Date</th><th>Status</th><th>Total</th><th>Payment</th><th>Coupon</th></tr></thead><tbody>' +
-      (rows || '<tr><td colspan="6" class="empty-state">No orders</td></tr>') + '</tbody></table>';
+      '</div><div class="az360-tbl-wrap"><table class="az360-tbl"><thead><tr><th>Order</th><th>Date</th><th>Status</th><th>Total</th><th>Payment</th><th>Coupon</th></tr></thead><tbody>' +
+      (rows || '<tr><td colspan="6" class="empty-state">No orders</td></tr>') + '</tbody></table></div>';
   }
   function az360Returns(d){
     var rs = d.returns.list, fs = d.refunds.list;
@@ -3246,9 +3259,9 @@ function azTogglePw() {
       '<div class="az360-kpi"><div class="k">Gateway refunds</div><div class="v">' + d.refunds.count + '</div></div>' +
       '</div>' +
       '<h4 style="font-size:.68rem;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.6px;margin:10px 0 6px">Return requests</h4>' +
-      '<table class="az360-tbl"><thead><tr><th>Order</th><th>Date</th><th>Reason</th><th>Status</th><th>Amount</th></tr></thead><tbody>' + (rows || '<tr><td colspan="5" class="empty-state">No returns</td></tr>') + '</tbody></table>' +
+      '<div class="az360-tbl-wrap"><table class="az360-tbl"><thead><tr><th>Order</th><th>Date</th><th>Reason</th><th>Status</th><th>Amount</th></tr></thead><tbody>' + (rows || '<tr><td colspan="5" class="empty-state">No returns</td></tr>') + '</tbody></table></div>' +
       '<h4 style="font-size:.68rem;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.6px;margin:14px 0 6px">Gateway refunds (latest 40)</h4>' +
-      '<table class="az360-tbl"><thead><tr><th>Order</th><th>Date</th><th>Gateway</th><th>Status</th><th>Amount</th></tr></thead><tbody>' + (fr || '<tr><td colspan="5" class="empty-state">No gateway refunds</td></tr>') + '</tbody></table>';
+      '<div class="az360-tbl-wrap"><table class="az360-tbl"><thead><tr><th>Order</th><th>Date</th><th>Gateway</th><th>Status</th><th>Amount</th></tr></thead><tbody>' + (fr || '<tr><td colspan="5" class="empty-state">No gateway refunds</td></tr>') + '</tbody></table></div>';
   }
   function az360Loyalty(d){
     var l = d.loyalty;
@@ -3268,11 +3281,11 @@ function azTogglePw() {
       kpi('Debt', l.debt, '➖') + kpi('Lifetime earned', l.lifetime_earned, '⬆') + kpi('Lifetime redeemed', l.lifetime_redeemed, '⬇') +
       '</div>' +
       '<h4 style="font-size:.68rem;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.6px;margin:10px 0 6px">Ledger (latest 60)</h4>' +
-      '<table class="az360-tbl"><thead><tr><th>Date</th><th>Type</th><th>Points</th><th>Order</th><th>Reason</th></tr></thead><tbody>' + (leRows || '<tr><td colspan="5" class="empty-state">No ledger entries</td></tr>') + '</tbody></table>' +
+      '<div class="az360-tbl-wrap"><table class="az360-tbl"><thead><tr><th>Date</th><th>Type</th><th>Points</th><th>Order</th><th>Reason</th></tr></thead><tbody>' + (leRows || '<tr><td colspan="5" class="empty-state">No ledger entries</td></tr>') + '</tbody></table></div>' +
       '<h4 style="font-size:.68rem;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.6px;margin:14px 0 6px">Pending releases</h4>' +
-      '<table class="az360-tbl"><thead><tr><th>Date</th><th>Points</th><th>Order</th><th>Release</th></tr></thead><tbody>' + (peRows || '<tr><td colspan="4" class="empty-state">No pending points</td></tr>') + '</tbody></table>' +
+      '<div class="az360-tbl-wrap"><table class="az360-tbl"><thead><tr><th>Date</th><th>Points</th><th>Order</th><th>Release</th></tr></thead><tbody>' + (peRows || '<tr><td colspan="4" class="empty-state">No pending points</td></tr>') + '</tbody></table></div>' +
       '<h4 style="font-size:.68rem;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.6px;margin:14px 0 6px">Rewards</h4>' +
-      '<table class="az360-tbl"><thead><tr><th>Claimed</th><th>Kind</th><th>Code</th><th>Status</th></tr></thead><tbody>' + (rwRows || '<tr><td colspan="4" class="empty-state">No rewards claimed</td></tr>') + '</tbody></table>';
+      '<div class="az360-tbl-wrap"><table class="az360-tbl"><thead><tr><th>Claimed</th><th>Kind</th><th>Code</th><th>Status</th></tr></thead><tbody>' + (rwRows || '<tr><td colspan="4" class="empty-state">No rewards claimed</td></tr>') + '</tbody></table></div>';
   }
   function az360Promos(d){
     var m = d.promos.coupons_used || {};
@@ -3283,14 +3296,14 @@ function azTogglePw() {
     return '<div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px">' +
       '<div class="az360-kpi"><div class="k">Distinct coupons used</div><div class="v">' + d.promos.coupon_codes_used_count + '</div></div>' +
       '<div class="az360-kpi"><div class="k">Orders with a coupon</div><div class="v">' + keys.reduce(function(s,k){ return s + m[k]; }, 0) + '</div></div>' +
-      '</div><table class="az360-tbl" style="max-width:380px"><thead><tr><th>Coupon code</th><th>Times used</th></tr></thead><tbody>' +
-      (rows || '<tr><td colspan="2" class="empty-state">No coupons used</td></tr>') + '</tbody></table>' +
+      '</div><div class="az360-tbl-wrap"><table class="az360-tbl" style="max-width:380px"><thead><tr><th>Coupon code</th><th>Times used</th></tr></thead><tbody>' +
+      (rows || '<tr><td colspan="2" class="empty-state">No coupons used</td></tr>') + '</tbody></table></div>' +
       '<div style="margin-top:12px;font-size:.7rem;color:var(--text3)">Codes are derived from order history (orders where the customer checked out with that code). Cancelled orders are included — cross-check against the Orders tab if a number looks off.</div>';
   }
   function az360Edit(d, c){
     var f = d.customer;
     return '<div style="font-size:.72rem;color:var(--text3);margin-bottom:12px">Edits are saved only after password re-confirmation. Every change is written to the audit log.</div>' +
-      '<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">' +
+      '<div class="az360-field-grid" style="display:grid;grid-template-columns:1fr 1fr;gap:10px">' +
       az360Field('az360Name', 'Full name', f.name) + az360Field('az360Phone', 'Phone', f.phone) +
       az360Field('az360Email', 'Email', f.email) + az360Field('az360City', 'City', f.city) +
       az360Field('az360State', 'State', f.state) + az360Field('az360Pincode', 'Pincode', f.pincode) +
