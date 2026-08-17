@@ -359,7 +359,19 @@ function buildInvoiceHTML(order) {
         'Invoice No: <b>' + _esc(invNo) + '</b><br>' +
         'Invoice Date: <b>' + _esc(o.date) + '</b><br>' +
         'Order Ref: ' + _esc(o.orderId) + '<br>' +
-        'Payment: ' + _esc(String(o.method).toUpperCase()) + '<br>' +
+        'Payment: ' + _esc((function(m){
+          switch (String(m||'').toLowerCase()) {
+            case 'cod': case 'cash': return 'COD (Cash on Delivery)';
+            case 'cashfree': return 'Online (Cashfree)';
+            case 'gokwik': return 'Online (GoKwik)';
+            case 'upi': return 'UPI';
+            case 'card': return 'Card';
+            case 'netbanking': return 'Net Banking';
+            case 'emi': return 'EMI';
+            case 'demo': return 'Demo (Test)';
+            default: return String(m||'Online Payment');
+          }
+        })(o.method)) + '<br>' +
         'Reverse Charge: <b>No</b>' +
       '</div></div>' +
     '</div>' +

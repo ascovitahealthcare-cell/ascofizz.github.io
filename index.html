@@ -10656,7 +10656,8 @@ window.dismissOfferReminder = function () {
           <div class="ck-loc-row">
             <div class="form-group"><label class="form-label">City</label><input class="form-input" type="text" placeholder="City" autocomplete="address-level2" autocapitalize="words" enterkeyhint="next" oninput="this.classList.remove('field-error')"></div>
             <div class="form-group"><label class="form-label">State</label><input class="form-input" type="text" placeholder="State" autocomplete="address-level1" autocapitalize="words" enterkeyhint="next"></div>
-            <div class="form-group"><label class="form-label">PIN Code</label><input class="form-input" type="text" placeholder="6-digit PIN" autocomplete="postal-code" inputmode="numeric" pattern="[0-9]*" maxlength="6" enterkeyhint="done" oninput="this.classList.remove('field-error')"></div>
+            <div class="form-group"><label class="form-label">PIN Code</label><input class="form-input" id="ckPinInput" type="text" placeholder="6-digit PIN" autocomplete="postal-code" inputmode="numeric" pattern="[0-9]*" maxlength="6" enterkeyhint="done" oninput="this.classList.remove('field-error');checkPincode(this.value)"></div>
+            <div id="pinStatus" style="display:none;font-size:.72rem;margin-top:4px;font-weight:600"></div>
           </div>
           <div class="form-row" style="margin-top:10px">
             <div class="form-group" style="margin-bottom:0"><label class="form-label">Country</label><input class="form-input" type="text" value="India" readonly tabindex="-1" autocomplete="country-name" aria-label="Country"></div>
@@ -10666,22 +10667,12 @@ window.dismissOfferReminder = function () {
           <div class="ck-section-title">💳 <strong style="margin-left:6px">Payment Method</strong></div>
           <div class="pay-methods">
             <div class="pay-method selected" onclick="selPayMethod(this)">
-              <span class="pm-icon">📱</span>
-              <div class="pm-info"><h4>UPI / Google Pay / PhonePe / BHIM</h4><p>Pay instantly via any UPI app</p></div>
-              <span class="pm-badge">Recommended</span>
+              <span class="pm-icon">🔒</span>
+              <div class="pm-info"><h4>Secure Online Payment</h4><p>UPI · GPay · PhonePe · BHIM · Cards · Net Banking · EMI — powered by GoKwik, processed server-side</p></div>
             </div>
             <div class="pay-method" onclick="selPayMethod(this)">
-              <span class="pm-icon">💳</span>
-              <div class="pm-info"><h4>Credit / Debit Card</h4><p>Visa, Mastercard, RuPay accepted</p></div>
-            </div>
-            <div class="pay-method" onclick="selPayMethod(this)">
-              <span class="pm-icon">🏦</span>
-              <div class="pm-info"><h4>Net Banking</h4><p>All major Indian banks supported</p></div>
-            </div>
-            
-            <div class="pay-method" onclick="selPayMethod(this)">
-              <span class="pm-icon">📊</span>
-              <div class="pm-info"><h4>EMI (No Cost available)</h4><p>0% EMI via GoKwik partner banks</p></div>
+              <span class="pm-icon">💵</span>
+              <div class="pm-info"><h4>Cash on Delivery (COD)</h4><p>Pay in cash when your parcel arrives — no extra charge</p></div>
             </div>
           </div>
           <div style="background:var(--green-wash);border-radius:9px;padding:10px 14px;margin-top:12px;font-size:.76rem;color:var(--gray);display:flex;align-items:center;gap:9px">
@@ -16115,9 +16106,9 @@ function renderCheckoutSummary() {
     ${tierOff > 0 ? `<div class="sum-row" style="color:var(--success)"><span>Pack / tier saving</span><span>-₹${tierOff.toLocaleString('en-IN')}</span></div>` : ''}
     ${mmOff > 0 ? `<div class="mm-line mm-unlocked">🎉 Mix &amp; Match bundle discount applied (−₹${mmOff.toLocaleString('en-IN')}) <small style="display:block;margin-top:3px">Any coupon is removed while this offer is active.</small></div>` : (mmUnits.length > 0 ? `<div class="mm-line">🎁 Add <strong>${mmNeed}</strong> more ${mmNeed === 1 ? 'item' : 'items'} — your Mix &amp; Match discount grows.</div>` : '')}
     ${disc > 0 ? `<div class="sum-row" style="color:var(--success)"><span>🏷️ Promo code ${activePromoCode?.code ? '('+activePromoCode.code+')' : ''}</span><span>-₹${disc.toLocaleString('en-IN')}</span></div>` : ''}
-    <div class="sum-row"><span>Shipping</span><span>${ship === 0 ? '<span style="color:var(--success);font-weight:700">FREE</span>' : '₹' + ship}</span></div>
-    <hr style="border:none;border-top:1px solid var(--light-gray);margin:8px 0">
     ${vitaOff > 0 ? `<div class="sum-row" style="color:var(--fern-lo)"><span>💎 VitaPoints (${_vita.applied.toLocaleString('en-IN')})</span><span>-₹${vitaOff.toFixed(2)}</span></div>` : ''}
+    <div class="sum-row"><span>Shipping</span><span>${ship === 0 ? '<span style="color:var(--success);font-weight:700">FREE</span>' : '₹' + ship}</span></div>
+    ${(() => { const totDisc = tierOff + mmOff + disc + vitaOff; return totDisc > 0 ? `<div class="sum-row"><span style="font-weight:700;color:var(--t-main)">Total savings</span><span style="font-weight:800;color:var(--success)">-₹${totDisc.toLocaleString('en-IN')}</span></div>` : ''; })()}
     <div class="sum-row total"><span>Total</span><span style="color:var(--green);font-size:1.1rem">₹${total.toLocaleString('en-IN',{maximumFractionDigits:2})}</span></div>
     ${vitaRedeemWidgetHTML(sub - mmOff - disc)}`;
 }
@@ -16763,6 +16754,20 @@ function validateCheckoutForm() {
 // ── MAIN ENTRY — called by "Pay Online" button ──
 function initiatePayment() {
   if (STORE.cart.length === 0) { showToast('🛒 Your cart is empty!', 'error'); return; }
+  // 2026-08: never open a payment session for a PIN Delhivery cannot serve —
+  // a courier failure discovered AFTER payment is India's #1 frustration.
+  // Only blocks when the pin has actually been checked and failed; an unchecked
+  // pin is tolerated (the server will re-check before creating the shipment).
+  const pinEl = document.getElementById('ckPinInput');
+  const clean = (pinEl?.value || '').replace(/\D/g, '');
+  if (clean.length === 6) {
+    const cached = window.__pinCache && window.__pinCache[clean];
+    if (cached && !cached.serviceable) {
+      showToast('⚠️ We cannot deliver to PIN ' + clean + '. Please change the delivery address first.', 'error');
+      pinEl.focus();
+      return;
+    }
+  }
   // LOGIN GATE: orders can only be placed by signed-in customers.
   if (!getCurrentUser()) { requireLoginForCheckout(function(){ initiatePayment(); }); return; }
   const formData = validateCheckoutForm();
@@ -16840,29 +16845,19 @@ function openPaymentGateway(orderId, total, sub, disc, ship, formData, btn, orig
           ${formData.addr1}, ${formData.city}, ${formData.state} – ${formData.pin}<br>
           <span style="color:var(--f-mineral-d)">✉ ${formData.email}</span>
         </div>
-        <!-- GoKwik Pay Button -->
+        <!-- Single Secure Pay Button (2026-08: removed the dual-gateway
+             selector — customers don't care which processor sits behind the
+             card; one confident button is faster and less confusing) -->
         <button class="cfPayBtn gk-pay-btn" onclick="startPayment('gokwik')"
-          style="width:100%;background:var(--face-warm);color:var(--st-danger-fg);box-shadow:inset 0 0 0 1.5px rgba(192,48,74,.34);border:none;border-radius:14px;padding:18px 20px;font-size:.95rem;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:14px;margin-bottom:14px;transition:opacity .15s">
+          style="width:100%;background:var(--face-warm);color:var(--st-danger-fg);box-shadow:inset 0 0 0 1.5px rgba(192,48,74,.34);border:none;border-radius:14px;padding:18px 20px;font-size:.95rem;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:14px;margin-bottom:10px;transition:opacity .15s">
           <span style="display:inline-flex;align-items:center;justify-content:center;width:42px;height:42px;background:rgba(255,255,255,0.18);border-radius:10px;flex-shrink:0">
             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
           </span>
           <div style="flex:1;text-align:left">
-            <div style="font-size:1rem;font-weight:800">Pay ₹${total.toLocaleString('en-IN')} via GoKwik</div>
-            <div style="font-size:.7rem;opacity:.85;margin-top:2px">UPI · Credit/Debit Card · Net Banking · EMI</div>
+            <div style="font-size:1rem;font-weight:800">Pay ₹${total.toLocaleString('en-IN')} Securely</div>
+            <div style="font-size:.7rem;opacity:.85;margin-top:2px">UPI · GPay · PhonePe · BHIM · Card · Net Banking · EMI</div>
           </div>
           <span style="background:rgba(255,255,255,.22);padding:4px 10px;border-radius:100px;font-size:.6rem;font-weight:800;letter-spacing:.5px">SECURE →</span>
-        </button>
-        <!-- Cashfree Pay Button -->
-        <button class="cfPayBtn cashfree-pay-btn" onclick="startPayment('cashfree')"
-          style="width:100%;background:#0B3558;color:#fff;border:none;border-radius:14px;padding:18px 20px;font-size:.95rem;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:14px;margin-bottom:14px;transition:opacity .15s">
-          <span style="display:inline-flex;align-items:center;justify-content:center;width:42px;height:42px;background:rgba(255,255,255,0.14);border-radius:10px;flex-shrink:0">
-            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20"/></svg>
-          </span>
-          <div style="flex:1;text-align:left">
-            <div style="font-size:1rem;font-weight:800">Pay ₹${total.toLocaleString('en-IN')} via Cashfree</div>
-            <div style="font-size:.7rem;opacity:.85;margin-top:2px">UPI · Cards · Net Banking · Wallets</div>
-          </div>
-          <span style="background:rgba(255,255,255,.18);padding:4px 10px;border-radius:100px;font-size:.6rem;font-weight:800;letter-spacing:.5px">SECURE →</span>
         </button>
         <!-- Trust Badges -->
         <div style="display:flex;align-items:center;justify-content:center;gap:14px;margin-bottom:14px;flex-wrap:wrap">
@@ -17116,6 +17111,21 @@ async function handleCashfreeReturn(orderId) {
 }
 async function initiateCOD() {
   if (STORE.cart.length === 0) { showToast('🛒 Your cart is empty!', 'error'); return; }
+  // 2026-08: PIN serviceability gate — see initiatePayment for the why.
+  const pinEl = document.getElementById('ckPinInput');
+  const clean = (pinEl?.value || '').replace(/\D/g, '');
+  if (clean.length === 6) {
+    const cached = window.__pinCache && window.__pinCache[clean];
+    if (cached && !cached.serviceable) {
+      showToast('⚠️ We cannot deliver to PIN ' + clean + '. Please change the delivery address first.', 'error');
+      pinEl.focus();
+      return;
+    }
+    if (cached && !cached.cod) {
+      showToast('⚠️ COD is not available for PIN ' + clean + ' — please pay online instead.', 'error');
+      return;
+    }
+  }
   // LOGIN GATE: orders can only be placed by signed-in customers.
   if (!getCurrentUser()) { requireLoginForCheckout(function(){ initiateCOD(); }); return; }
   const formData = validateCheckoutForm();
@@ -17617,6 +17627,15 @@ async function finalizeOrder(orderId, formData, total, method, codCharge) {
       total: total,
       coupon_code: (typeof activePromoCode !== 'undefined' && activePromoCode) ? activePromoCode.code : null,
       vita_points: _vitaPointsForOrder,
+      // 2026-08: the discount breakdown the customer saw at checkout travels
+      // with the order so the saved row, the invoice and My Account all show
+      // every discount by name and amount. The server recomputes its own
+      // authoritative numbers regardless — these are for display parity.
+      tier_discount: Number(disc || 0),
+      mix_match_discount: Number(mixDisc || 0),
+      coupon_discount: Number(promoDisc || 0),
+      vita_points_discount: Number(_vitaOffForOrder || 0),
+      vita_points_used: Number(_vitaPointsForOrder || 0),
       payment_status: method === 'cod' ? 'COD - Pending' : 'Paid',
       fulfillment: 'Pending',
       payment_method: method,
@@ -17730,7 +17749,17 @@ async function finalizeOrder(orderId, formData, total, method, codCharge) {
       email: formData.email, phone: formData.phone,
       address: `${formData.addr1}, ${formData.city}, ${formData.state} - ${formData.pin}`,
       state: formData.state,
-      items: srItems, ship, discount: (totalDisc || 0) + (promoDisc || 0),
+      items: srItems, ship,
+      // 2026-08: breakdown every discount separately — the invoice must list
+      // each saving (pack/tier, Mix&Match, promo code, VitaPoints) so the
+      // customer can reconcile My Orders, the invoice and the payment row.
+      // disc/mixDisc come from finalizeOrder's own totals computation.
+      tier_discount: Number(disc || 0),
+      mix_match_discount: Number(mixDisc || 0),
+      coupon_discount: Number(promoDisc || 0),
+      coupon_code: (typeof activePromoCode !== 'undefined' && activePromoCode && activePromoCode.code) || '',
+      vita_points_discount: (typeof VITA_APPLIED !== 'undefined' && Number(VITA_APPLIED) > 0) ? (typeof vitaCheckoutInfo === 'function' ? Number((vitaCheckoutInfo(sub - (promoDisc||0) - (mixDisc||0)) || {}).rupees || 0) : 0) : 0,
+      vita_points: (typeof VITA_APPLIED !== 'undefined' && Number(VITA_APPLIED) > 0) ? Number(VITA_APPLIED) : 0,
       total, method,
     });
     // Open it for the customer right away (the old generateInvoice()
@@ -17864,7 +17893,7 @@ async function sendOrderEmail({ orderId, formData, srItems, sub, totalDisc, prom
       <div style="background:var(--sub-1);border:1px solid var(--t-low);border-radius:8px;padding:14px 18px;margin-bottom:20px;font-size:13px">
         <div style="display:flex;justify-content:space-between;margin-bottom:4px"><strong>Order ID:</strong><span style="color:var(--f-mineral-d);font-weight:700">${orderId}</span></div>
         <div style="display:flex;justify-content:space-between;margin-bottom:4px"><strong>Date:</strong><span>${new Date().toLocaleDateString('en-IN',{day:'2-digit',month:'long',year:'numeric'})}</span></div>
-        <div style="display:flex;justify-content:space-between"><strong>Payment:</strong><span>${methodName} ✅ PAID</span></div>
+        <div style="display:flex;justify-content:space-between"><strong>Payment:</strong><span>${method === 'cod' ? '💵 Cash on Delivery (on delivery)' : methodName + ' ✅ PAID'}</span></div>
       </div>
 
       <h3 style="font-size:13px;text-transform:uppercase;letter-spacing:.5px;color:var(--t-low);margin-bottom:10px">Order Items</h3>
@@ -17880,8 +17909,11 @@ async function sendOrderEmail({ orderId, formData, srItems, sub, totalDisc, prom
 
       <div style="border-top:2px solid var(--f-mineral-d);padding-top:12px;font-size:13px">
         <div style="display:flex;justify-content:space-between;padding:4px 0;color:var(--t-mid)"><span>Subtotal</span><span>₹${sub.toLocaleString('en-IN')}</span></div>
-        ${totalDisc > 0 ? `<div style="display:flex;justify-content:space-between;padding:4px 0;color:var(--f-mineral-d);font-weight:700"><span>🏷️ Discount Saved</span><span>-₹${totalDisc.toLocaleString('en-IN')}</span></div>` : ''}
+        ${disc > 0 ? `<div style="display:flex;justify-content:space-between;padding:4px 0;color:var(--f-mineral-d)"><span>📦 Pack / Tier Saving</span><span>-₹${disc.toLocaleString('en-IN')}</span></div>` : ''}
+        ${mixDisc > 0 ? `<div style="display:flex;justify-content:space-between;padding:4px 0;color:var(--f-mineral-d)"><span>🎉 Mix &amp; Match Discount</span><span>-₹${mixDisc.toLocaleString('en-IN')}</span></div>` : ''}
+        ${promoDisc > 0 ? `<div style="display:flex;justify-content:space-between;padding:4px 0;color:var(--f-mineral-d);font-weight:700"><span>🏷️ Promo Code${(typeof activePromoCode !== 'undefined' && activePromoCode && activePromoCode.code) ? ' (' + activePromoCode.code + ')' : ''}</span><span>-₹${promoDisc.toLocaleString('en-IN')}</span></div>` : ''}
         <div style="display:flex;justify-content:space-between;padding:4px 0;color:var(--t-mid)"><span>Shipping</span><span>${ship === 0 ? '<span style="color:var(--f-mineral-d)">FREE</span>' : '₹' + ship}</span></div>
+        ${totalDisc > 0 ? `<div style="display:flex;justify-content:space-between;padding:6px 0 2px;color:var(--t-main);font-weight:700"><span>Total Savings</span><span>-₹${totalDisc.toLocaleString('en-IN')}</span></div>` : ''}
         <div style="display:flex;justify-content:space-between;padding:10px 0 4px;font-size:16px;font-weight:900;color:var(--f-mineral-d);border-top:1px solid var(--edge-hi);margin-top:6px"><span>Grand Total</span><span>₹${total.toLocaleString('en-IN')}</span></div>
       </div>
 
@@ -17935,6 +17967,16 @@ function generateInvoice({ orderId, formData, srItems, sub, disc, promoDisc, shi
   const now = new Date();
   const dateStr = now.toLocaleDateString('en-IN', { day:'2-digit', month:'long', year:'numeric' });
   const invNo = 'INV-' + orderId.replace('AVC-','').replace('DEMO-','D');
+
+  // 2026-08: VitaPoints redemption breakdown on the invoice — the frontend
+  // computed it for the order; mirror it on the invoice the customer prints.
+  let vitaInvDisc = 0, vitaInvPts = 0;
+  if (typeof VITA_APPLIED !== 'undefined' && VITA_APPLIED > 0) {
+    const _vi = (typeof vitaCheckoutInfo === 'function') ? vitaCheckoutInfo(sub - promoDisc - (mixMatchDiscount || 0)) : null;
+    vitaInvPts = Number(VITA_APPLIED || 0);
+    vitaInvDisc = Number((_vi && _vi.rupees) || 0);
+  }
+  const totalInvDisc = Number(disc || 0) + Number(mixMatchDiscount || 0) + Number(promoDisc || 0) + vitaInvDisc;
 
   // GST calculation: 5% GST (CGST 2.5% + SGST 2.5% for Gujarat, IGST 5% for other states)
   const isGujarat = (formData.state || '').toLowerCase().includes('gujarat');
@@ -18048,7 +18090,7 @@ function generateInvoice({ orderId, formData, srItems, sub, disc, promoDisc, shi
     </div>
     <div class="inv-meta-block">
       <strong>Payment</strong>
-      <span>${method === 'upi' ? 'UPI' : method === 'card' ? 'Card' : method === 'netbanking' ? 'Net Banking' : method === 'emi' ? 'EMI' : method === 'demo' ? '🧪 Demo' : method} <span class="inv-status" style="${method === 'demo' ? 'background:var(--seal)' : ''}">${method === 'demo' ? 'TEST MODE' : 'PAID'}</span></span>
+      <span>${method === 'cod' ? '💵 Cash on Delivery' : method === 'upi' ? 'UPI' : method === 'card' ? 'Card' : method === 'netbanking' ? 'Net Banking' : method === 'emi' ? 'EMI' : method === 'demo' ? '🧪 Demo' : '🔒 Online Payment'} <span class="inv-status" style="${method === 'demo' ? 'background:var(--seal)' : ''}">${method === 'demo' ? 'TEST MODE' : 'PAID'}</span></span>
     </div>
     ${srOrderId ? `<div class="inv-meta-block"><strong>Shiprocket ID</strong><span>${srOrderId}</span></div>` : ''}
   </div>
@@ -18088,9 +18130,12 @@ function generateInvoice({ orderId, formData, srItems, sub, disc, promoDisc, shi
         <tr><td colspan="7" style="padding:8px 12px;text-align:right;color:var(--t-mid)">Subtotal (incl. GST)</td><td colspan="2" style="padding:8px 12px;text-align:right;font-weight:700">₹${sub.toLocaleString('en-IN')}</td></tr>
         <tr><td colspan="7" style="padding:6px 12px;text-align:right;color:var(--t-mid)">Taxable Amount</td><td colspan="2" style="padding:6px 12px;text-align:right">₹${taxableBase.toLocaleString('en-IN')}</td></tr>
         ${gstRows}
-        ${disc > 0 ? `<tr><td colspan="7" style="padding:6px 12px;text-align:right;color:var(--f-mineral-d)">Product Discount</td><td colspan="2" style="padding:6px 12px;text-align:right;color:var(--f-mineral-d)">-₹${disc.toLocaleString('en-IN')}</td></tr>` : ''}
-        ${promoDisc > 0 ? `<tr><td colspan="7" style="padding:6px 12px;text-align:right;color:var(--f-mineral-d)">🏷️ Promo Discount</td><td colspan="2" style="padding:6px 12px;text-align:right;color:var(--f-mineral-d);font-weight:700">-₹${promoDisc.toLocaleString('en-IN')}</td></tr>` : ''}
+        ${disc > 0 ? `<tr><td colspan="7" style="padding:6px 12px;text-align:right;color:var(--f-mineral-d)">Pack / Tier Saving</td><td colspan="2" style="padding:6px 12px;text-align:right;color:var(--f-mineral-d)">-₹${disc.toLocaleString('en-IN')}</td></tr>` : ''}
+        ${mixMatchDiscount > 0 ? `<tr><td colspan="7" style="padding:6px 12px;text-align:right;color:var(--f-mineral-d)">🎉 Mix &amp; Match Discount</td><td colspan="2" style="padding:6px 12px;text-align:right;color:var(--f-mineral-d)">-₹${mixMatchDiscount.toLocaleString('en-IN')}</td></tr>` : ''}
+        ${promoDisc > 0 ? `<tr><td colspan="7" style="padding:6px 12px;text-align:right;color:var(--f-mineral-d)">🏷️ Promo Code${(typeof activePromoCode !== 'undefined' && activePromoCode && activePromoCode.code) ? ' (' + activePromoCode.code + ')' : ''}</td><td colspan="2" style="padding:6px 12px;text-align:right;color:var(--f-mineral-d);font-weight:700">-₹${promoDisc.toLocaleString('en-IN')}</td></tr>` : ''}
+        ${vitaInvDisc > 0 ? `<tr><td colspan="7" style="padding:6px 12px;text-align:right;color:var(--f-mineral-d)">💎 VitaPoints (${vitaInvPts.toLocaleString('en-IN')})</td><td colspan="2" style="padding:6px 12px;text-align:right;color:var(--f-mineral-d)">-₹${vitaInvDisc.toLocaleString('en-IN', { maximumFractionDigits: 2 })}</td></tr>` : ''}
         <tr><td colspan="7" style="padding:6px 12px;text-align:right;color:var(--t-mid)">Shipping</td><td colspan="2" style="padding:6px 12px;text-align:right">${ship <= 0 ? '<span style="color:var(--f-mineral-d)">FREE</span>' : '₹' + ship}</td></tr>
+        ${totalInvDisc > 0 ? `<tr><td colspan="7" style="padding:6px 12px;text-align:right;color:var(--t-main);font-weight:700">Total Savings</td><td colspan="2" style="padding:6px 12px;text-align:right;color:var(--f-mineral-d);font-weight:800">-₹${totalInvDisc.toLocaleString('en-IN', { maximumFractionDigits: 2 })}</td></tr>` : ''}
         <tr class="inv-grand"><td colspan="7" style="text-align:right">GRAND TOTAL</td><td colspan="2" style="text-align:right">₹${total.toLocaleString('en-IN')}</td></tr>
       </tbody>
     </table>
@@ -20032,6 +20077,20 @@ function _renderOrderCards(orders, container) {
       }
     }
     const payStatus = o.payment_status ? `<div style="font-size:.72rem;color:var(--gray,#888);margin-top:4px">${o.payment_status}</div>` : '';
+    // 2026-08: show WHICH payment method was used (COD vs Online) and every
+    // discount that applied, so My Orders matches the invoice and the
+    // VitaPoints ledger — same database row, same numbers.
+    const PAY_METHOD_LABEL = {
+      cod: '💵 COD', cashfree: '🔒 Online (Cashfree)', gokwik: '🔒 Online (GoKwik)',
+      online: '🔒 Online', UPI: '🔒 UPI',
+    };
+    const payMethod = o.payment_method ? `<div style="font-size:.72rem;font-weight:600;color:var(--t-mid,#444);margin-top:3px">${PAY_METHOD_LABEL[String(o.payment_method).toLowerCase()] || '🔒 ' + o.payment_method}</div>` : '';
+    const discBits = [];
+    if (Number(o.tier_discount || 0) > 0) discBits.push(`Pack/tier −₹${Number(o.tier_discount).toLocaleString('en-IN')}`);
+    if (Number(o.mix_match_discount || 0) > 0) discBits.push(`Mix&Match −₹${Number(o.mix_match_discount).toLocaleString('en-IN')}`);
+    if (Number(o.coupon_discount || 0) > 0) discBits.push(`Promo ${o.coupon_code ? '(' + o.coupon_code + ')' : ''} −₹${Number(o.coupon_discount).toLocaleString('en-IN')}`);
+    if (Number(o.vita_points_discount || 0) > 0) discBits.push(`VitaPoints −₹${Number(o.vita_points_discount).toLocaleString('en-IN')}`);
+    const discLine = discBits.length ? `<div style="font-size:.72rem;color:var(--success,#2E7D32);margin-top:3px">🏷️ ${discBits.join(' · ')}</div>` : '';
     // REVIEW COLLECTION: delivered orders get a direct "Write a Review"
     // button — this is where reviews come from in the real world. It opens
     // the product page straight onto the review form, so the customer is
@@ -20053,6 +20112,7 @@ function _renderOrderCards(orders, container) {
       </div>
       <div class="order-items">${items.map(i => `${i.name||i.item_name||''} × ${i.qty||i.units||1}`).join(', ') || 'Order confirmed'}</div>
       ${vitaLine}
+      ${payMethod}${discLine}
       <div class="order-footer">
         <div class="order-total">₹${parseFloat(total).toLocaleString('en-IN')}${payStatus}</div>
         <div style="display:flex;gap:8px">
@@ -20466,6 +20526,33 @@ function checkSavedAddressForCheckout() {
   } else {
     bar.style.display = 'none';
   }
+  // 2026-08: prefill the ENTIRE checkout form from the saved profile
+  // (name/email/phone/address/city/state/pin) — the backend now writes
+  // every order's contact details to the customer's profile row, so the
+  // first-order typing is the ONLY typing a customer ever does.
+  // Only fills EMPTY fields so a customer editing their own form is
+  // never overwritten mid-typing.
+  const hasContact = user && (user.name || user.email || user.phone);
+  if (user && hasContact) {
+    const inputs = document.querySelectorAll('#page-checkout .form-input');
+    if (inputs.length >= 9) {
+      const nameParts = (user.name || '').split(' ').filter(Boolean);
+      if (!inputs[0].value && nameParts[0]) inputs[0].value = nameParts[0];
+      if (!inputs[1].value && nameParts.length > 1) inputs[1].value = nameParts.slice(1).join(' ');
+      if (!inputs[2].value && user.email) inputs[2].value = user.email;
+      if (!inputs[3].value && user.phone) inputs[3].value = user.phone;
+      if (user.address) {
+        const a = user.address;
+        if (!inputs[4].value && a.addr1) inputs[4].value = a.addr1;
+        if (!inputs[5].value && a.addr2) inputs[5].value = a.addr2;
+        if (!inputs[6].value && a.city) inputs[6].value = a.city;
+        if (!inputs[7].value && a.state) inputs[7].value = a.state;
+        if (inputs[8] && !inputs[8].value && a.pin) inputs[8].value = a.pin;
+      }
+    }
+    // Trigger PIN serviceability check automatically if a pincode is filled.
+    if (inputs[8] && inputs[8].value) { try { checkPincode(inputs[8].value); } catch(e) {} }
+  }
 }
 
 function fillSavedAddress() {
@@ -20488,7 +20575,53 @@ function fillSavedAddress() {
     if (inputs[8]) inputs[8].value = a.pin || '';
   }
   const sab=document.getElementById('savedAddressBar'); if(sab) sab.style.display = 'none';
-  showToast('✅ Saved address filled in!');
+  // 2026-08: re-run the PIN serviceability check after filling — the badge
+  // now reflects the filled address, not the old one.
+  if (inputs[8] && inputs[8].value) { try { checkPincode(inputs[8].value); } catch(e) {} }
+  showToast('✅ Saved details filled in!');
+}
+
+// ── PIN SERVICEABILITY — checks Delhivery BEFORE the customer pays ────
+// The server endpoint is public (GET /api/delhivery/serviceability/:pin).
+// Result is cached per pin in memory; COD availability is shown too, so
+// a "not serviceable" PIN can never become a paid, unfulfillable order.
+var _pinCheckTimer = null;
+function checkPincode(pin) {
+  const badge = document.getElementById('pinStatus');
+  if (!badge) return;
+  const clean = (pin || '').replace(/\D/g, '');
+  if (clean.length < 6) { badge.style.display = 'none'; return; }
+  if (window.__pinCache && window.__pinCache[clean]) {
+    _showPinBadge(badge, window.__pinCache[clean]); return;
+  }
+  clearTimeout(_pinCheckTimer);
+  badge.style.display = 'block';
+  badge.style.color = 'var(--t-low)';
+  badge.textContent = '⏳ Checking delivery availability…';
+  _pinCheckTimer = setTimeout(async () => {
+    try {
+      const resp = await fetch(API_BASE + '/api/delhivery/serviceability/' + encodeURIComponent(clean));
+      const data = await resp.json();
+      const verdict = { pin: clean, serviceable: !!data.serviceable, cod: !!data.cod };
+      window.__pinCache = window.__pinCache || {};
+      window.__pinCache[clean] = verdict;
+      _showPinBadge(badge, verdict);
+    } catch(e) {
+      badge.style.color = 'var(--t-low)';
+      badge.textContent = 'Could not verify — proceed and we will confirm by WhatsApp.';
+    }
+  }, 400);
+}
+function _showPinBadge(badge, v) {
+  if (v.serviceable) {
+    badge.style.display = 'block';
+    badge.style.color = 'var(--success)';
+    badge.textContent = '✓ Deliverable to ' + v.pin + (v.cod ? ' · COD available' : ' · Prepaid only');
+  } else {
+    badge.style.display = 'block';
+    badge.style.color = 'var(--st-danger-fg)';
+    badge.textContent = '✕ Not deliverable to PIN ' + v.pin + ' — please check the number or choose a different address.';
+  }
 }
 
 // ── CONSOLIDATED showPage — handles ALL page-specific logic ──
