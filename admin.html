@@ -5146,7 +5146,7 @@ async function autReconNow() {
 <!-- ══════════════════════════════════════
      AUDIT / DEBUGGER
      Calls the standalone audit-system service (its own repo/Supabase/
-     Render) at auditdebuging.onrender.com, authenticated with this
+     Render) at YOUR_AUDIT_BACKEND.onrender.com, authenticated with this
      panel's own admin/owner JWT (the `authToken` variable declared
      earlier in this file) — no second login. Built entirely from this
      file's own components (.card, .kpi, .badge, .grid-4, .tab-bar,
@@ -14378,7 +14378,7 @@ document.addEventListener('DOMContentLoaded', function() {
      Render URL of the ASCOFIZZ-marketing-automation backend once deployed. -->
 <script>
   // ASCOFIZZ: marketing module is ASCOFIZZ-specific. Supply your own project if enabled:
-  window.MARKETING_SUPABASE_URL = "https://YOUR_MARKETING_SUPABASE_PROJECT.supabase.co";
+  window.MARKETING_SUPABASE_URL = "https://YOUR_SUPABASE_PROJECT.supabase.co";
   window.MARKETING_SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Ind5dnB1YWZ6aXJ3bHd3ZWlmemFvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODQyODU0NTUsImV4cCI6MjA5OTg2MTQ1NX0.JG_DIQJef2rshO7TYwrk1p0DqTLR3JUQeJbQHO8K8rg";
   /* Marketing calls now go through the main backend's /api/marketing/* proxy
      instead of straight to the marketing service.
@@ -14391,7 +14391,7 @@ document.addEventListener('DOMContentLoaded', function() {
      attaches the key server-side.
 
      The direct URL is kept below only for reference. */
-  window.MARKETING_DIRECT_URL  = "https://marketing-automation-rmcb.onrender.com";
+  window.MARKETING_DIRECT_URL  = "https://YOUR_MARKETING_BACKEND.onrender.com";
   window.MARKETING_BACKEND_URL = API + "/api/marketing";
 </script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
@@ -14933,7 +14933,7 @@ if (typeof _mktOrigShowPage === 'function') {
      components — no separate stylesheet.
      ══════════════════════════════════════ -->
 <script>
-const AUDIT_API_BASE = 'https://auditdebuging.onrender.com/api/audit';
+const AUDIT_API_BASE = 'https://YOUR_AUDIT_BACKEND.onrender.com/api/audit';
 let acCurrentRange = 7;
 let _acTrendChart = null;
 
@@ -15360,7 +15360,7 @@ if (typeof _auditOrigShowPage === 'function') {
   if (window.__unifiedPulse) return;
   window.__unifiedPulse = true;
 
-  var AUDIT_API_BASE = 'https://auditdebuging.onrender.com/api/audit';
+  var AUDIT_API_BASE = 'https://YOUR_AUDIT_BACKEND.onrender.com/api/audit';
   var _pulseCharts = {};
 
   function upMoney(n) {
