@@ -4899,13 +4899,7 @@ async function azStaffEditPerms(username, currentPerms, _unused){
         <label class="form-label">Google Client ID</label>
         <input type="text" class="form-control" value="6793142938-b9sl3d3lh2svjkmcnina8fsh31nut0bu.apps.googleusercontent.com" readonly style="opacity:0.6;font-size:0.73rem;font-family:var(--mono)">
       </div>
-      <div class="form-group" style="margin-bottom:14px">
-        <label class="form-label" style="margin-top:12px">GA4 Property ID <span style="color:var(--text3);font-weight:400">(for Admin Realtime API — numeric only, e.g. 123456789)</span></label>
-        <div style="display:flex;gap:8px">
-          <input type="text" class="form-control" id="ga4PropertyIdInput" placeholder="e.g. 123456789" style="font-family:var(--mono)" value="" oninput="localStorage.setItem('ga4_property_id',this.value)">
-          <button class="btn btn-secondary" onclick="testGA4Connection()">Test</button>
-        </div>
-        <div id="ga4TestResult" style="margin-top:8px;font-size:0.78rem;color:var(--text3)"></div>
+              <div id="ga4TestResult" style="margin-top:8px;font-size:0.78rem;color:var(--text3)"></div>
         <div style="background:var(--surface2);border-radius:8px;padding:12px;margin-top:10px;font-size:0.78rem;color:var(--text2);line-height:1.8">
           <strong>How to get your GA4 Property ID:</strong><br>
           1. Go to <a href="https://analytics.google.com" target="_blank" style="color:var(--green-text)">analytics.google.com</a><br>
@@ -7764,8 +7758,7 @@ function emDoExport() {
 
 // Format: "123456789" (numeric, NOT "G-XXXXXX")
 // Find it: GA4 → Admin → Property Settings → Property ID
-const GA4_PROPERTY_ID = localStorage.getItem('ga4_property_id') || '';
-const GA4_CLIENT_ID   = localStorage.getItem('ga4_client_id')   || '';  // OAuth client ID (optional)
+// OAuth client ID (optional)
 
 async function updateLiveVisitors() {
   const ts = new Date().toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit',second:'2-digit'});
@@ -7871,7 +7864,7 @@ async function updateLiveVisitors() {
         <strong style="color:var(--red)">⚠️ No real visitor data available</strong><br>
         <strong>Option A (Already set up):</strong> Your frontend pings <code>/api/visitors/ping</code> every 4 mins.
         Make sure your Render backend has the <code>GET /api/visitors/active</code> route deployed.<br>
-        <strong>Option B (Google Analytics):</strong> Add your GA4 Property ID in Settings → Integrations → GA4 Property ID<br>
+        <strong>Option B:</strong> Add your GA4 Property ID in Settings → Integrations → GA4 Property ID<br>
         <span style="font-size:0.75rem;color:var(--text3);">GA4 Property ID is the number shown in GA4 → Admin → Property Settings (e.g. 123456789, NOT G-XXXXXX)</span>
       </div>`;
     }
@@ -12450,19 +12443,7 @@ const INTEGRATIONS = [
       'Copy Client ID to frontend & backend env'
     ]
   },
-  {
-    id: 'ga4', name: 'Google Analytics 4', icon: '📊', category: 'Analytics',
-    desc: 'Customer behaviour, conversion & traffic tracking',
-    docsUrl: 'https://analytics.google.com',
-    envVars: [],
-    checkUrl: null,
-    checkAuth: false,
-    setupSteps: [
-      'Go to analytics.google.com to view reports',
-      'Set up Goals for Add to Cart & Checkout events',
-      'Enable Enhanced Ecommerce in GA4 settings'
-    ]
-  },
+  
   {
     id: 'instagram', name: 'Instagram Feed', icon: '📸', category: 'Social',
     desc: 'Live Instagram posts shown on website homepage',
