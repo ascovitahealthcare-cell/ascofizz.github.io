@@ -7743,10 +7743,8 @@ function emDoExport() {
 // Sources:
 //   1. Your Render backend /api/visitors/active
 //      (fed by ping calls from index.html)
-//   2. GA4 Realtime API (if GA_PROPERTY_ID set)
 // ═══════════════════════════════════════════════
 
-// Format: "123456789" (numeric, NOT "G-XXXXXX")
 // Find it: GA4 → Admin → Property Settings → Property ID
 // OAuth client ID (optional)
 
@@ -7856,8 +7854,6 @@ async function updateLiveVisitors() {
   }
 }
 
-// (GA4 removed) in Settings
-// Uses GA4 Data API — no OAuth needed for basic realtime counts
 // 
 
     if (d.screenPageViews !== undefined) {
