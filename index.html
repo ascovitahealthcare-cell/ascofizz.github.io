@@ -17034,7 +17034,7 @@ const _GOOGLE_MAX_RETRIES = 8;
   // spinner was then appended AFTER removal, leaving a frozen full-screen
   // overlay that blocked the page forever. Append synchronously instead;
   // this IIFE runs in <head>
-   so documentElement already exists.
+   // so documentElement already exists.
   document.documentElement.appendChild(spinner);
 
   // Send code to backend — server holds client_secret securely.
