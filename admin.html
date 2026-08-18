@@ -4900,8 +4900,6 @@ async function azStaffEditPerms(username, currentPerms, _unused){
         <input type="text" class="form-control" value="6793142938-b9sl3d3lh2svjkmcnina8fsh31nut0bu.apps.googleusercontent.com" readonly style="opacity:0.6;font-size:0.73rem;font-family:var(--mono)">
       </div>
       <div class="form-group" style="margin-bottom:14px">
-        <label class="form-label">GA4 Measurement ID (Optional)</label>
-        <input type="text" class="form-control" id="cfg-ga4id" placeholder="G-XXXXXXXXXX" style="font-family:var(--mono)">
         <label class="form-label" style="margin-top:12px">GA4 Property ID <span style="color:var(--text3);font-weight:400">(for Admin Realtime API — numeric only, e.g. 123456789)</span></label>
         <div style="display:flex;gap:8px">
           <input type="text" class="form-control" id="ga4PropertyIdInput" placeholder="e.g. 123456789" style="font-family:var(--mono)" value="" oninput="localStorage.setItem('ga4_property_id',this.value)">
@@ -12472,11 +12470,10 @@ const INTEGRATIONS = [
     id: 'ga4', name: 'Google Analytics 4', icon: '📊', category: 'Analytics',
     desc: 'Customer behaviour, conversion & traffic tracking',
     docsUrl: 'https://analytics.google.com',
-    envVars: ['GA4 Measurement ID (configurable)'],
+    envVars: [],
     checkUrl: null,
     checkAuth: false,
     setupSteps: [
-      'Enter a GA4 Measurement ID in the Config section if you wish to enable tracking (disabled by default)',
       'Go to analytics.google.com to view reports',
       'Set up Goals for Add to Cart & Checkout events',
       'Enable Enhanced Ecommerce in GA4 settings'
