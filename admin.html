@@ -7762,7 +7762,6 @@ function emDoExport() {
 //   2. GA4 Realtime API (if GA_PROPERTY_ID set)
 // ═══════════════════════════════════════════════
 
-// GA4 Property ID — set in Settings or hardcode here
 // Format: "123456789" (numeric, NOT "G-XXXXXX")
 // Find it: GA4 → Admin → Property Settings → Property ID
 const GA4_PROPERTY_ID = localStorage.getItem('ga4_property_id') || '';
@@ -7885,22 +7884,7 @@ async function updateLiveVisitors() {
 // Requires: GA4_PROPERTY_ID set in Settings
 // Uses GA4 Data API — no OAuth needed for basic realtime counts
 // (Uses the public Measurement Protocol endpoint + your G-XXXXXX tag)
-async function _fetchGA4Realtime() {
-  // GA4 Data API requires a server-side service account for full data
-  // For client-side: use Measurement Protocol to get active users
-  // Best approach: fetch via your Render backend which has the service account key
-  try {
-    const r = await fetch(`${API}/api/analytics/realtime`, {
-      headers: { 'Authorization': `Bearer ${authToken}` },
-      signal: AbortSignal.timeout(8000)
-    });
-    if (!r.ok) return;
-    const d = await r.json();
-    if (d.activeUsers !== undefined) {
-      _setLv('liveCount', d.activeUsers);
-      _setLv('lvActive',  d.activeUsers);
-      _lvStreamAdd(`📊 GA4: ${d.activeUsers} active users`);
-    }
+
     if (d.screenPageViews !== undefined) {
       _setLv('lvViews', Number(d.screenPageViews).toLocaleString('en-IN'));
     }
