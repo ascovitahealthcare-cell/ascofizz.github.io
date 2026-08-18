@@ -9823,7 +9823,7 @@ function mergeBackendProducts(backendProducts) {
 // STRUCTURED DATA — kept honest against live data
 //
 // The catalogue JSON-LD in <head>
-   is written by hand and shipped static,
+   // is written by hand and shipped static,
 // so it can only ever describe the build, not the shop. Every one of its
 // 16 offers said availability: OutOfStock, because the static PRODUCTS
 // array carries stock: 0 and real stock arrives from the backend a moment
@@ -10054,7 +10054,7 @@ function syncProductStructuredData() {
 }
 
 // A single-page app serves the same <head>
-   for every URL, so /product/<slug>
+   // for every URL, so /product/<slug>
 // had no Product markup of its own — only the catalogue list, which
 // describes 16 products at once and matches none of them. This writes a
 // page-scoped Product block whenever a product opens, and clears it on the
