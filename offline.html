@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ascofizz — You're Offline</title>
+  <link rel="icon" type="image/svg+xml" href="/assets/favicon.svg">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,300..800&family=Schibsted+Grotesk:wght@400..800&display=swap">
+  <style>
+    /* Effervescent Bloom — standalone page, same water as the storefront. */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Schibsted Grotesk', system-ui, sans-serif;
+      background: #02141A;
+      color: #A8C8C7;
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      min-height: 100dvh; padding: 28px; text-align: center;
+      -webkit-font-smoothing: antialiased;
+    }
+    body::before {
+      content: ''; position: fixed; inset: 0; z-index: -2; pointer-events: none;
+      background:
+        radial-gradient(120% 62% at 50% -14%, rgba(120,255,238,.20), transparent 62%),
+        linear-gradient(180deg, #0E5A5E 0%, #0A4247 12%, #072E36 38%, #041D24 70%, #02141A 100%);
+    }
+    body::after {
+      content: ''; position: fixed; inset: 0; z-index: -1; pointer-events: none; opacity: .4;
+      mix-blend-mode: overlay;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.8' numOctaves='3'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)' opacity='.34'/%3E%3C/svg%3E");
+    }
+    .bubble {
+      position: fixed; bottom: -30px; border-radius: 50%; pointer-events: none; z-index: -1;
+      background: radial-gradient(circle at 34% 28%, rgba(255,255,255,.5), rgba(180,250,242,.12) 42%, transparent 70%);
+      box-shadow: inset 0 0 6px rgba(255,255,255,.22), 0 0 12px rgba(120,240,225,.16);
+      animation: rise linear infinite;
+    }
+    @keyframes rise {
+      0%   { transform: translate3d(0,0,0) scale(.5); opacity: 0 }
+      12%  { opacity: .8 }
+      100% { transform: translate3d(24px,-108vh,0) scale(1.2); opacity: 0 }
+    }
+    .mark { width: 62px; height: 62px; margin-bottom: 22px; }
+    .wrap { max-width: 520px; position: relative; z-index: 1; }
+    h1 {
+      font-family: 'Bricolage Grotesque','Arial Narrow',sans-serif;
+      color: #F4FEFB; letter-spacing: -.045em; line-height: 1; font-weight: 800;
+    }
+    h2 {
+      font-family: 'Bricolage Grotesque','Arial Narrow',sans-serif;
+      font-size: 1.35rem; font-weight: 700; letter-spacing: -.035em;
+      color: #F4FEFB; margin-bottom: 12px;
+    }
+    p { font-size: .94rem; line-height: 1.66; color: #789C9E; margin: 0 auto 30px; max-width: 42ch; }
+    .btn {
+      display: inline-flex; align-items: center; justify-content: center; gap: 9px;
+      padding: 15px 30px; border-radius: 999px; border: none; cursor: pointer;
+      font-family: inherit; font-size: .92rem; font-weight: 800; color: #032A25; text-decoration: none;
+      background: linear-gradient(178deg, #4CF5DA, #17E0C0 45%, #0FA189);
+      box-shadow: 0 6px 20px rgba(23,224,192,.28), inset 0 1px 0 rgba(255,255,255,.4);
+      transition: transform .32s cubic-bezier(.34,1.48,.5,1), filter .32s ease;
+    }
+    .btn:hover { transform: translateY(-3px); filter: brightness(1.06); }
+    .btn.alt {
+      color: #04231F;
+      background: linear-gradient(168deg, #5AE9A0, #159E62);
+      box-shadow: 0 6px 20px rgba(21,158,98,.3), inset 0 1px 0 rgba(255,255,255,.35);
+    }
+    .links { margin-top: 26px; display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; }
+    .links a {
+      padding: 9px 18px; border-radius: 999px; text-decoration: none;
+      font-size: .82rem; font-weight: 700; color: #A8C8C7;
+      background: rgba(255,255,255,.055); border: 1px solid rgba(163,208,206,.16);
+      transition: background .2s ease, color .2s ease, transform .2s ease;
+    }
+    .links a:hover { background: rgba(23,224,192,.18); color: #F4FEFB; transform: translateY(-2px); }
+    @media (prefers-reduced-motion: reduce) { .bubble { display: none } * { animation: none !important } }
+  </style>
+  <script>
+    addEventListener('DOMContentLoaded', function () {
+      if (matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+      for (var i = 0; i < 10; i++) {
+        var b = document.createElement('div');
+        b.className = 'bubble';
+        var s = 4 + Math.random() * 10;
+        b.style.cssText = 'width:' + s + 'px;height:' + s + 'px;left:' + (Math.random() * 100) +
+          '%;animation-duration:' + (13 + Math.random() * 16) + 's;animation-delay:' + (Math.random() * 9) + 's';
+        document.body.appendChild(b);
+      }
+    });
+  </script>
+</head>
+<body>
+  <div class="wrap">
+    <img class="mark" style="margin:0 auto 22px" src="/assets/ascofizz-mark.svg" alt="Ascofizz">
+    <h1 style="font-size:clamp(1.9rem,5vw,2.6rem);margin-bottom:12px">You are offline</h1>
+    <p>We cannot reach the network right now. Check your Wi-Fi or mobile data,
+       then try again. Anything already in your cart is saved on this device.</p>
+    <a class="btn" href="/" onclick="window.location.reload()">Try again</a>
+    <div class="links" style="margin-top:18px">
+      <a class="btn alt" href="https://wa.me/919898582650">WhatsApp support</a>
+    </div>
+  </div>
+</body>
+</html>

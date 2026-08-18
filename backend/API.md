@@ -1,4 +1,4 @@
-# Ozylix Backend API — quick reference
+# Ascofizz Backend API — quick reference
 
 This is the single source of truth for the admin API surface. The
 machine-readable version lives in `route-docs.js` and is served live
@@ -11,7 +11,7 @@ can never drift apart again.
 Node.js 18+ · Express · Supabase (PostgreSQL) · deployed on Render.
 The storefront (`ascovitahealthcare-cell.github.io`) is a static
 site that consumes this API; the admin panel (`admin.html`) is the
-same repo under `back.ozylix.com`.
+same repo under `the admin hostname`.
 
 | Layer | What |
 |---|---|

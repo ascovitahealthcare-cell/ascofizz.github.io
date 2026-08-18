@@ -226,7 +226,7 @@ const _GOOGLE_MAX_RETRIES = 8;
   document.addEventListener('DOMContentLoaded', function() { document.body.appendChild(spinner); });
 
   // Send code to backend — server holds client_secret securely
-  fetch('https://ascovitahealthcare-cell-github-io.onrender.com/api/auth/google-code', {
+  fetch(((window.ASCOFIZZ_CONFIG && ASCOFIZZ_CONFIG.api && ASCOFIZZ_CONFIG.api.base) || '') + '/api/auth/google-code', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ code: code, redirect_uri: 'https://www.ascovita.com' })

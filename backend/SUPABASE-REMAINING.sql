@@ -1,5 +1,5 @@
 -- ═══════════════════════════════════════════════════════════════════
---  OZYLIX — THE ONLY MIGRATION LEFT TO RUN
+--  ASCOFIZZ — THE ONLY MIGRATION LEFT TO RUN
 --
 --  Paste this whole file into Supabase → SQL Editor → New query → Run.
 --  It is small, it is safe to run more than once, and it is the last
@@ -39,7 +39,7 @@
 --       ledger's unique idempotency_key.
 --
 --  After running, check on your phone (no login needed):
---    https://ascovitahealthcare-cell-github-io.onrender.com/api/health/db
+--    <your-api-url>/api/health/db
 --    {"ok":true} means every object the code needs is present.
 --
 --  005_rls_lockdown.sql is SEPARATE and still outstanding — that is the

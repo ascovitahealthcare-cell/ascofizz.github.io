@@ -610,7 +610,7 @@ async function sendOrderEmail({ orderId, formData, srItems, sub, totalDisc, prom
       ${method !== 'demo' ? `<a href="${trackUrl}" style="display:block;background:#2D5016;color:white;text-align:center;padding:13px;border-radius:100px;font-weight:700;text-decoration:none;font-size:14px;margin:16px 0">📦 Track Your Order on Shiprocket</a>` : ''}
 
       <p style="font-size:12px;color:#999;text-align:center;margin-top:20px">
-        For queries: <a href="mailto:ascovitahealthcare@gmail.com" style="color:#2D5016">ascovitahealthcare@gmail.com</a> | +91 98985 82650<br>
+        For queries: <a href="mailto:support@ascofizz.com" style="color:#2D5016">support@ascofizz.com</a> | +91 98985 82650<br>
         Ascovita Healthcare · Near Rajshivalay Cinema, Anand – 388001, Gujarat
       </p>
     </div>
@@ -633,7 +633,7 @@ async function sendOrderEmail({ orderId, formData, srItems, sub, totalDisc, prom
     order_date:    new Date().toLocaleDateString('en-IN', {day:'2-digit', month:'long', year:'numeric'}),
     items_text:    itemsText,
     email_body:    emailHtml,
-    company_email: 'ascovitahealthcare@gmail.com',
+    company_email: 'support@ascofizz.com',
     phone:         formData.phone,
     address:       `${formData.addr1}, ${formData.city}, ${formData.state} - ${formData.pin}`,
     tracking_url:  trackUrl,
@@ -741,7 +741,7 @@ function generateInvoice({ orderId, formData, srItems, sub, disc, promoDisc, shi
       Amin Auto Road, Near Rajshivalay Cinema<br>
       Anand – 388001, Gujarat, India<br>
       📞 +91 98985 82650<br>
-      ✉ ascovitahealthcare@gmail.com<br>
+      ✉ support@ascofizz.com<br>
       🌐 ascovita.in
     </div>
   </div>
@@ -816,7 +816,7 @@ function generateInvoice({ orderId, formData, srItems, sub, disc, promoDisc, shi
     • All prices are inclusive of 5% GST &nbsp;|&nbsp; HSN Code: 30049099 (Nutraceuticals)<br>
     • Returns accepted within 7 days for sealed/unused products<br>
     • This is a computer-generated invoice and does not require a physical signature<br>
-    • For queries: ascovitahealthcare@gmail.com &nbsp;|&nbsp; +91 98985 82650
+    • For queries: support@ascofizz.com &nbsp;|&nbsp; +91 98985 82650
   </div>
 
   <!-- FOOTER -->

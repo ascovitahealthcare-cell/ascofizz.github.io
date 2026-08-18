@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64" role="img" aria-label="Ascofizz">
+  <defs>
+    <linearGradient id="f-moss" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#3F6B57"/><stop offset="1" stop-color="#2F5545"/>
+    </linearGradient>
+    <linearGradient id="f-fizz" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#8FE0CA"/><stop offset="1" stop-color="#6FD2B8"/>
+    </linearGradient>
+  </defs>
+  <rect width="64" height="64" rx="14" fill="url(#f-moss)"/>
+  <circle cx="32" cy="40" r="16" fill="none" stroke="#fff" stroke-width="5"/>
+  <path d="M21 40a11 11 0 0 1 22 0" fill="none" stroke="url(#f-fizz)" stroke-width="5" stroke-linecap="round"/>
+  <circle cx="23" cy="17" r="5" fill="url(#f-fizz)"/>
+  <circle cx="37" cy="12" r="3.4" fill="url(#f-fizz)" opacity=".85"/>
+</svg>

@@ -13,7 +13,7 @@ have nothing to talk to.
 Supabase, press Run.**
 
 1. Open [supabase.com](https://supabase.com) and sign in.
-2. Pick the **ozylix** project.
+2. Pick your Supabase project.
 3. Left sidebar → **SQL Editor** → **New query**.
 4. Paste the whole file. Press **Run**.
 
@@ -31,7 +31,7 @@ should guess at.
 **Step 2 — check it worked.** Open this on your phone, no login needed:
 
 ```
-https://ascovitahealthcare-cell-github-io.onrender.com/api/health/db
+<your-api-url>/api/health/db
 ```
 
 `{"ok":true, ...}` means everything the code needs is present.

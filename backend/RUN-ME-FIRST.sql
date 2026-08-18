@@ -1,11 +1,11 @@
 -- ═══════════════════════════════════════════════════════════════════
---  OZYLIX — RUN THIS ONE FILE
+--  ASCOFIZZ — RUN THIS ONE FILE
 --
 --  Everything the running code needs and the database does not have.
 --  Five migrations in dependency order, in a single paste.
 --
 --  HOW
---    1. supabase.com  →  the ozylix project
+--    1. supabase.com  →  your Supabase project
 --    2. SQL Editor  →  New query
 --    3. Paste ALL of this  →  Run
 --
@@ -29,7 +29,7 @@
 --  guess at.
 --
 --  THEN check it worked, on your phone, no login needed:
---    https://ascovitahealthcare-cell-github-io.onrender.com/api/health/db
+--    <your-api-url>/api/health/db
 --  {"ok":true} means everything the code needs is now present.
 --
 --  005_rls_lockdown.sql is deliberately NOT in here. That one is

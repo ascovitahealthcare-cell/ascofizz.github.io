@@ -39,7 +39,9 @@ function fetchWithTimeout(url, options, ms) {
 // BACKEND CONNECTION — Supabase via Render API
 // Admin changes (products, stock, coupons) reflect here live
 // ══════════════════════════════════════════════════════════════
-const API_BASE = 'https://ascovitahealthcare-cell-github-io.onrender.com';
+// Resolved from assets/js/ascofizz.config.js. The previous operator's
+// Render hostname used to be hard-coded here.
+const API_BASE = (window.ASCOFIZZ_CONFIG && ASCOFIZZ_CONFIG.api && ASCOFIZZ_CONFIG.api.base) || '';
 
 // Merge backend product data over static product array — ALL fields synced
 function mergeBackendProducts(backendProducts) {

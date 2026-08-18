@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64" role="img" aria-label="Ascofizz">
+  <defs>
+    <linearGradient id="m-moss" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#3F6B57"/>
+      <stop offset="1" stop-color="#2F5545"/>
+    </linearGradient>
+    <linearGradient id="m-fizz" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#8FE0CA"/>
+      <stop offset="1" stop-color="#6FD2B8"/>
+    </linearGradient>
+  </defs>
+  <!-- The mark: an effervescent tablet with bubbles rising off it. -->
+  <rect x="0" y="0" width="64" height="64" rx="18" fill="url(#m-moss)"/>
+  <circle cx="32" cy="41" r="15" fill="none" stroke="#fff" stroke-width="3.6" opacity=".95"/>
+  <path d="M21.5 41a10.5 10.5 0 0 1 21 0" fill="none" stroke="url(#m-fizz)" stroke-width="3.6" stroke-linecap="round"/>
+  <circle cx="23" cy="19.5" r="4.4" fill="url(#m-fizz)"/>
+  <circle cx="35.5" cy="14"  r="3.1" fill="url(#m-fizz)" opacity=".8"/>
+  <circle cx="44"  cy="20.5" r="2.2" fill="url(#m-fizz)" opacity=".62"/>
+</svg>

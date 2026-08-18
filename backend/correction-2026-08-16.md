@@ -1,7 +1,7 @@
 # 2026-08-16 — VitaPoints lifetime counter correction run
 
 Migration `migrations/016_fix_vita_lifetime_on_reverse.sql` was applied to the live
-Supabase database (`frwsjgrrtzhjfflcdjjs`), followed by a one-off reconciliation of
+Supabase database, followed by a one-off reconciliation of
 the `lifetime_earned` column against the actual ledger.
 
 ## Function fix
