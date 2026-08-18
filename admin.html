@@ -7852,14 +7852,13 @@ async function updateLiveVisitors() {
       </div>`;
     }
     const tbody = document.getElementById('liveSessionsTbody');
-    if (tbody) tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;padding:32px;"><div style="color:var(--text3);font-size:0.82rem;">Connect your analytics source in Settings to see real visitor data</div></td></tr>';
+    if (tbody) tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;padding:32px;"><div style="color:var(--text3);font-size:0.82rem;">Connect your backend in Settings to see real visitor data</div></td></tr>';
   }
 }
 
-// GA4 Realtime API via Google Analytics Data API v1
-// Requires: GA4_PROPERTY_ID set in Settings
+// (GA4 removed) in Settings
 // Uses GA4 Data API — no OAuth needed for basic realtime counts
-// (Uses the public Measurement Protocol endpoint + your G-XXXXXX tag)
+// 
 
     if (d.screenPageViews !== undefined) {
       _setLv('lvViews', Number(d.screenPageViews).toLocaleString('en-IN'));
