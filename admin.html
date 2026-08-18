@@ -4898,9 +4898,7 @@ async function azStaffEditPerms(username, currentPerms, _unused){
       <div class="form-group" style="margin-bottom:14px">
         <label class="form-label">Google Client ID</label>
         <input type="text" class="form-control" value="6793142938-b9sl3d3lh2svjkmcnina8fsh31nut0bu.apps.googleusercontent.com" readonly style="opacity:0.6;font-size:0.73rem;font-family:var(--mono)">
-      </div>
-              <div id="ga4TestResult" style="margin-top:8px;font-size:0.78rem;color:var(--text3)"></div>
-        <div style="background:var(--surface2);border-radius:8px;padding:12px;margin-top:10px;font-size:0.78rem;color:var(--text2);line-height:1.8">
+      </div> <div style="background:var(--surface2);border-radius:8px;padding:12px;margin-top:10px;font-size:0.78rem;color:var(--text2);line-height:1.8">
           <strong>How to get your GA4 Property ID:</strong><br>
           1. Go to <a href="https://analytics.google.com" target="_blank" style="color:var(--green-text)">analytics.google.com</a><br>
           2. Admin → Property Settings<br>
@@ -7851,7 +7849,7 @@ async function updateLiveVisitors() {
   }
 
   // ── If both fail — show clear error, no fake data ──
-  if (!backendOk && !GA4_PROPERTY_ID) {
+  if (!backendOk) {
     _setLv('liveCount', '–');
     _setLv('lvActive',  '–');
     _setLv('lvViews',   '–');
@@ -7864,7 +7862,7 @@ async function updateLiveVisitors() {
         <strong style="color:var(--red)">⚠️ No real visitor data available</strong><br>
         <strong>Option A (Already set up):</strong> Your frontend pings <code>/api/visitors/ping</code> every 4 mins.
         Make sure your Render backend has the <code>GET /api/visitors/active</code> route deployed.<br>
-        <strong>Option B:</strong> Add your GA4 Property ID in Settings → Integrations → GA4 Property ID<br>
+        
         <span style="font-size:0.75rem;color:var(--text3);">GA4 Property ID is the number shown in GA4 → Admin → Property Settings (e.g. 123456789, NOT G-XXXXXX)</span>
       </div>`;
     }
@@ -7890,13 +7888,13 @@ async function updateLiveVisitors() {
           <td>${esc(s.device||'–')}</td>
           <td>–</td>
           <td>${esc(s.source||'organic')}</td>
-          <td><span class="badge badge-blue">GA4</span></td>
+          
         </tr>`).join('');
       }
     }
     const notice = document.getElementById('lvNotice');
     if (notice) notice.style.display = 'none';
-    _setLv('lvRefreshTime', new Date().toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit',second:'2-digit'}) + ' (GA4)');
+    _setLv('lvRefreshTime', new Date().toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit',second:'2-digit'}) + '');
   } catch(e) {
     throw e;
   }
@@ -14121,46 +14119,7 @@ async function geminiSend() {
 }
 </script>
 
-<script>
-// ═══════════════════════════════════════════════
-// GA4 Settings helpers
-// ═══════════════════════════════════════════════
-function testGA4Connection() {
-  var pidEl = document.getElementById("ga4PropertyIdInput");
-  var pid = pidEl ? pidEl.value.trim() : "";
-  var res = document.getElementById("ga4TestResult");
-  function setRes(text, color) { if (res) { res.textContent = text; res.style.color = color || 'var(--text3)'; } }
-  if (!pid) { setRes("Enter a Property ID first (numbers only, e.g. 381234567)", "var(--red)"); return; }
-  var allDigits = true;
-  for (var i = 0; i < pid.length; i++) { var c = pid.charCodeAt(i); if (c < 48 || c > 57) { allDigits = false; break; } }
-  if (!allDigits) { setRes("Property ID must be numbers only (e.g. 381234567) — NOT G-XXXXXX", "var(--red)"); return; }
-  localStorage.setItem("ga4_property_id", pid);
-  setRes("Testing connection via backend...", "var(--gold-text)");
-  fetch(API + "/api/analytics/realtime", {
-    headers: { "Authorization": "Bearer " + authToken },
-    signal: AbortSignal.timeout(8000)
-  })
-  .then(function(r) { return r.json(); })
-  .then(function(d) {
-    if (d.activeUsers !== undefined) {
-      setRes("Connected! " + d.activeUsers + " active users right now via GA4", "var(--green-text)");
-    } else if (d.error) {
-      setRes("Error: " + d.error, "var(--red)");
-    } else {
-      setRes("Connected but no data yet. Add GA4_PROPERTY_ID to Render env vars.", "var(--gold-text)");
-    }
-  })
-  .catch(function() {
-    setRes("Backend route not found. Make sure you deployed the latest server.js.", "var(--red)");
-  });
-}
 
-document.addEventListener("DOMContentLoaded", function() {
-  var saved = localStorage.getItem("ga4_property_id");
-  var inp = document.getElementById("ga4PropertyIdInput");
-  if (saved && inp) inp.value = saved;
-});
-</script>
 
 <script>
 /* ══════════════════════════════════════════════════════════════
