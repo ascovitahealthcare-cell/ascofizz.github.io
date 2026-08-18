@@ -1,5 +1,5 @@
 /**
- * Ozylix — routing shim for Cloudflare Workers static assets.
+ * ASCOFIZZ — routing shim for Cloudflare Workers static assets.
  *
  * The storefront is one index.html single-page app. Cloudflare serves any real
  * file straight from the edge WITHOUT invoking this Worker, so this code only
@@ -56,10 +56,10 @@ function isSpaPath(pathname) {
 }
 
 // The admin panel has its own hostname. Without this it is simply another
-// Custom Domain on the same Worker, so back.ozylix.com would serve a second
+// Custom Domain on the same Worker, so back.ascofizz.com would serve a second
 // complete copy of the storefront — duplicate content for Google, under a name
 // that is meant to be private.
-const ADMIN_HOST = 'back.ozylix.com';
+const ADMIN_HOST = 'back.ascofizz.com';
 const ADMIN_ENTRY = new Set(['/', '/admin', '/admin.html']);
 
 // Never let the admin hostname into a search index, whatever it serves.

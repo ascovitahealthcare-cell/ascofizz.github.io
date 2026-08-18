@@ -1,5 +1,5 @@
 /* ═══════════════════════════════════════════════════════════════════
-   Ozylix — "Fly to Cart" add-to-cart animation (v2)
+   ASCOFIZZ — "Fly to Cart" add-to-cart animation (v2)
 
    Inspired by the animated add-to-cart pattern: a mini product
    thumbnail flies along a smooth arc from the tapped card to the cart
@@ -7,9 +7,9 @@
    "✓ Added", and a mobile floating "View cart" pill rises up — then
    the side cart is opened so the customer can proceed.
 
-   Adapted to the Ozylix design language:
+   Adapted to the ASCOFIZZ design language:
      • parchment paper background (--paper #FBF3E8)
-     • Ozylix crimson accents (--indigo #C0394A, --indigo-hi #D7535D)
+     • ASCOFIZZ crimson accents (--indigo #C0394A, --indigo-hi #3F6B57)
      • the existing fz-bump spring on badges
 
    Targets (in priority order):
@@ -35,7 +35,7 @@
   background-size: cover; background-position: center;
   background-color: var(--paper, #FBF3E8);
   box-shadow: 0 12px 28px -8px rgba(192, 57, 74, .38);
-  border: 2px solid var(--indigo-hi, #D7535D);
+  border: 2px solid var(--indigo-hi, #3F6B57);
   will-change: transform, left, top, opacity;
   display: flex; align-items: center; justify-content: center;
 }
@@ -54,7 +54,7 @@
   position: absolute; top: 50%; left: 50%;
   width: 46px; height: 46px; margin: -23px 0 0 -23px;
   border-radius: 50%; pointer-events: none;
-  border: 2px solid var(--indigo-hi, #D7535D);
+  border: 2px solid var(--indigo-hi, #3F6B57);
   animation: ofc-ring .55s ease-out both;
 }
 @keyframes ofc-ring {
@@ -106,7 +106,7 @@
 `;
 
   const style = document.createElement('style');
-  style.id = 'ozylix-fly-cart-styles';
+  style.id = 'ascofizz-fly-cart-styles';
   style.textContent = CSS;
   document.head.appendChild(style);
 

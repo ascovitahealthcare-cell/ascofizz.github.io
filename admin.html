@@ -6,7 +6,7 @@
      The admin panel matters more here than the storefront: it posts a
      password and holds a staff JWT in localStorage, and over plain http
      both cross the network in clear text. The API refuses http origins
-     (adminOriginOnly allows https://ozylix.com and https://www.ozylix.com
+     (adminOriginOnly allows https://ascofizz.com and https://www.ascofizz.com
      only), so an http admin page cannot even sign in — it just reports
      "Cannot reach server" while the real reason, a CORS refusal, is
      visible only in the Render log. Get onto https before anything runs.
@@ -33,15 +33,15 @@
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="Ozylix Admin">
+<meta name="apple-mobile-web-app-title" content="ASCOFIZZ Admin">
 <meta name="format-detection" content="telephone=no">
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://www.googletagmanager.com https://accounts.google.com https://cdn.jsdelivr.net https://cdnjs.cloudflare.com https://sdk.cashfree.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: blob: https:; connect-src 'self' https: http://localhost:* http://127.0.0.1:*; frame-src https://accounts.google.com; object-src 'none'; base-uri 'self';">
-<title>Ozylix — Admin Backoffice</title>
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://accounts.google.com https://cdn.jsdelivr.net https://cdnjs.cloudflare.com https://sdk.cashfree.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: blob: https:; connect-src 'self' https: http://localhost:* http://127.0.0.1:*; frame-src https://accounts.google.com; object-src 'none'; base-uri 'self';">
+<title>ASCOFIZZ — Admin Backoffice</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
 :root {
-  /* ── Ozylix brand palette — matches index.html (the storefront) ── */
+  /* ── ASCOFIZZ brand palette — matches index.html (the storefront) ── */
   --bg: #FBF3E8;
   --bg2: #EDE3D2;
   --bg3: #F5EBDD;
@@ -747,7 +747,7 @@ body.role-admin .admin-hidden { display:flex !important; }
 
 /* ═══ RESPONSIVE ═══ */
 /* ════════════════════════════════════════════════════════
-   Ozylix ADMIN — UNIVERSAL RESPONSIVE CSS
+   ASCOFIZZ ADMIN — UNIVERSAL RESPONSIVE CSS
    Covers all screen sizes: 320px → 1400px+
    Web: sidebar always visible
    Mobile/Tablet: bottom nav, NO hamburger
@@ -2108,8 +2108,8 @@ body.theme-frost .card.frost-navy .kpi-val, body.theme-frost .card.frost-navy .k
 
   <div class="login-wrap">
     <div class="login-logo">
-      <div class="logo-mark"><img src="assets/ozylix-logo.png" alt="Ozylix" onerror="this.style.display='none';this.parentNode.textContent='🌿'"></div>
-      <span class="login-title">Ozylix</span>
+      <div class="logo-mark"><img src="assets/img/ascofizz-logo.svg" alt="ASCOFIZZ" onerror="this.style.display='none';this.parentNode.textContent='🌿'"></div>
+      <span class="login-title">ASCOFIZZ</span>
       <span class="login-sub">Admin Backoffice</span>
     </div>
     <!-- A form, not loose divs: this is what makes the phone keyboard show
@@ -2210,8 +2210,8 @@ function azTogglePw() {
 <header class="topbar">
   <button class="hamburger-btn" onclick="toggleSidebar()">☰</button>
   <a href="#" class="topbar-logo">
-    <div class="logo-icon"><img src="assets/ozylix-logo.png" alt="Ozylix" onerror="this.style.display='none';this.parentNode.textContent='🌿'"></div>
-    <span class="logo-name">Ozylix <span class="logo-badge">ADMIN</span></span>
+    <div class="logo-icon"><img src="assets/img/ascofizz-logo.svg" alt="ASCOFIZZ" onerror="this.style.display='none';this.parentNode.textContent='🌿'"></div>
+    <span class="logo-name">ASCOFIZZ <span class="logo-badge">ADMIN</span></span>
   </a>
   <div class="topbar-search">
     <span class="s-ico">🔍</span>
@@ -2915,7 +2915,7 @@ function azTogglePw() {
     <div class="drawer-2col">
       <div class="drawer-field">
         <div class="drawer-field-label">Brand</div>
-        <input class="drawer-input" id="dBrand" value="Ozylix">
+        <input class="drawer-input" id="dBrand" value="ASCOFIZZ">
       </div>
       <div class="drawer-field">
         <div class="drawer-field-label">Badge</div>
@@ -3052,7 +3052,7 @@ function azTogglePw() {
     </div>
     <div class="drawer-field">
       <div class="drawer-field-label">Canonical URL</div>
-      <input class="drawer-input" id="dSeoCanonical" placeholder="https://www.ozylix.com/product/vitamin-c-effervescent">
+      <input class="drawer-input" id="dSeoCanonical" placeholder="https://www.ascofizz.com/product/vitamin-c-effervescent">
     </div>
     <div class="drawer-field" style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
       <div>
@@ -3657,11 +3657,11 @@ function azTogglePw() {
       <h3 style="margin-top:0;">Generate a campaign package</h3>
       <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-bottom:12px;">
         <select id="mkt-product">
-          <option>Ozylix CS++ Calcium + Iron with B12, D3 and Organic Spirulina</option>
-          <option>Ozylix MG+++ Magnesium B12 + D3 with Organic Spirulina</option>
-          <option>Ozylix Multidiata Premium Multivitamin</option>
-          <option>Ozylix Organic Moringa Tablets</option>
-          <option>Ozylix VitaPlus B12 + D3 with Certified Organic Spirulina</option>
+          <option>ASCOFIZZ CS++ Calcium + Iron with B12, D3 and Organic Spirulina</option>
+          <option>ASCOFIZZ MG+++ Magnesium B12 + D3 with Organic Spirulina</option>
+          <option>ASCOFIZZ Multidiata Premium Multivitamin</option>
+          <option>ASCOFIZZ Organic Moringa Tablets</option>
+          <option>ASCOFIZZ VitaPlus B12 + D3 with Certified Organic Spirulina</option>
         </select>
         <select id="mkt-goal">
           <option>New customer acquisition</option>
@@ -3832,7 +3832,7 @@ function azTogglePw() {
 <!-- ═════════════ SITE IMAGES ═════════════ -->
 <div class="page" id="page-siteimages">
   <div class="page-hdr">
-    <div><div class="page-title">Site Images</div><div class="page-sub">Every fixed image on ozylix.com, grouped by where it appears — replace or reset any of them without touching code</div></div>
+    <div><div class="page-title">Site Images</div><div class="page-sub">Every fixed image on ascofizz.com, grouped by where it appears — replace or reset any of them without touching code</div></div>
   </div>
 
     <div id="siteImagesGroups"></div>
@@ -3874,7 +3874,7 @@ function azTogglePw() {
     <div id="promoStripGrid" class="grid-3"></div>
 </div>
 
-<!-- ═════════════ STORE EDITOR (v9.5) — recolour and restyle ozylix.com ── -->
+<!-- ═════════════ STORE EDITOR (v9.5) — recolour and restyle ascofizz.com ── -->
 <div class="page" id="page-storeeditor">
   <div class="page-hdr">
     <div><div class="page-title">🎨 Store Editor</div><div class="page-sub">Change the storefront's look and page copy from here. <strong>Style</strong> = colours, fonts, layout. <strong>Content</strong> = banners, hero headline, marquee and promo copy. Hit Save to publish — the live site updates within about a minute (visitors may need a fresh page load).</div></div>
@@ -4290,7 +4290,7 @@ function azTogglePw() {
   <div class="card" style="height:calc(100vh - 220px);display:flex;flex-direction:column;">
     <div id="chatMessages" style="flex:1;overflow-y:auto;padding:16px;display:flex;flex-direction:column;gap:14px;">
       <div class="ai-msg ai">
-        <div class="ai-bubble">👋 Hello! I'm your Ozylix AI assistant. I can help you analyse orders, products, customers, suggest discount strategies, and more. What would you like to know?</div>
+        <div class="ai-bubble">👋 Hello! I'm your ASCOFIZZ AI assistant. I can help you analyse orders, products, customers, suggest discount strategies, and more. What would you like to know?</div>
       </div>
     </div>
     <div style="padding:16px;border-top:1px solid var(--border);display:flex;gap:8px;">
@@ -4921,7 +4921,7 @@ async function azStaffEditPerms(username, currentPerms, _unused){
       </div>
       <div class="form-group">
         <label class="form-label">Backend URL</label>
-        <input type="text" class="form-control" value="https://ascovitahealthcare-cell-github-io.onrender.com" readonly style="opacity:0.6;font-size:0.78rem;font-family:var(--mono)">
+        <input type="text" class="form-control" value="(set ASCOFIZZ_ADMIN_CONFIG.BACKEND_URL — e.g. https://your-backend.onrender.com)" readonly style="opacity:0.6;font-size:0.78rem;font-family:var(--mono)">
       </div>
     </div>
     <div class="card">
@@ -5551,7 +5551,7 @@ if (!AbortSignal.timeout) {
 // ═══════════════════════════════════════════════
 // CONFIG
 // ═══════════════════════════════════════════════
-const API = 'https://ascovitahealthcare-cell-github-io.onrender.com';
+const API = (window.ASCOFIZZ_ADMIN_CONFIG && window.ASCOFIZZ_ADMIN_CONFIG.BACKEND_URL) || 'https://YOUR_BACKEND.onrender.com';
 let authToken = localStorage.getItem('ascovita_token') || '';
 let allOrders = [], allProducts = [], allCustomers = [], allDiscounts = [], allPayments = [];
 
@@ -7678,7 +7678,7 @@ function emGetData() {
   if(page==='products'){
     const cols=['ID','Name','Brand','Category','MRP','Sale Price','Stock','Rating','Reviews','Active','Badge','HSN','Created'];
     return{cols,rows:allProducts.filter(p=>inR(p.created_at)).map(p=>[
-      p.id,p.name,p.brand||'Ozylix',p.category||'',p.mrp||p.price||0,p.sale_price||p.price||0,
+      p.id,p.name,p.brand||'ASCOFIZZ',p.category||'',p.mrp||p.price||0,p.sale_price||p.price||0,
       p.stock||0,p.rating||'',p.reviews||0,p.active?'Yes':'No',p.badge||'',p.hsn||'30049099',fmtDate(p.created_at)])};
   }
   if(page==='inventory')
@@ -7739,7 +7739,7 @@ function emDoExport() {
   const {cols,rows}=emGetData();
   if(!rows.length){toast('No data for selected range','warning');return;}
   const rs={today:'today',week:'week',month:'month',year:'year',all:'all',custom:'custom'}[_emRange]||_emRange;
-  const filename=`Ozylix-${_emPage}-${rs}.${_emFmt}`;
+  const filename=`ASCOFIZZ-${_emPage}-${rs}.${_emFmt}`;
   const e=v=>`"${String(v??'').replace(/"/g,'""')}"`;
   const content=_emFmt==='csv'
     ?[cols.map(e).join(','),...rows.map(r=>r.map(e).join(','))].join('\n')
@@ -8473,7 +8473,7 @@ function renderProducts(list) {
       <td><img class="prod-img" src="${adminCdnImg(p.image)||'https://via.placeholder.com/44'}" onerror="this.src='https://via.placeholder.com/44'" alt=""></td>
       <td>
         <div class="prod-tbl-name">${esc(p.name)}</div>
-        <div class="prod-tbl-brand">${p.brand||'Ozylix'} · ${p.category||'–'}</div>
+        <div class="prod-tbl-brand">${p.brand||'ASCOFIZZ'} · ${p.category||'–'}</div>
       </td>
       <td><span class="badge badge-gray" style="text-transform:capitalize;">${p.category||'-'}</span></td>
       <td>
@@ -8531,7 +8531,7 @@ function renderProductCards(list) {
         onclick="openProductDrawer(${p.id})">
       <div class="prod-card-body">
         <div class="prod-card-name" title="${p.name}">${p.name}</div>
-        <div class="prod-card-brand">${p.brand||'Ozylix'} · <span style="text-transform:capitalize;">${p.category||''}</span></div>
+        <div class="prod-card-brand">${p.brand||'ASCOFIZZ'} · <span style="text-transform:capitalize;">${p.category||''}</span></div>
         <div class="prod-card-prices">
           ${disc > 0
             ? `<span class="prod-card-sale">₹${p.sale_price}</span>
@@ -8813,7 +8813,7 @@ function openProductDrawer(productId) {
     const p = allProducts.find(x=>x.id===productId);
     if(!p) return;
     document.getElementById('dName').value = p.name||'';
-    document.getElementById('dBrand').value = p.brand||'Ozylix';
+    document.getElementById('dBrand').value = p.brand||'ASCOFIZZ';
     document.getElementById('dBadge').value = p.badge||'';
     document.getElementById('dCategory').value = p.category||'effervescent';
     document.getElementById('dActive').value = p.active===false?'false':'true';
@@ -8878,7 +8878,7 @@ function openProductDrawer(productId) {
     document.getElementById('dSeoSchemaType').value = 'Product';
     document.getElementById('dSeoRobots').value = 'index,follow';
     document.getElementById('dSeoSitemap').checked = true;
-    document.getElementById('dBrand').value='Ozylix';
+    document.getElementById('dBrand').value='ASCOFIZZ';
     document.getElementById('dHsn').value='30049099';
     document.getElementById('dHsn2').value='30049099';
     document.getElementById('dStock').value='0';
@@ -9202,7 +9202,7 @@ async function saveProductFromDrawer() {
   if(!price) { toast('MRP is required','error'); return; }
   const body = {
     name,
-    brand:            document.getElementById('dBrand').value||'Ozylix',
+    brand:            document.getElementById('dBrand').value||'ASCOFIZZ',
     badge:            document.getElementById('dBadge').value,
     category:         document.getElementById('dCategory').value,
     active:           document.getElementById('dActive').value !== 'false',
@@ -9902,7 +9902,7 @@ async function openCustomerInsight(id) {
     <h4 style="font-size:0.72rem;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:0.6px;margin:4px 0 8px;">Contact for re-targeting</h4>
     ${copyable('Email', ins.email)}
     ${copyable('WhatsApp / Phone', ins.phone)}
-    ${ins.phone ? `<div style="margin-bottom:12px;"><a class="btn btn-primary btn-sm" href="https://wa.me/91${String(ins.phone).replace(/^0+|\D/g,'')}?text=${encodeURIComponent('Hello ' + (c.name||'') + ', this is Ozylix — a special offer just for you!')}" target="_blank" rel="noopener">💬 Open WhatsApp chat</a></div>` : '<div style="font-size:0.7rem;color:var(--text3);margin-bottom:12px;">No phone on file — ask at checkout or update below.</div>'}
+    ${ins.phone ? `<div style="margin-bottom:12px;"><a class="btn btn-primary btn-sm" href="https://wa.me/91${String(ins.phone).replace(/^0+|\D/g,'')}?text=${encodeURIComponent('Hello ' + (c.name||'') + ', this is ASCOFIZZ — a special offer just for you!')}" target="_blank" rel="noopener">💬 Open WhatsApp chat</a></div>` : '<div style="font-size:0.7rem;color:var(--text3);margin-bottom:12px;">No phone on file — ask at checkout or update below.</div>'}
     <h4 style="font-size:0.72rem;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:0.6px;margin:4px 0 8px;">Marketing consent</h4>
     <div style="display:flex;gap:10px;margin-bottom:14px;">
       <label style="flex:1;display:flex;align-items:center;gap:8px;background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:10px 12px;cursor:pointer;">
@@ -9948,7 +9948,7 @@ async function exportRetargetingList() {
     const blob = new Blob([text], { type: 'text/csv;charset=utf-8;' });
     const a = document.createElement('a');
     a.href = URL.createObjectURL(blob);
-    a.download = 'Ozylix-retarget-list-' + new Date().toISOString().slice(0,10) + '.csv';
+    a.download = 'ASCOFIZZ-retarget-list-' + new Date().toISOString().slice(0,10) + '.csv';
     a.click();
     URL.revokeObjectURL(a.href);
     toast('✅ Re-targeting list downloaded');
@@ -10955,7 +10955,7 @@ async function deletePhoto(filename) {
 })();
 
 // ═══════════════════════════════════════════════
-// SITE IMAGES — every fixed image slot on ozylix.com
+// SITE IMAGES — every fixed image slot on ascofizz.com
 // ═══════════════════════════════════════════════
 // Catalog of every hard-coded image slot on the live site, grouped
 // by where it shows up. `fallback` is the image currently baked into
@@ -10964,7 +10964,7 @@ async function deletePhoto(filename) {
 // admin page (or the backend) is ever unreachable.
 const SITE_IMAGE_CATALOG = [
   { group:'Global',      key:'site.logo',              label:'Site Logo',                 hint:'Header + mobile menu drawer',
-    fallback:'assets/ozylix-logo.png' },
+    fallback:'assets/img/ascofizz-logo.svg' },
   // ── Removed (dead slots — the home hero is now the admin banner
   //    carousel via Website Images → Offer Banners, and these keys are
   //    referenced by nothing in index.html):
@@ -10980,18 +10980,18 @@ const SITE_IMAGE_CATALOG = [
 
 // ── Aug 2026: PRODUCT EDUCATION GALLERY ──────────────────────────
 // The "Know Your Product" gallery on the product page (How To Use / What
-// Experts Say / What Research Says / Why Ozylix) has 16 creative slots —
+// Experts Say / What Research Says / Why ASCOFIZZ) has 16 creative slots —
 // 4 cards in each of the 4 tabs. Keys are edu.{slug}.{panel}.{n}.
 const EDU_PANELS = [
   { id:'howto',    label:'How To Use' },
   { id:'experts',  label:'What Experts Say' },
   { id:'research', label:'What Research Says' },
-  { id:'why',      label:'Why Ozylix' }
+  { id:'why',      label:'Why ASCOFIZZ' }
 ];
 const EDU_CARDS = 4; // cards per panel
 // The product whose gallery these creatives belong to — the slug comes from
 // the product name on the live site (e.g. "glutathione-effervescent-tablet").
-let EDU_SLUG = (localStorage.getItem('ozylix.eduSlug') || '').trim();
+let EDU_SLUG = (localStorage.getItem('ascofizz.eduSlug') || '').trim();
 
 async function loadSiteImages() {
   let overrides = {};
@@ -11114,7 +11114,7 @@ const __eduHtml = function(overrides){
         <div class="siteimg-sec-name">🎓 Product Gallery — "Know Your Product" cards</div>
         <div class="siteimg-sec-count">${EDU_CARDS * EDU_PANELS.length} slots</div>
       </div>
-      <div style="font-size:0.75rem;color:var(--text3);margin-bottom:12px;max-width:640px;">The 16 creatives on the product page's Know Your Product tabs (How To Use / What Experts Say / What Research Says / Why Ozylix — 4 cards each). <b style="color:var(--text);">Default set below applies to every product without its own uploads</b> — fill this first (e.g. with the Glutathione creatives), then optionally override individual products by slug. Videos are accepted too — they autoplay silently on the site.</div>
+      <div style="font-size:0.75rem;color:var(--text3);margin-bottom:12px;max-width:640px;">The 16 creatives on the product page's Know Your Product tabs (How To Use / What Experts Say / What Research Says / Why ASCOFIZZ — 4 cards each). <b style="color:var(--text);">Default set below applies to every product without its own uploads</b> — fill this first (e.g. with the Glutathione creatives), then optionally override individual products by slug. Videos are accepted too — they autoplay silently on the site.</div>
       <div style="font-size:0.78rem;font-weight:700;color:var(--green-text);margin:4px 0 8px;">🌐 Default creatives — shown on all products that don't have their own set</div>
       ${EDU_PANELS.map(pl => `
         <div style="font-size:0.75rem;font-weight:700;color:var(--text2);margin:12px 0 8px;">${pl.label}</div>
@@ -11268,7 +11268,7 @@ async function deleteEduCreative(key, url) {
 
 function saveEduSlug(slug) {
   EDU_SLUG = (slug || '').trim().toLowerCase().replace(/[^a-z0-9-]/g, '-').replace(/-+/g, '-').replace(/^-|-$/g, '');
-  localStorage.setItem('ozylix.eduSlug', EDU_SLUG);
+  localStorage.setItem('ascofizz.eduSlug', EDU_SLUG);
   toast(EDU_SLUG ? ('✅ Product slug set: ' + EDU_SLUG) : 'Slug cleared');
   loadSiteImages();
 }
@@ -11963,7 +11963,7 @@ async function sendAiMsg() {
   };
 
   try {
-    const systemPrompt = `You are the AI business assistant for Ozylix, an Indian health supplement company based in Anand, Gujarat. You help the admin manage the store.
+    const systemPrompt = `You are the AI business assistant for ASCOFIZZ, an Indian health supplement company based in Anand, Gujarat. You help the admin manage the store.
 
 Current business data:
 - Total Orders: ${statsSnap.totalOrders}
@@ -11972,7 +11972,7 @@ Current business data:
 - Customers: ${statsSnap.totalCustomers}
 - Pending Orders: ${statsSnap.pendingOrders}
 - Low Stock Products: ${statsSnap.lowStock}
-- Backend: https://ascovitahealthcare-cell-github-io.onrender.com
+- Backend: set ASCOFIZZ_ADMIN_CONFIG.BACKEND_URL (Render service URL)
 
 Products: ${allProducts.slice(0,5).map(p=>p.name+'(₹'+p.price+')').join(', ')}
 
@@ -12100,7 +12100,7 @@ async function runTeamMeeting() {
   for (const id of order) {
     const prompt = id === 'CEO'
       ? 'Give your CEO synthesis from the team updates so far this session: top 3 priorities and one decision you are making right now.'
-      : 'Give a 30-second update: one win, one challenge, one ask — specific to Ozylix and grounded in real numbers if you have them.';
+      : 'Give a 30-second update: one win, one challenge, one ask — specific to ASCOFIZZ and grounded in real numbers if you have them.';
     try {
       const r = await fetch(`${API}/api/owner/ai/ask`, {
         method:'POST', headers:{'Content-Type':'application/json','Authorization':'Bearer '+authToken},
@@ -12233,7 +12233,7 @@ function aiteamPersistFeed() {
     const feed = document.getElementById('aiteamFeed');
     if (!feed) return;
     const items = Array.from(feed.children).map(c => ({ html: c.innerHTML, cls: c.className }));
-    window.localStorage.setItem('ozylix-aiteam-feed', JSON.stringify(items.slice(0, 30)));
+    window.localStorage.setItem('ascofizz-aiteam-feed', JSON.stringify(items.slice(0, 30)));
   } catch (_) { /* storage full or disabled — fail silently */ }
 }
 function aiteamRestoreFeed() {
@@ -12241,7 +12241,7 @@ function aiteamRestoreFeed() {
     const feed = document.getElementById('aiteamFeed');
     if (!feed || feed.dataset.empty === 'false') return;
     let items = [];
-    try { items = JSON.parse(window.localStorage.getItem('ozylix-aiteam-feed') || '[]'); } catch (_) { items = []; }
+    try { items = JSON.parse(window.localStorage.getItem('ascofizz-aiteam-feed') || '[]'); } catch (_) { items = []; }
     if (!items.length) return;
     feed.innerHTML = '';
     feed.dataset.empty = 'false';
@@ -12504,7 +12504,7 @@ const INTEGRATIONS = [
     checkUrl: () => `${API}/health`,
     checkAuth: false,
     setupSteps: [
-      'Backend already deployed at ascovitahealthcare-cell-github-io.onrender.com',
+      'Backend deployed: set ASCOFIZZ_ADMIN_CONFIG.BACKEND_URL to your Render service URL',
       'Set all env variables in Render → Environment tab',
       'Free tier sleeps after 15 min — upgrade to avoid cold starts',
       'Connect GitHub for auto-deploy on push'
@@ -12908,7 +12908,7 @@ loadSettings();
 </script>
 
 <!-- ═══════════════════════════════════════════════════════════════════
-     Aug 2026: STORE EDITOR (v9.5) — recolour & restyle ozylix.com from
+     Aug 2026: STORE EDITOR (v9.5) — recolour & restyle ascofizz.com from
      the back office. Curated palettes + custom token pickers + live
      draft preview. Saves to the backend's public theme store; the
      storefront's live loader (also v9.5) picks it up within ~1 min.
@@ -12917,9 +12917,9 @@ loadSettings();
 // ── Curated palettes (each carries a meaning: paper ramp, brand crimson
 //    family, ink family, and the four ambient foil flavours). ──────────
 const STORE_ED_PALETTES = [
-  { name: 'Crimson Classic', desc: 'The current Ozylix look — crimson over warm near-white.', default: true, p: {
+  { name: 'Crimson Classic', desc: 'The current ASCOFIZZ look — crimson over warm near-white.', default: true, p: {
       paper:'#F5F3F4', paperHi:'#FFFFFF', paperLo:'#E9E5E7', white:'#FFFFFF',
-      brand:'#C0394A', brandDeep:'#8E2333', brandHi:'#D7535D',
+      brand:'#C0394A', brandDeep:'#8E2333', brandHi:'#3F6B57',
       secondary:'#6B5560', secondaryHi:'#EBD9DC',
       ink:'#16121A', inkMid:'#46404A', tHi:'#16121A', tMid:'#5A5560', tLow:'#6B6570',
       flavour1:'#C0394A', flavour2:'#46404A', flavour3:'#C0304A', flavour4:'#6B5560' } },
@@ -12984,8 +12984,8 @@ const STORE_ED_PICKERS = [
 
 // ── Draft = the in-flight theme (palette + layout + fonts). Kept in
 //    localStorage so a reload does not lose an unsaved edit. ────────────
-const STORE_ED_DRAFT_KEY = 'ozylix_theme';
-const STORE_ED_THEME_API = 'https://ascovitahealthcare-cell-github-io.onrender.com/api/public/theme';
+const STORE_ED_DRAFT_KEY = 'ascofizz_theme';
+const STORE_ED_THEME_API = ((window.ASCOFIZZ_ADMIN_CONFIG && window.ASCOFIZZ_ADMIN_CONFIG.BACKEND_URL) || 'https://YOUR_BACKEND.onrender.com') + '/api/public/theme';
 
 function storeEdDefaultDraft() {
   const pal = STORE_ED_PALETTES.find(x => x.default);
@@ -13129,7 +13129,7 @@ function storeEdRefreshPreview() {
   try { window.localStorage.setItem(STORE_ED_DRAFT_KEY, JSON.stringify(storeEdDraft)); } catch(_) {}
   // Demo harness rewrites happen in memory only — keep the production URL
   // here and let demo-server.js (or this block) map it when previewing:
-  var previewUrl = location.pathname.indexOf('/demo/') === 0 ? '/demo/store?preview=1&ed=' : 'https://ozylix.com/?preview=1&ed=';
+  var previewUrl = location.pathname.indexOf('/demo/') === 0 ? '/demo/store?preview=1&ed=' : 'https://ascofizz.com/?preview=1&ed=';
   iframe.src = previewUrl + Date.now();
 }
 
@@ -13162,7 +13162,7 @@ async function storeEdSave() {
     const res = await fetch(STORE_ED_THEME_API, {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + authToken },
-      body: JSON.stringify({ key: 'ozylix', theme: storeEdDraft })
+      body: JSON.stringify({ key: 'ascofizz', theme: storeEdDraft })
     });
     const d = await res.json();
     if (!res.ok) throw new Error((d && (d.error || d.message)) || `HTTP ${res.status}`);
@@ -13180,7 +13180,7 @@ async function storeEdSave() {
 // Load the currently published theme once the editor opens.
 async function storeEdLoadServerTheme() {
   try {
-    const res = await fetch(STORE_ED_THEME_API + '?key=ozylix');
+    const res = await fetch(STORE_ED_THEME_API + '?key=ascofizz');
     const d = await res.json();
     if (res.ok && d && d.ok && d.theme && Object.keys(d.theme).length) storeEdServerTheme = d.theme;
   } catch (_) { /* offline — status line stays honest via null */ }
@@ -13206,7 +13206,7 @@ window.showPage = function (page) {
 <script>
 
 // ═══════════════════════════════════════════════════════
-// Ozylix ADMIN v26 — NEW FEATURES (appended, safe)
+// ASCOFIZZ ADMIN v26 — NEW FEATURES (appended, safe)
 // ═══════════════════════════════════════════════════════
 
 // ── Disc tabs ──────────────────────────────────────────
@@ -13365,7 +13365,7 @@ updateLiveVisitors = async function () {
     live = true;
     const n = document.getElementById('lvNotice'); if (n) n.style.display = 'none';
 
-    // Answers "is this really only ozylix.com or is something else feeding
+    // Answers "is this really only ascofizz.com or is something else feeding
     // in too" directly in the panel, instead of having to ask.
     const bd = document.getElementById('lvSiteBreakdown');
     if (bd) {
@@ -14097,7 +14097,7 @@ async function geminiSend() {
       headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + authToken },
       body: JSON.stringify({
         system_instruction: { parts: [{ text:
-          'You are a smart AI assistant for Ozylix admin panel. ' +
+          'You are a smart AI assistant for ASCOFIZZ admin panel. ' +
           'You help manage a nutraceutical e-commerce store selling Vitamin C, Glutathione, Spirulina, Multivitamins. ' +
           'Current store data: ' + _buildStoreContext() + '. ' +
           'Be concise, actionable, use emojis. For WhatsApp messages, format ready to copy. ' +
@@ -14202,7 +14202,7 @@ document.addEventListener("DOMContentLoaded", function() {
 
 <script>
 /* ══════════════════════════════════════════════════════════════
-   Ozylix ADMIN — Login IP Audit & Bot Detection
+   ASCOFIZZ ADMIN — Login IP Audit & Bot Detection
    - Captures IP on every login attempt (success + failure)
    - Uses ip-api.com (free, no key needed, 45 req/min)
    - Stores up to 200 records in localStorage
@@ -14375,9 +14375,10 @@ document.addEventListener('DOMContentLoaded', function() {
 
 <!-- ═════════════ MARKETING AUTOMATION CONFIG ═════════════ -->
 <!-- Fill these in with your marketing Supabase project's values and the
-     Render URL of the Ozylix-marketing-automation backend once deployed. -->
+     Render URL of the ASCOFIZZ-marketing-automation backend once deployed. -->
 <script>
-  window.MARKETING_SUPABASE_URL = "https://wyvpuafzirwlwweifzao.supabase.co";
+  // ASCOFIZZ: marketing module is ASCOFIZZ-specific. Supply your own project if enabled:
+  window.MARKETING_SUPABASE_URL = "https://YOUR_MARKETING_SUPABASE_PROJECT.supabase.co";
   window.MARKETING_SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Ind5dnB1YWZ6aXJ3bHd3ZWlmemFvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODQyODU0NTUsImV4cCI6MjA5OTg2MTQ1NX0.JG_DIQJef2rshO7TYwrk1p0DqTLR3JUQeJbQHO8K8rg";
   /* Marketing calls now go through the main backend's /api/marketing/* proxy
      instead of straight to the marketing service.
@@ -16218,18 +16219,18 @@ async function azLoadPerms() {
 // The storefront itself is NOT modified — edits are stored in
 // store_contents via PUT /api/public/content, previewed by patching
 // the live-preview iframe DOM (same-origin in production: the admin
-// panel and ozylix.com live on the same GitHub Pages origin), and
+// panel and ascofizz.com live on the same GitHub Pages origin), and
 // will drive the live site once the storefront's loader is updated.
 // ═══════════════════════════════════════════════════════════════
-const STORE_ED_CONTENT_KEY = 'ozylix_content_draft';
-const STORE_ED_CONTENT_API = 'https://ascovitahealthcare-cell-github-io.onrender.com/api/public/content';
-const STORE_ED_CONTENT_STORE = 'ozylix';
+const STORE_ED_CONTENT_KEY = 'ascofizz_content_draft';
+const STORE_ED_CONTENT_API = ((window.ASCOFIZZ_ADMIN_CONFIG && window.ASCOFIZZ_ADMIN_CONFIG.BACKEND_URL) || 'https://YOUR_BACKEND.onrender.com') + '/api/public/content';
+const STORE_ED_CONTENT_STORE = 'ascofizz';
 
 // ── Live defaults: the copy currently hard-coded in the storefront.
 //    Editing against these is a diff from the real site. ────────────
 function storeEdDefaultContent() {
   // v10.1: seed the editor defaults from the REAL live website copy
-  // (extracted from www.ozylix.com on 2026-08-15) so the 'Reset to
+  // (extracted from www.ascofizz.com on 2026-08-15) so the 'Reset to
   // original website' button can roll any section back to the true
   // default, not a hand-typed approximation.
   return {
@@ -16373,8 +16374,8 @@ function storeEdContentRemove(sec, i) {
 }
 
 // ── Preview patch: push the content draft into the live-preview
-//    iframe DOM. Same-origin on production (ozylix.com/admin.html and
-//    ozylix.com share an origin), so contentDocument is reachable. ───
+//    iframe DOM. Same-origin on production (ascofizz.com/admin.html and
+//    ascofizz.com share an origin), so contentDocument is reachable. ───
 // Content tab needs the same storefront iframe the Style tab uses —
 // it already carries the live-theme loader draft, so one shared iframe
 // keeps theme + content drafts visible at the same time.

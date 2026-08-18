@@ -1,7 +1,7 @@
 /**
- * image-cdn.js — Ozylix
+ * image-cdn.js — ASCOFIZZ
  * ──────────────────────────────────────────────────────────────────────────
- * Edge image proxy: every site image is now delivered from ozylix.com
+ * Edge image proxy: every site image is now delivered from ascofizz.github.io
  * instead of Supabase Storage, so Supabase egress drops to near zero.
  *
  * How it works:
@@ -9,7 +9,7 @@
  *        /cdn-storage/<bucket>/<path>   (e.g. /cdn-storage/product-images/1786544808269-q1ro7o.webp)
  *   2) The Worker (see index.js) catches anything under /cdn-storage/ and
  *      fetches it from Supabase Storage in the background:
- *        https://frwsjgrrtzhjfflcdjjs.supabase.co/storage/v1/object/public/<bucket>/<path>
+ *        https://YOUR_SUPABASE_PROJECT.supabase.co/storage/v1/object/public/<bucket>/<path>
  *   3) The response is stored in the Cloudflare Cache API with a YEAR-long
  *      TTL — the FIRST visitor pays for the Supabase transfer once, every
  *      visitor after that is served straight from Cloudflare's edge and
@@ -22,7 +22,7 @@
 
 // The Supabase project that owns the product-images bucket (the same ref
 // the storefront's SUPABASE_URL points at).
-export const SUPABASE_STORAGE_ORIGIN = 'https://frwsjgrrtzhjfflcdjjs.supabase.co';
+export const SUPABASE_STORAGE_ORIGIN = 'https://YOUR_SUPABASE_PROJECT.supabase.co'; // set in wrangler.jsonc vars at deploy
 
 // All buckets the site may serve images from. Add new ones here as the
 // admin uploads to new buckets — the proxy itself needs no other changes.
@@ -66,7 +66,7 @@ export async function handleCdnRequest(request) {
     return new Response('Not found', { status: 404 });
   }
 
-  // Cloudflare Cache key includes the full ozylix.com URL; ?w= and similar
+  // Cloudflare Cache key includes the full ascofizz.github.io URL; ?w= and similar
   // transforms land in different cache entries, which is fine (and useful).
   const cacheKey = new Request(url.toString(), { method: 'GET' });
   const cache = caches.default;

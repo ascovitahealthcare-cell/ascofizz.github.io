@@ -1,5 +1,5 @@
 // ============================================================
-// Ozylix — Service Worker (sw.js)
+// ASCOFIZZ — Service Worker (sw.js)
 // Place this file in ROOT of your GitHub Pages repo
 // ============================================================
 
@@ -17,7 +17,7 @@
 // changing this string is what actually evicts the bad copy from devices
 // already carrying it. Bump it on any deploy that fixes a page-breaking
 // bug — a fix nobody can receive is not shipped.
-const CACHE_NAME = 'ozylix-pwa-v13';
+const CACHE_NAME = 'ascofizz-pwa-v13';
 const OFFLINE_URL = '/offline.html';
 
 // Files to cache on install (your core pages)
@@ -35,21 +35,21 @@ const CORE_FILES = [
   '/offline.html',
   // cache.addAll rejects the whole batch if a single entry 404s, so every
   // path below must exist.
-  '/assets/ozylix-logo.png',
-  '/assets/ozylix-mark.svg',
+  '/assets/ascofizz-logo.png',
+  '/assets/ascofizz-mark.svg',
   '/assets/favicon.svg',
-  '/assets/ozylix-icon-192.png',
-  '/assets/ozylix-icon-512.png'
+  '/assets/ascofizz-icon-192.png',
+  '/assets/ascofizz-icon-512.png'
 ];
 
 // ── INSTALL: cache core files ──
 self.addEventListener('install', event => {
-  console.log('[Ozylix SW] Installing...');
+  console.log('[ASCOFIZZ SW] Installing...');
   event.waitUntil(
     caches.open(CACHE_NAME).then(cache => {
       return cache.addAll(CORE_FILES).catch(err => {
         // If some files fail (e.g. /shop not a static file), continue anyway
-        console.warn('[Ozylix SW] Some files not cached:', err);
+        console.warn('[ASCOFIZZ SW] Some files not cached:', err);
       });
     })
   );
@@ -58,14 +58,14 @@ self.addEventListener('install', event => {
 
 // ── ACTIVATE: clean old caches ──
 self.addEventListener('activate', event => {
-  console.log('[Ozylix SW] Activated');
+  console.log('[ASCOFIZZ SW] Activated');
   event.waitUntil(
     caches.keys().then(keys =>
       Promise.all(
         keys
           .filter(key => key !== CACHE_NAME)
           .map(key => {
-            console.log('[Ozylix SW] Deleting old cache:', key);
+            console.log('[ASCOFIZZ SW] Deleting old cache:', key);
             return caches.delete(key);
           })
       )
@@ -146,18 +146,18 @@ self.addEventListener('fetch', event => {
 // The page only calls showNotification after the visitor has granted browser permission.
 self.addEventListener('message', event => {
   const d = event.data || {};
-  if (d.type !== 'ozylix-show-notification') return;
-  const title = d.title || 'Ozylix';
-  const options = { body: d.body || '', icon: '/assets/ozylix-icon-192.png', badge: '/assets/ozylix-icon-192.png', data: { url: d.url || '/' } };
+  if (d.type !== 'ascofizz-show-notification') return;
+  const title = d.title || 'ASCOFIZZ';
+  const options = { body: d.body || '', icon: '/assets/ascofizz-icon-192.png', badge: '/assets/ascofizz-icon-192.png', data: { url: d.url || '/' } };
   event.waitUntil(self.registration.showNotification(title, options));
 });
 self.addEventListener('push', event => {
   const data = event.data ? event.data.json() : {};
-  const title = data.title || 'Ozylix';
+  const title = data.title || 'ASCOFIZZ';
   const options = {
     body: data.body || 'Check out our latest offers!',
-    icon: '/assets/ozylix-icon-192.png',
-    badge: '/assets/ozylix-icon-192.png',
+    icon: '/assets/ascofizz-icon-192.png',
+    badge: '/assets/ascofizz-icon-192.png',
     data: { url: data.url || '/' }
   };
   event.waitUntil(self.registration.showNotification(title, options));

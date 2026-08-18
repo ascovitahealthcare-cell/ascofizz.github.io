@@ -1,5 +1,5 @@
 /* ══════════════════════════════════════════════════════════════════════
-   OZYLIX — SHARED TAX INVOICE TEMPLATE
+   ASCOFIZZ — SHARED TAX INVOICE TEMPLATE
 
    Loaded by BOTH the storefront (index.html) and the admin panel
    (admin.html). It used to live inside index.html, which meant the admin
@@ -12,7 +12,7 @@
    ══════════════════════════════════════════════════════════════════════ */
 
 // ══════════════════════════════════════════════════════════════
-// OZYLIX — A4 TAX INVOICE (GST Rule 46 compliant layout)
+// ASCOFIZZ — A4 TAX INVOICE (GST Rule 46 compliant layout)
 //
 // Single source of truth for every invoice the site produces.
 // Renders to exactly one A4 page (210x297mm) with @page margins,
@@ -25,16 +25,16 @@
 // ══════════════════════════════════════════════════════════════
 
 // ⚠️ UPDATE THESE BEFORE GOING LIVE — statutory identifiers.
-const OZYLIX_LEGAL = {
+const ASCOFIZZ_LEGAL = {
   legalName:  'Ascovita Healthcare',
-  tradeName:  'Ozylix',
+  tradeName:  'ASCOFIZZ',
   /* Absolute, not relative. The storefront hands this document to the
      customer as a Blob URL, and a blob has an opaque origin — "assets/…"
      resolves against nothing and the logo silently fails to load. An
      absolute https URL works from the blob, from the admin panel, and
      from a saved copy of the file. There is a text wordmark behind it
      via onerror for the offline case. */
-  logoUrl:    'https://www.ozylix.com/assets/ozylix-logo.png',
+  logoUrl:    'https://www.ascofizz.com/assets/ascofizz-logo.png',
   addr1:      'Near Rajshivalay Cinema, R.S. Cinema Road',
   addr2:      'Vivekanand Wadi, Anand, Gujarat 388001, India',
   gstin:      '24XXXXXXXXXXXZX',      // ⚠️ replace with real GSTIN
@@ -43,7 +43,7 @@ const OZYLIX_LEGAL = {
   stateCode:  '24',
   phone:      '+91 98985 82650',
   email:      'ascovitahealthcare@gmail.com',
-  site:       'ozylix.com',
+  site:       'ascofizz.com',
   hsnDefault: '2106',                  // food/nutraceutical preparations
   gstRate:    5                        // % — inclusive pricing
 };
@@ -132,7 +132,7 @@ function normaliseOrderForInvoice(o) {
     var itemDiscount = Math.max(0, (mrp - rate) * qty);
     return {
       name: i.name || i.product_name || i.title || 'Item',
-      hsn:  i.hsn || OZYLIX_LEGAL.hsnDefault,
+      hsn:  i.hsn || ASCOFIZZ_LEGAL.hsnDefault,
       qty: qty, rate: rate, mrp: mrp,
       itemDiscount: itemDiscount,
       itemDiscountName: i.discount_name || i.discountName || i.offer_name || i.offerName || i.applied_offer || (itemDiscount ? 'Product price saving' : ''),
@@ -187,7 +187,7 @@ function normaliseOrderForInvoice(o) {
 }
 
 function buildInvoiceHTML(order) {
-  const L = OZYLIX_LEGAL;
+  const L = ASCOFIZZ_LEGAL;
   const o = normaliseOrderForInvoice(order);
   const invNo = 'INV-' + String(o.orderId).replace(/^(AVC-|DEMO-)/,'');
 
@@ -195,7 +195,7 @@ function buildInvoiceHTML(order) {
   const buyerCode  = IN_STATE_CODES[buyerState] || '';
   const intra      = buyerState ? (buyerCode === L.stateCode) : true;
 
-  if (!o.items.length) o.items = [{ name:'Order '+o.orderId, hsn:OZYLIX_LEGAL.hsnDefault, qty:1, rate:o.total, gross:o.total }];
+  if (!o.items.length) o.items = [{ name:'Order '+o.orderId, hsn:ASCOFIZZ_LEGAL.hsnDefault, qty:1, rate:o.total, gross:o.total }];
   const gross    = o.items.reduce(function(t,i){ return t + i.gross; }, 0) || o.total;
   const mrpTotal = o.mrpTotal || o.items.reduce(function(t,i){ return t + (i.mrp || i.rate) * i.qty; }, 0) || gross;
   const money = function(n){ return '₹' + Number(n||0).toLocaleString('en-IN',{minimumFractionDigits:2,maximumFractionDigits:2}); };
@@ -272,7 +272,7 @@ function buildInvoiceHTML(order) {
     : '';
 
   return '<!DOCTYPE html><html lang="en"><head><meta charset="utf-8">' +
-  '<title>Tax Invoice ' + _esc(invNo) + ' — Ozylix</title><style>' +
+  '<title>Tax Invoice ' + _esc(invNo) + ' — ASCOFIZZ</title><style>' +
   '@page{size:A4;margin:10mm}' +
   '*{box-sizing:border-box;margin:0;padding:0}' +
   'body{font-family:"Helvetica Neue",Arial,sans-serif;color:#20303A;font-size:9pt;line-height:1.4;' +
@@ -342,7 +342,7 @@ function buildInvoiceHTML(order) {
     '<div class="hdr">' +
       '<div>' +
         /* Was a text wordmark reading ASCOFIZZ — the old brand, still going
-           out on every tax invoice long after the rename. Now the Ozylix
+           out on every tax invoice long after the rename. Now the ASCOFIZZ
            logo, with the wordmark kept behind it as an onerror fallback so
            an invoice printed with no network still shows a brand. */
         '<div class="logo">' +
