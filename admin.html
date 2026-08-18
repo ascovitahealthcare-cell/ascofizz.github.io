@@ -4899,15 +4899,7 @@ async function azStaffEditPerms(username, currentPerms, _unused){
         <label class="form-label">Google Client ID</label>
         <input type="text" class="form-control" value="6793142938-b9sl3d3lh2svjkmcnina8fsh31nut0bu.apps.googleusercontent.com" readonly style="opacity:0.6;font-size:0.73rem;font-family:var(--mono)">
       </div> <div style="background:var(--surface2);border-radius:8px;padding:12px;margin-top:10px;font-size:0.78rem;color:var(--text2);line-height:1.8">
-          <strong>How to get your GA4 Property ID:</strong><br>
-          1. Go to <a href="https://analytics.google.com" target="_blank" style="color:var(--green-text)">analytics.google.com</a><br>
-          2. Admin → Property Settings<br>
-          3. Copy the <strong>Property ID</strong> (a number like 123456789)<br>
-          <strong style="color:var(--gold-text)">⚠️ This is NOT G-XXXXXX (that is the Measurement ID)</strong><br><br>
-          <strong>For full realtime data, also add to Render env vars:</strong><br>
-          <code style="background:var(--bg);padding:2px 6px;border-radius:4px">GA4_PROPERTY_ID=123456789</code><br>
-          <code style="background:var(--bg);padding:2px 6px;border-radius:4px">GOOGLE_APPLICATION_CREDENTIALS=./service-account.json</code>
-        </div>
+          
       </div>
       <div class="form-group">
         <label class="form-label">Backend URL</label>
@@ -7839,14 +7831,7 @@ async function updateLiveVisitors() {
     console.warn('[LiveVisitors] Backend ping failed:', e.message);
   }
 
-  // ── Source 2: GA4 Realtime API ──
-  if (GA4_PROPERTY_ID) {
-    try {
-      await _fetchGA4Realtime();
-    } catch(e) {
-      console.warn('[LiveVisitors] GA4 Realtime failed:', e.message);
-    }
-  }
+  
 
   // ── If both fail — show clear error, no fake data ──
   if (!backendOk) {
@@ -7863,7 +7848,7 @@ async function updateLiveVisitors() {
         <strong>Option A (Already set up):</strong> Your frontend pings <code>/api/visitors/ping</code> every 4 mins.
         Make sure your Render backend has the <code>GET /api/visitors/active</code> route deployed.<br>
         
-        <span style="font-size:0.75rem;color:var(--text3);">GA4 Property ID is the number shown in GA4 → Admin → Property Settings (e.g. 123456789, NOT G-XXXXXX)</span>
+        <span style="font-size:0.75rem;color:var(--text3);">Analytics tracking removed in this white-label build</span>
       </div>`;
     }
     const tbody = document.getElementById('liveSessionsTbody');
