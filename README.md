@@ -1,5 +1,24 @@
 # ASCOFIZZ — White-Label E-Commerce Platform
 
+**Live storefront:** [ascofizz.com](https://www.ascofizz.com) — unchanged.
+
+**Six white-label demo storefronts**, one shared e-commerce engine:
+
+| # | Demo link | Brand | Portfolio |
+|---|-----------|-------|-----------|
+| 01 | [ascofizz.com/demo-1](https://www.ascofizz.com/demo-1) | Ascofizz | Effervescent supplements |
+| 02 | [ascofizz.com/demo-2](https://www.ascofizz.com/demo-2) | Arcadia | Premium everyday wellness |
+| 03 | [ascofizz.com/demo-3](https://www.ascofizz.com/demo-3) | Forge | Sports & gym nutrition |
+| 04 | [ascofizz.com/demo-4](https://www.ascofizz.com/demo-4) | Algaeva | Spirulina & superfoods |
+| 05 | [ascofizz.com/demo-5](https://www.ascofizz.com/demo-5) | Chewly | Gummies, chewables & suckers |
+| 06 | [ascofizz.com/demo-6](https://www.ascofizz.com/demo-6) | Ascofizz Original | The existing storefront |
+
+All six: **[ascofizz.com/demo](https://www.ascofizz.com/demo)**
+
+Six brands, six product portfolios, six designs — one cart, checkout, payment, order,
+account, search, filtering, inventory and admin implementation behind all of them.
+See [`demo/README.md`](demo/README.md) for the architecture.
+
 ## Overview
 ASCOFIZZ is a fully independent, white-labeled e-commerce platform cloned from the Ozylix architecture. This repository contains the static frontend for the storefront and admin panel, designed to be deployed on GitHub Pages.
 
