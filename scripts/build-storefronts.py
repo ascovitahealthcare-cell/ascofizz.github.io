@@ -8,7 +8,7 @@ edited by hand and never forked: this script copies it verbatim and makes
 exactly four mechanical adjustments, all of them consequences of serving
 the same file from a subfolder instead of the site root.
 
-    1. relative asset paths          assets/… → ../../assets/…
+    1. relative asset paths          assets/… → ../assets/…
     2. the <title>                   so tabs and bookmarks name the brand
     3. service-worker registration   disabled, so six storefronts on one
                                      origin cannot serve each other's
@@ -21,9 +21,9 @@ untouched engine underneath.
 
 Two outputs, from the same source:
 
-    python3 scripts/build-storefronts.py            the six storefronts under
-                                                    storefronts/, sharing the
-                                                    site's assets
+    python3 scripts/build-storefronts.py            the six storefronts at
+                                                    /demo-1 … /demo-6, sharing
+                                                    the site's own assets
 
     python3 scripts/build-storefronts.py --bundle   plus dist/<brand>.zip — each
                                                     a standalone copy of that
@@ -40,35 +40,50 @@ import zipfile
 
 ROOT = pathlib.Path(__file__).resolve().parent.parent
 ENGINE = ROOT / "index.html"
-OUT = ROOT / "storefronts"
-DIST = ROOT / "dist"
+DEMO = ROOT / "demo"          # the switcher page and the shared kit
+DIST = ROOT / "dist"          # standalone bundles
 
-# slug, brand name, portfolio, browser title
+# The six storefronts, in the order they are presented.
+#
+#   folder   is also the public URL — ascofizz.com/demo-1 … /demo-6. The
+#            existing Ascofizz storefront keeps the site root; nothing here
+#            touches it.
+#   slug     names the brand in the template layer (html[data-tpl]).
+#
+# folder, slug, brand name, portfolio, browser title
 STORES = [
-    ("ascofizz", "Ascofizz", "Effervescent Supplements",
+    ("demo-1", "ascofizz", "Ascofizz", "Effervescent Supplements",
      "Ascofizz — Effervescent Vitamins, Minerals & Electrolytes"),
-    ("arcadia", "Arcadia", "Premium Everyday Wellness",
+    ("demo-2", "arcadia", "Arcadia", "Premium Everyday Wellness",
      "Arcadia — Wellness, thoughtfully formulated"),
-    ("forge", "Forge", "Sports & Gym Nutrition",
+    ("demo-3", "forge", "Forge", "Sports & Gym Nutrition",
      "FORGE — Protein, Performance & Recovery Supplements"),
-    ("algaeva", "Algaeva", "Spirulina & Superfoods",
+    ("demo-4", "algaeva", "Algaeva", "Spirulina & Superfoods",
      "Algaeva — Spirulina, Chlorella & Green Superfoods"),
-    ("chewly", "Chewly", "Gummies, Chewables & Suckers",
+    ("demo-5", "chewly", "Chewly", "Gummies, Chewables & Suckers",
      "Chewly — Gummies, Chewables & Vitamin Suckers"),
-    ("ascofizz-original", "Ascofizz Original", "Existing Ascofizz Storefront",
+    ("demo-6", "ascofizz-original", "Ascofizz Original", "Existing Ascofizz Storefront",
      "ASCOFIZZ — Effervescent Vitamins & Supplements"),
 ]
 
 # Paths the engine resolves relative to the document. At the site root they
-# resolve against /, inside /storefronts/<brand>/ they must climb back out.
+# resolve against /, inside /demo-N/ they must climb back out one level.
 RELATIVE_PREFIXES = ("assets/", "scripts/", "invoice-template.js", "manifest.json", "sw.js")
 
 TEMPLATE_TAG = "<!-- ══ WHITE-LABEL TEMPLATE LAYER ══ -->"
 
 HEAD_INCLUDE = """  {tag}
-  <link rel="stylesheet" href="{kit}wl-kit.css">
+{noindex}  <link rel="stylesheet" href="{kit}wl-kit.css">
   <link rel="stylesheet" href="template/brand.css">
 """
+
+# The demo storefronts are published on the customer's live domain, beside the
+# real shop. The engine self-canonicalises to https://www.ascofizz.com plus the
+# current path, and a demo product page would canonicalise to a real product URL
+# that sells something else entirely — so six near-duplicate storefronts would
+# compete with the shop they are meant to sell. They are kept out of the index.
+# Bundles do not carry this: where a client publishes one is their decision.
+NOINDEX = '  <meta name="robots" content="noindex, nofollow">\n'
 
 BODY_INCLUDE = """{tag}
 {standalone}<script src="{kit}wl-kit.js"></script>
@@ -143,7 +158,8 @@ def inject_template(html: str, slug: str, kit: str, standalone: bool) -> str:
     if head_at >= body_at:
         raise SystemExit(f"{slug}: document boundaries look wrong — head close after body close")
 
-    html = html[:head_at] + HEAD_INCLUDE.format(tag=TEMPLATE_TAG, kit=kit) + html[head_at:]
+    html = html[:head_at] + HEAD_INCLUDE.format(
+        tag=TEMPLATE_TAG, kit=kit, noindex="" if standalone else NOINDEX) + html[head_at:]
     body_at = html.rindex("</body>")
     body = BODY_INCLUDE.format(tag=TEMPLATE_TAG, kit=kit,
                                standalone=STANDALONE_FLAG if standalone else "")
@@ -190,37 +206,41 @@ def banner(name: str, portfolio: str, slug: str, standalone: bool) -> str:
     return f"<!--\n{body}\n-->\n"
 
 
-def has_pack(slug: str) -> bool:
-    if (OUT / slug / "template" / "brand.js").exists():
+def has_pack(folder: str) -> bool:
+    if (ROOT / folder / "template" / "brand.js").exists():
         return True
-    print(f"  ! {slug} skipped — template/brand.js not written yet")
+    print(f"  ! {folder} skipped — template/brand.js not written yet")
     return False
 
 
-def build_site(slug: str, name: str, portfolio: str, title: str, engine: str) -> None:
-    """The storefront as it is served from this site, sharing the root assets."""
-    if not has_pack(slug):
+def build_site(folder: str, slug: str, name: str, portfolio: str, title: str, engine: str) -> None:
+    """
+    The storefront as it is served from the live site: one directory below the
+    root, so the engine's assets are one level up and the shared kit sits in
+    /demo/kit/. Published at ascofizz.com/<folder>.
+    """
+    if not has_pack(folder):
         return
-    html = render(engine, slug, title, "../../", "../_kit/")
-    out = OUT / slug / "index.html"
-    out.write_text(banner(name, portfolio, slug, standalone=False) + html, encoding="utf-8")
-    print(f"  ✓ storefronts/{slug}/index.html   {name} · {portfolio}  ({out.stat().st_size // 1024} KB)")
+    html = render(engine, slug, title, "../", "../demo/kit/")
+    out = ROOT / folder / "index.html"
+    out.write_text(banner(name, portfolio, folder, standalone=False) + html, encoding="utf-8")
+    print(f"  ✓ /{folder}/   {name} · {portfolio}  ({out.stat().st_size // 1024} KB)")
 
 
-def build_bundle(slug: str, name: str, portfolio: str, title: str, engine: str) -> None:
+def build_bundle(folder: str, slug: str, name: str, portfolio: str, title: str, engine: str) -> None:
     """
     The same storefront as a standalone deliverable: engine, assets, template
     pack and kit in one folder that runs on its own, zipped for handover.
     """
-    if not has_pack(slug):
+    if not has_pack(folder):
         return
 
-    folder = DIST / slug
-    if folder.exists():
-        shutil.rmtree(folder)
-    folder.mkdir(parents=True)
+    out = DIST / slug
+    if out.exists():
+        shutil.rmtree(out)
+    out.mkdir(parents=True)
 
-    (folder / "index.html").write_text(
+    (out / "index.html").write_text(
         banner(name, portfolio, slug, standalone=True)
         + render(engine, slug, title, "", "_kit/", standalone=True),
         encoding="utf-8",
@@ -229,13 +249,14 @@ def build_bundle(slug: str, name: str, portfolio: str, title: str, engine: str) 
         src = ROOT / item
         if not src.exists():
             continue
-        shutil.copytree(src, folder / item) if src.is_dir() else shutil.copy2(src, folder / item)
-    shutil.copytree(OUT / "_kit", folder / "_kit")
-    shutil.copytree(OUT / slug / "template", folder / "template")
-    (folder / "README.txt").write_text(
+        shutil.copytree(src, out / item) if src.is_dir() else shutil.copy2(src, out / item)
+    shutil.copytree(DEMO / "kit", out / "_kit")
+    shutil.copytree(ROOT / folder / "template", out / "template")
+    (out / "README.txt").write_text(
         f"{name} — {portfolio}\n"
-        f"Storefront {slug} of the Ascofizz white-label demo.\n\n"
-        f"To view it:\n"
+        f"Storefront {slug} of the Ascofizz white-label demo.\n"
+        f"Published on the demo site at ascofizz.com/{folder}\n\n"
+        f"To view it here:\n"
         f"    cd {slug}\n"
         f"    python3 -m http.server 8000\n"
         f"    open http://localhost:8000\n\n"
@@ -263,7 +284,7 @@ def build_bundle(slug: str, name: str, portfolio: str, title: str, engine: str) 
     if archive.exists():
         archive.unlink()
     with zipfile.ZipFile(archive, "w", zipfile.ZIP_DEFLATED, compresslevel=9) as z:
-        for path in sorted(folder.rglob("*")):
+        for path in sorted(out.rglob("*")):
             if path.is_file():
                 z.write(path, path.relative_to(DIST))
     print(f"  ✓ dist/{slug}.zip   {name} · {portfolio}  ({archive.stat().st_size // 1024} KB)")
@@ -289,7 +310,7 @@ def main() -> int:
         for store in STORES:
             build_bundle(*store, engine)
 
-    print("\ndone. Open storefronts/index.html for the switcher.")
+    print("\ndone. /demo is the switcher; /demo-1 … /demo-6 are the storefronts.")
     return 0
 
 

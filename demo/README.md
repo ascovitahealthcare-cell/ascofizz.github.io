@@ -3,16 +3,19 @@
 Six complete supplement storefronts — six brands, six product portfolios, six designs —
 running on one shared e-commerce engine.
 
-Open **[`storefronts/index.html`](index.html)** for the switcher, or go straight to a brand:
+**The live Ascofizz storefront keeps the site root and is untouched.** The demos are
+published beside it, one directory each:
 
-| # | Brand | Portfolio | Audience | Folder |
-|---|-------|-----------|----------|--------|
-| 01 | Ascofizz | Effervescent supplements | Everyday wellness | [`ascofizz/`](ascofizz/) |
-| 02 | Arcadia | Premium everyday wellness | Premium daily health | [`arcadia/`](arcadia/) |
-| 03 | Forge | Sports & gym nutrition | Gym, athletes, active | [`forge/`](forge/) |
-| 04 | Algaeva | Spirulina & superfoods | Natural, plant-based | [`algaeva/`](algaeva/) |
-| 05 | Chewly | Gummies, chewables & suckers | Families, young adults | [`chewly/`](chewly/) |
-| 06 | Ascofizz Original | The existing catalogue | Existing customers | [`ascofizz-original/`](ascofizz-original/) |
+| # | URL | Brand | Portfolio | Audience |
+|---|-----|-------|-----------|----------|
+| 01 | `ascofizz.com/demo-1` | Ascofizz | Effervescent supplements | Everyday wellness |
+| 02 | `ascofizz.com/demo-2` | Arcadia | Premium everyday wellness | Premium daily health |
+| 03 | `ascofizz.com/demo-3` | Forge | Sports & gym nutrition | Gym, athletes, active |
+| 04 | `ascofizz.com/demo-4` | Algaeva | Spirulina & superfoods | Natural, plant-based |
+| 05 | `ascofizz.com/demo-5` | Chewly | Gummies, chewables & suckers | Families, young adults |
+| 06 | `ascofizz.com/demo-6` | Ascofizz Original | The existing catalogue | Existing customers |
+
+`ascofizz.com/demo` is the switcher that presents all six.
 
 ---
 
@@ -49,11 +52,15 @@ The engine file itself is never hand-edited, and no storefront carries a modifie
 ## What a brand pack contains
 
 ```
-storefronts/<brand>/
+demo-N/
   index.html          ← GENERATED. engine + this brand's pack. do not edit
   template/
     brand.css         ← palette, type, and every component this brand draws
     brand.js          ← catalogue, product card, product page, header, home, footer
+
+demo/
+  index.html          ← the switcher, at ascofizz.com/demo
+  kit/wl-kit.js|css   ← the seam, shared by all six
 ```
 
 `template/brand.js` ends in a single `WL.define({…})` call:
@@ -73,7 +80,7 @@ WL.define({
 });
 ```
 
-`storefronts/_kit/wl-kit.js` is the seam between the two layers. It installs the catalogue
+`demo/kit/wl-kit.js` is the seam between the two layers. It installs the catalogue
 before the engine's first render, swaps the chrome after the engine has booted, and provides
 the shared helpers — packshot drawing, merchandising selectors, the reveal observer, the demo
 switcher, and the routing shim that keeps clean URLs working from a subfolder.
@@ -91,6 +98,12 @@ python3 scripts/build-storefronts.py
 
 Run it after editing the engine or any brand pack. It rewrites every `storefronts/*/index.html`
 and refuses to double-inject a template layer.
+
+Two things in the site root know about these paths, and both are deliberate:
+`sw.js` skips `/demo…` entirely — its document fallback answers a failed navigation with
+the ASCOFIZZ shell, which on a demo URL would hand the visitor the wrong storefront — and
+`worker/index.js` needs no change at all, because it only sees paths that do not exist on
+disk and every `demo-N/index.html` does.
 
 ## Standalone bundles
 
@@ -110,11 +123,11 @@ is `'self'`, which a `file://` URL has no origin to satisfy.
 
 ## Adding a seventh brand
 
-1. `mkdir -p storefronts/<slug>/template`
+1. `mkdir -p demo-7/template`
 2. write `template/brand.css` and `template/brand.js` (copy the closest existing pack as a start)
-3. add the slug to `STORES` in `scripts/build-storefronts.py`
-4. add it to `STORES` in `storefronts/_kit/wl-kit.js` so the switcher lists it
-5. add a card to `storefronts/index.html`
+3. add the folder and slug to `STORES` in `scripts/build-storefronts.py`
+4. add it to `STORES` in `demo/kit/wl-kit.js` so the switcher lists it
+5. add a card to `demo/index.html`
 6. `python3 scripts/build-storefronts.py`
 
 No change to the cart, checkout, orders, accounts or admin is involved at any step.

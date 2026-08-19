@@ -493,13 +493,16 @@
     restoreHashRoute();
   }
 
+  /* number, brand, portfolio, slug, published folder — which is also the URL:
+     ascofizz.com/demo-1 … /demo-6. The existing Ascofizz storefront keeps the
+     site root and is not in this list. */
   var STORES = [
-    ['01', 'Ascofizz', 'Effervescents', 'ascofizz'],
-    ['02', 'Arcadia', 'Premium Wellness', 'arcadia'],
-    ['03', 'Forge', 'Sports Nutrition', 'forge'],
-    ['04', 'Algaeva', 'Spirulina & Greens', 'algaeva'],
-    ['05', 'Chewly', 'Gummies & Chewables', 'chewly'],
-    ['06', 'Ascofizz Original', 'Baseline Template', 'ascofizz-original']
+    ['01', 'Ascofizz', 'Effervescents', 'ascofizz', 'demo-1'],
+    ['02', 'Arcadia', 'Premium Wellness', 'arcadia', 'demo-2'],
+    ['03', 'Forge', 'Sports Nutrition', 'forge', 'demo-3'],
+    ['04', 'Algaeva', 'Spirulina & Greens', 'algaeva', 'demo-4'],
+    ['05', 'Chewly', 'Gummies & Chewables', 'chewly', 'demo-5'],
+    ['06', 'Ascofizz Original', 'Baseline Template', 'ascofizz-original', 'demo-6']
   ];
   WL.stores = STORES;
 
@@ -509,6 +512,8 @@
        this flag; the demo site does not. */
     if (window.WL_STANDALONE) return;
     if (document.getElementById('wlSwitch')) return;
+    /* The storefronts sit one level below the site root, so their common
+       parent is the root itself. */
     var root = BASE.replace(/[^/]+\/$/, '');
     var el = document.createElement('div');
     el.id = 'wlSwitch';
@@ -520,12 +525,12 @@
       '<p class="wl-sw-sub">Same cart, checkout, orders, accounts and admin behind every one.</p>' +
       STORES.map(function (s) {
         var on = s[3] === cfg.slug;
-        return '<a class="wl-sw-item' + (on ? ' is-on' : '') + '" href="' + root + s[3] + '/">' +
+        return '<a class="wl-sw-item' + (on ? ' is-on' : '') + '" href="' + root + s[4] + '/">' +
           '<span class="wl-sw-num">' + s[0] + '</span>' +
           '<span class="wl-sw-txt"><strong>' + s[1] + '</strong><em>' + s[2] + '</em></span>' +
           (on ? '<span class="wl-sw-here">Viewing</span>' : '') + '</a>';
       }).join('') +
-      '<a class="wl-sw-all" href="' + root + '">All storefronts →</a>' +
+      '<a class="wl-sw-all" href="' + root + 'demo/">All storefronts →</a>' +
       '</div>';
     document.body.appendChild(el);
   }

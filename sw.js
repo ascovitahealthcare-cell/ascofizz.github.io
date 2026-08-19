@@ -17,7 +17,7 @@
 // changing this string is what actually evicts the bad copy from devices
 // already carrying it. Bump it on any deploy that fixes a page-breaking
 // bug — a fix nobody can receive is not shipped.
-const CACHE_NAME = 'ascofizz-pwa-v13';
+const CACHE_NAME = 'ascofizz-pwa-v14';
 const OFFLINE_URL = '/offline.html';
 
 // Files to cache on install (your core pages)
@@ -101,6 +101,14 @@ self.addEventListener('fetch', event => {
 
   // Rule 1 — anything not served from this origin.
   if (url.origin !== self.location.origin) return;
+
+  // Rule 1b — the white-label demo storefronts at /demo-1 … /demo-6 and the
+  // switcher at /demo. They are separate sites that happen to share this
+  // origin, and this worker's document fallback answers a failed navigation
+  // with the ASCOFIZZ shell — which would hand a visitor the wrong storefront
+  // entirely. Left to the network, which is also why the demo copies of the
+  // engine do not register a worker of their own.
+  if (/^\/demo(-\d+)?(\/|$)/.test(url.pathname)) return;
 
   const isDocument = request.mode === 'navigate' || request.destination === 'document';
 

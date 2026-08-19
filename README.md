@@ -26,18 +26,20 @@ In `index.html` and `admin.html`, ensure the following placeholders are replaced
 
 ## White-Label Demo Storefronts
 
-`storefronts/` holds six complete demonstration storefronts — six brands, six product
-portfolios, six designs — running on this repository's single e-commerce engine. Open
-`storefronts/index.html` for the switcher.
+Six complete demonstration storefronts — six brands, six product portfolios, six designs —
+running on this repository's single e-commerce engine. **The live Ascofizz storefront keeps
+the site root and is not touched by any of it**; the demos are published beside it:
 
-| # | Brand | Portfolio |
-|---|-------|-----------|
-| 01 | Ascofizz | Effervescent supplements |
-| 02 | Arcadia | Premium everyday wellness |
-| 03 | Forge | Sports & gym nutrition |
-| 04 | Algaeva | Spirulina & superfoods |
-| 05 | Chewly | Gummies, chewables & suckers |
-| 06 | Ascofizz Original | The existing storefront, unchanged |
+| # | URL | Brand | Portfolio |
+|---|-----|-------|-----------|
+| 01 | `/demo-1` | Ascofizz | Effervescent supplements |
+| 02 | `/demo-2` | Arcadia | Premium everyday wellness |
+| 03 | `/demo-3` | Forge | Sports & gym nutrition |
+| 04 | `/demo-4` | Algaeva | Spirulina & superfoods |
+| 05 | `/demo-5` | Chewly | Gummies, chewables & suckers |
+| 06 | `/demo-6` | Ascofizz Original | The existing storefront, unchanged |
+
+`/demo` is the switcher that presents all six.
 
 Each storefront owns its brand, navigation, homepage, product cards, product page,
 merchandising, typography, colour and motion. All six share one cart, checkout, payment,
@@ -51,4 +53,4 @@ python3 scripts/build-storefronts.py            # the six storefronts
 python3 scripts/build-storefronts.py --bundle   # plus dist/<brand>.zip, standalone copies
 ```
 
-See `storefronts/README.md` for the architecture and for how to add a brand.
+See `demo/README.md` for the architecture and for how to add a brand.

@@ -1,6 +1,6 @@
 <!--
   Chewly — Gummies, Chewables & Suckers
-  Storefront chewly of the Ascofizz white-label demo.
+  Storefront demo-5 of the Ascofizz white-label demo.
 
   GENERATED FILE — do not edit.
   This is index.html from the repository root — the shared
@@ -66,9 +66,9 @@
        invoice a customer downloads and the one staff print are one document,
        not two lookalikes that drift apart. Defines ASCOFIZZ_LEGAL,
        IN_STATE_CODES, normaliseOrderForInvoice() and buildInvoiceHTML(). -->
-  <script src="../../invoice-template.js?v=20260815-3"></script>
+  <script src="../invoice-template.js?v=20260815-3"></script>
   <!-- 🛒 Fly-to-cart animation (reel-inspired): flying thumbnail arc + badge bump + ✓ Added button flip -->
-  <script defer src="../../scripts/fly-to-cart.js?v=20260815-2"></script>
+  <script defer src="../scripts/fly-to-cart.js?v=20260815-2"></script>
   <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.jsdelivr.net https://cdnjs.cloudflare.com https://sdk.cashfree.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: blob: https:; connect-src 'self' https://*.supabase.co https://*.onrender.com https://*.gokwik.co https://gkx.gokwik.co https://www.googleapis.com https://oauth2.googleapis.com https://openidconnect.googleapis.com https://api.cashfree.com https://sandbox.cashfree.com; frame-src https://oauth2.googleapis.com https://*.gokwik.co https://sdk.cashfree.com https://api.cashfree.com https://sandbox.cashfree.com https://payments.cashfree.com https://payments-test.cashfree.com; object-src 'none'; base-uri 'self';">
   <!-- ── Clickjacking guard ──────────────────────────────────────────
        X-Frame-Options is a response header, and CSP's frame-ancestors is
@@ -149,9 +149,9 @@
        WebPage, LocalBusiness, Products, FAQ, BreadcrumbList
   ════════════════════════════════════════════════════════ -->
   <!-- Favicon -->
-  <link rel="icon" type="image/png" sizes="32x32" href="../../assets/ascofizz-icon-32.png">
-  <link rel="icon" type="image/png" sizes="16x16" href="../../assets/ascofizz-icon-16.png">
-  <link rel="apple-touch-icon" href="../../assets/ascofizz-icon-180.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="../assets/ascofizz-icon-32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="../assets/ascofizz-icon-16.png">
+  <link rel="apple-touch-icon" href="../assets/ascofizz-icon-180.png">
   <link rel="manifest" href="/manifest.json">
   <link rel="sitemap" type="application/xml" href="https://www.ascofizz.com/sitemap.xml">
   <!-- GoKwik Payment — no SDK required -->
@@ -240,7 +240,7 @@
      ═══════════════════════════════════════════════════════════════ -->
 
   <!-- Effervescent Bloom — type -->
-  <link rel="icon" type="image/svg+xml" href="../../assets/favicon.svg">
+  <link rel="icon" type="image/svg+xml" href="../assets/favicon.svg">
   <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Jost:wght@200;300;400;500;600&family=Schibsted+Grotesk:wght@400..700&display=swap">
   <!-- media="print" makes this non-blocking; the onload promotes it to all.
        A blocking cross-origin stylesheet in <head>
@@ -5645,7 +5645,8 @@ button, [role="button"] {
 <style id="ascofizz-nav-upgrades">
 .app-topbar-brand-name{font-family:var(--font-display);font-size:1.02rem;font-weight:800;letter-spacing:-.04em;color:var(--t-hi);white-space:nowrap}
 .notification-center-page{min-height:78vh;padding-top:90px}.notification-center-head{display:flex;align-items:flex-end;justify-content:space-between;gap:16px;margin-bottom:18px}.notification-center-actions{display:flex;gap:8px;flex-wrap:wrap}.notification-center-list{display:grid;gap:10px;max-width:820px}.notification-center-card{display:grid;grid-template-columns:auto 1fr auto;gap:12px;align-items:start;padding:15px 16px;border-radius:16px;background:var(--paper);box-shadow:var(--neo-1);border:1px solid var(--edge)}.notification-center-card.unread{border-color:rgba(61,117,90,.45)}.notification-center-icon{width:34px;height:34px;display:grid;place-items:center;border-radius:12px;background:var(--green-lo,#e8f2eb)}.notification-center-message{color:var(--t-mid);line-height:1.55;font-size:.88rem}.notification-center-message strong{color:var(--t-hi);display:block;margin-bottom:3px}.notification-center-time{display:block;margin-top:5px;font-size:.7rem;color:var(--t-dim)}.notification-center-empty{padding:30px 20px;text-align:center;border-radius:16px;background:var(--paper);box-shadow:var(--neo-1);color:var(--t-low)}.notification-center-empty h3{margin:0 0 7px;color:var(--t-hi)}.notification-center-badge{position:absolute;top:2px;right:1px;min-width:16px;height:16px;padding:0 4px;display:none;place-items:center;border-radius:99px;background:#b84242;color:#fff;font-size:.58rem;font-weight:800}.footer-compact .footer-top{padding-top:16px;padding-bottom:14px}.footer-compact .footer-grid{grid-template-columns:minmax(210px,1.45fr) repeat(4,minmax(112px,1fr));gap:12px 16px}.footer-compact .footer-col summary{list-style:none;cursor:pointer;font-size:.58rem;font-weight:700;letter-spacing:.18em;text-transform:uppercase;color:var(--green);margin-bottom:7px}.footer-compact .footer-col summary::-webkit-details-marker{display:none}.footer-compact .footer-col summary:after{content:'⌄';float:right}.footer-compact .footer-col:not([open]) summary:after{transform:rotate(-90deg)}.footer-compact .footer-col ul{gap:3px}.footer-compact .footer-col a{font-size:.7rem}.footer-compact .footer-bottom{padding-top:8px;padding-bottom:8px;font-size:.66rem}@media(min-width:701px){.footer-compact .footer-col summary:after{display:none}}@media(max-width:700px){.app-topbar-brand-name{font-size:.98rem}.notification-center-page{padding-top:82px}.notification-center-head{align-items:flex-start;flex-direction:column}.notification-center-card{grid-template-columns:auto 1fr}.notification-center-card .notification-center-time{grid-column:2}.footer-compact .footer-grid{grid-template-columns:1fr;gap:7px}.footer-compact .footer-col{padding:10px 0;border-top:1px solid var(--edge)}.footer-compact .footer-col ul{margin-top:9px}.footer-compact .footer-col:not([open]) ul{display:none}}</style>  <!-- ══ WHITE-LABEL TEMPLATE LAYER ══ -->
-  <link rel="stylesheet" href="../_kit/wl-kit.css">
+  <meta name="robots" content="noindex, nofollow">
+  <link rel="stylesheet" href="../demo/kit/wl-kit.css">
   <link rel="stylesheet" href="template/brand.css">
 </head>
 <!-- Promotional Media Config -->
@@ -5782,7 +5783,7 @@ var PROMO_MEDIA = [
 <div class="app-topbar" id="appTopBar">
   <!-- Logo -->
   <a href="#" onclick="showPage('home');return false;" style="display:flex;align-items:center;text-decoration:none;flex-shrink:0;gap:8px;">
-    <img class="app-topbar-logo" src="../../assets/ascofizz-mark.svg" alt="ASCOFIZZ" onerror="this.onerror=null;this.style.display='none';" decoding="async">
+    <img class="app-topbar-logo" src="../assets/ascofizz-mark.svg" alt="ASCOFIZZ" onerror="this.onerror=null;this.style.display='none';" decoding="async">
     <span class="app-topbar-brand-name">ASCOFIZZ</span>
   </a>
   <!-- B2B pill only -->
@@ -6669,7 +6670,7 @@ setInterval(function() { syncAppCartBadge(); syncAppWishBadge(); }, 2000);
 <nav class="navbar">
   <div class="nav-inner">
     <a href="#" class="nav-logo" onclick="showPage('home')">
-      <img data-media-key="site.logo" src="../../assets/img/ascofizz-logo.svg" alt="ASCOFIZZ Logo" fetchpriority="high" decoding="sync" onerror="this.style.display='none';document.getElementById('logoFallback').style.display='flex'">
+      <img data-media-key="site.logo" src="../assets/img/ascofizz-logo.svg" alt="ASCOFIZZ Logo" fetchpriority="high" decoding="sync" onerror="this.style.display='none';document.getElementById('logoFallback').style.display='flex'">
       <div id="logoFallback" class="nav-logo-fallback" style="display:none">
         <div class="nav-logo-leaf"><svg width="22" height="22"><use href="#ico-leaf"/></svg></div>
         <div>
@@ -15933,7 +15934,7 @@ function generateInvoice({ orderId, formData, srItems, sub, disc, promoDisc, shi
   <!-- HEADER -->
   <div class="inv-header">
     <div style="display:flex;align-items:center;gap:14px;">
-      <img src="../../assets/ascofizz-icon-192.png"
+      <img src="../assets/ascofizz-icon-192.png"
         alt="ASCOFIZZ" style="height:56px;width:auto;background:var(--sub-1);border-radius:8px;padding:6px 10px;flex-shrink:0;"
         onerror="this.style.display='none';var s=document.getElementById('invLogoFallback');if(s)s.style.display='block';" decoding="async">
       <div>
@@ -20000,7 +20001,7 @@ function closeMoreDrawer() {
   <!-- Header -->
   <div class="app-menu-header">
     <img class="app-menu-logo" data-media-key="site.logo"
-      src="../../assets/img/ascofizz-logo.svg"
+      src="../assets/img/ascofizz-logo.svg"
       alt="ASCOFIZZ" onerror="this.style.display='none'" decoding="async">
     <button class="app-menu-close" onclick="closeAppMenu()">✕</button>
   </div>
@@ -22876,7 +22877,7 @@ function closeBlog() {
 })();
 </script>
 <!-- ══ WHITE-LABEL TEMPLATE LAYER ══ -->
-<script src="../_kit/wl-kit.js"></script>
+<script src="../demo/kit/wl-kit.js"></script>
 <script src="template/brand.js"></script>
 </body>
 </html>
