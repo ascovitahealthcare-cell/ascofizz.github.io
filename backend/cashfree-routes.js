@@ -31,6 +31,7 @@ module.exports = function mountCashfreeRoutes(app, deps) {
   const {
     supabase, verifyToken, resolveVitaDiscount, releaseVitaReservation, reverseVitaForRefund, computeServerSideTotal,
     sp_place_order, awardVitaPoints, sendOrderEmail, authMiddleware, adminOnly, rateLimit,
+    recordWebhookEvent,
   } = deps;
 
   // AUDIT FIX: payment-session creation had no rate limit — same gap
@@ -344,6 +345,34 @@ module.exports = function mountCashfreeRoutes(app, deps) {
       const event = req.body || {};
       const type  = event.type;
       console.log('[Cashfree] Webhook verified:', type);
+
+      // Idempotency. Cashfree retries on timeout, and the refund branch
+      // below is not self-guarding the way the payment branch is — it
+      // would happily re-apply a refund status transition. Record the
+      // delivery first and stop here if this exact event was already
+      // handled. Signature verification has already passed at this point,
+      // so a duplicate is a genuine redelivery, not a forgery.
+      const _cfEventId =
+        event.data?.payment?.cf_payment_id ||
+        event.data?.refund?.cf_refund_id ||
+        event.data?.refund?.refund_id ||
+        event.event_id ||
+        // Last resort: the provider's own event timestamp plus the order
+        // id is stable across retries of the SAME event.
+        (event.event_time && event.data?.order?.order_id
+          ? `${type}:${event.data.order.order_id}:${event.event_time}`
+          : null);
+
+      if (typeof recordWebhookEvent === 'function') {
+        const seen = await recordWebhookEvent({
+          provider:  'cashfree',
+          eventId:   _cfEventId,
+          eventType: type,
+          orderId:   event.data?.order?.order_id || event.data?.refund?.order_id || null,
+          payload:   event,
+        });
+        if (seen.duplicate) return res.json({ received: true, duplicate: true });
+      }
 
       if (type === 'PAYMENT_SUCCESS_WEBHOOK' || type === 'PAYMENT_STATUS_WEBHOOK') {
         const orderId = event.data?.order?.order_id;

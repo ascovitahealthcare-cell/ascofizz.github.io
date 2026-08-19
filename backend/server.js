@@ -624,6 +624,67 @@ async function recordVelocity(scope, value, event) {
   } catch (e) { /* never let telemetry break an order */ }
 }
 
+// ═══════════════════════════════════════════════════════════════
+// WEBHOOK IDEMPOTENCY
+//
+// Every handler here already guards its own effect — the payment path
+// checks `payment_status !== 'Paid'`, the refund path updates a row keyed
+// by the gateway's refund id. That covers a redelivered PAYMENT webhook,
+// but it does not cover a redelivered SHIPPING or REFUND event, and it
+// leaves no record that a delivery was ever seen. A provider that retries
+// on a timeout (all three do) could re-run a status transition, and
+// nothing would say so afterwards.
+//
+// This records each delivery against a unique (provider, event_id) index
+// and reports whether it is the first sighting. The database decides, not
+// a read-then-write: a duplicate loses the race on INSERT with 23505 and
+// is acknowledged without re-running the effect.
+//
+// FAILS OPEN, deliberately. If the webhook_events table is absent (a
+// database that predates 000_base_schema.sql) this returns true and the
+// handler proceeds exactly as it did before. Refusing to process real
+// payment notifications because a logging table is missing would be a
+// far worse failure than processing one twice.
+//
+// Returns { first, duplicate }.
+async function recordWebhookEvent({ provider, eventId, eventType, orderId, payload, signatureOk = true }) {
+  // No usable event id from the provider means there is nothing stable to
+  // deduplicate on. Say so rather than inventing a key (a hash of the body
+  // would treat two genuinely distinct events with identical payloads as
+  // duplicates and silently drop the second).
+  if (!provider || !eventId) return { first: true, duplicate: false, unlogged: true };
+
+  try {
+    const { error } = await supabase.from('webhook_events').insert({
+      provider,
+      event_id:     String(eventId),
+      event_type:   eventType || null,
+      order_id:     orderId || null,
+      signature_ok: !!signatureOk,
+      payload:      payload || null,
+      processed_at: new Date().toISOString(),
+    });
+
+    if (!error) return { first: true, duplicate: false };
+
+    // 23505 = unique_violation on (provider, event_id): seen before.
+    if (error.code === '23505') {
+      console.log(`[webhook] duplicate ${provider} event ${eventId} — already processed, skipping`);
+      return { first: false, duplicate: true };
+    }
+
+    // 42P01 = table absent. Anything else is unexpected but still must not
+    // stop a real payment notification.
+    if (error.code !== '42P01') {
+      console.warn(`[webhook] could not log ${provider} event ${eventId}:`, error.message);
+    }
+    return { first: true, duplicate: false, unlogged: true };
+  } catch (e) {
+    console.warn('[webhook] event log failed:', e.message);
+    return { first: true, duplicate: false, unlogged: true };
+  }
+}
+
 async function raiseAlert({ severity = 'warn', category, title, detail, orderId }) {
   try {
     await supabase.from('system_alerts').insert({
@@ -2787,6 +2848,7 @@ try {
   require('./cashfree-routes')(app, {
     supabase, verifyToken, resolveVitaDiscount, releaseVitaReservation, reverseVitaForRefund, computeServerSideTotal,
     sp_place_order, awardVitaPoints, sendOrderEmail, authMiddleware, adminOnly, rateLimit,
+    recordWebhookEvent,
   });
 } catch (e) { console.error('[mount] cashfree-routes FAILED:', e.message); }
 
@@ -6296,6 +6358,26 @@ app.post('/api/delhivery/webhook/:secret', express.json(), async (req, res) => {
         const status  = shipment.Status?.Status || shipment.status || '';
     const instructions = (shipment.Status?.Instructions || shipment.instructions || '').toString();
     if (!waybill) return res.status(400).json({ error: 'No waybill in payload' });
+
+    // Idempotency. This handler is the one that most needs it: a repeated
+    // 'Delivered' scan re-runs the VitaPoints and stock hooks below, and
+    // Delhivery retries on any non-2xx. The dedupe key is the waybill plus
+    // the scan itself (status + timestamp), which is stable across retries
+    // of one scan but different for each genuine new scan on the same
+    // parcel — so a normal Manifested -> In Transit -> Delivered sequence
+    // is three distinct events, and a redelivery of any of them is not.
+    const _scanStamp =
+      shipment.Status?.StatusDateTime || shipment.Status?.StatusDate ||
+      shipment.status_date || shipment.StatusDateTime || '';
+    const _dlEventId = `${waybill}:${status}:${_scanStamp}`;
+    const _dlSeen = await recordWebhookEvent({
+      provider:  'delhivery',
+      eventId:   _dlEventId,
+      eventType: status || 'scan',
+      payload:   req.body,
+    });
+    if (_dlSeen.duplicate) return res.json({ success: true, duplicate: true });
+
     const MAP = {
       'Manifested': 'Processing',
       'In Transit': 'Shipped', 'Pending': 'Shipped', 'Dispatched': 'Out for Delivery',
