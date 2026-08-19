@@ -1,0 +1,320 @@
+/* ═══════════════════════════════════════════════════════════════════════
+   TEMPLATE 02 · ARCADIA — PREMIUM EVERYDAY WELLNESS
+   Ivory ground, a high-contrast serif for display, wide letterspaced small
+   caps for utility text, hairline rules instead of cards wherever a rule
+   will do. Motion is a slow, short fade — nothing on this storefront
+   slides, bounces or scales.
+   ═══════════════════════════════════════════════════════════════════════ */
+@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400&family=Jost:wght@300;400;500&display=swap');
+
+html[data-tpl="arcadia"] {
+  --ar-ivory:   #FBF8F2;
+  --ar-cream:   #F4EFE4;
+  --ar-paper:   #FFFEFB;
+  --ar-ink:     #23201B;
+  --ar-ink-2:   #55503F;
+  --ar-ink-3:   #857E6C;
+  --ar-gold:    #9A7F45;
+  --ar-sage:    #6E7F5F;
+  --ar-line:    rgba(35,32,27,.14);
+  --ar-line-2:  rgba(35,32,27,.26);
+
+  --wl-accent: #9A7F45;
+  --wl-star:   #9A7F45;
+  --wl-rise-y: 10px;
+  --wl-rise-t: 1.05s;
+  --wl-ease:   cubic-bezier(.16,1,.3,1);
+
+  --paper: #FBF8F2; --paper-hi: #FFFEFB; --paper-lo: #F0EADC;
+  --ink: #23201B; --navy: #55503F;
+  --indigo: #23201B; --indigo-lo: #000000; --indigo-hi: #9A7F45;
+  --green: #6E7F5F; --green-hi: #EDEAD F;
+  --t-hi: #23201B; --t-mid: #55503F; --t-low: #857E6C; --t-dim: #857E6C;
+  --edge: rgba(35,32,27,.14); --edge-hi: rgba(35,32,27,.26);
+  --font-display: 'Cormorant Garamond', Georgia, serif;
+  --font-ui: 'Jost', system-ui, sans-serif;
+  --font-body: 'Jost', system-ui, sans-serif;
+  --r-xs: 0px; --r-sm: 0px; --r-md: 2px; --r-lg: 2px; --r-xl: 3px; --r-pill: 2px;
+}
+
+html[data-tpl="arcadia"] body {
+  background: var(--ar-ivory); color: var(--ar-ink);
+  font-family: 'Jost', system-ui, sans-serif; font-weight: 300; font-size: 15.5px;
+  -webkit-font-smoothing: antialiased;
+}
+html[data-tpl="arcadia"] h1, html[data-tpl="arcadia"] h2, html[data-tpl="arcadia"] h3 {
+  font-family: 'Cormorant Garamond', Georgia, serif; font-weight: 400; letter-spacing: 0;
+}
+.ar-wrap { max-width: 1180px; margin: 0 auto; padding: 0 clamp(20px, 5vw, 48px); }
+.ar-eyebrow {
+  font-size: .66rem; letter-spacing: .28em; text-transform: uppercase;
+  color: var(--ar-ink-3); font-weight: 400; margin: 0 0 22px;
+}
+.ar-btn {
+  background: var(--ar-ink); color: var(--ar-ivory); border: 0; cursor: pointer;
+  padding: 16px 40px; font: 400 .72rem 'Jost', sans-serif; letter-spacing: .2em; text-transform: uppercase;
+  transition: background .3s;
+}
+.ar-btn:hover { background: var(--ar-gold); }
+.ar-btn-text {
+  background: none; border: 0; padding: 0; cursor: pointer; color: var(--ar-ink);
+  font: 400 .72rem 'Jost', sans-serif; letter-spacing: .18em; text-transform: uppercase;
+  border-bottom: 1px solid var(--ar-line-2); padding-bottom: 3px;
+}
+.ar-btn-text:hover { color: var(--ar-gold); border-color: var(--ar-gold); }
+
+/* ── header ──────────────────────────────────────────────────────────── */
+.ar-util { background: var(--ar-ink); color: var(--ar-cream); }
+.ar-util-in {
+  display: flex; justify-content: space-between; align-items: center; gap: 16px;
+  padding: 9px 0; font-size: .66rem; letter-spacing: .16em; text-transform: uppercase;
+}
+.ar-util-r { display: flex; gap: 22px; }
+.ar-util-r a { cursor: pointer; color: inherit; opacity: .82; }
+.ar-util-r a:hover { opacity: 1; }
+.ar-head { position: sticky; top: 0; z-index: 900; background: var(--ar-ivory); border-bottom: 1px solid var(--ar-line); }
+.ar-head-top { display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; padding: 22px 0 16px; }
+.ar-word {
+  grid-column: 2; cursor: pointer; font-family: 'Cormorant Garamond', serif;
+  font-size: clamp(1.5rem, 3vw, 2.05rem); letter-spacing: .42em; text-indent: .42em;
+  font-weight: 400; color: var(--ar-ink); text-align: center;
+}
+.ar-head-acts { display: flex; justify-content: flex-end; gap: 22px; }
+.ar-head-acts button {
+  background: none; border: 0; cursor: pointer; color: var(--ar-ink);
+  font: 400 .68rem 'Jost', sans-serif; letter-spacing: .18em; text-transform: uppercase; position: relative;
+}
+.ar-head-acts button:hover { color: var(--ar-gold); }
+.ar-head-acts .cart-badge {
+  display: inline-block; margin-left: 4px; font-size: .66rem; color: var(--ar-gold);
+}
+.ar-nav { display: flex; justify-content: center; gap: clamp(24px, 4vw, 54px); padding: 0 0 16px; }
+.ar-nav a {
+  cursor: pointer; font-size: .68rem; letter-spacing: .22em; color: var(--ar-ink-2);
+  padding-bottom: 4px; border-bottom: 1px solid transparent;
+}
+.ar-nav a:hover { color: var(--ar-ink); border-bottom-color: var(--ar-gold); }
+.ar-burger {
+  display: none; background: none; border: 0; cursor: pointer; color: var(--ar-ink);
+  font: 400 .68rem 'Jost', sans-serif; letter-spacing: .18em; text-transform: uppercase; justify-self: start;
+}
+.ar-drawer { display: none; }
+@media (max-width: 900px) {
+  .ar-nav { display: none; }
+  .ar-burger { display: block; }
+  .ar-drawer { display: grid; max-height: 0; overflow: hidden; transition: max-height .4s cubic-bezier(.16,1,.3,1); }
+  .ar-drawer.is-open { max-height: 460px; }
+  .ar-drawer a {
+    padding: 15px clamp(20px, 5vw, 48px); border-top: 1px solid var(--ar-line); cursor: pointer;
+    font-size: .72rem; letter-spacing: .18em; text-transform: uppercase; color: var(--ar-ink-2);
+  }
+}
+
+/* ── hero — editorial, centred, no image ─────────────────────────────── */
+.ar-hero { background: var(--ar-cream); padding: clamp(70px, 11vw, 150px) 0 clamp(60px, 9vw, 118px); text-align: center; }
+.ar-hero-eye { font-size: .64rem; letter-spacing: .3em; text-transform: uppercase; color: var(--ar-ink-3); margin: 0 0 30px; }
+.ar-hero h1 {
+  font-size: clamp(2.6rem, 7vw, 5rem); line-height: 1.08; margin: 0; font-weight: 300; color: var(--ar-ink);
+}
+.ar-hero h1 em { font-style: italic; color: var(--ar-gold); }
+.ar-hero-rule { width: 68px; height: 1px; background: var(--ar-line-2); margin: 36px auto; }
+.ar-hero-lede {
+  max-width: 58ch; margin: 0 auto 40px; font-size: 1rem; line-height: 1.95; color: var(--ar-ink-2); font-weight: 300;
+}
+.ar-hero-cta { display: flex; flex-wrap: wrap; gap: 28px; justify-content: center; align-items: center; }
+
+/* ── sections ────────────────────────────────────────────────────────── */
+.ar-sec { padding: clamp(60px, 8vw, 112px) 0; background: var(--ar-ivory); }
+.ar-sec-cream { background: var(--ar-cream); }
+.ar-sec-line { border-top: 1px solid var(--ar-line); }
+.ar-sec-head { display: flex; align-items: baseline; justify-content: space-between; gap: 20px; margin-bottom: clamp(32px, 4vw, 54px); }
+.ar-sec-head h2 { font-size: clamp(1.8rem, 3.6vw, 2.9rem); margin: 0; font-weight: 300; }
+.ar-lead { max-width: 62ch; font-size: .96rem; line-height: 1.95; color: var(--ar-ink-2); margin: 0 0 44px; }
+
+/* ── shop by goal — five tall columns ────────────────────────────────── */
+.ar-goals { display: grid; grid-template-columns: repeat(5, 1fr); border-left: 1px solid var(--ar-line); }
+@media (max-width: 940px) { .ar-goals { grid-template-columns: repeat(2, 1fr); } }
+@media (max-width: 520px) { .ar-goals { grid-template-columns: 1fr; } }
+.ar-goal {
+  background: none; border: 0; border-right: 1px solid var(--ar-line); border-bottom: 1px solid var(--ar-line);
+  cursor: pointer; text-align: left; padding: 34px 26px 30px; display: flex; flex-direction: column;
+  min-height: 268px; transition: background .35s;
+}
+.ar-goal:hover { background: var(--ar-paper); }
+.ar-goal-n { font-family: 'Cormorant Garamond', serif; font-size: 2.4rem; color: var(--ar-gold); line-height: 1; margin-bottom: 22px; }
+.ar-goal strong { font-family: 'Cormorant Garamond', serif; font-size: 1.5rem; font-weight: 400; margin-bottom: 10px; }
+.ar-goal em { font-style: normal; font-size: .82rem; line-height: 1.75; color: var(--ar-ink-2); }
+.ar-goal-go { margin-top: auto; font-size: .64rem; letter-spacing: .22em; text-transform: uppercase; color: var(--ar-ink-3); }
+.ar-goal:hover .ar-goal-go { color: var(--ar-gold); }
+
+/* ── product card — catalogue entry ──────────────────────────────────── */
+.ar-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: clamp(22px, 3vw, 46px); }
+@media (max-width: 900px) { .ar-grid { grid-template-columns: repeat(2, 1fr); } }
+@media (max-width: 560px) { .ar-grid { grid-template-columns: 1fr; } }
+.ar-card { cursor: pointer; display: flex; flex-direction: column; }
+.ar-card-shot { background: var(--ar-cream); aspect-ratio: 4 / 5; display: grid; place-items: center; overflow: hidden; margin-bottom: 22px; }
+.ar-card-shot img { width: 74%; transition: transform 1.1s cubic-bezier(.16,1,.3,1); }
+.ar-card:hover .ar-card-shot img { transform: scale(1.035); }
+.ar-card-kicker { font-size: .62rem; letter-spacing: .22em; text-transform: uppercase; color: var(--ar-ink-3); margin: 0 0 9px; }
+.ar-card-name { font-size: 1.32rem; font-weight: 400; margin: 0 0 8px; line-height: 1.28; }
+.ar-card-note { font-size: .84rem; line-height: 1.72; color: var(--ar-ink-2); margin: 0 0 18px; }
+.ar-card-foot { margin-top: auto; display: flex; align-items: center; justify-content: space-between; gap: 14px; padding-top: 14px; border-top: 1px solid var(--ar-line); }
+.ar-card-price { font-family: 'Cormorant Garamond', serif; font-size: 1.3rem; }
+.ar-card-price s { font-size: .84rem; color: var(--ar-ink-3); font-family: 'Jost', sans-serif; }
+.ar-card-add {
+  background: none; border: 0; cursor: pointer; color: var(--ar-ink);
+  font: 400 .66rem 'Jost', sans-serif; letter-spacing: .2em; text-transform: uppercase;
+  border-bottom: 1px solid var(--ar-line-2); padding-bottom: 3px; opacity: 0; transition: opacity .3s, color .3s;
+}
+.ar-card:hover .ar-card-add { opacity: 1; }
+.ar-card-add:hover { color: var(--ar-gold); border-color: var(--ar-gold); }
+@media (hover: none) { .ar-card-add { opacity: 1; } }
+
+/* ── daily rituals ───────────────────────────────────────────────────── */
+.ar-rit-tabs { display: flex; gap: 30px; border-bottom: 1px solid var(--ar-line); margin-bottom: 8px; }
+.ar-rit-tab {
+  background: none; border: 0; cursor: pointer; padding: 0 0 14px;
+  font: 400 .70rem 'Jost', sans-serif; letter-spacing: .22em; text-transform: uppercase;
+  color: var(--ar-ink-3); border-bottom: 1px solid transparent; margin-bottom: -1px;
+}
+.ar-rit-tab.is-on { color: var(--ar-ink); border-bottom-color: var(--ar-ink); }
+.ar-rit { list-style: none; margin: 0 0 54px; padding: 0; counter-reset: rit; }
+.ar-rit li { display: grid; grid-template-columns: 60px 1fr auto; gap: 20px; align-items: center; padding: 24px 0; border-bottom: 1px solid var(--ar-line); }
+.ar-rit-n { font-family: 'Cormorant Garamond', serif; font-size: 1.2rem; color: var(--ar-gold); }
+.ar-rit-c { display: flex; flex-direction: column; gap: 5px; }
+.ar-rit-c strong { font-family: 'Cormorant Garamond', serif; font-size: 1.24rem; font-weight: 400; }
+.ar-rit-c em { font-style: normal; font-size: .82rem; color: var(--ar-ink-2); line-height: 1.65; }
+.ar-rit li button {
+  background: none; border: 0; cursor: pointer; color: var(--ar-ink);
+  font: 400 .64rem 'Jost', sans-serif; letter-spacing: .2em; text-transform: uppercase;
+  border-bottom: 1px solid var(--ar-line-2); padding-bottom: 3px;
+}
+@media (max-width: 620px) { .ar-rit li { grid-template-columns: 34px 1fr; } .ar-rit li button { grid-column: 2; justify-self: start; } }
+
+.ar-sets { display: grid; grid-template-columns: repeat(2, 1fr); gap: 26px; }
+@media (max-width: 800px) { .ar-sets { grid-template-columns: 1fr; } }
+.ar-set { display: grid; grid-template-columns: 150px 1fr; gap: 22px; align-items: center; background: var(--ar-paper); padding: 22px; cursor: pointer; border: 1px solid var(--ar-line); }
+.ar-set:hover { border-color: var(--ar-line-2); }
+.ar-set img { width: 100%; }
+.ar-set h3 { font-size: 1.34rem; font-weight: 400; margin: 0 0 8px; }
+.ar-set p { font-size: .82rem; line-height: 1.7; color: var(--ar-ink-2); margin: 0 0 12px; }
+.ar-set-price { font-family: 'Cormorant Garamond', serif; font-size: 1.24rem; }
+
+/* ── ingredient story ────────────────────────────────────────────────── */
+.ar-split { display: grid; grid-template-columns: 1fr 1fr; gap: clamp(34px, 6vw, 84px); align-items: start; }
+@media (max-width: 900px) { .ar-split { grid-template-columns: 1fr; } }
+.ar-split-a h2 { font-size: clamp(1.7rem, 3.2vw, 2.5rem); line-height: 1.24; margin: 0 0 24px; font-weight: 300; }
+.ar-split-a p { font-size: .94rem; line-height: 1.95; color: var(--ar-ink-2); margin: 0 0 20px; }
+.ar-split-b { list-style: none; margin: 0; padding: 0; border-top: 1px solid var(--ar-line); }
+.ar-split-b li { padding: 22px 0; border-bottom: 1px solid var(--ar-line); display: grid; gap: 7px; }
+.ar-split-b strong { font-family: 'Cormorant Garamond', serif; font-size: 1.22rem; font-weight: 400; }
+.ar-split-b span { font-size: .84rem; line-height: 1.78; color: var(--ar-ink-2); }
+
+/* ── why · quotes · journal ──────────────────────────────────────────── */
+.ar-why { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1px; background: var(--ar-line); border: 1px solid var(--ar-line); }
+@media (max-width: 900px) { .ar-why { grid-template-columns: repeat(2, 1fr); } }
+@media (max-width: 520px) { .ar-why { grid-template-columns: 1fr; } }
+.ar-why-c { background: var(--ar-cream); padding: 30px 24px; }
+.ar-why-c span { font-family: 'Cormorant Garamond', serif; font-size: 1.1rem; color: var(--ar-gold); }
+.ar-why-c h3 { font-size: 1.2rem; font-weight: 400; margin: 12px 0 10px; line-height: 1.34; }
+.ar-why-c p { font-size: .82rem; line-height: 1.78; color: var(--ar-ink-2); margin: 0; }
+
+.ar-quotes { display: grid; grid-template-columns: repeat(2, 1fr); gap: clamp(28px, 5vw, 70px); }
+@media (max-width: 800px) { .ar-quotes { grid-template-columns: 1fr; } }
+.ar-quote { margin: 0; }
+.ar-quote blockquote {
+  margin: 0 0 20px; font-family: 'Cormorant Garamond', serif; font-size: clamp(1.3rem, 2.4vw, 1.75rem);
+  line-height: 1.55; font-style: italic; color: var(--ar-ink); font-weight: 300;
+}
+.ar-quote figcaption { font-size: .68rem; letter-spacing: .2em; text-transform: uppercase; color: var(--ar-ink-2); display: flex; flex-direction: column; gap: 5px; }
+.ar-quote figcaption span { color: var(--ar-ink-3); letter-spacing: .12em; }
+
+.ar-journal { display: grid; grid-template-columns: repeat(3, 1fr); gap: clamp(24px, 4vw, 52px); }
+@media (max-width: 880px) { .ar-journal { grid-template-columns: 1fr; } }
+.ar-journal-c { border-top: 1px solid var(--ar-ink); padding-top: 20px; cursor: pointer; }
+.ar-journal-t { font-size: .62rem; letter-spacing: .24em; text-transform: uppercase; color: var(--ar-gold); margin: 0 0 14px; }
+.ar-journal-c h3 { font-size: 1.4rem; font-weight: 400; line-height: 1.3; margin: 0 0 12px; }
+.ar-journal-c p { font-size: .84rem; line-height: 1.8; color: var(--ar-ink-2); margin: 0; }
+
+/* ── product page ────────────────────────────────────────────────────── */
+html[data-tpl="arcadia"] #page-product { padding-top: 30px !important; }
+html[data-tpl="arcadia"] #productEduGallery { display: none; }
+.ar-pd { display: grid; grid-template-columns: 1fr 1fr; gap: clamp(30px, 6vw, 80px); align-items: start; padding-bottom: 60px; }
+@media (max-width: 900px) { .ar-pd { grid-template-columns: 1fr; } }
+.ar-pd-media { background: var(--ar-cream); display: grid; place-items: center; padding: clamp(24px, 5vw, 60px); }
+.ar-pd-media img { width: 76%; }
+.ar-pd-kicker { font-size: .64rem; letter-spacing: .26em; text-transform: uppercase; color: var(--ar-gold); margin: 0 0 18px; }
+.ar-pd-body h1 { font-size: clamp(2rem, 4vw, 3.1rem); font-weight: 300; line-height: 1.14; margin: 0 0 12px; }
+.ar-pd-form { font-size: .68rem; letter-spacing: .2em; text-transform: uppercase; color: var(--ar-ink-3); margin: 0 0 26px; }
+.ar-pd-lede { font-size: .96rem; line-height: 1.95; color: var(--ar-ink-2); margin: 0 0 32px; }
+.ar-pd-buy { display: flex; align-items: center; gap: 26px; flex-wrap: wrap; padding: 26px 0; border-top: 1px solid var(--ar-line); border-bottom: 1px solid var(--ar-line); }
+.ar-pd-price { font-family: 'Cormorant Garamond', serif; font-size: 2rem; }
+.ar-pd-price s { font-size: 1rem; color: var(--ar-ink-3); font-family: 'Jost', sans-serif; }
+.ar-pd-add {
+  background: var(--ar-ink); color: var(--ar-ivory); border: 0; cursor: pointer; padding: 16px 42px;
+  font: 400 .70rem 'Jost', sans-serif; letter-spacing: .2em; text-transform: uppercase; transition: background .3s;
+}
+.ar-pd-add:hover { background: var(--ar-gold); }
+.ar-pd-meta { display: grid; grid-template-columns: repeat(2, 1fr); gap: 0; margin: 0; }
+.ar-pd-meta > div { padding: 18px 0; border-bottom: 1px solid var(--ar-line); }
+.ar-pd-meta dt { font-size: .62rem; letter-spacing: .22em; text-transform: uppercase; color: var(--ar-ink-3); margin-bottom: 6px; }
+.ar-pd-meta dd { margin: 0; font-size: .92rem; }
+.ar-pd-cols { display: grid; grid-template-columns: repeat(3, 1fr); gap: clamp(26px, 4vw, 56px); padding: 50px 0; border-top: 1px solid var(--ar-line); }
+@media (max-width: 900px) { .ar-pd-cols { grid-template-columns: 1fr; } }
+.ar-pd-cols h2 { font-size: 1.34rem; font-weight: 400; margin: 0 0 16px; }
+.ar-pd-cols .ar-pd-h2b { margin-top: 30px; }
+.ar-pd-cols p { font-size: .88rem; line-height: 1.9; color: var(--ar-ink-2); margin: 0; }
+.ar-pd-cols ul { list-style: none; margin: 0; padding: 0; }
+.ar-pd-cols ul li { padding: 10px 0; border-bottom: 1px solid var(--ar-line); font-size: .86rem; color: var(--ar-ink-2); }
+.ar-pd-pair { display: grid; gap: 12px; }
+.ar-pd-pair button {
+  display: grid; grid-template-columns: 56px 1fr; gap: 14px; align-items: center; text-align: left;
+  background: var(--ar-cream); border: 0; cursor: pointer; padding: 12px;
+}
+.ar-pd-pair img { width: 100%; }
+.ar-pd-pair span { display: flex; flex-direction: column; gap: 4px; }
+.ar-pd-pair strong { font-family: 'Cormorant Garamond', serif; font-weight: 400; font-size: 1.06rem; }
+.ar-pd-pair em { font-style: normal; font-size: .78rem; color: var(--ar-ink-2); }
+
+/* ── shop page ───────────────────────────────────────────────────────── */
+html[data-tpl="arcadia"] #page-shop { padding-top: 34px !important; }
+.ar-shop-intro { padding: 0 0 34px; border-bottom: 1px solid var(--ar-line); margin-bottom: 26px; }
+.ar-shop-intro h1 { font-size: clamp(2rem, 4vw, 3rem); font-weight: 300; margin: 0 0 14px; }
+.ar-shop-intro p { max-width: 56ch; font-size: .92rem; line-height: 1.9; color: var(--ar-ink-2); margin: 0; }
+html[data-tpl="arcadia"] .wl-cats { display: flex; flex-wrap: wrap; gap: 26px; margin: 0 0 30px; }
+html[data-tpl="arcadia"] .wl-cat {
+  background: none; border: 0; box-shadow: none; cursor: pointer; padding: 0 0 5px;
+  font: 400 .66rem 'Jost', sans-serif; letter-spacing: .2em; text-transform: uppercase;
+  color: var(--ar-ink-3); border-bottom: 1px solid transparent;
+}
+html[data-tpl="arcadia"] .wl-cat.active { color: var(--ar-ink); border-bottom-color: var(--ar-gold); }
+html[data-tpl="arcadia"] .products-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: clamp(22px, 3vw, 44px); }
+@media (max-width: 900px) { html[data-tpl="arcadia"] .products-grid { grid-template-columns: repeat(2, 1fr); } }
+@media (max-width: 560px) { html[data-tpl="arcadia"] .products-grid { grid-template-columns: 1fr; } }
+html[data-tpl="arcadia"] .shop-promos, html[data-tpl="arcadia"] .mm-side-card,
+html[data-tpl="arcadia"] #shopHero, html[data-tpl="arcadia"] .breadcrumb { display: none !important; }
+
+/* ── footer ──────────────────────────────────────────────────────────── */
+html[data-tpl="arcadia"] .wl-footer { background: var(--ar-cream); color: var(--ar-ink); border-top: 1px solid var(--ar-line); }
+.ar-foot-top { display: grid; grid-template-columns: 1fr auto; gap: 40px; padding: clamp(50px, 6vw, 84px) 0 44px; border-bottom: 1px solid var(--ar-line); }
+@media (max-width: 800px) { .ar-foot-top { grid-template-columns: 1fr; } }
+.ar-foot-word { font-family: 'Cormorant Garamond', serif; font-size: 1.7rem; letter-spacing: .42em; margin: 0 0 16px; }
+.ar-foot-tag { max-width: 40ch; font-size: .84rem; line-height: 1.85; color: var(--ar-ink-2); margin: 0; }
+.ar-foot-nl label { display: block; font-size: .64rem; letter-spacing: .24em; text-transform: uppercase; color: var(--ar-ink-3); margin-bottom: 14px; }
+.ar-foot-nl div { display: flex; gap: 0; border-bottom: 1px solid var(--ar-line-2); }
+.ar-foot-nl input { background: none; border: 0; padding: 10px 0; font: inherit; font-size: .88rem; min-width: 220px; color: var(--ar-ink); }
+.ar-foot-nl input::placeholder { color: var(--ar-ink-3); }
+.ar-foot-nl button { background: none; border: 0; cursor: pointer; font: 400 .64rem 'Jost', sans-serif; letter-spacing: .2em; text-transform: uppercase; color: var(--ar-ink); padding: 0 0 0 20px; }
+.ar-foot-cols { display: grid; grid-template-columns: repeat(4, 1fr); gap: 28px; padding: 44px 0; }
+@media (max-width: 640px) { .ar-foot-cols { grid-template-columns: repeat(2, 1fr); } }
+.ar-foot-cols h4 { font-size: .62rem; letter-spacing: .24em; text-transform: uppercase; color: var(--ar-ink-3); font-weight: 400; margin: 0 0 16px; }
+.ar-foot-cols a { display: block; padding: 6px 0; font-size: .84rem; color: var(--ar-ink-2); cursor: pointer; }
+.ar-foot-cols a:hover { color: var(--ar-gold); }
+.ar-foot-legal { display: flex; justify-content: space-between; flex-wrap: wrap; gap: 10px; padding: 22px 0 34px; border-top: 1px solid var(--ar-line); font-size: .68rem; letter-spacing: .12em; color: var(--ar-ink-3); }
+.ar-foot-legal p { margin: 0; }
+
+/* ── mobile bar ──────────────────────────────────────────────────────── */
+html[data-tpl="arcadia"] .app-bottom-nav { background: var(--ar-ivory); border-top: 1px solid var(--ar-line); box-shadow: none; }
+html[data-tpl="arcadia"] .app-nav-item { color: var(--ar-ink-3); }
+html[data-tpl="arcadia"] .app-nav-item.active { color: var(--ar-ink); }
+html[data-tpl="arcadia"] .app-nav-label { letter-spacing: .1em; text-transform: uppercase; font-size: .58rem; }

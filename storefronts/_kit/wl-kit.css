@@ -1,0 +1,80 @@
+/* ═══════════════════════════════════════════════════════════════════════
+   WHITE-LABEL KIT — shared, brand-neutral layer
+   Only three things live here: the demo switcher, the reveal primitive,
+   and the small number of resets that stop the engine's own storefront
+   chrome from showing through a replaced template. Every colour, typeface
+   and layout decision belongs to a brand pack, never to this file.
+   ═══════════════════════════════════════════════════════════════════════ */
+
+/* ── reveal primitive · brands tune distance and duration ──
+   Armed by the kit (html.wl-motion), never by the stylesheet alone: if the
+   template script fails to run, every section stays visible instead of the
+   page going blank. */
+html.wl-motion .wl-rise { opacity: 0; transform: translateY(var(--wl-rise-y, 16px)); transition: opacity var(--wl-rise-t, .7s) var(--wl-ease, cubic-bezier(.22,1,.36,1)), transform var(--wl-rise-t, .7s) var(--wl-ease, cubic-bezier(.22,1,.36,1)); }
+html.wl-motion .wl-rise.is-in { opacity: 1; transform: none; }
+@media (prefers-reduced-motion: reduce) {
+  html.wl-motion .wl-rise, html.wl-motion .wl-rise.is-in { opacity: 1 !important; transform: none !important; transition: none !important; }
+  * { animation-duration: .001ms !important; animation-iteration-count: 1 !important; }
+}
+
+/* ── engine chrome that a replaced template must not inherit ── */
+html[data-tpl] .bubbles,
+html[data-tpl] .field-bg,
+html[data-tpl] .grain,
+html[data-tpl] #shaderHero,
+html[data-tpl] #heroBanner,
+html[data-tpl] #offerReminder,
+html[data-tpl] .navbar,
+html[data-tpl] .mobile-menu,
+html[data-tpl] #appTopBar,
+html[data-tpl] #appAnnTicker,
+html[data-tpl] .ann-bar { display: none !important; }
+html[data-tpl] body { padding-top: 0 !important; }
+html[data-tpl] #page-home { padding-top: 0 !important; }
+
+/* The engine's #productDetail is itself a two-column grid. A brand template
+   writes one element into it and lays the page out on its own terms, so the
+   container has to stop being a grid or that element is squeezed into the
+   engine's first column. */
+html[data-tpl] #productDetail.product-page { display: block !important; max-width: none !important; }
+
+/* Scroll progress bar — kept, but painted by the brand. */
+html[data-tpl] #scrollBar { background: var(--wl-accent, #333) !important; }
+
+/* ── demo switcher ── */
+#wlSwitch { position: fixed; left: 16px; bottom: 16px; z-index: 10060; font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif; }
+#wlSwitch .wl-sw-tab {
+  display: inline-flex; align-items: center; gap: 9px;
+  background: #16201C; color: #fff; border: 0; cursor: pointer;
+  padding: 10px 16px; border-radius: 8px; font-size: .78rem; font-weight: 600;
+  letter-spacing: .02em; box-shadow: 0 10px 30px rgba(10,20,16,.28);
+}
+#wlSwitch .wl-sw-dot { width: 7px; height: 7px; border-radius: 50%; background: #6FD2B8; }
+#wlSwitch .wl-sw-name { padding-left: 9px; margin-left: 3px; border-left: 1px solid rgba(255,255,255,.24); opacity: .8; font-weight: 500; }
+#wlSwitch .wl-sw-panel {
+  position: absolute; left: 0; bottom: calc(100% + 10px); width: 296px;
+  background: #fff; color: #16201C; border: 1px solid rgba(20,32,28,.12);
+  border-radius: 12px; padding: 16px; box-shadow: 0 24px 60px rgba(10,20,16,.22);
+}
+#wlSwitch .wl-sw-panel[hidden] { display: none; }
+#wlSwitch .wl-sw-head { margin: 0 0 3px; font-size: .82rem; font-weight: 700; }
+#wlSwitch .wl-sw-sub { margin: 0 0 12px; font-size: .72rem; line-height: 1.5; color: #5C6A63; }
+#wlSwitch .wl-sw-item {
+  display: flex; align-items: center; gap: 11px; padding: 8px 9px; margin: 0 -9px;
+  border-radius: 8px; text-decoration: none; color: inherit;
+}
+#wlSwitch .wl-sw-item:hover { background: #F2F5F2; }
+#wlSwitch .wl-sw-item.is-on { background: #F0F6F3; }
+#wlSwitch .wl-sw-num { font-size: .68rem; font-weight: 700; color: #93A099; letter-spacing: .06em; }
+#wlSwitch .wl-sw-txt { display: flex; flex-direction: column; line-height: 1.3; }
+#wlSwitch .wl-sw-txt strong { font-size: .82rem; font-weight: 650; }
+#wlSwitch .wl-sw-txt em { font-style: normal; font-size: .69rem; color: #6B7A70; }
+#wlSwitch .wl-sw-here { margin-left: auto; font-size: .62rem; font-weight: 700; letter-spacing: .07em; text-transform: uppercase; color: #2C7A5C; }
+#wlSwitch .wl-sw-all { display: block; margin-top: 12px; padding-top: 11px; border-top: 1px solid rgba(20,32,28,.1); font-size: .74rem; font-weight: 600; color: #16201C; text-decoration: none; }
+@media (max-width: 860px) { #wlSwitch { left: 10px; bottom: 76px; } #wlSwitch .wl-sw-panel { width: min(296px, calc(100vw - 28px)); } }
+
+/* ── shared rating chip (each brand restyles colour and weight) ── */
+.wl-rate { display: inline-flex; align-items: baseline; gap: 5px; font-size: .74rem; }
+.wl-rate-stars { color: var(--wl-star, #E0A93A); letter-spacing: .06em; }
+.wl-rate-c { opacity: .6; }
+.wl-rate.is-empty { opacity: .55; font-size: .7rem; }

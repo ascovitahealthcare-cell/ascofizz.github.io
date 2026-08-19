@@ -23,3 +23,31 @@ In `index.html` and `admin.html`, ensure the following placeholders are replaced
 - `https://YOUR_SUPABASE_PROJECT.supabase.co`
 - `YOUR_SUPABASE_ANON_KEY`
 - `https://YOUR_BACKEND.onrender.com`
+
+## White-Label Demo Storefronts
+
+`storefronts/` holds six complete demonstration storefronts — six brands, six product
+portfolios, six designs — running on this repository's single e-commerce engine. Open
+`storefronts/index.html` for the switcher.
+
+| # | Brand | Portfolio |
+|---|-------|-----------|
+| 01 | Ascofizz | Effervescent supplements |
+| 02 | Arcadia | Premium everyday wellness |
+| 03 | Forge | Sports & gym nutrition |
+| 04 | Algaeva | Spirulina & superfoods |
+| 05 | Chewly | Gummies, chewables & suckers |
+| 06 | Ascofizz Original | The existing storefront, unchanged |
+
+Each storefront owns its brand, navigation, homepage, product cards, product page,
+merchandising, typography, colour and motion. All six share one cart, checkout, payment,
+order, account, search, filtering, inventory and admin implementation — `index.html` is
+copied verbatim into each folder and a template pack is attached to it.
+
+Rebuild after editing the engine or a brand pack:
+
+```bash
+python3 scripts/build-storefronts.py
+```
+
+See `storefronts/README.md` for the architecture and for how to add a brand.
