@@ -330,13 +330,23 @@ async function ensureBucket(sb) {
 }
 
 // ── Supabase ──────────────────────────────────────────────────────
-// Crash loudly on missing env vars so Render shows the real error in build logs
-const _REQUIRED_ENV = ['SUPABASE_URL', 'SUPABASE_SERVICE_KEY', 'JWT_SECRET', 'ADMIN_PASSWORD', 'GOOGLE_CLIENT_SECRET'];
+// Crash loudly on missing env vars so the platform's build log shows the
+// real error rather than a confusing runtime failure later.
+// Hard requirements: without these the server cannot serve a single
+// request. GOOGLE_CLIENT_SECRET is deliberately NOT here — it is only
+// needed for Google sign-in, and a deployment that does not offer that
+// should still boot. It is warned about below instead of being fatal.
+const _REQUIRED_ENV = ['SUPABASE_URL', 'SUPABASE_SERVICE_KEY', 'JWT_SECRET', 'ADMIN_PASSWORD'];
 const _MISSING = _REQUIRED_ENV.filter(k => !process.env[k]);
 if (_MISSING.length) {
   console.error('\n❌  FATAL — Missing required environment variables:\n  ' + _MISSING.join('\n  '));
-  console.error('\nFix: Render Dashboard → your service → Environment → add the missing vars → Manual Deploy\n');
+  console.error('\nFix: set them in your host\'s environment settings (or .env locally) and redeploy.');
+  console.error('See backend/.env.example for the full list and what each one is for.\n');
   process.exit(1);
+}
+if (!process.env.GOOGLE_CLIENT_SECRET) {
+  console.warn('[boot] GOOGLE_CLIENT_SECRET is not set — Google sign-in is disabled. ' +
+               'Email/password login and checkout are unaffected.');
 }
 const supabase = createClient(
   process.env.SUPABASE_URL,
@@ -411,7 +421,19 @@ app.use(cors({
   allowedHeaders: ['Content-Type','Authorization','Cache-Control','Pragma','X-Requested-With'],
   credentials: true,
 }));
-app.options('*', cors());
+// NOTE: there used to be `app.options('*', cors())` here — a SECOND cors()
+// with default options, which answers every preflight with
+// `Access-Control-Allow-Origin: *`. It silently undid the allow-list above:
+// a disallowed origin was refused by the configured middleware (no headers),
+// fell through to this line, and got a wildcard approval for its preflight.
+// The browser would then send the real cross-origin POST — to /api/orders,
+// /api/returns, anything — and although the response could not be READ
+// (no ACAO on the response, and credentials:true is incompatible with `*`),
+// the request had already been executed. The side effect is the damage.
+//
+// The configured cors() above already answers preflight itself, so this
+// line was redundant as well as harmful. Verified after removal: a
+// disallowed origin's OPTIONS now comes back with no CORS headers at all.
 
 // ── Security headers ────────────────────────────────────────────────
 app.use(helmet({
@@ -7830,6 +7852,56 @@ try {
   app.use('/api', require('./customers-insights-routes')(supabase, authMiddleware, adminOnly, requirePerm));
   console.log('[mount] customers-insights-routes ✅');
 } catch (e) { console.warn('[mount] customers-insights-routes skipped:', e.message); }
+
+// ═══════════════════════════════════════════════════════════════
+// 404 + ERROR HANDLING  —  must be mounted LAST, after every route.
+//
+// WHY THIS EXISTS
+//   There was no error handler at all, so Express's default one answered.
+//   That returns an HTML page containing the full stack trace, including
+//   absolute filesystem paths. Posting `{"bad":` to /api/orders replied
+//   with:
+//
+//     SyntaxError: Unexpected end of JSON input
+//         at JSON.parse (<anonymous>)
+//         at parse (/srv/app/node_modules/body-parser/lib/types/json.js...)
+//
+//   That hands an attacker the runtime, the directory layout and the
+//   dependency versions, from an unauthenticated request. Unknown routes
+//   likewise answered "Cannot GET /api/..." as HTML, which a JSON client
+//   cannot parse.
+//
+//   Both now answer JSON, and the body never carries a stack. The full
+//   error is still logged server-side, where it belongs.
+// ═══════════════════════════════════════════════════════════════
+
+app.use((req, res) => {
+  res.status(404).json({ error: 'Not found', path: req.path });
+});
+
+app.use((err, req, res, _next) => {
+  // Log everything: the operator needs the stack, the caller does not.
+  console.error('[error]', req.method, req.originalUrl, '—', err && err.stack ? err.stack : err);
+
+  const status =
+    err && (err.status || err.statusCode) ? (err.status || err.statusCode) : 500;
+
+  // Malformed JSON is the caller's mistake, so say which it is — but say
+  // only that. body-parser reports it as a SyntaxError with a `body`
+  // property carrying the raw payload, which must not be echoed back.
+  if (err instanceof SyntaxError && status === 400 && 'body' in err) {
+    return res.status(400).json({ error: 'Malformed JSON in request body' });
+  }
+
+  // A 4xx raised deliberately by a route carries a message meant for the
+  // caller. A 5xx is an internal failure and its message may contain
+  // connection strings, table names or file paths, so it is replaced.
+  const message = status < 500
+    ? (err && err.message) || 'Request rejected'
+    : 'Internal server error';
+
+  res.status(status).json({ error: message });
+});
 
 app.listen(PORT, async () => {
   console.log(`✅ ${BRAND.name} Backend v9.3.0 running on port ${PORT}`);
