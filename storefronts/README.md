@@ -68,6 +68,7 @@ WL.define({
   header, home, footer, shopIntro,
   categories,     // the merchandising taxonomy for the shop page
   bottomNav,      // mobile bar destinations
+  mark,           // favicon, touch icon and mobile logo, drawn from the brand
   onMount         // anything the template needs after the engine boots
 });
 ```
@@ -90,6 +91,22 @@ python3 scripts/build-storefronts.py
 
 Run it after editing the engine or any brand pack. It rewrites every `storefronts/*/index.html`
 and refuses to double-inject a template layer.
+
+## Standalone bundles
+
+```bash
+python3 scripts/build-storefronts.py --bundle
+```
+
+Also writes `dist/<brand>.zip` — each one a self-contained copy of that storefront with its
+own `assets/`, `scripts/`, `_kit/` and `template/`, for handing a single brand to someone
+without the rest of the repository. Inside a bundle the asset paths are local rather than
+site-rooted, and the demo switcher stays out of it: a storefront shipped on its own has no
+sibling storefronts to switch to.
+
+`dist/` is gitignored. Unzip a bundle and serve the folder — `python3 -m http.server` inside
+it — rather than opening `index.html` from the filesystem; the page's content-security-policy
+is `'self'`, which a `file://` URL has no origin to satisfy.
 
 ## Adding a seventh brand
 

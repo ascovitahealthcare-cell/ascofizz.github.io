@@ -47,7 +47,8 @@ copied verbatim into each folder and a template pack is attached to it.
 Rebuild after editing the engine or a brand pack:
 
 ```bash
-python3 scripts/build-storefronts.py
+python3 scripts/build-storefronts.py            # the six storefronts
+python3 scripts/build-storefronts.py --bundle   # plus dist/<brand>.zip, standalone copies
 ```
 
 See `storefronts/README.md` for the architecture and for how to add a brand.

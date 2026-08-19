@@ -242,6 +242,43 @@
     return 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(svg);
   };
 
+  /* ─────────────────────────  02b · BRAND MARK  ───────────────────────────────
+     The engine's favicon, touch icon and mobile top-bar logo all point at
+     Ascofizz artwork. A white-label storefront is a different brand and
+     should not be asking for another brand's icons — nor 404ing on them, as
+     it would in a bundle handed over on its own. Each pack declares a mark
+     and the kit draws it. */
+  WL.mark = function (m) {
+    var r = m.round == null ? 22 : m.round;
+    var svg = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">' +
+      '<rect width="100" height="100" rx="' + r + '" fill="' + m.bg + '"/>' +
+      (m.dot ? '<circle cx="70" cy="32" r="11" fill="' + m.dot + '"/>' : '') +
+      '<text x="50" y="50" text-anchor="middle" dominant-baseline="central" ' +
+      'font-family="' + (m.font || 'Helvetica,Arial,sans-serif') + '" font-size="' + (m.size || 58) + '" ' +
+      'font-weight="' + (m.weight || 700) + '" letter-spacing="' + (m.track || 0) + '" fill="' + m.fg + '">' +
+      WL.esc(m.letter) + '</text></svg>';
+    return 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(svg);
+  };
+
+  function installBrandMark() {
+    if (!cfg.mark) return;
+    var uri = WL.mark(cfg.mark);
+    document.querySelectorAll('link[rel~="icon"], link[rel~="apple-touch-icon"], link[rel~="shortcut"]')
+      .forEach(function (l) { l.parentNode.removeChild(l); });
+    [['icon', 'image/svg+xml'], ['apple-touch-icon', '']].forEach(function (pair) {
+      var link = document.createElement('link');
+      link.rel = pair[0];
+      if (pair[1]) link.type = pair[1];
+      link.href = uri;
+      document.head.appendChild(link);
+    });
+    document.querySelectorAll('.app-topbar-logo').forEach(function (img) {
+      img.removeAttribute('onerror');
+      img.src = uri;
+    });
+    WL.markURI = uri;
+  }
+
   /* ─────────────────────────  03 · CATALOGUE INSTALL  ─────────────────────────
      PRODUCTS is a top-level `const` in the engine, so it cannot be
      reassigned — but it can be emptied and refilled, which is all a
@@ -444,6 +481,7 @@
       }
     }
 
+    installBrandMark();
     installPriceFilter();
 
     /* Demo switcher — every storefront carries the same way back. */
@@ -466,6 +504,10 @@
   WL.stores = STORES;
 
   function mountSwitcher() {
+    /* A storefront handed over on its own has no sibling storefronts to
+       offer, so the switcher would be six dead links. The bundle build sets
+       this flag; the demo site does not. */
+    if (window.WL_STANDALONE) return;
     if (document.getElementById('wlSwitch')) return;
     var root = BASE.replace(/[^/]+\/$/, '');
     var el = document.createElement('div');
@@ -591,6 +633,7 @@
     installRouting();
     installCatalog(brand.catalog || []);
     installOverrides();
+    installBrandMark();
 
     function go() {
       mountChrome();

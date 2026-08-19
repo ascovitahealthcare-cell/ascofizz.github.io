@@ -477,6 +477,7 @@
 
   WL.define({
     slug: 'forge',
+    mark: { bg: '#14171C', fg: '#FFFFFF', dot: '#FF4A17', letter: 'F', round: 4, font: 'Helvetica,Arial,sans-serif', weight: 900 },
     name: 'Forge',
     tagline: 'Train hard. Recover smart.',
     title: 'FORGE — Protein, Performance & Recovery Supplements',

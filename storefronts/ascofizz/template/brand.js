@@ -522,6 +522,7 @@
 
   WL.define({
     slug: 'ascofizz',
+    mark: { bg: '#12503A', fg: '#FFFFFF', dot: '#F3A712', letter: 'A', round: 24, font: 'Helvetica,Arial,sans-serif', weight: 800 },
     name: 'Ascofizz',
     tagline: 'Effervescent wellness',
     title: 'Ascofizz — Effervescent Vitamins, Minerals & Electrolytes',

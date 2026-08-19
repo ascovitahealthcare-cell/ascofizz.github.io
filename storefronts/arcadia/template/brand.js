@@ -430,6 +430,7 @@
 
   WL.define({
     slug: 'arcadia',
+    mark: { bg: '#23201B', fg: '#F4EFE4', letter: 'A', round: 8, font: 'Georgia,serif', weight: 400, size: 54 },
     name: 'Arcadia',
     tagline: 'Premium everyday wellness',
     title: 'Arcadia — Wellness, thoughtfully formulated',

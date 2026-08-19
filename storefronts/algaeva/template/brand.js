@@ -436,6 +436,7 @@
 
   WL.define({
     slug: 'algaeva',
+    mark: { bg: '#23523A', fg: '#F8F5EC', letter: 'A', round: 30, font: 'Georgia,serif', weight: 600, size: 54 },
     name: 'Algaeva',
     tagline: 'Power from the green',
     title: 'Algaeva — Spirulina, Chlorella & Green Superfoods',

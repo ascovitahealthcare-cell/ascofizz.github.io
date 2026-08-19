@@ -444,6 +444,7 @@
 
   WL.define({
     slug: 'chewly',
+    mark: { bg: '#FF5A8A', fg: '#FFFFFF', letter: 'C', round: 50, font: 'Helvetica,Arial,sans-serif', weight: 800 },
     name: 'Chewly',
     tagline: 'Good health should taste good',
     title: 'Chewly — Gummies, Chewables & Vitamin Suckers',
